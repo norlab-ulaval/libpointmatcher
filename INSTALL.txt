@@ -7,7 +7,7 @@ Dependencies:
 
 - libnabo: kdtree library developed at ASL
     create a repository elsewhere and download the lib using
-    $ git clone http://github.com/stephanemagnenat/libnabo
+    $ git clone http://github.com/ethz-asl/libnabo
     then cmake and make...
 
 - eigen2: math library in C++
