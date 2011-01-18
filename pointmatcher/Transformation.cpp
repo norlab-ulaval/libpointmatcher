@@ -4,7 +4,7 @@
 
 Copyright (c) 2010--2011,
 François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
-You can contact the authors at <f.pomerleau@gmail.com> and
+You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
 
 All rights reserved.
