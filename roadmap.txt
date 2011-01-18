@@ -1,0 +1,124 @@
+ROADMAP
+
+29 sept. 2010
+
+Strategy
+-------------------
+- TODO: deal with sequence of filter, checker
+icp strategy:
+- 26 sept. 2010: put in place method to deal with 2 scans
+- 20 dec. 2010: decouple input filter for reading and reference
+icp_seq strategy:
+- TODO: define how to deal with a sequence of scans
+
+Sensors / wrapper / reader
+-------------------
+- 15 sept. 2010: 2D scans
+- 25 sept. 2010: 3D scans
+- 8 nov. 2010: wrapper to a ROS service using ROS point cloud message
+
+
+
+Input filter
+-------------------
+- TODO: validate loop condition
+- 20 dec. 2010: move points to their center of mass
+
+Noise evaluation:
+- 26 sept. 2010: Density 
+      Descriptor label: "densities"
+- TODO: incidence angle from sensor to surface (reuse fonction for generic vector see below for gravity vector*)
+- TODO: model for SICK laser
+- TODO: model for Hokuyo laser
+- TODO: model for Stereo camera
+- TODO: model for Kinect
+
+Point reduction:
+- 9 nov. 2010: Random selection for BOTH point clouds
+      PARAM: a probability of keeping a point, between 0 and 1
+- 9 nov. 2010: random selection ONLY of reading points at each iteration
+      PARAM: a probability of keeping a point, between 0 and 1
+- 10 dec. 2010: sequencial selection based on ids
+      PARAM: percentage of points that should be kept
+- TODO: Based on surrounding PCA
+- TODO: Based on Tensor Voting, may required octree support
+
+Weak descriptors:
+- 20 sept. 2010: Surface normal (orientation variant)
+      Descriptor label: "normals"
+- TODO: in surface normal: force the direction of the normal toward the center
+- TODO: force vector direction toward sensor center
+- 20 sept. 2010: Eigen values (invariant but strongly related to eigenvectors) 
+      Descriptor label: "eigenValues"
+- 20 sept. 2010: Eigen vectors (orientation variant)
+      Descriptor label: "eigenVectors"
+- TODO: validate unit lenght for eigenvectors
+- TODO: Surface angle to gravity vector (or a given vector)*
+
+Strong descriptors:
+- TODO: find pertinent one
+
+
+
+Match function
+-------------------
+- TODO: validate loop condition
+Optmization:
+- 15 sept. 2010: kd-tree (ANN) 
+- 3 nov. 2010  : change ANN for Nabo
+- TODO: do block request instead of point by point for NN resquest
+      - FP: how to get 20 closest points for block request?
+- TODO: precalculated tables for dual proximity hypothesis
+- TODO: dynamic search direction as a function of density
+Distances:
+- 15 sept. 2010: Euclidian distance 
+- TODO: Evaluate how to mix Eucl. dist with features (surface orientation or PCA)
+
+
+
+Outlier Filters
+-------------------
+- 15 sept. 2010: null filter
+- 20 sept. 2010: Median distance filter
+        PARAM: factor of the median for hard threshold (everything under is kept)
+- 7 nov. 2010: Trimmed
+        PARAM: ratio of points with the lowest distance to kept
+- TODO: Relative motion threshold
+- TODO: validate loop condition
+
+
+Error Minimization
+-------------------
+error metric
+- 15 sept. 2010: Point-to-point error
+- 4 nov. 2010: Point-to-plane error
+- TODO: Point-to-gaussian error
+- TODO: Plane-to-plane error
+- TODO: Gaussian-to-gaussian error
+- TODO: Minimization polar coordinates
+- TODO: Minimization using point-angle error
+- TODO: deal with multiple matching columns 
+- TODO: deal with matching in both directions
+Early out conditions
+- TODO: minimum error. 
+        PARAM: Authorized error intervals
+- TODO: oscillation detection. Second derivative of the error.
+        PARAM: Authorized oscillation intervals
+
+
+Transformation Checker
+-------------------
+- TODO: validate if that should'nt be in Error Minimization
+- 7 nov. 2010: stabilization of the error. First derivative of the error
+        PARAM: Authorized stabilization intervals
+
+
+Inspector (Paraview)
+-------------------
+- 20 sept. 2010: Basic viewing capability via VTK files
+- TODO: Have iteration information as a csv file
+- TODO: display outlier weights
+- TODO: clean to have one VTK files per module
+- 8 nov. 2010: Evaluate pertinence of basic outputs to rviz: not pertinent
+
+

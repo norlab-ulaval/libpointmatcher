@@ -1,0 +1,41 @@
+Short note to compile the library:
+
+---------------------------------------------------------
+Dependencies:
+- git: used to maintain source code like SVN 
+    $ sudo apt-get install git-core
+
+- libnabo: kdtree library developed at ASL
+    create a repository elsewhere and download the lib using
+    $ git clone http://github.com/stephanemagnenat/libnabo
+    then cmake and make...
+
+- eigen2: math library in C++
+    $ sudo apt-get install libeigen2-dev
+
+
+---------------------------------------------------------
+Installation:
+
+$ mkdir build
+$ cd ./build
+$ cmake-gui ../
+You'll need to tell where are the include files and the lib for Nabo
+
+
+
+---------------------------------------------------------
+Test:
+
+In 2D:
+$ ./icp ../../sandbox/data/2D_oneBox.cvs ../../sandbox/data/2D_twoBoxes.cvs
+
+In 3D:
+$ ./icp ../../sandbox/data/car_cloud401.csv ../../sandbox/data/car_cloud400.csv
+
+
+Use Paraview to view the results:
+$ sudo-apt get install paraview
+
+
+
