@@ -1,8 +1,10 @@
 libpointmatcher is a modular ICP library, useful for robotics and computer vision.
 
 libpointmatcher depends on:
+
  * [Eigen], a modern C++ matrix and linear-algebra library,
  * [libnabo], a fast K Nearest Neighbour library for low-dimensional spaces.
+ 
 libpointmatcher is being developed by François Pomerleau and Stéphane Magnenat as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
 
