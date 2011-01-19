@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <math.h>
 
 // Eigenvalues
-#include <Eigen/Eigen>
+#include "Eigen/Eigen"
 
 // CGAL
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>

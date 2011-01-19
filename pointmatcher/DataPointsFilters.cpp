@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 // Eigenvalues
-#include <eigen2/Eigen/QR>
+#include "Eigen/QR"
 
 using namespace std;
 

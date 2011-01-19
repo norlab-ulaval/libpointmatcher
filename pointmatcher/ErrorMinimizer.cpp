@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Core.h"
-#include <Eigen/SVD>
+#include "Eigen/SVD"
 #include <iostream>
 
 using namespace Eigen;
