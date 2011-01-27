@@ -349,6 +349,19 @@ struct MetricSpaceAligner
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
 	};
 	
+	// ---------------------------------
+	struct FeatureDistanceExtractor
+	{
+		virtual ~FeatureDistanceExtractor() {}
+		virtual Matches::Dists compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches::Ids& associations) = 0;
+	};
+	
+	// ---------------------------------
+	struct DescriptorDistanceExtractor
+	{
+		virtual ~DescriptorDistanceExtractor() {}
+		virtual Matches::Dists compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches::Ids& associations) = 0;
+	};
 	
 	// ---------------------------------
 	struct FeatureOutlierFilter
