@@ -59,7 +59,7 @@ Please use [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/i
 License
 -------
 
-libnabo is released under a permissive BSD license.
+libpointmatcher is released under a permissive BSD license.
 
 [Ubuntu]: http://www.ubuntu.com
 [CMake]: http://www.cmake.org
