@@ -47,35 +47,36 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	typedef MetricSpaceAlignerD MSA;
-	MSA::Strategy p;
+	typedef float T;
+	typedef MetricSpaceAligner<T> MSA;
+	MSA::ICP icp;
 	
-	p.transformations.push_back(new MSA::TransformFeatures());
-	p.transformations.push_back(new MSA::TransformDescriptors());
+	icp.transformations.push_back(new MSA::TransformFeatures());
+	icp.transformations.push_back(new MSA::TransformDescriptors());
 	
-	p.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5, true, false));
+	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
 	
-	p.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5, true, false));
-	//p.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(10, 0, true, true, true, true, true));
+	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
+	//icp.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(10, 0, true, true, true, true, true));
 	
-	p.matcher = new MSA::KDTreeMatcher();
+	icp.matcher = new MSA::KDTreeMatcher();
 	
-	p.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.05));
-	//p.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(3));
-	//p.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.85));
+	icp.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.05));
+	//icp.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(3));
+	//icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.85));
 	
-	p.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
+	icp.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
 
-	p.errorMinimizer = new MSA::PointToPointErrorMinimizer();
-	//p.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
+	icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
+	//icp.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
 	
-	p.transformationCheckers.push_back(new MSA::CounterTransformationChecker(60));
-	p.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.001, 0.001, 3));
+	icp.transformationCheckers.push_back(new MSA::CounterTransformationChecker(60));
+	icp.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.001, 0.001, 3));
 	
-	p.inspector = new MSA::VTKFileInspector("test");
-	//p.inspector = new MSA::Inspector;
+	icp.inspector = new MSA::VTKFileInspector("test");
+	//icp.inspector = new MSA::Inspector;
 	
-	p.outlierMixingWeight = 1;
+	icp.outlierMixingWeight = 1;
 	
 	typedef MSA::TransformationParameters TP;
 	typedef MSA::DataPoints DP;
@@ -86,12 +87,12 @@ int main(int argc, char *argv[])
 	
 	for (int i = 0; i < data.features.cols(); ++i)
 	{
-		data.features.block(0, i, 2, 1) = Eigen::Rotation2D<double>(0.2) * data.features.block(0, i, 2, 1);
+		data.features.block(0, i, 2, 1) = Eigen::Rotation2D<T>(0.2) * data.features.block(0, i, 2, 1);
 		data.features(0, i) += 0.2;
 		data.features(1, i) -= 0.1;
 	}
 	
-	TP res = MSA::icp(t, data, ref, p);
+	TP res = icp(t, data, ref);
 
 	return 0;
 }

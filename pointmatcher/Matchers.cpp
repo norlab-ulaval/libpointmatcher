@@ -61,9 +61,10 @@ template struct MetricSpaceAligner<double>::NullMatcher;
 
 // KDTreeMatcher
 template<typename T>
-MetricSpaceAligner<T>::KDTreeMatcher::KDTreeMatcher(const int knn, const double epsilon):
+MetricSpaceAligner<T>::KDTreeMatcher::KDTreeMatcher(const int knn, const double epsilon, const NNSearchType searchType):
 	knn(knn),
 	epsilon(epsilon),
+	searchType(searchType),
 	featureNNS(0)
 {
 }
@@ -84,7 +85,7 @@ void MetricSpaceAligner<T>::KDTreeMatcher::init(
 	// build and populate NNS
 	if (featureNNS)
 		delete featureNNS;
-	featureNNS = NNS::create(filteredReference.features, filteredReference.features.rows() - 1);
+	featureNNS = NNS::create(filteredReference.features, filteredReference.features.rows() - 1, searchType);
 }
 
 template<typename T>
@@ -100,7 +101,7 @@ typename MetricSpaceAligner<T>::Matches MetricSpaceAligner<T>::KDTreeMatcher::fi
 		typename Matches::Ids(knn, pointsCount)
 	);
 	
-	featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, Nabo::NearestNeighbourSearch<T>::ALLOW_SELF_MATCH);
+	featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, NNS::ALLOW_SELF_MATCH);
 	
 	return matches;
 }

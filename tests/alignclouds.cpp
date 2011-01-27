@@ -50,33 +50,33 @@ int main(int argc, char *argv[])
 	}
 	
 	typedef MetricSpaceAlignerD MSA;
-	MSA::Strategy p;
+	MSA::ICP icp;
 	
-	p.transformations.push_back(new MSA::TransformFeatures());
-	//p.transformations.push_back(new MSA::TransformDescriptors());
+	icp.transformations.push_back(new MSA::TransformFeatures());
+	//icp.transformations.push_back(new MSA::TransformDescriptors());
 	
-	p.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.02, true, false));
-	p.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.05, true, false));
-	p.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(15, 0, true, false, false, false, false));
+	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.02));
+	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.05));
+	icp.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(15, 0, true, false, false, false, false));
 	
-	p.matcher = new MSA::KDTreeMatcher();
+	icp.matcher = new MSA::KDTreeMatcher();
 	
-	//p.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(25));
-	p.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.92));
-	p.featureOutlierFilters.push_back(new MSA::MinDistOutlierFilter(0.000001));
+	//icp.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(25));
+	icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.92));
+	icp.featureOutlierFilters.push_back(new MSA::MinDistOutlierFilter(0.000001));
 	
-	p.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
+	icp.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
 
-	//p.errorMinimizer = new MSA::PointToPointErrorMinimizer();
-	p.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
+	//icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
+	icp.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
 	
-	p.transformationCheckers.push_back(new MSA::CounterTransformationChecker(200));
-	p.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.0001, 0.001, 3));
+	icp.transformationCheckers.push_back(new MSA::CounterTransformationChecker(200));
+	icp.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.0001, 0.001, 3));
 	
-	p.inspector = new MSA::VTKFileInspector("/tmp/vtk/debug");
-	//p.inspector = new MSA::Inspector;
+	icp.inspector = new MSA::VTKFileInspector("/tmp/vtk/debug");
+	//icp.inspector = new MSA::Inspector;
 	
-	p.outlierMixingWeight = 1;
+	icp.outlierMixingWeight = 1;
 	
 	typedef MSA::TransformationParameters TP;
 	typedef MSA::DataPoints DP;
@@ -97,8 +97,6 @@ int main(int argc, char *argv[])
 			cout << "Stopping at frame " << frameCounter << endl;
 			break;
 		}
-	
-		
 
 		newCloud = loadVTK<MSA::ScalarType>(ifs);
 		if (frameCounter == 0)
@@ -108,7 +106,7 @@ int main(int argc, char *argv[])
 		
 		if (frameCounter != 0)
 		{
-			tp = MSA::icp(tp, newCloud, lastCloud, p);
+			tp = icp(tp, newCloud, lastCloud);
 			newCloud = tf.compute(newCloud, tp);
 		}
 		

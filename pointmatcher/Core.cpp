@@ -41,23 +41,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 template<typename T>
-void MetricSpaceAligner<T>::DataPointsFilters::applyPre(DataPoints& cloud, bool iterate) const
+void MetricSpaceAligner<T>::DataPointsFilters::apply(DataPoints& cloud, bool iterate) const
 {
 	DataPoints filteredCloud;
 	for (DataPointsFiltersConstIt it = this->begin(); it != this->end(); ++it)
 	{
-		filteredCloud = (*it)->preFilter(cloud, iterate);
-		swapDataPoints<T>(cloud, filteredCloud);
-	}
-}
-
-template<typename T>
-void MetricSpaceAligner<T>::DataPointsFilters::applyStep(DataPoints& cloud, bool iterate) const
-{
-	DataPoints filteredCloud;
-	for (DataPointsFiltersConstIt it = this->begin(); it != this->end(); ++it)
-	{
-		filteredCloud = (*it)->stepFilter(cloud, iterate);
+		filteredCloud = (*it)->filter(cloud, iterate);
 		swapDataPoints<T>(cloud, filteredCloud);
 	}
 }
@@ -99,18 +88,45 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::FeatureOut
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::icp(
+MetricSpaceAligner<T>::ICP::ICP():
+	matcher(0), 
+	descriptorOutlierFilter(0),
+	errorMinimizer(0),
+	inspector(0),
+	outlierMixingWeight(0.5)
+{}
+
+template<typename T>
+MetricSpaceAligner<T>::ICP::~ICP()
+{
+	for (DataPointsFiltersIt it = readingDataPointsFilters.begin(); it != readingDataPointsFilters.end(); ++it)
+		delete *it;
+	for (DataPointsFiltersIt it = referenceDataPointsFilters.begin(); it != referenceDataPointsFilters.end(); ++it)
+		delete *it;
+	for (TransformationsIt it = transformations.begin(); it != transformations.end(); ++it)
+		delete *it;
+	delete matcher;
+	for (FeatureOutlierFiltersIt it = featureOutlierFilters.begin(); it != featureOutlierFilters.end(); ++it)
+		delete *it;
+	delete descriptorOutlierFilter;
+	delete errorMinimizer;
+	for (TransformationCheckersIt it = transformationCheckers.begin(); it != transformationCheckers.end(); ++it)
+		delete *it;
+	delete inspector;
+}
+
+template<typename T>
+typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICP::operator ()(
 	const TransformationParameters& initialTransformationParameters, 
 	DataPoints reading,
-	DataPoints reference,
-	Strategy& strategy)
+	DataPoints reference)
 {
 	boost::timer t; // Print how long take the algo
 
-	assert(strategy.matcher);
-	assert(strategy.descriptorOutlierFilter);
-	assert(strategy.errorMinimizer);
-	assert(strategy.inspector);
+	assert(matcher);
+	assert(descriptorOutlierFilter);
+	assert(errorMinimizer);
+	assert(inspector);
 	
 	// Move point clouds to their center of mass
 	const int dim = reading.features.rows();
@@ -140,14 +156,14 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 	bool iterate(true);
 	
-	strategy.readingDataPointsFilters.applyPre(reading, iterate);
-	strategy.referenceDataPointsFilters.applyPre(reference, iterate);
+	readingDataPointsFilters.apply(reading, iterate);
+	referenceDataPointsFilters.apply(reference, iterate);
 
-	strategy.transformationCheckers.init(initialTransformationParameters, iterate);
+	transformationCheckers.init(initialTransformationParameters, iterate);
 	
-	strategy.matcher->init(reading, reference, iterate);
+	matcher->init(reading, reference, iterate);
 
-	strategy.inspector->init();
+	inspector->init();
 	
 	TransformationParameters transformationParameters = Tref.inverse() * initialTransformationParameters;
 
@@ -160,18 +176,18 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	{
 		DataPoints stepReading(reading);
 		DataPoints stepReference(reference);
-		strategy.readingDataPointsFilters.applyStep(stepReading, iterate);
+		//strategy.readingDataPointsFilters.applyStep(stepReading, iterate);
 		
-		strategy.referenceDataPointsFilters.applyStep(stepReference, iterate);
+		//strategy.referenceDataPointsFilters.applyStep(stepReference, iterate);
 		
 		//-----------------------------
 		// Transform Readings
-		strategy.transformations.apply(stepReading, transformationParameters);
+		transformations.apply(stepReading, transformationParameters);
 		
 		//-----------------------------
 		// Match to closest point in Reference
 		const Matches matches(
-			strategy.matcher->findClosests(
+			matcher->findClosests(
 				stepReading, 
 				stepReference, 
 				iterate)
@@ -180,11 +196,11 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		//-----------------------------
 		// Detect outliers
 		const OutlierWeights featureOutlierWeights(
-			strategy.featureOutlierFilters.compute(stepReading, stepReference, matches, iterate)
+			featureOutlierFilters.compute(stepReading, stepReference, matches, iterate)
 		);
 		
 		const OutlierWeights descriptorOutlierWeights(
-			strategy.descriptorOutlierFilter->compute(
+			descriptorOutlierFilter->compute(
 				stepReading, 
 				stepReference, 
 				matches, 
@@ -200,25 +216,25 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		//cout << "descriptorOutlierWeights: " << descriptorOutlierWeights << "\n";
 		
 		const OutlierWeights outlierWeights(
-			featureOutlierWeights * strategy.outlierMixingWeight +
-			descriptorOutlierWeights * (1 - strategy.outlierMixingWeight)
+			featureOutlierWeights * outlierMixingWeight +
+			descriptorOutlierWeights * (1 - outlierMixingWeight)
 		);
 		
 
 		//-----------------------------
 		// Write VTK files
-		strategy.inspector->dumpIteration(iterationCount, transformationParameters, stepReference, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, strategy.transformationCheckers);
+		inspector->dumpIteration(iterationCount, transformationParameters, stepReference, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, transformationCheckers);
 		
 		//-----------------------------
 		// Error minimization
-		transformationParameters *= strategy.errorMinimizer->compute(stepReading, stepReference, outlierWeights, matches, iterate);
+		transformationParameters *= errorMinimizer->compute(stepReading, stepReference, outlierWeights, matches, iterate);
 		
-		strategy.transformationCheckers.check(Tref * transformationParameters, iterate);
+		transformationCheckers.check(Tref * transformationParameters, iterate);
 		
 		++iterationCount;
 	}
 	
-	strategy.inspector->finish(iterationCount);
+	inspector->finish(iterationCount);
 	
 	cerr << "msa::icp - iterations took " << t.elapsed() << " [s]" << endl;
 	

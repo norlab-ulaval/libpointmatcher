@@ -67,6 +67,7 @@ struct MetricSpaceAligner
 	typedef typename Eigen::Matrix<T, 3, 3> Matrix3;
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	typedef typename Nabo::NearestNeighbourSearch<T> NNS;
+	typedef typename NNS::SearchType NNSearchType;
 	
 	typedef Matrix TransformationParameters;
 	
@@ -180,14 +181,12 @@ struct MetricSpaceAligner
 	struct DataPointsFilter
 	{
 		virtual ~DataPointsFilter() {}
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const = 0;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const = 0;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const = 0;
 	};
 	
 	struct DataPointsFilters: public std::vector<DataPointsFilter*>
 	{
-		void applyPre(DataPoints& cloud, bool iterate) const;
-		void applyStep(DataPoints& cloud, bool iterate) const;
+		void apply(DataPoints& cloud, bool iterate) const;
 	};
 	typedef typename DataPointsFilters::iterator DataPointsFiltersIt;
 	typedef typename DataPointsFilters::const_iterator DataPointsFiltersConstIt;
@@ -198,8 +197,7 @@ struct MetricSpaceAligner
 	// Identidy
 	struct IdentityDataPointsFilter: public DataPointsFilter
 	{
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const {return input;};
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
 	};
 	
 	// Surface normals
@@ -222,8 +220,7 @@ struct MetricSpaceAligner
 			const bool keepEigenVectors = false,
 			const bool keepMatchedIds = false);
 		virtual ~SurfaceNormalDataPointsFilter() {};
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const {return input;};
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
 	};
 	
 	// Sampling surface normals
@@ -244,8 +241,7 @@ struct MetricSpaceAligner
 			const bool keepEigenValues = false, 
 			const bool keepEigenVectors = false);
 		virtual ~SamplingSurfaceNormalDataPointsFilter() {}
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const {return input;};
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
 		
 	protected:
 		struct BuildData
@@ -294,8 +290,7 @@ struct MetricSpaceAligner
 	class OrientNormalsDataPointsFilter: public DataPointsFilter
 	{
 	public:
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const {return input;};
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
 	};
 
 	// Random sampling
@@ -303,14 +298,11 @@ struct MetricSpaceAligner
 	{
 		// Probability to keep points, between 0 and 1
 		const double prob;
-		const bool enableStepFilter;
-		const bool enablePreFilter;
 		
 	public:
-		RandomSamplingDataPointsFilter(const double ratio = 0.5, bool enablePreFilter = true, bool enableStepFilter = false);
+		RandomSamplingDataPointsFilter(const double ratio = 0.5);
 		virtual ~RandomSamplingDataPointsFilter() {};
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
 	private:
 		DataPoints randomSample(const DataPoints& input) const;
 	};
@@ -320,14 +312,11 @@ struct MetricSpaceAligner
 	{
 		// Probability to keep points, between 0 and 1
 		const int step;
-		const bool enableStepFilter;
-		const bool enablePreFilter;
 		
 	public:
-		FixstepSamplingDataPointsFilter(const int step = 10, bool enablePreFilter = true, bool enableStepFilter = false);
+		FixstepSamplingDataPointsFilter(const int step = 10);
 		virtual ~FixstepSamplingDataPointsFilter() {};
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
 	private:
 		DataPoints fixstepSample(const DataPoints& input) const;
 	};
@@ -350,10 +339,11 @@ struct MetricSpaceAligner
 	{
 		const int knn;
 		const double epsilon;
+		const NNSearchType searchType;
 		NNS* featureNNS;
 	
 	public:
-		KDTreeMatcher(const int knn = 1, const double epsilon = 0);
+		KDTreeMatcher(const int knn = 1, const double epsilon = 0, const NNSearchType searchType = NNS::KDTREE_LINEAR_HEAP);
 		virtual ~KDTreeMatcher();
 		virtual void init(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
@@ -611,34 +601,16 @@ struct MetricSpaceAligner
 	};
 	
 	
-	// strategy
-	struct Strategy
+	// ICP algorithm
+	struct ICP
 	{
-		Strategy():
-			matcher(0), 
-			descriptorOutlierFilter(0),
-			errorMinimizer(0),
-			inspector(0),
-			outlierMixingWeight(0.5)
-		{}
+		ICP();
+		~ICP();
 		
-		~Strategy()
-		{
-			for (DataPointsFiltersIt it = readingDataPointsFilters.begin(); it != readingDataPointsFilters.end(); ++it)
-				delete *it;
-			for (DataPointsFiltersIt it = referenceDataPointsFilters.begin(); it != referenceDataPointsFilters.end(); ++it)
-				delete *it;
-			for (TransformationsIt it = transformations.begin(); it != transformations.end(); ++it)
-				delete *it;
-			delete matcher;
-			for (FeatureOutlierFiltersIt it = featureOutlierFilters.begin(); it != featureOutlierFilters.end(); ++it)
-				delete *it;
-			delete descriptorOutlierFilter;
-			delete errorMinimizer;
-			for (TransformationCheckersIt it = transformationCheckers.begin(); it != transformationCheckers.end(); ++it)
-				delete *it;
-			delete inspector;
-		}
+		TransformationParameters operator()(
+			const TransformationParameters& initialTransformationParameters, 
+			DataPoints reading,
+			DataPoints reference);
 		
 		DataPointsFilters readingDataPointsFilters;
 		DataPointsFilters referenceDataPointsFilters;
@@ -651,12 +623,6 @@ struct MetricSpaceAligner
 		Inspector* inspector;
 		T outlierMixingWeight;
 	};
-	
-	static TransformationParameters icp(
-		const TransformationParameters& initialTransformationParameters, 
-		DataPoints reading,
-		DataPoints reference,
-		Strategy& strategy);
 }; // MetricSpaceAligner
 
 template<typename T>

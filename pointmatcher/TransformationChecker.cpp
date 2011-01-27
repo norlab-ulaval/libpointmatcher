@@ -99,16 +99,12 @@ template<typename T>
 MetricSpaceAligner<T>::ErrorTransformationChecker::ErrorTransformationChecker(const T minDeltaRotErr, T minDeltaTransErr, const unsigned int tail):
 	tail(tail)
 {
-	this->limits.setZero(4);
+	this->limits.setZero(2);
 	this->limits(0) = minDeltaRotErr;
 	this->limits(1) = minDeltaTransErr;
-	this->limits(2) = -minDeltaRotErr;
-	this->limits(3) = -minDeltaTransErr;
 	
 	this->valueNames.push_back("Mean abs delta translation err");
 	this->valueNames.push_back("Mean abs delta rotation err");
-	this->valueNames.push_back("Mean delta translation err");
-	this->valueNames.push_back("Mean delta rotation err");
 	this->limitNames.push_back("Min delta translation err");
 	this->limitNames.push_back("Min delta rotation err");
 
@@ -150,8 +146,6 @@ void MetricSpaceAligner<T>::ErrorTransformationChecker::check(const Transformati
 		{
 			this->values(0) += anyabs(rotations[i].angularDistance(rotations[i-1]));
 			this->values(1) += anyabs((translations[i] - translations[i-1]).norm());
-			this->values(2) += rotations[i].angularDistance(rotations[i-1]);
-			this->values(3) += (translations[i] - translations[i-1]).norm();
 		}
 
 		this->values /= tail;
@@ -162,15 +156,11 @@ void MetricSpaceAligner<T>::ErrorTransformationChecker::check(const Transformati
 	
 	std::cout << "Abs Rotation: " << this->values(0) << " / " << this->limits(0) << std::endl;
 	std::cout << "Abs Translation: " << this->values(1) << " / " << this->limits(1) << std::endl;
-	std::cout << "Rotation: " << this->values(2) << std::endl;
-	std::cout << "Translation: " << this->values(3) << std::endl;
 	
 	if (isnan(this->values(0)))
 		throw ConvergenceError("abs rotation norm not a number");
 	if (isnan(this->values(1)))
 		throw ConvergenceError("abs translation norm not a number");
-	if (this->values(2) < this->limits(2) && this->values(3) < this->limits(3))
-		throw ConvergenceError("error is increasing");
 }
 
 template struct MetricSpaceAligner<float>::ErrorTransformationChecker;

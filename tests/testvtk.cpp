@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 	DataPoints d = loadVTK<float>(argv[1]);
 	MSA::SamplingSurfaceNormalDataPointsFilter filter(100);
 	bool iterate;
-	DataPoints d2 = filter.preFilter(d, iterate);
+	DataPoints d2 = filter.filter(d, iterate);
 	//MSA::VTKFileInspector inspector(argv[2]); inspector.dumpDataPoints(d2, "cloud");
 	saveVTK<float>(d2, argv[2]);
 	

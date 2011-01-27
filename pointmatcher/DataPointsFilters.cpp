@@ -44,7 +44,7 @@ using namespace std;
 
 // IdentityDataPointsFilter
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::IdentityDataPointsFilter::preFilter(
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::IdentityDataPointsFilter::filter(
 	const DataPoints& input, 
 	bool& iterate) const
 {
@@ -79,7 +79,7 @@ MetricSpaceAligner<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFil
 
 // Compute
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalDataPointsFilter::preFilter(
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input, 
 	bool& iterate) const
 {
@@ -291,7 +291,7 @@ MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNor
 
 // Compute
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::preFilter(
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input, 
 	bool& iterate) const
 {
@@ -550,7 +550,7 @@ template struct MetricSpaceAligner<double>::SamplingSurfaceNormalDataPointsFilte
 // OrientNormalsDataPointsFilter
 // Compute
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::OrientNormalsDataPointsFilter::preFilter(const DataPoints& input, bool& iterate) const
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input, bool& iterate) const
 {
 	Matrix normals = input.getDescriptorByName("normals");
 
@@ -606,10 +606,8 @@ template struct MetricSpaceAligner<double>::OrientNormalsDataPointsFilter;
 // Constructor
 template<typename T>
 MetricSpaceAligner<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(
-	const double prob, bool enablePreFilter, bool enableStepFilter):
-	prob(prob),
-	enableStepFilter(enableStepFilter),
-	enablePreFilter(enablePreFilter)
+	const double prob):
+	prob(prob)
 {
 	assert(prob > 0 && prob <= 1);
 }
@@ -663,22 +661,9 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSampling
 
 // Pre filter
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSamplingDataPointsFilter::preFilter(const DataPoints& input,	bool& iterate) const
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSamplingDataPointsFilter::filter(const DataPoints& input,	bool& iterate) const
 {
-	if(enablePreFilter)
-		return randomSample(input);
-	else
-		return input;
-}
-
-// Step filter
-template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSamplingDataPointsFilter::stepFilter(const DataPoints& input,	bool& iterate) const
-{
-	if(enableStepFilter)
-		return randomSample(input);
-	else
-		return input;
+	return randomSample(input);
 }
 
 template struct MetricSpaceAligner<float>::RandomSamplingDataPointsFilter;
@@ -689,10 +674,8 @@ template struct MetricSpaceAligner<double>::RandomSamplingDataPointsFilter;
 // Constructor
 template<typename T>
 MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(
-	const int step, bool enablePreFilter, bool enableStepFilter):
-	step(step),
-	enableStepFilter(enableStepFilter),
-	enablePreFilter(enablePreFilter)
+	const int step):
+	step(step)
 {
 	assert(step > 0);
 }
@@ -739,22 +722,9 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplin
 
 // Pre filter
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::preFilter(const DataPoints& input,	bool& iterate) const
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::filter(const DataPoints& input,	bool& iterate) const
 {
-	if(enablePreFilter)
-		return fixstepSample(input);
-	else
-		return input;
-}
-
-// Step filter
-template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::stepFilter(const DataPoints& input,	bool& iterate) const
-{
-	if(enableStepFilter)
-		return fixstepSample(input);
-	else
-		return input;
+	return fixstepSample(input);
 }
 
 template struct MetricSpaceAligner<float>::FixstepSamplingDataPointsFilter;
