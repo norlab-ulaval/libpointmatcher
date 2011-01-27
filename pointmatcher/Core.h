@@ -59,10 +59,10 @@ struct MetricSpaceAligner
 {
 	typedef T ScalarType;
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
+	typedef typename Eigen::Matrix<T, 3, 1> Vector3;
 	typedef std::vector<Vector, Eigen::aligned_allocator<Vector> > VectorVector;
 	typedef typename Eigen::Quaternion<T> Quaternion;
 	typedef std::vector<Quaternion, Eigen::aligned_allocator<Quaternion> > QuaternionVector;
-	typedef typename Eigen::Matrix<T, 3, 1> Vector3;
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
 	typedef typename Eigen::Matrix<T, 3, 3> Matrix3;
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
@@ -331,74 +331,6 @@ struct MetricSpaceAligner
 	private:
 		DataPoints fixstepSample(const DataPoints& input) const;
 	};
-
-	
-	/* Meshing operations */
-
-#ifdef HAVE_CGAL
-
-	// MeshingFilter
-	struct MeshingFilter: public DataPointsFilter
-	{
-		Vector3 computeCentroid(const Matrix3 matrixIn) const;
-		Vector3 computeNormal(Matrix3 matrixIn) const;
-		
-		virtual ~MeshingFilter() {};
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const = 0;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const = 0;
-	};
-
-	// ITMLocalMeshingFilter
-	class ITMLocalMeshingFilter: public MeshingFilter
-	{
-	public:
-		ITMLocalMeshingFilter();
-		virtual ~ITMLocalMeshingFilter() {};
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const {return input;};
-
-	private:
-		Matrix cart2Spheric(const Matrix matrixIn) const;
-		Matrix delaunay2D(const Matrix matrixIn) const;
-		void generateTriMesh(const Matrix matrixFeatures, const Matrix matrixIndices, Matrix& matrixNewFeatures, Matrix& matrixNewDescriptors) const;
-	};
-
-	// ITMGlobalMeshingFilter
-	// ...
-
-	// MarchingCubeMeshingFilter
-	// ...
-
-	// ArtifactsRemovalMeshingFilter
-	class ArtifactsRemovalMeshingFilter: public MeshingFilter 
-	{
-		// Filter thrasholds
-		const T thresh1;
-		const T thresh2;
-		const T thresh3;
-
-	public:
-		ArtifactsRemovalMeshingFilter(const T thresh1 = 1.1, const T thresh2 = 10, const T thresh3 = 0.2);
-		virtual ~ArtifactsRemovalMeshingFilter() {};
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const {return input;};
- 	};
-
-	// SimplifyMeshingFilter
-	class SimplifyMeshingFilter: public MeshingFilter
-	{
-		// Filter thrasholds
-		const int edgeCount;
-
-		public:
-		SimplifyMeshingFilter(const int edgeCount = 1000);
-		virtual ~SimplifyMeshingFilter() {};
-		virtual DataPoints preFilter(const DataPoints& input, bool& iterate) const;
-		virtual DataPoints stepFilter(const DataPoints& input, bool& iterate) const {return input;};
-	};
-
-#endif // HAVE_CGAL
-
 
 	// ---------------------------------
 	struct Matcher
