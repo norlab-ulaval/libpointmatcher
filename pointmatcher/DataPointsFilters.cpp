@@ -84,12 +84,9 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalD
 	bool& iterate) const
 {
 	std::cerr << "SurfaceNormalDataPointsFilter::preFilter" << std::endl;
-	//typedef typename Types<T>::DataPoints DataPoints;
 	typedef typename DataPoints::Features Features;
-	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
-	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
 	typedef typename DataPoints::Label Label;
-	typedef std::vector<Label> Labels;
+	typedef typename DataPoints::Labels Labels;
 	
 	const int pointsCount(input.features.cols());
 	const int featDim(input.features.rows());
@@ -299,12 +296,9 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfac
 	bool& iterate) const
 {
 	//std::cerr << "SamplingSurfaceNormalDataPointsFilter::preFilter " << input.features.cols() << std::endl;
-	//typedef typename Types<T>::DataPoints DataPoints;
 	typedef typename DataPoints::Features Features;
-	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
-	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
 	typedef typename DataPoints::Label Label;
-	typedef std::vector<Label> Labels;
+	typedef typename DataPoints::Labels Labels;
 	
 	const int pointsCount(input.features.cols());
 	const int featDim(input.features.rows());
