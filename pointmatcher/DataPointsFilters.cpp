@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Core.h"
 #include <stdexcept>
 #include <algorithm>
+#include <boost/progress.hpp>
 
 // Eigenvalues
 #include "Eigen/QR"
@@ -141,7 +142,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalD
 	Matrix newDescriptors(finalDim, pointsCount);
 	
 	KDTreeMatcher matcher(knn, epsilon);
-	matcher.init(DataPoints(), input, iterate);
+	matcher.init(input, iterate);
 
 	Matches matches(typename Matches::Dists(knn, 1), typename Matches::Ids(knn, 1));
 	// Search for surrounding points
@@ -295,6 +296,8 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfac
 	const DataPoints& input, 
 	bool& iterate) const
 {
+	boost::progress_timer t; // Print how long take the algorithm
+	
 	//std::cerr << "SamplingSurfaceNormalDataPointsFilter::preFilter " << input.features.cols() << std::endl;
 	typedef typename DataPoints::Features Features;
 	typedef typename DataPoints::Label Label;

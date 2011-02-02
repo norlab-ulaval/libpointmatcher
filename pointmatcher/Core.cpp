@@ -161,7 +161,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 	transformationCheckers.init(initialTransformationParameters, iterate);
 	
-	matcher->init(reading, reference, iterate);
+	matcher->init(reference, iterate);
 
 	inspector->init();
 	
@@ -240,6 +240,182 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	
 	// Move transformation back to original coordinate (without center of mass)
 	return Tref * transformationParameters;
+}
+
+template<typename T>
+MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim):
+	matcher(0), 
+	descriptorOutlierFilter(0),
+	errorMinimizer(0),
+	inspector(0),
+	outlierMixingWeight(0.5),
+	ratioToSwitchKeyframe(0.8),
+	keyFrameTransform(Matrix::Identity(dim+1, dim+1)),
+	keyFrameTransformOffset(Matrix::Identity(dim+1, dim+1)),
+	curTransform(Matrix::Identity(dim+1, dim+1))
+{}
+
+template<typename T>
+MetricSpaceAligner<T>::ICPSequence::~ICPSequence()
+{
+	for (DataPointsFiltersIt it = readingDataPointsFilters.begin(); it != readingDataPointsFilters.end(); ++it)
+		delete *it;
+	for (DataPointsFiltersIt it = keyframeDataPointsFilters.begin(); it != keyframeDataPointsFilters.end(); ++it)
+		delete *it;
+	for (TransformationsIt it = transformations.begin(); it != transformations.end(); ++it)
+		delete *it;
+	delete matcher;
+	for (FeatureOutlierFiltersIt it = featureOutlierFilters.begin(); it != featureOutlierFilters.end(); ++it)
+		delete *it;
+	delete descriptorOutlierFilter;
+	delete errorMinimizer;
+	for (TransformationCheckersIt it = transformationCheckers.begin(); it != transformationCheckers.end(); ++it)
+		delete *it;
+	delete inspector;
+}
+
+template<typename T>
+void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
+{
+	const int tDim(keyFrameTransform.rows());
+	
+	// apply filters
+	bool iterate(true);
+	keyframeDataPointsFilters.apply(inputCloud, iterate);
+	if (!iterate)
+		return;
+	
+	// center keyframe, retrieve offset
+	const int nbPtsKeyframe = inputCloud.features.cols();
+	const Vector meanKeyframe = inputCloud.features.rowwise().sum() / nbPtsKeyframe;
+	for(int i=0; i < tDim-1; i++)
+		inputCloud.features.row(i).cwise() -= meanKeyframe(i);
+		
+	// update keyframe
+	keyFrameCloud = inputCloud;
+	keyFrameTransformOffset.block(0,tDim-1, tDim-1, 1) = meanKeyframe.start(tDim-1);
+	curTransform = Matrix::Identity(tDim, tDim);
+	
+	matcher->init(keyFrameCloud, iterate);
+	
+	cerr << "created new keyframe" << endl;
+}
+
+template<typename T>
+typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICPSequence::operator ()(
+	DataPoints& inputCloud)
+{
+	boost::timer t; // Print how long take the algo
+
+	assert(matcher);
+	assert(descriptorOutlierFilter);
+	assert(errorMinimizer);
+	assert(inspector);
+	
+	// initial keyframe
+	if (keyFrameCloud.features.cols() == 0)
+	{
+		this->createKeyFrame(inputCloud);
+		return curTransform;
+	}
+	
+	////
+
+	bool iterate(true);
+	
+	DataPoints reading(inputCloud);
+	readingDataPointsFilters.apply(reading, iterate);
+	
+	transformationCheckers.init(curTransform, iterate);
+	
+	// FIXME: store kd-tree somewhere
+
+	inspector->init();
+	
+	TransformationParameters transformationParameters = keyFrameTransformOffset.inverse() * curTransform;
+
+	size_t iterationCount(0);
+	
+	cerr << "msa::icp - preprocess took " << t.elapsed() << " [s]" << endl;
+	t.restart();
+	
+	while (iterate)
+	{
+		DataPoints stepReading(reading);
+		
+		//-----------------------------
+		// Transform Readings
+		transformations.apply(stepReading, transformationParameters);
+		
+		//-----------------------------
+		// Match to closest point in Reference
+		const Matches matches(
+			matcher->findClosests(
+				stepReading, 
+				keyFrameCloud, 
+				iterate)
+		);
+		
+		//-----------------------------
+		// Detect outliers
+		const OutlierWeights featureOutlierWeights(
+			featureOutlierFilters.compute(
+				stepReading, 
+				keyFrameCloud, 
+				matches, 
+				iterate)
+		);
+		
+		const OutlierWeights descriptorOutlierWeights(
+			descriptorOutlierFilter->compute(
+				stepReading, 
+				keyFrameCloud, 
+				matches, 
+				iterate)
+		);
+		
+		assert(featureOutlierWeights.rows() == matches.ids.rows());
+		assert(featureOutlierWeights.cols() == matches.ids.cols());
+		assert(descriptorOutlierWeights.rows() == matches.ids.rows());
+		assert(descriptorOutlierWeights.cols() == matches.ids.cols());
+		
+		//cout << "featureOutlierWeights: " << featureOutlierWeights << "\n";
+		//cout << "descriptorOutlierWeights: " << descriptorOutlierWeights << "\n";
+		
+		const OutlierWeights outlierWeights(
+			featureOutlierWeights * outlierMixingWeight +
+			descriptorOutlierWeights * (1 - outlierMixingWeight)
+		);
+
+		//-----------------------------
+		// Dump
+		inspector->dumpIteration(iterationCount, transformationParameters, keyFrameCloud, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, transformationCheckers);
+		
+		//-----------------------------
+		// Error minimization
+		transformationParameters *= errorMinimizer->compute(stepReading, keyFrameCloud, outlierWeights, matches, iterate);
+		
+		transformationCheckers.check(keyFrameTransformOffset * transformationParameters, iterate);
+		
+		++iterationCount;
+	}
+	
+	inspector->finish(iterationCount);
+	
+	// Move transformation back to original coordinate (without center of mass)
+	curTransform = keyFrameTransformOffset * transformationParameters;
+	
+	if (errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
+	{
+		// new keyframe
+		keyFrameTransform *= curTransform;
+		this->createKeyFrame(inputCloud);
+	}
+	
+	cerr << "msa::icp - iterations took " << t.elapsed() << " [s]" << endl;
+	
+	// Return transform in world space
+	return keyFrameTransform * curTransform;
 }
 
 template struct MetricSpaceAligner<float>;

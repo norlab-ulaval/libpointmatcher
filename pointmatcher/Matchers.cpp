@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // NullMatcher
 template<typename T>
 void MetricSpaceAligner<T>::NullMatcher::init(
-	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	bool& iterate)
 {
@@ -78,7 +77,6 @@ MetricSpaceAligner<T>::KDTreeMatcher::~KDTreeMatcher()
 
 template<typename T>
 void MetricSpaceAligner<T>::KDTreeMatcher::init(
-	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	bool& iterate)
 {

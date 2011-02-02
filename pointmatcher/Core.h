@@ -325,13 +325,13 @@ struct MetricSpaceAligner
 	struct Matcher
 	{
 		virtual ~Matcher() {}
-		virtual void init(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate) = 0;
+		virtual void init(const DataPoints& filteredReference, bool& iterate) = 0;
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate) = 0;
 	};
 	
 	struct NullMatcher: public Matcher
 	{
-		virtual void init(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
+		virtual void init(const DataPoints& filteredReference, bool& iterate);
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
 	};
 	
@@ -345,7 +345,7 @@ struct MetricSpaceAligner
 	public:
 		KDTreeMatcher(const int knn = 1, const double epsilon = 0, const NNSearchType searchType = NNS::KDTREE_LINEAR_HEAP);
 		virtual ~KDTreeMatcher();
-		virtual void init(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
+		virtual void init(const DataPoints& filteredReference, bool& iterate);
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
 	};
 	
@@ -353,14 +353,14 @@ struct MetricSpaceAligner
 	struct FeatureDistanceExtractor
 	{
 		virtual ~FeatureDistanceExtractor() {}
-		virtual Matches::Dists compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches::Ids& associations) = 0;
+		virtual typename Matches::Dists compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const typename Matches::Ids& associations) = 0;
 	};
 	
 	// ---------------------------------
 	struct DescriptorDistanceExtractor
 	{
 		virtual ~DescriptorDistanceExtractor() {}
-		virtual Matches::Dists compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches::Ids& associations) = 0;
+		virtual typename Matches::Dists compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const typename Matches::Ids& associations) = 0;
 	};
 	
 	// ---------------------------------
@@ -635,6 +635,37 @@ struct MetricSpaceAligner
 		TransformationCheckers transformationCheckers;
 		Inspector* inspector;
 		T outlierMixingWeight;
+	};
+	
+	// ICP sequence, with keyframing
+	struct ICPSequence
+	{
+		ICPSequence(const int dim);
+		~ICPSequence();
+		
+		TransformationParameters operator()(DataPoints& inputCloud);
+		
+		DataPointsFilters readingDataPointsFilters;
+		DataPointsFilters keyframeDataPointsFilters;
+		Transformations transformations;
+		Matcher* matcher;
+		FeatureOutlierFilters featureOutlierFilters;
+		DescriptorOutlierFilter* descriptorOutlierFilter;
+		ErrorMinimizer* errorMinimizer;
+		TransformationCheckers transformationCheckers;
+		Inspector* inspector;
+		T outlierMixingWeight;
+		T ratioToSwitchKeyframe;
+		
+		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
+		
+	private:
+		void createKeyFrame(DataPoints& inputCloud);
+		
+		DataPoints keyFrameCloud; //!< point cloud of the keyframe
+		TransformationParameters keyFrameTransform; //!< pose of keyframe
+		TransformationParameters keyFrameTransformOffset; //!< offset for centered keyframe
+		TransformationParameters curTransform; //!< transform of last frame wrt keyframe (last call to operator())
 	};
 }; // MetricSpaceAligner
 

@@ -169,7 +169,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	// if 2D, use homogenious coordinates [x, y] 
 	// if 3D, use [x, y, z]
 
-	const typename ErrorMinimizer::ErrorElements mPts = getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	const typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
 	
 	const Matrix normalRef = mPts.reference.getDescriptorByName("normals");
 
@@ -177,7 +177,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	assert(normalRef.rows() > 0);
 
 	// Compute cross product of cross = cross(reading X normalRef)
-	const Matrix cross = crossProduct(mPts.reading.features, normalRef);
+	const Matrix cross = this->crossProduct(mPts.reading.features, normalRef);
 
 	// wF = [weights*cross, normals]
 	// F  = [cross, normals]
