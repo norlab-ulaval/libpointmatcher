@@ -56,6 +56,142 @@ template struct MetricSpaceAligner<float>::IdentityDataPointsFilter;
 template struct MetricSpaceAligner<double>::IdentityDataPointsFilter;
 
 
+// ClampOnAxisThresholdDataPointsFilter
+// Constructor
+template<typename T>
+MetricSpaceAligner<T>::ClampOnAxisThresholdDataPointsFilter::ClampOnAxisThresholdDataPointsFilter(
+	const unsigned dim, 
+	const T threshold):
+	dim(dim),
+	threshold(threshold)
+{
+}
+
+template<typename T>
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::ClampOnAxisThresholdDataPointsFilter::filter(const DataPoints& input, bool& iterate) const
+{
+	if (int(dim) >= input.features.rows())
+	{
+		cerr << "ClampOnAxisThresholdDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
+		abort();
+	}
+	
+	const int nbPointsIn = input.features.cols();
+	const int nbPointsOut = (input.features.row(dim).cwise() < threshold).count();
+	DataPoints outputCloud(
+		typename DataPoints::Features(input.features.rows(), nbPointsOut),
+		input.featureLabels
+	);
+	if (input.descriptors.cols() > 0)
+	{
+		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
+		outputCloud.descriptorLabels = input.descriptorLabels;
+	}
+	
+	int j = 0;
+	for (int i = 0; i < nbPointsIn; i++)
+	{
+		if (input.features(dim, i) < threshold)
+		{
+			outputCloud.features.col(j) = input.features.col(i);
+			if (outputCloud.descriptors.cols() > 0)
+				outputCloud.descriptors.col(j) = input.descriptors.col(i);
+			j++;
+		}
+	}
+	assert(j == nbPointsOut);
+	return outputCloud;
+}
+
+template struct MetricSpaceAligner<float>::ClampOnAxisThresholdDataPointsFilter;
+template struct MetricSpaceAligner<double>::ClampOnAxisThresholdDataPointsFilter;
+
+// ClampOnAxisThresholdDataPointsFilter
+// Constructor
+template<typename T>
+MetricSpaceAligner<T>::ClampOnAxisRatioDataPointsFilter::ClampOnAxisRatioDataPointsFilter(
+	const unsigned dim, 
+	const T ratio):
+	dim(dim),
+	ratio(ratio)
+{
+	if (ratio >= 1 || ratio <= 0)
+	{
+		cerr << "ClampOnAxisRatioDataPointsFilter: Error, trim ratio " << ratio << " is outside interval ]0;1[." << endl;
+		abort();
+	}
+}
+
+template<typename T>
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::ClampOnAxisRatioDataPointsFilter::filter(const DataPoints& input, bool& iterate) const
+{
+	if (int(dim) >= input.features.rows())
+	{
+		cerr << "ClampOnAxisRatioDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
+		abort();
+	}
+	
+	const int nbPointsIn = input.features.cols();
+	const int nbPointsOut = nbPointsIn * ratio;
+	
+	// build array
+	vector<T> values;
+	values.reserve(input.features.cols());
+	for (int x = 0; x < input.features.cols(); ++x)
+		values.push_back(input.features(dim, x));
+	
+	// get quartiles value
+	nth_element(values.begin(), values.begin() + (values.size() * ratio), values.end());
+	const T limit = values[nbPointsOut];
+	
+	// build output values
+	DataPoints outputCloud(
+		typename DataPoints::Features(input.features.rows(), nbPointsOut),
+		input.featureLabels
+	);
+	if (input.descriptors.cols() > 0)
+	{
+		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
+		outputCloud.descriptorLabels = input.descriptorLabels;
+	}
+	
+	// fill output values
+	int j = 0;
+	for (int i = 0; i < nbPointsIn; i++)
+	{
+		if (input.features(dim, i) < limit)
+		{
+			outputCloud.features.col(j) = input.features.col(i);
+			if (outputCloud.descriptors.cols() > 0)
+				outputCloud.descriptors.col(j) = input.descriptors.col(i);
+			j++;
+		}
+	}
+	assert(j <= nbPointsOut);
+	
+	if (j < nbPointsOut)
+	{
+		if (outputCloud.descriptors.cols() > 0)
+			return DataPoints(
+				outputCloud.features.corner(Eigen::TopLeft,outputCloud.features.rows(),j),
+				outputCloud.featureLabels,
+				outputCloud.descriptors.corner(Eigen::TopLeft,outputCloud.descriptors.rows(),j),
+				outputCloud.descriptorLabels
+			);
+		else
+			return DataPoints(
+				outputCloud.features.corner(Eigen::TopLeft,outputCloud.features.rows(),j),
+				outputCloud.featureLabels
+			);
+	}
+	
+	return outputCloud;
+}
+
+template struct MetricSpaceAligner<float>::ClampOnAxisRatioDataPointsFilter;
+template struct MetricSpaceAligner<double>::ClampOnAxisRatioDataPointsFilter;
+
+
 // SurfaceNormalDataPointsFilter
 // Constructor
 template<typename T>
@@ -455,6 +591,9 @@ void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(Bui
 	data.outputFeatures(featDim-1, data.outputInsertionPoint) = 1;
 	
 	// compute covariance
+	/*const Eigen::Matrix<T, 3, 3> C(NN * NN.transpose());
+	Eigen::Matrix<T, 3, 1> eigenVa = Eigen::Matrix<T, 3, 1>::Identity();
+	Eigen::Matrix<T, 3, 3> eigenVe = Eigen::Matrix<T, 3, 3>::Identity();*/
 	const Matrix C(NN * NN.transpose());
 	Vector eigenVa = Vector::Identity(featDim-1, 1);
 	Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
@@ -463,6 +602,8 @@ void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(Bui
 	{
 		eigenVa = Eigen::EigenSolver<Matrix>(C).eigenvalues().real();
 		eigenVe = Eigen::EigenSolver<Matrix>(C).eigenvectors().real();
+		//eigenVa = Eigen::EigenSolver<Eigen::Matrix<T,3,3> >(C).eigenvalues().real();
+		//eigenVe = Eigen::EigenSolver<Eigen::Matrix<T,3,3> >(C).eigenvectors().real();
 	}
 	else
 	{

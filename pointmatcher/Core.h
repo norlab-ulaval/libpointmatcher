@@ -200,6 +200,24 @@ struct MetricSpaceAligner
 		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
 	};
 	
+	struct ClampOnAxisThresholdDataPointsFilter: public DataPointsFilter
+	{
+		const unsigned dim;
+		const T threshold;
+		
+		ClampOnAxisThresholdDataPointsFilter(const unsigned dim, const T threshold);
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+	};
+	
+	struct ClampOnAxisRatioDataPointsFilter: public DataPointsFilter
+	{
+		const unsigned dim;
+		const T ratio;
+		
+		ClampOnAxisRatioDataPointsFilter(const unsigned dim, const T ratio);
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+	};
+	
 	// Surface normals
 	class SurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
@@ -658,10 +676,12 @@ struct MetricSpaceAligner
 		T ratioToSwitchKeyframe;
 		
 		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
+		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }
 		
 	private:
 		void createKeyFrame(DataPoints& inputCloud);
 		
+		bool keyFrameCreated;
 		DataPoints keyFrameCloud; //!< point cloud of the keyframe
 		TransformationParameters keyFrameTransform; //!< pose of keyframe
 		TransformationParameters keyFrameTransformOffset; //!< offset for centered keyframe

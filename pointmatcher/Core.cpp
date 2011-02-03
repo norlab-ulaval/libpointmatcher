@@ -250,6 +250,7 @@ MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim):
 	inspector(0),
 	outlierMixingWeight(0.5),
 	ratioToSwitchKeyframe(0.8),
+	keyFrameCreated(false),
 	keyFrameTransform(Matrix::Identity(dim+1, dim+1)),
 	keyFrameTransformOffset(Matrix::Identity(dim+1, dim+1)),
 	curTransform(Matrix::Identity(dim+1, dim+1))
@@ -298,7 +299,7 @@ void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 	
 	matcher->init(keyFrameCloud, iterate);
 	
-	cerr << "created new keyframe" << endl;
+	keyFrameCreated = true;
 }
 
 template<typename T>
@@ -313,6 +314,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	assert(inspector);
 	
 	// initial keyframe
+	keyFrameCreated = false;
 	if (keyFrameCloud.features.cols() == 0)
 	{
 		this->createKeyFrame(inputCloud);
