@@ -41,10 +41,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 template<typename T>
-void MetricSpaceAligner<T>::DataPointsFilters::apply(DataPoints& cloud, bool iterate) const
+void MetricSpaceAligner<T>::DataPointsFilters::init()
+{
+	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
+	{
+		(*it)->init();
+	}
+}
+
+template<typename T>
+void MetricSpaceAligner<T>::DataPointsFilters::apply(DataPoints& cloud, bool iterate)
 {
 	DataPoints filteredCloud;
-	for (DataPointsFiltersConstIt it = this->begin(); it != this->end(); ++it)
+	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
 	{
 		filteredCloud = (*it)->filter(cloud, iterate);
 		swapDataPoints<T>(cloud, filteredCloud);
@@ -156,7 +165,9 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 	bool iterate(true);
 	
+	readingDataPointsFilters.init();
 	readingDataPointsFilters.apply(reading, iterate);
+	referenceDataPointsFilters.init();
 	referenceDataPointsFilters.apply(reference, iterate);
 
 	transformationCheckers.init(initialTransformationParameters, iterate);
@@ -176,9 +187,6 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	{
 		DataPoints stepReading(reading);
 		DataPoints stepReference(reference);
-		//strategy.readingDataPointsFilters.applyStep(stepReading, iterate);
-		
-		//strategy.referenceDataPointsFilters.applyStep(stepReference, iterate);
 		
 		//-----------------------------
 		// Transform Readings
@@ -250,6 +258,12 @@ MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim):
 	inspector(0),
 	outlierMixingWeight(0.5),
 	ratioToSwitchKeyframe(0.8),
+	keyFrameDuration(16, "key frame duration"),
+	convergenceDuration(16, "convergence duration"),
+	iterationsCount(16, "iterations count"),
+	transDriftX(16, "trans drift x"),
+	transDriftY(16, "trans drift y"),
+	transDriftZ(16, "trans drift z"),
 	keyFrameCreated(false),
 	keyFrameTransform(Matrix::Identity(dim+1, dim+1)),
 	keyFrameTransformOffset(Matrix::Identity(dim+1, dim+1)),
@@ -278,10 +292,13 @@ MetricSpaceAligner<T>::ICPSequence::~ICPSequence()
 template<typename T>
 void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 {
+	boost::timer t; // Print how long take the algo
+	t.restart();
 	const int tDim(keyFrameTransform.rows());
 	
 	// apply filters
 	bool iterate(true);
+	keyframeDataPointsFilters.init();
 	keyframeDataPointsFilters.apply(inputCloud, iterate);
 	if (!iterate)
 		return;
@@ -300,14 +317,14 @@ void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 	matcher->init(keyFrameCloud, iterate);
 	
 	keyFrameCreated = true;
+	
+	keyFrameDuration.push_back(t.elapsed());
 }
 
 template<typename T>
 typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICPSequence::operator ()(
 	DataPoints& inputCloud)
 {
-	boost::timer t; // Print how long take the algo
-
 	assert(matcher);
 	assert(descriptorOutlierFilter);
 	assert(errorMinimizer);
@@ -321,29 +338,35 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		return curTransform;
 	}
 	
+	boost::timer t; // Print how long take the algo
+	t.restart();
+
 	////
 
 	bool iterate(true);
 	
 	DataPoints reading(inputCloud);
+	
+	readingDataPointsFilters.init();
 	readingDataPointsFilters.apply(reading, iterate);
+	
+	readingStepDataPointsFilters.init();
 	
 	transformationCheckers.init(curTransform, iterate);
 	
-	// FIXME: store kd-tree somewhere
-
 	inspector->init();
 	
 	TransformationParameters transformationParameters = keyFrameTransformOffset.inverse() * curTransform;
 
 	size_t iterationCount(0);
 	
-	cerr << "msa::icp - preprocess took " << t.elapsed() << " [s]" << endl;
-	t.restart();
-	
 	while (iterate)
 	{
 		DataPoints stepReading(reading);
+		
+		//-----------------------------
+		// Apply step filter
+		readingStepDataPointsFilters.apply(stepReading, iterate);
 		
 		//-----------------------------
 		// Transform Readings
@@ -401,11 +424,14 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		
 		++iterationCount;
 	}
+	iterationsCount.push_back(iterationCount);
 	
 	inspector->finish(iterationCount);
 	
 	// Move transformation back to original coordinate (without center of mass)
 	curTransform = keyFrameTransformOffset * transformationParameters;
+	
+	convergenceDuration.push_back(t.elapsed());
 	
 	if (errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
 	{
@@ -414,7 +440,9 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		this->createKeyFrame(inputCloud);
 	}
 	
-	cerr << "msa::icp - iterations took " << t.elapsed() << " [s]" << endl;
+	transDriftX.push_back(curTransform(0, 3));
+	transDriftY.push_back(curTransform(1, 3));
+	transDriftZ.push_back(curTransform(2, 3));
 	
 	// Return transform in world space
 	return keyFrameTransform * curTransform;

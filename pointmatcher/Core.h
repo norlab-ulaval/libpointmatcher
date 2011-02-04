@@ -44,6 +44,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Eigen/Geometry"
 #include "nabo/nabo.h"
 #include <stdexcept>
+#include <limits>
+#include <iomanip>
+#include <stdint.h>
 
 template<typename T>
 T anyabs(const T& v)
@@ -53,6 +56,56 @@ T anyabs(const T& v)
 	else
 		return v;
 }
+
+template<typename T>
+struct Histogram: public std::vector<T>
+{
+	const size_t binCount;
+	const std::string name;
+	
+	Histogram(const size_t binCount, const std::string& name):binCount(binCount), name(name) {}
+	
+	virtual ~Histogram()
+	{
+		T meanV(0);
+		T minV(std::numeric_limits<T>::max());
+		T maxV(std::numeric_limits<T>::min());
+		for (size_t i = 0; i < this->size(); ++i)
+		{
+			const T v((*this)[i]);
+			meanV += v;
+			minV = std::min<double>(minV, v);
+			maxV = std::max<double>(maxV, v);
+		}
+		meanV /= double(this->size());
+		uint64_t bins[binCount];
+		uint64_t maxBinV(0);
+		std::fill(bins, bins+binCount, uint64_t(0));
+		for (size_t i = 0; i < this->size(); ++i)
+		{
+			const T v((*this)[i]);
+			const size_t index((v - minV) * (binCount) / (maxV - minV + 0.00001));
+			//std::cerr << "adding value " << v << " to index " << index << std::endl;
+			++bins[index];
+			maxBinV = std::max<uint64_t>(maxBinV, bins[index]);
+		}
+		std::cerr.precision(3);
+		std::cerr.fill(' ');
+		std::cerr.flags(std::ios::left);
+		std::cerr << "Histogram " << name << ":\n";
+		std::cerr << "  count: " << this->size() << ", mean: " << meanV << "\n";
+		for (size_t i = 0; i < binCount; ++i)
+		{
+			const T v(minV + i * (maxV - minV) / T(binCount));
+			std::cerr << "  " << std::setw(10) << v << " (" << std::setw(6) << bins[i] << ") : ";
+			//std::cerr << (bins[i] * 60) / maxBinV << " " ;
+			for (size_t j = 0; j < (bins[i] * 60) / maxBinV; ++j)
+				std::cerr << "*";
+			std::cerr << "\n";
+		}
+		std::cerr << std::endl;
+	}
+};
 
 template<typename T>
 struct MetricSpaceAligner
@@ -181,12 +234,14 @@ struct MetricSpaceAligner
 	struct DataPointsFilter
 	{
 		virtual ~DataPointsFilter() {}
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const = 0;
+		virtual void init() {}
+		virtual DataPoints filter(const DataPoints& input, bool& iterate) = 0;
 	};
 	
 	struct DataPointsFilters: public std::vector<DataPointsFilter*>
 	{
-		void apply(DataPoints& cloud, bool iterate) const;
+		void init();
+		void apply(DataPoints& cloud, bool iterate);
 	};
 	typedef typename DataPointsFilters::iterator DataPointsFiltersIt;
 	typedef typename DataPointsFilters::const_iterator DataPointsFiltersConstIt;
@@ -197,7 +252,7 @@ struct MetricSpaceAligner
 	// Identidy
 	struct IdentityDataPointsFilter: public DataPointsFilter
 	{
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	};
 	
 	struct ClampOnAxisThresholdDataPointsFilter: public DataPointsFilter
@@ -206,7 +261,7 @@ struct MetricSpaceAligner
 		const T threshold;
 		
 		ClampOnAxisThresholdDataPointsFilter(const unsigned dim, const T threshold);
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	};
 	
 	struct ClampOnAxisRatioDataPointsFilter: public DataPointsFilter
@@ -215,7 +270,7 @@ struct MetricSpaceAligner
 		const T ratio;
 		
 		ClampOnAxisRatioDataPointsFilter(const unsigned dim, const T ratio);
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	};
 	
 	// Surface normals
@@ -238,7 +293,7 @@ struct MetricSpaceAligner
 			const bool keepEigenVectors = false,
 			const bool keepMatchedIds = false);
 		virtual ~SurfaceNormalDataPointsFilter() {};
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	};
 	
 	// Sampling surface normals
@@ -259,7 +314,7 @@ struct MetricSpaceAligner
 			const bool keepEigenValues = false, 
 			const bool keepEigenVectors = false);
 		virtual ~SamplingSurfaceNormalDataPointsFilter() {}
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 		
 	protected:
 		struct BuildData
@@ -308,7 +363,7 @@ struct MetricSpaceAligner
 	class OrientNormalsDataPointsFilter: public DataPointsFilter
 	{
 	public:
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	};
 
 	// Random sampling
@@ -320,7 +375,7 @@ struct MetricSpaceAligner
 	public:
 		RandomSamplingDataPointsFilter(const double ratio = 0.5);
 		virtual ~RandomSamplingDataPointsFilter() {};
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	private:
 		DataPoints randomSample(const DataPoints& input) const;
 	};
@@ -328,15 +383,20 @@ struct MetricSpaceAligner
 	// Systematic sampling
 	class FixstepSamplingDataPointsFilter: public DataPointsFilter
 	{
-		// Probability to keep points, between 0 and 1
-		const int step;
+		// number of steps to skip
+		const double startStep;
+		const double endStep;
+		const double stepMult;
+		double step;
+		
 		
 	public:
-		FixstepSamplingDataPointsFilter(const int step = 10);
+		FixstepSamplingDataPointsFilter(const double startStep = 10, const double endStep = 10, const double stepMult = 1);
 		virtual ~FixstepSamplingDataPointsFilter() {};
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) const;
+		virtual void init();
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	private:
-		DataPoints fixstepSample(const DataPoints& input) const;
+		DataPoints fixstepSample(const DataPoints& input);
 	};
 
 	// ---------------------------------
@@ -664,6 +724,7 @@ struct MetricSpaceAligner
 		TransformationParameters operator()(DataPoints& inputCloud);
 		
 		DataPointsFilters readingDataPointsFilters;
+		DataPointsFilters readingStepDataPointsFilters;
 		DataPointsFilters keyframeDataPointsFilters;
 		Transformations transformations;
 		Matcher* matcher;
@@ -674,6 +735,15 @@ struct MetricSpaceAligner
 		Inspector* inspector;
 		T outlierMixingWeight;
 		T ratioToSwitchKeyframe;
+		
+		Histogram<double> keyFrameDuration;
+		Histogram<double> convergenceDuration;
+		Histogram<unsigned> iterationsCount;
+		
+		// FIXME: remove
+		Histogram<double> transDriftX;
+		Histogram<double> transDriftY;
+		Histogram<double> transDriftZ;
 		
 		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
 		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }
