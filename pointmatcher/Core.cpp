@@ -91,7 +91,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::FeatureOut
 	//TODO: suboptimal, first multiplication by ones should be avoid
 	OutlierWeights w = OutlierWeights::Ones(input.dists.rows(), input.dists.cols());
 	for (FeatureOutlierFiltersIt it = this->begin(); it != this->end(); ++it)
-		w.cwise() *= (*it)->compute(filteredReading, filteredReference, input, iterate);
+		w = w.array() * (*it)->compute(filteredReading, filteredReference, input, iterate).array();
 
 	return w;
 }
@@ -149,15 +149,15 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 	for(int i=0; i < dim-1; i++)
 	{
-		//reading.features.row(i).cwise() -= meanReading(i);
-		reference.features.row(i).cwise() -= meanReference(i);
+		//reading.features.row(i).array() -= meanReading(i);
+		reference.features.row(i).array() -= meanReference(i);
 	}
 	
 	Matrix Tread(Matrix::Identity(dim, dim));
-	//Tread.block(0,dim-1, dim-1, 1) = meanReading.start(dim-1);
+	//Tread.block(0,dim-1, dim-1, 1) = meanReading.head(dim-1);
 	
 	Matrix Tref(Matrix::Identity(dim, dim));
-	Tref.block(0,dim-1, dim-1, 1) = meanReference.start(dim-1);
+	Tref.block(0,dim-1, dim-1, 1) = meanReference.head(dim-1);
 
 	
 	////
@@ -251,19 +251,21 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 }
 
 template<typename T>
-MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim):
+MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim, const std::string& filePrefix):
 	matcher(0), 
 	descriptorOutlierFilter(0),
 	errorMinimizer(0),
 	inspector(0),
 	outlierMixingWeight(0.5),
 	ratioToSwitchKeyframe(0.8),
-	keyFrameDuration(16, "key frame duration"),
-	convergenceDuration(16, "convergence duration"),
-	iterationsCount(16, "iterations count"),
-	transDriftX(16, "trans drift x"),
-	transDriftY(16, "trans drift y"),
-	transDriftZ(16, "trans drift z"),
+	keyFrameDuration(16, "key_frame_duration", filePrefix),
+	convergenceDuration(16, "convergence_duration", filePrefix),
+	iterationsCount(16, "iterations_count", filePrefix),
+	pointCountIn(16, "point_count_in", filePrefix),
+	pointCountReading(16, "point_count_reading", filePrefix),
+	pointCountKeyFrame(16, "point_count_key_frame", filePrefix),
+	pointCountTouched(16, "point_count_touched", filePrefix),
+	overlapRatio(16, "overlap_ratio", filePrefix),
 	keyFrameCreated(false),
 	keyFrameTransform(Matrix::Identity(dim+1, dim+1)),
 	keyFrameTransformOffset(Matrix::Identity(dim+1, dim+1)),
@@ -303,15 +305,17 @@ void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 	if (!iterate)
 		return;
 	
+	pointCountKeyFrame.push_back(inputCloud.features.cols());
+	
 	// center keyframe, retrieve offset
 	const int nbPtsKeyframe = inputCloud.features.cols();
 	const Vector meanKeyframe = inputCloud.features.rowwise().sum() / nbPtsKeyframe;
 	for(int i=0; i < tDim-1; i++)
-		inputCloud.features.row(i).cwise() -= meanKeyframe(i);
+		inputCloud.features.row(i).array() -= meanKeyframe(i);
 		
 	// update keyframe
 	keyFrameCloud = inputCloud;
-	keyFrameTransformOffset.block(0,tDim-1, tDim-1, 1) = meanKeyframe.start(tDim-1);
+	keyFrameTransformOffset.block(0,tDim-1, tDim-1, 1) = meanKeyframe.head(tDim-1);
 	curTransform = Matrix::Identity(tDim, tDim);
 	
 	matcher->init(keyFrameCloud, iterate);
@@ -346,9 +350,11 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	bool iterate(true);
 	
 	DataPoints reading(inputCloud);
+	pointCountIn.push_back(inputCloud.features.cols());
 	
 	readingDataPointsFilters.init();
 	readingDataPointsFilters.apply(reading, iterate);
+	pointCountReading.push_back(reading.features.cols());
 	
 	readingStepDataPointsFilters.init();
 	
@@ -425,13 +431,15 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		++iterationCount;
 	}
 	iterationsCount.push_back(iterationCount);
-	
+	pointCountTouched.push_back(matcher->getVisitCount());
+	matcher->resetVisitCount();
 	inspector->finish(iterationCount);
 	
 	// Move transformation back to original coordinate (without center of mass)
 	curTransform = keyFrameTransformOffset * transformationParameters;
 	
 	convergenceDuration.push_back(t.elapsed());
+	overlapRatio.push_back(errorMinimizer->getWeightedPointUsedRatio());
 	
 	if (errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
 	{
@@ -440,9 +448,17 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		this->createKeyFrame(inputCloud);
 	}
 	
-	transDriftX.push_back(curTransform(0, 3));
+	/*transDriftX.push_back(curTransform(0, 3));
 	transDriftY.push_back(curTransform(1, 3));
 	transDriftZ.push_back(curTransform(2, 3));
+	
+	const double pitch = -asin(curTransform(2,0));
+	const double roll = atan2(curTransform(2,1), curTransform(2,2));
+	const double yaw = atan2(curTransform(1,0) / cos(pitch), curTransform(0,0) / cos(pitch));
+	rotDriftRoll.push_back(roll);
+	rotDriftPitch.push_back(pitch);
+	rotDriftYaw.push_back(yaw);
+	*/
 	
 	// Return transform in world space
 	return keyFrameTransform * curTransform;

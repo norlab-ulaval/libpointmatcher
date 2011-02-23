@@ -314,7 +314,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalD
 		Vector eigenVa = Vector::Identity(featDim-1, 1);
 		Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
 		// Ensure that the matrix is suited for eigenvalues calculation
-		if(C.qr().rank() == featDim-1)
+		if(C.fullPivHouseholderQr().rank() == featDim-1)
 		{
 			eigenVa = Eigen::EigenSolver<Matrix>(C).eigenvalues().real();
 			eigenVe = Eigen::EigenSolver<Matrix>(C).eigenvectors().real();
@@ -598,7 +598,7 @@ void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(Bui
 	Vector eigenVa = Vector::Identity(featDim-1, 1);
 	Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
 	// Ensure that the matrix is suited for eigenvalues calculation
-	if(C.qr().rank() == featDim-1)
+	if(C.fullPivHouseholderQr().rank() == featDim-1)
 	{
 		eigenVa = Eigen::EigenSolver<Matrix>(C).eigenvalues().real();
 		eigenVe = Eigen::EigenSolver<Matrix>(C).eigenvectors().real();

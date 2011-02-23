@@ -81,8 +81,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::TransformDescr
 	const int ptCount(input.descriptors.cols());
 
 	//NOTE: Only need rotation for descriptors (up to now...)
-	const Matrix R(parameters.corner(Eigen::TopLeft, 
-			parameters.rows()-1, parameters.cols()-1));
+	const Matrix R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
 
 	int descRow(0);
 	for(int unsigned i = 0; i < transformedDataPoints.descriptorLabels.size(); i++)

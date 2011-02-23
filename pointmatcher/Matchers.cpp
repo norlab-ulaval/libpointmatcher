@@ -83,7 +83,7 @@ void MetricSpaceAligner<T>::KDTreeMatcher::init(
 	// build and populate NNS
 	if (featureNNS)
 		delete featureNNS;
-	featureNNS = NNS::create(filteredReference.features, filteredReference.features.rows() - 1, searchType);
+	featureNNS = NNS::create(filteredReference.features, filteredReference.features.rows() - 1, searchType, NNS::TOUCH_STATISTICS);
 }
 
 template<typename T>
@@ -99,7 +99,7 @@ typename MetricSpaceAligner<T>::Matches MetricSpaceAligner<T>::KDTreeMatcher::fi
 		typename Matches::Ids(knn, pointsCount)
 	);
 	
-	featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, NNS::ALLOW_SELF_MATCH);
+	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, NNS::ALLOW_SELF_MATCH);
 	
 	return matches;
 }

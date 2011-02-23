@@ -86,7 +86,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataPoints(const DataPoint
 	stream << "POINTS " << features.cols() << " float\n";
 	if(features.rows() == 4)
 	{
-		stream << features.corner(Eigen::TopLeft, 3, features.cols()).transpose() << "\n";
+		stream << features.topLeftCorner(3, features.cols()).transpose() << "\n";
 	}
 	else
 	{
@@ -177,9 +177,9 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataLinks(
 	if(refFeatures.rows() == 4)
 	{
 		// reference pt
-		stream << refFeatures.corner(Eigen::TopLeft, 3, refFeatures.cols()).transpose() << "\n";
+		stream << refFeatures.topLeftCorner(3, refFeatures.cols()).transpose() << "\n";
 		// reading pt
-		stream << readingFeatures.corner(Eigen::TopLeft, 3, readingFeatures.cols()).transpose() << "\n";
+		stream << readingFeatures.topLeftCorner(3, readingFeatures.cols()).transpose() << "\n";
 	}
 	else
 	{
@@ -444,7 +444,7 @@ typename MetricSpaceAligner<T>::Matrix MetricSpaceAligner<T>::AbstractVTKInspect
 	else
 	{
 		Matrix tmp = Matrix::Zero(expectedRow, expectedCols); 
-		tmp.corner(Eigen::TopLeft, m.rows(), m.cols()) = m;
+		tmp.topLeftCorner(m.rows(), m.cols()) = m;
 		return tmp;
 	}
 

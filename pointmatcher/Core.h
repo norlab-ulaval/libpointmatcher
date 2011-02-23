@@ -39,12 +39,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EIGEN_USE_NEW_STDVECTOR
 #define EIGEN_USE_NEW_STDVECTOR
 #endif // EIGEN_USE_NEW_STDVECTOR
+#define EIGEN2_SUPPORT
 #include "Eigen/StdVector"
 #include "Eigen/Eigen"
 #include "Eigen/Geometry"
 #include "nabo/nabo.h"
 #include <stdexcept>
 #include <limits>
+#include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <stdint.h>
 
@@ -62,9 +65,9 @@ struct Histogram: public std::vector<T>
 {
 	const size_t binCount;
 	const std::string name;
+	const std::string filePrefix;
 	
-	Histogram(const size_t binCount, const std::string& name):binCount(binCount), name(name) {}
-	
+	Histogram(const size_t binCount, const std::string& name, const std::string& filePrefix):binCount(binCount), name(name), filePrefix(filePrefix) {}
 	virtual ~Histogram()
 	{
 		T meanV(0);
@@ -76,7 +79,17 @@ struct Histogram: public std::vector<T>
 			meanV += v;
 			minV = std::min<double>(minV, v);
 			maxV = std::max<double>(maxV, v);
+			
 		}
+		if (filePrefix.size() > 0)
+		{
+			std::cerr << "writing to " << (filePrefix + name) << std::endl;
+			std::ofstream ofs((filePrefix + name).c_str());
+			for (size_t i = 0; i < this->size(); ++i)
+				ofs << ((*this)[i]) << "\n";
+		}
+		else
+			std::cerr << "no file prefix, not writing" << std::endl;
 		meanV /= double(this->size());
 		uint64_t bins[binCount];
 		uint64_t maxBinV(0);
@@ -84,11 +97,12 @@ struct Histogram: public std::vector<T>
 		for (size_t i = 0; i < this->size(); ++i)
 		{
 			const T v((*this)[i]);
-			const size_t index((v - minV) * (binCount) / (maxV - minV + 0.00001));
+			const size_t index((v - minV) * (binCount) / ((maxV - minV) * (1+std::numeric_limits<double>::epsilon()*10)));
 			//std::cerr << "adding value " << v << " to index " << index << std::endl;
 			++bins[index];
 			maxBinV = std::max<uint64_t>(maxBinV, bins[index]);
 		}
+		
 		std::cerr.precision(3);
 		std::cerr.fill(' ');
 		std::cerr.flags(std::ios::left);
@@ -402,6 +416,13 @@ struct MetricSpaceAligner
 	// ---------------------------------
 	struct Matcher
 	{
+		// FIXME: this is a rather ugly way to do stats
+		unsigned long visitCounter;
+		
+		Matcher():visitCounter(0) {}
+		
+		void resetVisitCount() { visitCounter = 0; }
+		unsigned long getVisitCount() { return visitCounter; }
 		virtual ~Matcher() {}
 		virtual void init(const DataPoints& filteredReference, bool& iterate) = 0;
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate) = 0;
@@ -718,7 +739,7 @@ struct MetricSpaceAligner
 	// ICP sequence, with keyframing
 	struct ICPSequence
 	{
-		ICPSequence(const int dim);
+		ICPSequence(const int dim, const std::string& filePrefix = "");
 		~ICPSequence();
 		
 		TransformationParameters operator()(DataPoints& inputCloud);
@@ -739,11 +760,11 @@ struct MetricSpaceAligner
 		Histogram<double> keyFrameDuration;
 		Histogram<double> convergenceDuration;
 		Histogram<unsigned> iterationsCount;
-		
-		// FIXME: remove
-		Histogram<double> transDriftX;
-		Histogram<double> transDriftY;
-		Histogram<double> transDriftZ;
+		Histogram<unsigned> pointCountIn;
+		Histogram<unsigned> pointCountReading;
+		Histogram<unsigned> pointCountKeyFrame;
+		Histogram<unsigned> pointCountTouched;
+		Histogram<double> overlapRatio;
 		
 		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
 		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }

@@ -120,24 +120,24 @@ void MetricSpaceAligner<T>::ErrorTransformationChecker::init(const Transformatio
 	
 	if (parameters.rows() == 4)
 	{
-		rotations.push_back(Quaternion(Eigen::Matrix<T,3,3>(parameters.corner(Eigen::TopLeft,3,3))));
+		rotations.push_back(Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3))));
 	}
 	else
 	{
 		// Handle the 2D case
 		Eigen::Matrix<T,3,3> m(Matrix::Identity(3,3));
-		m.corner(Eigen::TopLeft,2,2) = parameters.corner(Eigen::TopLeft,2,2);
+		m.topLeftCorner(2,2) = parameters.topLeftCorner(2,2);
 		rotations.push_back(Quaternion(m));
 	}
 	
-	translations.push_back(parameters.corner(Eigen::TopRight,parameters.rows()-1,1));
+	translations.push_back(parameters.topRightCorner(parameters.rows()-1,1));
 }
 
 template<typename T>
 void MetricSpaceAligner<T>::ErrorTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
-	rotations.push_back(Quaternion(Eigen::Matrix<T,3,3>(parameters.corner(Eigen::TopLeft,3,3))));
-	translations.push_back(parameters.corner(Eigen::TopRight,parameters.rows()-1,1));
+	rotations.push_back(Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3))));
+	translations.push_back(parameters.topRightCorner(parameters.rows()-1,1));
 	
 	this->values.setZero(4);
 	if(rotations.size() > tail)
@@ -188,15 +188,15 @@ void MetricSpaceAligner<T>::BoundTransformationChecker::init(const Transformatio
 	this->values.setZero(2);
 	// FIXME: handle 2D case
 	assert(parameters.rows() == 4);
-	initialRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.corner(Eigen::TopLeft,3,3)));
-	initialTranslation = parameters.corner(Eigen::TopRight,parameters.rows()-1,1);
+	initialRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
+	initialTranslation = parameters.topRightCorner(parameters.rows()-1,1);
 }
 
 template<typename T>
 void MetricSpaceAligner<T>::BoundTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
-	const Quaternion currentRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.corner(Eigen::TopLeft,3,3)));
-	const Vector currentTranslation = parameters.corner(Eigen::TopRight,parameters.rows()-1,1);
+	const Quaternion currentRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
+	const Vector currentTranslation = parameters.topRightCorner(parameters.rows()-1,1);
 	this->values(0) = currentRotation.angularDistance(initialRotation);
 	this->values(1) = (currentTranslation - initialTranslation).norm();
 	if (this->values(0) > this->limits(0) || this->values(1) > this->limits(1))

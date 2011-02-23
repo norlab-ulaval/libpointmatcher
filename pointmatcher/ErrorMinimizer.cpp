@@ -131,7 +131,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 // 		const Vector trVector(meanOfAssociatedRef - rotMatrix * meanOfReading);
 	
 	const Matrix m(associatedRef * centeredFeatureReading.transpose());
-	const SVD<Matrix> svd(m);
+	const JacobiSVD<Matrix> svd(m);
 	const Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
 	//cout << "meanOfAssociatedRef " << meanOfAssociatedRef << endl;
 	//cout << "meanOfReading " << meanOfReading << endl;
@@ -197,7 +197,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 	// Unadjust covariance A = wF * F'
 	const Matrix A = wF * F.transpose();
-	if (A.qr().rank() != A.rows())
+	if (A.fullPivHouseholderQr().rank() != A.rows())
 	{
 		throw ConvergenceError("encountered singular while minimizing point to plane distance");
 	}
@@ -223,18 +223,22 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	Matrix mOut;
 	if(normalRef.rows() == 3)
 	{
-		Eigen::Transform<T, 3> transform;
+		Eigen::Transform<T, 3, Eigen::Affine> transform;
 		// Rotation in Eular angles follow roll-pitch-yaw (1-2-3) rule
 		transform = Eigen::AngleAxis<T>(x(0), Eigen::Matrix<T,1,3>::UnitX())
 				* Eigen::AngleAxis<T>(x(1), Eigen::Matrix<T,1,3>::UnitY())
 				* Eigen::AngleAxis<T>(x(2), Eigen::Matrix<T,1,3>::UnitZ());
-
+		// Reverse roll-pitch-yaw conversion, very useful piece of knowledge, keep it with you all time!
+		/*const T pitch = -asin(transform(2,0));
+		const T roll = atan2(transform(2,1), transform(2,2));
+		const T yaw = atan2(transform(1,0) / cos(pitch), transform(0,0) / cos(pitch));
+		std::cerr << "d angles" << x(0) - roll << ", " << x(1) - pitch << "," << x(2) - yaw << std::endl;*/
 		transform.translation() = x.segment(3, 3);
 		mOut = transform.matrix();
 	}
 	else
 	{
-		Eigen::Transform<T, 2> transform;
+		Eigen::Transform<T, 2, Eigen::Affine> transform;
 		transform = Eigen::Rotation2D<T> (x(0));
 		transform.translation() = x.segment(1, 2);
 
