@@ -66,21 +66,19 @@ struct Histogram: public std::vector<T>
 	const size_t binCount;
 	const std::string name;
 	const std::string filePrefix;
+	const bool dumpStdErrOnExit;
 	
-	Histogram(const size_t binCount, const std::string& name, const std::string& filePrefix):binCount(binCount), name(name), filePrefix(filePrefix) {}
+	Histogram(const size_t binCount, const std::string& name, const std::string& 
+	filePrefix, const bool dumpStdErrOnExit):binCount(binCount), name(name), filePrefix(filePrefix), dumpStdErrOnExit(dumpStdErrOnExit) {}
+	
 	virtual ~Histogram()
 	{
-		T meanV(0);
-		T minV(std::numeric_limits<T>::max());
-		T maxV(std::numeric_limits<T>::min());
-		for (size_t i = 0; i < this->size(); ++i)
-		{
-			const T v((*this)[i]);
-			meanV += v;
-			minV = std::min<double>(minV, v);
-			maxV = std::max<double>(maxV, v);
-			
-		}
+		T meanV, minV, maxV;
+		uint64_t bins[binCount];
+		uint64_t maxBinC;
+		if (dumpStdErrOnExit || filePrefix.size() > 0)
+			computeStats(meanV, minV, maxV, bins, maxBinC);
+		
 		if (filePrefix.size() > 0)
 		{
 			std::cerr << "writing to " << (filePrefix + name) << std::endl;
@@ -88,36 +86,65 @@ struct Histogram: public std::vector<T>
 			for (size_t i = 0; i < this->size(); ++i)
 				ofs << ((*this)[i]) << "\n";
 		}
-		else
-			std::cerr << "no file prefix, not writing" << std::endl;
+		
+		if (dumpStdErrOnExit)
+		{
+			std::fill(bins, bins+binCount, uint64_t(0));
+			std::cerr.precision(3);
+			std::cerr.fill(' ');
+			std::cerr.flags(std::ios::left);
+			std::cerr << "Histogram " << name << ":\n";
+			std::cerr << "  count: " << this->size() << ", mean: " << meanV << "\n";
+			for (size_t i = 0; i < binCount; ++i)
+			{
+				const T v(minV + i * (maxV - minV) / T(binCount));
+				std::cerr << "  " << std::setw(10) << v << " (" << std::setw(6) << bins[i] << ") : ";
+				//std::cerr << (bins[i] * 60) / maxBinC << " " ;
+				for (size_t j = 0; j < (bins[i] * 60) / maxBinC; ++j)
+					std::cerr << "*";
+				std::cerr << "\n";
+			}
+			std::cerr << std::endl;
+		}
+	}
+	
+	void computeStats(T& meanV, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
+	{
+		// basic stats
+		meanV = 0;
+		minV = std::numeric_limits<T>::max();
+		maxV = std::numeric_limits<T>::min();
+		for (size_t i = 0; i < this->size(); ++i)
+		{
+			const T v((*this)[i]);
+			meanV += v;
+			minV = std::min<double>(minV, v);
+			maxV = std::max<double>(maxV, v);
+		}
 		meanV /= double(this->size());
-		uint64_t bins[binCount];
-		uint64_t maxBinV(0);
+		// hist
 		std::fill(bins, bins+binCount, uint64_t(0));
+		maxBinC = 0;
 		for (size_t i = 0; i < this->size(); ++i)
 		{
 			const T v((*this)[i]);
 			const size_t index((v - minV) * (binCount) / ((maxV - minV) * (1+std::numeric_limits<double>::epsilon()*10)));
 			//std::cerr << "adding value " << v << " to index " << index << std::endl;
 			++bins[index];
-			maxBinV = std::max<uint64_t>(maxBinV, bins[index]);
+			maxBinC = std::max<uint64_t>(maxBinC, bins[index]);
 		}
-		
-		std::cerr.precision(3);
-		std::cerr.fill(' ');
-		std::cerr.flags(std::ios::left);
-		std::cerr << "Histogram " << name << ":\n";
-		std::cerr << "  count: " << this->size() << ", mean: " << meanV << "\n";
+	}
+	
+	void dumpStats(std::ostream& os)
+	{
+		T meanV, minV, maxV;
+		uint64_t bins[binCount];
+		uint64_t maxBinC;
+		computeStats(meanV, minV, maxV, bins, maxBinC);
+		os << meanV << " " << minV << " " << maxV << " " << binCount << " ";
 		for (size_t i = 0; i < binCount; ++i)
-		{
-			const T v(minV + i * (maxV - minV) / T(binCount));
-			std::cerr << "  " << std::setw(10) << v << " (" << std::setw(6) << bins[i] << ") : ";
-			//std::cerr << (bins[i] * 60) / maxBinV << " " ;
-			for (size_t j = 0; j < (bins[i] * 60) / maxBinV; ++j)
-				std::cerr << "*";
-			std::cerr << "\n";
-		}
-		std::cerr << std::endl;
+			os << bins[i] << " ";
+		os << maxBinC;
 	}
 };
 
@@ -739,7 +766,7 @@ struct MetricSpaceAligner
 	// ICP sequence, with keyframing
 	struct ICPSequence
 	{
-		ICPSequence(const int dim, const std::string& filePrefix = "");
+		ICPSequence(const int dim, const std::string& filePrefix = "", const bool dumpStdErrOnExit = true);
 		~ICPSequence();
 		
 		TransformationParameters operator()(DataPoints& inputCloud);

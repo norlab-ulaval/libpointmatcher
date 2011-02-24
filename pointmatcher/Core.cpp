@@ -251,21 +251,21 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 }
 
 template<typename T>
-MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim, const std::string& filePrefix):
+MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim, const std::string& filePrefix, const bool dumpStdErrOnExit):
 	matcher(0), 
 	descriptorOutlierFilter(0),
 	errorMinimizer(0),
 	inspector(0),
 	outlierMixingWeight(0.5),
 	ratioToSwitchKeyframe(0.8),
-	keyFrameDuration(16, "key_frame_duration", filePrefix),
-	convergenceDuration(16, "convergence_duration", filePrefix),
-	iterationsCount(16, "iterations_count", filePrefix),
-	pointCountIn(16, "point_count_in", filePrefix),
-	pointCountReading(16, "point_count_reading", filePrefix),
-	pointCountKeyFrame(16, "point_count_key_frame", filePrefix),
-	pointCountTouched(16, "point_count_touched", filePrefix),
-	overlapRatio(16, "overlap_ratio", filePrefix),
+	keyFrameDuration(16, "key_frame_duration", filePrefix, dumpStdErrOnExit),
+	convergenceDuration(16, "convergence_duration", filePrefix, dumpStdErrOnExit),
+	iterationsCount(16, "iterations_count", filePrefix, dumpStdErrOnExit),
+	pointCountIn(16, "point_count_in", filePrefix, dumpStdErrOnExit),
+	pointCountReading(16, "point_count_reading", filePrefix, dumpStdErrOnExit),
+	pointCountKeyFrame(16, "point_count_key_frame", filePrefix, dumpStdErrOnExit),
+	pointCountTouched(16, "point_count_touched", filePrefix, dumpStdErrOnExit),
+	overlapRatio(16, "overlap_ratio", filePrefix, dumpStdErrOnExit),
 	keyFrameCreated(false),
 	keyFrameTransform(Matrix::Identity(dim+1, dim+1)),
 	keyFrameTransformOffset(Matrix::Identity(dim+1, dim+1)),
