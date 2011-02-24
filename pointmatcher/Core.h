@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <iomanip>
 #include <stdint.h>
+#include <sys/time.h>
 
 template<typename T>
 T anyabs(const T& v)
@@ -59,6 +60,30 @@ T anyabs(const T& v)
 	else
 		return v;
 }
+
+/*
+	High-precision timer class, using gettimeofday().
+	The interface is a subset of the one boost::timer provides,
+	but the implementation is much more precise
+	on systems where clock() has low precision, such as glibc.
+*/
+struct timer
+{
+	typedef unsigned long long Time;
+	
+	timer():_start_time(curTime()){ } 
+	void restart() { _start_time = curTime(); }
+	double elapsed() const                  // return elapsed time in seconds
+    { return  double(curTime() - _start_time) / double(1000000); }
+
+private:
+	Time curTime() const {
+		struct timeval tv;
+		gettimeofday(&tv, 0);
+		return Time(tv.tv_sec) * Time(1000000) + Time(tv.tv_usec);
+	}
+	Time _start_time;
+};
 
 template<typename T>
 struct Histogram: public std::vector<T>

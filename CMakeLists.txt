@@ -5,7 +5,7 @@ project(libpointmatcher)
 #include(UseDoxygen)
 
 # boost
-find_package(Boost REQUIRED)
+#find_package(Boost REQUIRED)
 
 # eigen 2
 find_path(EIGEN2_INCLUDE_DIR Eigen/Core
@@ -38,7 +38,7 @@ if (OPENCL_LIBRARIES)
 endif (OPENCL_LIBRARIES)
 
 # include all libs so far
-include_directories(${CMAKE_SOURCE_DIR} ${EIGEN2_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${NABO_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR} ${EIGEN2_INCLUDE_DIR} ${NABO_INCLUDE_DIR})
 add_definitions(-Wall)
 
 # main pointmatcher lib
@@ -64,11 +64,11 @@ install(FILES
 
 # test programs
 add_executable(icp tests/icp.cpp)
-target_link_libraries(icp pointmatcher ${Boost_LIBRARIES} ${NABO_LIBRARY} ${EXTRA_LIBS})
+target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS})
 
 add_executable(alignclouds tests/alignclouds.cpp)
-target_link_libraries(alignclouds pointmatcher ${Boost_LIBRARIES} ${NABO_LIBRARY} ${EXTRA_LIBS})
+target_link_libraries(alignclouds pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS})
 
 add_executable(testvtk tests/testvtk.cpp)
-target_link_libraries(testvtk pointmatcher ${Boost_LIBRARIES} ${NABO_LIBRARY} ${EXTRA_LIBS})
+target_link_libraries(testvtk pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS})
 

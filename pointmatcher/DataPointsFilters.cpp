@@ -36,7 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Core.h"
 #include <stdexcept>
 #include <algorithm>
-#include <boost/progress.hpp>
 
 // Eigenvalues
 #include "Eigen/QR"
@@ -432,8 +431,6 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfac
 	const DataPoints& input, 
 	bool& iterate)
 {
-	boost::progress_timer t; // Print how long take the algorithm
-	
 	//std::cerr << "SamplingSurfaceNormalDataPointsFilter::preFilter " << input.features.cols() << std::endl;
 	typedef typename DataPoints::Features Features;
 	typedef typename DataPoints::Label Label;

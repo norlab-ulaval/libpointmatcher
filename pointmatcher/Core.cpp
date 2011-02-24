@@ -36,7 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Core.h"
 #include <cassert>
 #include <iostream>
-#include <boost/progress.hpp>
 
 using namespace std;
 
@@ -130,7 +129,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	DataPoints reading,
 	DataPoints reference)
 {
-	boost::timer t; // Print how long take the algo
+	timer t; // Print how long take the algo
 
 	assert(matcher);
 	assert(descriptorOutlierFilter);
@@ -294,7 +293,7 @@ MetricSpaceAligner<T>::ICPSequence::~ICPSequence()
 template<typename T>
 void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 {
-	boost::timer t; // Print how long take the algo
+	timer t; // Print how long take the algo
 	t.restart();
 	const int tDim(keyFrameTransform.rows());
 	
@@ -342,7 +341,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		return curTransform;
 	}
 	
-	boost::timer t; // Print how long take the algo
+	timer t; // Print how long take the algo
 	t.restart();
 
 	////
