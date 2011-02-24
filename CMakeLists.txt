@@ -64,11 +64,11 @@ install(FILES
 
 # test programs
 add_executable(icp tests/icp.cpp)
-target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS})
+target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
 
 add_executable(alignclouds tests/alignclouds.cpp)
-target_link_libraries(alignclouds pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS})
+target_link_libraries(alignclouds pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
 
 add_executable(testvtk tests/testvtk.cpp)
-target_link_libraries(testvtk pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS})
+target_link_libraries(testvtk pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
 

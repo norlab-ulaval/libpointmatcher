@@ -74,13 +74,13 @@ struct timer
 	timer():_start_time(curTime()){ } 
 	void restart() { _start_time = curTime(); }
 	double elapsed() const                  // return elapsed time in seconds
-    { return  double(curTime() - _start_time) / double(1000000); }
+    { return  double(curTime() - _start_time) / double(1000000000); }
 
 private:
 	Time curTime() const {
-		struct timeval tv;
-		gettimeofday(&tv, 0);
-		return Time(tv.tv_sec) * Time(1000000) + Time(tv.tv_usec);
+		struct timespec ts;
+		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
+		return Time(ts.tv_sec) * Time(1000000000) + Time(ts.tv_nsec);
 	}
 	Time _start_time;
 };
