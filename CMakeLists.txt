@@ -7,10 +7,10 @@ project(libpointmatcher)
 # boost
 #find_package(Boost REQUIRED)
 
-# eigen 2
-find_path(EIGEN2_INCLUDE_DIR Eigen/Core
-	/usr/local/include/eigen2
-	/usr/include/eigen2
+# eigen 3
+find_path(EIGEN_INCLUDE_DIR Eigen/Core
+	/usr/local/include/eigen
+	/usr/include/eigen
 )
 
 # nabo
@@ -38,7 +38,7 @@ if (OPENCL_LIBRARIES)
 endif (OPENCL_LIBRARIES)
 
 # include all libs so far
-include_directories(${CMAKE_SOURCE_DIR} ${EIGEN2_INCLUDE_DIR} ${NABO_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR})
 add_definitions(-Wall)
 
 # main pointmatcher lib
