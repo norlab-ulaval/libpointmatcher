@@ -839,7 +839,7 @@ template<typename T>
 typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::fixstepSample(const DataPoints& input)
 {
 	const int iStep(step);
-	cerr << "FixstepSamplingDataPointsFilter::filter: stepping " << iStep << endl;
+	//cerr << "FixstepSamplingDataPointsFilter::filter: stepping " << iStep << endl;
 	const int nbPointsIn = input.features.cols();
 	const int nbPointsOut = (nbPointsIn + iStep - 1) / iStep;
 	typename DataPoints::Features filteredFeat(input.features.rows(), nbPointsOut);

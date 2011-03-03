@@ -82,7 +82,7 @@ void MetricSpaceAligner<T>::CounterTransformationChecker::check(const Transforma
 {
 	this->values(0)++;
 	
-	std::cout << "Iter: " << this->values(0) << " / " << this->limits(0) << std::endl;
+	//std::cout << "Iter: " << this->values(0) << " / " << this->limits(0) << std::endl;
 	//cerr << parameters << endl;
 	
 	if (this->values(0) >= this->limits(0))
@@ -154,8 +154,8 @@ void MetricSpaceAligner<T>::ErrorTransformationChecker::check(const Transformati
 			iterate = false;
 	}
 	
-	std::cout << "Abs Rotation: " << this->values(0) << " / " << this->limits(0) << std::endl;
-	std::cout << "Abs Translation: " << this->values(1) << " / " << this->limits(1) << std::endl;
+	//std::cout << "Abs Rotation: " << this->values(0) << " / " << this->limits(0) << std::endl;
+	//std::cout << "Abs Translation: " << this->values(1) << " / " << this->limits(1) << std::endl;
 	
 	if (isnan(this->values(0)))
 		throw ConvergenceError("abs rotation norm not a number");

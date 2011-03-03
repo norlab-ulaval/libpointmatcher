@@ -296,6 +296,7 @@ void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 	timer t; // Print how long take the algo
 	t.restart();
 	const int tDim(keyFrameTransform.rows());
+	const int ptCount(inputCloud.features.cols());
 	
 	// apply filters
 	bool iterate(true);
@@ -313,15 +314,20 @@ void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		inputCloud.features.row(i).array() -= meanKeyframe(i);
 		
 	// update keyframe
-	keyFrameCloud = inputCloud;
-	keyFrameTransformOffset.block(0,tDim-1, tDim-1, 1) = meanKeyframe.head(tDim-1);
-	curTransform = Matrix::Identity(tDim, tDim);
+	if (inputCloud.features.cols() > 0)
+	{
+		keyFrameCloud = inputCloud;
+		keyFrameTransformOffset.block(0,tDim-1, tDim-1, 1) = meanKeyframe.head(tDim-1);
+		curTransform = Matrix::Identity(tDim, tDim);
+		
+		matcher->init(keyFrameCloud, iterate);
+		
+		keyFrameCreated = true;
 	
-	matcher->init(keyFrameCloud, iterate);
-	
-	keyFrameCreated = true;
-	
-	keyFrameDuration.push_back(t.elapsed());
+		keyFrameDuration.push_back(t.elapsed());
+	}
+	else
+		cerr << "Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)" << endl;
 }
 
 template<typename T>
