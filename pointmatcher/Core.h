@@ -98,11 +98,11 @@ struct Histogram: public std::vector<T>
 	
 	virtual ~Histogram()
 	{
-		T meanV, minV, maxV;
+		T meanV, varV, minV, maxV;
 		uint64_t bins[binCount];
 		uint64_t maxBinC;
 		if (dumpStdErrOnExit || filePrefix.size() > 0)
-			computeStats(meanV, minV, maxV, bins, maxBinC);
+			computeStats(meanV, varV, minV, maxV, bins, maxBinC);
 		
 		if (filePrefix.size() > 0)
 		{
@@ -133,7 +133,7 @@ struct Histogram: public std::vector<T>
 		}
 	}
 	
-	void computeStats(T& meanV, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
+	void computeStats(T& meanV, T& varV, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
 	{
 		// basic stats
 		meanV = 0;
@@ -143,30 +143,33 @@ struct Histogram: public std::vector<T>
 		{
 			const T v((*this)[i]);
 			meanV += v;
-			minV = std::min<double>(minV, v);
-			maxV = std::max<double>(maxV, v);
+			minV = std::min<T>(minV, v);
+			maxV = std::max<T>(maxV, v);
 		}
-		meanV /= double(this->size());
-		// hist
+		meanV /= T(this->size());
+		// var and hist
 		std::fill(bins, bins+binCount, uint64_t(0));
 		maxBinC = 0;
+		varV = 0;
 		for (size_t i = 0; i < this->size(); ++i)
 		{
 			const T v((*this)[i]);
-			const size_t index((v - minV) * (binCount) / ((maxV - minV) * (1+std::numeric_limits<double>::epsilon()*10)));
+			varV += (v - meanV)*(v - meanV);
+			const size_t index((v - minV) * (binCount) / ((maxV - minV) * (1+std::numeric_limits<T>::epsilon()*10)));
 			//std::cerr << "adding value " << v << " to index " << index << std::endl;
 			++bins[index];
 			maxBinC = std::max<uint64_t>(maxBinC, bins[index]);
 		}
+		varV /= T(this->size());
 	}
 	
 	void dumpStats(std::ostream& os)
 	{
-		T meanV, minV, maxV;
+		T meanV, varV, minV, maxV;
 		uint64_t bins[binCount];
 		uint64_t maxBinC;
-		computeStats(meanV, minV, maxV, bins, maxBinC);
-		os << meanV << " " << minV << " " << maxV << " " << binCount << " ";
+		computeStats(meanV, varV, minV, maxV, bins, maxBinC);
+		os << meanV << " " << varV << minV << " " << maxV << " " << binCount << " ";
 		for (size_t i = 0; i < binCount; ++i)
 			os << bins[i] << " ";
 		os << maxBinC;
