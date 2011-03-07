@@ -180,7 +180,7 @@ struct Histogram: public std::vector<T>
 		uint64_t bins[binCount];
 		uint64_t maxBinC;
 		computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, bins, maxBinC);
-		os << meanV << " " << varV << minV << " " << maxV << " " << binCount << " ";
+		os << meanV << " " << varV << " " << medianV << " " << lowQt << " " << highQt << " " << minV << " " << maxV << " " << binCount << " ";
 		for (size_t i = 0; i < binCount; ++i)
 			os << bins[i] << " ";
 		os << maxBinC;
