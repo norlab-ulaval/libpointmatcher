@@ -98,11 +98,11 @@ struct Histogram: public std::vector<T>
 	
 	virtual ~Histogram()
 	{
-		T meanV, varV, minV, maxV;
+		T meanV, varV, medianV, lowQt, highQt, minV, maxV;
 		uint64_t bins[binCount];
 		uint64_t maxBinC;
 		if (dumpStdErrOnExit || filePrefix.size() > 0)
-			computeStats(meanV, varV, minV, maxV, bins, maxBinC);
+			computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, bins, maxBinC);
 		
 		if (filePrefix.size() > 0)
 		{
@@ -133,8 +133,9 @@ struct Histogram: public std::vector<T>
 		}
 	}
 	
-	void computeStats(T& meanV, T& varV, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
+	void computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
 	{
+		assert(size() > 0);
 		// basic stats
 		meanV = 0;
 		minV = std::numeric_limits<T>::max();
@@ -161,14 +162,24 @@ struct Histogram: public std::vector<T>
 			maxBinC = std::max<uint64_t>(maxBinC, bins[index]);
 		}
 		varV /= T(this->size());
+		// median
+		const iterator lowQtIt(begin() + (size() / 4));
+		const iterator medianIt(begin() + (size() / 2));
+		const iterator highQtIt(begin() + (3*size() / 4));
+		std::nth_element(begin(), medianQtIt, end());
+		median = *medianQt;
+		std::nth_element(begin(), lowQtIt, end());
+		lowQt = *lowQtIt;
+		std::nth_element(begin(), highQtIt, end());
+		highQt = *highQtIt;
 	}
 	
 	void dumpStats(std::ostream& os)
 	{
-		T meanV, varV, minV, maxV;
+		T meanV, varV, medianV, lowQt, highQt, minV, maxV;
 		uint64_t bins[binCount];
 		uint64_t maxBinC;
-		computeStats(meanV, varV, minV, maxV, bins, maxBinC);
+		computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, bins, maxBinC);
 		os << meanV << " " << varV << minV << " " << maxV << " " << binCount << " ";
 		for (size_t i = 0; i < binCount; ++i)
 			os << bins[i] << " ";
