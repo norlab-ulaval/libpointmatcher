@@ -88,6 +88,7 @@ private:
 template<typename T>
 struct Histogram: public std::vector<T>
 {
+	typedef typename std::vector<T>::iterator Iterator;
 	const size_t binCount;
 	const std::string name;
 	const std::string filePrefix;
@@ -135,7 +136,7 @@ struct Histogram: public std::vector<T>
 	
 	void computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
 	{
-		assert(size() > 0);
+		assert(this->size() > 0);
 		// basic stats
 		meanV = 0;
 		minV = std::numeric_limits<T>::max();
@@ -163,14 +164,14 @@ struct Histogram: public std::vector<T>
 		}
 		varV /= T(this->size());
 		// median
-		const iterator lowQtIt(begin() + (size() / 4));
-		const iterator medianIt(begin() + (size() / 2));
-		const iterator highQtIt(begin() + (3*size() / 4));
-		std::nth_element(begin(), medianQtIt, end());
-		median = *medianQt;
-		std::nth_element(begin(), lowQtIt, end());
+		const Iterator lowQtIt(this->begin() + (this->size() / 4));
+		const Iterator medianIt(this->begin() + (this->size() / 2));
+		const Iterator highQtIt(this->begin() + (3*this->size() / 4));
+		std::nth_element(this->begin(), medianIt, this->end());
+		medianV = *medianIt;
+		std::nth_element(this->begin(), lowQtIt, this->end());
 		lowQt = *lowQtIt;
-		std::nth_element(begin(), highQtIt, end());
+		std::nth_element(this->begin(), highQtIt, this->end());
 		highQt = *highQtIt;
 	}
 	
