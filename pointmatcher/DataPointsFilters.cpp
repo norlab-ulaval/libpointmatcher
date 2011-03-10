@@ -439,7 +439,10 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfac
 	const int pointsCount(input.features.cols());
 	const int featDim(input.features.rows());
 	const int descDim(input.descriptors.rows());
-
+	
+	if (pointsCount == 0)
+		throw ConvergenceError("no point to filter");
+	
 	int insertDim(0);
 	if (averageExistingDescriptors)
 	{
@@ -763,7 +766,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSampling
 
 	const int nbPoints = (filter.cwise() < prob).count();
 
-	std::cout << "RandomSampling: size before: " << input.features.cols() << std::endl;
+	//std::cout << "RandomSampling: size before: " << input.features.cols() << std::endl;
 
 	typename DataPoints::Features filteredFeat(input.features.rows(), nbPoints);
 
@@ -795,7 +798,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSampling
 		}
 	}
 
-	std::cout << "RandomSampling: size after: " << filteredFeat.cols() << std::endl;
+	//std::cout << "RandomSampling: size after: " << filteredFeat.cols() << std::endl;
 	
 	return DataPoints(filteredFeat, input.featureLabels, filteredDesc, input.descriptorLabels);
 }
