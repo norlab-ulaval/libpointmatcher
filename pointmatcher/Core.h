@@ -134,6 +134,7 @@ struct Histogram: public std::vector<T>
 		}
 	}
 	
+	// this function compute statistics and writes them into the variables passed as reference
 	void computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
 	{
 		//assert(this->size() > 0);
@@ -155,11 +156,16 @@ struct Histogram: public std::vector<T>
 			std::fill(bins, bins+binCount, uint64_t(0));
 			maxBinC = 0;
 			varV = 0;
+			if (minV == maxV)
+			{
+				medianV = lowQt = highQt = minV;
+				return;
+			}
 			for (size_t i = 0; i < this->size(); ++i)
 			{
 				const T v((*this)[i]);
 				varV += (v - meanV)*(v - meanV);
-				const size_t index((v - minV) * (binCount) / ((maxV - minV) + (1+std::numeric_limits<T>::epsilon()*10)));
+				const size_t index((v - minV) * (binCount) / ((maxV - minV) * (1+std::numeric_limits<T>::epsilon()*10)));
 				//std::cerr << "adding value " << v << " to index " << index << std::endl;
 				++bins[index];
 				maxBinC = std::max<uint64_t>(maxBinC, bins[index]);
@@ -178,15 +184,14 @@ struct Histogram: public std::vector<T>
 		}
 		else
 		{
-			meanV = T(NAN);
-			varV = T(NAN);
-			medianV = T(NAN);
-			lowQt = T(NAN);
-			highQt = T(NAN);
-			minV = T(NAN);
-			maxV = T(NAN); 
-			bins = 0; 
-			maxBinC = uint64_t(NAN);
+			meanV = std::numeric_limits<T>::quiet_NaN();
+			varV = std::numeric_limits<T>::quiet_NaN();
+			medianV = std::numeric_limits<T>::quiet_NaN();
+			lowQt = std::numeric_limits<T>::quiet_NaN();
+			highQt = std::numeric_limits<T>::quiet_NaN();
+			minV = std::numeric_limits<T>::quiet_NaN();
+			maxV = std::numeric_limits<T>::quiet_NaN();
+			maxBinC = 0;
 		}
 	}
 	
@@ -198,11 +203,8 @@ struct Histogram: public std::vector<T>
 		computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, bins, maxBinC);
 		os << meanV << " " << varV << " " << medianV << " " << lowQt << " " << highQt << " " << minV << " " << maxV << " " << binCount << " ";
 		
-		if (bins != 0)
-		{
-			for (size_t i = 0; i < binCount; ++i)
-				os << bins[i] << " ";
-		}
+		for (size_t i = 0; i < binCount; ++i)
+			os << bins[i] << " ";
 		os << maxBinC;
 	}
 };
