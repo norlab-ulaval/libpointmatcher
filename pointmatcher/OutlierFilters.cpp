@@ -123,6 +123,8 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MedianDist
 		for (int y = 0; y < input.dists.rows(); ++y)
 			if (input.dists(y, x) > 0)
 				values.push_back(input.dists(y, x));
+	if (values.size() == 0)
+		throw ConvergenceError("no outlier to filter");
 	
 	// get median
 	nth_element(values.begin(), values.begin() + (values.size() /2), values.end());

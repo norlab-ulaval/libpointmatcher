@@ -54,6 +54,10 @@ void MetricSpaceAligner<T>::DataPointsFilters::apply(DataPoints& cloud, bool ite
 	DataPoints filteredCloud;
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
 	{
+		const int pointsCount(cloud.features.cols());
+		if (pointsCount == 0)
+			throw ConvergenceError("no point to filter");
+		
 		filteredCloud = (*it)->filter(cloud, iterate);
 		swapDataPoints<T>(cloud, filteredCloud);
 	}

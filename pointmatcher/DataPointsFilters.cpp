@@ -440,8 +440,8 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfac
 	const int featDim(input.features.rows());
 	const int descDim(input.descriptors.rows());
 	
-	if (pointsCount == 0)
-		throw ConvergenceError("no point to filter");
+	//if (pointsCount == 0)
+	//	throw ConvergenceError("no point to filter");
 	
 	int insertDim(0);
 	if (averageExistingDescriptors)
