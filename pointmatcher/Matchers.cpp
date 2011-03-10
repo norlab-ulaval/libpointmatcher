@@ -71,8 +71,8 @@ MetricSpaceAligner<T>::KDTreeMatcher::KDTreeMatcher(const int knn, const double 
 template<typename T>
 MetricSpaceAligner<T>::KDTreeMatcher::~KDTreeMatcher()
 {
-	assert(featureNNS);
-	delete featureNNS;
+	if(featureNNS);
+		delete featureNNS;
 }
 
 template<typename T>
