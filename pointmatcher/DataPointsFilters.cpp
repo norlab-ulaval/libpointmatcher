@@ -844,15 +844,16 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplin
 	const int iStep(step);
 	//cerr << "FixstepSamplingDataPointsFilter::filter: stepping " << iStep << endl;
 	const int nbPointsIn = input.features.cols();
-	const int nbPointsOut = (nbPointsIn + iStep - 1) / iStep;
+	const int phase(rand() % iStep);
+	const int nbPointsOut = ((nbPointsIn - phase) + iStep - 1) / iStep;
 	typename DataPoints::Features filteredFeat(input.features.rows(), nbPointsOut);
 	
 	int j(0);
-	for (int i = 0; i < nbPointsIn; i++)
+	for (int i = 0; i < nbPointsIn-phase; i++)
 	{
 		if ((i % iStep) == 0)
 		{
-			filteredFeat.col(j) = input.features.col(i);
+			filteredFeat.col(j) = input.features.col(i+phase);
 			j++;
 		}
 	}
@@ -865,11 +866,11 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplin
 		filteredDesc = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
 		
 		j = 0;
-		for (int i = 0; i < nbPointsIn; i++)
+		for (int i = 0; i < nbPointsIn-phase; i++)
 		{
 			if ((i % iStep) == 0)
 			{
-				filteredDesc.col(j) = input.descriptors.col(i);
+				filteredDesc.col(j) = input.descriptors.col(i+phase);
 				j++;
 			}
 		}
