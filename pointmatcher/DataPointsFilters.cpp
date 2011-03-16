@@ -315,6 +315,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalD
 		// Ensure that the matrix is suited for eigenvalues calculation
 		if(C.fullPivHouseholderQr().rank() == featDim-1)
 		{
+			//TODO: construct the eigenSolver ONLY once...
 			eigenVa = Eigen::EigenSolver<Matrix>(C).eigenvalues().real();
 			eigenVe = Eigen::EigenSolver<Matrix>(C).eigenvectors().real();
 		}
