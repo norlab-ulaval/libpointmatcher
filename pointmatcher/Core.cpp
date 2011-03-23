@@ -173,13 +173,13 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	referenceDataPointsFilters.init();
 	referenceDataPointsFilters.apply(reference, iterate);
 
-	transformationCheckers.init(initialTransformationParameters, iterate);
-	
 	matcher->init(reference, iterate);
 
 	inspector->init();
 	
 	TransformationParameters transformationParameters = Tref.inverse() * initialTransformationParameters;
+	
+	transformationCheckers.init(transformationParameters, iterate);
 
 	size_t iterationCount(0);
 	
@@ -367,11 +367,11 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	
 	readingStepDataPointsFilters.init();
 	
-	transformationCheckers.init(curTransform, iterate);
-	
 	inspector->init();
 	
 	TransformationParameters transformationParameters = keyFrameTransformOffset.inverse() * curTransform;
+	
+	transformationCheckers.init(transformationParameters, iterate);
 
 	size_t iterationCount(0);
 	
