@@ -855,7 +855,10 @@ struct MetricSpaceAligner
 		Histogram<double> overlapRatio;
 		
 		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
+		TransformationParameters getDeltaTransform() const { return lastTransformInv * getTransform(); }
 		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }
+		//! Drop current key frame, create a new one with inputCloud, reset transformations
+		void resetTracking(DataPoints& inputCloud);
 		
 	private:
 		void createKeyFrame(DataPoints& inputCloud);
@@ -865,6 +868,7 @@ struct MetricSpaceAligner
 		TransformationParameters keyFrameTransform; //!< pose of keyframe
 		TransformationParameters keyFrameTransformOffset; //!< offset for centered keyframe
 		TransformationParameters curTransform; //!< transform of last frame wrt keyframe (last call to operator())
+		TransformationParameters lastTransformInv; //!< inv of previous computed transform (using getTransform())
 	};
 }; // MetricSpaceAligner
 

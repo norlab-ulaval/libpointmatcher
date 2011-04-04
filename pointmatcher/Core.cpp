@@ -272,7 +272,8 @@ MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim, const std::string
 	keyFrameCreated(false),
 	keyFrameTransform(Matrix::Identity(dim+1, dim+1)),
 	keyFrameTransformOffset(Matrix::Identity(dim+1, dim+1)),
-	curTransform(Matrix::Identity(dim+1, dim+1))
+	curTransform(Matrix::Identity(dim+1, dim+1)),
+	lastTransformInv(Matrix::Identity(dim+1, dim+1))
 {}
 
 template<typename T>
@@ -292,6 +293,15 @@ MetricSpaceAligner<T>::ICPSequence::~ICPSequence()
 	for (TransformationCheckersIt it = transformationCheckers.begin(); it != transformationCheckers.end(); ++it)
 		delete *it;
 	delete inspector;
+}
+
+template<typename T>
+void MetricSpaceAligner<T>::ICPSequence::resetTracking(DataPoints& inputCloud)
+{
+	const int tDim(keyFrameTransform.rows());
+	createKeyFrame(inputCloud);
+	keyFrameTransform = Matrix::Identity(tDim, tDim);
+	lastTransformInv = Matrix::Identity(tDim, tDim);
 }
 
 template<typename T>
@@ -342,6 +352,8 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	assert(descriptorOutlierFilter);
 	assert(errorMinimizer);
 	assert(inspector);
+	
+	lastTransformInv = getTransform().inverse();
 	
 	// initial keyframe
 	keyFrameCreated = false;
