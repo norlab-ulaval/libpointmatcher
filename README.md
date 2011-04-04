@@ -2,7 +2,7 @@ libpointmatcher is a modular ICP library, useful for robotics and computer visio
 
 libpointmatcher depends on:
 
- * [Eigen], a modern C++ matrix and linear-algebra library,
+ * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
  * [libnabo], a fast K Nearest Neighbour library for low-dimensional spaces.
  
 libpointmatcher is being developed by François Pomerleau and Stéphane Magnenat as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
@@ -21,11 +21,15 @@ If the dependencies are not installed system wide, you might have to tell [CMake
 In case of doubt, read the [CMake documentation].
 
 You first need to fetch and compile [libnabo].
-To do so, you need [cmake], [git] and [Eigen].
+To do so, you need [cmake], [git].
 On [Ubuntu], you can install these with `apt-get`:
 
-	sudo apt-get install git-core cmake cmake-qt-gui libeigen2-dev
+	sudo apt-get install git-core cmake cmake-qt-gui
 
+You can fetche [Eigen] 3 from:
+
+	http://eigen.tuxfamily.org/index.php?title=Main_Page#Download
+	
 Then, you need to clone and build [libnabo]:
 
 	git clone http://github.com/ethz-asl/libnabo
