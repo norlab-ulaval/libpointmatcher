@@ -2,6 +2,10 @@ ROADMAP
 
 29 sept. 2010
 
+General
+-------
+- TODO: rework parameter architecture
+
 Strategy
 -------------------
 - TODO: deal with sequence of filter, checker

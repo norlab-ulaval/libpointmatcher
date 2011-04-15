@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
@@ -121,7 +122,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MedianDist
 	values.reserve(input.dists.rows() * input.dists.cols());
 	for (int x = 0; x < input.dists.cols(); ++x)
 		for (int y = 0; y < input.dists.rows(); ++y)
-			if (input.dists(y, x) > 0)
+			if ((input.dists(y, x) != numeric_limits<T>::infinity()) && (input.dists(y, x) > 0))
 				values.push_back(input.dists(y, x));
 	if (values.size() == 0)
 		throw ConvergenceError("no outlier to filter");
@@ -177,7 +178,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::TrimmedDis
 	values.reserve(input.dists.rows() * input.dists.cols());
 	for (int x = 0; x < input.dists.cols(); ++x)
 		for (int y = 0; y < input.dists.rows(); ++y)
-			if (input.dists(y, x) > 0)
+			if ((input.dists(y, x) != numeric_limits<T>::infinity()) && (input.dists(y, x) > 0))
 				values.push_back(input.dists(y, x));
 
 	// get quartiles value
@@ -219,7 +220,9 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MinDistOut
 	{
 		for (int y = 0; y < w.rows(); ++y)
 		{
-			if (input.dists(y, x) < minDist)
+			if (input.dists(y, x) == numeric_limits<T>::infinity())
+				w(y, x) = 0;
+			else if (input.dists(y, x) < minDist)
 				w(y, x) = input.dists(y, x)/minDist;
 			else
 				w(y, x) = 1;
