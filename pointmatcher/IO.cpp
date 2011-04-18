@@ -173,27 +173,33 @@ typename MetricSpaceAligner<T>::DataPoints loadVTK(std::istream& is)
 		throw runtime_error("Different amount of points in the geometry and in attribute sections");
 	getline(is, line);
 	getline(is, line);
-	if (line != "COLOR_SCALARS lut 4")
-		throw runtime_error(string("Wrong point data, found ") + line);
-	
-	// read color (descriptors)
-	Descriptors descriptors(4, pointCount);
-	for (int p = 0; p < pointCount; ++p)
+	//if (line != "COLOR_SCALARS lut 4")
+		//throw runtime_error(string("Wrong point data, found ") + line);
+
+	DataPoints loadedPoints;
+
+	if (line == "COLOR_SCALARS lut 4")
 	{
-		is >> descriptors(0, p);
-		is >> descriptors(1, p);
-		is >> descriptors(2, p);
-		is >> descriptors(3, p);
+		// read color (descriptors)
+		Descriptors descriptors(4, pointCount);
+		for (int p = 0; p < pointCount; ++p)
+		{
+			is >> descriptors(0, p);
+			is >> descriptors(1, p);
+			is >> descriptors(2, p);
+			is >> descriptors(3, p);
+		}
+		Labels descriptorLabels;
+		descriptorLabels.push_back(Label("color", 4));
+		loadedPoints = DataPoints(features, featureLabels, descriptors, descriptorLabels);
 	}
-	Labels descriptorLabels;
-	descriptorLabels.push_back(Label("color", 4));
+	else
+	{
+		loadedPoints = DataPoints(features, featureLabels);
+	}
 	
-	return DataPoints(
-		features,
-		featureLabels,
-		descriptors,
-		descriptorLabels
-	);
+	
+	return loadedPoints;
 }
 
 template

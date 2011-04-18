@@ -41,48 +41,72 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+/**
+  * Code example for ICP taking a sequence of point clouds relatively close 
+  * and computing the transformation between them.
+  */
 int main(int argc, char *argv[])
 {
 	if (argc != 3)
 	{
 		cerr << "Error in command line, usage " << argv[0] << " inputBaseFileName outputBaseFileName" << endl;
+		cerr << endl << "Example:" << endl;
+		cerr << argv[0] << " ../examples/data/cloud ./cloud_out" << endl << endl;
+
 		return 1;
 	}
 	
-	typedef MetricSpaceAlignerD MSA;
-	MSA::ICP icp;
+	const string inputBaseFileName(argv[1]);
+	const string outputBaseFileName(argv[2]);
 	
+	typedef MetricSpaceAlignerD MSA;
+	
+	// Main algorithm definition
+	MSA::ICP icp;
+	// Also available ICPSequence
+	
+	// Defines which space needs is influenced by the transformation
 	icp.transformations.push_back(new MSA::TransformFeatures());
 	//icp.transformations.push_back(new MSA::TransformDescriptors());
 	
-	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.02));
-	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.05));
+	// Defines preprocessing filters for reference and reading point clouds
+	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
+	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
 	icp.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(15, 0, true, false, false, false, false));
 	
+	// Defines the matching method
 	icp.matcher = new MSA::KDTreeMatcher();
-	
+
+	// Defines features outlier filters. It can be stacked up.
 	//icp.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(25));
 	icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.92));
-	icp.featureOutlierFilters.push_back(new MSA::MinDistOutlierFilter(0.000001));
-	
+	//icp.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.5));
+	//icp.featureOutlierFilters.push_back(new MSA::MinDistOutlierFilter(0.000001));
+
+	// Defines descriptor outlier filters (not implemented yet)
 	icp.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
 
-	//icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
+	// Defines how to mix feature and descriptor outlier (not implemented yet)
+	icp.outlierMixingWeight = 1;
+	
+	// Defines the type of error to minimize
+	//icp.errorMinimizer = newdd MSA::PointToPointErrorMinimizer();
 	icp.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
 	
-	icp.transformationCheckers.push_back(new MSA::CounterTransformationChecker(200));
-	icp.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.0001, 0.001, 3));
+	// Defines out conditions for the iterative loop. It can be stacked up.
+	icp.transformationCheckers.push_back(new MSA::CounterTransformationChecker(40));
+	icp.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.001, 0.01, 3));
 	
-	icp.inspector = new MSA::VTKFileInspector("/tmp/vtk/debug");
-	//icp.inspector = new MSA::Inspector;
+	// Defines how to inspect the iterative process
+	// This will output a VTK file for each iteration
+	icp.inspector = new MSA::VTKFileInspector(outputBaseFileName);
+	//icp.inspector = new MSA::NullInspector;
 	
-	icp.outlierMixingWeight = 1;
 	
 	typedef MSA::TransformationParameters TP;
 	typedef MSA::DataPoints DP;
 	
-	const string inputBaseFileName(argv[1]);
-	const string outputBaseFileName(argv[2]);
+	
 	DP lastCloud, newCloud;
 	MSA::TransformFeatures tf;
 	TP tp;
@@ -90,7 +114,7 @@ int main(int argc, char *argv[])
 	{
 		const string inputFileName((boost::format("%s.%05d.vtk") % inputBaseFileName % frameCounter).str());
 		const string outputFileName((boost::format("%s.%05d.vtk") % outputBaseFileName % frameCounter).str());
-		
+
 		ifstream ifs(inputFileName.c_str());
 		if (!ifs.good())
 		{
@@ -108,8 +132,12 @@ int main(int argc, char *argv[])
 		{
 			tp = icp(tp, newCloud, lastCloud);
 			newCloud = tf.compute(newCloud, tp);
+
+			cout << "Transformation of frame " << frameCounter << " to " << frameCounter - 1 << endl;
+			cout << tp << endl;
 		}
 		
+		cout << "outputFileName: " << outputFileName << endl;
 		saveVTK<MSA::ScalarType>(newCloud, outputFileName);
 		lastCloud = newCloud;
 	}

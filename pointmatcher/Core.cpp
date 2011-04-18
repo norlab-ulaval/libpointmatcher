@@ -152,16 +152,13 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 	for(int i=0; i < dim-1; i++)
 	{
-		//reading.features.row(i).array() -= meanReading(i);
 		reference.features.row(i).array() -= meanReference(i);
 	}
 	
 	Matrix Tread(Matrix::Identity(dim, dim));
-	//Tread.block(0,dim-1, dim-1, 1) = meanReading.head(dim-1);
 	
 	Matrix Tref(Matrix::Identity(dim, dim));
 	Tref.block(0,dim-1, dim-1, 1) = meanReference.head(dim-1);
-
 	
 	////
 
@@ -247,7 +244,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	
 	inspector->finish(iterationCount);
 	
-	cerr << "msa::icp - iterations took " << t.elapsed() << " [s]" << endl;
+	cerr << "msa::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]" << endl;
 	
 	// Move transformation back to original coordinate (without center of mass)
 	return Tref * transformationParameters;

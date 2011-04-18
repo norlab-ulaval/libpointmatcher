@@ -36,7 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pointmatcher/PointMatcher.h"
 #include <cassert>
 #include <iostream>
-#include <boost/progress.hpp>
 
 using namespace std;
 typedef MetricSpaceAligner<float> MSA;
@@ -46,16 +45,24 @@ int main(int argc, char *argv[])
 {
 	if (argc != 3)
 	{
-		cerr << "Usage " << argv[0] << " INPUT OUTPUT\n";
+		cerr << "Usage " << argv[0] << " INPUT.csv OUTPUT.vtk\n";
 		return 1;
 	}
 	
-	DataPoints d = loadVTK<float>(argv[1]);
-	MSA::SamplingSurfaceNormalDataPointsFilter filter(100);
-	bool iterate;
-	DataPoints d2 = filter.filter(d, iterate);
-	//MSA::VTKFileInspector inspector(argv[2]); inspector.dumpDataPoints(d2, "cloud");
-	saveVTK<float>(d2, argv[2]);
+	DataPoints d = loadCSV<float>(argv[1]);
+	
+	// Example for subsampling
+	//MSA::SamplingSurfaceNormalDataPointsFilter subsample(100);
+	//d = subsample.filter(d, true);
+	
+	// Example of moving points
+	//Eigen::Matrix4f T;
+	//T << 0.981060262190407,	0.172987393925089,	-0.087155742747658, 0.1, -0.15610556184973,	0.972474377607239,	0.172987393925089, 0.2, 0.11468136514042,	-0.15610556184973,	0.981060262190407, 0, 0,0,0,1;
+	//cout << "Moving points using: " << endl << T << endl;
+	//
+	//d.features = T * d.features;
+
+	saveVTK<float>(d, argv[2]);
 	
 	return 0;
 }

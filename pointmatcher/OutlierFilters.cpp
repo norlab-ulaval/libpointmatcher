@@ -95,6 +95,44 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MaxDistOut
 template struct MetricSpaceAligner<float>::MaxDistOutlierFilter;
 template struct MetricSpaceAligner<double>::MaxDistOutlierFilter;
 
+// MinDistOutlierFilter
+template<typename T>
+MetricSpaceAligner<T>::MinDistOutlierFilter::MinDistOutlierFilter(const T minDist):
+	minDist(minDist)
+{
+	if (minDist <= 0)
+	{
+		cerr << "MinDistOutlierFilter: Error, minDist (" << minDist << ") cannot be below or equal to 0." << endl;
+		abort();
+	}
+}
+
+template<typename T>
+typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MinDistOutlierFilter::compute(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const Matches& input,
+	bool& iterate)
+{
+	
+	OutlierWeights w(input.dists.rows(), input.dists.cols());
+	for (int x = 0; x < w.cols(); ++x)
+	{
+		for (int y = 0; y < w.rows(); ++y)
+		{
+			if (input.dists(y, x) < minDist)
+				w(y, x) = 0;
+			else
+				w(y, x) = 1;
+		}
+	}
+	
+	return w;
+}
+
+template struct MetricSpaceAligner<float>::MinDistOutlierFilter;
+template struct MetricSpaceAligner<double>::MinDistOutlierFilter;
+
 
 // MedianDistOutlierFilter
 template<typename T>
@@ -205,32 +243,6 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::TrimmedDis
 template struct MetricSpaceAligner<float>::TrimmedDistOutlierFilter;
 template struct MetricSpaceAligner<double>::TrimmedDistOutlierFilter;
 
-// MinDistOutlierFilter
-template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MinDistOutlierFilter::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const Matches& input,
-	bool& iterate)
-{
-	
-	OutlierWeights w(input.dists.rows(), input.dists.cols());
-	for (int x = 0; x < w.cols(); ++x)
-	{
-		for (int y = 0; y < w.rows(); ++y)
-		{
-			if (input.dists(y, x) < minDist)
-				w(y, x) = input.dists(y, x)/minDist;
-			else
-				w(y, x) = 1;
-		}
-	}
-	
-	return w;
-}
-
-template struct MetricSpaceAligner<float>::MinDistOutlierFilter;
-template struct MetricSpaceAligner<double>::MinDistOutlierFilter;
 
 
 

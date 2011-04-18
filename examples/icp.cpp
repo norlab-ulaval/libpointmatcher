@@ -39,11 +39,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+/**
+  * Code example for ICP taking 2 points clouds (2D or 3D) relatively close 
+  * and computing the transformation between them.
+  */
 int main(int argc, char *argv[])
 {
 	if (argc != 3)
 	{
 		cerr << "Error in command line, usage " << argv[0] << " reference.csv reading.csv" << endl;
+		cerr << endl << "2D Example:" << endl;
+		cerr << "  " << argv[0] << " ../examples/data/2D_twoBoxes.csv ../examples/data/2D_oneBox.csv" << endl;
+		cerr << endl << "3D Example:" << endl;
+		cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl << endl;
+
+
 		return 1;
 	}
 	
@@ -61,9 +71,9 @@ int main(int argc, char *argv[])
 	
 	icp.matcher = new MSA::KDTreeMatcher();
 	
-	icp.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.05));
+	//icp.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.05));
 	//icp.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(3));
-	//icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.85));
+	icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.85));
 	
 	icp.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
 
@@ -85,14 +95,10 @@ int main(int argc, char *argv[])
 	DP data(loadCSV<MSA::ScalarType>(argv[2]));
 	TP t(TP::Identity(data.features.rows(), data.features.rows()));
 	
-	for (int i = 0; i < data.features.cols(); ++i)
-	{
-		data.features.block(0, i, 2, 1) = Eigen::Rotation2D<T>(0.2) * data.features.block(0, i, 2, 1);
-		data.features(0, i) += 0.2;
-		data.features(1, i) -= 0.1;
-	}
-	
+
 	TP res = icp(t, data, ref);
+
+	cout << "Final transformation:" << endl << res << endl;
 
 	return 0;
 }

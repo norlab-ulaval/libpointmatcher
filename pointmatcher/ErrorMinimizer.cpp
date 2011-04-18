@@ -131,7 +131,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 // 		const Vector trVector(meanOfAssociatedRef - rotMatrix * meanOfReading);
 	
 	const Matrix m(associatedRef * centeredFeatureReading.transpose());
-	const JacobiSVD<Matrix> svd(m);
+	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
 	const Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
 	//cout << "meanOfAssociatedRef " << meanOfAssociatedRef << endl;
 	//cout << "meanOfReading " << meanOfReading << endl;

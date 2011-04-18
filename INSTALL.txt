@@ -10,8 +10,9 @@ Dependencies:
     $ git clone http://github.com/ethz-asl/libnabo
     then cmake and make...
 
-- eigen2: math library in C++
-    $ sudo apt-get install libeigen2-dev
+- eigen3: math library in C++
+    You can fetch it directly at: http://eigen.tuxfamily.org
+    or if you have ROS on your system, it's already installed.
 
 
 ---------------------------------------------------------
@@ -21,6 +22,8 @@ $ mkdir build
 $ cd ./build
 $ cmake-gui ../
 You'll need to tell where are the include files and the lib for Nabo
+If you have have ROS - Diamondback the path for Eigen3 should be: 
+/opt/ros/diamondback/stacks/geometry/eigen/include
 
 
 

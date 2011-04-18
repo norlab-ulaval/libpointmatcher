@@ -591,7 +591,7 @@ struct MetricSpaceAligner
 	{
 		const T minDist;
 		
-		MinDistOutlierFilter(const T minDist): minDist(minDist) {}
+		MinDistOutlierFilter(const T minDist); 
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 	};
 	
@@ -745,6 +745,9 @@ struct MetricSpaceAligner
 		virtual void finish(const size_t iterationCount) {}
 		virtual ~Inspector() {}
 	};
+
+	// Clearer name when no inspector is required
+	typedef Inspector NullInspector;
 	
 	struct AbstractVTKInspector: public Inspector
 	{
