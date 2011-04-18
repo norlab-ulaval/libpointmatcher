@@ -49,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <limits>
 #include <stdint.h>
 #include <sys/time.h>
 
@@ -525,12 +526,13 @@ struct MetricSpaceAligner
 	class KDTreeMatcher: public Matcher
 	{
 		const int knn;
-		const double epsilon;
+		const T epsilon;
 		const NNSearchType searchType;
+		const T maxDist;
 		NNS* featureNNS;
 	
 	public:
-		KDTreeMatcher(const int knn = 1, const double epsilon = 0, const NNSearchType searchType = NNS::KDTREE_LINEAR_HEAP);
+		KDTreeMatcher(const int knn = 1, const T epsilon = 0, const NNSearchType searchType = NNS::KDTREE_LINEAR_HEAP, const T maxDist = std::numeric_limits<T>::infinity());
 		virtual ~KDTreeMatcher();
 		virtual void init(const DataPoints& filteredReference, bool& iterate);
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);

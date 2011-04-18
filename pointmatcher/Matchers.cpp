@@ -60,10 +60,11 @@ template struct MetricSpaceAligner<double>::NullMatcher;
 
 // KDTreeMatcher
 template<typename T>
-MetricSpaceAligner<T>::KDTreeMatcher::KDTreeMatcher(const int knn, const double epsilon, const NNSearchType searchType):
+MetricSpaceAligner<T>::KDTreeMatcher::KDTreeMatcher(const int knn, const T epsilon, const NNSearchType searchType, const T maxDist):
 	knn(knn),
 	epsilon(epsilon),
 	searchType(searchType),
+	maxDist(maxDist),
 	featureNNS(0)
 {
 }
@@ -99,7 +100,7 @@ typename MetricSpaceAligner<T>::Matches MetricSpaceAligner<T>::KDTreeMatcher::fi
 		typename Matches::Ids(knn, pointsCount)
 	);
 	
-	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, NNS::ALLOW_SELF_MATCH);
+	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, NNS::ALLOW_SELF_MATCH, maxDist);
 	
 	return matches;
 }

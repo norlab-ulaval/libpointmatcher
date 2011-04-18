@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Core.h"
 #include <cassert>
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
@@ -91,12 +92,33 @@ void MetricSpaceAligner<T>::TransformationCheckers::check(const TransformationPa
 template<typename T>
 typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::FeatureOutlierFilters::compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate)
 {
-	//TODO: suboptimal, first multiplication by ones should be avoid
-	OutlierWeights w = OutlierWeights::Ones(input.dists.rows(), input.dists.cols());
-	for (FeatureOutlierFiltersIt it = this->begin(); it != this->end(); ++it)
-		w = w.array() * (*it)->compute(filteredReading, filteredReference, input, iterate).array();
-
-	return w;
+	if (this->empty())
+	{
+		// we do not have any filter, therefore we must put 0 weights for infinite distances
+		OutlierWeights w(input.dists.rows(), input.dists.cols());
+		for (int x = 0; x < w.cols(); ++x)
+		{
+			for (int y = 0; y < w.rows(); ++y)
+			{
+				if (input.dists(y, x) == numeric_limits<T>::infinity())
+					w(y, x) = 0;
+				else
+					w(y, x) = 1;
+			}
+		}
+		return w;
+	}
+	else
+	{
+		// apply filters, they should take care of infinite distances
+		OutlierWeights w = (*this->begin())->compute(filteredReading, filteredReference, input, iterate);
+		if (this->size() > 1)
+		{
+			for (FeatureOutlierFiltersIt it = (this->begin() + 1); it != this->end(); ++it)
+				w = w.array() * (*it)->compute(filteredReading, filteredReference, input, iterate).array();
+		}
+		return w;
+	}
 }
 
 template<typename T>
