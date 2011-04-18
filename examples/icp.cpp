@@ -62,12 +62,13 @@ int main(int argc, char *argv[])
 	MSA::ICP icp;
 	
 	icp.transformations.push_back(new MSA::TransformFeatures());
-	icp.transformations.push_back(new MSA::TransformDescriptors());
+	//icp.transformations.push_back(new MSA::TransformDescriptors());
 	
 	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
 	
-	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
+	//icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
 	//icp.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(10, 0, true, true, true, true, true));
+	icp.referenceDataPointsFilters.push_back(new MSA::SamplingSurfaceNormalDataPointsFilter(10, true, true, false, false, false));
 	
 	icp.matcher = new MSA::KDTreeMatcher();
 	
@@ -77,8 +78,8 @@ int main(int argc, char *argv[])
 	
 	icp.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
 
-	icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
-	//icp.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
+	//icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
+	icp.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
 	
 	icp.transformationCheckers.push_back(new MSA::CounterTransformationChecker(60));
 	icp.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.001, 0.001, 3));

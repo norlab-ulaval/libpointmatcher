@@ -315,9 +315,13 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalD
 		// Ensure that the matrix is suited for eigenvalues calculation
 		if(C.fullPivHouseholderQr().rank() == featDim-1)
 		{
-			//TODO: construct the eigenSolver ONLY once...
-			eigenVa = Eigen::EigenSolver<Matrix>(C).eigenvalues().real();
-			eigenVe = Eigen::EigenSolver<Matrix>(C).eigenvectors().real();
+			
+			const Eigen::EigenSolver<Matrix> solver(C);
+			eigenVa = solver.eigenvalues().real();
+			eigenVe = solver.eigenvectors().real();
+			
+			//eigenVa = Eigen::EigenSolver<Matrix>(C).eigenvalues().real();
+			//eigenVe = Eigen::EigenSolver<Matrix>(C).eigenvectors().real();
 		}
 		else
 		{
@@ -601,8 +605,10 @@ void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(Bui
 	// Ensure that the matrix is suited for eigenvalues calculation
 	if(C.fullPivHouseholderQr().rank() == featDim-1)
 	{
-		eigenVa = Eigen::EigenSolver<Matrix>(C).eigenvalues().real();
-		eigenVe = Eigen::EigenSolver<Matrix>(C).eigenvectors().real();
+		Eigen::EigenSolver<Matrix> solver(C);
+		
+		eigenVa = solver.eigenvalues().real();
+		eigenVe = solver.eigenvectors().real();
 		//eigenVa = Eigen::EigenSolver<Eigen::Matrix<T,3,3> >(C).eigenvalues().real();
 		//eigenVe = Eigen::EigenSolver<Eigen::Matrix<T,3,3> >(C).eigenvectors().real();
 	}
