@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
 	//icp.transformations.push_back(new MSA::TransformDescriptors());
 	
 	// Defines preprocessing filters for reference and reading point clouds
-	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
-	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
+	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.15));
+	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.15));
 	icp.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(15, 0, true, false, false, false, false));
 	
 	// Defines the matching method
@@ -79,7 +79,8 @@ int main(int argc, char *argv[])
 
 	// Defines features outlier filters. It can be stacked up.
 	//icp.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(25));
-	icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.92));
+	//icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.92));
+	icp.featureOutlierFilters.push_back(new MSA::VarTrimmedDistOutlierFilter(0.85, 0.4, 0.99, 0.85));
 	//icp.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.5));
 	//icp.featureOutlierFilters.push_back(new MSA::MinDistOutlierFilter(0.000001));
 

@@ -11,6 +11,7 @@ project(libpointmatcher)
 find_path(EIGEN_INCLUDE_DIR Eigen/Core
 	/usr/local/include/eigen
 	/usr/include/eigen
+  /opt/ros/diamondback/stacks/geometry/eigen/include
 )
 
 # nabo
@@ -21,6 +22,14 @@ find_path(NABO_INCLUDE_DIR nabo/nabo.h
 find_library(NABO_LIBRARY libnabo
 	/usr/local/lib
 	/usr/lib
+)
+
+# gtest
+find_path(GTEST_INCLUDE_DIR gtest/gtest.h
+    /usr/include
+)
+find_library(GTEST_LIBRARY gtest
+    /usr/lib/
 )
 
 # look for OpenCL library
@@ -71,3 +80,12 @@ target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} 
 
 add_executable(convertCSVtoVTK examples/convertCSVtoVTK.cpp)
 target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+
+
+if(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
+  include_directories(${GTEST_INCLUDE_DIR})
+  add_executable(utest utest/utest.cpp)
+  target_link_libraries(utest pointmatcher ${NABO_LIBRARY} ${GTEST_LIBRARY} rt)
+else(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
+  message("Google test (gtest) not found - Skipping unit tests")
+endif(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)

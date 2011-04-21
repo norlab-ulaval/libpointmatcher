@@ -203,6 +203,8 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	size_t iterationCount(0);
 	
 	cerr << "msa::icp - preprocess took " << t.elapsed() << " [s]" << endl;
+	cerr << "msa::icp - nb points in reference: " << nbPtsReference << " -> " << reference.features.cols() << endl;
+	cerr << "msa::icp - nb points in reading: " << nbPtsReading << " -> " << reading.features.cols() << endl;
 	t.restart();
 	
 	while (iterate)
