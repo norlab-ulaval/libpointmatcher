@@ -573,14 +573,25 @@ struct MetricSpaceAligner
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 	};
 	
-	struct MedianDistOutlierFilter: public FeatureOutlierFilter
+	// Generic function to get quartile
+	// TODO: move that to Utils.h
+	static T getQuantile(const Matches& input, const T quantile);
+
+
+	struct MedianDistOutlierFilter: public FeatureOutlierFilter 
 	{
 		const T factor;
 		
 		MedianDistOutlierFilter(const T factor);
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 	};
+
 	
+	
+	/* Hard rejection threshold using quantile.
+	   Based on:
+	     D Chetverikov, "The Trimmed Iterative Closest Point Algorithm" (2002)
+	 */
 	struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 	{
 		const T ratio;
@@ -589,6 +600,31 @@ struct MetricSpaceAligner
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 	};
 	
+	/* Hard rejection threshold using quantile and variable ratio.
+	   Based on:
+	     J. M. Phillips and al., "Outlier Robust ICP for Minimizing Fractional RMSD" (2007)
+	 */
+	struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
+	{
+	    // default ratio
+	    T ratio_;
+		// min ratio
+		T min_;
+		// max ratio
+		T max_;
+		// lambda (part of the term that balance the rmsd: 1/ratio^lambda)
+		T lambda_;
+
+		VarTrimmedDistOutlierFilter(T r);
+		VarTrimmedDistOutlierFilter(T r, T min, T max, T lambda);
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+
+		private:
+		// return the optimized ratio
+		T optimizeInlierRatio(const Matches& matches, T min = 0.05, T max = 0.99, T lambda = 0.95);
+};
+
+
 	struct MinDistOutlierFilter: public FeatureOutlierFilter
 	{
 		const T minDist;

@@ -74,7 +74,8 @@ int main(int argc, char *argv[])
 	
 	//icp.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.05));
 	//icp.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(3));
-	icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.85));
+	//icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.85));
+	icp.featureOutlierFilters.push_back(new MSA::VarTrimmedDistOutlierFilter(0.85, 0.4, 0.99, 0.85));
 	
 	icp.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
 
