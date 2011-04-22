@@ -246,18 +246,7 @@ template struct MetricSpaceAligner<double>::TrimmedDistOutlierFilter;
 
 
 template<typename T>
-MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(T r):
-	ratio_(r)
-{
-	if (r >= 1 || r <= 0)
-	{
-		cerr << "VarTrimmedDistOutlierFilter: Error, trim ratio (" << r << ") is outside interval ]0;1[." << endl;
-		abort();
-	}
-}
-
-template<typename T>
-MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(T r, T min, T max, T lambda):
+MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const T r, const T min, const T max, const T lambda):
 	ratio_(r), min_(min), max_(max), lambda_(lambda)
 {
 	if (r >= 1 || r <= 0)
@@ -285,7 +274,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::VarTrimmed
 	const Matches& input,
 	bool& iterate)
 {
-	ratio_ = optimizeInlierRatio(input, min_, max_, lambda_);
+	ratio_ = optimizeInlierRatio(input);
 	std::cout<< "Optimized ratio: " << ratio_ << std::endl;
 
 	const T limit = getQuantile(input, ratio_);
@@ -307,11 +296,47 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::VarTrimmed
 }
 
 template<typename T>
-T MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matches& matches, T min, T max, T lambda)
+T MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matches& matches)
 {
-	int points_nbr = matches.dists.cols();
+	const int points_nbr = matches.dists.rows() * matches.dists.cols();
+	
 	// vector containing the squared distances of the matches
+	std::vector<T> tmpSortedDist;
+	tmpSortedDist.reserve(points_nbr);
+	for (int x = 0; x < matches.dists.cols(); ++x)
+		for (int y = 0; y < matches.dists.rows(); ++y)
+			if ((matches.dists(y, x) != numeric_limits<T>::infinity()) && (matches.dists(y, x) > 0))
+				tmpSortedDist.push_back(matches.dists(y, x));
+	if (tmpSortedDist.size() == 0)
+		throw ConvergenceError("no outlier to filter");
+			
+	std::sort(tmpSortedDist.begin(), tmpSortedDist.end());
+
+	const int minEl = floor(this->min_*points_nbr);
+	const int maxEl = floor(this->max_*points_nbr);
+
+	// Return std::vector to an eigen::vector
+	Eigen::Map<LineArray> sortedDist(&tmpSortedDist[0], points_nbr);
+
+	const LineArray trunkSortedDist = sortedDist.segment(minEl, maxEl-minEl);
+	const T lowerSum = sortedDist.head(minEl).sum();
+	const LineArray ids = LineArray::LinSpaced(trunkSortedDist.rows(), minEl+1, maxEl);
+	const LineArray ratio = ids / points_nbr;
+	const LineArray deno = ratio.pow(this->lambda_);
+	const LineArray FRMS = deno.inverse().square() * ids.inverse() * (lowerSum + trunkSortedDist);
+	int minIndex(0);// = FRMS.minCoeff();
+	FRMS.minCoeff(&minIndex);
+	const T optRatio = (float)(minIndex + minEl)/ (float)points_nbr;
+	
+	cout << "Optimized ratio: " << optRatio << endl;
+	
+	return optRatio;
+	
+
+	// Old implementation
+	/*
 	std::vector<T> dist2s;
+	
 	for (int i=0; i < points_nbr; ++i)
 	{
 		dist2s.push_back(matches.dists(0, i));
@@ -319,12 +344,12 @@ T MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 
 	// sort the squared distance with increasing order
 	std::sort(dist2s.begin(), dist2s.end());
-
+	
 	// vector containing the FRMS values ( 1/ratio^lambda * square_root[ 1/nbr_of_selected_points * sum_over_selected_points(squared_distances)] )
 	std::vector<T> FRMSs;
 	T lastSum = 0;
-	int minEl = floor(min*points_nbr);
-	int maxEl = floor(max*points_nbr);
+	//const int minEl = floor(this->min_*points_nbr);
+	//const int maxEl = floor(this->max_*points_nbr);
 
 	for (int i=0; i<minEl; ++i)
 	{
@@ -335,10 +360,11 @@ T MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	for (int i=0; i<(maxEl - minEl); ++i)
 	{
 		int currEl = i + minEl;
-		T f = ((float) (currEl))/((float) points_nbr);
-		T deno = pow(f ,lambda);
-		T FRMS = pow(1/deno,2)*1/(currEl)*(lastSum+dist2s.at(currEl));
-		FRMSs.push_back(FRMS);
+		T f = ((T) (currEl))/((T) points_nbr);
+		T deno = pow(f ,this->lambda_);
+		T FRMS_s = pow(1/deno,2)*1/(currEl)*(lastSum+dist2s.at(currEl));
+		FRMSs.push_back(FRMS_s);
+		//cout << FRMS_s - FRMS(i);
 	}
 
 	T smallestValue(std::numeric_limits<T>::max());
@@ -359,6 +385,7 @@ T MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	}
 
 	return (float) (idx + minEl)/( (float) points_nbr);
+	*/
 }
 
 template struct MetricSpaceAligner<float>::VarTrimmedDistOutlierFilter;

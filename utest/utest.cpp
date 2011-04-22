@@ -36,7 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pointmatcher/PointMatcher.h"
 #include "gtest/gtest.h"
 
-
+using namespace Eigen;
 
 TEST(DefaultParameter, ICP)
 {
@@ -45,6 +45,20 @@ TEST(DefaultParameter, ICP)
 	EXPECT_TRUE(0);
 }
 
+TEST(Sandbox, vector2Eigen)
+{
+
+	std::vector<float> vec;
+	vec.push_back(4);
+	vec.push_back(2);
+	vec.push_back(1);
+
+	std::sort(vec.begin(), vec.end());
+
+	Map<RowVectorXf> v(&vec[0], vec.size());
+	std::cout << v << std::endl;
+	std::cout << v.array().inverse() << std::endl;
+}
 
 
 

@@ -214,6 +214,7 @@ template<typename T>
 struct MetricSpaceAligner
 {
 	typedef T ScalarType;
+	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
 	typedef typename Eigen::Matrix<T, 3, 1> Vector3;
 	typedef std::vector<Vector, Eigen::aligned_allocator<Vector> > VectorVector;
@@ -615,13 +616,12 @@ struct MetricSpaceAligner
 		// lambda (part of the term that balance the rmsd: 1/ratio^lambda)
 		T lambda_;
 
-		VarTrimmedDistOutlierFilter(T r);
-		VarTrimmedDistOutlierFilter(T r, T min, T max, T lambda);
+		VarTrimmedDistOutlierFilter(const T r, const T min=0.05, const T max=0.99, const T lambda=0.95);
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 
 		private:
 		// return the optimized ratio
-		T optimizeInlierRatio(const Matches& matches, T min = 0.05, T max = 0.99, T lambda = 0.95);
+		T optimizeInlierRatio(const Matches& matches);
 };
 
 
