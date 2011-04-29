@@ -852,21 +852,22 @@ struct MetricSpaceAligner
 		~ICP();
 		
 		TransformationParameters operator()(
-			DataPoints reading,
-			DataPoints reference);
+			const DataPoints& readingIn,
+			const DataPoints& referenceIn);
 		
 
 		TransformationParameters operator()(
-			DataPoints reading,
-			DataPoints reference,
+			const DataPoints& readingIn,
+			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
 		
 		TransformationParameters compute(
-			DataPoints reading,
-			DataPoints reference,
+			const DataPoints& readingIn,
+			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
 		
 
+		//! Construct an ICP algorithm that worked in most of the cases
 		void setDefault();
 
 		DataPointsFilters readingDataPointsFilters;
@@ -888,8 +889,11 @@ struct MetricSpaceAligner
 		ICPSequence(const int dim, const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
 		~ICPSequence();
 		
-		TransformationParameters operator()(DataPoints& inputCloud);
-		
+		TransformationParameters operator()(const DataPoints& inputCloudIn);
+	
+		//! Construct an ICP algorithm that worked in most of the cases
+		void setDefault();
+
 		DataPointsFilters readingDataPointsFilters;
 		DataPointsFilters readingStepDataPointsFilters;
 		DataPointsFilters keyframeDataPointsFilters;

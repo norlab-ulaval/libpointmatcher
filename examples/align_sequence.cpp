@@ -41,75 +41,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+void validateArgs(int argc, char *argv[]);
+
 /**
   * Code example for ICP taking a sequence of point clouds relatively close 
   * and computing the transformation between them.
   */
 int main(int argc, char *argv[])
 {
-	if (argc != 3)
-	{
-		cerr << "Error in command line, usage " << argv[0] << " inputBaseFileName outputBaseFileName" << endl;
-		cerr << endl << "Example:" << endl;
-		cerr << argv[0] << " ../examples/data/cloud ./cloud_out" << endl << endl;
-
-		return 1;
-	}
+	validateArgs(argc, argv);
+	
+	typedef MetricSpaceAligner<float> MSA;
 	
 	const string inputBaseFileName(argv[1]);
 	const string outputBaseFileName(argv[2]);
 	
-	typedef MetricSpaceAlignerD MSA;
 	
 	// Main algorithm definition
-	//MSA::ICPSequence icp(3, "", true);
 	MSA::ICPSequence icp(3);
-	
-	// Defines which space needs is influenced by the transformation
-	icp.transformations.push_back(new MSA::TransformFeatures());
-	//icp.transformations.push_back(new MSA::TransformDescriptors());
-	
-	// Defines preprocessing filters for reference and reading point clouds
-	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.15));
-	icp.keyframeDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.15));
-	icp.keyframeDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(30, 0, true, false, false, false, false));
-	
-	// Defines the matching method
-	icp.matcher = new MSA::KDTreeMatcher();
 
-	// Defines features outlier filters. It can be stacked up.
-	//icp.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(25));
-	//icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.92));
-	icp.featureOutlierFilters.push_back(new MSA::VarTrimmedDistOutlierFilter(0.85, 0.4, 0.99, 0.85));
-	//icp.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.5));
-	//icp.featureOutlierFilters.push_back(new MSA::MinDistOutlierFilter(0.000001));
-
-	// Defines descriptor outlier filters (not implemented yet)
-	icp.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
-
-	// Defines how to mix feature and descriptor outlier (not implemented yet)
-	icp.outlierMixingWeight = 1;
-	
-	// Defines the type of error to minimize
-	//icp.errorMinimizer = newdd MSA::PointToPointErrorMinimizer();
-	icp.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
-	
-	// Defines out conditions for the iterative loop. It can be stacked up.
-	icp.transformationCheckers.push_back(new MSA::CounterTransformationChecker(40));
-	icp.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.001, 0.01, 3));
-	
-	// Defines how to inspect the iterative process
-	// This will output a VTK file for each iteration
-	icp.inspector = new MSA::VTKFileInspector(outputBaseFileName);
-	//icp.inspector = new MSA::NullInspector;
-	
+	icp.setDefault();
 	
 	typedef MSA::TransformationParameters TP;
 	typedef MSA::DataPoints DP;
 	
 	
-	DP lastCloud, newCloud;
-	MSA::TransformFeatures tf;
+	MSA::DataPoints lastCloud, newCloud;
+	MSA::TransformFeatures transform;
 	TP tp;
 	for (unsigned frameCounter = 0; frameCounter < 10; ++frameCounter)
 	{
@@ -130,15 +88,12 @@ int main(int argc, char *argv[])
 		// call icp
 		try 
 		{
-			//WARNING: point cloud change coordinates...
-			DP cloud(newCloud);
-			tp = icp(cloud);
+			tp = icp(newCloud);
 			//tp = icp.getDeltaTransform();
-			cout << "Transformation: "<< tp << endl;
+			//cout << "Transformation: "<< tp << endl;
 			cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 			
-
-			newCloud = tf.compute(newCloud, tp);
+			newCloud = transform.compute(newCloud, tp);
 		}
 		catch (MSA::ConvergenceError error)
 		{
@@ -152,4 +107,16 @@ int main(int argc, char *argv[])
 		saveVTK<MSA::ScalarType>(newCloud, outputFileName);
 	}
 	return 0;
+}
+
+void validateArgs(int argc, char *argv[])
+{
+	if (argc != 3)
+	{
+		cerr << "Error in command line, usage " << argv[0] << " inputBaseFileName outputBaseFileName" << endl;
+		cerr << endl << "Example:" << endl;
+		cerr << argv[0] << " ../examples/data/cloud ./cloud_out" << endl << endl;
+
+		abort();
+	}
 }
