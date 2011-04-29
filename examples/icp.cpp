@@ -39,14 +39,48 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+void validateArgs(int argc, char *argv[]);
+
 /**
   * Code example for ICP taking 2 points clouds (2D or 3D) relatively close 
   * and computing the transformation between them.
   */
 int main(int argc, char *argv[])
 {
+	validateArgs(argc, argv);
+	
+	typedef MetricSpaceAligner<float> MSA;
+	
+	// Load point clouds
+	const MSA::DataPoints ref = loadCSV<MSA::ScalarType>(argv[1]);
+	MSA::DataPoints data = loadCSV<MSA::ScalarType>(argv[2]);
+	
+	// Create the default ICP algorithm
+	MSA::ICP icp;
+	icp.setDefault();
+	
+	// Compute the transformation to express data in ref
+	MSA::TransformationParameters T = icp(data, ref);
+
+	// Transform data to express it in ref
+	MSA::TransformFeatures transform;
+	MSA::DataPoints data_out = transform.compute(data, T);
+	
+	// Safe files to see the results
+	saveVTK<MSA::ScalarType>(ref, "test_ref.vtk");
+	saveVTK<MSA::ScalarType>(data, "test_data_in.vtk");
+	saveVTK<MSA::ScalarType>(data_out, "test_data_out.vtk");
+	cout << "Final transformation:" << endl << T << endl;
+
+	return 0;
+}
+
+
+void validateArgs(int argc, char *argv[])
+{
 	if (argc != 3)
 	{
+		cerr << endl;
 		cerr << "Error in command line, usage " << argv[0] << " reference.csv reading.csv" << endl;
 		cerr << endl << "2D Example:" << endl;
 		cerr << "  " << argv[0] << " ../examples/data/2D_twoBoxes.csv ../examples/data/2D_oneBox.csv" << endl;
@@ -54,53 +88,6 @@ int main(int argc, char *argv[])
 		cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl << endl;
 
 
-		return 1;
+		abort();
 	}
-	
-	typedef float T;
-	typedef MetricSpaceAligner<T> MSA;
-	MSA::ICP icp;
-	
-	icp.transformations.push_back(new MSA::TransformFeatures());
-	//icp.transformations.push_back(new MSA::TransformDescriptors());
-	
-	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
-	
-	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.5));
-	icp.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(20, 0, true, true, true, true, true));
-	//icp.referenceDataPointsFilters.push_back(new MSA::SamplingSurfaceNormalDataPointsFilter(10, true, true, false, false, false));
-	
-	icp.matcher = new MSA::KDTreeMatcher();
-	
-	//icp.featureOutlierFilters.push_back(new MSA::MaxDistOutlierFilter(0.05));
-	//icp.featureOutlierFilters.push_back(new MSA::MedianDistOutlierFilter(3));
-	//icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.85));
-	icp.featureOutlierFilters.push_back(new MSA::VarTrimmedDistOutlierFilter(0.85, 0.4, 0.99, 0.85));
-	
-	icp.descriptorOutlierFilter = new MSA::NullDescriptorOutlierFilter();
-
-	//icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
-	icp.errorMinimizer = new MSA::PointToPlaneErrorMinimizer();
-	
-	icp.transformationCheckers.push_back(new MSA::CounterTransformationChecker(40));
-	icp.transformationCheckers.push_back(new MSA::ErrorTransformationChecker(0.001, 0.001, 3));
-	
-	icp.inspector = new MSA::VTKFileInspector("test");
-	//icp.inspector = new MSA::Inspector;
-	
-	icp.outlierMixingWeight = 1;
-	
-	typedef MSA::TransformationParameters TP;
-	typedef MSA::DataPoints DP;
-	
-	const DP ref(loadCSV<MSA::ScalarType>(argv[1]));
-	DP data(loadCSV<MSA::ScalarType>(argv[2]));
-	TP t(TP::Identity(data.features.rows(), data.features.rows()));
-	
-
-	TP res = icp(t, data, ref);
-
-	cout << "Final transformation:" << endl << res << endl;
-
-	return 0;
 }

@@ -117,21 +117,24 @@ struct Histogram: public std::vector<T>
 		if (dumpStdErrOnExit)
 		{
 			std::fill(bins, bins+binCount, uint64_t(0));
-			std::cerr.precision(3);
+			std::cerr.precision(4);
 			std::cerr.fill(' ');
 			std::cerr.flags(std::ios::left);
 			std::cerr << "Histogram " << name << ":\n";
 			std::cerr << "  count: " << this->size() << ", mean: " << meanV << "\n";
-			for (size_t i = 0; i < binCount; ++i)
+			if(this->size() > 1)
 			{
-				const T v(minV + i * (maxV - minV) / T(binCount));
-				std::cerr << "  " << std::setw(10) << v << " (" << std::setw(6) << bins[i] << ") : ";
-				//std::cerr << (bins[i] * 60) / maxBinC << " " ;
-				for (size_t j = 0; j < (bins[i] * 60) / maxBinC; ++j)
-					std::cerr << "*";
-				std::cerr << "\n";
+				for (size_t i = 0; i < binCount; ++i)
+				{
+					const T v(minV + i * (maxV - minV) / T(binCount));
+					std::cerr << "  " << std::setw(10) << v << " (" << std::setw(6) << bins[i] << ") : ";
+					//std::cerr << (bins[i] * 60) / maxBinC << " " ;
+					for (size_t j = 0; j < (bins[i] * 60) / maxBinC; ++j)
+						std::cerr << "*";
+					std::cerr << "\n";
+				}
+				std::cerr << std::endl;
 			}
-			std::cerr << std::endl;
 		}
 	}
 	
@@ -849,10 +852,23 @@ struct MetricSpaceAligner
 		~ICP();
 		
 		TransformationParameters operator()(
-			const TransformationParameters& initialTransformationParameters, 
 			DataPoints reading,
 			DataPoints reference);
 		
+
+		TransformationParameters operator()(
+			DataPoints reading,
+			DataPoints reference,
+			const TransformationParameters& initialTransformationParameters);
+		
+		TransformationParameters compute(
+			DataPoints reading,
+			DataPoints reference,
+			const TransformationParameters& initialTransformationParameters);
+		
+
+		void setDefault();
+
 		DataPointsFilters readingDataPointsFilters;
 		DataPointsFilters referenceDataPointsFilters;
 		Transformations transformations;
@@ -868,7 +884,8 @@ struct MetricSpaceAligner
 	// ICP sequence, with keyframing
 	struct ICPSequence
 	{
-		ICPSequence(const int dim, const std::string& filePrefix = "", const bool dumpStdErrOnExit = true);
+		// TODO: dim should be removed
+		ICPSequence(const int dim, const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
 		~ICPSequence();
 		
 		TransformationParameters operator()(DataPoints& inputCloud);
@@ -894,7 +911,7 @@ struct MetricSpaceAligner
 		Histogram<unsigned> pointCountKeyFrame;
 		Histogram<unsigned> pointCountTouched;
 		Histogram<double> overlapRatio;
-		
+	
 		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
 		TransformationParameters getDeltaTransform() const { return lastTransformInv * getTransform(); }
 		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }

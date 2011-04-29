@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
 	typedef MetricSpaceAlignerD MSA;
 	
 	// Main algorithm definition
-	MSA::ICP icp;
-	// Also available ICPSequence
+	//MSA::ICPSequence icp(3, "", true);
+	MSA::ICPSequence icp(3);
 	
 	// Defines which space needs is influenced by the transformation
 	icp.transformations.push_back(new MSA::TransformFeatures());
@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
 	
 	// Defines preprocessing filters for reference and reading point clouds
 	icp.readingDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.15));
-	icp.referenceDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.15));
-	icp.referenceDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(15, 0, true, false, false, false, false));
+	icp.keyframeDataPointsFilters.push_back(new MSA::RandomSamplingDataPointsFilter(0.15));
+	icp.keyframeDataPointsFilters.push_back(new MSA::SurfaceNormalDataPointsFilter(30, 0, true, false, false, false, false));
 	
 	// Defines the matching method
 	icp.matcher = new MSA::KDTreeMatcher();
@@ -123,24 +123,33 @@ int main(int argc, char *argv[])
 			break;
 		}
 
-		newCloud = loadVTK<MSA::ScalarType>(ifs);
-		if (frameCounter == 0)
-		{
-			tp = TP::Identity(newCloud.features.rows(), newCloud.features.rows());
-		}	
-		
-		if (frameCounter != 0)
-		{
-			tp = icp(tp, newCloud, lastCloud);
-			newCloud = tf.compute(newCloud, tp);
+		if(frameCounter == 3)
+			abort();
 
-			cout << "Transformation of frame " << frameCounter << " to " << frameCounter - 1 << endl;
-			cout << tp << endl;
+		newCloud = loadVTK<MSA::ScalarType>(ifs);
+		// call icp
+		try 
+		{
+			//WARNING: point cloud change coordinates...
+			DP cloud(newCloud);
+			tp = icp(cloud);
+			//tp = icp.getDeltaTransform();
+			cout << "Transformation: "<< tp << endl;
+			cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
+			
+
+			newCloud = tf.compute(newCloud, tp);
+		}
+		catch (MSA::ConvergenceError error)
+		{
+			cout << "ERROR MSA::ICP failed to converge: " << endl;
+			cout << "   " << error.what() << endl;
+			cout << "Reseting tracking" << endl;
+			icp.resetTracking(newCloud);
 		}
 		
 		cout << "outputFileName: " << outputFileName << endl;
 		saveVTK<MSA::ScalarType>(newCloud, outputFileName);
-		lastCloud = newCloud;
 	}
 	return 0;
 }

@@ -275,10 +275,10 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::VarTrimmed
 	bool& iterate)
 {
 	ratio_ = optimizeInlierRatio(input);
-	std::cout<< "Optimized ratio: " << ratio_ << std::endl;
+	//std::cout<< "Optimized ratio: " << ratio_ << std::endl;
 
 	const T limit = getQuantile(input, ratio_);
-
+	
 	// select weight from median
 	typename MetricSpaceAligner<T>::OutlierWeights w(input.dists.rows(), input.dists.cols());
 	for (int x = 0; x < w.cols(); ++x)
@@ -328,7 +328,7 @@ T MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	FRMS.minCoeff(&minIndex);
 	const T optRatio = (float)(minIndex + minEl)/ (float)points_nbr;
 	
-	cout << "Optimized ratio: " << optRatio << endl;
+	//cout << "Optimized ratio: " << optRatio << endl;
 	
 	return optRatio;
 	

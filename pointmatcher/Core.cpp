@@ -150,10 +150,65 @@ MetricSpaceAligner<T>::ICP::~ICP()
 }
 
 template<typename T>
+void MetricSpaceAligner<T>::ICP::setDefault()
+{
+	this->transformations.clear();
+	this->transformations.push_back(new TransformFeatures());
+	
+	this->readingDataPointsFilters.clear();
+	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter(0.5));
+
+	this->referenceDataPointsFilters.clear();
+	this->referenceDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter(10, true, true, false, false, false));
+	
+	this->matcher = new KDTreeMatcher();
+
+	this->featureOutlierFilters.clear();
+	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.85));
+	
+	this->descriptorOutlierFilter = new NullDescriptorOutlierFilter();
+
+	this->errorMinimizer = new PointToPlaneErrorMinimizer();
+
+	this->transformationCheckers.clear();
+	this->transformationCheckers.push_back(new CounterTransformationChecker(40));
+	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
+	
+	this->inspector = new Inspector;
+	
+	this->outlierMixingWeight = 1;
+}
+
+// WARNING: Reading and reference DataPoints will change!
+// TODO: Put those constant??
+template<typename T>
 typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICP::operator ()(
-	const TransformationParameters& initialTransformationParameters, 
 	DataPoints reading,
 	DataPoints reference)
+{
+	const int dim = reading.features.rows();
+	TransformationParameters identity = TransformationParameters::Identity(dim, dim);
+	return this->compute(reading, reference, identity);
+}
+
+// WARNING: Reading and reference DataPoints will change!
+// TODO: Put those constant??
+template<typename T>
+typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICP::operator ()(
+	DataPoints reading,
+	DataPoints reference,
+	const TransformationParameters& initialTransformationParameters)
+{
+	return this->compute(reading, reference, initialTransformationParameters);
+}
+
+// WARNING: Reading and reference DataPoints will change!
+// TODO: Put those constant??
+template<typename T>
+typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICP::compute(
+	DataPoints reading,
+	DataPoints reference,
+	const TransformationParameters& initialTransformationParameters)
 {
 	timer t; // Print how long take the algo
 
@@ -365,6 +420,8 @@ void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		cerr << "Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)" << endl;
 }
 
+// WARNING: Reading and reference DataPoints will change!
+// TODO: Put those constant??
 template<typename T>
 typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICPSequence::operator ()(
 	DataPoints& inputCloud)

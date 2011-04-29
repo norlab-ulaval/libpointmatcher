@@ -244,6 +244,8 @@ void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostrea
 		for (int i = 0; i < dimCount-1; ++i)
 		{
 			os << data.features(i, p) << " ";
+			if(i == 1 && dimCount-1 == 2)
+				os << " 0";
 		}
 		os << "\n";
 	}
@@ -261,7 +263,7 @@ void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostrea
 	Descriptors colors = data.getDescriptorByName("color");
 	if (colors.cols() == 0)
 	{
-		cerr << "Warning: cannot find color in descriptors" << endl;
+		//cerr << "Warning: cannot find color in descriptors" << endl;
 		return;
 	}
 	

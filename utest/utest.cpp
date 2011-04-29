@@ -35,15 +35,49 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "pointmatcher/PointMatcher.h"
 #include "gtest/gtest.h"
+#include <string>
 
 using namespace Eigen;
 
-TEST(DefaultParameter, ICP)
+// Utility classes
+class PointCloud2DTest: public ::testing::Test
 {
 	typedef MetricSpaceAligner<float> MSA;
+
+protected:
+	static void SetUpTestCase()
+	{
+
+		std::string dataPath = "../example/data/";
+		//ref =  loadCSV<MSA::ScalarType>(dataPath + "2D_oneBox.csv");
+		//data = loadCSV<MSA::ScalarType>(dataPath + "2D_twoBoxes.csv");
+	}
+
+	static MSA::DataPoints* ref;
+	static MSA::DataPoints* data;
+
+};
+
+
+
+TEST_F(PointCloud2DTest, ICP_default)
+{
+	typedef MetricSpaceAligner<float> MSA;
+
+	std::string dataPath = "../examples/data/";
+	
+	MSA::DataPoints ref =  loadCSV<MSA::ScalarType>(dataPath + "2D_oneBox.csv");
+	MSA::DataPoints data = loadCSV<MSA::ScalarType>(dataPath + "2D_twoBoxes.csv");
+		
 	MSA::ICP icp;
+	icp.setDefault();
+
+	icp(data, ref);
+
+	//TODO: add proper evaluation of the answer
 	EXPECT_TRUE(0);
 }
+
 
 TEST(Sandbox, vector2Eigen)
 {
@@ -56,8 +90,8 @@ TEST(Sandbox, vector2Eigen)
 	std::sort(vec.begin(), vec.end());
 
 	Map<RowVectorXf> v(&vec[0], vec.size());
-	std::cout << v << std::endl;
-	std::cout << v.array().inverse() << std::endl;
+	//std::cout << v << std::endl;
+	//std::cout << v.array().inverse() << std::endl;
 }
 
 
