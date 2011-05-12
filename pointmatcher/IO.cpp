@@ -105,6 +105,47 @@ MetricSpaceAligner<float>::DataPoints loadCSV<float>(const std::string& fileName
 template
 MetricSpaceAligner<double>::DataPoints loadCSV<double>(const std::string& fileName);
 
+template<typename T>
+void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, const std::string& fileName)
+{
+	ofstream ofs(fileName.c_str());
+	if (!ofs.good())
+		throw runtime_error(string("Cannot open file ") + fileName);
+	saveCSV<T>(data, ofs);
+}
+
+template<typename T>
+void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostream& os)
+{
+	typedef typename MetricSpaceAligner<T>::DataPoints::Descriptors Descriptors;
+	
+	const int pointCount(data.features.cols());
+	const int dimCount(data.features.rows());
+	
+	if (pointCount == 0)
+	{
+		cerr << "Warning, no points, doing nothing" << endl;
+		return;
+	}
+	
+	// write points
+	for (int p = 0; p < pointCount; ++p)
+	{
+		for (int i = 0; i < dimCount-1; ++i)
+		{
+			os << data.features(i, p);
+			if(i != dimCount-2)
+				os << " , ";
+		}
+		os << "\n";
+	}
+	
+}
+
+template
+void saveCSV<float>(const MetricSpaceAligner<float>::DataPoints& data, const std::string& fileName);
+template
+void saveCSV<double>(const MetricSpaceAligner<double>::DataPoints& data, const std::string& fileName);
 
 template<typename T>
 typename MetricSpaceAligner<T>::DataPoints loadVTK(const std::string& fileName)

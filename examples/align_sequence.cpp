@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 void validateArgs(int argc, char *argv[]);
+void setupArgs(int argc, char *argv[], unsigned int& startId, unsigned int& endId, string& extension);
 
 /**
   * Code example for ICP taking a sequence of point clouds relatively close 
@@ -50,7 +51,13 @@ void validateArgs(int argc, char *argv[]);
 int main(int argc, char *argv[])
 {
 	validateArgs(argc, argv);
+
+	unsigned int startId, endId;
+	string extension = "vtk";
+	setupArgs(argc, argv, startId, endId, extension);
 	
+	
+
 	typedef MetricSpaceAligner<float> MSA;
 	
 	const string inputBaseFileName(argv[1]);
@@ -61,7 +68,7 @@ int main(int argc, char *argv[])
 	MSA::ICPSequence icp(3);
 
 	icp.setDefault();
-	
+
 	typedef MSA::TransformationParameters TP;
 	typedef MSA::DataPoints DP;
 	
@@ -69,22 +76,32 @@ int main(int argc, char *argv[])
 	MSA::DataPoints lastCloud, newCloud;
 	MSA::TransformFeatures transform;
 	TP tp;
-	for (unsigned frameCounter = 0; frameCounter < 10; ++frameCounter)
+	for (unsigned frameCounter = startId; frameCounter < endId; ++frameCounter)
 	{
-		const string inputFileName((boost::format("%s.%05d.vtk") % inputBaseFileName % frameCounter).str());
+		const string inputFileName((boost::format("%s.%05d.%s") % inputBaseFileName % frameCounter % extension).str());
 		const string outputFileName((boost::format("%s.%05d.vtk") % outputBaseFileName % frameCounter).str());
 
 		ifstream ifs(inputFileName.c_str());
 		if (!ifs.good())
 		{
 			cout << "Stopping at frame " << frameCounter << endl;
+			cout << "No file named " << inputFileName << endl;
 			break;
 		}
 
 		if(frameCounter == 3)
 			abort();
 
-		newCloud = loadVTK<MSA::ScalarType>(ifs);
+		if(extension == "vtk")
+			newCloud = loadVTK<MSA::ScalarType>(ifs);
+		else if (extension == "csv")
+			newCloud = loadCSV<MSA::ScalarType>(ifs);
+		else
+		{
+			cerr << "Unkowned extension" << endl;
+			abort();
+		}
+		
 		// call icp
 		try 
 		{
@@ -111,12 +128,34 @@ int main(int argc, char *argv[])
 
 void validateArgs(int argc, char *argv[])
 {
-	if (argc != 3)
+	if (!(argc == 3 || argc == 5 || argc == 6))
 	{
-		cerr << "Error in command line, usage " << argv[0] << " inputBaseFileName outputBaseFileName" << endl;
+		cerr << "Error in command line, usage " << argv[0] << " inputBaseFileName outputBaseFileName [startId endId] [-csv]" << endl;
 		cerr << endl << "Example:" << endl;
 		cerr << argv[0] << " ../examples/data/cloud ./cloud_out" << endl << endl;
 
 		abort();
+	}
+}
+
+
+void setupArgs(int argc, char *argv[], unsigned int& startId, unsigned int& endId, string& extension)
+{
+	if(argc >= 5)
+	{
+		startId = atoi(argv[3]);
+		endId = atoi(argv[4]);
+	}
+	else
+	{
+		startId = 0;
+		endId = 1000;
+	}
+
+	if(argc == 6)
+	{
+		const string command(argv[5]);
+		if(command == "-csv")
+			extension = "csv";
 	}
 }

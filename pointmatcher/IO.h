@@ -47,6 +47,13 @@ template<typename T>
 typename MetricSpaceAligner<T>::DataPoints loadCSV(std::istream& is);
 
 template<typename T>
+void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, const std::string& fileName);
+
+template<typename T>
+void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostream& os);
+
+
+template<typename T>
 typename MetricSpaceAligner<T>::DataPoints loadVTK(const std::string& fileName);
 
 template<typename T>

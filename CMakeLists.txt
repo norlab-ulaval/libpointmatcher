@@ -5,7 +5,7 @@ project(libpointmatcher)
 #include(UseDoxygen)
 
 # boost
-#find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 # eigen 3
 find_path(EIGEN_INCLUDE_DIR Eigen/Core
@@ -47,7 +47,7 @@ if (OPENCL_LIBRARIES)
 endif (OPENCL_LIBRARIES)
 
 # include all libs so far
-include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_LIBRARY_DIRS})
 add_definitions(-Wall)
 
 # main pointmatcher lib
@@ -73,7 +73,7 @@ install(FILES
 
 # test programs
 add_executable(icp examples/icp.cpp)
-target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
 
 add_executable(align_sequence examples/align_sequence.cpp)
 target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)

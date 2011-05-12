@@ -174,7 +174,7 @@ void MetricSpaceAligner<T>::ICP::setDefault()
 	this->transformationCheckers.push_back(new CounterTransformationChecker(40));
 	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
 	
-	this->inspector = new Inspector;
+	this->inspector = new NullInspector;
 	
 	this->outlierMixingWeight = 1;
 }
@@ -400,7 +400,7 @@ void MetricSpaceAligner<T>::ICPSequence::setDefault()
 	this->transformationCheckers.push_back(new CounterTransformationChecker(40));
 	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
 	
-	this->inspector = new Inspector;
+	this->inspector = new NullInspector;
 	
 	this->outlierMixingWeight = 1;
 }

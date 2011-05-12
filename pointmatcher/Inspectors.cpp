@@ -476,6 +476,9 @@ void MetricSpaceAligner<T>::VTKFileInspector::init()
 	oss << baseFileName << "-iterationInfo.csv";
 
 	this->streamIter = new ofstream(oss.str().c_str());
+	if (this->streamIter->fail())
+		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if repository exist.");
+	
 }
 
 template<typename T>
@@ -489,7 +492,10 @@ std::ostream* MetricSpaceAligner<T>::VTKFileInspector::openStream(const std::str
 {
 	ostringstream oss;
 	oss << baseFileName << "-" << role << ".vtk";
-	return new ofstream(oss.str().c_str());
+	ofstream* file = new ofstream(oss.str().c_str());
+	if (file->fail())
+		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if repository exist.");
+	return file;
 }
 
 template<typename T>
@@ -497,7 +503,10 @@ std::ostream* MetricSpaceAligner<T>::VTKFileInspector::openStream(const std::str
 {
 	ostringstream oss;
 	oss << baseFileName << "-" << role << "-" << iterationCount << ".vtk";
-	return new ofstream(oss.str().c_str());
+	ofstream* file = new ofstream(oss.str().c_str());
+	if (file->fail())
+		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if repository exist.");
+	return file;
 }
 
 template<typename T>
