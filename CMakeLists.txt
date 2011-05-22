@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 project(libpointmatcher)
+option(COMPILE_SANDBOX "Set to ON to compile sandbox binaries" OFF)
 
 #include(UseDoxygen)
 
@@ -71,7 +72,7 @@ install(FILES
 	DESTINATION include/pointmatcher
 )
 
-# test programs
+# Example programs
 add_executable(icp examples/icp.cpp)
 target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
 
@@ -81,6 +82,18 @@ target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} 
 add_executable(convertCSVtoVTK examples/convertCSVtoVTK.cpp)
 target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
 
+# Sandbox programs
+if(COMPILE_SANDBOX)
+  add_executable(sandbox_icp sandbox/icp.cpp)
+  target_link_libraries(sandbox_icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
+
+  add_executable(sandbox_align_seq sandbox/align_sequence.cpp)
+  target_link_libraries(sandbox_align_seq pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+
+  add_executable(sandbox_CSVtoVTK sandbox/convertCSVtoVTK.cpp)
+  target_link_libraries(sandbox_CSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+
+endif(COMPILE_SANDBOX)
 
 if(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
   include_directories(${GTEST_INCLUDE_DIR})
