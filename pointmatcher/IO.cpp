@@ -300,23 +300,35 @@ void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostrea
 	for (size_t i = 0; i < pointCount; ++i)
 		os << " " << i;
 	os << "\n";*/
+
+	os << "POINT_DATA " << pointCount << "\n";
 	
 	Descriptors colors = data.getDescriptorByName("color");
-	if (colors.cols() == 0)
+	if (colors.cols() != 0)
 	{
 		//cerr << "Warning: cannot find color in descriptors" << endl;
-		return;
+		assert(colors.cols() == pointCount);
+		assert(colors.rows() == 4);
+	
+		// write colors
+		os << "COLOR_SCALARS lut 4\n";
+		for (int p = 0; p < pointCount; ++p)
+		{
+			os << colors(0, p) << " " << colors(1, p) << " " << colors(2, p) << " " << colors(3, p) << "\n";
+		}
 	}
-	
-	assert(colors.cols() == pointCount);
-	assert(colors.rows() == 4);
-	
-	// write colors
-	os << "POINT_DATA " << pointCount << "\n";
-	os << "COLOR_SCALARS lut 4\n";
-	for (int p = 0; p < pointCount; ++p)
+
+	Descriptors normals = data.getDescriptorByName("normals");
+	if (normals.cols() != 0)
 	{
-		os << colors(0, p) << " " << colors(1, p) << " " << colors(2, p) << " " << colors(3, p) << "\n";
+		assert(normals.cols() == pointCount);
+		assert(normals.rows() == 3);
+
+		os << "NORMALS triangle_normals float\n";
+		for (int p = 0; p < pointCount; ++p)
+		{
+			os << normals(0, p) << " " << normals(1, p) << " " << normals(2, p) << "\n";
+		}
 	}
 }
 
