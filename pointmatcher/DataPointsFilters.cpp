@@ -415,13 +415,13 @@ template struct MetricSpaceAligner<double>::SurfaceNormalDataPointsFilter;
 // Constructor
 template<typename T>
 MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(
-	const int k,
+	const int binSize,
 	const bool averageExistingDescriptors,
 	const bool keepNormals,
 	const bool keepDensities,
 	const bool keepEigenValues, 
 	const bool keepEigenVectors):
-	k(k),
+	binSize(binSize),
 	averageExistingDescriptors(averageExistingDescriptors),
 	keepNormals(keepNormals),
 	keepDensities(keepDensities),
@@ -534,7 +534,7 @@ template<typename T>
 void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
 {
 	const int count(last - first);
-	if (count <= k)
+	if (count <= binSize)
 	{
 		// compute for this range
 		fuseRange(data, first, last);

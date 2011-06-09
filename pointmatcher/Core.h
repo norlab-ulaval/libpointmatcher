@@ -75,7 +75,7 @@ struct timer
 	timer():_start_time(curTime()){ } 
 	void restart() { _start_time = curTime(); }
 	double elapsed() const                  // return elapsed time in seconds
-    { return  double(curTime() - _start_time) / double(1000000000); }
+	{ return  double(curTime() - _start_time) / double(1000000000); }
 
 private:
 	Time curTime() const {
@@ -406,7 +406,7 @@ struct MetricSpaceAligner
 	// Sampling surface normals
 	class SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
-		const int k;
+		const int binSize;
 		const bool averageExistingDescriptors;
 		const bool keepNormals;
 		const bool keepDensities;
@@ -414,7 +414,7 @@ struct MetricSpaceAligner
 		const bool keepEigenVectors;
 		
 	public:
-		SamplingSurfaceNormalDataPointsFilter(const int k = 10,
+		SamplingSurfaceNormalDataPointsFilter(const int binSize = 10,
 			const bool averageExistingDescriptors = true,
 			const bool keepNormals = true,
 			const bool keepDensities = false,
@@ -589,13 +589,12 @@ struct MetricSpaceAligner
 		MedianDistOutlierFilter(const T factor);
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 	};
-
 	
 	
 	/* Hard rejection threshold using quantile.
-	   Based on:
-	     D Chetverikov, "The Trimmed Iterative Closest Point Algorithm" (2002)
-	 */
+	Based on:
+		D Chetverikov, "The Trimmed Iterative Closest Point Algorithm" (2002)
+	*/
 	struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 	{
 		const T ratio;
@@ -605,13 +604,13 @@ struct MetricSpaceAligner
 	};
 	
 	/* Hard rejection threshold using quantile and variable ratio.
-	   Based on:
-	     J. M. Phillips and al., "Outlier Robust ICP for Minimizing Fractional RMSD" (2007)
-	 */
+	Based on:
+		J. M. Phillips and al., "Outlier Robust ICP for Minimizing Fractional RMSD" (2007)
+	*/
 	struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
 	{
-	    // default ratio
-	    T ratio_;
+		// default ratio
+		T ratio_;
 		// min ratio
 		T min_;
 		// max ratio
@@ -621,12 +620,11 @@ struct MetricSpaceAligner
 
 		VarTrimmedDistOutlierFilter(const T r, const T min=0.05, const T max=0.99, const T lambda=0.95);
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
-
+		
 		private:
 		// return the optimized ratio
 		T optimizeInlierRatio(const Matches& matches);
-};
-
+	};
 
 	struct MinDistOutlierFilter: public FeatureOutlierFilter
 	{
@@ -811,10 +809,10 @@ struct MetricSpaceAligner
 		virtual void finish(const size_t iterationCount);
 	
 	private:
-    	void buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim);
+		void buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim);
 
 		void buildScalarStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
-    	void buildScalarStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
+		void buildScalarStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
 		
 		void buildNormalStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
 		void buildNormalStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
@@ -854,7 +852,6 @@ struct MetricSpaceAligner
 		TransformationParameters operator()(
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn);
-		
 
 		TransformationParameters operator()(
 			const DataPoints& readingIn,
