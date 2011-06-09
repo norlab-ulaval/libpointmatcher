@@ -89,8 +89,12 @@ void MetricSpaceAligner<T>::TransformationCheckers::check(const TransformationPa
 		(*it)->check(parameters, iterate);
 }
 
-template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::FeatureOutlierFilters::compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate)
+template<typename T> template<typename F>
+typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::OutlierFilters<F>::compute(
+	const typename MetricSpaceAligner<T>::DataPoints& filteredReading,
+	const typename MetricSpaceAligner<T>::DataPoints& filteredReference,
+	const typename MetricSpaceAligner<T>::Matches& input,
+	bool& iterate) const
 {
 	if (this->empty())
 	{
@@ -114,7 +118,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::FeatureOut
 		OutlierWeights w = (*this->begin())->compute(filteredReading, filteredReference, input, iterate);
 		if (this->size() > 1)
 		{
-			for (FeatureOutlierFiltersIt it = (this->begin() + 1); it != this->end(); ++it)
+			for (typename Vector::const_iterator it = (this->begin() + 1); it != this->end(); ++it)
 				w = w.array() * (*it)->compute(filteredReading, filteredReference, input, iterate).array();
 		}
 		return w;
@@ -124,7 +128,6 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::FeatureOut
 template<typename T>
 MetricSpaceAligner<T>::ICP::ICP():
 	matcher(0), 
-	descriptorOutlierFilter(0),
 	errorMinimizer(0),
 	inspector(0),
 	outlierMixingWeight(0.5)
@@ -133,47 +136,48 @@ MetricSpaceAligner<T>::ICP::ICP():
 template<typename T>
 MetricSpaceAligner<T>::ICP::~ICP()
 {
+	this->cleanup();
+}
+
+template<typename T>
+void MetricSpaceAligner<T>::ICP::cleanup()
+{
 	for (DataPointsFiltersIt it = readingDataPointsFilters.begin(); it != readingDataPointsFilters.end(); ++it)
 		delete *it;
 	for (DataPointsFiltersIt it = referenceDataPointsFilters.begin(); it != referenceDataPointsFilters.end(); ++it)
 		delete *it;
 	for (TransformationsIt it = transformations.begin(); it != transformations.end(); ++it)
 		delete *it;
-	delete matcher;
+	if (matcher)
+		delete matcher;
+	matcher = 0;
 	for (FeatureOutlierFiltersIt it = featureOutlierFilters.begin(); it != featureOutlierFilters.end(); ++it)
 		delete *it;
-	delete descriptorOutlierFilter;
-	delete errorMinimizer;
+	for (DescriptorOutlierFiltersIt it = descriptorOutlierFilters.begin(); it != descriptorOutlierFilters.end(); ++it)
+		delete *it;
+	if (errorMinimizer)
+		delete errorMinimizer;
+	errorMinimizer = 0;
 	for (TransformationCheckersIt it = transformationCheckers.begin(); it != transformationCheckers.end(); ++it)
 		delete *it;
-	delete inspector;
+	if (inspector)
+		delete inspector;
+	inspector = 0;
 }
 
 template<typename T>
 void MetricSpaceAligner<T>::ICP::setDefault()
 {
-	this->transformations.clear();
+	this->cleanup();
+	
 	this->transformations.push_back(new TransformFeatures());
-	
-	this->readingDataPointsFilters.clear();
 	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter(0.5));
-
-	this->referenceDataPointsFilters.clear();
 	this->referenceDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter(10, true, true, false, false, false));
-	
 	this->matcher = new KDTreeMatcher();
-
-	this->featureOutlierFilters.clear();
 	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.85));
-	
-	this->descriptorOutlierFilter = new NullDescriptorOutlierFilter();
-
 	this->errorMinimizer = new PointToPlaneErrorMinimizer();
-
-	this->transformationCheckers.clear();
 	this->transformationCheckers.push_back(new CounterTransformationChecker(40));
 	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
-	
 	this->inspector = new NullInspector;
 	
 	this->outlierMixingWeight = 1;
@@ -214,7 +218,6 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 	// Ensure that the algorithm has been setup
 	assert(matcher);
-	assert(descriptorOutlierFilter);
 	assert(errorMinimizer);
 	assert(inspector);
 	
@@ -291,11 +294,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		);
 		
 		const OutlierWeights descriptorOutlierWeights(
-			descriptorOutlierFilter->compute(
-				stepReading, 
-				stepReference, 
-				matches, 
-				iterate)
+			descriptorOutlierFilters.compute(stepReading, stepReference, matches, iterate)
 		);
 		
 		assert(featureOutlierWeights.rows() == matches.ids.rows());
@@ -336,7 +335,6 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 template<typename T>
 MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim, const std::string& filePrefix, const bool dumpStdErrOnExit):
 	matcher(0), 
-	descriptorOutlierFilter(0),
 	errorMinimizer(0),
 	inspector(0),
 	outlierMixingWeight(0.5),
@@ -359,44 +357,46 @@ MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim, const std::string
 template<typename T>
 MetricSpaceAligner<T>::ICPSequence::~ICPSequence()
 {
+	this->cleanup();
+}
+
+template<typename T>
+void MetricSpaceAligner<T>::ICPSequence::cleanup()
+{
 	for (DataPointsFiltersIt it = readingDataPointsFilters.begin(); it != readingDataPointsFilters.end(); ++it)
 		delete *it;
 	for (DataPointsFiltersIt it = keyframeDataPointsFilters.begin(); it != keyframeDataPointsFilters.end(); ++it)
 		delete *it;
 	for (TransformationsIt it = transformations.begin(); it != transformations.end(); ++it)
 		delete *it;
-	delete matcher;
+	if (matcher)
+		delete matcher;
+	matcher = 0;
 	for (FeatureOutlierFiltersIt it = featureOutlierFilters.begin(); it != featureOutlierFilters.end(); ++it)
 		delete *it;
-	delete descriptorOutlierFilter;
-	delete errorMinimizer;
+	for (DescriptorOutlierFiltersIt it = descriptorOutlierFilters.begin(); it != descriptorOutlierFilters.end(); ++it)
+		delete *it;
+	if (errorMinimizer)
+		delete errorMinimizer;
+	errorMinimizer = 0;
 	for (TransformationCheckersIt it = transformationCheckers.begin(); it != transformationCheckers.end(); ++it)
 		delete *it;
-	delete inspector;
+	if (inspector)
+		delete inspector;
+	inspector = 0;
 }
 
 template<typename T>
 void MetricSpaceAligner<T>::ICPSequence::setDefault()
 {
-	this->transformations.clear();
+	this->cleanup();
+	
 	this->transformations.push_back(new TransformFeatures());
-	
-	this->readingDataPointsFilters.clear();
 	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter(0.5));
-
-	this->keyframeDataPointsFilters.clear();
 	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter(10, true, true, false, false, false));
-	
 	this->matcher = new KDTreeMatcher();
-
-	this->featureOutlierFilters.clear();
 	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.85));
-	
-	this->descriptorOutlierFilter = new NullDescriptorOutlierFilter();
-
 	this->errorMinimizer = new PointToPlaneErrorMinimizer();
-
-	this->transformationCheckers.clear();
 	this->transformationCheckers.push_back(new CounterTransformationChecker(40));
 	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
 	
@@ -461,7 +461,6 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	const DataPoints& inputCloudIn)
 {
 	assert(matcher);
-	assert(descriptorOutlierFilter);
 	assert(errorMinimizer);
 	assert(inspector);
 	
@@ -533,7 +532,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		);
 		
 		const OutlierWeights descriptorOutlierWeights(
-			descriptorOutlierFilter->compute(
+			descriptorOutlierFilters.compute(
 				stepReading, 
 				keyFrameCloud, 
 				matches, 

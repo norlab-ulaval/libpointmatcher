@@ -635,14 +635,6 @@ struct MetricSpaceAligner
 	};
 	
 	
-	// Vector of transformation checker
-	struct FeatureOutlierFilters: public std::vector<FeatureOutlierFilter*>
-	{
-		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
-	};
-	typedef typename FeatureOutlierFilters::iterator FeatureOutlierFiltersIt;
-
-	
 	// ---------------------------------
 	struct DescriptorOutlierFilter
 	{
@@ -654,6 +646,22 @@ struct MetricSpaceAligner
 	{
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 	};
+	
+	
+	// Vector outlier filters
+	template<typename F>
+	struct OutlierFilters: public std::vector<F*>
+	{
+		typedef std::vector<F*> Vector;
+		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) const;
+	};
+	
+	typedef OutlierFilters<FeatureOutlierFilter> FeatureOutlierFilters;
+	typedef OutlierFilters<DescriptorOutlierFilter> DescriptorOutlierFilters;
+	typedef typename FeatureOutlierFilters::const_iterator FeatureOutlierFiltersConstIt;
+	typedef typename FeatureOutlierFilters::iterator FeatureOutlierFiltersIt;
+	typedef typename DescriptorOutlierFilters::const_iterator DescriptorOutlierFiltersConstIt;
+	typedef typename DescriptorOutlierFilters::iterator DescriptorOutlierFiltersIt;
 
 
 	// ---------------------------------
@@ -866,13 +874,15 @@ struct MetricSpaceAligner
 
 		//! Construct an ICP algorithm that worked in most of the cases
 		void setDefault();
+		//! Empty all filters and delete associated objects
+		void cleanup();
 
 		DataPointsFilters readingDataPointsFilters;
 		DataPointsFilters referenceDataPointsFilters;
 		Transformations transformations;
 		Matcher* matcher;
 		FeatureOutlierFilters featureOutlierFilters;
-		DescriptorOutlierFilter* descriptorOutlierFilter;
+		DescriptorOutlierFilters descriptorOutlierFilters;
 		ErrorMinimizer* errorMinimizer;
 		TransformationCheckers transformationCheckers;
 		Inspector* inspector;
@@ -890,6 +900,8 @@ struct MetricSpaceAligner
 	
 		//! Construct an ICP algorithm that worked in most of the cases
 		void setDefault();
+		//! Empty all filters and delete associated objects
+		void cleanup();
 
 		DataPointsFilters readingDataPointsFilters;
 		DataPointsFilters readingStepDataPointsFilters;
@@ -897,7 +909,7 @@ struct MetricSpaceAligner
 		Transformations transformations;
 		Matcher* matcher;
 		FeatureOutlierFilters featureOutlierFilters;
-		DescriptorOutlierFilter* descriptorOutlierFilter;
+		DescriptorOutlierFilters descriptorOutlierFilters;
 		ErrorMinimizer* errorMinimizer;
 		TransformationCheckers transformationCheckers;
 		Inspector* inspector;
