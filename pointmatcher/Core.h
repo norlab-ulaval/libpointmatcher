@@ -850,7 +850,6 @@ struct MetricSpaceAligner
 		virtual void finish(const size_t iterationCount);
 	};
 	
-	
 	// ICP algorithm
 	struct ICP
 	{
@@ -874,8 +873,6 @@ struct MetricSpaceAligner
 
 		//! Construct an ICP algorithm that worked in most of the cases
 		void setDefault();
-		//! Empty all filters and delete associated objects
-		void cleanup();
 
 		DataPointsFilters readingDataPointsFilters;
 		DataPointsFilters referenceDataPointsFilters;
@@ -887,6 +884,10 @@ struct MetricSpaceAligner
 		TransformationCheckers transformationCheckers;
 		Inspector* inspector;
 		T outlierMixingWeight;
+		
+	private:
+		//! Empty all filters and delete associated objects
+		void cleanup();
 	};
 	
 	// ICP sequence, with keyframing
@@ -900,8 +901,6 @@ struct MetricSpaceAligner
 	
 		//! Construct an ICP algorithm that worked in most of the cases
 		void setDefault();
-		//! Empty all filters and delete associated objects
-		void cleanup();
 
 		DataPointsFilters readingDataPointsFilters;
 		DataPointsFilters readingStepDataPointsFilters;
@@ -932,14 +931,18 @@ struct MetricSpaceAligner
 		void resetTracking(DataPoints& inputCloud);
 		
 	private:
-		void createKeyFrame(DataPoints& inputCloud);
-		
-		bool keyFrameCreated;
+		bool keyFrameCreated; //!< true if the key frame was created at least once
 		DataPoints keyFrameCloud; //!< point cloud of the keyframe
 		TransformationParameters keyFrameTransform; //!< pose of keyframe
 		TransformationParameters keyFrameTransformOffset; //!< offset for centered keyframe
 		TransformationParameters curTransform; //!< transform of last frame wrt keyframe (last call to operator())
 		TransformationParameters lastTransformInv; //!< inv of previous computed transform (using getTransform())
+		
+		//! Create a new key frame
+		void createKeyFrame(DataPoints& inputCloud);
+		
+		//! Empty all filters and delete associated objects
+		void cleanup();
 	};
 }; // MetricSpaceAligner
 
