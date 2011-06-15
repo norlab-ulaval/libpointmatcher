@@ -262,7 +262,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpIteration(
 		{
 			for(unsigned int i=0; i < transCheck[j]->valueNames.size(); i++)
 			{
-				if (j > 0)
+				if (!(j == 0 && i == 0))
 					*streamIter << ", ";
 				*streamIter << transCheck[j]->valueNames[i] << ", "; 
 				*streamIter << transCheck[j]->limitNames[i]; 
@@ -272,11 +272,13 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpIteration(
 		*streamIter << "\n";
 	}
 
+
 	for(unsigned int j = 0; j < transCheck.size(); j++)
 	{
 		for(unsigned int i=0; i < transCheck[j]->valueNames.size(); i++)
 		{
-			if (j > 0)
+		
+			if (!(j == 0 && i == 0))
 				*streamIter << ", ";
 			*streamIter << transCheck[j]->values(i) << ", ";
 			*streamIter << transCheck[j]->limits(i); 
