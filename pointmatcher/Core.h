@@ -767,6 +767,7 @@ struct MetricSpaceAligner
 		Vector initialTranslation;
 		
 	public:
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		BoundTransformationChecker(const T maxRotationNorm, const T maxTranslationNorm);
 		virtual void init(const TransformationParameters& parameters, bool& iterate);
 		virtual void check(const TransformationParameters& parameters, bool& iterate);
