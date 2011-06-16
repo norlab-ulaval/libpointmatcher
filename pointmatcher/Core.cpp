@@ -560,7 +560,8 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		// Error minimization
 		transformationParameters *= errorMinimizer->compute(stepReading, keyFrameCloud, outlierWeights, matches, iterate);
 		
-		transformationCheckers.check(keyFrameTransformOffset * transformationParameters, iterate);
+		//transformationCheckers.check(keyFrameTransformOffset * transformationParameters, iterate);
+		transformationCheckers.check(transformationParameters, iterate);
 		
 		++iterationCount;
 	}
