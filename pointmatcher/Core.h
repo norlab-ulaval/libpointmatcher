@@ -851,8 +851,36 @@ struct MetricSpaceAligner
 		virtual void finish(const size_t iterationCount);
 	};
 	
+	// stuff common to all ICP algorithms
+	struct ICPChainBase
+	{
+	public:
+		DataPointsFilters readingDataPointsFilters;
+		DataPointsFilters readingStepDataPointsFilters;
+		DataPointsFilters keyframeDataPointsFilters;
+		Transformations transformations;
+		Matcher* matcher;
+		FeatureOutlierFilters featureOutlierFilters;
+		DescriptorOutlierFilters descriptorOutlierFilters;
+		ErrorMinimizer* errorMinimizer;
+		TransformationCheckers transformationCheckers;
+		Inspector* inspector;
+		T outlierMixingWeight;
+		
+		virtual ~ICPChainBase();
+		
+		//! Construct an ICP algorithm that works in most of the cases
+		virtual void setDefault();
+		
+	protected:
+		//! Protected contstructor, to prevent the creation of this object
+		ICPChainBase();
+		//! Clean chain up, empty all filters and delete associated objects
+		void cleanup();
+	};
+	
 	// ICP algorithm
-	struct ICP
+	struct ICP: ICPChainBase
 	{
 		ICP();
 		~ICP();
@@ -870,50 +898,11 @@ struct MetricSpaceAligner
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
-		
-
-		//! Construct an ICP algorithm that worked in most of the cases
-		void setDefault();
-
-		DataPointsFilters readingDataPointsFilters;
-		DataPointsFilters referenceDataPointsFilters;
-		Transformations transformations;
-		Matcher* matcher;
-		FeatureOutlierFilters featureOutlierFilters;
-		DescriptorOutlierFilters descriptorOutlierFilters;
-		ErrorMinimizer* errorMinimizer;
-		TransformationCheckers transformationCheckers;
-		Inspector* inspector;
-		T outlierMixingWeight;
-		
-	private:
-		//! Empty all filters and delete associated objects
-		void cleanup();
 	};
 	
 	// ICP sequence, with keyframing
-	struct ICPSequence
+	struct ICPSequence: ICPChainBase
 	{
-		// TODO: dim should be removed
-		ICPSequence(const int dim, const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
-		~ICPSequence();
-		
-		TransformationParameters operator()(const DataPoints& inputCloudIn);
-	
-		//! Construct an ICP algorithm that worked in most of the cases
-		void setDefault();
-
-		DataPointsFilters readingDataPointsFilters;
-		DataPointsFilters readingStepDataPointsFilters;
-		DataPointsFilters keyframeDataPointsFilters;
-		Transformations transformations;
-		Matcher* matcher;
-		FeatureOutlierFilters featureOutlierFilters;
-		DescriptorOutlierFilters descriptorOutlierFilters;
-		ErrorMinimizer* errorMinimizer;
-		TransformationCheckers transformationCheckers;
-		Inspector* inspector;
-		T outlierMixingWeight;
 		T ratioToSwitchKeyframe;
 		
 		Histogram<double> keyFrameDuration;
@@ -924,10 +913,19 @@ struct MetricSpaceAligner
 		Histogram<unsigned> pointCountKeyFrame;
 		Histogram<unsigned> pointCountTouched;
 		Histogram<double> overlapRatio;
+		
+		// TODO: dim should be removed
+		ICPSequence(const int dim, const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
+		~ICPSequence();
+		
+		TransformationParameters operator()(const DataPoints& inputCloudIn);
 	
 		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
 		TransformationParameters getDeltaTransform() const { return lastTransformInv * getTransform(); }
 		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }
+		
+		virtual void setDefault();
+		
 		//! Drop current key frame, create a new one with inputCloud, reset transformations
 		void resetTracking(DataPoints& inputCloud);
 		
@@ -941,9 +939,6 @@ struct MetricSpaceAligner
 		
 		//! Create a new key frame
 		void createKeyFrame(DataPoints& inputCloud);
-		
-		//! Empty all filters and delete associated objects
-		void cleanup();
 	};
 }; // MetricSpaceAligner
 
