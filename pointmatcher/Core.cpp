@@ -195,7 +195,7 @@ void MetricSpaceAligner<T>::ICPChainBase::setDefault()
 	this->matcher = new KDTreeMatcher();
 	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.85));
 	this->errorMinimizer = new PointToPlaneErrorMinimizer();
-	this->transformationCheckers.push_back(new CounterTransformationChecker(40));
+	this->transformationCheckers.push_back(new CounterTransformationChecker(100));
 	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
 	
 	this->inspector = new NullInspector;
@@ -239,7 +239,7 @@ template<typename T>
 typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICP::compute(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn,
-	const TransformationParameters& initialTransformationParameters)
+	const TransformationParameters& T_refIn_dataIn)
 {
 	assert(this->matcher);
 	assert(this->errorMinimizer);
@@ -247,37 +247,56 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	
 	timer t; // Print how long take the algo
 	const int dim = referenceIn.features.rows();
-	
-	// apply reference filters
 	bool iterate(true);
+	
+	// Apply reference filters
+	// reference is express in frame <refIn>
 	DataPoints reference(referenceIn);
 	this->keyframeDataPointsFilters.init();
 	this->keyframeDataPointsFilters.apply(reference, iterate);
 	if (!iterate)
 		return Matrix::Identity(dim, dim);
 	
-	// center reference point cloud, retrieve offset
+	// Create intermediate frame at the center of mass of reference pts cloud
+	//  this help to solve for rotations
 	const int nbPtsReference = referenceIn.features.cols();
 	const Vector meanReference = referenceIn.features.rowwise().sum() / nbPtsReference;
+	TransformationParameters T_refIn_refMean(Matrix::Identity(dim, dim));
+	T_refIn_refMean.block(0,dim-1, dim-1, 1) = meanReference.head(dim-1);
+	
+	// Reajust reference position: 
+	// from here reference is express in frame <refMean>
+	// Shortcut to do T_refIn_refMean.inverse() * reference
 	for(int i=0; i < dim-1; i++)
 		reference.features.row(i).array() -= meanReference(i);
 	
-	Matrix Tref(Matrix::Identity(dim, dim));
-	Tref.block(0,dim-1, dim-1, 1) = meanReference.head(dim-1);
+	cout << "DEBUG init: \n" << meanReference << endl;
+		// Init matcher with reference points center on its mean
 	this->matcher->init(reference, iterate);
 
+	// Apply readings filters
+	// reading is express in frame <dataIn>
 	DataPoints reading(readingIn);
 	const int nbPtsReading = reading.features.cols();
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading, iterate);
 	
+	// Reajust reading position: 
+	// from here reading is express in frame <refMean>
+	TransformationParameters 
+		T_refMean_dataIn = T_refIn_refMean.inverse() * T_refIn_dataIn;
+	this->transformations.apply(reading, T_refMean_dataIn);
+	
+	// Prepare reading filters used in the loop 
 	this->readingStepDataPointsFilters.init();
 
 	this->inspector->init();
 	
-	TransformationParameters transformationParameters = Tref.inverse() * initialTransformationParameters;
+	// Since reading and reference are express in <refMean>
+	// the frame <refMean> is equivalent to the frame <iter(0)>
+	TransformationParameters T_iter = Matrix::Identity(dim, dim);
 	
-	this->transformationCheckers.init(transformationParameters, iterate);
+	this->transformationCheckers.init(T_iter, iterate);
 
 	size_t iterationCount(0);
 	
@@ -288,6 +307,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	
 	while (iterate)
 	{
+		cout << "DEBUG mean1: \n" << reading.features.rowwise().sum() / reading.features.cols() << endl;
 		DataPoints stepReading(reading);
 		
 		//-----------------------------
@@ -296,8 +316,12 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		
 		//-----------------------------
 		// Transform Readings
-		this->transformations.apply(stepReading, transformationParameters);
+		cout << "DEBUG mean2: \n" << stepReading.features.rowwise().sum() / stepReading.features.cols() << endl;
 		
+		cout << "DEBUG transformation: \n" << T_iter << endl;
+		this->transformations.apply(stepReading, T_iter);
+		
+		cout << "DEBUG mean3: \n" << stepReading.features.rowwise().sum() / stepReading.features.cols() << endl;
 		//-----------------------------
 		// Match to closest point in Reference
 		const Matches matches(
@@ -331,16 +355,19 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		//-----------------------------
 		// Dump
 		this->inspector->dumpIteration(
-			iterationCount, transformationParameters, reference, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, this->transformationCheckers
+			iterationCount, T_iter, reference, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, this->transformationCheckers
 		);
 		
 		//-----------------------------
 		// Error minimization
-		transformationParameters *= this->errorMinimizer->compute(
+		// equivalent to: 
+		//   T_iter(0)_iter(i+1) = T_iter(0)_iter(i) * T_iter(i)_iter(i+1)
+		T_iter = T_iter * this->errorMinimizer->compute(
 			stepReading, reference, outlierWeights, matches, iterate
 		);
 		
-		this->transformationCheckers.check(Tref * transformationParameters, iterate);
+		cout << "DEBUG2: \n" << T_iter<< endl;
+		this->transformationCheckers.check(T_iter, iterate);
 		
 		++iterationCount;
 	}
@@ -350,7 +377,14 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	cerr << "msa::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]" << endl;
 	
 	// Move transformation back to original coordinate (without center of mass)
-	return Tref * transformationParameters;
+	//return Tref_mean * transformationParameters;
+
+	// T_iter is equivalent to: T_iter(0)_iter(i+1)
+	// the frame <iter(0)> equals <refMean>
+	// so we have: 
+	//   T_iter(i+1)_dataIn = T_iter(0)_iter(i+1).inverse() * T_refMean_dataIn
+	// TODO: debug that, it's wrong
+	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
 }
 
 template<typename T>
