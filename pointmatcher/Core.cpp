@@ -270,8 +270,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	for(int i=0; i < dim-1; i++)
 		reference.features.row(i).array() -= meanReference(i);
 	
-	cout << "DEBUG init: \n" << meanReference << endl;
-		// Init matcher with reference points center on its mean
+	// Init matcher with reference points center on its mean
 	this->matcher->init(reference, iterate);
 
 	// Apply readings filters
@@ -307,7 +306,6 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	
 	while (iterate)
 	{
-		cout << "DEBUG mean1: \n" << reading.features.rowwise().sum() / reading.features.cols() << endl;
 		DataPoints stepReading(reading);
 		
 		//-----------------------------
@@ -316,12 +314,8 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		
 		//-----------------------------
 		// Transform Readings
-		cout << "DEBUG mean2: \n" << stepReading.features.rowwise().sum() / stepReading.features.cols() << endl;
-		
-		cout << "DEBUG transformation: \n" << T_iter << endl;
 		this->transformations.apply(stepReading, T_iter);
 		
-		cout << "DEBUG mean3: \n" << stepReading.features.rowwise().sum() / stepReading.features.cols() << endl;
 		//-----------------------------
 		// Match to closest point in Reference
 		const Matches matches(
@@ -361,12 +355,18 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 		//-----------------------------
 		// Error minimization
 		// equivalent to: 
-		//   T_iter(0)_iter(i+1) = T_iter(0)_iter(i) * T_iter(i)_iter(i+1)
-		T_iter = T_iter * this->errorMinimizer->compute(
+		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
+		T_iter = this->errorMinimizer->compute(
 			stepReading, reference, outlierWeights, matches, iterate
-		);
+		) * T_iter;
 		
-		cout << "DEBUG2: \n" << T_iter<< endl;
+		// Old version
+		//T_iter = T_iter * this->errorMinimizer->compute(
+		//	stepReading, reference, outlierWeights, matches, iterate
+		//);
+		
+		// in test
+		
 		this->transformationCheckers.check(T_iter, iterate);
 		
 		++iterationCount;
@@ -377,13 +377,12 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	cerr << "msa::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]" << endl;
 	
 	// Move transformation back to original coordinate (without center of mass)
-	//return Tref_mean * transformationParameters;
-
-	// T_iter is equivalent to: T_iter(0)_iter(i+1)
+	// T_iter is equivalent to: T_iter(i+1)_iter(0)
 	// the frame <iter(0)> equals <refMean>
 	// so we have: 
-	//   T_iter(i+1)_dataIn = T_iter(0)_iter(i+1).inverse() * T_refMean_dataIn
-	// TODO: debug that, it's wrong
+	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_refMean_dataIn
+	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_iter(0)_dataIn
+	// T_refIn_refMean remove the temperary frame added during initialization
 	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
 }
 
