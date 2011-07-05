@@ -923,6 +923,7 @@ struct MetricSpaceAligner
 		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
 		TransformationParameters getDeltaTransform() const { return lastTransformInv * getTransform(); }
 		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }
+		bool hasKeyFrame() const { return (keyFrameCloud.features.cols() != 0); }
 		
 		virtual void setDefault();
 		
