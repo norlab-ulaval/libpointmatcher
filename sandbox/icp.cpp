@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 	bool isCSV = true;
 	validateArgs(argc, argv, isCSV);
 	
-	typedef MetricSpaceAligner<float> MSA;
+	typedef MetricSpaceAligner<double> MSA;
 	
 	
 	// Load point clouds
@@ -74,6 +74,12 @@ int main(int argc, char *argv[])
 	MSA::ICP icp;
 	// See the implementation of setDefault() to create a custom ICP algorithm
 	icp.setDefault();
+
+	icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingStepDataPointsFilters.clear();
+	icp.keyframeDataPointsFilters.clear();
 
 	// Modify the default Inspector to output vtk file
 	if(argc == 4)

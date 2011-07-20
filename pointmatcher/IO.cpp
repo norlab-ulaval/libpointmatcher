@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
+#include <ctype.h>
+
 
 using namespace std;
 
@@ -56,48 +58,181 @@ typename MetricSpaceAligner<T>::DataPoints loadCSV(std::istream& is)
 	typedef typename DataPoints::Labels Labels;
 	typedef typename DataPoints::Label Label;
 	
-	vector<T> data;
+	vector<T> xData;
+	vector<T> yData;
+	vector<T> zData;
+	vector<T> padData;
+	vector<string> header;
 	int dim(0);
 	bool firstLine(true);
+	bool hasHeader(false);
 	Labels labels;
-	
+	int xCol(-1);
+	int yCol(-1);
+	int zCol(-1);
+
+	char delimiters[] = " \t,;";
+	char *token;
 	while (!is.eof())
 	{
 		char line[1024];
 		is.getline(line, sizeof(line));
 		line[sizeof(line)-1] = 0;
+	
+		// Look for text header
+		unsigned int len = strspn(line, " ,+-.1234567890Ee");
+		if(len != strlen(line))
+		{
+			//cout << "Header detected" << endl;
+			hasHeader = true;
+		}
+		else
+		{
+			hasHeader = false;
+		}
+
+		// Count dimension using first line
+		if(firstLine)
+		{
+			char tmpLine[1024];
+			strcpy(tmpLine, line);
+			token = strtok(tmpLine, delimiters);
+			while (token)
+			{
+				dim++;
+				
+				// Load text header
+				if(hasHeader)
+				{
+					header.push_back(string(token));
+				}
+
+				token = strtok(NULL, delimiters); // FIXME: non reentrant, use strtok_r
+			}
 		
-		char *token = strtok(line, " \t,;");
+				
+			if (hasHeader)
+			{
+				// Search for x, y and z tags
+				for(unsigned int i = 0; i < header.size(); i++)
+				{
+					if(header[i].compare("x") == 0)
+						xCol = i;
+				
+					if(header[i].compare("y") == 0)
+						yCol = i;
+				
+					if(header[i].compare("z") == 0)
+						zCol = i;
+				}
+				if(xCol == -1 || yCol == -1)
+				{
+					for(unsigned int i = 0; i < header.size(); i++)
+					{
+						cout << "(" << i << ") " << header[i] << endl;
+					}
+					cout << endl << "Enter ID for x: ";
+					cin >> xCol;
+					cout << "Enter ID for y: ";
+					cin >> yCol;
+					cout << "Enter ID for z (-1 if 2D data): ";
+					cin >> zCol;
+				}
+			}
+			else
+			{
+				// Check if it is a simple file with only coordinates
+				if (!(dim == 2 || dim == 3))
+				{
+					cout << "WARNING: " << dim << " columns detected. Not obivious which columns to load for x, y or z." << endl;
+					cout << endl << "Enter column ID (starting from 0) for x: ";
+					cin >> xCol;
+					cout << "Enter column ID (starting from 0) for y: ";
+					cin >> yCol;
+					cout << "Enter column ID (starting from 0, -1 if 2D data) for z: ";
+					cin >> zCol;
+				}
+				else
+				{
+					// Assume logical order...
+					xCol = 0;
+					yCol = 1;
+					if(dim == 3)
+						zCol = 2;
+				}
+			}
+
+			if(zCol != -1)
+				dim = 3;
+			else
+				dim = 2;
+		}
+
+		// Load data!
+		token = strtok(line, delimiters);
+		int currentCol = 0;
 		while (token)
 		{
-			if (firstLine)
-				++dim;
-			data.push_back(atof(token));
-			//cout << atof(token) << " ";
-			token = strtok(NULL, " \t,;"); // FIXME: non reentrant, use strtok_r
+			// Load data only if no text is on the line
+			if(!hasHeader)
+			{
+				//TODO: look for specific columns
+				if(currentCol == xCol)
+					xData.push_back(atof(token));
+				if(currentCol == yCol)
+					yData.push_back(atof(token));
+				if(currentCol == zCol)
+					zData.push_back(atof(token));
+			}
+
+			token = strtok(NULL, delimiters); // FIXME: non reentrant, use strtok_r
+			currentCol++;
 		}
-		if (firstLine)
-			++dim;
-		data.push_back(1);
-		//cout << "\n";
+		
+		// Add one for uniform coordinates
+		padData.push_back(1);
+		
 		if (firstLine)
 		{
-			// create labels
-			size_t i=0;
-			while (i < 3 && i <data.size())
+			// create standard labels
+			for (int i=0; i < dim; i++)
 			{
 				string text;
 				text += char('x' + i);
 				labels.push_back(Label(text, 1));
-				++i;
 			}
-			if (i + 1 < data.size())
-				labels.push_back(Label("pad", data.size() - i));
 		}
+		
+		labels.push_back(Label("pad", 1));
+
 		firstLine = false;
 	}
-	
-	return DataPoints(DataPoints::Features::Map(&data[0], dim, data.size() / dim), labels);
+
+	assert(xData.size() == yData.size());
+	int nbPoints = xData.size();
+
+	// Transfer loaded points in specific structure (eigen matrix)
+	typename DataPoints::Features features(dim+1, nbPoints);
+	for(int i=0; i < nbPoints; i++)
+	{
+		features(0,i) = xData[i];
+		features(1,i) = yData[i];
+		if(dim == 3)
+		{
+			features(2,i) = zData[i];
+			features(3,i) = 1;
+		}
+		else
+		{
+			features(2,i) = 1;
+		}
+	}
+
+	DataPoints dataPoints(features, labels);
+	//cout << "Loaded " << dataPoints.features.cols() << " points." << endl;
+	//cout << "Find " << dataPoints.features.rows() << " dimensions." << endl;
+
+	return dataPoints;
 }
 
 template
