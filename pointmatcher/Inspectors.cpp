@@ -93,7 +93,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataPoints(const DataPoint
 		stream << features.transpose() << "\n";
 	}
 	
-	stream << "VERTICES 1 "  << features.cols() * 2 << "\n";
+	stream << "VERTICES "  << features.cols() << " "<< features.cols() * 2 << "\n";
 	for (int i = 0; i < features.cols(); ++i)
 		stream << "1 " << i << "\n";
 	

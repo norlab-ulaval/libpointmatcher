@@ -425,7 +425,7 @@ void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostrea
 		}
 		os << "\n";
 	}
-	os << "VERTICES 1 " << pointCount * 2 << "\n";
+	os << "VERTICES " << pointCount << " " << pointCount * 2 << "\n";
 	for (int i = 0; i < pointCount; ++i)
 	{
 		os << "1 " << i << "\n";
