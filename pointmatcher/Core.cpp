@@ -481,7 +481,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 	// initial keyframe
 	keyFrameCreated = false;
-	if (keyFrameCloud.features.cols() == 0)
+	if (!hasKeyFrame())
 	{
 		this->createKeyFrame(inputCloud);
 		return curTransform;
