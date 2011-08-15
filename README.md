@@ -20,7 +20,7 @@ Prerequisites
 
 If your operating system does not provide it, you must get [Eigen].
 It only needs to be downloaded and extracted.
-[libnabo] must be downloaded and installed, please follow the [libnabo's] documentation to do so.
+[libnabo] must be downloaded and installed, please follow the [libnabo]'s documentation to do so.
 
 Quick compilation and installation under Unix
 ---------------------------------------------
