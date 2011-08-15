@@ -4,21 +4,21 @@ libpointmatcher depends on:
 
  * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
  * [libnabo], a fast K Nearest Neighbour library for low-dimensional spaces.
- 
-libpointmatcher is being developed by François Pomerleau and Stéphane Magnenat as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
+
+[Eigen] only needs to be downloaded and extracted.
+[libnabo] must be downloaded and installed.
+libpointmatcher is being developed by François Pomerleau and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
 
 Compilation
------------
+===========
 
 libpointmatcher uses [CMake] as build system.
-Just create a directory, go inside it and type:
+The complete compilation process depends on the system you are using (Linux, Mac OS X or Windows).
+You will find a nice introductory tutorial in [this video](http://www.youtube.com/watch?v=CLvZTyji_Uw).
 
-	cmake SRC_DIR
-    
-where `SRC_DIR` is the top-level directory of libpointmatcher's sources.
-If the dependencies are not installed system wide, you might have to tell [CMake] where to find them.
-In case of doubt, read the [CMake documentation].
+Quick compilation and installation under Unix
+---------------------------------------------
 
 You first need to fetch and compile [libnabo].
 To do so, you need [cmake], [git].
@@ -26,28 +26,37 @@ On [Ubuntu], you can install these with `apt-get`:
 
 	sudo apt-get install git-core cmake cmake-qt-gui
 
-You can fetche [Eigen] 3 from:
+Under Unix, assuming that [Eigen] and [libnabo] are installed system-wide, you can compile (with optimisation and debug information) and install libpointmatcher in `/usr/local` with the following commands run in the top-level directory of libpointmatcher's sources:
 
-	http://eigen.tuxfamily.org/index.php?title=Main_Page#Download
-	
-Then, you need to clone and build [libnabo]:
+	SRC_DIR=`pwd`
+	BUILD_DIR=${SRC_DIR}/build
+	mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+	cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
+	# if Eigen or libnabo are not available system-wide, run at that point: 
+	#   cmake-gui .
+	# cmake-gui allows you to tell the location of the header
+	# and the static libraries of Eigen and libnabo
+	make
+	sudo make install
 
-	git clone http://github.com/ethz-asl/libnabo
-	mkdir build
-	cd build
-	cmake ..
+These lines will compile libpointmatcher in a `build` sub-directory and therefore keep your source tree clean.
+Note that you could compile libpointmatcher anywhere you have write access, such as in `/tmp/libpointmatcher.
+This out-of-source build is a nice feature of [CMake] under Unixes.
 
-Then, in the directory in which you are building libpointmatcher, launch `cmake-gui .` and specify the location of [libnabo]'s headers and static library.
+If [Eigen] or [libnabo] are not installed system-wide, you might have to tell [CMake] where to find them.
+You can do this with a command-line tool, `ccmake`, or with a graphical tool, `cmake-gui`.
+Please read the [CMake documentation] for more information.
+Note that if you have [ROS] (Diamondback or later) installed, Eigen 3 should be availabe in the path `/opt/ros/diamondback/stacks/geometry/eigen/include`.
 
 
 Test
-----
+====
 
 In 2D:
-	./icp SRC_DIR/tests/data/2D_oneBox.csv SRC_DIR/tests/data/data/2D_twoBoxes.csv
+	./icp ${SRC_DIR}/examples/data/2D_oneBox.csv ${SRC_DIR}/examples/data/data/2D_twoBoxes.csv
 
 In 3D:
-	./icp SRC_DIR/tests/data/car_cloud401.csv SRC_DIR/tests/data/car_cloud400.csv
+	./icp ${SRC_DIR}/examples/data/car_cloud401.csv ${SRC_DIR}/examples/data/car_cloud400.csv
 
 Use [Paraview] to view the results.
 On [Ubuntu], you can install [Paraview] with `apt-get`:
@@ -55,13 +64,13 @@ On [Ubuntu], you can install [Paraview] with `apt-get`:
 
 
 Bug reporting
--------------
+=============
 
 Please use [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs.
 
 
 License
--------
+=======
 
 libpointmatcher is released under a permissive BSD license.
 
@@ -71,4 +80,5 @@ libpointmatcher is released under a permissive BSD license.
 [git]: http://git-scm.com
 [Eigen]: http://eigen.tuxfamily.org
 [libnabo]: http://github.com/ethz-asl/libnabo
+[ROS]: http://www.ros.org/
 [Paraview]: http://www.paraview.org/
