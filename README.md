@@ -62,7 +62,7 @@ In 3D:
 Use [Paraview] to view the results.
 On [Ubuntu], you can install [Paraview] with `apt-get`:
 
-	sudo-apt get install paraview
+	sudo apt-get install paraview
 
 
 Bug reporting
