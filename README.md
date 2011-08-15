@@ -5,8 +5,6 @@ libpointmatcher depends on:
  * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
  * [libnabo], a fast K Nearest Neighbour library for low-dimensional spaces.
 
-[Eigen] only needs to be downloaded and extracted.
-[libnabo] must be downloaded and installed.
 libpointmatcher is being developed by François Pomerleau and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
 
@@ -17,14 +15,15 @@ libpointmatcher uses [CMake] as build system.
 The complete compilation process depends on the system you are using (Linux, Mac OS X or Windows).
 You will find a nice introductory tutorial in [this video](http://www.youtube.com/watch?v=CLvZTyji_Uw).
 
+Prerequisites
+-------------
+
+If your operating system does not provide it, you must get [Eigen].
+It only needs to be downloaded and extracted.
+[libnabo] must be downloaded and installed, please follow the [libnabo's] documentation to do so.
+
 Quick compilation and installation under Unix
 ---------------------------------------------
-
-You first need to fetch and compile [libnabo].
-To do so, you need [cmake], [git].
-On [Ubuntu], you can install these with `apt-get`:
-
-	sudo apt-get install git-core cmake cmake-qt-gui
 
 Under Unix, assuming that [Eigen] and [libnabo] are installed system-wide, you can compile (with optimisation and debug information) and install libpointmatcher in `/usr/local` with the following commands run in the top-level directory of libpointmatcher's sources:
 
