@@ -52,9 +52,11 @@ Test
 ====
 
 In 2D:
+
 	./icp ${SRC_DIR}/examples/data/2D_oneBox.csv ${SRC_DIR}/examples/data/data/2D_twoBoxes.csv
 
 In 3D:
+
 	./icp ${SRC_DIR}/examples/data/car_cloud401.csv ${SRC_DIR}/examples/data/car_cloud400.csv
 
 Use [Paraview] to view the results.

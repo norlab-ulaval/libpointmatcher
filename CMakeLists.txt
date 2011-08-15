@@ -20,7 +20,7 @@ find_path(NABO_INCLUDE_DIR nabo/nabo.h
 	/usr/local/include
 	/usr/include
 )
-find_library(NABO_LIBRARY libnabo
+find_library(NABO_LIBRARY NAMES libnabo.a libnabo PATHS
 	/usr/local/lib
 	/usr/lib
 )
