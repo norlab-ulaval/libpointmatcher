@@ -190,11 +190,17 @@ void MetricSpaceAligner<T>::ICPChainBase::setDefault()
 	this->cleanup();
 	
 	this->transformations.push_back(new TransformFeatures());
+	
 	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter(0.5));
+	
 	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter(10, true, true, false, false, false));
+	
+	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.75));
+	
 	this->matcher = new KDTreeMatcher();
-	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.85));
+	
 	this->errorMinimizer = new PointToPlaneErrorMinimizer();
+	
 	this->transformationCheckers.push_back(new CounterTransformationChecker(100));
 	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
 	

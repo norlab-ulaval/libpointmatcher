@@ -275,7 +275,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::VarTrimmed
 	bool& iterate)
 {
 	ratio_ = optimizeInlierRatio(input);
-	//std::cout<< "Optimized ratio: " << ratio_ << std::endl;
+	std::cout<< "Optimized ratio: " << ratio_ << std::endl;
 
 	const T limit = getQuantile(input, ratio_);
 	

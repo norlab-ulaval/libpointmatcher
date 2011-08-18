@@ -54,29 +54,33 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::IdentityDataPo
 template struct MetricSpaceAligner<float>::IdentityDataPointsFilter;
 template struct MetricSpaceAligner<double>::IdentityDataPointsFilter;
 
-
-// ClampOnAxisThresholdDataPointsFilter
+// MaxDistOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::ClampOnAxisThresholdDataPointsFilter::ClampOnAxisThresholdDataPointsFilter(
+MetricSpaceAligner<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFilter(
 	const unsigned dim, 
-	const T threshold):
+	const T maxDist):
 	dim(dim),
-	threshold(threshold)
+	maxDist(maxDist)
 {
+	if (maxDist < 0)
+	{
+		cerr << "MaxDistOnAxisDataPointsFilter: Error, max distance " << maxDist << " is outside interval [0;inf[." << endl;
+		abort();
+	}
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::ClampOnAxisThresholdDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MaxDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
 	{
-		cerr << "ClampOnAxisThresholdDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
+		cerr << "MaxDistOnAxisDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
 		abort();
 	}
 	
 	const int nbPointsIn = input.features.cols();
-	const int nbPointsOut = (input.features.row(dim).cwise() < threshold).count();
+	const int nbPointsOut = (input.features.row(dim).array().abs() < maxDist).count();
 	DataPoints outputCloud(
 		typename DataPoints::Features(input.features.rows(), nbPointsOut),
 		input.featureLabels
@@ -90,7 +94,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::ClampOnAxisThr
 	int j = 0;
 	for (int i = 0; i < nbPointsIn; i++)
 	{
-		if (input.features(dim, i) < threshold)
+		if (anyabs(input.features(dim, i)) < maxDist)
 		{
 			outputCloud.features.col(j) = input.features.col(i);
 			if (outputCloud.descriptors.cols() > 0)
@@ -102,13 +106,68 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::ClampOnAxisThr
 	return outputCloud;
 }
 
-template struct MetricSpaceAligner<float>::ClampOnAxisThresholdDataPointsFilter;
-template struct MetricSpaceAligner<double>::ClampOnAxisThresholdDataPointsFilter;
+template struct MetricSpaceAligner<float>::MaxDistOnAxisDataPointsFilter;
+template struct MetricSpaceAligner<double>::MaxDistOnAxisDataPointsFilter;
 
-// ClampOnAxisThresholdDataPointsFilter
+// MinDistOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::ClampOnAxisRatioDataPointsFilter::ClampOnAxisRatioDataPointsFilter(
+MetricSpaceAligner<T>::MinDistOnAxisDataPointsFilter::MinDistOnAxisDataPointsFilter(
+	const unsigned dim, 
+	const T minDist):
+	dim(dim),
+	minDist(minDist)
+{
+	if (minDist < 0)
+	{
+		cerr << "MinDistOnAxisDataPointsFilter: Error, min distance " << minDist << " is outside interval [0;inf[." << endl;
+		abort();
+	}
+}
+
+template<typename T>
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MinDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+{
+	if (int(dim) >= input.features.rows())
+	{
+		cerr << "MinDistOnAxisDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
+		abort();
+	}
+	
+	const int nbPointsIn = input.features.cols();
+	const int nbPointsOut = (input.features.row(dim).array().abs() > minDist).count();
+	DataPoints outputCloud(
+		typename DataPoints::Features(input.features.rows(), nbPointsOut),
+		input.featureLabels
+	);
+	if (input.descriptors.cols() > 0)
+	{
+		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
+		outputCloud.descriptorLabels = input.descriptorLabels;
+	}
+	
+	int j = 0;
+	for (int i = 0; i < nbPointsIn; i++)
+	{
+		if (anyabs(input.features(dim, i)) > minDist)
+		{
+			outputCloud.features.col(j) = input.features.col(i);
+			if (outputCloud.descriptors.cols() > 0)
+				outputCloud.descriptors.col(j) = input.descriptors.col(i);
+			j++;
+		}
+	}
+	assert(j == nbPointsOut);
+	return outputCloud;
+}
+
+template struct MetricSpaceAligner<float>::MinDistOnAxisDataPointsFilter;
+template struct MetricSpaceAligner<double>::MinDistOnAxisDataPointsFilter;
+
+// MaxQuantileOnAxisDataPointsFilter
+// Constructor
+template<typename T>
+MetricSpaceAligner<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsFilter(
 	const unsigned dim, 
 	const T ratio):
 	dim(dim),
@@ -116,17 +175,17 @@ MetricSpaceAligner<T>::ClampOnAxisRatioDataPointsFilter::ClampOnAxisRatioDataPoi
 {
 	if (ratio >= 1 || ratio <= 0)
 	{
-		cerr << "ClampOnAxisRatioDataPointsFilter: Error, trim ratio " << ratio << " is outside interval ]0;1[." << endl;
+		cerr << "MaxQuantileOnAxisDataPointsFilter: Error, trim ratio " << ratio << " is outside interval ]0;1[." << endl;
 		abort();
 	}
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::ClampOnAxisRatioDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
 	{
-		cerr << "ClampOnAxisRatioDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
+		cerr << "MaxQuantileOnAxisDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
 		abort();
 	}
 	
@@ -187,8 +246,159 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::ClampOnAxisRat
 	return outputCloud;
 }
 
-template struct MetricSpaceAligner<float>::ClampOnAxisRatioDataPointsFilter;
-template struct MetricSpaceAligner<double>::ClampOnAxisRatioDataPointsFilter;
+template struct MetricSpaceAligner<float>::MaxQuantileOnAxisDataPointsFilter;
+template struct MetricSpaceAligner<double>::MaxQuantileOnAxisDataPointsFilter;
+
+// UniformizeDensityDataPointsFilter
+// Constructor
+template<typename T>
+MetricSpaceAligner<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(
+	const T ratio, const int nbBin):
+	ratio(ratio),
+	nbBin(nbBin)
+{
+	if (ratio >= 1 || ratio <= 0)
+	{
+		cerr << "UniformizeDensityDataPointsFilter: Error, trim ratio " << ratio << " is outside interval ]0;1[." << endl;
+		abort();
+	}
+	
+	if (nbBin <= 0)
+	{
+		cerr << "UniformizeDensityDataPointsFilter: Error, number of bin " << ratio << " is outside interval ]0;inf]." << endl;
+		abort();
+	}
+}
+
+// Structure for histogram (created for UniformizeDensityDataPointsFilter)
+struct HistElement 
+{
+	int count;
+	int id;
+	float ratio;
+	HistElement():count(0), id(-1), ratio(1.0){};
+	static bool largestCountFirst(const HistElement h1, const HistElement h2)
+	{
+		return (h1.count > h2.count);	
+	};
+	static bool smallestIdFirst(const HistElement h1, const HistElement h2)
+	{
+		return (h1.id < h2.id);	
+	};
+};
+
+template<typename T>
+typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+{
+	
+	const int nbPointsIn = input.features.cols();
+	const int nbPointsOut = nbPointsIn * ratio;
+
+	typename DataPoints::Descriptors origineDistance(1, nbPointsIn);
+	origineDistance = input.features.colwise().norm();
+
+	const T minDist = origineDistance.minCoeff();
+	const T maxDist = origineDistance.maxCoeff();
+	const T delta = (maxDist - minDist)/(T)nbBin;
+
+	typename DataPoints::Descriptors binId(1, nbPointsIn);
+	
+	std::vector<HistElement> hist;
+	hist.resize(nbBin);
+
+	// Initialize ids (useful to backtrack after sorting)
+	for(int i=0; i < nbBin; i++)
+	{
+		hist[i].id = i;	
+	}
+
+	// Associate a bin per point and cumulate the histogram
+	for (int i=0; i < nbPointsIn; i++)
+	{
+		int id = (origineDistance(i)-minDist)/delta;
+
+		// validate last interval
+		if(id == nbBin)
+			id = nbBin-1;
+
+		hist[id].count = hist[id].count + 1;
+
+		binId(i) = id;
+	}
+
+	// Sort histogram based on count
+	std::sort(hist.begin(), hist.end(), HistElement::largestCountFirst);
+	
+	// Search for maximum nb points per bin respecting the ratio constraint
+	int theta = 0;
+	for(int j=0; j < (nbBin-1); j++)
+	{
+		int totalDiff = 0;
+		for(int i=0; i <= j; i++ )
+		{
+			totalDiff += hist[i].count - hist[j+1].count;
+		}
+
+		if(totalDiff > nbPointsOut)
+		{
+			for(int i=0; i <= j; i++ )
+			{
+				theta += hist[i].count;
+			}
+
+			theta = (theta - (1-ratio)*nbPointsIn)/(j+1);
+			break;
+		}
+	}
+
+	assert(theta != 0);
+
+	// Compute the acceptance ratio per bin
+	for(int i=0; i<nbBin ; i++)
+	{
+		hist[i].ratio = (float)theta/(float)hist[i].count;
+	}
+	
+	// Sort back histogram based on id
+	std::sort(hist.begin(), hist.end(), HistElement::smallestIdFirst);
+	
+
+	// build output values
+	DataPoints outputCloud(
+		typename DataPoints::Features(input.features.rows(), nbPointsIn),
+		input.featureLabels
+	);
+	if (input.descriptors.cols() > 0)
+	{
+		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsIn);
+		outputCloud.descriptorLabels = input.descriptorLabels;
+	}
+	
+	// fill output values
+	int j = 0;
+	for (int i = 0; i < nbPointsIn; i++)
+	{
+		const int id = binId(i);
+		const float r = (float)std::rand()/(float)RAND_MAX;
+		if (r < hist[id].ratio)
+		{
+			outputCloud.features.col(j) = input.features.col(i);
+			if (outputCloud.descriptors.cols() > 0)
+				outputCloud.descriptors.col(j) = input.descriptors.col(i);
+			j++;
+		}
+	}
+
+	// Reduce the point cloud size
+	outputCloud.features.conservativeResize(Eigen::NoChange, j+1);
+	if (outputCloud.descriptors.cols() > 0)
+			outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
+	
+	return outputCloud;
+}
+
+template struct MetricSpaceAligner<float>::UniformizeDensityDataPointsFilter;
+template struct MetricSpaceAligner<double>::UniformizeDensityDataPointsFilter;
 
 
 // SurfaceNormalDataPointsFilter
@@ -355,6 +565,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalD
 		{
 			//TODO: set lambda to a realistic value (based on sensor)
 			//TODO: debug here: volume too low 
+			//TODO: change name epsilon to avoid confusion with kdtree
 			const double epsilon(0.005);
 
 			//T volume(eigenVa(0)+lambda);

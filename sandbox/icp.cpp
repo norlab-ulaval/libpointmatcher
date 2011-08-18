@@ -75,24 +75,57 @@ int main(int argc, char *argv[])
 	// See the implementation of setDefault() to create a custom ICP algorithm
 	icp.setDefault();
 
-	icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingStepDataPointsFilters.clear();
-	icp.keyframeDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(new MSA::UniformizeDensityDataPointsFilter(0.5, 30));
+	
+	//icp.keyframeDataPointsFilters.clear();
+	
+	//icp.readingDataPointsFilters.push_back(new MSA::MinDistOnAxisDataPointsFilter(0, 1.5));
+	//icp.keyframeDataPointsFilters.push_back(new MSA::MinDistOnAxisDataPointsFilter(0, 0.5));
+	
+	icp.featureOutlierFilters.clear();
+	icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.75));
+	//icp.featureOutlierFilters.push_back(new MSA::VarTrimmedDistOutlierFilter(0.85));
+	
+	icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
+
+
+	//icp.readingDataPointsFilters.clear();
+	//icp.readingStepDataPointsFilters.clear();
+	//icp.keyframeDataPointsFilters.clear();
 
 	// Modify the default Inspector to output vtk file
-	if(argc == 4)
+	if(argc == 4 || argc == 20)
 	{
 		string baseFolder(argv[3]);
 		icp.inspector = new MSA::VTKFileInspector(baseFolder + "test");
 	}
 	
+	MSA::TransformationParameters T_in = MSA::TransformationParameters::Identity(4,4);
+	if(argc == 20)
+	{
+		cout << "Get input transformation matrix" << endl;
+		std::vector<double> transformationArgs;
+		for(int i=0; i < 4; i++)
+		{
+			T_in(i,0) = atof(argv[i*4+4]);
+			T_in(i,1) = atof(argv[i*4+5]);
+			T_in(i,2) = atof(argv[i*4+6]);
+			T_in(i,3) = atof(argv[i*4+7]);
+		}
+		
+	}
+	
+	// Add the offset
+	MSA::TransformFeatures transform;
+	//data = transform.compute(data, T_in);
+	//ref = transform.compute(ref, T_in);
+	
 	// Compute the transformation to express data in ref
-	MSA::TransformationParameters T = icp(data, ref);
+	MSA::TransformationParameters T = icp(data, ref, T_in);
 
 	// Transform data to express it in ref
-	MSA::TransformFeatures transform;
+	
 	MSA::DataPoints data_out = transform.compute(data, T);
 	
 	// Safe files to see the results
@@ -124,8 +157,9 @@ void validateArgs(int argc, char *argv[], bool& isCSV )
 
 		}
 	}
-	if (!(argc == 3 || argc == 4))
+	if (!(argc == 3 || argc == 4|| argc == 20))
 	{
+		cout << "Received " << argc << " arguments" << endl;
 		basicUsage(argv);
 		cerr << "Use " << argv[0] << " --help for more info" << endl << endl; 
 		

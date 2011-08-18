@@ -231,6 +231,7 @@ typename MetricSpaceAligner<T>::DataPoints loadCSV(std::istream& is)
 	DataPoints dataPoints(features, labels);
 	//cout << "Loaded " << dataPoints.features.cols() << " points." << endl;
 	//cout << "Find " << dataPoints.features.rows() << " dimensions." << endl;
+	//cout << features << endl;
 
 	return dataPoints;
 }

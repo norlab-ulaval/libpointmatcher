@@ -361,25 +361,67 @@ struct MetricSpaceAligner
 	{
 		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	};
-	
-	struct ClampOnAxisThresholdDataPointsFilter: public DataPointsFilter
+
+	//! Subsampling. Filter points beyond a maximum distance measured on a specific axis
+	struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
 	{
 		const unsigned dim;
-		const T threshold;
+		const T maxDist;
 		
-		ClampOnAxisThresholdDataPointsFilter(const unsigned dim, const T threshold);
+		//! Constructor
+		/*
+			\param dim dimension on which the filter will be applied. x=0, y=1, z=2
+			\param maxDist maximum distance authorized. All points beyond that will be filtered. Expecting value within [0;inf[
+		*/
+		MaxDistOnAxisDataPointsFilter(const unsigned dim, const T maxDist);
 		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	};
 	
-	struct ClampOnAxisRatioDataPointsFilter: public DataPointsFilter
+	//! Subsampling. Filter points before a minimum distance measured on a specific axis
+	struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
+	{
+		const unsigned dim;
+		const T minDist;
+		
+		//! Constructor
+		/*
+			\param dim dimension on which the filter will be applied. x=0, y=1, z=2
+			\param minDist minimum distance authorized. All points before that will be filtered. Expecting value within [0;inf[
+		*/
+		MinDistOnAxisDataPointsFilter(const unsigned dim, const T minDist);
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	};
+	
+	//! Subsampling. Filter points beyond a maximum quantile measured on a specific axis
+	struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
 	{
 		const unsigned dim;
 		const T ratio;
 		
-		ClampOnAxisRatioDataPointsFilter(const unsigned dim, const T ratio);
+		//! Constructor
+		/*
+			\param dim dimension on which the filter will be applied. x=0, y=1, z=2
+			\param ratio maximum quantile authorized. All points beyond that will be filtered. Expecting value within ]0;1[
+		*/
+		MaxQuantileOnAxisDataPointsFilter(const unsigned dim, const T ratio);
 		virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	};
 	
+	//! Subsampling. Reduce the points number of a certain ration while trying to uniformize the density of the point cloud.
+	struct UniformizeDensityDataPointsFilter: public DataPointsFilter
+	{
+		const T ratio;
+		const int nbBin;
+		
+		//! Constructor
+		/*
+			\param ratio targeted reduction ratio. Expecting value within ]0;1[
+			\param nbBin number of bin used to estimate the probability distribution of the density. Expecting value within ]0;inf]
+		*/
+		UniformizeDensityDataPointsFilter(const T ratio, const int nbBin);
+		virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	};
+
 	// Surface normals
 	class SurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
