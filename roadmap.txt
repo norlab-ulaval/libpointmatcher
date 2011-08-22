@@ -5,6 +5,7 @@ ROADMAP
 General
 -------
 - TODO: rework parameter architecture
+- TODO: charge yaml files for parameters setup
 
 Strategy
 -------------------
