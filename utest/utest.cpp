@@ -42,19 +42,19 @@ using namespace Eigen;
 // Utility classes
 class PointCloud2DTest: public ::testing::Test
 {
-	typedef MetricSpaceAligner<float> MSA;
+	typedef PointMatcher<float> PM;
 
 protected:
 	static void SetUpTestCase()
 	{
 
 		std::string dataPath = "../example/data/";
-		//ref =  loadCSV<MSA::ScalarType>(dataPath + "2D_oneBox.csv");
-		//data = loadCSV<MSA::ScalarType>(dataPath + "2D_twoBoxes.csv");
+		//ref =  loadCSV<PM::ScalarType>(dataPath + "2D_oneBox.csv");
+		//data = loadCSV<PM::ScalarType>(dataPath + "2D_twoBoxes.csv");
 	}
 
-	static MSA::DataPoints* ref;
-	static MSA::DataPoints* data;
+	static PM::DataPoints* ref;
+	static PM::DataPoints* data;
 
 };
 
@@ -62,14 +62,14 @@ protected:
 
 TEST_F(PointCloud2DTest, ICP_default)
 {
-	typedef MetricSpaceAligner<float> MSA;
+	typedef PointMatcher<float> PM;
 
 	std::string dataPath = "../examples/data/";
 	
-	MSA::DataPoints ref =  loadCSV<MSA::ScalarType>(dataPath + "2D_oneBox.csv");
-	MSA::DataPoints data = loadCSV<MSA::ScalarType>(dataPath + "2D_twoBoxes.csv");
+	PM::DataPoints ref =  loadCSV<PM::ScalarType>(dataPath + "2D_oneBox.csv");
+	PM::DataPoints data = loadCSV<PM::ScalarType>(dataPath + "2D_twoBoxes.csv");
 		
-	MSA::ICP icp;
+	PM::ICP icp;
 	icp.setDefault();
 
 	icp(data, ref);

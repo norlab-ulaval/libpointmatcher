@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // NullMatcher
 template<typename T>
-void MetricSpaceAligner<T>::NullMatcher::init(
+void PointMatcher<T>::NullMatcher::init(
 	const DataPoints& filteredReference,
 	bool& iterate)
 {
@@ -45,7 +45,7 @@ void MetricSpaceAligner<T>::NullMatcher::init(
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::Matches MetricSpaceAligner<T>::NullMatcher::findClosests(
+typename PointMatcher<T>::Matches PointMatcher<T>::NullMatcher::findClosests(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	bool& iterate)
@@ -53,14 +53,14 @@ typename MetricSpaceAligner<T>::Matches MetricSpaceAligner<T>::NullMatcher::find
 	return Matches();
 }
 
-template struct MetricSpaceAligner<float>::NullMatcher;
-template struct MetricSpaceAligner<double>::NullMatcher;
+template struct PointMatcher<float>::NullMatcher;
+template struct PointMatcher<double>::NullMatcher;
 
 
 
 // KDTreeMatcher
 template<typename T>
-MetricSpaceAligner<T>::KDTreeMatcher::KDTreeMatcher(const int knn, const T epsilon, const NNSearchType searchType, const T maxDist):
+PointMatcher<T>::KDTreeMatcher::KDTreeMatcher(const int knn, const T epsilon, const NNSearchType searchType, const T maxDist):
 	knn(knn),
 	epsilon(epsilon),
 	searchType(searchType),
@@ -70,14 +70,14 @@ MetricSpaceAligner<T>::KDTreeMatcher::KDTreeMatcher(const int knn, const T epsil
 }
 
 template<typename T>
-MetricSpaceAligner<T>::KDTreeMatcher::~KDTreeMatcher()
+PointMatcher<T>::KDTreeMatcher::~KDTreeMatcher()
 {
 	if(featureNNS);
 		delete featureNNS;
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::KDTreeMatcher::init(
+void PointMatcher<T>::KDTreeMatcher::init(
 	const DataPoints& filteredReference,
 	bool& iterate)
 {
@@ -88,7 +88,7 @@ void MetricSpaceAligner<T>::KDTreeMatcher::init(
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::Matches MetricSpaceAligner<T>::KDTreeMatcher::findClosests(
+typename PointMatcher<T>::Matches PointMatcher<T>::KDTreeMatcher::findClosests(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	bool& iterate)
@@ -105,5 +105,5 @@ typename MetricSpaceAligner<T>::Matches MetricSpaceAligner<T>::KDTreeMatcher::fi
 	return matches;
 }
 
-template struct MetricSpaceAligner<float>::KDTreeMatcher;
-template struct MetricSpaceAligner<double>::KDTreeMatcher;
+template struct PointMatcher<float>::KDTreeMatcher;
+template struct PointMatcher<double>::KDTreeMatcher;

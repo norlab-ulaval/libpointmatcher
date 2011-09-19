@@ -38,8 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 
 using namespace std;
-typedef MetricSpaceAligner<float> MSA;
-typedef MSA::DataPoints DataPoints;
+typedef PointMatcher<float> PM;
+typedef PM::DataPoints DataPoints;
 
 int main(int argc, char *argv[])
 {
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 	DataPoints d = loadCSV<float>(argv[1]);
 	
 	// Example for subsampling
-	//MSA::SamplingSurfaceNormalDataPointsFilter subsample(100);
+	//PM::SamplingSurfaceNormalDataPointsFilter subsample(100);
 	//d = subsample.filter(d, true);
 	
 	// Example of moving 3D points

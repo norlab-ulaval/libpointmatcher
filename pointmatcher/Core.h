@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Timer.h"
 
 template<typename T>
-struct MetricSpaceAligner
+struct PointMatcher
 {
 	typedef T ScalarType;
 	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
@@ -379,10 +379,11 @@ struct MetricSpaceAligner
 	};
 	
 	#include "Functions.h"
-}; // MetricSpaceAligner
+	
+}; // PointMatcher
 
 template<typename T>
-void swapDataPoints(typename MetricSpaceAligner<T>::DataPoints& a, typename MetricSpaceAligner<T>::DataPoints& b)
+void swapDataPoints(typename PointMatcher<T>::DataPoints& a, typename PointMatcher<T>::DataPoints& b)
 {
 	a.features.swap(b.features);
 	swap(a.featureLabels, b.featureLabels);

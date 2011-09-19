@@ -41,28 +41,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints loadCSV(const std::string& fileName);
+typename PointMatcher<T>::DataPoints loadCSV(const std::string& fileName);
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints loadCSV(std::istream& is);
+typename PointMatcher<T>::DataPoints loadCSV(std::istream& is);
 
 template<typename T>
-void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, const std::string& fileName);
+void saveCSV(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName);
 
 template<typename T>
-void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostream& os);
+void saveCSV(const typename PointMatcher<T>::DataPoints& data, std::ostream& os);
 
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints loadVTK(const std::string& fileName);
+typename PointMatcher<T>::DataPoints loadVTK(const std::string& fileName);
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints loadVTK(std::istream& is);
+typename PointMatcher<T>::DataPoints loadVTK(std::istream& is);
 
 template<typename T>
-void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, const std::string& fileName);
+void saveVTK(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName);
 
 template<typename T>
-void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostream& os);
+void saveVTK(const typename PointMatcher<T>::DataPoints& data, std::ostream& os);
 
 #endif // __POINTMATCHER_IO_H

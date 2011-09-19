@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 template<typename T>
-typename MetricSpaceAligner<T>::Vector MetricSpaceAligner<T>::TransformationChecker::matrixToAngles(const TransformationParameters& parameters)
+typename PointMatcher<T>::Vector PointMatcher<T>::TransformationChecker::matrixToAngles(const TransformationParameters& parameters)
 {
 	Vector angles;
 	if(parameters.rows() == 4)
@@ -62,7 +62,7 @@ typename MetricSpaceAligner<T>::Vector MetricSpaceAligner<T>::TransformationChec
 //--------------------------------------
 // max iteration counter
 template<typename T>
-MetricSpaceAligner<T>::CounterTransformationChecker::CounterTransformationChecker(const int maxIterationCount)
+PointMatcher<T>::CounterTransformationChecker::CounterTransformationChecker(const int maxIterationCount)
 {
 	this->limits.setZero(1);
 	this->limits(0) = maxIterationCount;
@@ -72,13 +72,13 @@ MetricSpaceAligner<T>::CounterTransformationChecker::CounterTransformationChecke
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::CounterTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void PointMatcher<T>::CounterTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values.setZero(1);
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::CounterTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void PointMatcher<T>::CounterTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values(0)++;
 	
@@ -89,14 +89,14 @@ void MetricSpaceAligner<T>::CounterTransformationChecker::check(const Transforma
 		iterate = false;
 }
 
-template struct MetricSpaceAligner<float>::CounterTransformationChecker;
-template struct MetricSpaceAligner<double>::CounterTransformationChecker;
+template struct PointMatcher<float>::CounterTransformationChecker;
+template struct PointMatcher<double>::CounterTransformationChecker;
 
 
 //--------------------------------------
 // error
 template<typename T>
-MetricSpaceAligner<T>::ErrorTransformationChecker::ErrorTransformationChecker(const T minDeltaRotErr, T minDeltaTransErr, const unsigned int tail):
+PointMatcher<T>::ErrorTransformationChecker::ErrorTransformationChecker(const T minDeltaRotErr, T minDeltaTransErr, const unsigned int tail):
 	tail(tail)
 {
 	this->limits.setZero(2);
@@ -111,7 +111,7 @@ MetricSpaceAligner<T>::ErrorTransformationChecker::ErrorTransformationChecker(co
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::ErrorTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void PointMatcher<T>::ErrorTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values.setZero(4);
 	
@@ -134,7 +134,7 @@ void MetricSpaceAligner<T>::ErrorTransformationChecker::init(const Transformatio
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::ErrorTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void PointMatcher<T>::ErrorTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
 	rotations.push_back(Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3))));
 	translations.push_back(parameters.topRightCorner(parameters.rows()-1,1));
@@ -163,14 +163,14 @@ void MetricSpaceAligner<T>::ErrorTransformationChecker::check(const Transformati
 		throw ConvergenceError("abs translation norm not a number");
 }
 
-template struct MetricSpaceAligner<float>::ErrorTransformationChecker;
-template struct MetricSpaceAligner<double>::ErrorTransformationChecker;
+template struct PointMatcher<float>::ErrorTransformationChecker;
+template struct PointMatcher<double>::ErrorTransformationChecker;
 
 //--------------------------------------
 // bound
 
 template<typename T>
-MetricSpaceAligner<T>::BoundTransformationChecker::BoundTransformationChecker(const T maxRotationNorm, const T maxTranslationNorm)
+PointMatcher<T>::BoundTransformationChecker::BoundTransformationChecker(const T maxRotationNorm, const T maxTranslationNorm)
 {
 	this->limits.setZero(2);
 	this->limits(0) = maxRotationNorm;
@@ -183,7 +183,7 @@ MetricSpaceAligner<T>::BoundTransformationChecker::BoundTransformationChecker(co
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::BoundTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void PointMatcher<T>::BoundTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values.setZero(2);
 	// FIXME: handle 2D case
@@ -193,7 +193,7 @@ void MetricSpaceAligner<T>::BoundTransformationChecker::init(const Transformatio
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::BoundTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void PointMatcher<T>::BoundTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
 	const Quaternion currentRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
 	const Vector currentTranslation = parameters.topRightCorner(parameters.rows()-1,1);
@@ -209,5 +209,5 @@ void MetricSpaceAligner<T>::BoundTransformationChecker::check(const Transformati
 	}
 }
 
-template struct MetricSpaceAligner<float>::BoundTransformationChecker;
-template struct MetricSpaceAligner<double>::BoundTransformationChecker;
+template struct PointMatcher<float>::BoundTransformationChecker;
+template struct PointMatcher<double>::BoundTransformationChecker;

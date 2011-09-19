@@ -38,8 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Core.h"
 
-typedef MetricSpaceAligner<float> MetricSpaceAlignerF;
-typedef MetricSpaceAligner<double> MetricSpaceAlignerD;
+typedef PointMatcher<float> PointMatcherF;
+typedef PointMatcher<double> PointMatcherD;
 
 #endif // __POINTMATCHER_TYPE_ALIASES_H
 

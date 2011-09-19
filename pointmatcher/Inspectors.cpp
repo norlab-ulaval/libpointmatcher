@@ -67,14 +67,14 @@ using namespace std;
 		ofs << " ";
 	}*/
 template<typename T>
-MetricSpaceAligner<T>::AbstractVTKInspector::AbstractVTKInspector():
+PointMatcher<T>::AbstractVTKInspector::AbstractVTKInspector():
 	streamIter(0)
 {
 }
 
 	
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& data, std::ostream& stream)
+void PointMatcher<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& data, std::ostream& stream)
 {
 	const typename DataPoints::Features& features(data.features);
 	//const typename DataPoints::Descriptors& descriptors(data.descriptors);
@@ -106,7 +106,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataPoints(const DataPoint
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& data, std::ostream& stream)
+void PointMatcher<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& data, std::ostream& stream)
 {
 	//const typename DataPoints::Features& features(data.features);
 	const typename DataPoints::Descriptors& descriptors(data.descriptors.transpose());
@@ -153,7 +153,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints
 
 // FIXME:rethink how we dump stuff (accumulate in a correctly-referenced table, and then dump?) and unify with previous
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataLinks(
+void PointMatcher<T>::AbstractVTKInspector::dumpDataLinks(
 	const DataPoints& ref, 
 	const DataPoints& reading, 
 	const Matches& matches, 
@@ -213,7 +213,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataLinks(
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& filteredReference, const std::string& name)
+void PointMatcher<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& filteredReference, const std::string& name)
 {
 	ostream* stream(openStream(name));
 	dumpDataPoints(filteredReference, *stream);
@@ -221,7 +221,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpDataPoints(const DataPoint
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& filteredReference, const std::string& name)
+void PointMatcher<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& filteredReference, const std::string& name)
 {
 	ostream* stream(openStream(name));
 	dumpMeshNodes(filteredReference, *stream);
@@ -229,7 +229,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::dumpIteration(
+void PointMatcher<T>::AbstractVTKInspector::dumpIteration(
 	const size_t iterationCount,
 	const TransformationParameters& parameters,
 	const DataPoints& filteredReference,
@@ -289,7 +289,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::dumpIteration(
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim)
+void PointMatcher<T>::AbstractVTKInspector::buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim)
 {
 	const Matrix desc(cloud.getDescriptorByName(nameTag));	
 
@@ -309,7 +309,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildGenericAttributeStream(st
 	
 	
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
+void PointMatcher<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& cloud)
 {
@@ -317,7 +317,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildScalarStream(std::ostream
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stream,
+void PointMatcher<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& cloud)
 {
@@ -325,7 +325,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildNormalStream(std::ostream
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stream,
+void PointMatcher<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& cloud)
 {
@@ -333,7 +333,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildVectorStream(std::ostream
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stream,
+void PointMatcher<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& cloud)
 {
@@ -341,7 +341,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildTensorStream(std::ostream
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
+void PointMatcher<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& ref, 
 	const DataPoints& reading)
@@ -366,7 +366,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildScalarStream(std::ostream
 
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stream,
+void PointMatcher<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& ref, 
 	const DataPoints& reading)
@@ -390,7 +390,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildNormalStream(std::ostream
 
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stream,
+void PointMatcher<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& ref, 
 	const DataPoints& reading)
@@ -414,7 +414,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildVectorStream(std::ostream
 
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stream,
+void PointMatcher<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& ref, 
 	const DataPoints& reading)
@@ -437,7 +437,7 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::buildTensorStream(std::ostream
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::Matrix MetricSpaceAligner<T>::AbstractVTKInspector::padWithZeros(
+typename PointMatcher<T>::Matrix PointMatcher<T>::AbstractVTKInspector::padWithZeros(
 	const Matrix m,
 	const int expectedRow,
 	const int expectedCols)
@@ -457,7 +457,7 @@ typename MetricSpaceAligner<T>::Matrix MetricSpaceAligner<T>::AbstractVTKInspect
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::AbstractVTKInspector::finish(const size_t iterationCount)
+void PointMatcher<T>::AbstractVTKInspector::finish(const size_t iterationCount)
 {
 }
 
@@ -466,13 +466,13 @@ void MetricSpaceAligner<T>::AbstractVTKInspector::finish(const size_t iterationC
 // VTK File inspector
 
 template<typename T>
-MetricSpaceAligner<T>::VTKFileInspector::VTKFileInspector(const std::string& baseFileName):
+PointMatcher<T>::VTKFileInspector::VTKFileInspector(const std::string& baseFileName):
 	baseFileName(baseFileName)
 {
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::VTKFileInspector::init()
+void PointMatcher<T>::VTKFileInspector::init()
 {
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
@@ -484,13 +484,13 @@ void MetricSpaceAligner<T>::VTKFileInspector::init()
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::VTKFileInspector::finish(const size_t iterationCount)
+void PointMatcher<T>::VTKFileInspector::finish(const size_t iterationCount)
 {
 	closeStream(this->streamIter);
 }
 
 template<typename T>
-std::ostream* MetricSpaceAligner<T>::VTKFileInspector::openStream(const std::string& role)
+std::ostream* PointMatcher<T>::VTKFileInspector::openStream(const std::string& role)
 {
 	ostringstream oss;
 	oss << baseFileName << "-" << role << ".vtk";
@@ -501,7 +501,7 @@ std::ostream* MetricSpaceAligner<T>::VTKFileInspector::openStream(const std::str
 }
 
 template<typename T>
-std::ostream* MetricSpaceAligner<T>::VTKFileInspector::openStream(const std::string& role, const size_t iterationCount)
+std::ostream* PointMatcher<T>::VTKFileInspector::openStream(const std::string& role, const size_t iterationCount)
 {
 	ostringstream oss;
 	oss << baseFileName << "-" << role << "-" << iterationCount << ".vtk";
@@ -512,12 +512,12 @@ std::ostream* MetricSpaceAligner<T>::VTKFileInspector::openStream(const std::str
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::VTKFileInspector::closeStream(std::ostream* stream)
+void PointMatcher<T>::VTKFileInspector::closeStream(std::ostream* stream)
 {
 	delete stream;
 }
 
 
 
-template struct MetricSpaceAligner<float>::VTKFileInspector;
-template struct MetricSpaceAligner<double>::VTKFileInspector;
+template struct PointMatcher<float>::VTKFileInspector;
+template struct PointMatcher<double>::VTKFileInspector;

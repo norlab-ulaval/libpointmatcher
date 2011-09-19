@@ -52,42 +52,42 @@ int main(int argc, char *argv[])
 	bool isCSV = true;
 	validateArgs(argc, argv, isCSV);
 	
-	typedef MetricSpaceAligner<double> MSA;
+	typedef PointMatcher<double> PM;
 	
 	
 	// Load point clouds
-	MSA::DataPoints ref;
-	MSA::DataPoints data;
+	PM::DataPoints ref;
+	PM::DataPoints data;
 	if(isCSV)
 	{
-		ref = loadCSV<MSA::ScalarType>(argv[1]);
-		data = loadCSV<MSA::ScalarType>(argv[2]);
+		ref = loadCSV<PM::ScalarType>(argv[1]);
+		data = loadCSV<PM::ScalarType>(argv[2]);
 	}
 	else
 	{
-		ref = loadVTK<MSA::ScalarType>(argv[1]);
-		data= loadVTK<MSA::ScalarType>(argv[2]);
+		ref = loadVTK<PM::ScalarType>(argv[1]);
+		data= loadVTK<PM::ScalarType>(argv[2]);
 	}
 
 
 	// Create the default ICP algorithm
-	MSA::ICP icp;
+	PM::ICP icp;
 	// See the implementation of setDefault() to create a custom ICP algorithm
 	icp.setDefault();
 
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(new MSA::UniformizeDensityDataPointsFilter(0.5, 30));
+	icp.readingDataPointsFilters.push_back(new PM::UniformizeDensityDataPointsFilter(0.5, 30));
 	
 	//icp.keyframeDataPointsFilters.clear();
 	
-	//icp.readingDataPointsFilters.push_back(new MSA::MinDistOnAxisDataPointsFilter(0, 1.5));
-	//icp.keyframeDataPointsFilters.push_back(new MSA::MinDistOnAxisDataPointsFilter(0, 0.5));
+	//icp.readingDataPointsFilters.push_back(new PM::MinDistOnAxisDataPointsFilter(0, 1.5));
+	//icp.keyframeDataPointsFilters.push_back(new PM::MinDistOnAxisDataPointsFilter(0, 0.5));
 	
 	icp.featureOutlierFilters.clear();
-	icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.75));
-	//icp.featureOutlierFilters.push_back(new MSA::VarTrimmedDistOutlierFilter(0.85));
+	icp.featureOutlierFilters.push_back(new PM::TrimmedDistOutlierFilter(0.75));
+	//icp.featureOutlierFilters.push_back(new PM::VarTrimmedDistOutlierFilter(0.85));
 	
-	icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
+	icp.errorMinimizer = new PM::PointToPointErrorMinimizer();
 
 
 	//icp.readingDataPointsFilters.clear();
@@ -98,10 +98,10 @@ int main(int argc, char *argv[])
 	if(argc == 4 || argc == 20)
 	{
 		string baseFolder(argv[3]);
-		icp.inspector = new MSA::VTKFileInspector(baseFolder + "test");
+		icp.inspector = new PM::VTKFileInspector(baseFolder + "test");
 	}
 	
-	MSA::TransformationParameters T_in = MSA::TransformationParameters::Identity(4,4);
+	PM::TransformationParameters T_in = PM::TransformationParameters::Identity(4,4);
 	if(argc == 20)
 	{
 		cout << "Get input transformation matrix" << endl;
@@ -117,21 +117,21 @@ int main(int argc, char *argv[])
 	}
 	
 	// Add the offset
-	MSA::TransformFeatures transform;
+	PM::TransformFeatures transform;
 	//data = transform.compute(data, T_in);
 	//ref = transform.compute(ref, T_in);
 	
 	// Compute the transformation to express data in ref
-	MSA::TransformationParameters T = icp(data, ref, T_in);
+	PM::TransformationParameters T = icp(data, ref, T_in);
 
 	// Transform data to express it in ref
 	
-	MSA::DataPoints data_out = transform.compute(data, T);
+	PM::DataPoints data_out = transform.compute(data, T);
 	
 	// Safe files to see the results
-	saveVTK<MSA::ScalarType>(ref, "test_ref.vtk");
-	saveVTK<MSA::ScalarType>(data, "test_data_in.vtk");
-	saveVTK<MSA::ScalarType>(data_out, "test_data_out.vtk");
+	saveVTK<PM::ScalarType>(ref, "test_ref.vtk");
+	saveVTK<PM::ScalarType>(data, "test_data_in.vtk");
+	saveVTK<PM::ScalarType>(data_out, "test_data_out.vtk");
 	cout << "Final transformation:" << endl << T << endl;
 
 	return 0;
