@@ -33,16 +33,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_TRANSFORMATION_H
-#define __POINTMATCHER_TRANSFORMATION_H
+#ifndef __POINTMATCHER_ERRORMINIMIZERS_H
+#define __POINTMATCHER_ERRORMINIMIZERS_H
 
-struct TransformFeatures: public Transformation
+struct IdentityErrorMinimizer: ErrorMinimizer
 {
-	virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
-};
-struct TransformDescriptors: Transformation
-{
-	virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
+	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
 };
 
-#endif // __POINTMATCHER_TRANSFORMATION_H
+// Point-to-point error
+// Based on SVD decomposition
+struct PointToPointErrorMinimizer: ErrorMinimizer
+{
+	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
+};
+
+// Point-to-plane error (or point-to-line in 2D)
+struct PointToPlaneErrorMinimizer: public ErrorMinimizer
+{
+	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
+};
+
+#endif // __POINTMATCHER_ERRORMINIMIZER_H

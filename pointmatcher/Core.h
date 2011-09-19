@@ -143,7 +143,7 @@ struct MetricSpaceAligner
 	typedef typename Transformations::iterator TransformationsIt;
 	typedef typename Transformations::const_iterator TransformationsConstIt;
 	
-	#include "Transformation.h"
+	#include "Transformations.h"
 	
 	// ---------------------------------
 	
@@ -243,7 +243,7 @@ struct MetricSpaceAligner
 		T weightedPointUsedRatio;
 	};
 	
-	#include "ErrorMinimizer.h"
+	#include "ErrorMinimizers.h"
 	
 	// ---------------------------------
 	
@@ -270,7 +270,7 @@ struct MetricSpaceAligner
 	typedef typename TransformationCheckers::iterator TransformationCheckersIt;
 	typedef typename TransformationCheckers::const_iterator TransformationCheckersConstIt;
 
-	#include "TransformationChecker.h"
+	#include "TransformationCheckers.h"
 
 	// ---------------------------------
 	

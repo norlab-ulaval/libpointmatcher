@@ -57,9 +57,9 @@ add_library(pointmatcher
 	pointmatcher/DataPointsFilters.cpp
 	pointmatcher/Matchers.cpp
 	pointmatcher/OutlierFilters.cpp
-	pointmatcher/ErrorMinimizer.cpp
-	pointmatcher/Transformation.cpp
-	pointmatcher/TransformationChecker.cpp
+	pointmatcher/ErrorMinimizers.cpp
+	pointmatcher/Transformations.cpp
+	pointmatcher/TransformationCheckers.cpp
 	pointmatcher/Inspectors.cpp
 	pointmatcher/IO.cpp
 )
