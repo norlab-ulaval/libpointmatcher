@@ -218,7 +218,6 @@ class FixstepSamplingDataPointsFilter: public DataPointsFilter
 	const double stepMult;
 	double step;
 	
-	
 public:
 	FixstepSamplingDataPointsFilter(const double startStep = 10, const double endStep = 10, const double stepMult = 1);
 	virtual ~FixstepSamplingDataPointsFilter() {};

@@ -37,8 +37,74 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include <boost/format.hpp> 
 
 using namespace std;
+
+/*
+struct __toto
+{
+	__toto()
+	{
+		typedef PointMatcher<float>::Parametrizable P;
+		P p(
+			"test",
+			"this is a test",
+			{ { "val0", "test val0", 1}, { "val1", "test val1", "string" } },
+			P::Parameters()
+		);
+		cout << p << endl;
+	}
+};
+
+static __toto __toto_instance;*/
+
+template<typename T> template<typename S>
+PointMatcher<T>::Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const S defaultValue):
+	name(name),
+	doc(doc),
+	defaultValue(boost::lexical_cast<string>(defaultValue))
+{}
+
+template<typename T>
+PointMatcher<T>::Parametrizable::Parametrizable(
+	const std::string& name,
+	const std::string& doc,
+	std::initializer_list<ParameterDoc> paramsDoc,
+	const Parameters& params):
+	name(name),
+	doc(doc),
+	parametersDoc(paramsDoc)
+{
+	// fill current parameters from either values passed as argument, or default value
+	for (auto it = parametersDoc.cbegin(); it != parametersDoc.cend(); ++it)
+	{
+		const string& paramName(it->name);
+		Parameters::const_iterator paramIt(params.find(paramName));
+		if (paramIt != params.end())
+			parameters[paramName] = paramIt->second;
+		else
+			parameters[paramName] = it->defaultValue;
+	}
+}
+
+template<typename T>
+void PointMatcher<T>::Parametrizable::dump(std::ostream& o) const
+{
+	o << name << " - " << doc << endl;
+	for (auto it = parametersDoc.cbegin(); it != parametersDoc.cend(); ++it)
+		o << it->name << " (" << it->defaultValue << ") - " << it->doc << endl;
+}
+
+template<typename T>
+std::string PointMatcher<T>::Parametrizable::getParam(const std::string& name) const
+{
+	Parameters::const_iterator paramIt(parameters.find(name));
+	if (paramIt == parameters.end())
+		throw Error((boost::format("Parameter %1 does not exist in object %2") % name % this->name).str());
+	// TODO: use string distance to propose close one, copy/paste code from Aseba
+	return paramIt->second;
+}
 
 // DataPoints
 

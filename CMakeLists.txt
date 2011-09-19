@@ -3,6 +3,19 @@ cmake_minimum_required(VERSION 2.6)
 project(libpointmatcher)
 option(COMPILE_SANDBOX "Set to ON to compile sandbox binaries" OFF)
 
+# c++ 0x
+#if("${CMAKE_CXX_COMPILER_ID}" MATCHES "clang") 
+#	set(CMAKE_COMPILER_IS_CLANGXX)
+#endif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "clang")
+if(CMAKE_COMPILER_IS_GNUCXX)
+	add_definitions(-std=gnu++0x)
+endif(CMAKE_COMPILER_IS_GNUCXX)
+# well, this breaks libpointmatcher on non-unix platform,
+# please contribute the define for your favorite compiler
+# It must support (compiler support in parenthesis):
+# - N2672: Initializer lists (gcc)
+# - N1984: auto-typed variables (gcc, clang)
+
 #include(UseDoxygen)
 
 # boost
