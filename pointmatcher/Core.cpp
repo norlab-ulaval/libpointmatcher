@@ -40,6 +40,68 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+// DataPoints
+
+template<typename T>
+MetricSpaceAligner<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels):
+	features(features),
+	featureLabels(featureLabels)
+{}
+
+template<typename T>
+MetricSpaceAligner<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels):
+	features(features),
+	featureLabels(featureLabels),
+	descriptors(descriptors),
+	descriptorLabels(descriptorLabels)
+{}
+
+template<typename T>
+typename MetricSpaceAligner<T>::DataPoints::Descriptors MetricSpaceAligner<T>::DataPoints::getDescriptorByName(const std::string& name) const
+{
+	int row(0);
+	
+	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	{
+		const int span(descriptorLabels[i].span);
+		if(descriptorLabels[i].text.compare(name) == 0)
+		{
+			return descriptors.block(row, 0, 
+					span, descriptors.cols());
+		}
+
+		row += span;
+	}
+
+	return Descriptors();
+}
+
+// Matches
+template<typename T>
+MetricSpaceAligner<T>::Matches::Matches(const Dists& dists, const Ids ids):
+	dists(dists),
+	ids(ids)
+{}
+
+template<typename T>
+T MetricSpaceAligner<T>::Matches::getDistsQuantile(const T quantile) const
+{
+	// TODO: check alignment and use matrix underlying storage when available
+	// build array
+	vector<T> values;
+	values.reserve(dists.rows() * dists.cols());
+	for (int x = 0; x < dists.cols(); ++x)
+		for (int y = 0; y < dists.rows(); ++y)
+			if ((dists(y, x) != numeric_limits<T>::infinity()) && (dists(y, x) > 0))
+				values.push_back(dists(y, x));
+	if (values.size() == 0)
+		throw ConvergenceError("no outlier to filter");
+	
+	// get quantile
+	nth_element(values.begin(), values.begin() + (values.size() * quantile), values.end());
+	return values[values.size() * quantile];
+}
+
 template<typename T>
 void MetricSpaceAligner<T>::DataPointsFilters::init()
 {

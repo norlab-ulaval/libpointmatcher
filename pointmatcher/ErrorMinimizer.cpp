@@ -40,6 +40,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Eigen;
 using namespace std;
 
+template<typename T>
+MetricSpaceAligner<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& reading, const DataPoints reference, const OutlierWeights weights, const Matches matches):
+	reading(reading),
+	reference(reference),
+	weights(weights),
+	matches(matches)
+{
+	assert(reading.features.cols() == reference.features.cols());
+	assert(reading.features.cols() == weights.cols());
+	assert(reading.features.cols() == matches.dists.cols());
+	// May have no descriptors... size 0
+}
 
 // Identity Error Minimizer
 template<typename T>

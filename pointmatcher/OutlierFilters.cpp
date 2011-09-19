@@ -135,29 +135,6 @@ template struct MetricSpaceAligner<float>::MinDistOutlierFilter;
 template struct MetricSpaceAligner<double>::MinDistOutlierFilter;
 
 
-// Utility function
-template<typename T>
-T MetricSpaceAligner<T>::getQuantile(
-	const Matches& input,
-	const T quantile)
-{
-	// TODO: check alignment and use matrix underlying storage when available
-	// build array
-	vector<T> values;
-	values.reserve(input.dists.rows() * input.dists.cols());
-	for (int x = 0; x < input.dists.cols(); ++x)
-		for (int y = 0; y < input.dists.rows(); ++y)
-			if ((input.dists(y, x) != numeric_limits<T>::infinity()) && (input.dists(y, x) > 0))
-				values.push_back(input.dists(y, x));
-	if (values.size() == 0)
-		throw ConvergenceError("no outlier to filter");
-	
-	// get quantile
-	nth_element(values.begin(), values.begin() + (values.size() * quantile), values.end());
-	return values[values.size() * quantile];
-}
-
-
 
 // MedianDistOutlierFilter
 template<typename T>
@@ -178,7 +155,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MedianDist
 	const Matches& input,
 	bool& iterate)
 {
-	const T median = getQuantile(input, 0.5);
+	const T median = input.getDistsQuantile(0.5);
 	
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
@@ -221,7 +198,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::TrimmedDis
 	const Matches& input,
 	bool& iterate)
 {
-	const T limit = getQuantile(input, ratio);
+	const T limit = input.getDistsQuantile(ratio);
 	
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
@@ -277,7 +254,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::VarTrimmed
 	ratio_ = optimizeInlierRatio(input);
 	std::cout<< "Optimized ratio: " << ratio_ << std::endl;
 
-	const T limit = getQuantile(input, ratio_);
+	const T limit = input.getDistsQuantile(ratio_);
 	
 	// select weight from median
 	typename MetricSpaceAligner<T>::OutlierWeights w(input.dists.rows(), input.dists.cols());
