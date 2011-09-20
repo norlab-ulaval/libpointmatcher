@@ -11,7 +11,7 @@ General
 - TODO SM: remove abort relative to parameter check
 - TODO FP: validate loop condition for all module (vs expections)
 - TODO SM: unit testing (gtest or cmake)
-- TODO FP: remove dim which should be infered be the data size
+- 20 sept. 2011: remove dim which should be infered be the data size
 
 Strategy
 -------------------
