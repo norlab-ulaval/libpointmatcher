@@ -51,14 +51,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include <limits>
 #include <stdint.h>
-#include <boost/lexical_cast.hpp>
 
 #include "Histogram.h"
 #include "Timer.h"
+#include "Parametrizable.h"
 
 template<typename T>
 struct PointMatcher
 {
+	// eigen-based types
 	typedef T ScalarType;
 	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
@@ -72,6 +73,7 @@ struct PointMatcher
 	typedef typename Nabo::NearestNeighbourSearch<T> NNS;
 	typedef typename NNS::SearchType NNSearchType;
 	
+	// alias for semantic reasons
 	typedef Matrix TransformationParameters;
 	
 	// input types
@@ -112,7 +114,6 @@ struct PointMatcher
 	};
 	
 	// intermediate types
-	
 	struct Matches
 	{
 		typedef Matrix Dists;
@@ -130,50 +131,7 @@ struct PointMatcher
 
 	typedef Matrix OutlierWeights;
 	
-	// parametrizable object
-	
-	struct Parametrizable
-	{
-		struct Error: std::runtime_error
-		{
-			Error(const std::string& reason):runtime_error(reason) {}
-		};
-		
-		struct ParameterDoc
-		{
-			std::string name;
-			std::string doc;
-			std::string defaultValue;
-			
-			template<typename S>
-			ParameterDoc(const std::string name, const std::string doc, const S defaultValue);
-		};
-	
-		typedef std::map<std::string, std::string> Parameters;
-		typedef std::vector<std::string> StringVector;
-		typedef std::vector<ParameterDoc> ParametersDoc;
-		
-		const std::string name;
-		const std::string doc;
-		const ParametersDoc parametersDoc;
-		
-		Parameters parameters;
-		
-		Parametrizable(
-			const std::string& name,
-			const std::string& doc,
-			std::initializer_list<ParameterDoc> paramsDoc,
-			const Parameters& params);
-		
-		std::string getParam(const std::string& name) const;
-		template<typename S>
-		S getParam(const std::string& name) const { return boost::lexical_cast<S>(getParam(name)); }
-		
-		void dump(std::ostream& o) const;
-		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p) { p.dump(o); return o; }
-	};
-	
-	// type of processing bricks
+	// types of processing bricks
 	
 	struct Transformation
 	{
@@ -330,6 +288,8 @@ struct PointMatcher
 	#include "Inspectors.h"
 
 	// ---------------------------------
+	
+	// algorithms
 	
 	// stuff common to all ICP algorithms
 	struct ICPChainBase
