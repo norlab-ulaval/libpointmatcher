@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/format.hpp> 
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 /*
 struct __toto

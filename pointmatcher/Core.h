@@ -385,14 +385,14 @@ struct PointMatcher
 	{
 		T ratioToSwitchKeyframe;
 		
-		Histogram<double> keyFrameDuration;
-		Histogram<double> convergenceDuration;
-		Histogram<unsigned> iterationsCount;
-		Histogram<unsigned> pointCountIn;
-		Histogram<unsigned> pointCountReading;
-		Histogram<unsigned> pointCountKeyFrame;
-		Histogram<unsigned> pointCountTouched;
-		Histogram<double> overlapRatio;
+		PointMatcherSupport::Histogram<double> keyFrameDuration;
+		PointMatcherSupport::Histogram<double> convergenceDuration;
+		PointMatcherSupport::Histogram<unsigned> iterationsCount;
+		PointMatcherSupport::Histogram<unsigned> pointCountIn;
+		PointMatcherSupport::Histogram<unsigned> pointCountReading;
+		PointMatcherSupport::Histogram<unsigned> pointCountKeyFrame;
+		PointMatcherSupport::Histogram<unsigned> pointCountTouched;
+		PointMatcherSupport::Histogram<double> overlapRatio;
 		
 		// TODO: dim should be removed
 		ICPSequence(const int dim, const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
@@ -424,7 +424,7 @@ struct PointMatcher
 	
 	#include "Functions.h"
 	
-}; // PointMatcher
+}; // PointMatcher<T>
 
 template<typename T>
 void swapDataPoints(typename PointMatcher<T>::DataPoints& a, typename PointMatcher<T>::DataPoints& b)
