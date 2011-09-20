@@ -76,23 +76,23 @@ int main(int argc, char *argv[])
 	icp.setDefault();
 
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(new MSA::UniformizeDensityDataPointsFilter(0.5, 30));
+	//icp.readingDataPointsFilters.push_back(new MSA::UniformizeDensityDataPointsFilter(0.15, 60));
+	icp.readingDataPointsFilters.push_back(new MSA::MinDistOnAxisDataPointsFilter(0, 4));
+
 	
-	//icp.keyframeDataPointsFilters.clear();
+	icp.keyframeDataPointsFilters.clear();
+	//icp.keyframeDataPointsFilters.push_back(new MSA::UniformizeDensityDataPointsFilter(0.20, 30));
+	icp.keyframeDataPointsFilters.push_back(new MSA::SamplingSurfaceNormalDataPointsFilter(15));
 	
 	//icp.readingDataPointsFilters.push_back(new MSA::MinDistOnAxisDataPointsFilter(0, 1.5));
 	//icp.keyframeDataPointsFilters.push_back(new MSA::MinDistOnAxisDataPointsFilter(0, 0.5));
 	
 	icp.featureOutlierFilters.clear();
-	icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.75));
-	//icp.featureOutlierFilters.push_back(new MSA::VarTrimmedDistOutlierFilter(0.85));
+	//icp.featureOutlierFilters.push_back(new MSA::TrimmedDistOutlierFilter(0.8));
+	icp.featureOutlierFilters.push_back(new MSA::VarTrimmedDistOutlierFilter(0.85));
 	
-	icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
+	//icp.errorMinimizer = new MSA::PointToPointErrorMinimizer();
 
-
-	//icp.readingDataPointsFilters.clear();
-	//icp.readingStepDataPointsFilters.clear();
-	//icp.keyframeDataPointsFilters.clear();
 
 	// Modify the default Inspector to output vtk file
 	if(argc == 4 || argc == 20)
@@ -133,6 +133,15 @@ int main(int argc, char *argv[])
 	saveVTK<MSA::ScalarType>(data, "test_data_in.vtk");
 	saveVTK<MSA::ScalarType>(data_out, "test_data_out.vtk");
 	cout << "Final transformation:" << endl << T << endl;
+
+	for(int i=0; i<T.rows(); i++)
+	{
+		for(int j=0; j<T.cols(); j++)
+		{
+			cout << ", " << T(i,j);
+		}
+	}
+	cout << endl;
 
 	return 0;
 }

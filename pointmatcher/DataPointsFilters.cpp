@@ -324,8 +324,16 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::UniformizeDens
 		hist[id].count = hist[id].count + 1;
 
 		binId(i) = id;
+		
 	}
-
+	
+	//cout << "count:" << endl;
+	//for(int i=0; i<hist.size(); i++)
+	//{
+	//	cout << hist[i].count << ", ";	
+	//}
+	
+	
 	// Sort histogram based on count
 	std::sort(hist.begin(), hist.end(), HistElement::largestCountFirst);
 	
@@ -341,23 +349,40 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::UniformizeDens
 
 		if(totalDiff > nbPointsOut)
 		{
+			int fullBinCount = 0;
 			for(int i=0; i <= j; i++ )
 			{
-				theta += hist[i].count;
+				fullBinCount += hist[i].count;
 			}
 
-			theta = (theta - (1-ratio)*nbPointsIn)/(j+1);
+			theta = ((T)fullBinCount - (ratio)*(T)nbPointsIn)/(j+1);
 			break;
 		}
 	}
 
 	assert(theta != 0);
 
+	
+
 	// Compute the acceptance ratio per bin
 	for(int i=0; i<nbBin ; i++)
 	{
-		hist[i].ratio = (float)theta/(float)hist[i].count;
+		if(hist[i].count != 0)
+		{
+			hist[i].ratio = (float)theta/(float)hist[i].count;
+		}
+		else
+		{
+			hist[i].ratio = 1.0;
+		}
 	}
+	
+	//cout << "ratio:" << endl;
+	//for(int i=0; i<hist.size(); i++)
+	//{
+	//	cout << hist[i].ratio << ", ";	
+	//}
+	//cout << endl;
 	
 	// Sort back histogram based on id
 	std::sort(hist.begin(), hist.end(), HistElement::smallestIdFirst);
