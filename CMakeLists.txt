@@ -96,6 +96,9 @@ target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} 
 add_executable(convertCSVtoVTK examples/convertCSVtoVTK.cpp)
 target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
 
+add_executable(list_modules examples/list_modules.cpp)
+target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+
 # Sandbox programs
 if(COMPILE_SANDBOX)
   add_executable(sandbox_icp sandbox/icp.cpp)

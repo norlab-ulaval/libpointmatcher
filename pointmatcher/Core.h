@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Histogram.h"
 #include "Timer.h"
 #include "Parametrizable.h"
+#include "Registrar.h"
 
 template<typename T>
 struct PointMatcher
@@ -75,6 +76,10 @@ struct PointMatcher
 	
 	// alias for semantic reasons
 	typedef Matrix TransformationParameters;
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
+	typedef Parametrizable::InvalidParameter InvalidParameter;
 	
 	// input types
 	struct DataPoints
@@ -107,7 +112,9 @@ struct PointMatcher
 		Labels descriptorLabels;
 	};
 	
-	// exception if point matcher does not converge
+	// exceptions
+	
+	// point matcher does not converge
 	struct ConvergenceError: std::runtime_error
 	{
 		ConvergenceError(const std::string& reason):runtime_error(reason) {}
@@ -149,8 +156,10 @@ struct PointMatcher
 	
 	// ---------------------------------
 	
-	struct DataPointsFilter
+	struct DataPointsFilter: public Parametrizable
 	{
+		DataPointsFilter(){}
+		DataPointsFilter(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual ~DataPointsFilter() {}
 		virtual void init() {}
 		virtual DataPoints filter(const DataPoints& input, bool& iterate) = 0;
@@ -163,6 +172,8 @@ struct PointMatcher
 	};
 	typedef typename DataPointsFilters::iterator DataPointsFiltersIt;
 	typedef typename DataPointsFilters::const_iterator DataPointsFiltersConstIt;
+	
+	DEF_REGISTRAR(DataPointsFilter)
 	
 	#include "DataPointsFilters.h"
 	
@@ -384,6 +395,8 @@ struct PointMatcher
 	
 	#include "Functions.h"
 	
+	//! Constructor, fill registrars
+	PointMatcher();
 }; // PointMatcher<T>
 
 template<typename T>

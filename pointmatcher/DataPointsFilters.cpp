@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Core.h"
 #include <stdexcept>
 #include <algorithm>
+#include <boost/format.hpp>
 
 // Eigenvalues
 #include "Eigen/QR"
@@ -57,27 +58,18 @@ template struct PointMatcher<double>::IdentityDataPointsFilter;
 // MaxDistOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFilter(
-	const unsigned dim, 
-	const T maxDist):
-	dim(dim),
-	maxDist(maxDist)
+PointMatcher<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFilter(const Parameters& params):
+	DataPointsFilter(MaxDistOnAxisDataPointsFilter::availableParameters(), params),
+	dim(Parametrizable::get<unsigned>("dim")),
+	maxDist(Parametrizable::get<T>("maxDist"))
 {
-	if (maxDist < 0)
-	{
-		cerr << "MaxDistOnAxisDataPointsFilter: Error, max distance " << maxDist << " is outside interval [0;inf[." << endl;
-		abort();
-	}
 }
 
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
-	{
-		cerr << "MaxDistOnAxisDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
-		abort();
-	}
+		throw InvalidParameter((boost::format("MaxDistOnAxisDataPointsFilter: Error, filtering on dimension number %1, larger than feature dimensionality %2") % dim % input.features.rows()).str());
 	
 	const int nbPointsIn = input.features.cols();
 	const int nbPointsOut = (input.features.row(dim).array().abs() < maxDist).count();
@@ -112,27 +104,18 @@ template struct PointMatcher<double>::MaxDistOnAxisDataPointsFilter;
 // MinDistOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::MinDistOnAxisDataPointsFilter::MinDistOnAxisDataPointsFilter(
-	const unsigned dim, 
-	const T minDist):
-	dim(dim),
-	minDist(minDist)
+PointMatcher<T>::MinDistOnAxisDataPointsFilter::MinDistOnAxisDataPointsFilter(const Parameters& params):
+	DataPointsFilter(MinDistOnAxisDataPointsFilter::availableParameters(), params),
+	dim(Parametrizable::get<unsigned>("dim")),
+	minDist(Parametrizable::get<T>("minDist"))
 {
-	if (minDist < 0)
-	{
-		cerr << "MinDistOnAxisDataPointsFilter: Error, min distance " << minDist << " is outside interval [0;inf[." << endl;
-		abort();
-	}
 }
 
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
-	{
-		cerr << "MinDistOnAxisDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
-		abort();
-	}
+		throw InvalidParameter((boost::format("MinDistOnAxisDataPointsFilter: Error, filtering on dimension number %1, larger than feature dimensionality %2") % dim % input.features.rows()).str());
 	
 	const int nbPointsIn = input.features.cols();
 	const int nbPointsOut = (input.features.row(dim).array().abs() > minDist).count();
@@ -167,27 +150,18 @@ template struct PointMatcher<double>::MinDistOnAxisDataPointsFilter;
 // MaxQuantileOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsFilter(
-	const unsigned dim, 
-	const T ratio):
-	dim(dim),
-	ratio(ratio)
+PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsFilter(const Parameters& params):
+	DataPointsFilter(MaxQuantileOnAxisDataPointsFilter::availableParameters(), params),
+	dim(Parametrizable::get<unsigned>("dim")),
+	ratio(Parametrizable::get<T>("ratio"))
 {
-	if (ratio >= 1 || ratio <= 0)
-	{
-		cerr << "MaxQuantileOnAxisDataPointsFilter: Error, trim ratio " << ratio << " is outside interval ]0;1[." << endl;
-		abort();
-	}
 }
 
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
-	{
-		cerr << "MaxQuantileOnAxisDataPointsFilter: Error, filtering at dim " << dim << " larger than feature dimension " << input.features.rows() << endl;
-		abort();
-	}
+		throw InvalidParameter((boost::format("MaxQuantileOnAxisDataPointsFilter: Error, filtering on dimension number %1, larger than feature dimensionality %2") % dim % input.features.rows()).str());
 	
 	const int nbPointsIn = input.features.cols();
 	const int nbPointsOut = nbPointsIn * ratio;
@@ -249,25 +223,15 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxQuantileOnAxisDataPoint
 template struct PointMatcher<float>::MaxQuantileOnAxisDataPointsFilter;
 template struct PointMatcher<double>::MaxQuantileOnAxisDataPointsFilter;
 
+
 // UniformizeDensityDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(
-	const T ratio, const int nbBin):
-	ratio(ratio),
-	nbBin(nbBin)
+PointMatcher<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(const Parameters& params):
+	DataPointsFilter(UniformizeDensityDataPointsFilter::availableParameters(), params),
+	ratio(Parametrizable::get<T>("ratio")),
+	nbBin(Parametrizable::get<unsigned>("nbBin"))
 {
-	if (ratio >= 1 || ratio <= 0)
-	{
-		cerr << "UniformizeDensityDataPointsFilter: Error, trim ratio " << ratio << " is outside interval ]0;1[." << endl;
-		abort();
-	}
-	
-	if (nbBin <= 0)
-	{
-		cerr << "UniformizeDensityDataPointsFilter: Error, number of bin " << ratio << " is outside interval ]0;inf]." << endl;
-		abort();
-	}
 }
 
 // Structure for histogram (created for UniformizeDensityDataPointsFilter)
@@ -307,7 +271,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPoint
 	hist.resize(nbBin);
 
 	// Initialize ids (useful to backtrack after sorting)
-	for(int i=0; i < nbBin; i++)
+	for(unsigned i=0; i < nbBin; i++)
 	{
 		hist[i].id = i;	
 	}
@@ -315,7 +279,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPoint
 	// Associate a bin per point and cumulate the histogram
 	for (int i=0; i < nbPointsIn; i++)
 	{
-		int id = (origineDistance(i)-minDist)/delta;
+		unsigned id = (origineDistance(i)-minDist)/delta;
 
 		// validate last interval
 		if(id == nbBin)
@@ -331,17 +295,18 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPoint
 	
 	// Search for maximum nb points per bin respecting the ratio constraint
 	int theta = 0;
-	for(int j=0; j < (nbBin-1); j++)
+	assert(nbBin>0);
+	for(unsigned j=0; j < (nbBin-1); j++)
 	{
 		int totalDiff = 0;
-		for(int i=0; i <= j; i++ )
+		for(unsigned i=0; i <= j; i++ )
 		{
 			totalDiff += hist[i].count - hist[j+1].count;
 		}
 
 		if(totalDiff > nbPointsOut)
 		{
-			for(int i=0; i <= j; i++ )
+			for(unsigned i=0; i <= j; i++ )
 			{
 				theta += hist[i].count;
 			}
@@ -354,7 +319,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPoint
 	assert(theta != 0);
 
 	// Compute the acceptance ratio per bin
-	for(int i=0; i<nbBin ; i++)
+	for(unsigned i=0; i<nbBin ; i++)
 	{
 		hist[i].ratio = (float)theta/(float)hist[i].count;
 	}
@@ -404,21 +369,15 @@ template struct PointMatcher<double>::UniformizeDensityDataPointsFilter;
 // SurfaceNormalDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(
-	const int knn, 
-	const double epsilon, 
-	const bool keepNormals, 
-	const bool keepDensities, 
-	const bool keepEigenValues, 
-	const bool keepEigenVectors,
-	const bool keepMatchedIds):
-	knn(knn),
-	epsilon(epsilon),
-	keepNormals(keepNormals),
-	keepDensities(keepDensities),
-	keepEigenValues(keepEigenValues),
-	keepEigenVectors(keepEigenVectors),
-	keepMatchedIds(keepMatchedIds)
+PointMatcher<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(const Parameters& params):
+	DataPointsFilter(SurfaceNormalDataPointsFilter::availableParameters(), params),
+	knn(Parametrizable::get<int>("knn")),
+	epsilon(Parametrizable::get<T>("epsilon")),
+	keepNormals(Parametrizable::get<bool>("keepNormals")),
+	keepDensities(Parametrizable::get<bool>("keepDensities")),
+	keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
+	keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors")),
+	keepMatchedIds(Parametrizable::get<bool>("keepMatchedIds"))
 {
 }
 
@@ -625,19 +584,14 @@ template struct PointMatcher<double>::SurfaceNormalDataPointsFilter;
 
 // Constructor
 template<typename T>
-PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(
-	const int binSize,
-	const bool averageExistingDescriptors,
-	const bool keepNormals,
-	const bool keepDensities,
-	const bool keepEigenValues, 
-	const bool keepEigenVectors):
-	binSize(binSize),
-	averageExistingDescriptors(averageExistingDescriptors),
-	keepNormals(keepNormals),
-	keepDensities(keepDensities),
-	keepEigenValues(keepEigenValues),
-	keepEigenVectors(keepEigenVectors)
+PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(const Parameters& params):
+	DataPointsFilter(SamplingSurfaceNormalDataPointsFilter::availableParameters(), params),
+	binSize(Parametrizable::get<int>("binSize")),
+	averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
+	keepNormals(Parametrizable::get<bool>("keepNormals")),
+	keepDensities(Parametrizable::get<bool>("keepDensities")),
+	keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
+	keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors"))
 {
 }
 
@@ -967,11 +921,10 @@ template struct PointMatcher<double>::OrientNormalsDataPointsFilter;
 // RandomSamplingDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(
-	const double prob):
-	prob(prob)
+PointMatcher<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(const Parameters& params):
+	DataPointsFilter(RandomSamplingDataPointsFilter::availableParameters(), params),
+	prob(Parametrizable::get<double>("prob"))
 {
-	assert(prob > 0 && prob <= 1);
 }
 
 // Sampling
@@ -1035,16 +988,13 @@ template struct PointMatcher<double>::RandomSamplingDataPointsFilter;
 // FixstepSamplingDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(const double startStep, const double endStep, const double stepMult):
-	startStep(startStep),
-	endStep(endStep),
-	stepMult(stepMult),
+PointMatcher<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(const Parameters& params):
+	DataPointsFilter(FixstepSamplingDataPointsFilter::availableParameters(), params),
+	startStep(Parametrizable::get<double>("startStep")),
+	endStep(Parametrizable::get<double>("endStep")),
+	stepMult(Parametrizable::get<double>("stepMult")),
 	step(startStep)
 {
-	if (startStep <= 0)
-		throw std::runtime_error("FixstepSamplingDataPointsFilter: startStep <= 0");
-	if (endStep <= 0)
-		throw std::runtime_error("FixstepSamplingDataPointsFilter: endStep <= 0");
 	assert(step > 0);
 }
 

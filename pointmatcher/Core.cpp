@@ -254,9 +254,18 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	
 	this->transformations.push_back(new TransformFeatures());
 	
-	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter(0.5));
+	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter({
+		{ "prob", "0.5" }
+	}));
 	
-	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter(10, true, true, false, false, false));
+	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter({
+		{ "binSize", "10" },
+		{ "averageExistingDescriptors", "true" },
+		{ "keepNormals", "true" },
+		{ "keepDensities", "false" },
+		{ "keepEigenValues", "false" },
+		{ "keepEigenVectors", "false" }
+	}));
 	
 	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.75));
 	
@@ -669,6 +678,21 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	// Return transform in world space
 	return keyFrameTransform * curTransform;
+}
+
+template<typename T>
+PointMatcher<T>::PointMatcher()
+{
+	ADD_TO_REGISTRAR(DataPointsFilter, IdentityDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistOnAxisDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MinDistOnAxisDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, UniformizeDensityDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, OrientNormalsDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, RandomSamplingDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, FixstepSamplingDataPointsFilter)
 }
 
 template struct PointMatcher<float>;
