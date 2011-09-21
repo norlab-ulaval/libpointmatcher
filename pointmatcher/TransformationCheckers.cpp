@@ -62,7 +62,9 @@ typename PointMatcher<T>::Vector PointMatcher<T>::TransformationChecker::matrixT
 //--------------------------------------
 // max iteration counter
 template<typename T>
-PointMatcher<T>::CounterTransformationChecker::CounterTransformationChecker(const int maxIterationCount)
+PointMatcher<T>::CounterTransformationChecker::CounterTransformationChecker(const Parameters& params):
+	TransformationChecker(CounterTransformationChecker::availableParameters(), params),
+	maxIterationCount(Parametrizable::get<int>("maxIterationCount")) // FIXME: should this be unsigned?
 {
 	this->limits.setZero(1);
 	this->limits(0) = maxIterationCount;
@@ -96,8 +98,11 @@ template struct PointMatcher<double>::CounterTransformationChecker;
 //--------------------------------------
 // error
 template<typename T>
-PointMatcher<T>::ErrorTransformationChecker::ErrorTransformationChecker(const T minDeltaRotErr, T minDeltaTransErr, const unsigned int tail):
-	tail(tail)
+PointMatcher<T>::ErrorTransformationChecker::ErrorTransformationChecker(const Parameters& params):
+	TransformationChecker(ErrorTransformationChecker::availableParameters(), params),
+	minDeltaRotErr(Parametrizable::get<T>("minDeltaRotErr")),
+	minDeltaTransErr(Parametrizable::get<T>("minDeltaTransErr")),
+	tail(Parametrizable::get<unsigned>("tail"))
 {
 	this->limits.setZero(2);
 	this->limits(0) = minDeltaRotErr;
@@ -170,7 +175,10 @@ template struct PointMatcher<double>::ErrorTransformationChecker;
 // bound
 
 template<typename T>
-PointMatcher<T>::BoundTransformationChecker::BoundTransformationChecker(const T maxRotationNorm, const T maxTranslationNorm)
+PointMatcher<T>::BoundTransformationChecker::BoundTransformationChecker(const Parameters& params):
+	TransformationChecker(BoundTransformationChecker::availableParameters(), params),
+	maxRotationNorm(Parametrizable::get<T>("maxRotationNorm")),
+	maxTranslationNorm(Parametrizable::get<T>("maxTranslationNorm"))
 {
 	this->limits.setZero(2);
 	this->limits(0) = maxRotationNorm;

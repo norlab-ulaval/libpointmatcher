@@ -60,7 +60,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<typename T>
 struct PointMatcher
 {
+	// ---------------------------------
+	// macros for constants
+	// ---------------------------------
+	
+	#define ZERO_PLUS_EPS (0. + std::numeric_limits<double>::epsilon())
+	#define ONE_MINUS_EPS (1. - std::numeric_limits<double>::epsilon())
+	
+	// ---------------------------------
+	// exceptions
+	// ---------------------------------
+	
+	// point matcher does not converge
+	struct ConvergenceError: std::runtime_error
+	{
+		ConvergenceError(const std::string& reason):runtime_error(reason) {}
+	};
+	
+	// ---------------------------------
 	// eigen-based types
+	// ---------------------------------
+	
 	typedef T ScalarType;
 	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
@@ -81,7 +101,10 @@ struct PointMatcher
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
 	
+	// ---------------------------------
 	// input types
+	// ---------------------------------
+	
 	struct DataPoints
 	{
 		typedef Matrix Features;
@@ -112,15 +135,10 @@ struct PointMatcher
 		Labels descriptorLabels;
 	};
 	
-	// exceptions
-	
-	// point matcher does not converge
-	struct ConvergenceError: std::runtime_error
-	{
-		ConvergenceError(const std::string& reason):runtime_error(reason) {}
-	};
-	
+	// ---------------------------------
 	// intermediate types
+	// ---------------------------------
+	
 	struct Matches
 	{
 		typedef Matrix Dists;
@@ -138,13 +156,18 @@ struct PointMatcher
 
 	typedef Matrix OutlierWeights;
 	
+	// ---------------------------------
 	// types of processing bricks
+	// ---------------------------------
 	
-	struct Transformation
+	struct Transformation: public Parametrizable
 	{
+		Transformation(){}
+		Transformation(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual ~Transformation() {}
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0;
 	};
+	
 	struct Transformations: public std::vector<Transformation*>
 	{
 		void apply(DataPoints& cloud, const TransformationParameters& parameters) const;
@@ -153,6 +176,8 @@ struct PointMatcher
 	typedef typename Transformations::const_iterator TransformationsConstIt;
 	
 	#include "Transformations.h"
+	
+	DEF_REGISTRAR(Transformation)
 	
 	// ---------------------------------
 	
@@ -179,12 +204,13 @@ struct PointMatcher
 	
 	// ---------------------------------
 	
-	struct Matcher
+	struct Matcher: public Parametrizable
 	{
 		// FIXME: this is a rather ugly way to do stats
 		unsigned long visitCounter;
 		
 		Matcher():visitCounter(0) {}
+		Matcher(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params),visitCounter(0) {}
 		
 		void resetVisitCount() { visitCounter = 0; }
 		unsigned long getVisitCount() const { return visitCounter; }
@@ -193,12 +219,16 @@ struct PointMatcher
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate) = 0;
 	};
 	
+	DEF_REGISTRAR(Matcher)
+	
 	#include "Matchers.h"	
 	
 	// ---------------------------------
 	
-	struct FeatureOutlierFilter
+	struct FeatureOutlierFilter: public Parametrizable
 	{
+		FeatureOutlierFilter() {}
+		FeatureOutlierFilter(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual ~FeatureOutlierFilter() {}
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) = 0;
 	};
@@ -224,11 +254,14 @@ struct PointMatcher
 	typedef typename DescriptorOutlierFilters::const_iterator DescriptorOutlierFiltersConstIt;
 	typedef typename DescriptorOutlierFilters::iterator DescriptorOutlierFiltersIt;
 	
+	DEF_REGISTRAR(FeatureOutlierFilter)
+	DEF_REGISTRAR(DescriptorOutlierFilter)
+	
 	#include "OutlierFilters.h"
 
 	// ---------------------------------
 	
-	struct ErrorMinimizer
+	struct ErrorMinimizer: public Parametrizable
 	{
 		struct ErrorElements
 		{
@@ -258,18 +291,30 @@ struct PointMatcher
 	
 	#include "ErrorMinimizers.h"
 	
+	DEF_REGISTRAR(ErrorMinimizer)
+	
 	// ---------------------------------
 	
-	struct TransformationChecker
+	struct TransformationChecker: public Parametrizable
 	{
+	protected:
+		typedef std::vector<std::string> StringVector;
 		Vector limits;
 		Vector values;
-		std::vector<std::string> limitNames;
-		std::vector<std::string> valueNames;
+		StringVector limitNames;
+		StringVector valueNames;
 
+	public:
+		TransformationChecker();
+		TransformationChecker(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual ~TransformationChecker() {}
 		virtual void init(const TransformationParameters& parameters, bool& iterate) = 0;
 		virtual void check(const TransformationParameters& parameters, bool& iterate) = 0;
+		
+		const Vector& getLimits() const { return limits; }
+		const Vector& getValues() const { return values; }
+		const StringVector& getLimitNames() const { return limitNames; }
+		const StringVector& getValueNames() const { return valueNames; }
 		
 		static Vector matrixToAngles(const TransformationParameters& parameters);
 	};
@@ -284,11 +329,15 @@ struct PointMatcher
 	typedef typename TransformationCheckers::const_iterator TransformationCheckersConstIt;
 
 	#include "TransformationCheckers.h"
+	
+	DEF_REGISTRAR(TransformationChecker)
 
 	// ---------------------------------
 	
-	struct Inspector
+	struct Inspector: public Parametrizable
 	{
+		Inspector() {}
+		Inspector(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual void init() {};
 		virtual void dumpFilteredReference(const DataPoints& filteredReference) {}
 		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers) {}
@@ -297,6 +346,8 @@ struct PointMatcher
 	};
 	
 	#include "Inspectors.h"
+	
+	DEF_REGISTRAR(Inspector)
 
 	// ---------------------------------
 	

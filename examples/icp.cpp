@@ -79,7 +79,9 @@ int main(int argc, char *argv[])
 	if(argc == 4)
 	{
 		string baseFolder(argv[3]);
-		icp.inspector = new PM::VTKFileInspector(baseFolder + "test");
+		icp.inspector = new PM::VTKFileInspector({
+			{ "baseFileName", baseFolder + "test" }
+		});
 	}
 	
 	// Compute the transformation to express data in ref

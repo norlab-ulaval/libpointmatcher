@@ -254,27 +254,24 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	
 	this->transformations.push_back(new TransformFeatures());
 	
-	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter({
-		{ "prob", "0.5" }
-	}));
+	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter());
 	
-	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter({
-		{ "binSize", "10" },
-		{ "averageExistingDescriptors", "true" },
-		{ "keepNormals", "true" },
-		{ "keepDensities", "false" },
-		{ "keepEigenValues", "false" },
-		{ "keepEigenVectors", "false" }
-	}));
+	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter());
 	
-	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.75));
+	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter({{ "factor", 0.75 }}));
 	
 	this->matcher = new KDTreeMatcher();
 	
 	this->errorMinimizer = new PointToPlaneErrorMinimizer();
 	
-	this->transformationCheckers.push_back(new CounterTransformationChecker(100));
-	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
+	this->transformationCheckers.push_back(new CounterTransformationChecker({
+		{ "maxIterationCount", 100}
+	}));
+	this->transformationCheckers.push_back(new ErrorTransformationChecker({
+		{ "minDeltaRotErr", 0.001}, 
+		{ "minDeltaTransErr", 0.001}, 
+		{ "tail", 3}
+	})); // FIXME: if these parameters are the reasonable ones, shouldn'it we put them in constructors?
 	
 	this->inspector = new NullInspector;
 	
@@ -683,16 +680,37 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 template<typename T>
 PointMatcher<T>::PointMatcher()
 {
-	ADD_TO_REGISTRAR(DataPointsFilter, IdentityDataPointsFilter)
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformFeatures)
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformDescriptors)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistOnAxisDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MinDistOnAxisDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, UniformizeDensityDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, OrientNormalsDataPointsFilter)
+	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, OrientNormalsDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, RandomSamplingDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, FixstepSamplingDataPointsFilter)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher)
+	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(FeatureOutlierFilter, NullFeatureOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MaxDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MinDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MedianDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, TrimmedDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, VarTrimmedDistOutlierFilter)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, IdentityErrorMinimizer)
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointErrorMinimizer)
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPlaneErrorMinimizer)
+	
+	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker)
+	ADD_TO_REGISTRAR(TransformationChecker, ErrorTransformationChecker)
+	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker)
 }
 
 template struct PointMatcher<float>;

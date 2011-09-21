@@ -38,35 +38,78 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct CounterTransformationChecker: public TransformationChecker
 {
-	CounterTransformationChecker(const int maxIterationCount = 20);
+	static const std::string description()
+	{
+		return "This checker stops the ICP loop after a certain number of iterations.";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "maxIterationCount", "maximum number of iterations ", 20, 0 }
+		};
+	}
 	
+	const int maxIterationCount;
+	
+	CounterTransformationChecker(const Parameters& params = Parameters());
 	virtual void init(const TransformationParameters& parameters, bool& iterate);
 	virtual void check(const TransformationParameters& parameters, bool& iterate);
 };
 
-class ErrorTransformationChecker: public TransformationChecker
+struct ErrorTransformationChecker: public TransformationChecker
 {
+	static const std::string description()
+	{
+		return "This checker stops the ICP loop when the average transformation errors are below thresholds.";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "minDeltaRotErr", "threshold for rotation error (radian)", 0.01, 0., 2*M_PI },
+			{ "minDeltaTransErr", "threshold for translation error", 0.01, 0.},
+			{ "tail", "number of iterations over which to average error", 3, 0 }
+		};
+	}
+	
+	const T minDeltaRotErr;
+	const T minDeltaTransErr;
+	const unsigned int tail;
+
 protected:
 	QuaternionVector rotations;
 	VectorVector translations;
-	const unsigned int tail;
 
 public:
-	ErrorTransformationChecker(const T minDeltaRotErr, const T minDeltaTransErr, const unsigned int tail = 3);
+	ErrorTransformationChecker(const Parameters& params = Parameters());
 	
 	virtual void init(const TransformationParameters& parameters, bool& iterate);
 	virtual void check(const TransformationParameters& parameters, bool& iterate);
 };
 
-class BoundTransformationChecker: public TransformationChecker
+struct BoundTransformationChecker: public TransformationChecker
 {
+	static const std::string description()
+	{
+		return "This checker stops the ICP loop with an exception when the transformation values exceed bounds.";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "maxRotationNorm", "rotation bound", 1., 0. },
+			{ "maxTranslationNorm", "translation bound", 1., 0. }
+		};
+	}
+		
+	const T maxRotationNorm;
+	const T maxTranslationNorm;
+	
 protected:
 	Quaternion initialRotation;
 	Vector initialTranslation;
 	
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	BoundTransformationChecker(const T maxRotationNorm, const T maxTranslationNorm);
+	BoundTransformationChecker(const Parameters& params = Parameters());
 	virtual void init(const TransformationParameters& parameters, bool& iterate);
 	virtual void check(const TransformationParameters& parameters, bool& iterate);
 };

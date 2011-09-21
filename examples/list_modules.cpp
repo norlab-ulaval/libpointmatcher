@@ -37,19 +37,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+#define DUMP_REGISTRAR_CONTENT(name) \
+{ \
+	cout << "* " << # name << " *\n" << endl; \
+	for (auto it = pm.REG(name).begin(); it != pm.REG(name).end(); ++it) \
+	{ \
+		cout << it->first << endl; \
+		cout << it->second->description() << endl; \
+		cout << it->second->availableParameters(); \
+		cout << endl; \
+	} \
+	cout << endl; \
+} \
+
 int main()
 {
 	PointMatcherD pm;
 	
-	cout << "* DataPointsFilter *\n" << endl;
-	for (auto it = pm.REG(DataPointsFilter).begin(); it != pm.REG(DataPointsFilter).end(); ++it)
-	{
-		cout << it->first << endl;
-		cout << it->second->description() << endl;
-		cout << it->second->availableParameters();
-		cout << endl;
-	}
-	cout << endl;
+	DUMP_REGISTRAR_CONTENT(Transformation)
+	DUMP_REGISTRAR_CONTENT(DataPointsFilter)
+	DUMP_REGISTRAR_CONTENT(Matcher)
+	DUMP_REGISTRAR_CONTENT(FeatureOutlierFilter)
+	DUMP_REGISTRAR_CONTENT(ErrorMinimizer)
+	DUMP_REGISTRAR_CONTENT(TransformationChecker)
+	DUMP_REGISTRAR_CONTENT(Inspector)
 	
 	return 0;
 }

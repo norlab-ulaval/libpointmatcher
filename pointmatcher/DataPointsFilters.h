@@ -36,9 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_DATAPOINTSFILTERS_H
 #define __POINTMATCHER_DATAPOINTSFILTERS_H
 
-#define ZERO_PLUS_EPS (0. + std::numeric_limits<double>::epsilon())
-#define ONE_MINUS_EPS (1. - std::numeric_limits<double>::epsilon())
-
 //! Identidy, does nothing
 struct IdentityDataPointsFilter: public DataPointsFilter
 {
@@ -46,12 +43,7 @@ struct IdentityDataPointsFilter: public DataPointsFilter
 	{
 		return "does nothing";
 	}
-	static const ParametersDoc availableParameters()
-	{
-		return {};
-	}
 	
-	IdentityDataPointsFilter(const Parameters& params) {}
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
 
@@ -74,7 +66,7 @@ struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
 	const T maxDist;
 	
 	//! Constructor, uses parameter interface
-	MaxDistOnAxisDataPointsFilter(const Parameters& params);
+	MaxDistOnAxisDataPointsFilter(const Parameters& params = Parameters());
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
 
@@ -97,7 +89,7 @@ struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
 	const T minDist;
 	
 	//! Constructor, uses parameter interface
-	MinDistOnAxisDataPointsFilter(const Parameters& params);
+	MinDistOnAxisDataPointsFilter(const Parameters& params = Parameters());
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
 
@@ -120,7 +112,7 @@ struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
 	const T ratio;
 	
 	//! Constructor, uses parameter interface
-	MaxQuantileOnAxisDataPointsFilter(const Parameters& params);
+	MaxQuantileOnAxisDataPointsFilter(const Parameters& params = Parameters());
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
 
@@ -143,7 +135,7 @@ struct UniformizeDensityDataPointsFilter: public DataPointsFilter
 	const unsigned nbBin;
 	
 	//! Constructor, uses parameter interface
-	UniformizeDensityDataPointsFilter(const Parameters& params);
+	UniformizeDensityDataPointsFilter(const Parameters& params = Parameters());
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
 
@@ -175,7 +167,7 @@ struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 	const bool keepEigenVectors;
 	const bool keepMatchedIds;
 
-	SurfaceNormalDataPointsFilter(const Parameters& params);
+	SurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~SurfaceNormalDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
@@ -207,7 +199,7 @@ struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	const bool keepEigenVectors;
 	
 public:
-	SamplingSurfaceNormalDataPointsFilter(const Parameters& params);
+	SamplingSurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~SamplingSurfaceNormalDataPointsFilter() {}
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	
@@ -261,12 +253,7 @@ struct OrientNormalsDataPointsFilter: public DataPointsFilter
 	{
 		return "Normals. Reorient normals so that they all point in the same direction, with respect to coordinate 0.";
 	}
-	static const ParametersDoc availableParameters()
-	{
-		return {};
-	}
 	
-	OrientNormalsDataPointsFilter(const Parameters& params) {}
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
 
@@ -286,7 +273,7 @@ struct RandomSamplingDataPointsFilter: public DataPointsFilter
 	
 	const double prob;
 	
-	RandomSamplingDataPointsFilter(const Parameters& params);
+	RandomSamplingDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~RandomSamplingDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 	
@@ -319,7 +306,7 @@ protected:
 	double step;
 	
 public:
-	FixstepSamplingDataPointsFilter(const Parameters& params);
+	FixstepSamplingDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~FixstepSamplingDataPointsFilter() {};
 	virtual void init();
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);

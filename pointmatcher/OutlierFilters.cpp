@@ -59,14 +59,10 @@ template struct PointMatcher<double>::NullFeatureOutlierFilter;
 
 // MaxDistOutlierFilter
 template<typename T>
-PointMatcher<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const T maxDist):
-	maxDist(maxDist)
+PointMatcher<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Parameters& params):
+	FeatureOutlierFilter(MaxDistOutlierFilter::availableParameters(), params),
+	maxDist(Parametrizable::get<T>("maxDist"))
 {
-	if (maxDist <= 0)
-	{
-		cerr << "MaxDistOutlierFilter: Error, maxDist " << maxDist << " is below or equal to 0." << endl;
-		abort();
-	}
 }
 
 
@@ -98,14 +94,10 @@ template struct PointMatcher<double>::MaxDistOutlierFilter;
 
 // MinDistOutlierFilter
 template<typename T>
-PointMatcher<T>::MinDistOutlierFilter::MinDistOutlierFilter(const T minDist):
-	minDist(minDist)
+PointMatcher<T>::MinDistOutlierFilter::MinDistOutlierFilter(const Parameters& params):
+	FeatureOutlierFilter(MinDistOutlierFilter::availableParameters(), params),
+	minDist(Parametrizable::get<T>("minDist"))
 {
-	if (minDist <= 0)
-	{
-		cerr << "MinDistOutlierFilter: Error, minDist (" << minDist << ") cannot be below or equal to 0." << endl;
-		abort();
-	}
 }
 
 template<typename T>
@@ -138,14 +130,10 @@ template struct PointMatcher<double>::MinDistOutlierFilter;
 
 // MedianDistOutlierFilter
 template<typename T>
-PointMatcher<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const T factor):
-	factor(factor)
+PointMatcher<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const Parameters& params):
+	FeatureOutlierFilter(MedianDistOutlierFilter::availableParameters(), params),
+	factor(Parametrizable::get<T>("factor"))
 {
-	if (factor <= 0)
-	{
-		cerr << "MedianDistOutlierFilter: Error, factor " << factor << " is below 0." << endl;
-		abort();
-	}
 }
 
 template<typename T>
@@ -181,14 +169,10 @@ template struct PointMatcher<double>::MedianDistOutlierFilter;
 
 // TrimmedDistOutlierFilter
 template<typename T>
-PointMatcher<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const T ratio):
-	ratio(ratio)
+PointMatcher<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const Parameters& params):
+	FeatureOutlierFilter(TrimmedDistOutlierFilter::availableParameters(), params),
+	ratio(Parametrizable::get<T>("ratio"))
 {
-	if (ratio >= 1 || ratio <= 0)
-	{
-		cerr << "TrimmedDistOutlierFilter: Error, trim ratio " << ratio << " is outside interval ]0;1[." << endl;
-		abort();
-	}
 }
 
 template<typename T>
@@ -223,25 +207,12 @@ template struct PointMatcher<double>::TrimmedDistOutlierFilter;
 
 
 template<typename T>
-PointMatcher<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const T r, const T min, const T max, const T lambda):
-	ratio_(r), min_(min), max_(max), lambda_(lambda)
+PointMatcher<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const Parameters& params):
+	FeatureOutlierFilter(VarTrimmedDistOutlierFilter::availableParameters(), params),
+	minRatio(Parametrizable::get<T>("minRatio")),
+	maxRatio(Parametrizable::get<T>("maxRatio")),
+	lambda(Parametrizable::get<T>("lambda"))
 {
-	if (r >= 1 || r <= 0)
-	{
-		cerr << "VarTrimmedDistOutlierFilter: Error, trim ratio (" << r << ") is outside interval ]0;1[." << endl;
-		abort();
-	}
-	if (min > max)
-	{
-		cerr << "VarTrimmedDistOutlierFilter: Error, min value (" << min << ") must be smaller than max value (" << max << ")" << endl;
-		abort();
-	}
-	if (min <= 0 && max > 1)
-	{
-		cerr << "VarTrimmedDistOutlierFilter: Error, min and max value (" << min << ", " << max << ") are outside interval ]0;1[." << endl;
-		abort();
-	}
-	
 }
 
 template<typename T>
@@ -251,10 +222,11 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::VarTrimmedDistOutlierF
 	const Matches& input,
 	bool& iterate)
 {
-	ratio_ = optimizeInlierRatio(input);
-	std::cout<< "Optimized ratio: " << ratio_ << std::endl;
+	const T tunedRatio = optimizeInlierRatio(input);
+	// FIXME: this should go through the logging structure
+	std::cout<< "Optimized ratio: " << tunedRatio << std::endl;
 
-	const T limit = input.getDistsQuantile(ratio_);
+	const T limit = input.getDistsQuantile(tunedRatio);
 	
 	// select weight from median
 	typename PointMatcher<T>::OutlierWeights w(input.dists.rows(), input.dists.cols());
@@ -289,8 +261,8 @@ T PointMatcher<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matche
 			
 	std::sort(tmpSortedDist.begin(), tmpSortedDist.end());
 
-	const int minEl = floor(this->min_*points_nbr);
-	const int maxEl = floor(this->max_*points_nbr);
+	const int minEl = floor(this->minRatio*points_nbr);
+	const int maxEl = floor(this->maxRatio*points_nbr);
 
 	// Return std::vector to an eigen::vector
 	Eigen::Map<LineArray> sortedDist(&tmpSortedDist[0], points_nbr);
@@ -299,7 +271,7 @@ T PointMatcher<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matche
 	const T lowerSum = sortedDist.head(minEl).sum();
 	const LineArray ids = LineArray::LinSpaced(trunkSortedDist.rows(), minEl+1, maxEl);
 	const LineArray ratio = ids / points_nbr;
-	const LineArray deno = ratio.pow(this->lambda_);
+	const LineArray deno = ratio.pow(this->lambda);
 	const LineArray FRMS = deno.inverse().square() * ids.inverse() * (lowerSum + trunkSortedDist);
 	int minIndex(0);// = FRMS.minCoeff();
 	FRMS.minCoeff(&minIndex);

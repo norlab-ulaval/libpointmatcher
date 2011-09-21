@@ -38,74 +38,127 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct NullFeatureOutlierFilter: public FeatureOutlierFilter
 {
+	static const std::string description()
+	{
+		return "does nothing";
+	}
+	
 	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 };
 
 struct MaxDistOutlierFilter: public FeatureOutlierFilter
 {
+	static const std::string description()
+	{
+		return "This filter considers as outlier links whose norms are above a threshold.";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "maxDist", "threshold distance", 1.0, ZERO_PLUS_EPS }
+		};
+	}
+	
 	const T maxDist;
 	
-	MaxDistOutlierFilter(const T maxDist);
+	MaxDistOutlierFilter(const Parameters& params = Parameters());
+	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+};
 
+struct MinDistOutlierFilter: public FeatureOutlierFilter
+{
+	static const std::string description()
+	{
+		return "This filter considers as outlier links whose norms are below a threshold.";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "minDist", "threshold distance", 1.0, ZERO_PLUS_EPS }
+		};
+	}
+	
+	const T minDist;
+	
+	MinDistOutlierFilter(const Parameters& params = Parameters()); 
 	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 };
 
 struct MedianDistOutlierFilter: public FeatureOutlierFilter 
 {
+	static const std::string description()
+	{
+		return "This filter considers as outlier links whose norms are above the median link norms times a factor.";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "factor", "points farther away factor * median will be considered outliers.", 3.0, ZERO_PLUS_EPS }
+		};
+	}
+	
 	const T factor;
 	
-	MedianDistOutlierFilter(const T factor);
+	MedianDistOutlierFilter(const Parameters& params = Parameters());
 	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 };
 
-
-/* Hard rejection threshold using quantile.
-Based on:
-	D Chetverikov, "The Trimmed Iterative Closest Point Algorithm" (2002)
-*/
 struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 {
+	static const std::string description()
+	{
+		return "Hard rejection threshold using quantile. This filter considers as inlier a certain percentage of the links with the smallest norms. Based on: D Chetverikov, \"The Trimmed Iterative Closest Point Algorithm\" (2002)";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "factor", "percentage to keep", 0.9, ZERO_PLUS_EPS, ONE_MINUS_EPS }
+		};
+	}
+	
 	const T ratio;
 	
-	TrimmedDistOutlierFilter(const T ratio);
+	TrimmedDistOutlierFilter(const Parameters& params = Parameters());
 	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 };
 
-/* Hard rejection threshold using quantile and variable ratio.
-Based on:
-	J. M. Phillips and al., "Outlier Robust ICP for Minimizing Fractional RMSD" (2007)
-*/
 struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
 {
-	// default ratio
-	T ratio_;
-	// min ratio
-	T min_;
-	// max ratio
-	T max_;
-	// lambda (part of the term that balance the rmsd: 1/ratio^lambda)
-	T lambda_;
+	static const std::string description()
+	{
+		return "Hard rejection threshold using quantile and variable ratio. Based on: J. M. Phillips and al., \"Outlier Robust ICP for Minimizing Fractional RMSD\" (2007)";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "minRatio", "min ratio", 0.05, ZERO_PLUS_EPS, 1. },
+			{ "maxRatio", "max ratio", 0.99, ZERO_PLUS_EPS, 1. },
+			{ "lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda)", 0.95 }
+		};
+	}
 
-	VarTrimmedDistOutlierFilter(const T r, const T min=0.05, const T max=0.99, const T lambda=0.95);
+	const T minRatio;
+	const T maxRatio;
+	const T lambda;
+	
+	VarTrimmedDistOutlierFilter(const Parameters& params = Parameters());
 	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 	
-	private:
+private:
 	// return the optimized ratio
 	T optimizeInlierRatio(const Matches& matches);
 };
 
-struct MinDistOutlierFilter: public FeatureOutlierFilter
-{
-	const T minDist;
-	
-	MinDistOutlierFilter(const T minDist); 
-	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
-};
 
 // ---------------------------------
 
 struct NullDescriptorOutlierFilter: public DescriptorOutlierFilter
 {
+	static const std::string description()
+	{
+		return "does nothing";
+	}
+	
 	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
 };
 

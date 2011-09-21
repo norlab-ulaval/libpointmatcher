@@ -38,19 +38,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct IdentityErrorMinimizer: ErrorMinimizer
 {
+	static const std::string description()
+	{
+		return "does nothing";
+	}
+	
 	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
 };
 
-// Point-to-point error
-// Based on SVD decomposition
 struct PointToPointErrorMinimizer: ErrorMinimizer
 {
+	static const std::string description()
+	{
+		return "Point-to-point error. Based on SVD decomposition";
+	}
+	
 	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
 };
 
-// Point-to-plane error (or point-to-line in 2D)
 struct PointToPlaneErrorMinimizer: public ErrorMinimizer
 {
+	static const std::string description()
+	{
+		// FIXME: should we improve doc here?
+		return "Point-to-plane error (or point-to-line in 2D).";
+	}
+	
 	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
 };
 

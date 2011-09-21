@@ -38,20 +38,41 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct NullMatcher: public Matcher
 {
+	static const std::string description()
+	{
+		return "does nothing, return no matches";
+	}
+	
 	virtual void init(const DataPoints& filteredReference, bool& iterate);
 	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
 };
 
-class KDTreeMatcher: public Matcher
+struct KDTreeMatcher: public Matcher
 {
+	static const std::string description()
+	{
+		return "This matcher matches a point from the reading to its closest neighbors in the reference.";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "knn", "number of nearest neighbors to consider it the reference", 1, 1 },
+			{ "epsilon", "approximation to use for the nearest-neighbor search", 0., 0. },
+			{ "searchType", "Nabo search type", int(NNS::KDTREE_LINEAR_HEAP), 0, int(NNS::SEARCH_TYPE_COUNT) },
+			{ "maxDist", "maximum distance to consider for neighbors", std::numeric_limits<T>::infinity(), T(0.), std::numeric_limits<T>::infinity() }
+		};
+	}
+	
 	const int knn;
 	const T epsilon;
 	const NNSearchType searchType;
 	const T maxDist;
+
+protected:
 	NNS* featureNNS;
 
 public:
-	KDTreeMatcher(const int knn = 1, const T epsilon = 0, const NNSearchType searchType = NNS::KDTREE_LINEAR_HEAP, const T maxDist = std::numeric_limits<T>::infinity());
+	KDTreeMatcher(const Parameters& params = Parameters());
 	virtual ~KDTreeMatcher();
 	virtual void init(const DataPoints& filteredReference, bool& iterate);
 	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);

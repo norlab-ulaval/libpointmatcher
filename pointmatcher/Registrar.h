@@ -70,6 +70,23 @@ namespace PointMatcherSupport
 			}
 		};
 		
+		template<typename C>
+		struct GenericClassDescriptorNoParam: public ClassDescriptor
+		{
+			virtual Interface* createInstance(const Parametrizable::Parameters& params) const
+			{
+				return new C();
+			}
+			virtual const std::string description() const
+			{
+				return C::description();
+			}
+			virtual const Parametrizable::ParametersDoc availableParameters() const
+			{
+				return {};
+			}
+		};
+		
 	protected:
 		typedef std::map<std::string, ClassDescriptor*> DescriptorMap;
 		DescriptorMap classes;
@@ -135,6 +152,10 @@ namespace PointMatcherSupport
 	#define DEF_REGISTRAR(name) PointMatcherSupport::Registrar< name > name##Registrar;
 	#define ADD_TO_REGISTRAR(name, element) { \
 		typedef typename PointMatcherSupport::Registrar< name >::template GenericClassDescriptor< element > Desc; \
+		name##Registrar.reg(# element, new Desc() ); \
+	}
+	#define ADD_TO_REGISTRAR_NO_PARAM(name, element) { \
+		typedef typename PointMatcherSupport::Registrar< name >::template GenericClassDescriptorNoParam< element > Desc; \
 		name##Registrar.reg(# element, new Desc() ); \
 	}
 } // namespace PointMatcherSupport

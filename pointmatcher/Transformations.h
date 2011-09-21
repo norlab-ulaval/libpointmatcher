@@ -36,12 +36,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_TRANSFORMATIONS_H
 #define __POINTMATCHER_TRANSFORMATIONS_H
 
+// FIXME: these namings are not very good
+
 struct TransformFeatures: public Transformation
 {
+	static const std::string description()
+	{
+		return "transform features";
+	}
+	
 	virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
 };
+
 struct TransformDescriptors: Transformation
 {
+	static const std::string description()
+	{
+		return "rotate normals";
+	}
+	
 	virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
 };
 

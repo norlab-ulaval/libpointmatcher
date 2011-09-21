@@ -42,7 +42,7 @@ namespace PointMatcherSupport
 	
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParameterDoc& p)
 	{
-		o << p.name << " (" << p.defaultValue << ") - " << p.doc;
+		o << p.name << " (default: " << p.defaultValue << ") - " << p.doc;
 		if (!p.minValue.empty())
 			o << " - min: " << p.minValue;
 		if (!p.maxValue.empty())
@@ -53,7 +53,7 @@ namespace PointMatcherSupport
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParametersDoc& p)
 	{
 		for (auto it = p.cbegin(); it != p.cend(); ++it)
-			o << "\t" << *it << endl;
+			o << "- " << *it << endl;
 		return o;
 	}
 
@@ -88,11 +88,28 @@ namespace PointMatcherSupport
 		comp(TrueLexicalComparison)
 	{}
 	
+	template<typename S>
+	Parametrizable::Parameter::Parameter(const S value):
+		std::string(boost::lexical_cast<string>(value))
+	{}
+	
 	// force instantiation of constructors
-	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int, const int, const int);
-	template Parametrizable::ParameterDoc::ParameterDoc<double>(const std::string, const std::string, const double, const double, const double);
+	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int);
+	template Parametrizable::ParameterDoc::ParameterDoc<float>(const std::string, const std::string, const float);
+	template Parametrizable::ParameterDoc::ParameterDoc<double>(const std::string, const std::string, const double);
 	template Parametrizable::ParameterDoc::ParameterDoc<bool>(const std::string, const std::string, const bool);
 	template Parametrizable::ParameterDoc::ParameterDoc<std::string>(const std::string, const std::string, const std::string);
+	template Parametrizable::ParameterDoc::ParameterDoc<const char*>(const std::string, const std::string, const char*);
+	
+	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int, const int, const int);
+	template Parametrizable::ParameterDoc::ParameterDoc<float>(const std::string, const std::string, const float, const float, const float);
+	template Parametrizable::ParameterDoc::ParameterDoc<double>(const std::string, const std::string, const double, const double, const double);
+	
+	template Parametrizable::Parameter::Parameter<int>(const int);
+	template Parametrizable::Parameter::Parameter<float>(const float);
+	template Parametrizable::Parameter::Parameter<double>(const double);
+	template Parametrizable::Parameter::Parameter<bool>(const bool);
+	template Parametrizable::Parameter::Parameter<std::string>(const std::string);
 
 	Parametrizable::Parametrizable(
 		const ParametersDoc paramsDoc, const Parameters& params):

@@ -71,15 +71,22 @@ namespace PointMatcherSupport
 			
 			friend std::ostream& operator<< (std::ostream& o, const ParameterDoc& p);
 		};
-	
-		typedef std::map<std::string, std::string> Parameters;
-		typedef std::vector<std::string> StringVector;
+		
 		struct ParametersDoc : public std::vector<ParameterDoc>
 		{
 			ParametersDoc(std::initializer_list<ParameterDoc> list):std::vector<ParameterDoc>(list){}
 			ParametersDoc() {}
 			friend std::ostream& operator<< (std::ostream& o, const ParametersDoc& p);
 		};
+		
+		struct Parameter: public std::string
+		{
+			template<typename S>
+			Parameter(const S value);
+			Parameter(){}
+		};
+	
+		typedef std::map<std::string, Parameter> Parameters;
 		
 		const ParametersDoc parametersDoc;
 		
