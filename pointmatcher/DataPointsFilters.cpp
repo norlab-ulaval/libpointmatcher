@@ -446,8 +446,8 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 	Matrix newDescriptors(finalDim, pointsCount);
 	
 	KDTreeMatcher matcher({
-		{ "knn", knn},
-		{ "epsilon", epsilon}
+		{ "knn", toParam(knn) },
+		{ "epsilon", toParam(epsilon) }
 	});
 	matcher.init(input, iterate);
 

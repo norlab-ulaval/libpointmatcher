@@ -110,12 +110,14 @@ namespace PointMatcherSupport
 		comp(TrueLexicalComparison)
 	{}
 	
+	/*
+	Again, not used because fo gcc bug 9050
+	
 	template<typename S>
 	Parametrizable::Parameter::Parameter(const S value):
 		std::string(boost::lexical_cast<string>(value))
 	{}
 	
-	/*
 	// force instantiation of constructors
 	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int);
 	template Parametrizable::ParameterDoc::ParameterDoc<float>(const std::string, const std::string, const float);

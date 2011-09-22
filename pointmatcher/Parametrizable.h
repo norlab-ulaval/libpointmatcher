@@ -94,13 +94,16 @@ namespace PointMatcherSupport
 			friend std::ostream& operator<< (std::ostream& o, const ParametersDoc& p);
 		};
 		
+		/*
+		Again, not used because fo gcc bug 9050
 		struct Parameter: public std::string
 		{
 			template<typename S>
 			Parameter(const S value);
 			Parameter(){}
 		};
-	
+		*/
+		typedef std::string Parameter;
 		typedef std::map<std::string, Parameter> Parameters;
 		
 		const ParametersDoc parametersDoc;

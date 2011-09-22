@@ -79,7 +79,7 @@ struct PointMatcher
 	};
 	
 	// ---------------------------------
-	// eigen-based types
+	// eigen and nabo-based types
 	// ---------------------------------
 	
 	typedef T ScalarType;
@@ -167,6 +167,12 @@ struct PointMatcher
 	{
 		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
 	};
+	
+	template<typename S>
+	static std::string toParam(const S& value)
+	{
+		return boost::lexical_cast<std::string>(value);
+	}
 	
 	// ---------------------------------
 	
