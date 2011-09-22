@@ -67,7 +67,8 @@ using namespace std;
 		ofs << " ";
 	}*/
 template<typename T>
-PointMatcher<T>::AbstractVTKInspector::AbstractVTKInspector():
+PointMatcher<T>::AbstractVTKInspector::AbstractVTKInspector(const ParametersDoc paramsDoc, const Parameters& params):
+	Inspector(paramsDoc,params),
 	streamIter(0)
 {
 }
@@ -260,28 +261,27 @@ void PointMatcher<T>::AbstractVTKInspector::dumpIteration(
 		//Build header
 		for(unsigned int j = 0; j < transCheck.size(); j++)
 		{
-			for(unsigned int i=0; i < transCheck[j]->valueNames.size(); i++)
+			for(unsigned int i=0; i < transCheck[j]->getValueNames().size(); i++)
 			{
 				if (!(j == 0 && i == 0))
 					*streamIter << ", ";
-				*streamIter << transCheck[j]->valueNames[i] << ", "; 
-				*streamIter << transCheck[j]->limitNames[i]; 
+				*streamIter << transCheck[j]->getValueNames()[i] << ", "; 
+				*streamIter << transCheck[j]->getLimitNames()[i]; 
 			}
 		}
 		
 		*streamIter << "\n";
 	}
 
-
 	for(unsigned int j = 0; j < transCheck.size(); j++)
 	{
-		for(unsigned int i=0; i < transCheck[j]->valueNames.size(); i++)
+		for(unsigned int i=0; i < transCheck[j]->getValueNames().size(); i++)
 		{
 		
 			if (!(j == 0 && i == 0))
 				*streamIter << ", ";
-			*streamIter << transCheck[j]->values(i) << ", ";
-			*streamIter << transCheck[j]->limits(i); 
+			*streamIter << transCheck[j]->getValues()(i) << ", ";
+			*streamIter << transCheck[j]->getLimits()(i); 
 		}
 	}
 
@@ -466,8 +466,9 @@ void PointMatcher<T>::AbstractVTKInspector::finish(const size_t iterationCount)
 // VTK File inspector
 
 template<typename T>
-PointMatcher<T>::VTKFileInspector::VTKFileInspector(const std::string& baseFileName):
-	baseFileName(baseFileName)
+PointMatcher<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
+	AbstractVTKInspector(VTKFileInspector::availableParameters(), params),
+	baseFileName(Parametrizable::get<string>("baseFileName"))
 {
 }
 

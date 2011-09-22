@@ -191,60 +191,27 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
-	matcher(0), 
-	errorMinimizer(0),
-	inspector(0),
 	outlierMixingWeight(0.5)
 {}
 
 template<typename T>
 PointMatcher<T>::ICPChainBase::~ICPChainBase()
 {
-	this->cleanup();
 }
 
 template<typename T>
 void PointMatcher<T>::ICPChainBase::cleanup()
 {
-	for (DataPointsFiltersIt it = readingDataPointsFilters.begin(); it != readingDataPointsFilters.end(); ++it)
-		delete *it;
 	readingDataPointsFilters.clear();
-	
-	for (DataPointsFiltersIt it = readingStepDataPointsFilters.begin(); it != readingStepDataPointsFilters.end(); ++it)
-		delete *it;
 	readingStepDataPointsFilters.clear();
-	
-	for (DataPointsFiltersIt it = keyframeDataPointsFilters.begin(); it != keyframeDataPointsFilters.end(); ++it)
-		delete *it;
 	keyframeDataPointsFilters.clear();
-	
-	for (TransformationsIt it = transformations.begin(); it != transformations.end(); ++it)
-		delete *it;
 	transformations.clear();
-	
-	if (matcher)
-		delete matcher;
-	matcher = 0;
-	
-	for (FeatureOutlierFiltersIt it = featureOutlierFilters.begin(); it != featureOutlierFilters.end(); ++it)
-		delete *it;
+	matcher.reset();
 	featureOutlierFilters.clear();
-	
-	for (DescriptorOutlierFiltersIt it = descriptorOutlierFilters.begin(); it != descriptorOutlierFilters.end(); ++it)
-		delete *it;
 	descriptorOutlierFilters.clear();
-	
-	if (errorMinimizer)
-		delete errorMinimizer;
-	errorMinimizer = 0;
-	
-	for (TransformationCheckersIt it = transformationCheckers.begin(); it != transformationCheckers.end(); ++it)
-		delete *it;
+	errorMinimizer.reset();
 	transformationCheckers.clear();
-	
-	if (inspector)
-		delete inspector;
-	inspector = 0;
+	inspector.reset();
 }
 
 template<typename T>
@@ -253,22 +220,14 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->cleanup();
 	
 	this->transformations.push_back(new TransformFeatures());
-	
-	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter(0.5));
-	
-	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter(10, true, true, false, false, false));
-	
-	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter(0.75));
-	
-	this->matcher = new KDTreeMatcher();
-	
-	this->errorMinimizer = new PointToPlaneErrorMinimizer();
-	
-	this->transformationCheckers.push_back(new CounterTransformationChecker(100));
-	this->transformationCheckers.push_back(new ErrorTransformationChecker(0.001, 0.001, 3));
-	
-	this->inspector = new NullInspector;
-	
+	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter());
+	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter());
+	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter());
+	this->matcher.reset(new KDTreeMatcher());
+	this->errorMinimizer.reset(new PointToPlaneErrorMinimizer());
+	this->transformationCheckers.push_back(new CounterTransformationChecker());
+	this->transformationCheckers.push_back(new ErrorTransformationChecker());
+	this->inspector.reset(new NullInspector);
 	this->outlierMixingWeight = 1;
 }
 
@@ -680,6 +639,42 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	// Return transform in world space
 	return keyFrameTransform * curTransform;
+}
+
+template<typename T>
+PointMatcher<T>::PointMatcher()
+{
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformFeatures)
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformDescriptors)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistOnAxisDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MinDistOnAxisDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, UniformizeDensityDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter)
+	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, OrientNormalsDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, RandomSamplingDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, FixstepSamplingDataPointsFilter)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher)
+	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(FeatureOutlierFilter, NullFeatureOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MaxDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MinDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MedianDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, TrimmedDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, VarTrimmedDistOutlierFilter)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, IdentityErrorMinimizer)
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointErrorMinimizer)
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPlaneErrorMinimizer)
+	
+	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker)
+	ADD_TO_REGISTRAR(TransformationChecker, ErrorTransformationChecker)
+	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker)
 }
 
 template struct PointMatcher<float>;

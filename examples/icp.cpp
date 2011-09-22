@@ -54,7 +54,6 @@ int main(int argc, char *argv[])
 	
 	typedef PointMatcher<float> PM;
 	
-	
 	// Load point clouds
 	PM::DataPoints ref;
 	PM::DataPoints data;
@@ -69,7 +68,6 @@ int main(int argc, char *argv[])
 		data= loadVTK<PM::ScalarType>(argv[2]);
 	}
 
-
 	// Create the default ICP algorithm
 	PM::ICP icp;
 	// See the implementation of setDefault() to create a custom ICP algorithm
@@ -79,7 +77,9 @@ int main(int argc, char *argv[])
 	if(argc == 4)
 	{
 		string baseFolder(argv[3]);
-		icp.inspector = new PM::VTKFileInspector(baseFolder + "test");
+		icp.inspector.reset(new PM::VTKFileInspector({
+			{ "baseFileName", baseFolder + "test" }
+		}));
 	}
 	
 	// Compute the transformation to express data in ref
@@ -113,17 +113,14 @@ void validateArgs(int argc, char *argv[], bool& isCSV )
 			cerr << endl << "3D Example:" << endl;
 			cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
 			cerr << endl << "If you enter optional REPOSITORY name, a vtk file will be created for every iteration in that repository"	<< endl << endl;
-
-			abort();
-
+			exit(1);
 		}
 	}
 	if (!(argc == 3 || argc == 4))
 	{
 		basicUsage(argv);
 		cerr << "Use " << argv[0] << " --help for more info" << endl << endl; 
-		
-		abort();
+		exit(1);
 	}
 	
 	// Validate extension
@@ -137,19 +134,19 @@ void validateArgs(int argc, char *argv[], bool& isCSV )
 	{
 		cout << refExt << ", " << dataExt << endl;
 		cerr << "Reference file extension must be .vtk or .csv" << endl;
-		abort();
+		exit(2);
 	}
 	
 	if (!(dataExt == ".vtk" || dataExt == ".csv"))
 	{
 		cerr << "Reading file extension must be .vtk or .csv" << endl;
-		abort();
+		exit(3);
 	}
 
 	if (dataExt != refExt)
 	{
 		cerr << "File extension between reference and reading should be the same" << endl;
-		abort();
+		exit(4);
 	}
 
 	if (dataExt == ".csv")

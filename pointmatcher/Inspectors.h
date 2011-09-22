@@ -37,7 +37,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_INSPECTORS_H
 
 // Clearer name when no inspector is required
-typedef Inspector NullInspector;
+struct NullInspector: public Inspector
+{
+	static const std::string description()
+	{
+		return "does nothing";
+	}
+};
 
 struct AbstractVTKInspector: public Inspector
 {
@@ -52,7 +58,7 @@ protected:
 	std::ostream* streamIter;
 
 public:
-	AbstractVTKInspector();
+	AbstractVTKInspector(const ParametersDoc paramsDoc, const Parameters& params);
 	virtual void init() {};
 	virtual void dumpDataPoints(const DataPoints& cloud, const std::string& name);
 	virtual void dumpMeshNodes(const DataPoints& cloud, const std::string& name);
@@ -79,16 +85,26 @@ private:
 
 struct VTKFileInspector: public AbstractVTKInspector
 {
-
-protected:
+	static const std::string description()
+	{
+		return "Dump the different steps into VTK files.";
+	}
+	static const ParametersDoc availableParameters()
+	{
+		return {
+			{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" }
+		};
+	}
+	
 	const std::string baseFileName;
-
+	
+protected:
 	virtual std::ostream* openStream(const std::string& role);
 	virtual std::ostream* openStream(const std::string& role, const size_t iterationCount);
 	virtual void closeStream(std::ostream* stream);
 	
 public:
-	VTKFileInspector(const std::string& baseFileName);
+	VTKFileInspector(const Parameters& params = Parameters());
 	virtual void init();
 	virtual void finish(const size_t iterationCount);
 };

@@ -33,38 +33,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_ERRORMINIMIZERS_H
-#define __POINTMATCHER_ERRORMINIMIZERS_H
+#include "pointmatcher/PointMatcher.h"
 
-struct IdentityErrorMinimizer: ErrorMinimizer
+using namespace std;
+
+#define DUMP_REGISTRAR_CONTENT(name) \
+{ \
+	cout << "* " << # name << " *\n" << endl; \
+	for (auto it = pm.REG(name).begin(); it != pm.REG(name).end(); ++it) \
+	{ \
+		cout << it->first << endl; \
+		cout << it->second->description() << endl; \
+		cout << it->second->availableParameters(); \
+		cout << endl; \
+	} \
+	cout << endl; \
+} \
+
+int main()
 {
-	static const std::string description()
-	{
-		return "does nothing";
-	}
+	PointMatcherD pm;
 	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
-};
-
-struct PointToPointErrorMinimizer: ErrorMinimizer
-{
-	static const std::string description()
-	{
-		return "Point-to-point error. Based on SVD decomposition";
-	}
+	DUMP_REGISTRAR_CONTENT(Transformation)
+	DUMP_REGISTRAR_CONTENT(DataPointsFilter)
+	DUMP_REGISTRAR_CONTENT(Matcher)
+	DUMP_REGISTRAR_CONTENT(FeatureOutlierFilter)
+	DUMP_REGISTRAR_CONTENT(ErrorMinimizer)
+	DUMP_REGISTRAR_CONTENT(TransformationChecker)
+	DUMP_REGISTRAR_CONTENT(Inspector)
 	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
-};
-
-struct PointToPlaneErrorMinimizer: public ErrorMinimizer
-{
-	static const std::string description()
-	{
-		// FIXME: should we improve doc here?
-		return "Point-to-plane error (or point-to-line in 2D).";
-	}
-	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
-};
-
-#endif // __POINTMATCHER_ERRORMINIMIZER_H
+	return 0;
+}

@@ -50,16 +50,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <iomanip>
 #include <limits>
+#include <memory>
 #include <stdint.h>
 
 #include "Histogram.h"
 #include "Timer.h"
 #include "Parametrizable.h"
+#include "Registrar.h"
 
 template<typename T>
 struct PointMatcher
 {
-	// eigen-based types
+	// ---------------------------------
+	// macros for constants
+	// ---------------------------------
+	
+	#define ZERO_PLUS_EPS (0. + std::numeric_limits<double>::epsilon())
+	#define ONE_MINUS_EPS (1. - std::numeric_limits<double>::epsilon())
+	
+	// ---------------------------------
+	// exceptions
+	// ---------------------------------
+	
+	// point matcher does not converge
+	struct ConvergenceError: std::runtime_error
+	{
+		ConvergenceError(const std::string& reason):runtime_error(reason) {}
+	};
+	
+	// ---------------------------------
+	// eigen and nabo-based types
+	// ---------------------------------
+	
 	typedef T ScalarType;
 	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
@@ -75,8 +97,16 @@ struct PointMatcher
 	
 	// alias for semantic reasons
 	typedef Matrix TransformationParameters;
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
+	typedef Parametrizable::InvalidParameter InvalidParameter;
 	
+	// ---------------------------------
 	// input types
+	// ---------------------------------
+	
 	struct DataPoints
 	{
 		typedef Matrix Features;
@@ -107,13 +137,10 @@ struct PointMatcher
 		Labels descriptorLabels;
 	};
 	
-	// exception if point matcher does not converge
-	struct ConvergenceError: std::runtime_error
-	{
-		ConvergenceError(const std::string& reason):runtime_error(reason) {}
-	};
-	
+	// ---------------------------------
 	// intermediate types
+	// ---------------------------------
+	
 	struct Matches
 	{
 		typedef Matrix Dists;
@@ -131,14 +158,33 @@ struct PointMatcher
 
 	typedef Matrix OutlierWeights;
 	
+	// ---------------------------------
 	// types of processing bricks
+	// ---------------------------------
 	
-	struct Transformation
+	template<typename S>
+	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
 	{
+		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
+	};
+	
+	template<typename S>
+	static std::string toParam(const S& value)
+	{
+		return boost::lexical_cast<std::string>(value);
+	}
+	
+	// ---------------------------------
+	
+	struct Transformation: public Parametrizable
+	{
+		Transformation(){}
+		Transformation(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual ~Transformation() {}
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0;
 	};
-	struct Transformations: public std::vector<Transformation*>
+	
+	struct Transformations: public SharedPtrVector<Transformation>
 	{
 		void apply(DataPoints& cloud, const TransformationParameters& parameters) const;
 	};
@@ -147,16 +193,20 @@ struct PointMatcher
 	
 	#include "Transformations.h"
 	
+	DEF_REGISTRAR(Transformation)
+	
 	// ---------------------------------
 	
-	struct DataPointsFilter
+	struct DataPointsFilter: public Parametrizable
 	{
+		DataPointsFilter(){}
+		DataPointsFilter(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual ~DataPointsFilter() {}
 		virtual void init() {}
 		virtual DataPoints filter(const DataPoints& input, bool& iterate) = 0;
 	};
 	
-	struct DataPointsFilters: public std::vector<DataPointsFilter*>
+	struct DataPointsFilters: public SharedPtrVector<DataPointsFilter>
 	{
 		void init();
 		void apply(DataPoints& cloud, bool iterate);
@@ -164,16 +214,19 @@ struct PointMatcher
 	typedef typename DataPointsFilters::iterator DataPointsFiltersIt;
 	typedef typename DataPointsFilters::const_iterator DataPointsFiltersConstIt;
 	
+	DEF_REGISTRAR(DataPointsFilter)
+	
 	#include "DataPointsFilters.h"
 	
 	// ---------------------------------
 	
-	struct Matcher
+	struct Matcher: public Parametrizable
 	{
 		// FIXME: this is a rather ugly way to do stats
 		unsigned long visitCounter;
 		
 		Matcher():visitCounter(0) {}
+		Matcher(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params),visitCounter(0) {}
 		
 		void resetVisitCount() { visitCounter = 0; }
 		unsigned long getVisitCount() const { return visitCounter; }
@@ -182,12 +235,16 @@ struct PointMatcher
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate) = 0;
 	};
 	
+	DEF_REGISTRAR(Matcher)
+	
 	#include "Matchers.h"	
 	
 	// ---------------------------------
 	
-	struct FeatureOutlierFilter
+	struct FeatureOutlierFilter: public Parametrizable
 	{
+		FeatureOutlierFilter() {}
+		FeatureOutlierFilter(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual ~FeatureOutlierFilter() {}
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) = 0;
 	};
@@ -200,9 +257,9 @@ struct PointMatcher
 	
 	// Vector outlier filters
 	template<typename F>
-	struct OutlierFilters: public std::vector<F*>
+	struct OutlierFilters: public SharedPtrVector<F>
 	{
-		typedef std::vector<F*> Vector;
+		typedef SharedPtrVector<F> Vector;
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) const;
 	};
 	
@@ -213,11 +270,14 @@ struct PointMatcher
 	typedef typename DescriptorOutlierFilters::const_iterator DescriptorOutlierFiltersConstIt;
 	typedef typename DescriptorOutlierFilters::iterator DescriptorOutlierFiltersIt;
 	
+	DEF_REGISTRAR(FeatureOutlierFilter)
+	DEF_REGISTRAR(DescriptorOutlierFilter)
+	
 	#include "OutlierFilters.h"
 
 	// ---------------------------------
 	
-	struct ErrorMinimizer
+	struct ErrorMinimizer: public Parametrizable
 	{
 		struct ErrorElements
 		{
@@ -247,24 +307,36 @@ struct PointMatcher
 	
 	#include "ErrorMinimizers.h"
 	
+	DEF_REGISTRAR(ErrorMinimizer)
+	
 	// ---------------------------------
 	
-	struct TransformationChecker
+	struct TransformationChecker: public Parametrizable
 	{
+	protected:
+		typedef std::vector<std::string> StringVector;
 		Vector limits;
 		Vector values;
-		std::vector<std::string> limitNames;
-		std::vector<std::string> valueNames;
+		StringVector limitNames;
+		StringVector valueNames;
 
+	public:
+		TransformationChecker();
+		TransformationChecker(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
 		virtual ~TransformationChecker() {}
 		virtual void init(const TransformationParameters& parameters, bool& iterate) = 0;
 		virtual void check(const TransformationParameters& parameters, bool& iterate) = 0;
+		
+		const Vector& getLimits() const { return limits; }
+		const Vector& getValues() const { return values; }
+		const StringVector& getLimitNames() const { return limitNames; }
+		const StringVector& getValueNames() const { return valueNames; }
 		
 		static Vector matrixToAngles(const TransformationParameters& parameters);
 	};
 	
 	// Vector of transformation checker
-	struct TransformationCheckers: public std::vector<TransformationChecker*>
+	struct TransformationCheckers: public SharedPtrVector<TransformationChecker>
 	{
 		void init(const TransformationParameters& parameters, bool& iterate);
 		void check(const TransformationParameters& parameters, bool& iterate);
@@ -273,19 +345,36 @@ struct PointMatcher
 	typedef typename TransformationCheckers::const_iterator TransformationCheckersConstIt;
 
 	#include "TransformationCheckers.h"
+	
+	DEF_REGISTRAR(TransformationChecker)
 
 	// ---------------------------------
 	
-	struct Inspector
+	struct Inspector: public Parametrizable
 	{
+		Inspector() {}
+		Inspector(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		
+		// 
+		virtual ~Inspector() {}
 		virtual void init() {};
 		virtual void dumpFilteredReference(const DataPoints& filteredReference) {}
 		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers) {}
 		virtual void finish(const size_t iterationCount) {}
-		virtual ~Inspector() {}
+		
+		// message output part
+		virtual bool hasInfoChannel() const { return false; };
+		virtual std::ostream* infoStream() { return 0; }
+		virtual bool hasWarningChannel() const { return false; }
+		virtual std::ostream* warningStream() { return 0; }
 	};
 	
+	#define INSPECTOR_INFO_STREAM(args) { if (inspector.hasInfoChannel()) { (*inspector.infoStream()) << args; } }
+	#define INSPECTOR_WARNING_STREAM(args) { if (inspector.hasWarningChannel()) { (*inspector.warningStream()) << args; } }
+	
 	#include "Inspectors.h"
+	
+	DEF_REGISTRAR(Inspector) 
 
 	// ---------------------------------
 	
@@ -299,12 +388,12 @@ struct PointMatcher
 		DataPointsFilters readingStepDataPointsFilters;
 		DataPointsFilters keyframeDataPointsFilters;
 		Transformations transformations;
-		Matcher* matcher;
+		std::shared_ptr<Matcher> matcher;
 		FeatureOutlierFilters featureOutlierFilters;
 		DescriptorOutlierFilters descriptorOutlierFilters;
-		ErrorMinimizer* errorMinimizer;
+		std::shared_ptr<ErrorMinimizer> errorMinimizer;
 		TransformationCheckers transformationCheckers;
-		Inspector* inspector;
+		std::shared_ptr<Inspector> inspector;
 		T outlierMixingWeight;
 		
 		virtual ~ICPChainBase();
@@ -385,6 +474,8 @@ struct PointMatcher
 	
 	#include "Functions.h"
 	
+	//! Constructor, fill registrars
+	PointMatcher();
 }; // PointMatcher<T>
 
 template<typename T>

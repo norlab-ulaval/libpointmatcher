@@ -39,34 +39,107 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace PointMatcherSupport
 {
 	using namespace std;
-	/*
-	struct __toto
+	
+	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParameterDoc& p)
 	{
-		__toto()
-		{
-			typedef PointMatcher<float>::Parametrizable P;
-			P p(
-				"test",
-				"this is a test",
-				{ { "val0", "test val0", 1}, { "val1", "test val1", "string" } },
-				P::Parameters()
-			);
-			cout << p << endl;
-		}
-	};
+		o << p.name << " (default: " << p.defaultValue << ") - " << p.doc;
+		if (!p.minValue.empty())
+			o << " - min: " << p.minValue;
+		if (!p.maxValue.empty())
+			o << " - max: " << p.maxValue;
+		return o;
+	}
+	
+	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParametersDoc& p)
+	{
+		for (auto it = p.cbegin(); it != p.cend(); ++it)
+			o << "- " << *it << endl;
+		return o;
+	}
 
-	static __toto __toto_instance;*/
-
+	bool TrueLexicalComparison(std::string, std::string)
+	{
+		return true;
+	}
+	
+	template<typename S>
+	bool ScalarLexicalComparison(std::string a, std::string b)
+	{
+		return boost::lexical_cast<S>(a) < boost::lexical_cast<S>(b);
+	}
+	
+	/*
+	Uncomment once most people have gcc >= 4.5
+	Shame on bug  9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050)
+	template<typename S>
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const S defaultValue, const S minValue, const S maxValue):
+		name(name),
+		doc(doc),
+		defaultValue(boost::lexical_cast<string>(defaultValue)), 
+		minValue(boost::lexical_cast<string>(minValue)), 
+		maxValue(boost::lexical_cast<string>(maxValue)),
+		comp(ScalarLexicalComparison<S>)
+	{}
+	
 	template<typename S>
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const S defaultValue):
 		name(name),
 		doc(doc),
-		defaultValue(boost::lexical_cast<string>(defaultValue))
+		defaultValue(boost::lexical_cast<string>(defaultValue)), 
+		minValue(""), 
+		maxValue(""),
+		comp(TrueLexicalComparison)
 	{}
+	*/
+	
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue, const std::string minValue, const std::string maxValue, LexicalComparison comp):
+		name(name),
+		doc(doc),
+		defaultValue(defaultValue), 
+		minValue(minValue), 
+		maxValue(maxValue),
+		comp(comp)
+	{}
+	
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue):
+		name(name),
+		doc(doc),
+		defaultValue(boost::lexical_cast<string>(defaultValue)), 
+		minValue(""), 
+		maxValue(""),
+		comp(TrueLexicalComparison)
+	{}
+	
+	/*
+	Again, not used because fo gcc bug 9050
+	
+	template<typename S>
+	Parametrizable::Parameter::Parameter(const S value):
+		std::string(boost::lexical_cast<string>(value))
+	{}
+	
+	// force instantiation of constructors
+	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int);
+	template Parametrizable::ParameterDoc::ParameterDoc<float>(const std::string, const std::string, const float);
+	template Parametrizable::ParameterDoc::ParameterDoc<double>(const std::string, const std::string, const double);
+	template Parametrizable::ParameterDoc::ParameterDoc<bool>(const std::string, const std::string, const bool);
+	template Parametrizable::ParameterDoc::ParameterDoc<std::string>(const std::string, const std::string, const std::string);
+	template Parametrizable::ParameterDoc::ParameterDoc<const char*>(const std::string, const std::string, const char*);
+	
+	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int, const int, const int);
+	template Parametrizable::ParameterDoc::ParameterDoc<float>(const std::string, const std::string, const float, const float, const float);
+	template Parametrizable::ParameterDoc::ParameterDoc<double>(const std::string, const std::string, const double, const double, const double);
+	
+	template Parametrizable::Parameter::Parameter<int>(const int);
+	template Parametrizable::Parameter::Parameter<float>(const float);
+	template Parametrizable::Parameter::Parameter<double>(const double);
+	template Parametrizable::Parameter::Parameter<bool>(const bool);
+	template Parametrizable::Parameter::Parameter<std::string>(const std::string);
 
+	*/
+	
 	Parametrizable::Parametrizable(
-		std::initializer_list<ParameterDoc> paramsDoc,
-		const Parameters& params):
+		const ParametersDoc paramsDoc, const Parameters& params):
 		parametersDoc(paramsDoc)
 	{
 		// fill current parameters from either values passed as argument, or default value
@@ -75,23 +148,24 @@ namespace PointMatcherSupport
 			const string& paramName(it->name);
 			Parameters::const_iterator paramIt(params.find(paramName));
 			if (paramIt != params.end())
-				parameters[paramName] = paramIt->second;
+			{
+				const string& val(paramIt->second);
+				if (it->comp(val, it->minValue))
+					throw InvalidParameter((boost::format("Value %1 of parameter %2 in object %3 is smaller than minimum admissible value %4") % val % paramName % typeid(*this).name() % it->minValue).str());
+				if (it->comp(it->maxValue, val))
+					throw InvalidParameter((boost::format("Value %1 of parameter %2 in object %3 is larger than maximum admissible value %4") % val % paramName % typeid(*this).name() % it->minValue).str());
+				parameters[paramName] = val;
+			}
 			else
 				parameters[paramName] = it->defaultValue;
 		}
 	}
 
-	void Parametrizable::dump(std::ostream& o) const
+	std::string Parametrizable::getParamValueString(const std::string& paramName) const
 	{
-		for (auto it = parametersDoc.cbegin(); it != parametersDoc.cend(); ++it)
-			o << it->name << " (" << it->defaultValue << ") - " << it->doc << endl;
-	}
-
-	std::string Parametrizable::getParam(const std::string& name) const
-	{
-		Parameters::const_iterator paramIt(parameters.find(name));
+		Parameters::const_iterator paramIt(parameters.find(paramName));
 		if (paramIt == parameters.end())
-			throw Error((boost::format("Parameter %1 does not exist in object %2") % name % typeid(*this).name()).str());
+			throw InvalidParameter((boost::format("Parameter %1 does not exist in object %2") % paramName % typeid(*this).name()).str());
 		// TODO: use string distance to propose close one, copy/paste code from Aseba
 		return paramIt->second;
 	}

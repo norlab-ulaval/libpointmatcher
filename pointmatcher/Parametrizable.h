@@ -41,43 +41,85 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <string>
 #include <boost/lexical_cast.hpp>
+#include <limits>
 
 namespace PointMatcherSupport
 {
 	struct Parametrizable
 	{
-		struct Error: std::runtime_error
+		struct InvalidParameter: std::runtime_error
 		{
-			Error(const std::string& reason):runtime_error(reason) {}
+			InvalidParameter(const std::string& reason):runtime_error(reason) {}
 		};
+		
+		//! return whether a is smaller than b
+		typedef bool(*LexicalComparison)(std::string a, std::string b);
+		
+		template<typename S>
+		static bool Comp(std::string a, std::string b)
+		{
+			return boost::lexical_cast<S>(a) < boost::lexical_cast<S>(b);
+		}
 		
 		struct ParameterDoc
 		{
 			std::string name;
 			std::string doc;
 			std::string defaultValue;
+			std::string minValue;
+			std::string maxValue;
+			LexicalComparison comp;
+			
+			/*
+			This code is beautiful, this code is correct, this code does not work ;-(
+			Blame gcc bug 9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050), shame
+			on them forever and beyond. People being laaaazzzy adopters, I'm forced to use
+			something that work on gcc 4.4.
 			
 			template<typename S>
+			ParameterDoc(const std::string name, const std::string doc, const S defaultValue, const S minValue, const S maxValue = std::numeric_limits<S>::max());
+			template<typename S>
 			ParameterDoc(const std::string name, const std::string doc, const S defaultValue);
+			*/
+			ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue, const std::string minValue, const std::string maxValue, LexicalComparison comp);
+			ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue);
+			
+			friend std::ostream& operator<< (std::ostream& o, const ParameterDoc& p);
 		};
-	
-		typedef std::map<std::string, std::string> Parameters;
-		typedef std::vector<std::string> StringVector;
-		typedef std::vector<ParameterDoc> ParametersDoc;
+		
+		struct ParametersDoc : public std::vector<ParameterDoc>
+		{
+			ParametersDoc(std::initializer_list<ParameterDoc> list):std::vector<ParameterDoc>(list){}
+			ParametersDoc() {}
+			friend std::ostream& operator<< (std::ostream& o, const ParametersDoc& p);
+		};
+		
+		/*
+		Again, not used because fo gcc bug 9050
+		struct Parameter: public std::string
+		{
+			template<typename S>
+			Parameter(const S value);
+			Parameter(){}
+		};
+		*/
+		typedef std::string Parameter;
+		typedef std::map<std::string, Parameter> Parameters;
 		
 		const ParametersDoc parametersDoc;
 		
 		Parameters parameters;
 		
-		Parametrizable(std::initializer_list<ParameterDoc> paramsDoc, const Parameters& params);
+		Parametrizable(){}
+		Parametrizable(const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~Parametrizable(){}
 		
-		std::string getParam(const std::string& name) const;
-		template<typename S>
-		S getParam(const std::string& name) const { return boost::lexical_cast<S>(getParam(name)); }
+		std::string getParamValueString(const std::string& paramName) const;
 		
-		void dump(std::ostream& o) const;
-		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p) { p.dump(o); return o; }
+		template<typename S>
+		S get(const std::string& paramName) const { return boost::lexical_cast<S>(getParamValueString(paramName)); }
+		
+		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p) { o << p.parametersDoc; return o; }
 	};
 } // namespace PointMatcherSupport
 
