@@ -56,10 +56,10 @@ struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> ),
-			ParameterDoc( "maxDist", "maximum distance authorized. All points beyond that will be filtered.", "1", "0", "inf", P::Comp<T> )
-		};
+		return ParametersDoc({
+			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+			{ "maxDist", "maximum distance authorized. All points beyond that will be filtered.", "1", "0", "inf", P::Comp<T> }
+		});
 	}
 
 	const unsigned dim;
@@ -79,10 +79,10 @@ struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> ),
-			ParameterDoc( "minDist", "minimum distance authorized. All points before that will be filtered.", "1", "0", "inf", &P::Comp<T> )
-		};
+		return ParametersDoc({
+			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+			{ "minDist", "minimum distance authorized. All points before that will be filtered.", "1", "0", "inf", &P::Comp<T> }
+		});
 	}
 	
 	const unsigned dim;
@@ -102,10 +102,10 @@ struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> ),
-			ParameterDoc( "ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "0.9999999", &P::Comp<T>)
-		};
+		return ParametersDoc({
+			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+			{ "ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "0.9999999", &P::Comp<T>}
+		});
 	}
 	
 	const unsigned dim;
@@ -125,10 +125,10 @@ struct UniformizeDensityDataPointsFilter: public DataPointsFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "ratio", "targeted reduction ratio", "0.5", "0.0000001", "0.9999999", &P::Comp<T>),
-			ParameterDoc( "nbBin", "number of bin used to estimate the probability distribution of the density.", "1", "1", "2147483647", &P::Comp<unsigned> )
-		};
+		return ParametersDoc({
+			 {"ratio", "targeted reduction ratio", "0.5", "0.0000001", "0.9999999", &P::Comp<T>},
+			{ "nbBin", "number of bin used to estimate the probability distribution of the density.", "1", "1", "2147483647", &P::Comp<unsigned> }
+		});
 	}
 	
 	const T ratio;
@@ -148,15 +148,15 @@ struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned> ),
-			ParameterDoc( "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> ),
-			ParameterDoc( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1"),
-			ParameterDoc( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0"),
-			ParameterDoc( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" ),
-			ParameterDoc( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" ),
-			ParameterDoc( "keepMatchedIds" , "whethen the identifiers of matches points should be added as descriptors to the resulting cloud", "0" )
-		};
+		return ParametersDoc({
+			{ "knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned> },
+			{ "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> },
+			{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1"},
+			{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0"},
+			{ "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" },
+			{ "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" },
+			{ "keepMatchedIds" , "whethen the identifiers of matches points should be added as descriptors to the resulting cloud", "0" }
+		});
 	}
 	
 	const int knn; // FIXME: shouldn't we put unsigned?
@@ -181,14 +181,14 @@ struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "binSize", "limit over which a box is splitted in two", "5", "3", "2147483647", &P::Comp<unsigned> ),
-			ParameterDoc( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" ),
-			ParameterDoc( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" ),
-			ParameterDoc( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" ),
-			ParameterDoc( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" ),
-			ParameterDoc( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
-		};
+		return ParametersDoc({
+			{ "binSize", "limit over which a box is splitted in two", "5", "3", "2147483647", &P::Comp<unsigned> },
+			{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
+			{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" },
+			{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" },
+			{ "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" },
+			{ "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" }
+		});
 	}
 	
 	const int binSize; // FIXME: shouldn't we put unsigned?
@@ -266,9 +266,9 @@ struct RandomSamplingDataPointsFilter: public DataPointsFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "prob", "probability to keep a point, one over decimation factor ", "0.5", "0", "1", &P::Comp<T> )
-		};
+		return ParametersDoc({
+			{ "prob", "probability to keep a point, one over decimation factor ", "0.5", "0", "1", &P::Comp<T> }
+		});
 	}
 	
 	const double prob;
@@ -290,11 +290,11 @@ struct FixstepSamplingDataPointsFilter: public DataPointsFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "startStep", "initial number of point to skip (initial decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> ),
-			ParameterDoc( "endStep", "maximal or minimal number of points to skip (final decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> ),
-			ParameterDoc( "stepMult", "multiplication factor to compute the new decimation factor for each iteration", "1", "0.0000001", "inf", &P::Comp<T> )
-		};
+		return ParametersDoc({
+			{ "startStep", "initial number of point to skip (initial decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> },
+			{ "endStep", "maximal or minimal number of points to skip (final decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> },
+			{ "stepMult", "multiplication factor to compute the new decimation factor for each iteration", "1", "0.0000001", "inf", &P::Comp<T> }
+		});
 	}
 	
 	// number of steps to skip

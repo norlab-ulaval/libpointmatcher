@@ -44,9 +44,9 @@ struct CounterTransformationChecker: public TransformationChecker
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "maxIterationCount", "maximum number of iterations ", "100", "0", "2147483647", &P::Comp<unsigned> )
-		};
+		return ParametersDoc({
+			{ "maxIterationCount", "maximum number of iterations ", "100", "0", "2147483647", &P::Comp<unsigned> }
+		});
 	}
 	
 	const int maxIterationCount;
@@ -64,11 +64,11 @@ struct ErrorTransformationChecker: public TransformationChecker
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "minDeltaRotErr", "threshold for rotation error (radian)", "0.001", "0.", "6.2831854", &P::Comp<T> ),
-			ParameterDoc( "minDeltaTransErr", "threshold for translation error", "0.001", "0.", "inf", &P::Comp<T> ),
-			ParameterDoc( "tail", "number of iterations over which to average error", "3", "0", "2147483647", &P::Comp<unsigned> )
-		};
+		return ParametersDoc({
+			{ "minDeltaRotErr", "threshold for rotation error (radian)", "0.001", "0.", "6.2831854", &P::Comp<T> },
+			{"minDeltaTransErr", "threshold for translation error", "0.001", "0.", "inf", &P::Comp<T> },
+			{ "tail", "number of iterations over which to average error", "3", "0", "2147483647", &P::Comp<unsigned> }
+		});
 	}
 	
 	const T minDeltaRotErr;
@@ -94,10 +94,10 @@ struct BoundTransformationChecker: public TransformationChecker
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "maxRotationNorm", "rotation bound", "1", "0", "inf", &P::Comp<T> ),
-			ParameterDoc( "maxTranslationNorm", "translation bound", "1", "0", "inf", &P::Comp<T> )
-		};
+		return ParametersDoc({
+			{ "maxRotationNorm", "rotation bound", "1", "0", "inf", &P::Comp<T> },
+			{ "maxTranslationNorm", "translation bound", "1", "0", "inf", &P::Comp<T> }
+		});
 	}
 		
 	const T maxRotationNorm;

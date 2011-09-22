@@ -91,9 +91,9 @@ struct VTKFileInspector: public AbstractVTKInspector
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			ParameterDoc( "baseFileName", "base file name for the VTK files ", "point-matcher-output" )
-		};
+		return ParametersDoc({
+			{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" }
+		});
 	}
 	
 	const std::string baseFileName;

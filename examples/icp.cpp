@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
 	validateArgs(argc, argv, isCSV);
 	
 	typedef PointMatcher<float> PM;
+	typedef PM::Parameters Parameters;
 	
 	// Load point clouds
 	PM::DataPoints ref;
@@ -77,9 +78,9 @@ int main(int argc, char *argv[])
 	if(argc == 4)
 	{
 		string baseFolder(argv[3]);
-		icp.inspector.reset(new PM::VTKFileInspector({
+		icp.inspector.reset(new PM::VTKFileInspector(Parameters({
 			{ "baseFileName", baseFolder + "test" }
-		}));
+		})));
 	}
 	
 	// Compute the transformation to express data in ref
