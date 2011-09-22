@@ -75,6 +75,7 @@ add_definitions(-Wall)
 # main pointmatcher lib
 add_library(pointmatcher
 	pointmatcher/Parametrizable.cpp
+	pointmatcher/Logger.cpp
 	pointmatcher/Core.cpp
 	pointmatcher/DataPointsFilters.cpp
 	pointmatcher/Matchers.cpp

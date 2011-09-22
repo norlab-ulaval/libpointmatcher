@@ -599,7 +599,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 	}
 	if (degenerateCount)
 	{
-		std::cout << "WARNING: Matrix C needed for eigen decomposition was degenerated in " << degenerateCount << " points over " << pointsCount << " (" << float(degenerateCount)*100.f/float(pointsCount) << " %)" << std::endl;
+		LOG_WARNING_STREAM("WARNING: Matrix C needed for eigen decomposition was degenerated in " << degenerateCount << " points over " << pointsCount << " (" << float(degenerateCount)*100.f/float(pointsCount) << " %)");
 	}
 	
 	return DataPoints(input.features, input.featureLabels, newDescriptors, newDescriptorLabels);
