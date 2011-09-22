@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boost/filesystem.hpp"
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 void validateArgs(int argc, char *argv[], bool& isCSV);
 void basicUsage(char *argv[]);
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
 	validateArgs(argc, argv, isCSV);
 	
 	typedef PointMatcher<double> PM;
-	
+	typedef PM::Parameters Parameters;
 	
 	// Load point clouds
 	PM::DataPoints ref;
@@ -77,27 +78,29 @@ int main(int argc, char *argv[])
 
 	icp.readingDataPointsFilters.clear();
 
-	icp.readingDataPointsFilters.push_back(new PM::UniformizeDensityDataPointsFilter(0.5, 30));
+	icp.readingDataPointsFilters.push_back(new PM::UniformizeDensityDataPointsFilter(Parameters({{"ratio", toParam(0.5)},{"nbBin",toParam(30)}})));
 	
 	icp.keyframeDataPointsFilters.clear();
 	//icp.keyframeDataPointsFilters.push_back(new PM::UniformizeDensityDataPointsFilter(0.20, 30));
-	icp.keyframeDataPointsFilters.push_back(new PM::SamplingSurfaceNormalDataPointsFilter(15));
+	icp.keyframeDataPointsFilters.push_back(new PM::SamplingSurfaceNormalDataPointsFilter(Parameters({{"binSize", toParam(15)}})));
 	
 	//icp.readingDataPointsFilters.push_back(new PM::MinDistOnAxisDataPointsFilter(0, 1.5));
 	//icp.keyframeDataPointsFilters.push_back(new PM::MinDistOnAxisDataPointsFilter(0, 0.5));
 	
 	icp.featureOutlierFilters.clear();
-	icp.featureOutlierFilters.push_back(new PM::TrimmedDistOutlierFilter(0.75));
+	icp.featureOutlierFilters.push_back(new PM::TrimmedDistOutlierFilter(Parameters({{"factor", toParam(0.75)}})));
 	//icp.featureOutlierFilters.push_back(new PM::VarTrimmedDistOutlierFilter(0.85));
 	
-	icp.errorMinimizer = new PM::PointToPointErrorMinimizer();
+	icp.errorMinimizer.reset(new PM::PointToPointErrorMinimizer());
 
 
 	// Modify the default Inspector to output vtk file
 	if(argc == 4 || argc == 20)
 	{
 		string baseFolder(argv[3]);
-		icp.inspector = new PM::VTKFileInspector(baseFolder + "test");
+		icp.inspector.reset(new PM::VTKFileInspector(Parameters({
+			{ "baseFileName", baseFolder + "test" }
+		})));
 	}
 	
 	PM::TransformationParameters T_in = PM::TransformationParameters::Identity(4,4);
