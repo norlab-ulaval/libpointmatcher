@@ -368,6 +368,7 @@ struct PointMatcher
 		TransformationCheckers transformationCheckers;
 		Inspector* inspector;
 		T outlierMixingWeight;
+		// FIXME: use smart pointers for non-vector modules?
 		
 		virtual ~ICPChainBase();
 		

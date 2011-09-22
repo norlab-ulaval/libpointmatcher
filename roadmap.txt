@@ -7,11 +7,11 @@ General
 - 21 sept. 2011: rework parameter architecture
 - TODO: charge yaml files for parameters setup
 - 21 sept. 2011: each module maintain their parameters list and doc
-- TODO SM: move factory (modular_icp) to libpointmatcher
+- 22 sept. 2011: move factory (modular_icp) to libpointmatcher
 - 21 sept. 2011: remove abort relative to parameter check
 - TODO FP: validate loop condition for all module (vs expections)
 - TODO SM: unit testing (gtest or cmake)
-- 20 sept. 2011: remove dim which should be infered be the data size
+- 20 sept. 2011: remove dim which should be infered from the data size
 
 Strategy
 -------------------

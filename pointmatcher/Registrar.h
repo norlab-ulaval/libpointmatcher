@@ -45,6 +45,8 @@ namespace PointMatcherSupport
 	struct Registrar
 	{
 	public:
+		typedef Interface TargetType;
+		
 		struct ClassDescriptor
 		{
 			virtual ~ClassDescriptor() {}
@@ -105,7 +107,7 @@ namespace PointMatcherSupport
 		}
 		
 		//! Return a descriptor following a name
-		ClassDescriptor* getDescriptor(const std::string& name)
+		const ClassDescriptor* getDescriptor(const std::string& name) const
 		{
 			auto it = classes.find(name);
 			if (it == classes.end())
@@ -118,19 +120,19 @@ namespace PointMatcherSupport
 		}
 		
 		//! Create an instance
-		Interface* create(const std::string& name, const Parametrizable::Parameters& params)
+		Interface* create(const std::string& name, const Parametrizable::Parameters& params) const
 		{
 			return getDescriptor(name)->createInstance(params);
 		}
 		
 		//! Get the description of a class
-		std::string getDescription(const std::string& name)
+		const std::string getDescription(const std::string& name) const
 		{
 			return getDescriptor(name)->description();
 		}
 		
 		//! Print the list of registered classes to stream
-		void dump(std::ostream &stream)
+		void dump(std::ostream &stream) const
 		{
 			for (auto it = classes.begin(); it != classes.end(); ++it)
 				stream << "- " << it->first << "\n";
