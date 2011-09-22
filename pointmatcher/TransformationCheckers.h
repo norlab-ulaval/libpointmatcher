@@ -45,7 +45,7 @@ struct CounterTransformationChecker: public TransformationChecker
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "maxIterationCount", "maximum number of iterations ", 20, 0 }
+			{ "maxIterationCount", "maximum number of iterations ", 100, 0 }
 		};
 	}
 	
@@ -65,8 +65,8 @@ struct ErrorTransformationChecker: public TransformationChecker
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "minDeltaRotErr", "threshold for rotation error (radian)", 0.01, 0., 2*M_PI },
-			{ "minDeltaTransErr", "threshold for translation error", 0.01, 0.},
+			{ "minDeltaRotErr", "threshold for rotation error (radian)", 0.001, 0., 2*M_PI },
+			{ "minDeltaTransErr", "threshold for translation error", 0.001, 0.},
 			{ "tail", "number of iterations over which to average error", 3, 0 }
 		};
 	}

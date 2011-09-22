@@ -191,60 +191,27 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
-	matcher(0), 
-	errorMinimizer(0),
-	inspector(0),
 	outlierMixingWeight(0.5)
 {}
 
 template<typename T>
 PointMatcher<T>::ICPChainBase::~ICPChainBase()
 {
-	this->cleanup();
 }
 
 template<typename T>
 void PointMatcher<T>::ICPChainBase::cleanup()
 {
-	for (DataPointsFiltersIt it = readingDataPointsFilters.begin(); it != readingDataPointsFilters.end(); ++it)
-		delete *it;
 	readingDataPointsFilters.clear();
-	
-	for (DataPointsFiltersIt it = readingStepDataPointsFilters.begin(); it != readingStepDataPointsFilters.end(); ++it)
-		delete *it;
 	readingStepDataPointsFilters.clear();
-	
-	for (DataPointsFiltersIt it = keyframeDataPointsFilters.begin(); it != keyframeDataPointsFilters.end(); ++it)
-		delete *it;
 	keyframeDataPointsFilters.clear();
-	
-	for (TransformationsIt it = transformations.begin(); it != transformations.end(); ++it)
-		delete *it;
 	transformations.clear();
-	
-	if (matcher)
-		delete matcher;
-	matcher = 0;
-	
-	for (FeatureOutlierFiltersIt it = featureOutlierFilters.begin(); it != featureOutlierFilters.end(); ++it)
-		delete *it;
+	matcher.reset();
 	featureOutlierFilters.clear();
-	
-	for (DescriptorOutlierFiltersIt it = descriptorOutlierFilters.begin(); it != descriptorOutlierFilters.end(); ++it)
-		delete *it;
 	descriptorOutlierFilters.clear();
-	
-	if (errorMinimizer)
-		delete errorMinimizer;
-	errorMinimizer = 0;
-	
-	for (TransformationCheckersIt it = transformationCheckers.begin(); it != transformationCheckers.end(); ++it)
-		delete *it;
+	errorMinimizer.reset();
 	transformationCheckers.clear();
-	
-	if (inspector)
-		delete inspector;
-	inspector = 0;
+	inspector.reset();
 }
 
 template<typename T>
@@ -253,28 +220,14 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->cleanup();
 	
 	this->transformations.push_back(new TransformFeatures());
-	
 	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter());
-	
 	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter());
-	
-	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter({{ "factor", 0.75 }}));
-	
-	this->matcher = new KDTreeMatcher();
-	
-	this->errorMinimizer = new PointToPlaneErrorMinimizer();
-	
-	this->transformationCheckers.push_back(new CounterTransformationChecker({
-		{ "maxIterationCount", 100}
-	}));
-	this->transformationCheckers.push_back(new ErrorTransformationChecker({
-		{ "minDeltaRotErr", 0.001}, 
-		{ "minDeltaTransErr", 0.001}, 
-		{ "tail", 3}
-	})); // FIXME: if these parameters are the reasonable ones, shouldn'it we put them in constructors?
-	
-	this->inspector = new NullInspector;
-	
+	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter());
+	this->matcher.reset(new KDTreeMatcher());
+	this->errorMinimizer.reset(new PointToPlaneErrorMinimizer());
+	this->transformationCheckers.push_back(new CounterTransformationChecker());
+	this->transformationCheckers.push_back(new ErrorTransformationChecker());
+	this->inspector.reset(new NullInspector);
 	this->outlierMixingWeight = 1;
 }
 

@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <iomanip>
 #include <limits>
+#include <memory>
 #include <stdint.h>
 
 #include "Histogram.h"
@@ -160,6 +161,14 @@ struct PointMatcher
 	// types of processing bricks
 	// ---------------------------------
 	
+	template<typename S>
+	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
+	{
+		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
+	};
+	
+	// ---------------------------------
+	
 	struct Transformation: public Parametrizable
 	{
 		Transformation(){}
@@ -168,7 +177,7 @@ struct PointMatcher
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0;
 	};
 	
-	struct Transformations: public std::vector<Transformation*>
+	struct Transformations: public SharedPtrVector<Transformation>
 	{
 		void apply(DataPoints& cloud, const TransformationParameters& parameters) const;
 	};
@@ -190,7 +199,7 @@ struct PointMatcher
 		virtual DataPoints filter(const DataPoints& input, bool& iterate) = 0;
 	};
 	
-	struct DataPointsFilters: public std::vector<DataPointsFilter*>
+	struct DataPointsFilters: public SharedPtrVector<DataPointsFilter>
 	{
 		void init();
 		void apply(DataPoints& cloud, bool iterate);
@@ -241,9 +250,9 @@ struct PointMatcher
 	
 	// Vector outlier filters
 	template<typename F>
-	struct OutlierFilters: public std::vector<F*>
+	struct OutlierFilters: public SharedPtrVector<F>
 	{
-		typedef std::vector<F*> Vector;
+		typedef SharedPtrVector<F> Vector;
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) const;
 	};
 	
@@ -320,7 +329,7 @@ struct PointMatcher
 	};
 	
 	// Vector of transformation checker
-	struct TransformationCheckers: public std::vector<TransformationChecker*>
+	struct TransformationCheckers: public SharedPtrVector<TransformationChecker>
 	{
 		void init(const TransformationParameters& parameters, bool& iterate);
 		void check(const TransformationParameters& parameters, bool& iterate);
@@ -361,14 +370,13 @@ struct PointMatcher
 		DataPointsFilters readingStepDataPointsFilters;
 		DataPointsFilters keyframeDataPointsFilters;
 		Transformations transformations;
-		Matcher* matcher;
+		std::shared_ptr<Matcher> matcher;
 		FeatureOutlierFilters featureOutlierFilters;
 		DescriptorOutlierFilters descriptorOutlierFilters;
-		ErrorMinimizer* errorMinimizer;
+		std::shared_ptr<ErrorMinimizer> errorMinimizer;
 		TransformationCheckers transformationCheckers;
-		Inspector* inspector;
+		std::shared_ptr<Inspector> inspector;
 		T outlierMixingWeight;
-		// FIXME: use smart pointers for non-vector modules?
 		
 		virtual ~ICPChainBase();
 		

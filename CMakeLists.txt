@@ -15,11 +15,12 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 		message(SEND_ERROR "You need GCC version 4.4 or greater to compile this library")
 	endif (GCC_VERSION VERSION_GREATER 4.4 OR GCC_VERSION VERSION_EQUAL 4.4)
 else(CMAKE_COMPILER_IS_GNUCXX)
-	message(SEND_ERROR "You need partial C++0x support for N2672 and N1984. Currently this build toolchain supports only GCC >= 4.4. If your compiler supports these specifications, please send us a patch.")
+	message(SEND_ERROR "You need partial C++0x support for N2351, N2672, N1984. Currently this build toolchain supports only GCC >= 4.4. If your compiler supports these specifications, please send us a patch.")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 # well, this breaks libpointmatcher on non-unix platform,
 # please contribute the define for your favorite compiler
 # It must support (compiler support in parenthesis):
+# - N2351: shared pointers in standard
 # - N2672: Initializer lists (gcc)
 # - N1984: auto-typed variables (gcc, clang)
 

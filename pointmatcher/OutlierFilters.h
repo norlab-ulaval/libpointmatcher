@@ -112,7 +112,7 @@ struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "factor", "percentage to keep", 0.9, ZERO_PLUS_EPS, ONE_MINUS_EPS }
+			{ "factor", "percentage to keep", 0.75, ZERO_PLUS_EPS, ONE_MINUS_EPS }
 		};
 	}
 	
