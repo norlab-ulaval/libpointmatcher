@@ -44,7 +44,7 @@ using namespace std;
 
 // NullFeatureOutlierFilter
 template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::NullFeatureOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::NullFeatureOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input,
@@ -53,13 +53,13 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::NullFeatur
 	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
 }
 
-template struct MetricSpaceAligner<float>::NullFeatureOutlierFilter;
-template struct MetricSpaceAligner<double>::NullFeatureOutlierFilter;
+template struct PointMatcher<float>::NullFeatureOutlierFilter;
+template struct PointMatcher<double>::NullFeatureOutlierFilter;
 
 
 // MaxDistOutlierFilter
 template<typename T>
-MetricSpaceAligner<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const T maxDist):
+PointMatcher<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const T maxDist):
 	maxDist(maxDist)
 {
 	if (maxDist <= 0)
@@ -71,7 +71,7 @@ MetricSpaceAligner<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const T maxDis
 
 
 template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MaxDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MaxDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input,
@@ -93,12 +93,12 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MaxDistOut
 	return w;
 }
 
-template struct MetricSpaceAligner<float>::MaxDistOutlierFilter;
-template struct MetricSpaceAligner<double>::MaxDistOutlierFilter;
+template struct PointMatcher<float>::MaxDistOutlierFilter;
+template struct PointMatcher<double>::MaxDistOutlierFilter;
 
 // MinDistOutlierFilter
 template<typename T>
-MetricSpaceAligner<T>::MinDistOutlierFilter::MinDistOutlierFilter(const T minDist):
+PointMatcher<T>::MinDistOutlierFilter::MinDistOutlierFilter(const T minDist):
 	minDist(minDist)
 {
 	if (minDist <= 0)
@@ -109,7 +109,7 @@ MetricSpaceAligner<T>::MinDistOutlierFilter::MinDistOutlierFilter(const T minDis
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MinDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MinDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input,
@@ -131,37 +131,14 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MinDistOut
 	return w;
 }
 
-template struct MetricSpaceAligner<float>::MinDistOutlierFilter;
-template struct MetricSpaceAligner<double>::MinDistOutlierFilter;
-
-
-// Utility function
-template<typename T>
-T MetricSpaceAligner<T>::getQuantile(
-	const Matches& input,
-	const T quantile)
-{
-	// TODO: check alignment and use matrix underlying storage when available
-	// build array
-	vector<T> values;
-	values.reserve(input.dists.rows() * input.dists.cols());
-	for (int x = 0; x < input.dists.cols(); ++x)
-		for (int y = 0; y < input.dists.rows(); ++y)
-			if ((input.dists(y, x) != numeric_limits<T>::infinity()) && (input.dists(y, x) > 0))
-				values.push_back(input.dists(y, x));
-	if (values.size() == 0)
-		throw ConvergenceError("no outlier to filter");
-	
-	// get quantile
-	nth_element(values.begin(), values.begin() + (values.size() * quantile), values.end());
-	return values[values.size() * quantile];
-}
+template struct PointMatcher<float>::MinDistOutlierFilter;
+template struct PointMatcher<double>::MinDistOutlierFilter;
 
 
 
 // MedianDistOutlierFilter
 template<typename T>
-MetricSpaceAligner<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const T factor):
+PointMatcher<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const T factor):
 	factor(factor)
 {
 	if (factor <= 0)
@@ -172,13 +149,13 @@ MetricSpaceAligner<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const T 
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MedianDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MedianDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input,
 	bool& iterate)
 {
-	const T median = getQuantile(input, 0.5);
+	const T median = input.getDistsQuantile(0.5);
 	
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
@@ -198,13 +175,13 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::MedianDist
 	return w;
 }
 
-template struct MetricSpaceAligner<float>::MedianDistOutlierFilter;
-template struct MetricSpaceAligner<double>::MedianDistOutlierFilter;
+template struct PointMatcher<float>::MedianDistOutlierFilter;
+template struct PointMatcher<double>::MedianDistOutlierFilter;
 
 
 // TrimmedDistOutlierFilter
 template<typename T>
-MetricSpaceAligner<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const T ratio):
+PointMatcher<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const T ratio):
 	ratio(ratio)
 {
 	if (ratio >= 1 || ratio <= 0)
@@ -215,13 +192,13 @@ MetricSpaceAligner<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const 
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::TrimmedDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::TrimmedDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input,
 	bool& iterate)
 {
-	const T limit = getQuantile(input, ratio);
+	const T limit = input.getDistsQuantile(ratio);
 	
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
@@ -241,12 +218,12 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::TrimmedDis
 	return w;
 }
 
-template struct MetricSpaceAligner<float>::TrimmedDistOutlierFilter;
-template struct MetricSpaceAligner<double>::TrimmedDistOutlierFilter;
+template struct PointMatcher<float>::TrimmedDistOutlierFilter;
+template struct PointMatcher<double>::TrimmedDistOutlierFilter;
 
 
 template<typename T>
-MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const T r, const T min, const T max, const T lambda):
+PointMatcher<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const T r, const T min, const T max, const T lambda):
 	ratio_(r), min_(min), max_(max), lambda_(lambda)
 {
 	if (r >= 1 || r <= 0)
@@ -268,7 +245,7 @@ MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::VarTrimmedDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input,
@@ -277,10 +254,10 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::VarTrimmed
 	ratio_ = optimizeInlierRatio(input);
 	std::cout<< "Optimized ratio: " << ratio_ << std::endl;
 
-	const T limit = getQuantile(input, ratio_);
+	const T limit = input.getDistsQuantile(ratio_);
 	
 	// select weight from median
-	typename MetricSpaceAligner<T>::OutlierWeights w(input.dists.rows(), input.dists.cols());
+	typename PointMatcher<T>::OutlierWeights w(input.dists.rows(), input.dists.cols());
 	for (int x = 0; x < w.cols(); ++x)
 	{
 		for (int y = 0; y < w.rows(); ++y)
@@ -296,7 +273,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::VarTrimmed
 }
 
 template<typename T>
-T MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matches& matches)
+T PointMatcher<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matches& matches)
 {
 	const int points_nbr = matches.dists.rows() * matches.dists.cols();
 	
@@ -388,14 +365,14 @@ T MetricSpaceAligner<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	*/
 }
 
-template struct MetricSpaceAligner<float>::VarTrimmedDistOutlierFilter;
-template struct MetricSpaceAligner<double>::VarTrimmedDistOutlierFilter;
+template struct PointMatcher<float>::VarTrimmedDistOutlierFilter;
+template struct PointMatcher<double>::VarTrimmedDistOutlierFilter;
 
 
 
 // NullDescriptorOutlierFilter
 template<typename T>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::NullDescriptorOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::NullDescriptorOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input,
@@ -404,6 +381,6 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::NullDescri
 	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
 }
 
-template struct MetricSpaceAligner<float>::NullDescriptorOutlierFilter;
-template struct MetricSpaceAligner<double>::NullDescriptorOutlierFilter;
+template struct PointMatcher<float>::NullDescriptorOutlierFilter;
+template struct PointMatcher<double>::NullDescriptorOutlierFilter;
 

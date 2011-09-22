@@ -33,37 +33,52 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "pointmatcher/PointMatcher.h"
-#include <cassert>
-#include <iostream>
+#ifndef __POINTMATCHER_PARAMETRIZABLE_H
+#define __POINTMATCHER_PARAMETRIZABLE_H
 
-using namespace std;
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DataPoints;
+#include <stdexcept>
+#include <vector>
+#include <map>
+#include <string>
+#include <boost/lexical_cast.hpp>
 
-int main(int argc, char *argv[])
+namespace PointMatcherSupport
 {
-	if (argc != 3)
+	struct Parametrizable
 	{
-		cerr << "Usage " << argv[0] << " INPUT.csv OUTPUT.vtk\n";
-		return 1;
-	}
+		struct Error: std::runtime_error
+		{
+			Error(const std::string& reason):runtime_error(reason) {}
+		};
+		
+		struct ParameterDoc
+		{
+			std::string name;
+			std::string doc;
+			std::string defaultValue;
+			
+			template<typename S>
+			ParameterDoc(const std::string name, const std::string doc, const S defaultValue);
+		};
 	
-	DataPoints d = loadCSV<float>(argv[1]);
-	
-	// Example for subsampling
-	//PM::SamplingSurfaceNormalDataPointsFilter subsample(100);
-	//d = subsample.filter(d, true);
-	
-	// Example of moving 3D points
-	Eigen::Matrix4f T;
-	T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;
-	cout << "Moving points using: " << endl << T << endl;
-	
-	d.features = T * d.features;
-	
-	
-	saveCSV<float>(d, argv[2]);
-	
-	return 0;
-}
+		typedef std::map<std::string, std::string> Parameters;
+		typedef std::vector<std::string> StringVector;
+		typedef std::vector<ParameterDoc> ParametersDoc;
+		
+		const ParametersDoc parametersDoc;
+		
+		Parameters parameters;
+		
+		Parametrizable(std::initializer_list<ParameterDoc> paramsDoc, const Parameters& params);
+		virtual ~Parametrizable(){}
+		
+		std::string getParam(const std::string& name) const;
+		template<typename S>
+		S getParam(const std::string& name) const { return boost::lexical_cast<S>(getParam(name)); }
+		
+		void dump(std::ostream& o) const;
+		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p) { p.dump(o); return o; }
+	};
+} // namespace PointMatcherSupport
+
+#endif // __POINTMATCHER_PARAMETRIZABLE_H

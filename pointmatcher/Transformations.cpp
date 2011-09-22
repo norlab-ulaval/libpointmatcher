@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TransformFeatures
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::TransformFeatures::compute(
+typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformFeatures::compute(
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
@@ -63,13 +63,13 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::TransformFeatu
 	return transformedDataPoints;
 }
 
-template struct MetricSpaceAligner<float>::TransformFeatures;
-template struct MetricSpaceAligner<double>::TransformFeatures;
+template struct PointMatcher<float>::TransformFeatures;
+template struct PointMatcher<double>::TransformFeatures;
 
 
 // TransformDescriptors
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::TransformDescriptors::compute(
+typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformDescriptors::compute(
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
@@ -99,6 +99,6 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::TransformDescr
 	return transformedDataPoints;
 }
 
-template struct MetricSpaceAligner<float>::TransformDescriptors;
-template struct MetricSpaceAligner<double>::TransformDescriptors;
+template struct PointMatcher<float>::TransformDescriptors;
+template struct PointMatcher<double>::TransformDescriptors;
 

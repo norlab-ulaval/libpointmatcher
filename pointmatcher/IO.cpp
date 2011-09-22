@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints loadCSV(const std::string& fileName)
+typename PointMatcher<T>::DataPoints loadCSV(const std::string& fileName)
 {
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
@@ -52,9 +52,9 @@ typename MetricSpaceAligner<T>::DataPoints loadCSV(const std::string& fileName)
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints loadCSV(std::istream& is)
+typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
 {
-	typedef typename MetricSpaceAligner<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename DataPoints::Labels Labels;
 	typedef typename DataPoints::Label Label;
 	
@@ -237,12 +237,12 @@ typename MetricSpaceAligner<T>::DataPoints loadCSV(std::istream& is)
 }
 
 template
-MetricSpaceAligner<float>::DataPoints loadCSV<float>(const std::string& fileName);
+PointMatcher<float>::DataPoints loadCSV<float>(const std::string& fileName);
 template
-MetricSpaceAligner<double>::DataPoints loadCSV<double>(const std::string& fileName);
+PointMatcher<double>::DataPoints loadCSV<double>(const std::string& fileName);
 
 template<typename T>
-void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, const std::string& fileName)
+void saveCSV(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
@@ -251,9 +251,9 @@ void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, const std::
 }
 
 template<typename T>
-void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostream& os)
+void saveCSV(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
 {
-	typedef typename MetricSpaceAligner<T>::DataPoints::Descriptors Descriptors;
+	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
 	
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
@@ -279,12 +279,12 @@ void saveCSV(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostrea
 }
 
 template
-void saveCSV<float>(const MetricSpaceAligner<float>::DataPoints& data, const std::string& fileName);
+void saveCSV<float>(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
 template
-void saveCSV<double>(const MetricSpaceAligner<double>::DataPoints& data, const std::string& fileName);
+void saveCSV<double>(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints loadVTK(const std::string& fileName)
+typename PointMatcher<T>::DataPoints loadVTK(const std::string& fileName)
 {
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
@@ -293,9 +293,9 @@ typename MetricSpaceAligner<T>::DataPoints loadVTK(const std::string& fileName)
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints loadVTK(std::istream& is)
+typename PointMatcher<T>::DataPoints loadVTK(std::istream& is)
 {
-	typedef typename MetricSpaceAligner<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename DataPoints::Descriptors Descriptors;
 	typedef typename DataPoints::Features Features;
 	typedef typename DataPoints::Labels Labels;
@@ -380,13 +380,13 @@ typename MetricSpaceAligner<T>::DataPoints loadVTK(std::istream& is)
 }
 
 template
-MetricSpaceAligner<float>::DataPoints loadVTK<float>(const std::string& fileName);
+PointMatcher<float>::DataPoints loadVTK<float>(const std::string& fileName);
 template
-MetricSpaceAligner<double>::DataPoints loadVTK<double>(const std::string& fileName);
+PointMatcher<double>::DataPoints loadVTK<double>(const std::string& fileName);
 
 
 template<typename T>
-void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, const std::string& fileName)
+void saveVTK(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
@@ -395,9 +395,9 @@ void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, const std::
 }
 
 template<typename T>
-void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostream& os)
+void saveVTK(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
 {
-	typedef typename MetricSpaceAligner<T>::DataPoints::Descriptors Descriptors;
+	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
 	
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
@@ -469,6 +469,6 @@ void saveVTK(const typename MetricSpaceAligner<T>::DataPoints& data, std::ostrea
 }
 
 template
-void saveVTK<float>(const MetricSpaceAligner<float>::DataPoints& data, const std::string& fileName);
+void saveVTK<float>(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
 template
-void saveVTK<double>(const MetricSpaceAligner<double>::DataPoints& data, const std::string& fileName);
+void saveVTK<double>(const PointMatcher<double>::DataPoints& data, const std::string& fileName);

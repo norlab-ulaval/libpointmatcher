@@ -40,10 +40,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Eigen;
 using namespace std;
 
+template<typename T>
+PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& reading, const DataPoints reference, const OutlierWeights weights, const Matches matches):
+	reading(reading),
+	reference(reference),
+	weights(weights),
+	matches(matches)
+{
+	assert(reading.features.cols() == reference.features.cols());
+	assert(reading.features.cols() == weights.cols());
+	assert(reading.features.cols() == matches.dists.cols());
+	// May have no descriptors... size 0
+}
 
 // Identity Error Minimizer
 template<typename T>
-typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::IdentityErrorMinimizer::compute(
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::IdentityErrorMinimizer::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
@@ -53,13 +65,13 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	return TransformationParameters::Identity(filteredReading.features.rows(), filteredReading.features.rows());
 }
 
-template struct MetricSpaceAligner<float>::IdentityErrorMinimizer;
-template struct MetricSpaceAligner<double>::IdentityErrorMinimizer;
+template struct PointMatcher<float>::IdentityErrorMinimizer;
+template struct PointMatcher<double>::IdentityErrorMinimizer;
 
 
 // Point To POINT ErrorMinimizer
 template<typename T>
-typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::PointToPointErrorMinimizer::compute(
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::PointToPointErrorMinimizer::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
@@ -147,14 +159,14 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	return result;
 }
 
-template struct MetricSpaceAligner<float>::PointToPointErrorMinimizer;
-template struct MetricSpaceAligner<double>::PointToPointErrorMinimizer;
+template struct PointMatcher<float>::PointToPointErrorMinimizer;
+template struct PointMatcher<double>::PointToPointErrorMinimizer;
 
 
 // Point To PLANE ErrorMinimizer
 
 template<typename T>
-typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::PointToPlaneErrorMinimizer::compute(
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::PointToPlaneErrorMinimizer::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
@@ -249,7 +261,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 
 
 template<typename T>
-typename MetricSpaceAligner<T>::Matrix MetricSpaceAligner<T>::ErrorMinimizer::crossProduct(const Matrix& A, const Matrix& B)
+typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(const Matrix& A, const Matrix& B)
 {
 	// Expecting matched points
 	assert(A.cols() == B.cols());
@@ -286,7 +298,7 @@ typename MetricSpaceAligner<T>::Matrix MetricSpaceAligner<T>::ErrorMinimizer::cr
 
 
 template<typename T>
-typename MetricSpaceAligner<T>::ErrorMinimizer::ErrorElements MetricSpaceAligner<T>::ErrorMinimizer::getMatchedPoints(
+typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMinimizer::getMatchedPoints(
 		const DataPoints& requestedPts,
 		const DataPoints& sourcePts,
 		const Matches& matches, 
@@ -376,5 +388,5 @@ typename MetricSpaceAligner<T>::ErrorMinimizer::ErrorElements MetricSpaceAligner
 }
 
 
-template struct MetricSpaceAligner<float>::PointToPlaneErrorMinimizer;
-template struct MetricSpaceAligner<double>::PointToPlaneErrorMinimizer;
+template struct PointMatcher<float>::PointToPlaneErrorMinimizer;
+template struct PointMatcher<double>::PointToPlaneErrorMinimizer;

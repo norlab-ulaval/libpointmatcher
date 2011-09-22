@@ -39,9 +39,72 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 
 using namespace std;
+using namespace PointMatcherSupport;
+
+// DataPoints
 
 template<typename T>
-void MetricSpaceAligner<T>::DataPointsFilters::init()
+PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels):
+	features(features),
+	featureLabels(featureLabels)
+{}
+
+template<typename T>
+PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels):
+	features(features),
+	featureLabels(featureLabels),
+	descriptors(descriptors),
+	descriptorLabels(descriptorLabels)
+{}
+
+template<typename T>
+typename PointMatcher<T>::DataPoints::Descriptors PointMatcher<T>::DataPoints::getDescriptorByName(const std::string& name) const
+{
+	int row(0);
+	
+	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	{
+		const int span(descriptorLabels[i].span);
+		if(descriptorLabels[i].text.compare(name) == 0)
+		{
+			return descriptors.block(row, 0, 
+					span, descriptors.cols());
+		}
+
+		row += span;
+	}
+
+	return Descriptors();
+}
+
+// Matches
+template<typename T>
+PointMatcher<T>::Matches::Matches(const Dists& dists, const Ids ids):
+	dists(dists),
+	ids(ids)
+{}
+
+template<typename T>
+T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
+{
+	// TODO: check alignment and use matrix underlying storage when available
+	// build array
+	vector<T> values;
+	values.reserve(dists.rows() * dists.cols());
+	for (int x = 0; x < dists.cols(); ++x)
+		for (int y = 0; y < dists.rows(); ++y)
+			if ((dists(y, x) != numeric_limits<T>::infinity()) && (dists(y, x) > 0))
+				values.push_back(dists(y, x));
+	if (values.size() == 0)
+		throw ConvergenceError("no outlier to filter");
+	
+	// get quantile
+	nth_element(values.begin(), values.begin() + (values.size() * quantile), values.end());
+	return values[values.size() * quantile];
+}
+
+template<typename T>
+void PointMatcher<T>::DataPointsFilters::init()
 {
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
 	{
@@ -50,7 +113,7 @@ void MetricSpaceAligner<T>::DataPointsFilters::init()
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::DataPointsFilters::apply(DataPoints& cloud, bool iterate)
+void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud, bool iterate)
 {
 	DataPoints filteredCloud;
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
@@ -65,7 +128,7 @@ void MetricSpaceAligner<T>::DataPointsFilters::apply(DataPoints& cloud, bool ite
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::Transformations::apply(DataPoints& cloud, const TransformationParameters& parameters) const
+void PointMatcher<T>::Transformations::apply(DataPoints& cloud, const TransformationParameters& parameters) const
 {
 	DataPoints transformedCloud;
 	for (TransformationsConstIt it = this->begin(); it != this->end(); ++it)
@@ -76,24 +139,24 @@ void MetricSpaceAligner<T>::Transformations::apply(DataPoints& cloud, const Tran
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::TransformationCheckers::init(const TransformationParameters& parameters, bool& iterate)
+void PointMatcher<T>::TransformationCheckers::init(const TransformationParameters& parameters, bool& iterate)
 {
 	for (TransformationCheckersIt it = this->begin(); it != this->end(); ++it)
 		(*it)->init(parameters, iterate);
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::TransformationCheckers::check(const TransformationParameters& parameters, bool& iterate)
+void PointMatcher<T>::TransformationCheckers::check(const TransformationParameters& parameters, bool& iterate)
 {
 	for (TransformationCheckersIt it = this->begin(); it != this->end(); ++it)
 		(*it)->check(parameters, iterate);
 }
 
 template<typename T> template<typename F>
-typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::OutlierFilters<F>::compute(
-	const typename MetricSpaceAligner<T>::DataPoints& filteredReading,
-	const typename MetricSpaceAligner<T>::DataPoints& filteredReference,
-	const typename MetricSpaceAligner<T>::Matches& input,
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::compute(
+	const typename PointMatcher<T>::DataPoints& filteredReading,
+	const typename PointMatcher<T>::DataPoints& filteredReference,
+	const typename PointMatcher<T>::Matches& input,
 	bool& iterate) const
 {
 	if (this->empty())
@@ -127,7 +190,7 @@ typename MetricSpaceAligner<T>::OutlierWeights MetricSpaceAligner<T>::OutlierFil
 
 
 template<typename T>
-MetricSpaceAligner<T>::ICPChainBase::ICPChainBase():
+PointMatcher<T>::ICPChainBase::ICPChainBase():
 	matcher(0), 
 	errorMinimizer(0),
 	inspector(0),
@@ -135,13 +198,13 @@ MetricSpaceAligner<T>::ICPChainBase::ICPChainBase():
 {}
 
 template<typename T>
-MetricSpaceAligner<T>::ICPChainBase::~ICPChainBase()
+PointMatcher<T>::ICPChainBase::~ICPChainBase()
 {
 	this->cleanup();
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::ICPChainBase::cleanup()
+void PointMatcher<T>::ICPChainBase::cleanup()
 {
 	for (DataPointsFiltersIt it = readingDataPointsFilters.begin(); it != readingDataPointsFilters.end(); ++it)
 		delete *it;
@@ -185,7 +248,7 @@ void MetricSpaceAligner<T>::ICPChainBase::cleanup()
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::ICPChainBase::setDefault()
+void PointMatcher<T>::ICPChainBase::setDefault()
 {
 	this->cleanup();
 	
@@ -212,18 +275,18 @@ void MetricSpaceAligner<T>::ICPChainBase::setDefault()
 
 
 template<typename T>
-MetricSpaceAligner<T>::ICP::ICP()
+PointMatcher<T>::ICP::ICP()
 {
 }
 
 template<typename T>
-MetricSpaceAligner<T>::ICP::~ICP()
+PointMatcher<T>::ICP::~ICP()
 {
 }
 
 
 template<typename T>
-typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICP::operator ()(
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operator ()(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn)
 {
@@ -233,7 +296,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICP::operator ()(
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operator ()(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn,
 	const TransformationParameters& initialTransformationParameters)
@@ -242,7 +305,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICP::compute(
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn,
 	const TransformationParameters& T_refIn_dataIn)
@@ -393,7 +456,7 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 }
 
 template<typename T>
-MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim, const std::string& filePrefix, const bool dumpStdErrOnExit):
+PointMatcher<T>::ICPSequence::ICPSequence(const std::string& filePrefix, const bool dumpStdErrOnExit):
 	ratioToSwitchKeyframe(0.8),
 	keyFrameDuration(16, "key_frame_duration", filePrefix, dumpStdErrOnExit),
 	convergenceDuration(16, "convergence_duration", filePrefix, dumpStdErrOnExit),
@@ -403,27 +466,25 @@ MetricSpaceAligner<T>::ICPSequence::ICPSequence(const int dim, const std::string
 	pointCountKeyFrame(16, "point_count_key_frame", filePrefix, dumpStdErrOnExit),
 	pointCountTouched(16, "point_count_touched", filePrefix, dumpStdErrOnExit),
 	overlapRatio(16, "overlap_ratio", filePrefix, dumpStdErrOnExit),
-	keyFrameCreated(false),
-	keyFrameTransform(Matrix::Identity(dim+1, dim+1)),
-	keyFrameTransformOffset(Matrix::Identity(dim+1, dim+1)),
-	curTransform(Matrix::Identity(dim+1, dim+1)),
-	lastTransformInv(Matrix::Identity(dim+1, dim+1))
-{}
-
-template<typename T>
-MetricSpaceAligner<T>::ICPSequence::~ICPSequence()
+	dim(-1),
+	keyFrameCreated(false)
 {
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::ICPSequence::setDefault()
+PointMatcher<T>::ICPSequence::~ICPSequence()
+{
+}
+
+template<typename T>
+void PointMatcher<T>::ICPSequence::setDefault()
 {
 	ICPChainBase::setDefault();
 	ratioToSwitchKeyframe = 0.8;
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::ICPSequence::resetTracking(DataPoints& inputCloud)
+void PointMatcher<T>::ICPSequence::resetTracking(DataPoints& inputCloud)
 {
 	const int tDim(keyFrameTransform.rows());
 	createKeyFrame(inputCloud);
@@ -432,7 +493,7 @@ void MetricSpaceAligner<T>::ICPSequence::resetTracking(DataPoints& inputCloud)
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
+void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 {
 	timer t; // Print how long take the algo
 	t.restart();
@@ -474,17 +535,29 @@ void MetricSpaceAligner<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 // WARNING: Reading and reference DataPoints will change!
 // TODO: Put those constant??
 template<typename T>
-typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::ICPSequence::operator ()(
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& inputCloudIn)
 {
+	// Insuring minimum definition of components
 	assert(this->matcher);
 	assert(this->errorMinimizer);
 	assert(this->inspector);
+
+	// Initialization at the first point cloud received
+	if(this->dim == -1)
+	{
+		this->dim = inputCloudIn.features.rows();
+		assert(this->dim == 3 || this->dim == 4);
+
+		keyFrameTransform = Matrix::Identity(this->dim, this->dim);
+		keyFrameTransformOffset = Matrix::Identity(this->dim, this->dim);
+		curTransform = Matrix::Identity(this->dim, this->dim);
+		lastTransformInv = Matrix::Identity(this->dim, this->dim);
+	}
 	
 	lastTransformInv = getTransform().inverse();
 	DataPoints inputCloud(inputCloudIn);
-
-
+	
 	// initial keyframe
 	keyFrameCreated = false;
 	if (!hasKeyFrame())
@@ -495,8 +568,9 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	
 	timer t; // Print how long take the algo
 	t.restart();
-
-	////
+	
+	
+	
 
 	bool iterate(true);
 	
@@ -608,6 +682,6 @@ typename MetricSpaceAligner<T>::TransformationParameters MetricSpaceAligner<T>::
 	return keyFrameTransform * curTransform;
 }
 
-template struct MetricSpaceAligner<float>;
-template struct MetricSpaceAligner<double>;
+template struct PointMatcher<float>;
+template struct PointMatcher<double>;
 

@@ -44,20 +44,20 @@ using namespace std;
 
 // IdentityDataPointsFilter
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::IdentityDataPointsFilter::filter(
+typename PointMatcher<T>::DataPoints PointMatcher<T>::IdentityDataPointsFilter::filter(
 	const DataPoints& input, 
 	bool& iterate)
 {
 	return input;
 }
 
-template struct MetricSpaceAligner<float>::IdentityDataPointsFilter;
-template struct MetricSpaceAligner<double>::IdentityDataPointsFilter;
+template struct PointMatcher<float>::IdentityDataPointsFilter;
+template struct PointMatcher<double>::IdentityDataPointsFilter;
 
 // MaxDistOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFilter(
+PointMatcher<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFilter(
 	const unsigned dim, 
 	const T maxDist):
 	dim(dim),
@@ -71,7 +71,7 @@ MetricSpaceAligner<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFil
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MaxDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
 	{
@@ -106,13 +106,13 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MaxDistOnAxisD
 	return outputCloud;
 }
 
-template struct MetricSpaceAligner<float>::MaxDistOnAxisDataPointsFilter;
-template struct MetricSpaceAligner<double>::MaxDistOnAxisDataPointsFilter;
+template struct PointMatcher<float>::MaxDistOnAxisDataPointsFilter;
+template struct PointMatcher<double>::MaxDistOnAxisDataPointsFilter;
 
 // MinDistOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::MinDistOnAxisDataPointsFilter::MinDistOnAxisDataPointsFilter(
+PointMatcher<T>::MinDistOnAxisDataPointsFilter::MinDistOnAxisDataPointsFilter(
 	const unsigned dim, 
 	const T minDist):
 	dim(dim),
@@ -126,7 +126,7 @@ MetricSpaceAligner<T>::MinDistOnAxisDataPointsFilter::MinDistOnAxisDataPointsFil
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MinDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
 	{
@@ -161,13 +161,13 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MinDistOnAxisD
 	return outputCloud;
 }
 
-template struct MetricSpaceAligner<float>::MinDistOnAxisDataPointsFilter;
-template struct MetricSpaceAligner<double>::MinDistOnAxisDataPointsFilter;
+template struct PointMatcher<float>::MinDistOnAxisDataPointsFilter;
+template struct PointMatcher<double>::MinDistOnAxisDataPointsFilter;
 
 // MaxQuantileOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsFilter(
+PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsFilter(
 	const unsigned dim, 
 	const T ratio):
 	dim(dim),
@@ -181,7 +181,7 @@ MetricSpaceAligner<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataP
 }
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
 	{
@@ -246,13 +246,13 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::MaxQuantileOnA
 	return outputCloud;
 }
 
-template struct MetricSpaceAligner<float>::MaxQuantileOnAxisDataPointsFilter;
-template struct MetricSpaceAligner<double>::MaxQuantileOnAxisDataPointsFilter;
+template struct PointMatcher<float>::MaxQuantileOnAxisDataPointsFilter;
+template struct PointMatcher<double>::MaxQuantileOnAxisDataPointsFilter;
 
 // UniformizeDensityDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(
+PointMatcher<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(
 	const T ratio, const int nbBin):
 	ratio(ratio),
 	nbBin(nbBin)
@@ -288,7 +288,7 @@ struct HistElement
 };
 
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	
 	const int nbPointsIn = input.features.cols();
@@ -422,14 +422,14 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::UniformizeDens
 	return outputCloud;
 }
 
-template struct MetricSpaceAligner<float>::UniformizeDensityDataPointsFilter;
-template struct MetricSpaceAligner<double>::UniformizeDensityDataPointsFilter;
+template struct PointMatcher<float>::UniformizeDensityDataPointsFilter;
+template struct PointMatcher<double>::UniformizeDensityDataPointsFilter;
 
 
 // SurfaceNormalDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(
+PointMatcher<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(
 	const int knn, 
 	const double epsilon, 
 	const bool keepNormals, 
@@ -450,7 +450,7 @@ MetricSpaceAligner<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFil
 
 // Compute
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalDataPointsFilter::filter(
+typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input, 
 	bool& iterate)
 {
@@ -642,15 +642,15 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SurfaceNormalD
 	return DataPoints(input.features, input.featureLabels, newDescriptors, newDescriptorLabels);
 }
 
-template struct MetricSpaceAligner<float>::SurfaceNormalDataPointsFilter;
-template struct MetricSpaceAligner<double>::SurfaceNormalDataPointsFilter;
+template struct PointMatcher<float>::SurfaceNormalDataPointsFilter;
+template struct PointMatcher<double>::SurfaceNormalDataPointsFilter;
 
 
 // SamplingSurfaceNormalDataPointsFilter
 
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(
+PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(
 	const int binSize,
 	const bool averageExistingDescriptors,
 	const bool keepNormals,
@@ -668,7 +668,7 @@ MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNor
 
 // Compute
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::filter(
+typename PointMatcher<T>::DataPoints PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input, 
 	bool& iterate)
 {
@@ -751,7 +751,7 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::SamplingSurfac
 
 // TODO: move into a file Utils.h
 template<typename T>
-size_t argMax(const typename MetricSpaceAligner<T>::Vector& v)
+size_t argMax(const typename PointMatcher<T>::Vector& v)
 {
 	T maxVal(0);
 	size_t maxIdx(0);
@@ -767,7 +767,7 @@ size_t argMax(const typename MetricSpaceAligner<T>::Vector& v)
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
+void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
 {
 	const int count(last - first);
 	if (count <= binSize)
@@ -812,7 +812,7 @@ void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(Buil
 }
 
 template<typename T>
-void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
+void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
 {
 	const int colCount(last-first);
 	const int featDim(data.inputFeatures.rows());
@@ -930,14 +930,14 @@ void MetricSpaceAligner<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(Bui
 	++data.outputInsertionPoint;
 }
 
-template struct MetricSpaceAligner<float>::SamplingSurfaceNormalDataPointsFilter;
-template struct MetricSpaceAligner<double>::SamplingSurfaceNormalDataPointsFilter;
+template struct PointMatcher<float>::SamplingSurfaceNormalDataPointsFilter;
+template struct PointMatcher<double>::SamplingSurfaceNormalDataPointsFilter;
 
 
 // OrientNormalsDataPointsFilter
 // Compute
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	Matrix normals = input.getDescriptorByName("normals");
 
@@ -985,14 +985,14 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::OrientNormalsD
 	return output;
 }
 
-template struct MetricSpaceAligner<float>::OrientNormalsDataPointsFilter;
-template struct MetricSpaceAligner<double>::OrientNormalsDataPointsFilter;
+template struct PointMatcher<float>::OrientNormalsDataPointsFilter;
+template struct PointMatcher<double>::OrientNormalsDataPointsFilter;
 
 
 // RandomSamplingDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(
+PointMatcher<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(
 	const double prob):
 	prob(prob)
 {
@@ -1001,7 +1001,7 @@ MetricSpaceAligner<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsF
 
 // Sampling
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSamplingDataPointsFilter::randomSample(const DataPoints& input) const
+typename PointMatcher<T>::DataPoints PointMatcher<T>::RandomSamplingDataPointsFilter::randomSample(const DataPoints& input) const
 {
 	Eigen::Matrix<double, 1, Eigen::Dynamic> filter;
 	filter.setRandom(input.features.cols());
@@ -1048,19 +1048,19 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSampling
 
 // Pre filter
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::RandomSamplingDataPointsFilter::filter(const DataPoints& input,	bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::RandomSamplingDataPointsFilter::filter(const DataPoints& input,	bool& iterate)
 {
 	return randomSample(input);
 }
 
-template struct MetricSpaceAligner<float>::RandomSamplingDataPointsFilter;
-template struct MetricSpaceAligner<double>::RandomSamplingDataPointsFilter;
+template struct PointMatcher<float>::RandomSamplingDataPointsFilter;
+template struct PointMatcher<double>::RandomSamplingDataPointsFilter;
 
 
 // FixstepSamplingDataPointsFilter
 // Constructor
 template<typename T>
-MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(const double startStep, const double endStep, const double stepMult):
+PointMatcher<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(const double startStep, const double endStep, const double stepMult):
 	startStep(startStep),
 	endStep(endStep),
 	stepMult(stepMult),
@@ -1075,14 +1075,14 @@ MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPoint
 
 
 template<typename T>
-void MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::init()
+void PointMatcher<T>::FixstepSamplingDataPointsFilter::init()
 {
 	step = startStep;
 }
 
 // Sampling
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::fixstepSample(const DataPoints& input)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::FixstepSamplingDataPointsFilter::fixstepSample(const DataPoints& input)
 {
 	const int iStep(step);
 	//cerr << "FixstepSamplingDataPointsFilter::filter: stepping " << iStep << endl;
@@ -1132,11 +1132,11 @@ typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplin
 
 // Pre filter
 template<typename T>
-typename MetricSpaceAligner<T>::DataPoints MetricSpaceAligner<T>::FixstepSamplingDataPointsFilter::filter(const DataPoints& input,	bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::FixstepSamplingDataPointsFilter::filter(const DataPoints& input,	bool& iterate)
 {
 	return fixstepSample(input);
 }
 
-template struct MetricSpaceAligner<float>::FixstepSamplingDataPointsFilter;
-template struct MetricSpaceAligner<double>::FixstepSamplingDataPointsFilter;
+template struct PointMatcher<float>::FixstepSamplingDataPointsFilter;
+template struct PointMatcher<double>::FixstepSamplingDataPointsFilter;
 

@@ -33,37 +33,36 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "pointmatcher/PointMatcher.h"
-#include <cassert>
-#include <iostream>
+#ifndef __POINTMATCHER_TIMER_H
+#define __POINTMATCHER_TIMER_H
 
-using namespace std;
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DataPoints;
+#include <sys/time.h>
 
-int main(int argc, char *argv[])
+namespace PointMatcherSupport
 {
-	if (argc != 3)
+	/*
+		High-precision timer class, using gettimeofday().
+		The interface is a subset of the one boost::timer provides,
+		but the implementation is much more precise
+		on systems where clock() has low precision, such as glibc.
+	*/
+	struct timer
 	{
-		cerr << "Usage " << argv[0] << " INPUT.csv OUTPUT.vtk\n";
-		return 1;
-	}
-	
-	DataPoints d = loadCSV<float>(argv[1]);
-	
-	// Example for subsampling
-	//PM::SamplingSurfaceNormalDataPointsFilter subsample(100);
-	//d = subsample.filter(d, true);
-	
-	// Example of moving 3D points
-	Eigen::Matrix4f T;
-	T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;
-	cout << "Moving points using: " << endl << T << endl;
-	
-	d.features = T * d.features;
-	
-	
-	saveCSV<float>(d, argv[2]);
-	
-	return 0;
-}
+		typedef unsigned long long Time;
+		
+		timer():_start_time(curTime()){ } 
+		void restart() { _start_time = curTime(); }
+		double elapsed() const                  // return elapsed time in seconds
+		{ return  double(curTime() - _start_time) / double(1000000000); }
+
+	private:
+		Time curTime() const {
+			struct timespec ts;
+			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
+			return Time(ts.tv_sec) * Time(1000000000) + Time(ts.tv_nsec);
+		}
+		Time _start_time;
+	};
+} // namespace PointMatcherSupport
+
+#endif // __POINTMATCHER_TIMER_H

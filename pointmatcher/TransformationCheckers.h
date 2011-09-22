@@ -33,37 +33,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "pointmatcher/PointMatcher.h"
-#include <cassert>
-#include <iostream>
+#ifndef __POINTMATCHER_TRANSFORMATIONCHECKERS_H
+#define __POINTMATCHER_TRANSFORMATIONCHECKERS_H
 
-using namespace std;
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DataPoints;
-
-int main(int argc, char *argv[])
+struct CounterTransformationChecker: public TransformationChecker
 {
-	if (argc != 3)
-	{
-		cerr << "Usage " << argv[0] << " INPUT.csv OUTPUT.vtk\n";
-		return 1;
-	}
+	CounterTransformationChecker(const int maxIterationCount = 20);
 	
-	DataPoints d = loadCSV<float>(argv[1]);
+	virtual void init(const TransformationParameters& parameters, bool& iterate);
+	virtual void check(const TransformationParameters& parameters, bool& iterate);
+};
+
+class ErrorTransformationChecker: public TransformationChecker
+{
+protected:
+	QuaternionVector rotations;
+	VectorVector translations;
+	const unsigned int tail;
+
+public:
+	ErrorTransformationChecker(const T minDeltaRotErr, const T minDeltaTransErr, const unsigned int tail = 3);
 	
-	// Example for subsampling
-	//PM::SamplingSurfaceNormalDataPointsFilter subsample(100);
-	//d = subsample.filter(d, true);
+	virtual void init(const TransformationParameters& parameters, bool& iterate);
+	virtual void check(const TransformationParameters& parameters, bool& iterate);
+};
+
+class BoundTransformationChecker: public TransformationChecker
+{
+protected:
+	Quaternion initialRotation;
+	Vector initialTranslation;
 	
-	// Example of moving 3D points
-	Eigen::Matrix4f T;
-	T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;
-	cout << "Moving points using: " << endl << T << endl;
-	
-	d.features = T * d.features;
-	
-	
-	saveCSV<float>(d, argv[2]);
-	
-	return 0;
-}
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	BoundTransformationChecker(const T maxRotationNorm, const T maxTranslationNorm);
+	virtual void init(const TransformationParameters& parameters, bool& iterate);
+	virtual void check(const TransformationParameters& parameters, bool& iterate);
+};
+
+#endif // __POINTMATCHER_TRANSFORMATIONCHECKERS_H

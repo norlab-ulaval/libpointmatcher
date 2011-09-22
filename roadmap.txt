@@ -5,15 +5,22 @@ ROADMAP
 General
 -------
 - TODO: rework parameter architecture
+- TODO: charge yaml files for parameters setup
+- TODO SM: each module maintain their parameters list and doc
+- TODO SM: move factory (modular_icp) to libpointmatcher
+- TODO SM: remove abort relative to parameter check
+- TODO FP: validate loop condition for all module (vs expections)
+- TODO SM: unit testing (gtest or cmake)
 
 Strategy
 -------------------
-- TODO: deal with sequence of filter, checker
+- 19 sept. 2011: deal with sequence of filter, checker
 icp strategy:
 - 26 sept. 2010: put in place method to deal with 2 scans
 - 20 dec. 2010: decouple input filter for reading and reference
 icp_seq strategy:
-- TODO: define how to deal with a sequence of scans
+- 19 sept 2011: define how to deal with a sequence of scans
+- TODO FP: uniform transformation between icp and icpSequence
 
 Sensors / wrapper / reader
 -------------------
@@ -25,13 +32,15 @@ Sensors / wrapper / reader
 
 Input filter
 -------------------
-- TODO: validate loop condition
+- 19 sept. 2011: use expection for abnormal loop termination (if normal, use iterate flag)
 - 20 dec. 2010: move points to their center of mass
 
 Noise evaluation:
 - 26 sept. 2010: Density 
       Descriptor label: "densities"
-- TODO: incidence angle from sensor to surface (reuse fonction for generic vector see below for gravity vector*)
+- TODO FP: incidence angle from sensor to surface (reuse fonction for generic vector see below for gravity vector*)
+- TODO FP: add min max dist filter
+
 - TODO: model for SICK laser
 - TODO: model for Hokuyo laser
 - TODO: model for Stereo camera
@@ -44,6 +53,8 @@ Point reduction:
       PARAM: a probability of keeping a point, between 0 and 1
 - 10 dec. 2010: sequencial selection based on ids
       PARAM: percentage of points that should be kept
+
+
 - TODO: Based on surrounding PCA
 - TODO: Based on Tensor Voting, may required octree support
 
@@ -66,14 +77,15 @@ Strong descriptors:
 
 Match function
 -------------------
-- TODO: validate loop condition
 Optmization:
 - 15 sept. 2010: kd-tree (ANN) 
 - 3 nov. 2010  : change ANN for Nabo
-- TODO: do block request instead of point by point for NN resquest
+- TODO FP: do block request instead of point by point for NN resquest
       - FP: how to get 20 closest points for block request?
+
 - TODO: precalculated tables for dual proximity hypothesis
 - TODO: dynamic search direction as a function of density
+
 Distances:
 - 15 sept. 2010: Euclidian distance 
 - TODO: Evaluate how to mix Eucl. dist with features (surface orientation or PCA)
@@ -87,8 +99,8 @@ Outlier Filters
         PARAM: factor of the median for hard threshold (everything under is kept)
 - 7 nov. 2010: Trimmed
         PARAM: ratio of points with the lowest distance to kept
+
 - TODO: Relative motion threshold
-- TODO: validate loop condition
 
 
 Error Minimization
@@ -96,13 +108,16 @@ Error Minimization
 error metric
 - 15 sept. 2010: Point-to-point error
 - 4 nov. 2010: Point-to-plane error
+
 - TODO: Point-to-gaussian error
 - TODO: Plane-to-plane error
 - TODO: Gaussian-to-gaussian error
 - TODO: Minimization polar coordinates
 - TODO: Minimization using point-angle error
+
 - TODO: deal with multiple matching columns 
 - TODO: deal with matching in both directions
+
 Early out conditions
 - TODO: minimum error. 
         PARAM: Authorized error intervals
@@ -112,7 +127,6 @@ Early out conditions
 
 Transformation Checker
 -------------------
-- TODO: validate if that should'nt be in Error Minimization
 - 7 nov. 2010: stabilization of the error. First derivative of the error
         PARAM: Authorized stabilization intervals
 
@@ -120,9 +134,13 @@ Transformation Checker
 Inspector (Paraview)
 -------------------
 - 20 sept. 2010: Basic viewing capability via VTK files
-- TODO: Have iteration information as a csv file
+- 19 sept. 2011: Have iteration information as a csv file
 - TODO: display outlier weights
 - TODO: clean to have one VTK files per module
+- TODO FP: unify IO operation for vtk files
+
+- TODO SM: "console" inspector
+
 - 8 nov. 2010: Evaluate pertinence of basic outputs to rviz: not pertinent
 
 

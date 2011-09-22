@@ -33,37 +33,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "pointmatcher/PointMatcher.h"
-#include <cassert>
-#include <iostream>
+#ifndef __POINTMATCHER_FUNCTIONS_H
+#define __POINTMATCHER_FUNCTIONS_H
 
-using namespace std;
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DataPoints;
-
-int main(int argc, char *argv[])
+static inline T anyabs(const T& v)
 {
-	if (argc != 3)
-	{
-		cerr << "Usage " << argv[0] << " INPUT.csv OUTPUT.vtk\n";
-		return 1;
-	}
-	
-	DataPoints d = loadCSV<float>(argv[1]);
-	
-	// Example for subsampling
-	//PM::SamplingSurfaceNormalDataPointsFilter subsample(100);
-	//d = subsample.filter(d, true);
-	
-	// Example of moving 3D points
-	Eigen::Matrix4f T;
-	T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;
-	cout << "Moving points using: " << endl << T << endl;
-	
-	d.features = T * d.features;
-	
-	
-	saveCSV<float>(d, argv[2]);
-	
-	return 0;
+	if (v < T(0))
+		return -v;
+	else
+		return v;
 }
+
+#endif // __POINTMATCHER_FUNCTIONS_H

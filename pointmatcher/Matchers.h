@@ -33,37 +33,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "pointmatcher/PointMatcher.h"
-#include <cassert>
-#include <iostream>
+#ifndef __POINTMATCHER_MATCHERS_H
+#define __POINTMATCHER_MATCHERS_H
 
-using namespace std;
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DataPoints;
-
-int main(int argc, char *argv[])
+struct NullMatcher: public Matcher
 {
-	if (argc != 3)
-	{
-		cerr << "Usage " << argv[0] << " INPUT.csv OUTPUT.vtk\n";
-		return 1;
-	}
-	
-	DataPoints d = loadCSV<float>(argv[1]);
-	
-	// Example for subsampling
-	//PM::SamplingSurfaceNormalDataPointsFilter subsample(100);
-	//d = subsample.filter(d, true);
-	
-	// Example of moving 3D points
-	Eigen::Matrix4f T;
-	T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;
-	cout << "Moving points using: " << endl << T << endl;
-	
-	d.features = T * d.features;
-	
-	
-	saveCSV<float>(d, argv[2]);
-	
-	return 0;
-}
+	virtual void init(const DataPoints& filteredReference, bool& iterate);
+	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
+};
+
+class KDTreeMatcher: public Matcher
+{
+	const int knn;
+	const T epsilon;
+	const NNSearchType searchType;
+	const T maxDist;
+	NNS* featureNNS;
+
+public:
+	KDTreeMatcher(const int knn = 1, const T epsilon = 0, const NNSearchType searchType = NNS::KDTREE_LINEAR_HEAP, const T maxDist = std::numeric_limits<T>::infinity());
+	virtual ~KDTreeMatcher();
+	virtual void init(const DataPoints& filteredReference, bool& iterate);
+	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
+};
+
+#endif // __POINTMATCHER_MATCHERS_H

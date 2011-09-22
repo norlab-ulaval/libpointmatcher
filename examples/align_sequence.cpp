@@ -58,23 +58,22 @@ int main(int argc, char *argv[])
 	
 	
 
-	typedef MetricSpaceAligner<float> MSA;
+	typedef PointMatcher<float> PM;
 	
 	const string inputBaseFileName(argv[1]);
 	const string outputBaseFileName(argv[2]);
 	
-	
 	// Main algorithm definition
-	MSA::ICPSequence icp(3);
+	PM::ICPSequence icp;
 
 	icp.setDefault();
 
-	typedef MSA::TransformationParameters TP;
-	typedef MSA::DataPoints DP;
+	typedef PM::TransformationParameters TP;
+	typedef PM::DataPoints DP;
 	
 	
-	MSA::DataPoints lastCloud, newCloud;
-	MSA::TransformFeatures transform;
+	PM::DataPoints lastCloud, newCloud;
+	PM::TransformFeatures transform;
 	TP tp;
 	for (unsigned frameCounter = startId; frameCounter < endId; ++frameCounter)
 	{
@@ -93,9 +92,9 @@ int main(int argc, char *argv[])
 			abort();
 
 		if(extension == "vtk")
-			newCloud = loadVTK<MSA::ScalarType>(ifs);
+			newCloud = loadVTK<PM::ScalarType>(ifs);
 		else if (extension == "csv")
-			newCloud = loadCSV<MSA::ScalarType>(ifs);
+			newCloud = loadCSV<PM::ScalarType>(ifs);
 		else
 		{
 			cerr << "Unkowned extension" << endl;
@@ -112,16 +111,16 @@ int main(int argc, char *argv[])
 			
 			newCloud = transform.compute(newCloud, tp);
 		}
-		catch (MSA::ConvergenceError error)
+		catch (PM::ConvergenceError error)
 		{
-			cout << "ERROR MSA::ICP failed to converge: " << endl;
+			cout << "ERROR PM::ICP failed to converge: " << endl;
 			cout << "   " << error.what() << endl;
 			cout << "Reseting tracking" << endl;
 			icp.resetTracking(newCloud);
 		}
 		
 		cout << "outputFileName: " << outputFileName << endl;
-		saveVTK<MSA::ScalarType>(newCloud, outputFileName);
+		saveVTK<PM::ScalarType>(newCloud, outputFileName);
 	}
 	return 0;
 }
