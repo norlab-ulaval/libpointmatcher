@@ -92,7 +92,7 @@ struct VTKFileInspector: public AbstractVTKInspector
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" }
+			ParameterDoc( "baseFileName", "base file name for the VTK files ", "point-matcher-output" )
 		};
 	}
 	

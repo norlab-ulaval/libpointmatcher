@@ -56,10 +56,10 @@ struct KDTreeMatcher: public Matcher
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned> },
-			{ "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> },
-			{ "searchType", "Nabo search type", "1", "0", "4", &P::Comp<unsigned> },
-			{ "maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>}
+			ParameterDoc( "knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned> ),
+			ParameterDoc( "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> ),
+			ParameterDoc( "searchType", "Nabo search type", "1", "0", "4", &P::Comp<unsigned> ),
+			ParameterDoc( "maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>)
 		};
 	}
 	
