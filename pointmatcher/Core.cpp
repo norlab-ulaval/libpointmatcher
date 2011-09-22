@@ -191,7 +191,8 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
-	outlierMixingWeight(0.5)
+	outlierMixingWeight(0.5),
+	logger(new NullLogger)
 {}
 
 template<typename T>
@@ -272,6 +273,11 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	assert(this->matcher);
 	assert(this->errorMinimizer);
 	assert(this->inspector);
+	assert(this->logger);
+	// FIXME: use exception
+	
+	// local logger lies in thread-local storage, and we know that for the duration of the () operator, this->logger will not be changed by outside
+	localLogger = this->logger.get();
 	
 	timer t; // Print how long take the algo
 	const int dim = referenceIn.features.rows();
@@ -501,6 +507,11 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	assert(this->matcher);
 	assert(this->errorMinimizer);
 	assert(this->inspector);
+	assert(this->logger);
+	// FIXME: use exception
+	
+	// local logger lies in thread-local storage, and we know that for the duration of the () operator, this->logger will not be changed by outside
+	localLogger = this->logger.get();
 
 	// Initialization at the first point cloud received
 	if(this->dim == -1)
@@ -527,9 +538,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	timer t; // Print how long take the algo
 	t.restart();
-	
-	
-	
 
 	bool iterate(true);
 	
@@ -675,6 +683,9 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, ErrorTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(Logger, NullLogger)
+	ADD_TO_REGISTRAR_NO_PARAM(Logger, FileLogger)
 }
 
 template struct PointMatcher<float>;

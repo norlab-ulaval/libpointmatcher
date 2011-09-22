@@ -65,7 +65,33 @@ namespace PointMatcherSupport
 	{
 		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
 	};
+	
+	struct Logger: public Parametrizable
+	{
+		Logger() {}
+		Logger(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		
+		virtual ~Logger() {}
+		virtual bool hasInfoChannel() const { return false; };
+		virtual std::ostream* infoStream() { return 0; }
+		virtual bool hasWarningChannel() const { return false; }
+		virtual std::ostream* warningStream() { return 0; }
+	};
+	
+	#define LOG_INFO_STREAM(args) { if (localLogger->hasInfoChannel()) { (*localLogger->infoStream()) << args << std::endl; } }
+	#define LOG_WARNING_STREAM(args) { if (localLogger->hasWarningChannel()) { (*localLogger->warningStream()) << args << std::endl; } }
+	
+	// send patches for your favourite compiler
+	#if defined(__GNUC__)
+	static __thread Logger* localLogger;
+	#elif defined(_MSC_VER)
+	static __declspec(thread) Logger* localLogger;
+	#else
+	static thread_local Logger* localLogger;
+	#endif
 }
+
+#include "Logger.h"
 
 template<typename T>
 struct PointMatcher
@@ -356,20 +382,15 @@ struct PointMatcher
 		virtual void dumpFilteredReference(const DataPoints& filteredReference) {}
 		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers) {}
 		virtual void finish(const size_t iterationCount) {}
-		
-		// message output part
-		virtual bool hasInfoChannel() const { return false; };
-		virtual std::ostream* infoStream() { return 0; }
-		virtual bool hasWarningChannel() const { return false; }
-		virtual std::ostream* warningStream() { return 0; }
 	};
-	
-	#define INSPECTOR_INFO_STREAM(args) { if (inspector.hasInfoChannel()) { (*inspector.infoStream()) << args; } }
-	#define INSPECTOR_WARNING_STREAM(args) { if (inspector.hasWarningChannel()) { (*inspector.warningStream()) << args; } }
 	
 	#include "Inspectors.h"
 	
 	DEF_REGISTRAR(Inspector) 
+	
+	// ---------------------------------
+	
+	DEF_REGISTRAR_IFACE(Logger, PointMatcherSupport::Logger)
 
 	// ---------------------------------
 	
@@ -390,6 +411,7 @@ struct PointMatcher
 		TransformationCheckers transformationCheckers;
 		std::shared_ptr<Inspector> inspector;
 		T outlierMixingWeight;
+		std::shared_ptr<PointMatcherSupport::Logger> logger;
 		
 		virtual ~ICPChainBase();
 		
@@ -472,6 +494,7 @@ struct PointMatcher
 	//! Constructor, fill registrars
 	PointMatcher();
 }; // PointMatcher<T>
+
 
 template<typename T>
 void swapDataPoints(typename PointMatcher<T>::DataPoints& a, typename PointMatcher<T>::DataPoints& b)
