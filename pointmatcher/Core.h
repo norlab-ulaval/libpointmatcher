@@ -58,6 +58,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parametrizable.h"
 #include "Registrar.h"
 
+namespace PointMatcherSupport
+{
+	template<typename S>
+	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
+	{
+		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
+	};
+}
+
 template<typename T>
 struct PointMatcher
 {
@@ -163,20 +172,6 @@ struct PointMatcher
 	// types of processing bricks
 	// ---------------------------------
 	
-	template<typename S>
-	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
-	{
-		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
-	};
-	
-	template<typename S>
-	static std::string toParam(const S& value)
-	{
-		return boost::lexical_cast<std::string>(value);
-	}
-	
-	// ---------------------------------
-	
 	struct Transformation: public Parametrizable
 	{
 		Transformation(){}
@@ -185,7 +180,7 @@ struct PointMatcher
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0;
 	};
 	
-	struct Transformations: public SharedPtrVector<Transformation>
+	struct Transformations: public PointMatcherSupport::SharedPtrVector<Transformation>
 	{
 		void apply(DataPoints& cloud, const TransformationParameters& parameters) const;
 	};
@@ -207,7 +202,7 @@ struct PointMatcher
 		virtual DataPoints filter(const DataPoints& input, bool& iterate) = 0;
 	};
 	
-	struct DataPointsFilters: public SharedPtrVector<DataPointsFilter>
+	struct DataPointsFilters: public PointMatcherSupport::SharedPtrVector<DataPointsFilter>
 	{
 		void init();
 		void apply(DataPoints& cloud, bool iterate);
@@ -258,9 +253,9 @@ struct PointMatcher
 	
 	// Vector outlier filters
 	template<typename F>
-	struct OutlierFilters: public SharedPtrVector<F>
+	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<F>
 	{
-		typedef SharedPtrVector<F> Vector;
+		typedef PointMatcherSupport::SharedPtrVector<F> Vector;
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) const;
 	};
 	
@@ -337,7 +332,7 @@ struct PointMatcher
 	};
 	
 	// Vector of transformation checker
-	struct TransformationCheckers: public SharedPtrVector<TransformationChecker>
+	struct TransformationCheckers: public PointMatcherSupport::SharedPtrVector<TransformationChecker>
 	{
 		void init(const TransformationParameters& parameters, bool& iterate);
 		void check(const TransformationParameters& parameters, bool& iterate);

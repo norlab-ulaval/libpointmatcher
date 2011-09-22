@@ -45,6 +45,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace PointMatcherSupport
 {
+	template<typename S>
+	std::string toParam(const S& value)
+	{
+		return boost::lexical_cast<std::string>(value);
+	}
+	
 	struct Parametrizable
 	{
 		struct InvalidParameter: std::runtime_error

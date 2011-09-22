@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Eigen/QR"
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 // IdentityDataPointsFilter
 template<typename T>
