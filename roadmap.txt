@@ -11,6 +11,7 @@ General
 - 21 sept. 2011: remove abort relative to parameter check
 - TODO FP: validate loop condition for all module (vs expections)
 - TODO SM: unit testing (gtest or cmake)
+- 20 sept. 2011: remove dim which should be infered be the data size
 
 Strategy
 -------------------
@@ -129,6 +130,7 @@ Transformation Checker
 -------------------
 - 7 nov. 2010: stabilization of the error. First derivative of the error
         PARAM: Authorized stabilization intervals
+- TODO: test 2D bound transformation checker
 
 
 Inspector (Paraview)
