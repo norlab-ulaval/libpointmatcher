@@ -4,11 +4,11 @@ ROADMAP
 
 General
 -------
-- TODO: rework parameter architecture
+- 21 sept. 2011: rework parameter architecture
 - TODO: charge yaml files for parameters setup
-- TODO SM: each module maintain their parameters list and doc
+- 21 sept. 2011: each module maintain their parameters list and doc
 - TODO SM: move factory (modular_icp) to libpointmatcher
-- TODO SM: remove abort relative to parameter check
+- 21 sept. 2011: remove abort relative to parameter check
 - TODO FP: validate loop condition for all module (vs expections)
 - TODO SM: unit testing (gtest or cmake)
 
