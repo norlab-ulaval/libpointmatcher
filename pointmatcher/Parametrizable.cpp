@@ -68,6 +68,9 @@ namespace PointMatcherSupport
 		return boost::lexical_cast<S>(a) < boost::lexical_cast<S>(b);
 	}
 	
+	/*
+	Uncomment once most people have gcc >= 4.5
+	Shame on bug  9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050)
 	template<typename S>
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const S defaultValue, const S minValue, const S maxValue):
 		name(name),
@@ -87,12 +90,32 @@ namespace PointMatcherSupport
 		maxValue(""),
 		comp(TrueLexicalComparison)
 	{}
+	*/
+	
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue, const std::string minValue, const std::string maxValue, LexicalComparison comp):
+		name(name),
+		doc(doc),
+		defaultValue(defaultValue), 
+		minValue(minValue), 
+		maxValue(maxValue),
+		comp(comp)
+	{}
+	
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue):
+		name(name),
+		doc(doc),
+		defaultValue(boost::lexical_cast<string>(defaultValue)), 
+		minValue(""), 
+		maxValue(""),
+		comp(TrueLexicalComparison)
+	{}
 	
 	template<typename S>
 	Parametrizable::Parameter::Parameter(const S value):
 		std::string(boost::lexical_cast<string>(value))
 	{}
 	
+	/*
 	// force instantiation of constructors
 	template Parametrizable::ParameterDoc::ParameterDoc<int>(const std::string, const std::string, const int);
 	template Parametrizable::ParameterDoc::ParameterDoc<float>(const std::string, const std::string, const float);
@@ -111,6 +134,8 @@ namespace PointMatcherSupport
 	template Parametrizable::Parameter::Parameter<bool>(const bool);
 	template Parametrizable::Parameter::Parameter<std::string>(const std::string);
 
+	*/
+	
 	Parametrizable::Parametrizable(
 		const ParametersDoc paramsDoc, const Parameters& params):
 		parametersDoc(paramsDoc)

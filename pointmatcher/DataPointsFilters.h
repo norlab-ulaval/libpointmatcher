@@ -57,8 +57,8 @@ struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", 0, 0 },
-			{ "maxDist", "maximum distance authorized. All points beyond that will be filtered.", 1.0, 0. }
+			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+			{ "maxDist", "maximum distance authorized. All points beyond that will be filtered.", "1", "0", "inf", P::Comp<T> }
 		};
 	}
 
@@ -80,8 +80,8 @@ struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", 0, 0},
-			{ "minDist", "minimum distance authorized. All points before that will be filtered.", 1.0, 0. }
+			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+			{ "minDist", "minimum distance authorized. All points before that will be filtered.", "1", "0", "inf", &P::Comp<T> }
 		};
 	}
 	
@@ -103,8 +103,8 @@ struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", 0, 0},
-			{ "ratio", "maximum quantile authorized. All points beyond that will be filtered.", 0.5, ZERO_PLUS_EPS, ONE_MINUS_EPS}
+			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+			{ "ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "0.9999999", &P::Comp<T>}
 		};
 	}
 	
@@ -126,8 +126,8 @@ struct UniformizeDensityDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "ratio", "targeted reduction ratio", 0.5, ZERO_PLUS_EPS, ONE_MINUS_EPS},
-			{ "nbBin", "number of bin used to estimate the probability distribution of the density.", 1, 1}
+			{ "ratio", "targeted reduction ratio", "0.5", "0.0000001", "0.9999999", &P::Comp<T>},
+			{ "nbBin", "number of bin used to estimate the probability distribution of the density.", "1", "1", "2147483647", &P::Comp<unsigned> }
 		};
 	}
 	
@@ -149,13 +149,13 @@ struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "knn", "number of nearest neighbors to consider, including the point itself", 5, 3 },
-			{ "epsilon", "approximation to use for the nearest-neighbor search", 0., 0. },
-			{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", true },
-			{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", false },
-			{ "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", false },
-			{ "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", false },
-			{ "keepMatchedIds" , "whethen the identifiers of matches points should be added as descriptors to the resulting cloud", false }
+			{ "knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned> },
+			{ "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> },
+			{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1"},
+			{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0"},
+			{ "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" },
+			{ "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" },
+			{ "keepMatchedIds" , "whethen the identifiers of matches points should be added as descriptors to the resulting cloud", "0" }
 		};
 	}
 	
@@ -182,12 +182,12 @@ struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "binSize", "limit over which a box is splitted in two", 10, 3 },
-			{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", true },
-			{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", true },
-			{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", false },
-			{ "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", false },
-			{ "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", false }
+			{ "binSize", "limit over which a box is splitted in two", "5", "3", "2147483647", &P::Comp<unsigned> },
+			{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
+			{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" },
+			{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" },
+			{ "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" },
+			{ "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" }
 		};
 	}
 	
@@ -267,7 +267,7 @@ struct RandomSamplingDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "prob", "probability to keep a point, one over decimation factor ", 0.5, 0., 1. }
+			{ "prob", "probability to keep a point, one over decimation factor ", "0.5", "0", "1", &P::Comp<T> }
 		};
 	}
 	
@@ -291,9 +291,9 @@ struct FixstepSamplingDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "startStep", "initial number of point to skip (initial decimation factor)", 10., ZERO_PLUS_EPS },
-			{ "endStep", "maximal or minimal number of points to skip (final decimation factor)", 10., ZERO_PLUS_EPS },
-			{ "stepMult", "multiplication factor to compute the new decimation factor for each iteration", 1., ZERO_PLUS_EPS }
+			{ "startStep", "initial number of point to skip (initial decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> },
+			{ "endStep", "maximal or minimal number of points to skip (final decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> },
+			{ "stepMult", "multiplication factor to compute the new decimation factor for each iteration", "1", "0.0000001", "inf", &P::Comp<T> }
 		};
 	}
 	

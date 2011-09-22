@@ -98,6 +98,7 @@ struct PointMatcher
 	// alias for semantic reasons
 	typedef Matrix TransformationParameters;
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
@@ -347,16 +348,27 @@ struct PointMatcher
 	{
 		Inspector() {}
 		Inspector(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		
+		// 
+		virtual ~Inspector() {}
 		virtual void init() {};
 		virtual void dumpFilteredReference(const DataPoints& filteredReference) {}
 		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers) {}
 		virtual void finish(const size_t iterationCount) {}
-		virtual ~Inspector() {}
+		
+		// message output part
+		virtual bool hasInfoChannel() const { return false; };
+		virtual std::ostream* infoStream() { return 0; }
+		virtual bool hasWarningChannel() const { return false; }
+		virtual std::ostream* warningStream() { return 0; }
 	};
+	
+	#define INSPECTOR_INFO_STREAM(args) { if (inspector.hasInfoChannel()) { (*inspector.infoStream()) << args; } }
+	#define INSPECTOR_WARNING_STREAM(args) { if (inspector.hasWarningChannel()) { (*inspector.warningStream()) << args; } }
 	
 	#include "Inspectors.h"
 	
-	DEF_REGISTRAR(Inspector)
+	DEF_REGISTRAR(Inspector) 
 
 	// ---------------------------------
 	

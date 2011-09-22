@@ -55,6 +55,12 @@ namespace PointMatcherSupport
 		//! return whether a is smaller than b
 		typedef bool(*LexicalComparison)(std::string a, std::string b);
 		
+		template<typename S>
+		static bool Comp(std::string a, std::string b)
+		{
+			return boost::lexical_cast<S>(a) < boost::lexical_cast<S>(b);
+		}
+		
 		struct ParameterDoc
 		{
 			std::string name;
@@ -64,10 +70,19 @@ namespace PointMatcherSupport
 			std::string maxValue;
 			LexicalComparison comp;
 			
+			/*
+			This code is beautiful, this code is correct, this code does not work ;-(
+			Blame gcc bug 9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050), shame
+			on them forever and beyond. People being laaaazzzy adopters, I'm forced to use
+			something that work on gcc 4.4.
+			
 			template<typename S>
 			ParameterDoc(const std::string name, const std::string doc, const S defaultValue, const S minValue, const S maxValue = std::numeric_limits<S>::max());
 			template<typename S>
 			ParameterDoc(const std::string name, const std::string doc, const S defaultValue);
+			*/
+			ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue, const std::string minValue, const std::string maxValue, LexicalComparison comp);
+			ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue);
 			
 			friend std::ostream& operator<< (std::ostream& o, const ParameterDoc& p);
 		};

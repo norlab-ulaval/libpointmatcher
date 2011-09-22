@@ -55,7 +55,7 @@ struct MaxDistOutlierFilter: public FeatureOutlierFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "maxDist", "threshold distance", 1.0, ZERO_PLUS_EPS }
+			{ "maxDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T> }
 		};
 	}
 	
@@ -74,7 +74,7 @@ struct MinDistOutlierFilter: public FeatureOutlierFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "minDist", "threshold distance", 1.0, ZERO_PLUS_EPS }
+			{ "minDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T> }
 		};
 	}
 	
@@ -93,7 +93,7 @@ struct MedianDistOutlierFilter: public FeatureOutlierFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "factor", "points farther away factor * median will be considered outliers.", 3.0, ZERO_PLUS_EPS }
+			{ "factor", "points farther away factor * median will be considered outliers.", "3", "0.0000001", "inf", &P::Comp<T>}
 		};
 	}
 	
@@ -112,7 +112,7 @@ struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "factor", "percentage to keep", 0.75, ZERO_PLUS_EPS, ONE_MINUS_EPS }
+			{ "factor", "percentage to keep", "0.75", "0.0000001", "0.9999999", &P::Comp<T>}
 		};
 	}
 	
@@ -131,9 +131,9 @@ struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
 	static const ParametersDoc availableParameters()
 	{
 		return {
-			{ "minRatio", "min ratio", 0.05, ZERO_PLUS_EPS, 1. },
-			{ "maxRatio", "max ratio", 0.99, ZERO_PLUS_EPS, 1. },
-			{ "lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda)", 0.95 }
+			{ "minRatio", "min ratio", "0.05", "0.0000001", "1", &P::Comp<T>},
+			{ "maxRatio", "max ratio", "0.99", "0.0000001", "1", &P::Comp<T>},
+			{ "lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda)", "0.95" }
 		};
 	}
 
