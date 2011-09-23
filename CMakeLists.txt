@@ -78,12 +78,13 @@ find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
 	/usr/lib
 NO_DEFAULT_PATH)
 if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+	include_directories(${yaml-cpp_INCLUDE_DIRS})
 	set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
-	add_definitions(-DHAVE_QWT)
+	add_definitions(-DHAVE_YAML_CPP)
 endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 
 # include all libs so far
-include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_LIBRARY_DIRS})
+include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 add_definitions(-Wall)
 
 # main pointmatcher lib
