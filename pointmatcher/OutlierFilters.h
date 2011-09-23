@@ -112,7 +112,7 @@ struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 	static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
-			{ "factor", "percentage to keep", "0.75", "0.0000001", "0.9999999", &P::Comp<T>}
+			{ "ratio", "percentage to keep", "0.75", "0.0000001", "0.9999999", &P::Comp<T>}
 		});
 	}
 	
