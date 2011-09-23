@@ -62,9 +62,7 @@ In 3D:
 	./icp ${SRC_DIR}/examples/data/car_cloud401.csv ${SRC_DIR}/examples/data/car_cloud400.csv
 
 Use [Paraview] to view the results.
-On [Ubuntu], you can install [Paraview] with `apt-get`:
-
-	sudo apt-get install paraview
+On [Ubuntu], you can install [Paraview] with `sudo apt-get install paraview`.
 
 You can list the available modules with:
 
