@@ -471,10 +471,10 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 
 	Matrix newDescriptors(finalDim, pointsCount);
 	
-	KDTreeMatcher matcher({
+	KDTreeMatcher matcher(Parameters({
 		{ "knn", toParam(knn) },
 		{ "epsilon", toParam(epsilon) }
-	});
+	}));
 	matcher.init(input, iterate);
 
 	Matches matches(typename Matches::Dists(knn, 1), typename Matches::Ids(knn, 1));

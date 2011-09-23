@@ -54,9 +54,9 @@ struct MaxDistOutlierFilter: public FeatureOutlierFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			{ "maxDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T> }
-		};
+		return ParametersDoc({
+			{ "maxDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>} 
+		});
 	}
 	
 	const T maxDist;
@@ -73,9 +73,9 @@ struct MinDistOutlierFilter: public FeatureOutlierFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
-			{ "minDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T> }
-		};
+		return ParametersDoc({
+			{ "minDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>} 
+		});
 	}
 	
 	const T minDist;
@@ -92,9 +92,9 @@ struct MedianDistOutlierFilter: public FeatureOutlierFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
+		return ParametersDoc({
 			{ "factor", "points farther away factor * median will be considered outliers.", "3", "0.0000001", "inf", &P::Comp<T>}
-		};
+		});
 	}
 	
 	const T factor;
@@ -111,9 +111,9 @@ struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
+		return ParametersDoc({
 			{ "factor", "percentage to keep", "0.75", "0.0000001", "0.9999999", &P::Comp<T>}
-		};
+		});
 	}
 	
 	const T ratio;
@@ -130,11 +130,11 @@ struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
 	}
 	static const ParametersDoc availableParameters()
 	{
-		return {
+		return ParametersDoc({
 			{ "minRatio", "min ratio", "0.05", "0.0000001", "1", &P::Comp<T>},
 			{ "maxRatio", "max ratio", "0.99", "0.0000001", "1", &P::Comp<T>},
-			{ "lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda)", "0.95" }
-		};
+			{ "lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda", "0.95" }
+		});
 	}
 
 	const T minRatio;
