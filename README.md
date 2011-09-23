@@ -76,7 +76,7 @@ If you have compiled libpointmatcher with [yaml-cpp] enabled, you can configure 
 Developing
 ==========
 
-If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and icp (in /example/icp_simple.cpp/ and `example/icp.cpp`). You can see how loading/saving of data files work by looking at convertCSVtoVTK (`example/convertCSVtoVTK.cpp`). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (`example/align_sequence.cpp`).
+If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and icp (in `example/icp_simple.cpp` and `example/icp.cpp`). You can see how loading/saving of data files work by looking at convertCSVtoVTK (`example/convertCSVtoVTK.cpp`). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (`example/align_sequence.cpp`).
 
 
 Bug reporting
