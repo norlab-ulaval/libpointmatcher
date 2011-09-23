@@ -51,7 +51,7 @@ int main(int argc, const char *argv[])
 {
 	bool isCSV = true;
 	string configFile;
-	string outputBaseFile;
+	string outputBaseFile("test");
 	validateArgs(argc, argv, isCSV, configFile, outputBaseFile);
 	const char *refFile(argv[argc-2]);
 	const char *dataFile(argv[argc-1]);
