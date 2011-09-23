@@ -45,10 +45,37 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace PointMatcherSupport
 {
+	// improvements over boost::lexical_cast that can handle "inf", "-inf", "Nan" for float and doubles
+	template<typename Target>
+	inline Target lexical_cast_scalar_to_string(const std::string& arg)
+	{
+		if (arg == "inf")
+			return std::numeric_limits<Target>::infinity();
+		else if (arg == "-inf")
+			return -std::numeric_limits<Target>::infinity();
+		else if (arg == "nan")
+			return std::numeric_limits<Target>::quiet_NaN();
+		else
+			return boost::lexical_cast<Target>(arg);
+	}
+	
+	template<typename Target, typename Source>
+	inline Target lexical_cast(const Source& arg)
+	{
+		return boost::lexical_cast<Target>(arg);
+	}
+	
+	template<>
+	inline float lexical_cast(const std::string& arg) { return lexical_cast_scalar_to_string<float>(arg); }
+	template<>
+	inline double lexical_cast(const std::string& arg) { return lexical_cast_scalar_to_string<double>(arg); }
+	
+	//
+	
 	template<typename S>
 	std::string toParam(const S& value)
 	{
-		return boost::lexical_cast<std::string>(value);
+		return lexical_cast<std::string>(value);
 	}
 	
 	struct Parametrizable
@@ -64,7 +91,7 @@ namespace PointMatcherSupport
 		template<typename S>
 		static bool Comp(std::string a, std::string b)
 		{
-			return boost::lexical_cast<S>(a) < boost::lexical_cast<S>(b);
+			return lexical_cast<S>(a) < lexical_cast<S>(b);
 		}
 		
 		struct ParameterDoc
@@ -123,7 +150,7 @@ namespace PointMatcherSupport
 		std::string getParamValueString(const std::string& paramName) const;
 		
 		template<typename S>
-		S get(const std::string& paramName) const { return boost::lexical_cast<S>(getParamValueString(paramName)); }
+		S get(const std::string& paramName) const { return lexical_cast<S>(getParamValueString(paramName)); }
 		
 		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p) { o << p.parametersDoc; return o; }
 	};
