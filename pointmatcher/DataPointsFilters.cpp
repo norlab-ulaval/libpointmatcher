@@ -70,7 +70,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
-		throw InvalidParameter((boost::format("MaxDistOnAxisDataPointsFilter: Error, filtering on dimension number %1, larger than feature dimensionality %2") % dim % input.features.rows()).str());
+		throw InvalidParameter((boost::format("MaxDistOnAxisDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
 	
 	const int nbPointsIn = input.features.cols();
 	const int nbPointsOut = (input.features.row(dim).array().abs() < maxDist).count();
@@ -116,7 +116,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
-		throw InvalidParameter((boost::format("MinDistOnAxisDataPointsFilter: Error, filtering on dimension number %1, larger than feature dimensionality %2") % dim % input.features.rows()).str());
+		throw InvalidParameter((boost::format("MinDistOnAxisDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
 	
 	const int nbPointsIn = input.features.cols();
 	const int nbPointsOut = (input.features.row(dim).array().abs() > minDist).count();
@@ -162,7 +162,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
-		throw InvalidParameter((boost::format("MaxQuantileOnAxisDataPointsFilter: Error, filtering on dimension number %1, larger than feature dimensionality %2") % dim % input.features.rows()).str());
+		throw InvalidParameter((boost::format("MaxQuantileOnAxisDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
 	
 	const int nbPointsIn = input.features.cols();
 	const int nbPointsOut = nbPointsIn * ratio;

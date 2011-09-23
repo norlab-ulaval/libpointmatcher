@@ -149,11 +149,12 @@ namespace PointMatcherSupport
 			Parameters::const_iterator paramIt(params.find(paramName));
 			if (paramIt != params.end())
 			{
+				const string className(typeid(*this).name());
 				const string& val(paramIt->second);
 				if (it->comp(val, it->minValue))
-					throw InvalidParameter((boost::format("Value %1 of parameter %2 in object %3 is smaller than minimum admissible value %4") % val % paramName % typeid(*this).name() % it->minValue).str());
+					throw InvalidParameter((boost::format("Value %1% of parameter %2% in class %3% is smaller than minimum admissible value %4%") % val % paramName % className % it->minValue).str());
 				if (it->comp(it->maxValue, val))
-					throw InvalidParameter((boost::format("Value %1 of parameter %2 in object %3 is larger than maximum admissible value %4") % val % paramName % typeid(*this).name() % it->minValue).str());
+					throw InvalidParameter((boost::format("Value %1% of parameter %2% in class %3% is larger than maximum admissible value %4%") % val % paramName % className % it->minValue).str());
 				parameters[paramName] = val;
 			}
 			else
@@ -164,8 +165,9 @@ namespace PointMatcherSupport
 	std::string Parametrizable::getParamValueString(const std::string& paramName) const
 	{
 		Parameters::const_iterator paramIt(parameters.find(paramName));
+		const string className(typeid(*this).name());
 		if (paramIt == parameters.end())
-			throw InvalidParameter((boost::format("Parameter %1 does not exist in object %2") % paramName % typeid(*this).name()).str());
+			throw InvalidParameter((boost::format("Parameter %1% does not exist in class %2%") % paramName % className).str());
 		// TODO: use string distance to propose close one, copy/paste code from Aseba
 		return paramIt->second;
 	}

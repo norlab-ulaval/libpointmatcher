@@ -114,7 +114,7 @@ namespace PointMatcherSupport
 			{
 				std::cerr << "No element named " << name << " is registered. Known ones are:\n";
 				dump(std::cerr);
-				throw std::runtime_error((boost::format("Trying to instanciate unknown element %1 from registrar") % name).str());
+				throw std::runtime_error((boost::format("Trying to instanciate unknown element %1% from registrar") % name).str());
 			}
 			return it->second;
 		}
