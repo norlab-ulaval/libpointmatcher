@@ -159,6 +159,6 @@ void validateArgs(int argc, char *argv[], bool& isCSV )
 void basicUsage(char *argv[])
 {
 	cerr << endl;
-	cerr << "Error in command line, usage " << argv[0] << " reference.csv reading.csv [REPOSITORY]" << endl;
+	cerr << "Error in command line, usage " << argv[0] << " reference.csv reading.csv [FOLDER]" << endl;
 	cerr << endl;
 }
