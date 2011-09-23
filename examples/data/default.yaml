@@ -11,11 +11,17 @@ keyframeDataPointsFilters:
   - SamplingSurfaceNormalDataPointsFilter:
       binSize: 10
 
+matcher:
+  KDTreeMatcher:
+    knn: 1
+    epsilon: 0 
+
 featureOutlierFilters:
   - TrimmedDistOutlierFilter:
       ratio: 0.75
 
-errorMinimizer: PointToPlaneErrorMinimizer
+errorMinimizer:
+  PointToPlaneErrorMinimizer
 
 transformationCheckers:
   - CounterTransformationChecker:
@@ -25,6 +31,7 @@ transformationCheckers:
       minDeltaTransErr: 0.01
       tail: 4   
       
-inspector: NullInspector
+inspector:
+  NullInspector
 
 outlierMixingWeight: 1

@@ -442,7 +442,7 @@ struct PointMatcher
 		void createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
 		template<typename R>
-		typename R::TargetType* createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar);
+		void createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
 		
 		template<typename R>
 		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);
