@@ -176,4 +176,6 @@ void usage(const char *argv[])
 	cerr << endl << "3D Example:" << endl;
 	cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
 	cerr << endl;
+	cerr << "You can list available modules using the \"list_modules\" command" << endl;
+	cerr << endl;
 }
