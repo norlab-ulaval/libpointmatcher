@@ -60,7 +60,7 @@ template struct PointMatcher<double>::NullFeatureOutlierFilter;
 // MaxDistOutlierFilter
 template<typename T>
 PointMatcher<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter(MaxDistOutlierFilter::availableParameters(), params),
+	FeatureOutlierFilter("MaxDistOutlierFilter", MaxDistOutlierFilter::availableParameters(), params),
 	maxDist(Parametrizable::get<T>("maxDist"))
 {
 }
@@ -95,7 +95,7 @@ template struct PointMatcher<double>::MaxDistOutlierFilter;
 // MinDistOutlierFilter
 template<typename T>
 PointMatcher<T>::MinDistOutlierFilter::MinDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter(MinDistOutlierFilter::availableParameters(), params),
+	FeatureOutlierFilter("MinDistOutlierFilter", MinDistOutlierFilter::availableParameters(), params),
 	minDist(Parametrizable::get<T>("minDist"))
 {
 }
@@ -131,7 +131,7 @@ template struct PointMatcher<double>::MinDistOutlierFilter;
 // MedianDistOutlierFilter
 template<typename T>
 PointMatcher<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter(MedianDistOutlierFilter::availableParameters(), params),
+	FeatureOutlierFilter("MedianDistOutlierFilter", MedianDistOutlierFilter::availableParameters(), params),
 	factor(Parametrizable::get<T>("factor"))
 {
 }
@@ -170,7 +170,7 @@ template struct PointMatcher<double>::MedianDistOutlierFilter;
 // TrimmedDistOutlierFilter
 template<typename T>
 PointMatcher<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter(TrimmedDistOutlierFilter::availableParameters(), params),
+	FeatureOutlierFilter("TrimmedDistOutlierFilter", TrimmedDistOutlierFilter::availableParameters(), params),
 	ratio(Parametrizable::get<T>("ratio"))
 {
 }
@@ -208,7 +208,7 @@ template struct PointMatcher<double>::TrimmedDistOutlierFilter;
 
 template<typename T>
 PointMatcher<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter(VarTrimmedDistOutlierFilter::availableParameters(), params),
+	FeatureOutlierFilter("VarTrimmedDistOutlierFilter", VarTrimmedDistOutlierFilter::availableParameters(), params),
 	minRatio(Parametrizable::get<T>("minRatio")),
 	maxRatio(Parametrizable::get<T>("maxRatio")),
 	lambda(Parametrizable::get<T>("lambda"))

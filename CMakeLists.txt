@@ -68,6 +68,20 @@ if (OPENCL_LIBRARIES)
 	set(EXTRA_LIBS ${OPENCL_LIBRARIES})
 endif (OPENCL_LIBRARIES)
 
+# yaml-cpp
+find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
+	/usr/local/include
+	/usr/include
+)
+find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
+	/usr/local/lib
+	/usr/lib
+NO_DEFAULT_PATH)
+if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+	set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
+	add_definitions(-DHAVE_QWT)
+endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+
 # include all libs so far
 include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_LIBRARY_DIRS})
 add_definitions(-Wall)

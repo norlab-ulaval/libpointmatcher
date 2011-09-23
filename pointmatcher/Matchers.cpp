@@ -61,7 +61,7 @@ template struct PointMatcher<double>::NullMatcher;
 // KDTreeMatcher
 template<typename T>
 PointMatcher<T>::KDTreeMatcher::KDTreeMatcher(const Parameters& params):
-	Matcher(KDTreeMatcher::availableParameters(), params),
+	Matcher("KDTreeMatcher", KDTreeMatcher::availableParameters(), params),
 	knn(Parametrizable::get<int>("knn")),
 	epsilon(Parametrizable::get<T>("epsilon")),
 	searchType(NNSearchType(Parametrizable::get<int>("searchType"))),

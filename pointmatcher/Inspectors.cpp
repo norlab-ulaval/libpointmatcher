@@ -67,8 +67,8 @@ using namespace std;
 		ofs << " ";
 	}*/
 template<typename T>
-PointMatcher<T>::AbstractVTKInspector::AbstractVTKInspector(const ParametersDoc paramsDoc, const Parameters& params):
-	Inspector(paramsDoc,params),
+PointMatcher<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
+	Inspector(className,paramsDoc,params),
 	streamIter(0)
 {
 }
@@ -467,7 +467,7 @@ void PointMatcher<T>::AbstractVTKInspector::finish(const size_t iterationCount)
 
 template<typename T>
 PointMatcher<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
-	AbstractVTKInspector(VTKFileInspector::availableParameters(), params),
+	AbstractVTKInspector("VTKFileInspector", VTKFileInspector::availableParameters(), params),
 	baseFileName(Parametrizable::get<string>("baseFileName"))
 {
 }

@@ -139,12 +139,12 @@ namespace PointMatcherSupport
 		typedef std::string Parameter;
 		typedef std::map<std::string, Parameter> Parameters;
 		
+		const std::string className;
 		const ParametersDoc parametersDoc;
-		
 		Parameters parameters;
 		
-		Parametrizable(){}
-		Parametrizable(const ParametersDoc paramsDoc, const Parameters& params);
+		Parametrizable():className("unknown") {}
+		Parametrizable(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~Parametrizable(){}
 		
 		std::string getParamValueString(const std::string& paramName) const;

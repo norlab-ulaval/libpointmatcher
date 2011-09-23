@@ -58,7 +58,7 @@ protected:
 	std::ostream* streamIter;
 
 public:
-	AbstractVTKInspector(const ParametersDoc paramsDoc, const Parameters& params);
+	AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
 	virtual void init() {};
 	virtual void dumpDataPoints(const DataPoints& cloud, const std::string& name);
 	virtual void dumpMeshNodes(const DataPoints& cloud, const std::string& name);

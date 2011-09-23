@@ -60,7 +60,7 @@ template struct PointMatcher<double>::IdentityDataPointsFilter;
 // Constructor
 template<typename T>
 PointMatcher<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFilter(const Parameters& params):
-	DataPointsFilter(MaxDistOnAxisDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("MaxDistOnAxisDataPointsFilter", MaxDistOnAxisDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
 	maxDist(Parametrizable::get<T>("maxDist"))
 {
@@ -106,7 +106,7 @@ template struct PointMatcher<double>::MaxDistOnAxisDataPointsFilter;
 // Constructor
 template<typename T>
 PointMatcher<T>::MinDistOnAxisDataPointsFilter::MinDistOnAxisDataPointsFilter(const Parameters& params):
-	DataPointsFilter(MinDistOnAxisDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("MinDistOnAxisDataPointsFilter", MinDistOnAxisDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
 	minDist(Parametrizable::get<T>("minDist"))
 {
@@ -152,7 +152,7 @@ template struct PointMatcher<double>::MinDistOnAxisDataPointsFilter;
 // Constructor
 template<typename T>
 PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsFilter(const Parameters& params):
-	DataPointsFilter(MaxQuantileOnAxisDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("MaxQuantileOnAxisDataPointsFilter", MaxQuantileOnAxisDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
 	ratio(Parametrizable::get<T>("ratio"))
 {
@@ -229,7 +229,7 @@ template struct PointMatcher<double>::MaxQuantileOnAxisDataPointsFilter;
 // Constructor
 template<typename T>
 PointMatcher<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(const Parameters& params):
-	DataPointsFilter(UniformizeDensityDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("UniformizeDensityDataPointsFilter", UniformizeDensityDataPointsFilter::availableParameters(), params),
 	ratio(Parametrizable::get<T>("ratio")),
 	nbBin(Parametrizable::get<unsigned>("nbBin"))
 {
@@ -396,7 +396,7 @@ template struct PointMatcher<double>::UniformizeDensityDataPointsFilter;
 // Constructor
 template<typename T>
 PointMatcher<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(const Parameters& params):
-	DataPointsFilter(SurfaceNormalDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("SurfaceNormalDataPointsFilter", SurfaceNormalDataPointsFilter::availableParameters(), params),
 	knn(Parametrizable::get<int>("knn")),
 	epsilon(Parametrizable::get<T>("epsilon")),
 	keepNormals(Parametrizable::get<bool>("keepNormals")),
@@ -614,7 +614,7 @@ template struct PointMatcher<double>::SurfaceNormalDataPointsFilter;
 // Constructor
 template<typename T>
 PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(const Parameters& params):
-	DataPointsFilter(SamplingSurfaceNormalDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("SamplingSurfaceNormalDataPointsFilter", SamplingSurfaceNormalDataPointsFilter::availableParameters(), params),
 	binSize(Parametrizable::get<int>("binSize")),
 	averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
 	keepNormals(Parametrizable::get<bool>("keepNormals")),
@@ -951,7 +951,7 @@ template struct PointMatcher<double>::OrientNormalsDataPointsFilter;
 // Constructor
 template<typename T>
 PointMatcher<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(const Parameters& params):
-	DataPointsFilter(RandomSamplingDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("RandomSamplingDataPointsFilter", RandomSamplingDataPointsFilter::availableParameters(), params),
 	prob(Parametrizable::get<double>("prob"))
 {
 }
@@ -1018,7 +1018,7 @@ template struct PointMatcher<double>::RandomSamplingDataPointsFilter;
 // Constructor
 template<typename T>
 PointMatcher<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(const Parameters& params):
-	DataPointsFilter(FixstepSamplingDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("FixstepSamplingDataPointsFilter", FixstepSamplingDataPointsFilter::availableParameters(), params),
 	startStep(Parametrizable::get<double>("startStep")),
 	endStep(Parametrizable::get<double>("endStep")),
 	stepMult(Parametrizable::get<double>("stepMult")),

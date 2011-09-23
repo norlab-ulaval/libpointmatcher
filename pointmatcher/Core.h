@@ -69,7 +69,7 @@ namespace PointMatcherSupport
 	struct Logger: public Parametrizable
 	{
 		Logger() {}
-		Logger(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		Logger(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		
 		virtual ~Logger() {}
 		virtual bool hasInfoChannel() const { return false; };
@@ -201,7 +201,7 @@ struct PointMatcher
 	struct Transformation: public Parametrizable
 	{
 		Transformation(){}
-		Transformation(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		Transformation(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		virtual ~Transformation() {}
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0;
 	};
@@ -222,7 +222,7 @@ struct PointMatcher
 	struct DataPointsFilter: public Parametrizable
 	{
 		DataPointsFilter(){}
-		DataPointsFilter(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		DataPointsFilter(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		virtual ~DataPointsFilter() {}
 		virtual void init() {}
 		virtual DataPoints filter(const DataPoints& input, bool& iterate) = 0;
@@ -248,7 +248,7 @@ struct PointMatcher
 		unsigned long visitCounter;
 		
 		Matcher():visitCounter(0) {}
-		Matcher(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params),visitCounter(0) {}
+		Matcher(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params),visitCounter(0) {}
 		
 		void resetVisitCount() { visitCounter = 0; }
 		unsigned long getVisitCount() const { return visitCounter; }
@@ -266,7 +266,7 @@ struct PointMatcher
 	struct FeatureOutlierFilter: public Parametrizable
 	{
 		FeatureOutlierFilter() {}
-		FeatureOutlierFilter(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		FeatureOutlierFilter(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		virtual ~FeatureOutlierFilter() {}
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) = 0;
 	};
@@ -344,7 +344,7 @@ struct PointMatcher
 
 	public:
 		TransformationChecker();
-		TransformationChecker(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		TransformationChecker(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		virtual ~TransformationChecker() {}
 		virtual void init(const TransformationParameters& parameters, bool& iterate) = 0;
 		virtual void check(const TransformationParameters& parameters, bool& iterate) = 0;
@@ -375,7 +375,7 @@ struct PointMatcher
 	struct Inspector: public Parametrizable
 	{
 		Inspector() {}
-		Inspector(const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(paramsDoc,params) {}
+		Inspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		
 		// 
 		virtual ~Inspector() {}

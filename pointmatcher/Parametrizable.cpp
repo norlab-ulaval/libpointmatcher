@@ -139,7 +139,8 @@ namespace PointMatcherSupport
 	*/
 	
 	Parametrizable::Parametrizable(
-		const ParametersDoc paramsDoc, const Parameters& params):
+		const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
+		className(className),
 		parametersDoc(paramsDoc)
 	{
 		// fill current parameters from either values passed as argument, or default value
@@ -149,7 +150,6 @@ namespace PointMatcherSupport
 			Parameters::const_iterator paramIt(params.find(paramName));
 			if (paramIt != params.end())
 			{
-				const string className(typeid(*this).name());
 				const string& val(paramIt->second);
 				if (it->comp(val, it->minValue))
 					throw InvalidParameter((boost::format("Value %1% of parameter %2% in class %3% is smaller than minimum admissible value %4%") % val % paramName % className % it->minValue).str());
@@ -165,7 +165,6 @@ namespace PointMatcherSupport
 	std::string Parametrizable::getParamValueString(const std::string& paramName) const
 	{
 		Parameters::const_iterator paramIt(parameters.find(paramName));
-		const string className(typeid(*this).name());
 		if (paramIt == parameters.end())
 			throw InvalidParameter((boost::format("Parameter %1% does not exist in class %2%") % paramName % className).str());
 		// TODO: use string distance to propose close one, copy/paste code from Aseba

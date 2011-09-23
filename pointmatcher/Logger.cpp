@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace PointMatcherSupport
 {
 	FileLogger::FileLogger(const Parameters& params):
-		Logger(FileLogger::availableParameters(), params),
+		Logger("FileLogger", FileLogger::availableParameters(), params),
 		infoFileName(Parametrizable::get<std::string>("infoFileName")),
 		warningFileName(Parametrizable::get<std::string>("warningFileName")),
 		_infoStream(infoFileName),
