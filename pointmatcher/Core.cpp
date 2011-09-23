@@ -38,6 +38,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <limits>
 
+#ifdef HAVE_YAML_CPP
+	#include "yaml-cpp/yaml.h"
+#endif // HAVE_YAML_CPP
+
 using namespace std;
 using namespace PointMatcherSupport;
 
@@ -232,7 +236,78 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->outlierMixingWeight = 1;
 }
 
+template<typename T>
+void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
+{
+	#ifdef HAVE_YAML_CPP
+	
+	this->cleanup();
+	
+	YAML::Parser parser(in);
+	YAML::Node doc;
+	parser.GetNextDocument(doc);
+	
+	PointMatcher<T> pm;
+	
+	createModulesFromRegistrar("readingDataPointsFilter", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
+	createModulesFromRegistrar("readingStepDataPointsFilter", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
+	createModulesFromRegistrar("keyframeDataPointsFilter", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
+	createModulesFromRegistrar("transformation", doc, pm.REG(Transformation), transformations);
+	matcher.reset(createModuleFromRegistrar("matcher", doc, pm.REG(Matcher)));
+	createModulesFromRegistrar("featureOutlierFilter", doc, pm.REG(FeatureOutlierFilter), featureOutlierFilters);
+	createModulesFromRegistrar("descriptorOutlierFilter", doc, pm.REG(DescriptorOutlierFilter), descriptorOutlierFilters);
+	errorMinimizer.reset(createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer)));
+	createModulesFromRegistrar("transformationChecker", doc, pm.REG(TransformationChecker), transformationCheckers);
+	inspector.reset(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector)));
+	if (doc.FindValue("outlierMixingWeight"))
+		outlierMixingWeight = doc["outlierMixingWeight"].to<typeof(outlierMixingWeight)>();
+	
+	loadAdditionalYAMLContent(doc);
+	
+	#else // HAVE_YAML_CPP
+	throw runtime_error("Yaml support not compiled in. Install yaml-cpp, configure build and recompile.");
+	#endif // HAVE_YAML_CPP
+}
 
+#ifdef HAVE_YAML_CPP
+
+template<typename T>
+template<typename R>
+void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules)
+{
+	const YAML::Node *reg = doc.FindValue(regName);
+	if (reg)
+	{
+		for(YAML::Iterator moduleIt = reg->begin(); moduleIt != reg->end(); ++moduleIt)
+		{
+			const YAML::Node& module(*moduleIt);
+			modules.push_back(createModuleFromRegistrar(regName, module, registrar));
+		}
+	}
+}
+
+template<typename T>
+template<typename R>
+typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& module, const R& registrar)
+{
+	std::string name;
+	Parameters params;
+	for(YAML::Iterator paramIt = module.begin(); paramIt != module.end(); ++paramIt)
+	{
+		std::string key, value;
+		paramIt.first() >> key;
+		paramIt.second() >> value;
+		if (key == "name")
+			name = value;
+		else
+			params[key] = value;
+	}
+	if (name.empty())
+		throw std::runtime_error((boost::format("Missing module name for registrar %1%") % regName).str());
+	return registrar.create(name, params);
+}
+
+#endif // HAVE_YAML_CPP
 
 template<typename T>
 PointMatcher<T>::ICP::ICP()
@@ -447,6 +522,15 @@ void PointMatcher<T>::ICPSequence::setDefault()
 	ICPChainBase::setDefault();
 	ratioToSwitchKeyframe = 0.8;
 }
+
+#ifdef HAVE_YAML_CPP
+template<typename T>
+void PointMatcher<T>::ICPSequence::loadAdditionalYAMLContent(YAML::Node& doc)
+{
+	if (doc.FindValue("ratioToSwitchKeyframe"))
+		ratioToSwitchKeyframe = doc["ratioToSwitchKeyframe"].to<typeof(ratioToSwitchKeyframe)>();
+}
+#endif // HAVE_YAML_CPP
 
 template<typename T>
 void PointMatcher<T>::ICPSequence::resetTracking(DataPoints& inputCloud)

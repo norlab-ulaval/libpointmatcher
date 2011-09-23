@@ -106,7 +106,7 @@ namespace PointMatcherSupport
 			classes[name] = descriptor;
 		}
 		
-		//! Return a descriptor following a name
+		//! Return a descriptor following a name, throw an exception if name is invalid
 		const ClassDescriptor* getDescriptor(const std::string& name) const
 		{
 			auto it = classes.find(name);
