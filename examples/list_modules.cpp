@@ -58,9 +58,11 @@ int main()
 	DUMP_REGISTRAR_CONTENT(DataPointsFilter)
 	DUMP_REGISTRAR_CONTENT(Matcher)
 	DUMP_REGISTRAR_CONTENT(FeatureOutlierFilter)
+	DUMP_REGISTRAR_CONTENT(DescriptorOutlierFilter)
 	DUMP_REGISTRAR_CONTENT(ErrorMinimizer)
 	DUMP_REGISTRAR_CONTENT(TransformationChecker)
 	DUMP_REGISTRAR_CONTENT(Inspector)
+	DUMP_REGISTRAR_CONTENT(Logger)
 	
 	return 0;
 }

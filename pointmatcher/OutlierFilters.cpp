@@ -223,8 +223,7 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::VarTrimmedDistOutlierF
 	bool& iterate)
 {
 	const T tunedRatio = optimizeInlierRatio(input);
-	// FIXME: this should go through the logging structure
-	std::cout<< "Optimized ratio: " << tunedRatio << std::endl;
+	LOG_INFO_STREAM("Optimized ratio: " << tunedRatio);
 
 	const T limit = input.getDistsQuantile(tunedRatio);
 	

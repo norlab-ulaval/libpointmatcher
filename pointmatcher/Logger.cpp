@@ -43,8 +43,8 @@ namespace PointMatcherSupport
 		Logger("FileLogger", FileLogger::availableParameters(), params),
 		infoFileName(Parametrizable::get<std::string>("infoFileName")),
 		warningFileName(Parametrizable::get<std::string>("warningFileName")),
-		_infoStream(infoFileName),
-		_warningStream(warningFileName)
+		_infoStream(infoFileName.c_str()),
+		_warningStream(warningFileName.c_str())
 	{
 		if (!_infoStream.good())
 			throw runtime_error(string("FileLogger::Cannot open info stream to file ") + infoFileName);

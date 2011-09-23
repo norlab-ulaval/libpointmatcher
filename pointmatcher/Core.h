@@ -85,8 +85,8 @@ namespace PointMatcherSupport
 		virtual std::ostream* warningStream() { return 0; }
 	};
 	
-	#define LOG_INFO_STREAM(args) { if (localLogger->hasInfoChannel()) { (*localLogger->infoStream()) << args << std::endl; } }
-	#define LOG_WARNING_STREAM(args) { if (localLogger->hasWarningChannel()) { (*localLogger->warningStream()) << args << std::endl; } }
+	#define LOG_INFO_STREAM(args) { if (PointMatcherSupport::localLogger->hasInfoChannel()) { (*PointMatcherSupport::localLogger->infoStream()) << args << std::endl; } }
+	#define LOG_WARNING_STREAM(args) { if (PointMatcherSupport::localLogger->hasWarningChannel()) { (*PointMatcherSupport::localLogger->warningStream()) << args << std::endl; } }
 	
 	// send patches for your favourite compiler
 	#if defined(__GNUC__)
