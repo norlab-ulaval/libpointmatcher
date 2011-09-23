@@ -4,7 +4,7 @@ libpointmatcher depends on:
 
  * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
  * [libnabo], a fast K Nearest Neighbour library for low-dimensional spaces.
- * [yaml-cpp] (optional), a YAML 1.2 parser and emitter
+ * [yaml-cpp], a YAML 1.2 parser and emitter (optional)
 
 libpointmatcher is being developed by François Pomerleau and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
@@ -22,7 +22,7 @@ Prerequisites
 If your operating system does not provide it, you must get [Eigen].
 It only needs to be downloaded and extracted.
 [libnabo] must be downloaded and installed, please follow the [libnabo]'s documentation to do so.
-If you want to use YAML-enabled config files, you have to install [yaml-cpp]; on Ubuntu, [ROS] [repositories](http://www.ros.org/wiki/electric/Installation/Ubuntu) provide `yaml-cpp0.2.6-dev`, that you can install with `sudo apt-get install paraview` once these repositories are setuped.
+If you want to use YAML-enabled config files, you have to install [yaml-cpp]; on Ubuntu, [ROS repositories](http://www.ros.org/wiki/electric/Installation/Ubuntu) provide `yaml-cpp0.2.6-dev`.
 
 Quick compilation and installation under Unix
 ---------------------------------------------
