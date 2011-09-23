@@ -57,9 +57,9 @@ namespace PointMatcherSupport
 		return o;
 	}
 
-	bool TrueLexicalComparison(std::string, std::string)
+	bool FalseLexicalComparison(std::string, std::string)
 	{
-		return true;
+		return false;
 	}
 	
 	template<typename S>
@@ -107,7 +107,7 @@ namespace PointMatcherSupport
 		defaultValue(boost::lexical_cast<string>(defaultValue)), 
 		minValue(""), 
 		maxValue(""),
-		comp(TrueLexicalComparison)
+		comp(FalseLexicalComparison)
 	{}
 	
 	/*
