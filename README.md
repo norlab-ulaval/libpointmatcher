@@ -27,7 +27,7 @@ If you want to use YAML-enabled config files, you have to install [yaml-cpp]; on
 Quick compilation and installation under Unix
 ---------------------------------------------
 
-Under Unix, assuming that [Eigen], [libnabo] and optionally [yaml-cpp] are installed system-wide, you can compile (with optimisation and debug information) and install libpointmatcher in `/usr/local` with the following commands run in the top-level directory of libpointmatcher's sources:
+Under Unix, assuming that [Eigen], [libnabo] and optionally [yaml-cpp] are installed system-wide, you can compile (with optimisation and debug information) and install libpointmatcher in `/usr/local` with the following commands, run in the top-level directory of libpointmatcher's sources:
 
 	SRC_DIR=`pwd`
 	BUILD_DIR=${SRC_DIR}/build
@@ -41,7 +41,7 @@ Under Unix, assuming that [Eigen], [libnabo] and optionally [yaml-cpp] are insta
 	sudo make install
 
 These lines will compile libpointmatcher in a `build` sub-directory and therefore keep your source tree clean.
-Note that you could compile libpointmatcher anywhere you have write access, such as in `/tmp/libpointmatcher.
+Note that you could compile libpointmatcher anywhere you have write access, such as in `/tmp/libpointmatcher`.
 This out-of-source build is a nice feature of [CMake] under Unixes.
 
 If [Eigen], [libnabo] or [yaml-cpp] are not installed system-wide, you might have to tell [CMake] where to find them.
@@ -70,7 +70,13 @@ You can list the available modules with:
 
 	./list_modules
 
-If you have compiled libpointmatcher with [yaml-cpp] enabled, you can configure the ICP chain without any recompilation by passing a configuration file to `./icp` command using the `--config` switch. An example file is available in `data/examples/default.yaml`.
+If you have compiled libpointmatcher with [yaml-cpp] enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the `./icp` command using the `--config` switch. An example file is available in `data/examples/default.yaml`.
+
+
+Developing
+==========
+
+If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and icp (in `example/icp_simple.cpp` and `example/icp.cpp`). You can see how loading/saving of data files work by looking at convertCSVtoVTK (`example/convertCSVtoVTK.cpp`). If you want to see how libpointmatcher can align a sequence of scan, you can have a look at align_sequence (`example/align_sequence.cpp`).
 
 
 Bug reporting

@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 void validateArgs(int argc, char *argv[], bool& isCSV);
+
 /**
   * Code example for ICP taking 2 points clouds (2D or 3D) relatively close 
   * and computing the transformation between them.
