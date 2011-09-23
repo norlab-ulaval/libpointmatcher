@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	{
 		string baseFolder(argv[3]);
 		icp.inspector.reset(new PM::VTKFileInspector(Parameters({
-			{ "baseFileName", baseFolder + "test" }
+			{ "baseFileName", baseFolder + "/test" }
 		})));
 	}
 	

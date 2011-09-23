@@ -58,6 +58,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parametrizable.h"
 #include "Registrar.h"
 
+#ifdef HAVE_YAML_CPP
+namespace YAML
+{
+	class Node;
+}
+#endif // HAVE_YAML_CPP
+
 namespace PointMatcherSupport
 {
 	template<typename S>
@@ -419,11 +426,24 @@ struct PointMatcher
 		//! Construct an ICP algorithm that works in most of the cases
 		virtual void setDefault();
 		
+		//! Construct an ICP algorithm from a YAML file
+		void loadFromYaml(std::istream& in);
+		
 	protected:
 		//! Protected contstructor, to prevent the creation of this object
 		ICPChainBase();
 		//! Clean chain up, empty all filters and delete associated objects
 		void cleanup();
+		
+		#ifdef HAVE_YAML_CPP
+		virtual void loadAdditionalYAMLContent(YAML::Node& doc) {}
+		
+		template<typename R>
+		void createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
+		
+		template<typename R>
+		typename R::TargetType* createModuleFromRegistrar(const std::string& regName, const YAML::Node& module, const R& registrar);
+		#endif // HAVE_YAML_CPP
 	};
 	
 	// ICP algorithm
@@ -476,6 +496,11 @@ struct PointMatcher
 		
 		//! Drop current key frame, create a new one with inputCloud, reset transformations
 		void resetTracking(DataPoints& inputCloud);
+		
+	protected:
+		#ifdef HAVE_YAML_CPP
+		virtual void loadAdditionalYAMLContent(YAML::Node& doc);
+		#endif // HAVE_YAML_CPP
 		
 	private:
 		int dim; //!< dimension of point clouds to process. Homogeneous coordinates are used, so expecting 3 or 4 
