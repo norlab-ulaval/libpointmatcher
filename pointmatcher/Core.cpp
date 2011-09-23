@@ -207,10 +207,10 @@ PointMatcher<T>::ICPChainBase::~ICPChainBase()
 template<typename T>
 void PointMatcher<T>::ICPChainBase::cleanup()
 {
-	transformations.clear();
 	readingDataPointsFilters.clear();
 	readingStepDataPointsFilters.clear();
 	keyframeDataPointsFilters.clear();
+	transformations.clear();
 	matcher.reset();
 	featureOutlierFilters.clear();
 	descriptorOutlierFilters.clear();
@@ -227,8 +227,8 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->transformations.push_back(new TransformFeatures());
 	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter());
 	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter());
-	this->matcher.reset(new KDTreeMatcher());
 	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter());
+	this->matcher.reset(new KDTreeMatcher());
 	this->errorMinimizer.reset(new PointToPlaneErrorMinimizer());
 	this->transformationCheckers.push_back(new CounterTransformationChecker());
 	this->transformationCheckers.push_back(new ErrorTransformationChecker());
@@ -249,18 +249,16 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	
 	PointMatcher<T> pm;
 	
-	createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
-	createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
-	createModulesFromRegistrar("keyframeDataPointsFilters", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
-	createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations);
-	createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher);
-	createModulesFromRegistrar("featureOutlierFilters", doc, pm.REG(FeatureOutlierFilter), featureOutlierFilters);
-	createModulesFromRegistrar("descriptorOutlierFilters", doc, pm.REG(DescriptorOutlierFilter), descriptorOutlierFilters);
-	createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer);
-	createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers);
-	createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector);
-	createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger);
-	
+	createModulesFromRegistrar("readingDataPointsFilter", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
+	createModulesFromRegistrar("readingStepDataPointsFilter", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
+	createModulesFromRegistrar("keyframeDataPointsFilter", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
+	createModulesFromRegistrar("transformation", doc, pm.REG(Transformation), transformations);
+	matcher.reset(createModuleFromRegistrar("matcher", doc, pm.REG(Matcher)));
+	createModulesFromRegistrar("featureOutlierFilter", doc, pm.REG(FeatureOutlierFilter), featureOutlierFilters);
+	createModulesFromRegistrar("descriptorOutlierFilter", doc, pm.REG(DescriptorOutlierFilter), descriptorOutlierFilters);
+	errorMinimizer.reset(createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer)));
+	createModulesFromRegistrar("transformationChecker", doc, pm.REG(TransformationChecker), transformationCheckers);
+	inspector.reset(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector)));
 	if (doc.FindValue("outlierMixingWeight"))
 		outlierMixingWeight = doc["outlierMixingWeight"].to<typeof(outlierMixingWeight)>();
 	
@@ -280,58 +278,32 @@ void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
 	{
-		cout << regName << endl;
 		for(YAML::Iterator moduleIt = reg->begin(); moduleIt != reg->end(); ++moduleIt)
 		{
 			const YAML::Node& module(*moduleIt);
-			modules.push_back(createModuleFromRegistrar(module, registrar));
+			modules.push_back(createModuleFromRegistrar(regName, module, registrar));
 		}
 	}
 }
 
 template<typename T>
 template<typename R>
-void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module)
+typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& module, const R& registrar)
 {
-	const YAML::Node *reg = doc.FindValue(regName);
-	if (reg)
-	{
-		cout << regName << endl;
-		module.reset(createModuleFromRegistrar(*reg, registrar));
-	}
-	else
-		module.reset();
-}
-
-template<typename T>
-template<typename R>
-typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar( const YAML::Node& module, const R& registrar)
-{
+	std::string name;
 	Parameters params;
-	string name;
-	
-	if (module.size() != 1)
+	for(YAML::Iterator paramIt = module.begin(); paramIt != module.end(); ++paramIt)
 	{
-		// parameter-less entry
-		name = module.to<string>();
-		cout << "  " << name << endl;
-	}
-	else
-	{
-		// get parameters
-		YAML::Iterator mapIt(module.begin());
-		mapIt.first() >> name;
-		cout << "  " << name << endl;
-		for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
-		{
-			std::string key, value;
-			paramIt.first() >> key;
-			paramIt.second() >> value;
-			cout << "    " << key << ": " << value << endl;
+		std::string key, value;
+		paramIt.first() >> key;
+		paramIt.second() >> value;
+		if (key == "name")
+			name = value;
+		else
 			params[key] = value;
-		}
 	}
-	
+	if (name.empty())
+		throw std::runtime_error((boost::format("Missing module name for registrar %1%") % regName).str());
 	return registrar.create(name, params);
 }
 
@@ -495,7 +467,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
 			stepReading, reference, outlierWeights, matches, iterate
-		) * T_iter;
+			) * T_iter;
 		
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(
@@ -663,21 +635,32 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 
 	bool iterate(true);
 	
+	// Apply readings filters
+	// reading is express in frame <dataIn>
 	DataPoints reading(inputCloud);
-	pointCountIn.push_back(inputCloud.features.cols());
-	
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading, iterate);
+	
+	pointCountIn.push_back(inputCloud.features.cols());
 	pointCountReading.push_back(reading.features.cols());
 	
+	// Reajust reading position: 
+	// from here reading is express in frame <refMean>
+	TransformationParameters
+		T_refMean_dataIn = T_refIn_refMean.inverse() * T_refIn_dataIn;
+	this->transformations.apply(reading, T_refMean_dataIn);
+	
+	// Prepare reading filters used in the loop 
 	this->readingStepDataPointsFilters.init();
 	
 	this->inspector->init();
 	
-	TransformationParameters transformationParameters = T_refIn_refMean.inverse() * T_refIn_dataIn;
+	// Since reading and reference are express in <refMean>
+	// the frame <refMean> is equivalent to the frame <iter(0)>
+	TransformationParameters T_iter = Matrix::Identity(dim, dim);
 	
-	this->transformationCheckers.init(transformationParameters, iterate);
-
+	this->transformationCheckers.init(T_iter, iterate);
+	
 	size_t iterationCount(0);
 	
 	while (iterate)
@@ -690,7 +673,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		
 		//-----------------------------
 		// Transform Readings
-		this->transformations.apply(stepReading, transformationParameters);
+		this->transformations.apply(stepReading, T_iter);
 		
 		//-----------------------------
 		// Match to closest point in Reference
@@ -724,16 +707,18 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		//-----------------------------
 		// Dump
 		this->inspector->dumpIteration(
-			iterationCount, transformationParameters, keyFrameCloud, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, this->transformationCheckers
+			iterationCount, T_iter, keyFrameCloud, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, this->transformationCheckers
 		);
 		
 		//-----------------------------
 		// Error minimization
-		transformationParameters *= this->errorMinimizer->compute(
+		// equivalent to: 
+		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
+		T_iter = this->errorMinimizer->compute(
 			stepReading, keyFrameCloud, outlierWeights, matches, iterate
-		);
+			) * T_iter;
 		
-		this->transformationCheckers.check(transformationParameters, iterate);
+		this->transformationCheckers.check(T_iter, iterate);
 		
 		++iterationCount;
 	}
@@ -743,9 +728,14 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	this->inspector->finish(iterationCount);
 	
 	// Move transformation back to original coordinate (without center of mass)
-	T_refIn_dataIn = T_refIn_refMean * transformationParameters;
+	// T_iter is equivalent to: T_iter(i+1)_iter(0)
+	// the frame <iter(0)> equals <refMean>
+	// so we have: 
+	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_refMean_dataIn
+	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_iter(0)_dataIn
+	// T_refIn_refMean remove the temperary frame added during initialization
+	T_refIn_dataIn = T_refIn_refMean * T_iter * T_refMean_dataIn;
 	
-	convergenceDuration.push_back(t.elapsed());
 	overlapRatio.push_back(this->errorMinimizer->getWeightedPointUsedRatio());
 	
 	if (this->errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
@@ -754,6 +744,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		keyFrameTransform *= T_refIn_dataIn;
 		this->createKeyFrame(inputCloud);
 	}
+	
+	convergenceDuration.push_back(t.elapsed());
 	
 	// Return transform in world space
 	return keyFrameTransform * T_refIn_dataIn;
@@ -793,9 +785,6 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, ErrorTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker)
-	
-	ADD_TO_REGISTRAR_NO_PARAM(Inspector, NullInspector)
-	ADD_TO_REGISTRAR(Inspector, VTKFileInspector)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Logger, NullLogger)
 	ADD_TO_REGISTRAR_NO_PARAM(Logger, FileLogger)

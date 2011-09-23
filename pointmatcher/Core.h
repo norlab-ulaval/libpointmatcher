@@ -442,10 +442,7 @@ struct PointMatcher
 		void createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
 		template<typename R>
-		void createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
-		
-		template<typename R>
-		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);
+		typename R::TargetType* createModuleFromRegistrar(const std::string& regName, const YAML::Node& module, const R& registrar);
 		#endif // HAVE_YAML_CPP
 	};
 	
@@ -515,7 +512,7 @@ struct PointMatcher
 		//TransformationParameters keyFrameTransformOffset; //old T_refIn_refMean 
 		
 		TransformationParameters T_refIn_dataIn; //!< transform of last frame wrt keyframe (last call to operator())
-		TransformationParameters curTransform; //old T_refMean_dataIn
+		//TransformationParameters curTransform; //old T_refMean_dataIn
 
 		TransformationParameters lastTransformInv; //!< inv of previous computed transform (using getTransform())
 		
