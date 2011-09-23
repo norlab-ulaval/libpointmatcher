@@ -259,6 +259,8 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer);
 	createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers);
 	createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector);
+	createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger);
+	
 	if (doc.FindValue("outlierMixingWeight"))
 		outlierMixingWeight = doc["outlierMixingWeight"].to<typeof(outlierMixingWeight)>();
 	
