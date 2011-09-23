@@ -51,7 +51,7 @@ int main(int argc, const char *argv[])
 {
 	bool isCSV = true;
 	string configFile;
-	string outputBaseFile;
+	string outputBaseFile("test");
 	validateArgs(argc, argv, isCSV, configFile, outputBaseFile);
 	const char *refFile(argv[argc-2]);
 	const char *dataFile(argv[argc-1]);
@@ -175,5 +175,7 @@ void usage(const char *argv[])
 	cerr << "  " << argv[0] << " ../examples/data/2D_twoBoxes.csv ../examples/data/2D_oneBox.csv" << endl;
 	cerr << endl << "3D Example:" << endl;
 	cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
+	cerr << endl;
+	cerr << "You can list available modules using the \"list_modules\" command" << endl;
 	cerr << endl;
 }

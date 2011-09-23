@@ -408,9 +408,9 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 
 	size_t iterationCount(0);
 	
-	cerr << "msa::icp - preprocess took " << t.elapsed() << " [s]" << endl;
-	cerr << "msa::icp - nb points in reference: " << nbPtsReference << " -> " << reference.features.cols() << endl;
-	cerr << "msa::icp - nb points in reading: " << nbPtsReading << " -> " << reading.features.cols() << endl;
+	LOG_INFO_STREAM("PointMatcher::icp - preprocess took " << t.elapsed() << " [s]");
+	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << reference.features.cols());
+	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << reading.features.cols());
 	t.restart();
 	
 	while (iterate)
@@ -483,7 +483,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	this->inspector->finish(iterationCount);
 	
-	cerr << "msa::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]" << endl;
+	LOG_INFO_STREAM("msa::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]");
 	
 	// Move transformation back to original coordinate (without center of mass)
 	// T_iter is equivalent to: T_iter(i+1)_iter(0)
@@ -588,7 +588,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		keyFrameDuration.push_back(t.elapsed());
 	}
 	else
-		cerr << "Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)" << endl;
+		LOG_WARNING_STREAM("Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)");
 }
 
 // WARNING: Reading and reference DataPoints will change!
@@ -787,7 +787,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Logger, NullLogger)
-	ADD_TO_REGISTRAR_NO_PARAM(Logger, FileLogger)
+	ADD_TO_REGISTRAR(Logger, FileLogger)
 }
 
 template struct PointMatcher<float>;

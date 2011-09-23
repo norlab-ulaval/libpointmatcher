@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 void validateArgs(int argc, char *argv[], bool& isCSV);
-void basicUsage(char *argv[]);
 
 /**
   * Code example for ICP taking 2 points clouds (2D or 3D) relatively close 
@@ -71,18 +70,10 @@ int main(int argc, char *argv[])
 
 	// Create the default ICP algorithm
 	PM::ICP icp;
+	
 	// See the implementation of setDefault() to create a custom ICP algorithm
 	icp.setDefault();
 
-	// Modify the default Inspector to output vtk file
-	if(argc == 4)
-	{
-		string baseFolder(argv[3]);
-		icp.inspector.reset(new PM::VTKFileInspector(Parameters({
-			{ "baseFileName", baseFolder + "/test" }
-		})));
-	}
-	
 	// Compute the transformation to express data in ref
 	PM::TransformationParameters T = icp(data, ref);
 
@@ -102,25 +93,14 @@ int main(int argc, char *argv[])
 
 void validateArgs(int argc, char *argv[], bool& isCSV )
 {
-	if (argc == 2)
+	if (argc != 3)
 	{
-		string cmd(argv[1]);
-		if(cmd == "--help")
-		{
-			basicUsage(argv);
-			cerr << "Will create 3 vtk files for inspection: ./test_ref.vtk, ./test_data_in.vtk and ./test_data_out.vtk" << endl;
-			cerr << endl << "2D Example:" << endl;
-			cerr << "  " << argv[0] << " ../examples/data/2D_twoBoxes.csv ../examples/data/2D_oneBox.csv" << endl;
-			cerr << endl << "3D Example:" << endl;
-			cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
-			cerr << endl << "If you enter optional REPOSITORY name, a vtk file will be created for every iteration in that repository"	<< endl << endl;
-			exit(1);
-		}
-	}
-	if (!(argc == 3 || argc == 4))
-	{
-		basicUsage(argv);
-		cerr << "Use " << argv[0] << " --help for more info" << endl << endl; 
+		cerr << "Wrong number of arguments, usage " << argv[0] << " reference.csv reading.csv" << endl;
+		cerr << "Will create 3 vtk files for inspection: ./test_ref.vtk, ./test_data_in.vtk and ./test_data_out.vtk" << endl;
+		cerr << endl << "2D Example:" << endl;
+		cerr << "  " << argv[0] << " ../examples/data/2D_twoBoxes.csv ../examples/data/2D_oneBox.csv" << endl;
+		cerr << endl << "3D Example:" << endl;
+		cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
 		exit(1);
 	}
 	
@@ -150,15 +130,5 @@ void validateArgs(int argc, char *argv[], bool& isCSV )
 		exit(4);
 	}
 
-	if (dataExt == ".csv")
-		isCSV = true;
-	else
-		isCSV = false;
-}
-
-void basicUsage(char *argv[])
-{
-	cerr << endl;
-	cerr << "Error in command line, usage " << argv[0] << " reference.csv reading.csv [FOLDER]" << endl;
-	cerr << endl;
+	isCSV = (dataExt == ".csv");
 }

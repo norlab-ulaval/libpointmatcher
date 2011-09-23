@@ -35,14 +35,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Core.h"
 
+using namespace std;
+
 namespace PointMatcherSupport
 {
 	FileLogger::FileLogger(const Parameters& params):
 		Logger("FileLogger", FileLogger::availableParameters(), params),
 		infoFileName(Parametrizable::get<std::string>("infoFileName")),
 		warningFileName(Parametrizable::get<std::string>("warningFileName")),
-		_infoStream(infoFileName),
-		_warningStream(warningFileName)
+		_infoStream(infoFileName.c_str()),
+		_warningStream(warningFileName.c_str())
 	{
+		if (!_infoStream.good())
+			throw runtime_error(string("FileLogger::Cannot open info stream to file ") + infoFileName);
+		if (!_warningStream.good())
+			throw runtime_error(string("FileLogger::Cannot open warning stream to file ") + warningFileName);
 	}
 } //PointMatcherSupport

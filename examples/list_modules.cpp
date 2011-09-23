@@ -37,30 +37,64 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-#define DUMP_REGISTRAR_CONTENT(name) \
+typedef PointMatcherSupport::Parametrizable::ParametersDoc ParametersDoc;
+
+void dumpWiki(const ParametersDoc& paramsDoc)
+{
+	cout << endl;
+	for (auto it = paramsDoc.cbegin(); it != paramsDoc.cend(); ++it)
+	{
+		cout << "`" << it->name << "` (default: `" << it->defaultValue << "`";
+		if (!it->minValue.empty())
+			cout << ", min: `" << it->minValue << "`";
+		if (!it->maxValue.empty())
+			cout << ", max: `" << it->maxValue << "`";
+		cout << ")" << endl;
+		cout << endl;
+		cout << " . " << it->doc << endl;
+		cout << endl;
+	}
+}
+
+#define DUMP_REGISTRAR_CONTENT(name, wiki) \
 { \
-	cout << "* " << # name << " *\n" << endl; \
+	if (wiki) \
+		cout << "==== " << # name << " ====\n" << endl; \
+	else \
+		cout << "* " << # name << " *\n" << endl; \
 	for (auto it = pm.REG(name).begin(); it != pm.REG(name).end(); ++it) \
 	{ \
-		cout << it->first << endl; \
+		if (wiki) \
+			cout << "===== " << it->first << " =====\n" << endl; \
+		else \
+			cout << it->first << endl; \
 		cout << it->second->description() << endl; \
-		cout << it->second->availableParameters(); \
+		if (wiki) \
+			dumpWiki(it->second->availableParameters()); \
+		else \
+			cout << it->second->availableParameters(); \
 		cout << endl; \
 	} \
 	cout << endl; \
-} \
+}
 
-int main()
+int main(int argc, char *argv[])
 {
 	PointMatcherD pm;
+	bool wiki(false);
 	
-	DUMP_REGISTRAR_CONTENT(Transformation)
-	DUMP_REGISTRAR_CONTENT(DataPointsFilter)
-	DUMP_REGISTRAR_CONTENT(Matcher)
-	DUMP_REGISTRAR_CONTENT(FeatureOutlierFilter)
-	DUMP_REGISTRAR_CONTENT(ErrorMinimizer)
-	DUMP_REGISTRAR_CONTENT(TransformationChecker)
-	DUMP_REGISTRAR_CONTENT(Inspector)
+	if (argc == 2 && string(argv[1]) == "--roswiki")
+		wiki = true;
+	
+	DUMP_REGISTRAR_CONTENT(Transformation, wiki)
+	DUMP_REGISTRAR_CONTENT(DataPointsFilter, wiki)
+	DUMP_REGISTRAR_CONTENT(Matcher, wiki)
+	DUMP_REGISTRAR_CONTENT(FeatureOutlierFilter, wiki)
+	DUMP_REGISTRAR_CONTENT(DescriptorOutlierFilter, wiki)
+	DUMP_REGISTRAR_CONTENT(ErrorMinimizer, wiki)
+	DUMP_REGISTRAR_CONTENT(TransformationChecker, wiki)
+	DUMP_REGISTRAR_CONTENT(Inspector, wiki)
+	DUMP_REGISTRAR_CONTENT(Logger, wiki)
 	
 	return 0;
 }

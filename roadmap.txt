@@ -141,7 +141,7 @@ Inspector (Paraview)
 - TODO: clean to have one VTK files per module
 - TODO FP: unify IO operation for vtk files
 
-- TODO SM: "console" inspector
+- 23 sept. 2010: "console" inspector
 
 - 8 nov. 2010: Evaluate pertinence of basic outputs to rviz: not pertinent
 
