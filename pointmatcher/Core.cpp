@@ -549,27 +549,37 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 	const int tDim(keyFrameTransform.rows());
 	const int ptCount(inputCloud.features.cols());
 	
-	// apply filters
-	bool iterate(true);
-	this->keyframeDataPointsFilters.init();
-	this->keyframeDataPointsFilters.apply(inputCloud, iterate);
-	if (!iterate)
-		return;
-	
-	pointCountKeyFrame.push_back(inputCloud.features.cols());
-	
-	// center keyframe, retrieve offset
-	const int nbPtsKeyframe = inputCloud.features.cols();
-	const Vector meanKeyframe = inputCloud.features.rowwise().sum() / nbPtsKeyframe;
-	for(int i=0; i < tDim-1; i++)
-		inputCloud.features.row(i).array() -= meanKeyframe(i);
-		
 	// update keyframe
-	if (inputCloud.features.cols() > 0)
+	if (ptCount > 0)
 	{
+		// Apply reference filters
+		// reference is express in frame <refIn>
+		bool iterate(true);
+		this->keyframeDataPointsFilters.init();
+		this->keyframeDataPointsFilters.apply(inputCloud, iterate);
+		
+		// FIXE ME: this should be obsolet
+		if (!iterate)
+			return;
+		
+		pointCountKeyFrame.push_back(inputCloud.features.cols());
+
+
+		// Create intermediate frame at the center of mass of reference pts cloud
+		//  this help to solve for rotations
+		const int nbPtsKeyframe = inputCloud.features.cols();
+		const Vector meanKeyframe = inputCloud.features.rowwise().sum() / nbPtsKeyframe;
+		T_refIn_refMean.block(0,dim-1, dim-1, 1) = meanKeyframe.head(dim-1);
+		
+		// Reajust reference position (only translations): 
+		// from here reference is express in frame <refMean>
+		// Shortcut to do T_refIn_refMean.inverse() * reference
+		for(int i=0; i < tDim-1; i++)
+			inputCloud.features.row(i).array() -= meanKeyframe(i);
+		
+	
 		keyFrameCloud = inputCloud;
-		keyFrameTransformOffset.block(0,tDim-1, tDim-1, 1) = meanKeyframe.head(tDim-1);
-		curTransform = Matrix::Identity(tDim, tDim);
+		T_refIn_dataIn = Matrix::Identity(tDim, tDim);
 		
 		this->matcher->init(keyFrameCloud, iterate);
 		
@@ -604,8 +614,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		assert(this->dim == 3 || this->dim == 4);
 
 		keyFrameTransform = Matrix::Identity(this->dim, this->dim);
-		keyFrameTransformOffset = Matrix::Identity(this->dim, this->dim);
-		curTransform = Matrix::Identity(this->dim, this->dim);
+		T_refIn_refMean = Matrix::Identity(this->dim, this->dim);
+		T_refIn_dataIn = Matrix::Identity(this->dim, this->dim);
 		lastTransformInv = Matrix::Identity(this->dim, this->dim);
 	}
 	
@@ -617,7 +627,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	if (!hasKeyFrame())
 	{
 		this->createKeyFrame(inputCloud);
-		return curTransform;
+		return T_refIn_dataIn;
 	}
 	
 	timer t; // Print how long take the algo
@@ -636,7 +646,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	this->inspector->init();
 	
-	TransformationParameters transformationParameters = keyFrameTransformOffset.inverse() * curTransform;
+	TransformationParameters transformationParameters = T_refIn_refMean.inverse() * T_refIn_dataIn;
 	
 	this->transformationCheckers.init(transformationParameters, iterate);
 
@@ -705,7 +715,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	this->inspector->finish(iterationCount);
 	
 	// Move transformation back to original coordinate (without center of mass)
-	curTransform = keyFrameTransformOffset * transformationParameters;
+	T_refIn_dataIn = T_refIn_refMean * transformationParameters;
 	
 	convergenceDuration.push_back(t.elapsed());
 	overlapRatio.push_back(this->errorMinimizer->getWeightedPointUsedRatio());
@@ -713,24 +723,12 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	if (this->errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
 	{
 		// new keyframe
-		keyFrameTransform *= curTransform;
+		keyFrameTransform *= T_refIn_dataIn;
 		this->createKeyFrame(inputCloud);
 	}
 	
-	/*transDriftX.push_back(curTransform(0, 3));
-	transDriftY.push_back(curTransform(1, 3));
-	transDriftZ.push_back(curTransform(2, 3));
-	
-	const double pitch = -asin(curTransform(2,0));
-	const double roll = atan2(curTransform(2,1), curTransform(2,2));
-	const double yaw = atan2(curTransform(1,0) / cos(pitch), curTransform(0,0) / cos(pitch));
-	rotDriftRoll.push_back(roll);
-	rotDriftPitch.push_back(pitch);
-	rotDriftYaw.push_back(yaw);
-	*/
-	
 	// Return transform in world space
-	return keyFrameTransform * curTransform;
+	return keyFrameTransform * T_refIn_dataIn;
 }
 
 template<typename T>

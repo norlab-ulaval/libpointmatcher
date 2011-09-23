@@ -487,7 +487,7 @@ struct PointMatcher
 		
 		TransformationParameters operator()(const DataPoints& inputCloudIn);
 	
-		TransformationParameters getTransform() const { return keyFrameTransform * curTransform; }
+		TransformationParameters getTransform() const { return keyFrameTransform * T_refIn_dataIn; }
 		TransformationParameters getDeltaTransform() const { return lastTransformInv * getTransform(); }
 		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }
 		bool hasKeyFrame() const { return (keyFrameCloud.features.cols() != 0); }
@@ -507,8 +507,13 @@ struct PointMatcher
 		bool keyFrameCreated; //!< true if the key frame was created at least once
 		DataPoints keyFrameCloud; //!< point cloud of the keyframe
 		TransformationParameters keyFrameTransform; //!< pose of keyframe
-		TransformationParameters keyFrameTransformOffset; //!< offset for centered keyframe
-		TransformationParameters curTransform; //!< transform of last frame wrt keyframe (last call to operator())
+		
+		TransformationParameters T_refIn_refMean; //!< offset for centered keyframe
+		//TransformationParameters keyFrameTransformOffset; //old T_refIn_refMean 
+		
+		TransformationParameters T_refIn_dataIn; //!< transform of last frame wrt keyframe (last call to operator())
+		TransformationParameters curTransform; //old T_refMean_dataIn
+
 		TransformationParameters lastTransformInv; //!< inv of previous computed transform (using getTransform())
 		
 		//! Create a new key frame
