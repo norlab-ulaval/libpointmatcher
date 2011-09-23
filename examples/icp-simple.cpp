@@ -40,21 +40,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-void validateArgs(const int argc, const char *argv[], bool& isCSV, string&, string&);
-void usage(const char *argv[]);
+void validateArgs(int argc, char *argv[], bool& isCSV);
+void basicUsage(char *argv[]);
 
 /**
   * Code example for ICP taking 2 points clouds (2D or 3D) relatively close 
   * and computing the transformation between them.
   */
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
 	bool isCSV = true;
-	string configFile;
-	string outputBaseFile;
-	validateArgs(argc, argv, isCSV, configFile, outputBaseFile);
-	const char *refFile(argv[argc-2]);
-	const char *dataFile(argv[argc-1]);
+	validateArgs(argc, argv, isCSV);
 	
 	typedef PointMatcher<float> PM;
 	typedef PM::Parameters Parameters;
@@ -64,34 +60,29 @@ int main(int argc, const char *argv[])
 	PM::DataPoints data;
 	if(isCSV)
 	{
-		ref = loadCSV<PM::ScalarType>(refFile);
-		data = loadCSV<PM::ScalarType>(dataFile);
+		ref = loadCSV<PM::ScalarType>(argv[1]);
+		data = loadCSV<PM::ScalarType>(argv[2]);
 	}
 	else
 	{
-		ref = loadVTK<PM::ScalarType>(refFile);
-		data= loadVTK<PM::ScalarType>(dataFile);
+		ref = loadVTK<PM::ScalarType>(argv[1]);
+		data= loadVTK<PM::ScalarType>(argv[2]);
 	}
 
 	// Create the default ICP algorithm
 	PM::ICP icp;
-	
-	if (configFile.empty())
-	{
-		// See the implementation of setDefault() to create a custom ICP algorithm
-		icp.setDefault();
-	}
-	else
-	{
-		// load YAML config
-		ifstream ifs(configFile.c_str());
-		if (!ifs.good())
-		{
-			cerr << "Cannot open config file " << configFile << ", usage:"; usage(argv); exit(1);
-		}
-		icp.loadFromYaml(ifs);
-	}
+	// See the implementation of setDefault() to create a custom ICP algorithm
+	icp.setDefault();
 
+	// Modify the default Inspector to output vtk file
+	if(argc == 4)
+	{
+		string baseFolder(argv[3]);
+		icp.inspector.reset(new PM::VTKFileInspector(Parameters({
+			{ "baseFileName", baseFolder + "/test" }
+		})));
+	}
+	
 	// Compute the transformation to express data in ref
 	PM::TransformationParameters T = icp(data, ref);
 
@@ -100,55 +91,56 @@ int main(int argc, const char *argv[])
 	PM::DataPoints data_out = transform.compute(data, T);
 	
 	// Safe files to see the results
-	saveVTK<PM::ScalarType>(ref, outputBaseFile + "_ref.vtk");
-	saveVTK<PM::ScalarType>(data, outputBaseFile + "_data_in.vtk");
-	saveVTK<PM::ScalarType>(data_out, outputBaseFile + "_data_out.vtk");
+	saveVTK<PM::ScalarType>(ref, "test_ref.vtk");
+	saveVTK<PM::ScalarType>(data, "test_data_in.vtk");
+	saveVTK<PM::ScalarType>(data_out, "test_data_out.vtk");
 	cout << "Final transformation:" << endl << T << endl;
 
 	return 0;
 }
 
 
-void validateArgs(const int argc, const char *argv[], bool& isCSV, string& configFile, string& outputBaseFile)
+void validateArgs(int argc, char *argv[], bool& isCSV )
 {
-	if (argc < 3)
+	if (argc == 2)
 	{
-		cerr << "Not enough arguments, usage:"; usage(argv); exit(1);
+		string cmd(argv[1]);
+		if(cmd == "--help")
+		{
+			basicUsage(argv);
+			cerr << "Will create 3 vtk files for inspection: ./test_ref.vtk, ./test_data_in.vtk and ./test_data_out.vtk" << endl;
+			cerr << endl << "2D Example:" << endl;
+			cerr << "  " << argv[0] << " ../examples/data/2D_twoBoxes.csv ../examples/data/2D_oneBox.csv" << endl;
+			cerr << endl << "3D Example:" << endl;
+			cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
+			cerr << endl << "If you enter optional REPOSITORY name, a vtk file will be created for every iteration in that repository"	<< endl << endl;
+			exit(1);
+		}
 	}
-	const int endOpt(argc - 2);
-	for (int i = 1; i < endOpt; i += 2)
+	if (!(argc == 3 || argc == 4))
 	{
-		const string opt(argv[i]);
-		if (i + 1 > endOpt)
-		{
-			cerr << "Missing value for option " << opt << ", usage:"; usage(argv); exit(1);
-		}
-		if (opt == "--config")
-			configFile = argv[i+1];
-		else if (opt == "--output")
-			outputBaseFile = argv[i+1];
-		else
-		{
-			cerr << "Unknown option " << opt << ", usage:"; usage(argv); exit(1);
-		}
+		basicUsage(argv);
+		cerr << "Use " << argv[0] << " --help for more info" << endl << endl; 
+		exit(1);
 	}
 	
 	// Validate extension
-	const boost::filesystem::path pathRef(argv[argc-2]);
-	const boost::filesystem::path pathData(argv[argc-1]);
+	const boost::filesystem::path pathRef(argv[1]);
+	const boost::filesystem::path pathData(argv[2]);
 
 	string refExt = boost::filesystem::extension(pathRef);
 	string dataExt = boost::filesystem::extension(pathData);
 
 	if (!(refExt == ".vtk" || refExt == ".csv"))
 	{
-		cerr << "Reference file extension must be .vtk or .csv, found " << refExt << " instead" << endl;
+		cout << refExt << ", " << dataExt << endl;
+		cerr << "Reference file extension must be .vtk or .csv" << endl;
 		exit(2);
 	}
 	
 	if (!(dataExt == ".vtk" || dataExt == ".csv"))
 	{
-		cerr << "Reading file extension must be .vtk or .csv, found " << dataExt << " instead" << endl;
+		cerr << "Reading file extension must be .vtk or .csv" << endl;
 		exit(3);
 	}
 
@@ -158,22 +150,15 @@ void validateArgs(const int argc, const char *argv[], bool& isCSV, string& confi
 		exit(4);
 	}
 
-	isCSV = (dataExt == ".csv");
+	if (dataExt == ".csv")
+		isCSV = true;
+	else
+		isCSV = false;
 }
 
-void usage(const char *argv[])
+void basicUsage(char *argv[])
 {
 	cerr << endl;
-	cerr << "  " << argv[0] << " [OPTIONS] reference.csv reading.csv" << endl;
-	cerr << endl;
-	cerr << "OPTIONS can be a combination of:" << endl;
-	cerr << "--config YAML_CONFIG_FILE  Load the config from a YAML file (default: default parameters)" << endl;
-	cerr << "--output FILENAME          Name of output files (default: test)" << endl;
-	cerr << endl;
-	cerr << "Running this program will create 3 vtk ouptput files: ./test_ref.vtk, ./test_data_in.vtk and ./test_data_out.vtk" << endl;
-	cerr << endl << "2D Example:" << endl;
-	cerr << "  " << argv[0] << " ../examples/data/2D_twoBoxes.csv ../examples/data/2D_oneBox.csv" << endl;
-	cerr << endl << "3D Example:" << endl;
-	cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
+	cerr << "Error in command line, usage " << argv[0] << " reference.csv reading.csv [FOLDER]" << endl;
 	cerr << endl;
 }
