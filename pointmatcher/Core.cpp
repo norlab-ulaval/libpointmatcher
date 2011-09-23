@@ -281,29 +281,33 @@ void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string
 		for(YAML::Iterator moduleIt = reg->begin(); moduleIt != reg->end(); ++moduleIt)
 		{
 			const YAML::Node& module(*moduleIt);
-			modules.push_back(createModuleFromRegistrar(regName, module, registrar));
+			modules.push_back(createModuleFromRegistrar(module, registrar));
 		}
 	}
 }
 
 template<typename T>
 template<typename R>
-typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& module, const R& registrar)
+typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar)
 {
-	std::string name;
+	const YAML::Node *reg = doc.FindValue(regName);
+	if (reg)
+		return createModuleFromRegistrar(*reg, registrar);
+}
+
+template<typename T>
+template<typename R>
+typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar( const YAML::Node& module, const R& registrar)
+{
+	std::string name(module.to<string>());
 	Parameters params;
 	for(YAML::Iterator paramIt = module.begin(); paramIt != module.end(); ++paramIt)
 	{
 		std::string key, value;
 		paramIt.first() >> key;
 		paramIt.second() >> value;
-		if (key == "name")
-			name = value;
-		else
-			params[key] = value;
+		params[key] = value;
 	}
-	if (name.empty())
-		throw std::runtime_error((boost::format("Missing module name for registrar %1%") % regName).str());
 	return registrar.create(name, params);
 }
 

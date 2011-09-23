@@ -182,7 +182,7 @@ struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
-			{ "binSize", "limit over which a box is splitted in two", "5", "3", "2147483647", &P::Comp<unsigned> },
+			{ "binSize", "limit over which a box is splitted in two", "10", "3", "2147483647", &P::Comp<unsigned> },
 			{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
 			{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" },
 			{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" },
