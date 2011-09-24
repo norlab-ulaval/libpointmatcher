@@ -249,7 +249,7 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	
 	PointMatcher<T> pm;
 	
-	createModulesFromRegistrar("readingDataPointsFilter", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
+	createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
 	createModulesFromRegistrar("readingStepDataPointsFilter", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
 	createModulesFromRegistrar("keyframeDataPointsFilter", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
 	createModulesFromRegistrar("transformation", doc, pm.REG(Transformation), transformations);
@@ -275,6 +275,7 @@ template<typename T>
 template<typename R>
 void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules)
 {
+	cout << "Looking for " << regName << endl;
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
 	{
@@ -284,6 +285,10 @@ void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string
 			modules.push_back(createModuleFromRegistrar(regName, module, registrar));
 		}
 	}
+	else
+	{
+		cout << "Not found..." << endl;	
+	}
 }
 
 template<typename T>
@@ -292,13 +297,20 @@ typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar
 {
 	std::string name;
 	Parameters params;
+
+
 	for(YAML::Iterator paramIt = module.begin(); paramIt != module.end(); ++paramIt)
 	{
+		cout << "TEST: " << regName << endl;
 		std::string key, value;
 		paramIt.first() >> key;
 		paramIt.second() >> value;
-		if (key == "name")
-			name = value;
+		
+		cout << key << ", " << value << endl; 
+		
+		//if (key == "name")
+		if (value == "~")
+			name = key;
 		else
 			params[key] = value;
 	}
@@ -649,7 +661,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	TransformationParameters
 		T_refMean_dataIn = T_refIn_refMean.inverse() * T_refIn_dataIn;
 	this->transformations.apply(reading, T_refMean_dataIn);
-	
+
+	//cout << "T_refMean_dataIn: " << endl << T_refMean_dataIn << endl;
 	// Prepare reading filters used in the loop 
 	this->readingStepDataPointsFilters.init();
 	
@@ -662,7 +675,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	this->transformationCheckers.init(T_iter, iterate);
 	
 	size_t iterationCount(0);
-	
+
 	while (iterate)
 	{
 		DataPoints stepReading(reading);
@@ -683,10 +696,13 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		
 		//-----------------------------
 		// Detect outliers
+		//cout << matches.ids.leftCols(10) << endl;
+		//cout << matches.dists.leftCols(10) << endl;
 		const OutlierWeights featureOutlierWeights(
 			this->featureOutlierFilters.compute(stepReading, keyFrameCloud, matches, iterate)
 		);
 		
+
 		const OutlierWeights descriptorOutlierWeights(
 			this->descriptorOutlierFilters.compute(stepReading, keyFrameCloud, matches, iterate)
 		);
@@ -720,6 +736,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		
 		this->transformationCheckers.check(T_iter, iterate);
 		
+		//cout << "T_iter: " << endl << T_iter << endl;
+
 		++iterationCount;
 	}
 	iterationsCount.push_back(iterationCount);
@@ -747,6 +765,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	convergenceDuration.push_back(t.elapsed());
 	
+	//cout << "keyFrameTransform: " << endl << keyFrameTransform << endl;
+	//cout << "T_refIn_dataIn: " << endl << T_refIn_dataIn << endl;
 	// Return transform in world space
 	return keyFrameTransform * T_refIn_dataIn;
 }
@@ -785,6 +805,9 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, ErrorTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker)
+	
+	ADD_TO_REGISTRAR_NO_PARAM(Inspector, NullInspector)
+	ADD_TO_REGISTRAR(Inspector, VTKFileInspector)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Logger, NullLogger)
 	ADD_TO_REGISTRAR(Logger, FileLogger)

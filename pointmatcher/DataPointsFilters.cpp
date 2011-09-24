@@ -64,6 +64,7 @@ PointMatcher<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFilter(co
 	dim(Parametrizable::get<unsigned>("dim")),
 	maxDist(Parametrizable::get<T>("maxDist"))
 {
+	cout << "dim: " << dim << " maxDist: " << maxDist << endl;
 }
 
 template<typename T>
@@ -1024,7 +1025,7 @@ PointMatcher<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilte
 	stepMult(Parametrizable::get<double>("stepMult")),
 	step(startStep)
 {
-	assert(step > 0);
+	cout << "Using FixstepSamplingDataPointsFilter with startStep=" << startStep << ", endStep=" << endStep << ", stepMult=" << stepMult << endl; 
 }
 
 

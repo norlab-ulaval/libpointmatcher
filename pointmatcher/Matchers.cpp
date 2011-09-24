@@ -68,6 +68,7 @@ PointMatcher<T>::KDTreeMatcher::KDTreeMatcher(const Parameters& params):
 	maxDist(Parametrizable::get<T>("maxDist")),
 	featureNNS(0)
 {
+	std::cout << "Using KDTreeMatcher with knn=" << knn << ", epsilon=" << epsilon << ", searchType=" << searchType << ", maxDist=" << maxDist << std::endl;
 }
 
 template<typename T>
@@ -102,7 +103,7 @@ typename PointMatcher<T>::Matches PointMatcher<T>::KDTreeMatcher::findClosests(
 	);
 	
 	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, NNS::ALLOW_SELF_MATCH, maxDist);
-	
+
 	return matches;
 }
 
