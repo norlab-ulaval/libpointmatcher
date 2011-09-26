@@ -45,6 +45,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
+namespace PointMatcherSupport
+{
+	// send patches for your favourite compiler
+	#if defined(__GNUC__)
+	__thread Logger* localLogger;
+	#elif defined(_MSC_VER)
+	__declspec(thread) Logger* localLogger;
+	#else
+	thread_local Logger* localLogger;
+	#endif
+}
+
 // DataPoints
 
 template<typename T>

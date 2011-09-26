@@ -90,11 +90,11 @@ namespace PointMatcherSupport
 	
 	// send patches for your favourite compiler
 	#if defined(__GNUC__)
-	static __thread Logger* localLogger;
+	extern __thread Logger* localLogger;
 	#elif defined(_MSC_VER)
-	static __declspec(thread) Logger* localLogger;
+	extern __declspec(thread) Logger* localLogger;
 	#else
-	static thread_local Logger* localLogger;
+	extern thread_local Logger* localLogger;
 	#endif
 }
 
