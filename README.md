@@ -83,6 +83,20 @@ Bug reporting
 Please use [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs.
 
 
+Citing
+======
+
+If you use libpointmatcher in an academic contest, please cite the following publication:
+
+	@INPROCEEDINGS{pomerleau11tracking,
+		author = {F Pomerleau and S Magnenat and F Colas and M Liu and R Siegwart},
+		title = {Tracking a Depth Camera: Parameter Exploration for Fast ICP},
+		booktitle = {Proc. of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+		publisher = {IEEE Press},
+		year = {2011}
+	}
+
+
 License
 =======
 
