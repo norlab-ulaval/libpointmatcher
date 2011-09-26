@@ -19,7 +19,6 @@ matcher:
 featureOutlierFilters:
   - TrimmedDistOutlierFilter:
       ratio: 0.75
-  - VarTrimmedDistOutlierFilter
 
 errorMinimizer:
   PointToPlaneErrorMinimizer
