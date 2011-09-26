@@ -207,16 +207,17 @@ PointMatcher<T>::ICPChainBase::~ICPChainBase()
 template<typename T>
 void PointMatcher<T>::ICPChainBase::cleanup()
 {
+	transformations.clear();
 	readingDataPointsFilters.clear();
 	readingStepDataPointsFilters.clear();
 	keyframeDataPointsFilters.clear();
-	transformations.clear();
 	matcher.reset();
 	featureOutlierFilters.clear();
 	descriptorOutlierFilters.clear();
 	errorMinimizer.reset();
 	transformationCheckers.clear();
 	inspector.reset();
+	logger.reset();
 }
 
 template<typename T>
@@ -233,6 +234,7 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->transformationCheckers.push_back(new CounterTransformationChecker());
 	this->transformationCheckers.push_back(new ErrorTransformationChecker());
 	this->inspector.reset(new NullInspector);
+	this->logger.reset(new NullLogger);
 	this->outlierMixingWeight = 1;
 }
 
@@ -250,15 +252,17 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	PointMatcher<T> pm;
 	
 	createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
-	createModulesFromRegistrar("readingStepDataPointsFilter", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
-	createModulesFromRegistrar("keyframeDataPointsFilter", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
-	createModulesFromRegistrar("transformation", doc, pm.REG(Transformation), transformations);
-	matcher.reset(createModuleFromRegistrar("matcher", doc, pm.REG(Matcher)));
-	createModulesFromRegistrar("featureOutlierFilter", doc, pm.REG(FeatureOutlierFilter), featureOutlierFilters);
-	createModulesFromRegistrar("descriptorOutlierFilter", doc, pm.REG(DescriptorOutlierFilter), descriptorOutlierFilters);
-	errorMinimizer.reset(createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer)));
-	createModulesFromRegistrar("transformationChecker", doc, pm.REG(TransformationChecker), transformationCheckers);
-	inspector.reset(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector)));
+	createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
+	createModulesFromRegistrar("keyframeDataPointsFilters", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
+	createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations);
+	createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher);
+	createModulesFromRegistrar("featureOutlierFilters", doc, pm.REG(FeatureOutlierFilter), featureOutlierFilters);
+	createModulesFromRegistrar("descriptorOutlierFilters", doc, pm.REG(DescriptorOutlierFilter), descriptorOutlierFilters);
+	createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer);
+	createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers);
+	createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector);
+	createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger);
+	
 	if (doc.FindValue("outlierMixingWeight"))
 		outlierMixingWeight = doc["outlierMixingWeight"].to<typeof(outlierMixingWeight)>();
 	
@@ -275,47 +279,61 @@ template<typename T>
 template<typename R>
 void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules)
 {
-	cout << "Looking for " << regName << endl;
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
 	{
+		cout << regName << endl;
 		for(YAML::Iterator moduleIt = reg->begin(); moduleIt != reg->end(); ++moduleIt)
 		{
 			const YAML::Node& module(*moduleIt);
-			modules.push_back(createModuleFromRegistrar(regName, module, registrar));
+			modules.push_back(createModuleFromRegistrar(module, registrar));
 		}
-	}
-	else
-	{
-		cout << "Not found..." << endl;	
 	}
 }
 
 template<typename T>
 template<typename R>
-typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& module, const R& registrar)
+void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module)
 {
-	std::string name;
-	Parameters params;
-
-
-	for(YAML::Iterator paramIt = module.begin(); paramIt != module.end(); ++paramIt)
+	const YAML::Node *reg = doc.FindValue(regName);
+	if (reg)
 	{
-		cout << "TEST: " << regName << endl;
-		std::string key, value;
-		paramIt.first() >> key;
-		paramIt.second() >> value;
-		
-		cout << key << ", " << value << endl; 
-		
-		//if (key == "name")
-		if (value == "~")
-			name = key;
-		else
-			params[key] = value;
+		cout << regName << endl;
+		module.reset(createModuleFromRegistrar(*reg, registrar));
 	}
-	if (name.empty())
-		throw std::runtime_error((boost::format("Missing module name for registrar %1%") % regName).str());
+	else
+		module.reset();
+}
+
+template<typename T>
+template<typename R>
+typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar( const YAML::Node& module, const R& registrar)
+{
+	Parameters params;
+	string name;
+	
+	if (module.size() != 1)
+	{
+		// parameter-less entry
+		name = module.to<string>();
+		cout << "  " << name << endl;
+	}
+	else
+	{
+		// get parameters
+		YAML::Iterator mapIt(module.begin());
+		mapIt.first() >> name;
+		cout << "  " << name << endl;
+		for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
+		{
+			std::string key, value;
+			paramIt.first() >> key;
+			paramIt.second() >> value;
+			cout << "    " << key << ": " << value << endl;
+			params[key] = value;
+		}
+	}
+	
 	return registrar.create(name, params);
 }
 

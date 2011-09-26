@@ -19,6 +19,7 @@ matcher:
 featureOutlierFilters:
   - TrimmedDistOutlierFilter:
       ratio: 0.75
+  - VarTrimmedDistOutlierFilter
 
 errorMinimizer:
   PointToPlaneErrorMinimizer
@@ -33,5 +34,8 @@ transformationCheckers:
       
 inspector:
   NullInspector
+
+logger:
+  NullLogger
 
 outlierMixingWeight: 1
