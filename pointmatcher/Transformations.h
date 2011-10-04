@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct TransformFeatures: public Transformation
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "transform features";
 	}
@@ -50,7 +50,7 @@ struct TransformFeatures: public Transformation
 
 struct TransformDescriptors: Transformation
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "rotate normals";
 	}

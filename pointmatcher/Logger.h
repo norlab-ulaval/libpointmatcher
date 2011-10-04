@@ -43,7 +43,7 @@ namespace PointMatcherSupport
 {
 	struct NullLogger: public Logger
 	{
-		static const std::string description()
+		inline static const std::string description()
 		{
 			return "does not log anything";
 		}
@@ -51,11 +51,11 @@ namespace PointMatcherSupport
 	
 	struct FileLogger: public Logger
 	{
-		static const std::string description()
+		inline static const std::string description()
 		{
 			return "Log using std::stream";
 		}
-		static const ParametersDoc availableParameters()
+		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
 				{ "infoFileName", "name of the file to output infos to", "/dev/stdout"},

@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct NullMatcher: public Matcher
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "does nothing, return no matches";
 	}
@@ -49,11 +49,11 @@ struct NullMatcher: public Matcher
 
 struct KDTreeMatcher: public Matcher
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "This matcher matches a point from the reading to its closest neighbors in the reference.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned> },

@@ -38,11 +38,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct CounterTransformationChecker: public TransformationChecker
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "This checker stops the ICP loop after a certain number of iterations.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "maxIterationCount", "maximum number of iterations ", "40", "0", "2147483647", &P::Comp<unsigned> }
@@ -58,11 +58,11 @@ struct CounterTransformationChecker: public TransformationChecker
 
 struct ErrorTransformationChecker: public TransformationChecker
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "This checker stops the ICP loop when the average transformation errors are below thresholds.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "minDeltaRotErr", "threshold for rotation error (radian)", "0.001", "0.", "6.2831854", &P::Comp<T> },
@@ -88,11 +88,11 @@ public:
 
 struct BoundTransformationChecker: public TransformationChecker
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "This checker stops the ICP loop with an exception when the transformation values exceed bounds.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "maxRotationNorm", "rotation bound", "1", "0", "inf", &P::Comp<T> },

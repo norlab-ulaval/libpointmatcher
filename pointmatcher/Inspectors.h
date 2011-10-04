@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Clearer name when no inspector is required
 struct NullInspector: public Inspector
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "does nothing";
 	}
@@ -85,11 +85,11 @@ private:
 
 struct VTKFileInspector: public AbstractVTKInspector
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Dump the different steps into VTK files.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" }

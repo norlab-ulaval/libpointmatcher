@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct IdentityErrorMinimizer: ErrorMinimizer
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "does nothing";
 	}
@@ -48,7 +48,7 @@ struct IdentityErrorMinimizer: ErrorMinimizer
 
 struct PointToPointErrorMinimizer: ErrorMinimizer
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Point-to-point error. Based on SVD decomposition";
 	}
@@ -58,7 +58,7 @@ struct PointToPointErrorMinimizer: ErrorMinimizer
 
 struct PointToPlaneErrorMinimizer: public ErrorMinimizer
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		// FIXME: should we improve doc here?
 		return "Point-to-plane error (or point-to-line in 2D).";

@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct NullFeatureOutlierFilter: public FeatureOutlierFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "does nothing";
 	}
@@ -48,11 +48,11 @@ struct NullFeatureOutlierFilter: public FeatureOutlierFilter
 
 struct MaxDistOutlierFilter: public FeatureOutlierFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "This filter considers as outlier links whose norms are above a threshold.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "maxDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>} 
@@ -67,11 +67,11 @@ struct MaxDistOutlierFilter: public FeatureOutlierFilter
 
 struct MinDistOutlierFilter: public FeatureOutlierFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "This filter considers as outlier links whose norms are below a threshold.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "minDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>} 
@@ -86,11 +86,11 @@ struct MinDistOutlierFilter: public FeatureOutlierFilter
 
 struct MedianDistOutlierFilter: public FeatureOutlierFilter 
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "This filter considers as outlier links whose norms are above the median link norms times a factor.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "factor", "points farther away factor * median will be considered outliers.", "3", "0.0000001", "inf", &P::Comp<T>}
@@ -105,11 +105,11 @@ struct MedianDistOutlierFilter: public FeatureOutlierFilter
 
 struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Hard rejection threshold using quantile. This filter considers as inlier a certain percentage of the links with the smallest norms. Based on: D Chetverikov, \"The Trimmed Iterative Closest Point Algorithm\" (2002)";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "ratio", "percentage to keep", "0.75", "0.0000001", "0.9999999", &P::Comp<T>}
@@ -124,11 +124,11 @@ struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 
 struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Hard rejection threshold using quantile and variable ratio. Based on: J. M. Phillips and al., \"Outlier Robust ICP for Minimizing Fractional RMSD\" (2007)";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "minRatio", "min ratio", "0.05", "0.0000001", "1", &P::Comp<T>},
@@ -154,7 +154,7 @@ private:
 
 struct NullDescriptorOutlierFilter: public DescriptorOutlierFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "does nothing";
 	}

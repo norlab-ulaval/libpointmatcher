@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //! Identidy, does nothing
 struct IdentityDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "does nothing";
 	}
@@ -50,11 +50,11 @@ struct IdentityDataPointsFilter: public DataPointsFilter
 //! Subsampling. Filter points beyond a maximum distance measured on a specific axis
 struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Subsampling. Filter points beyond a maximum distance measured on a specific axis.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
@@ -73,11 +73,11 @@ struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
 //! Subsampling. Filter points before a minimum distance measured on a specific axis
 struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Subsampling. Filter points before a minimum distance measured on a specific axis.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
@@ -96,11 +96,11 @@ struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
 //! Subsampling. Filter points beyond a maximum quantile measured on a specific axis
 struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Subsampling. Filter points beyond a maximum quantile measured on a specific axis.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
@@ -119,11 +119,11 @@ struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
 //! Subsampling. Reduce the points number of a certain ration while trying to uniformize the density of the point cloud.
 struct UniformizeDensityDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Subsampling. Reduce the points number of a certain ration while trying to uniformize the density of the point cloud.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			 {"ratio", "targeted reduction ratio", "0.5", "0.0000001", "0.9999999", &P::Comp<T>},
@@ -142,11 +142,11 @@ struct UniformizeDensityDataPointsFilter: public DataPointsFilter
 //! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
 struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Normals. This filter extracts the normal to each point by taking the eigenvector corresponding to the smallest eigenvalue of its nearest neighbors.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned> },
@@ -175,11 +175,11 @@ struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 //! Sampling surface normals. First decimate the space until there is at most binSize points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
 struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Subsampling, Normals. This filter decomposes the point-cloud space in boxes, by recursively splitting the cloud through axis-aligned hyperplanes such as to maximize the evenness of the aspect ratio of the box. When the number of points in a box reaches a value binSize or lower, the filter computes the center of mass of these points and its normal by taking the eigenvector corresponding to the smallest eigenvalue of all points in the box.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "binSize", "limit over which a box is splitted in two", "10", "3", "2147483647", &P::Comp<unsigned> },
@@ -249,7 +249,7 @@ protected:
 //! Reorientation of normals
 struct OrientNormalsDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Normals. Reorient normals so that they all point in the same direction, with respect to coordinate 0.";
 	}
@@ -260,11 +260,11 @@ struct OrientNormalsDataPointsFilter: public DataPointsFilter
 //! Random sampling
 struct RandomSamplingDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Subsampling. This filter reduces the size of the point cloud by randomly dropping points.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "prob", "probability to keep a point, one over decimation factor ", "0.5", "0", "1", &P::Comp<T> }
@@ -284,11 +284,11 @@ private:
 //! Systematic sampling, with variation over time
 struct FixstepSamplingDataPointsFilter: public DataPointsFilter
 {
-	static const std::string description()
+	inline static const std::string description()
 	{
 		return "Subsampling. This filter reduces the size of the point cloud by only keeping one point over step ones; with step varying in time from startStep to endStep, each iteration getting multiplied by stepMult.";
 	}
-	static const ParametersDoc availableParameters()
+	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
 			{ "startStep", "initial number of point to skip (initial decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> },
