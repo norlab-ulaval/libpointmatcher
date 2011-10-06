@@ -44,6 +44,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Eigen/Eigen"
 #include "Eigen/Geometry"
 #include "nabo/nabo.h"
+#include <boost/thread/mutex.hpp>
+//#include <boost/thread.hpp>
 #include <stdexcept>
 #include <limits>
 #include <iostream>
@@ -73,6 +75,7 @@ namespace PointMatcherSupport
 		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
 	};
 	
+	// The logger holds one mutex for each type of output, making the log macros thread safe
 	struct Logger: public Parametrizable
 	{
 		Logger() {}
@@ -81,21 +84,14 @@ namespace PointMatcherSupport
 		virtual ~Logger() {}
 		virtual bool hasInfoChannel() const { return false; };
 		virtual std::ostream* infoStream() { return 0; }
+		virtual void finishInfoEntry(const char *file, unsigned line, const char *func) {}
 		virtual bool hasWarningChannel() const { return false; }
 		virtual std::ostream* warningStream() { return 0; }
+		virtual void finishWarningEntry(const char *file, unsigned line, const char *func) {}
+		
+		boost::mutex infoMutex;
+		boost::mutex warningMutex;
 	};
-	
-	#define LOG_INFO_STREAM(args) { if (PointMatcherSupport::localLogger->hasInfoChannel()) { (*PointMatcherSupport::localLogger->infoStream()) << args << std::endl; } }
-	#define LOG_WARNING_STREAM(args) { if (PointMatcherSupport::localLogger->hasWarningChannel()) { (*PointMatcherSupport::localLogger->warningStream()) << args << std::endl; } }
-	
-	// send patches for your favourite compiler
-	#if defined(__GNUC__)
-	extern __thread Logger* localLogger;
-	#elif defined(_MSC_VER)
-	extern __declspec(thread) Logger* localLogger;
-	#else
-	extern thread_local Logger* localLogger;
-	#endif
 }
 
 #include "Logger.h"

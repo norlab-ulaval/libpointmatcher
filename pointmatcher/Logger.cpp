@@ -51,4 +51,34 @@ namespace PointMatcherSupport
 		if (!_warningStream.good())
 			throw runtime_error(string("FileLogger::Cannot open warning stream to file ") + warningFileName);
 	}
+	
+	bool FileLogger::hasInfoChannel() const
+	{
+		return true; 
+	};
+	
+	std::ostream* FileLogger::infoStream()
+	{
+		return &_infoStream;
+	}
+	
+	void FileLogger::finishInfoEntry(const char *file, unsigned line, const char *func)
+	{
+		_infoStream << file << ":" << line << " in " << func << ": " << std::endl; 
+	}
+	
+	bool FileLogger::hasWarningChannel() const
+	{
+		return true;
+	}
+	
+	std::ostream* FileLogger::warningStream()
+	{
+		return &_warningStream;
+	}
+	
+	void FileLogger::finishWarningEntry(const char *file, unsigned line, const char *func)
+	{
+		_warningStream << file << ":" << line << " in " << func << ": " << std::endl;
+	}
 } //PointMatcherSupport

@@ -68,15 +68,53 @@ namespace PointMatcherSupport
 		
 		FileLogger(const Parameters& params = Parameters());
 		
-		virtual bool hasInfoChannel() const { return true; };
-		virtual std::ostream* infoStream() { return &_infoStream; }
-		virtual bool hasWarningChannel() const { return true; }
-		virtual std::ostream* warningStream() { return &_warningStream; }
+		virtual bool hasInfoChannel() const;
+		virtual std::ostream* infoStream();
+		virtual void finishInfoEntry(const char *file, unsigned line, const char *func);
+		virtual bool hasWarningChannel() const;
+		virtual std::ostream* warningStream();
+		virtual void finishWarningEntry(const char *file, unsigned line, const char *func);
 		
 	protected:
 		std::ofstream _infoStream;
 		std::ofstream _warningStream;
 	};
+	
+	// macro holding the name of current function, send patches for your favourite compiler
+	#if defined(MSVC)
+		#define __POINTMATCHER_FUNCTION__ __FUNCSIG__
+	#elif defined(__GNUC__)
+		#define __POINTMATCHER_FUNCTION__ __PRETTY_FUNCTION__
+	#else
+		#define __POINTMATCHER_FUNCTION__ ""
+	#endif
+	
+	// macro for logging
+	#define LOG_INFO_STREAM(args) \
+	{ \
+		if (PointMatcherSupport::localLogger->hasInfoChannel()) { \
+			boost::mutex::scoped_lock lock(PointMatcherSupport::localLogger->infoMutex); \
+			(*PointMatcherSupport::localLogger->infoStream()) << args; \
+			PointMatcherSupport::localLogger->finishInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+		} \
+	}
+	#define LOG_WARNING_STREAM(args) \
+	{ \
+		if (PointMatcherSupport::localLogger->hasWarningChannel()) { \
+			boost::mutex::scoped_lock lock(PointMatcherSupport::localLogger->warningMutex); \
+			(*PointMatcherSupport::localLogger->warningStream()) << args; \
+			PointMatcherSupport::localLogger->finishWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+		} \
+	}
+	
+	// thread-local storage, send patches for your favourite compiler
+	#if defined(__GNUC__)
+	extern __thread Logger* localLogger;
+	#elif defined(_MSC_VER)
+	extern __declspec(thread) Logger* localLogger;
+	#else
+	extern thread_local Logger* localLogger;
+	#endif
 } //PointMatcherSupport
 
 #endif // __POINTMATCHER_LOGGER_H
