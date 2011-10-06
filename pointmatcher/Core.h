@@ -83,9 +83,11 @@ namespace PointMatcherSupport
 		
 		virtual ~Logger() {}
 		virtual bool hasInfoChannel() const { return false; };
+		virtual void beginInfoEntry(const char *file, unsigned line, const char *func) {}
 		virtual std::ostream* infoStream() { return 0; }
 		virtual void finishInfoEntry(const char *file, unsigned line, const char *func) {}
 		virtual bool hasWarningChannel() const { return false; }
+		virtual void beginWarningEntry(const char *file, unsigned line, const char *func) {}
 		virtual std::ostream* warningStream() { return 0; }
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func) {}
 		

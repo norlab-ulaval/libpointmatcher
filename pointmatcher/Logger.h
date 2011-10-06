@@ -59,19 +59,23 @@ namespace PointMatcherSupport
 		{
 			return ParametersDoc({
 				{ "infoFileName", "name of the file to output infos to", "/dev/stdout"},
-				{ "warningFileName", "name of the file to output warnings to", "/dev/stderr" }
+				{ "warningFileName", "name of the file to output warnings to", "/dev/stderr" },
+				{ "displayLocation", "display the location of message in source code", "0" }
 			});
 		};
 		
 		const std::string infoFileName;
 		const std::string warningFileName;
+		const bool displayLocation;
 		
 		FileLogger(const Parameters& params = Parameters());
 		
 		virtual bool hasInfoChannel() const;
+		virtual void beginInfoEntry(const char *file, unsigned line, const char *func);
 		virtual std::ostream* infoStream();
 		virtual void finishInfoEntry(const char *file, unsigned line, const char *func);
 		virtual bool hasWarningChannel() const;
+		virtual void beginWarningEntry(const char *file, unsigned line, const char *func);
 		virtual std::ostream* warningStream();
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func);
 		
@@ -94,6 +98,7 @@ namespace PointMatcherSupport
 	{ \
 		if (PointMatcherSupport::localLogger->hasInfoChannel()) { \
 			boost::mutex::scoped_lock lock(PointMatcherSupport::localLogger->infoMutex); \
+			PointMatcherSupport::localLogger->beginInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
 			(*PointMatcherSupport::localLogger->infoStream()) << args; \
 			PointMatcherSupport::localLogger->finishInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
 		} \
@@ -102,6 +107,7 @@ namespace PointMatcherSupport
 	{ \
 		if (PointMatcherSupport::localLogger->hasWarningChannel()) { \
 			boost::mutex::scoped_lock lock(PointMatcherSupport::localLogger->warningMutex); \
+			PointMatcherSupport::localLogger->beginWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
 			(*PointMatcherSupport::localLogger->warningStream()) << args; \
 			PointMatcherSupport::localLogger->finishWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
 		} \

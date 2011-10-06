@@ -43,6 +43,7 @@ namespace PointMatcherSupport
 		Logger("FileLogger", FileLogger::availableParameters(), params),
 		infoFileName(Parametrizable::get<std::string>("infoFileName")),
 		warningFileName(Parametrizable::get<std::string>("warningFileName")),
+		displayLocation(Parametrizable::get<bool>("displayLocation")),
 		_infoStream(infoFileName.c_str()),
 		_warningStream(warningFileName.c_str())
 	{
@@ -57,6 +58,10 @@ namespace PointMatcherSupport
 		return true; 
 	};
 	
+	void FileLogger::beginInfoEntry(const char *file, unsigned line, const char *func)
+	{
+	}
+	
 	std::ostream* FileLogger::infoStream()
 	{
 		return &_infoStream;
@@ -64,12 +69,19 @@ namespace PointMatcherSupport
 	
 	void FileLogger::finishInfoEntry(const char *file, unsigned line, const char *func)
 	{
-		_infoStream << file << ":" << line << " in " << func << ": " << std::endl; 
+		if (displayLocation)
+			_infoStream << " (at " << file << ":" << line << " in " << func << " )" << endl; 
+		else
+			_infoStream << endl;
 	}
 	
 	bool FileLogger::hasWarningChannel() const
 	{
 		return true;
+	}
+	
+	void FileLogger::beginWarningEntry(const char *file, unsigned line, const char *func)
+	{
 	}
 	
 	std::ostream* FileLogger::warningStream()
@@ -79,6 +91,9 @@ namespace PointMatcherSupport
 	
 	void FileLogger::finishWarningEntry(const char *file, unsigned line, const char *func)
 	{
-		_warningStream << file << ":" << line << " in " << func << ": " << std::endl;
+		if (displayLocation)
+			_warningStream << " (at " << file << ":" << line << " in " << func << " )" << endl;
+		else
+			_warningStream << endl;
 	}
 } //PointMatcherSupport
