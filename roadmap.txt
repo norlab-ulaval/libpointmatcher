@@ -10,6 +10,7 @@ General
 - 22 sept. 2011: move factory (modular_icp) to libpointmatcher
 - 21 sept. 2011: remove abort relative to parameter check
 - TODO FP: validate loop condition for all module (vs expections)
+- TODO FP: add article references in the doc
 - TODO SM: unit testing (gtest or cmake)
 - 20 sept. 2011: remove dim which should be infered from the data size
 
@@ -21,7 +22,7 @@ icp strategy:
 - 20 dec. 2010: decouple input filter for reading and reference
 icp_seq strategy:
 - 19 sept 2011: define how to deal with a sequence of scans
-- TODO FP: uniform transformation between icp and icpSequence
+- 4 Oct. 2011: uniform transformation between icp and icpSequence
 
 Sensors / wrapper / reader
 -------------------
@@ -137,7 +138,7 @@ Inspector (Paraview)
 -------------------
 - 20 sept. 2010: Basic viewing capability via VTK files
 - 19 sept. 2011: Have iteration information as a csv file
-- TODO: display outlier weights
+- 4 Oct. 2011: display outlier weights
 - TODO: clean to have one VTK files per module
 - TODO FP: unify IO operation for vtk files
 
