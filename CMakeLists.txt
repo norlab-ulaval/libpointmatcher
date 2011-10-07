@@ -27,7 +27,7 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 #include(UseDoxygen)
 
 # boost
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+find_package(Boost COMPONENTS thread system filesystem REQUIRED)
 
 # eigen 3
 find_path(EIGEN_INCLUDE_DIR Eigen/Core
@@ -112,37 +112,37 @@ install(FILES
 
 # Example programs
 add_executable(icp examples/icp.cpp)
-target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
+target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
 
 add_executable(icp_simple examples/icp_simple.cpp)
-target_link_libraries(icp_simple pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
+target_link_libraries(icp_simple pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
 
 add_executable(align_sequence examples/align_sequence.cpp)
-target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
 
 add_executable(convertCSVtoVTK examples/convertCSVtoVTK.cpp)
-target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
 
 add_executable(list_modules examples/list_modules.cpp)
-target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
 
 # Sandbox programs
 if(COMPILE_SANDBOX)
   add_executable(sandbox_icp sandbox/icp.cpp)
-  target_link_libraries(sandbox_icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
+  target_link_libraries(sandbox_icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
 
   add_executable(sandbox_align_seq sandbox/align_sequence.cpp)
-  target_link_libraries(sandbox_align_seq pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+  target_link_libraries(sandbox_align_seq pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
 
   add_executable(sandbox_CSVtoVTK sandbox/convertCSVtoVTK.cpp)
-  target_link_libraries(sandbox_CSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} rt)
+  target_link_libraries(sandbox_CSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
 
 endif(COMPILE_SANDBOX)
 
 if(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
   include_directories(${GTEST_INCLUDE_DIR})
   add_executable(utest utest/utest.cpp)
-  target_link_libraries(utest pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${GTEST_LIBRARY} rt)
+  target_link_libraries(utest pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${GTEST_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
 else(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
   message("Google test (gtest) not found - Skipping unit tests")
 endif(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)

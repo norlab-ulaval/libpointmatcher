@@ -56,29 +56,41 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::IdentityDataPointsFilter::
 template struct PointMatcher<float>::IdentityDataPointsFilter;
 template struct PointMatcher<double>::IdentityDataPointsFilter;
 
-// MaxDistOnAxisDataPointsFilter
+// MaxDistDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::MaxDistOnAxisDataPointsFilter::MaxDistOnAxisDataPointsFilter(const Parameters& params):
-	DataPointsFilter("MaxDistOnAxisDataPointsFilter", MaxDistOnAxisDataPointsFilter::availableParameters(), params),
+PointMatcher<T>::MaxDistDataPointsFilter::MaxDistDataPointsFilter(const Parameters& params):
+	DataPointsFilter("MaxDistDataPointsFilter", MaxDistDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
 	maxDist(Parametrizable::get<T>("maxDist"))
 {
-	cout << "dim: " << dim << " maxDist: " << maxDist << endl;
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
-		throw InvalidParameter((boost::format("MaxDistOnAxisDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
+		throw InvalidParameter((boost::format("MaxDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
 	
+	//TODO: should we do that in 2 passes or use conservativeResize?
 	const int nbPointsIn = input.features.cols();
-	const int nbPointsOut = (input.features.row(dim).array().abs() < maxDist).count();
+	const int nbRows = input.features.rows();
+	int nbPointsOut = 0;
+	if (dim == 3)
+	{
+		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() < maxDist).count();
+	}
+	else
+	{
+		nbPointsOut = (input.features.row(dim).array().abs() < maxDist).count();
+	}
+
 	DataPoints outputCloud(
 		typename DataPoints::Features(input.features.rows(), nbPointsOut),
 		input.featureLabels
 	);
+	
+	// if there is descriptors, copy the labels
 	if (input.descriptors.cols() > 0)
 	{
 		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
@@ -86,45 +98,77 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistOnAxisDataPointsFil
 	}
 	
 	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
+	if(dim == 3) // Euclidian distance
 	{
-		if (anyabs(input.features(dim, i)) < maxDist)
+		for (int i = 0; i < nbPointsIn; i++)
 		{
-			outputCloud.features.col(j) = input.features.col(i);
-			if (outputCloud.descriptors.cols() > 0)
-				outputCloud.descriptors.col(j) = input.descriptors.col(i);
-			j++;
+			if (input.features.col(i).head(nbRows-1).norm() < maxDist)
+			{
+				outputCloud.features.col(j) = input.features.col(i);
+				if (outputCloud.descriptors.cols() > 0)
+					outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				j++;
+			}
 		}
 	}
+	else // Single axis distance
+	{
+		for (int i = 0; i < nbPointsIn; i++)
+		{
+			if (anyabs(input.features(dim, i)) < maxDist)
+			{
+				outputCloud.features.col(j) = input.features.col(i);
+				if (outputCloud.descriptors.cols() > 0)
+					outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				j++;
+			}
+		}
+	}
+	
 	assert(j == nbPointsOut);
 	return outputCloud;
 }
 
-template struct PointMatcher<float>::MaxDistOnAxisDataPointsFilter;
-template struct PointMatcher<double>::MaxDistOnAxisDataPointsFilter;
+template struct PointMatcher<float>::MaxDistDataPointsFilter;
+template struct PointMatcher<double>::MaxDistDataPointsFilter;
 
-// MinDistOnAxisDataPointsFilter
+// MinDistDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::MinDistOnAxisDataPointsFilter::MinDistOnAxisDataPointsFilter(const Parameters& params):
-	DataPointsFilter("MinDistOnAxisDataPointsFilter", MinDistOnAxisDataPointsFilter::availableParameters(), params),
+PointMatcher<T>::MinDistDataPointsFilter::MinDistDataPointsFilter(const Parameters& params):
+	DataPointsFilter("MinDistDataPointsFilter", MinDistDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
 	minDist(Parametrizable::get<T>("minDist"))
 {
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistDataPointsFilter::filter(const DataPoints& input, bool& iterate)
 {
 	if (int(dim) >= input.features.rows())
-		throw InvalidParameter((boost::format("MinDistOnAxisDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
+		throw InvalidParameter((boost::format("MinDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
 	
 	const int nbPointsIn = input.features.cols();
-	const int nbPointsOut = (input.features.row(dim).array().abs() > minDist).count();
+	const int nbRows = input.features.rows();
+	int nbPointsOut = 0;
+	if (dim == 3)
+	{
+		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() > minDist).count();
+	}
+	else
+	{
+		nbPointsOut = (input.features.row(dim).array().abs() > minDist).count();
+	}
+
+cout << "nbPointsIn: " << nbPointsIn << " nbPointsOut: " << nbPointsOut << endl;
+cout << "max dist: " << input.features.topRows(nbRows-1).colwise().norm().maxCoeff() << endl;
+cout << "min dist: " << input.features.topRows(nbRows-1).colwise().norm().minCoeff() << endl;
 	DataPoints outputCloud(
 		typename DataPoints::Features(input.features.rows(), nbPointsOut),
 		input.featureLabels
 	);
+	
+	// if there is descriptors, copy the labels
 	if (input.descriptors.cols() > 0)
 	{
 		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
@@ -132,22 +176,38 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistOnAxisDataPointsFil
 	}
 	
 	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
+	if(dim == 3) // Euclidian distance
 	{
-		if (anyabs(input.features(dim, i)) > minDist)
+		for (int i = 0; i < nbPointsIn; i++)
 		{
-			outputCloud.features.col(j) = input.features.col(i);
-			if (outputCloud.descriptors.cols() > 0)
-				outputCloud.descriptors.col(j) = input.descriptors.col(i);
-			j++;
+			if (input.features.col(i).head(nbRows-1).norm() > minDist)
+			{
+				outputCloud.features.col(j) = input.features.col(i);
+				if (outputCloud.descriptors.cols() > 0)
+					outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				j++;
+			}
+		}
+	}
+	else // Single axis distance
+	{
+		for (int i = 0; i < nbPointsIn; i++)
+		{
+			if (anyabs(input.features(dim, i)) > minDist)
+			{
+				outputCloud.features.col(j) = input.features.col(i);
+				if (outputCloud.descriptors.cols() > 0)
+					outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				j++;
+			}
 		}
 	}
 	assert(j == nbPointsOut);
 	return outputCloud;
 }
 
-template struct PointMatcher<float>::MinDistOnAxisDataPointsFilter;
-template struct PointMatcher<double>::MinDistOnAxisDataPointsFilter;
+template struct PointMatcher<float>::MinDistDataPointsFilter;
+template struct PointMatcher<double>::MinDistDataPointsFilter;
 
 // MaxQuantileOnAxisDataPointsFilter
 // Constructor

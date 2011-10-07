@@ -68,7 +68,6 @@ PointMatcher<T>::KDTreeMatcher::KDTreeMatcher(const Parameters& params):
 	maxDist(Parametrizable::get<T>("maxDist")),
 	featureNNS(0)
 {
-	std::cout << "Using KDTreeMatcher with knn=" << knn << ", epsilon=" << epsilon << ", searchType=" << searchType << ", maxDist=" << maxDist << std::endl;
 }
 
 template<typename T>

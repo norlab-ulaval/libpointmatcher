@@ -48,7 +48,7 @@ struct IdentityDataPointsFilter: public DataPointsFilter
 };
 
 //! Subsampling. Filter points beyond a maximum distance measured on a specific axis
-struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
+struct MaxDistDataPointsFilter: public DataPointsFilter
 {
 	inline static const std::string description()
 	{
@@ -57,7 +57,7 @@ struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
 	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
-			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, all=3", "3", "0", "2147483647", &P::Comp<unsigned> },
 			{ "maxDist", "maximum distance authorized. All points beyond that will be filtered.", "1", "0", "inf", P::Comp<T> }
 		});
 	}
@@ -66,12 +66,12 @@ struct MaxDistOnAxisDataPointsFilter: public DataPointsFilter
 	const T maxDist;
 	
 	//! Constructor, uses parameter interface
-	MaxDistOnAxisDataPointsFilter(const Parameters& params = Parameters());
+	MaxDistDataPointsFilter(const Parameters& params = Parameters());
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
 
 //! Subsampling. Filter points before a minimum distance measured on a specific axis
-struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
+struct MinDistDataPointsFilter: public DataPointsFilter
 {
 	inline static const std::string description()
 	{
@@ -80,7 +80,7 @@ struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
 	inline static const ParametersDoc availableParameters()
 	{
 		return ParametersDoc({
-			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+			{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, all=3", "3", "0", "2147483647", &P::Comp<unsigned> },
 			{ "minDist", "minimum distance authorized. All points before that will be filtered.", "1", "0", "inf", &P::Comp<T> }
 		});
 	}
@@ -89,7 +89,7 @@ struct MinDistOnAxisDataPointsFilter: public DataPointsFilter
 	const T minDist;
 	
 	//! Constructor, uses parameter interface
-	MinDistOnAxisDataPointsFilter(const Parameters& params = Parameters());
+	MinDistDataPointsFilter(const Parameters& params = Parameters());
 	virtual DataPoints filter(const DataPoints& input, bool& iterate);
 };
 
