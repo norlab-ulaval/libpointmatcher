@@ -160,9 +160,6 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistDataPointsFilter::f
 		nbPointsOut = (input.features.row(dim).array().abs() > minDist).count();
 	}
 
-cout << "nbPointsIn: " << nbPointsIn << " nbPointsOut: " << nbPointsOut << endl;
-cout << "max dist: " << input.features.topRows(nbRows-1).colwise().norm().maxCoeff() << endl;
-cout << "min dist: " << input.features.topRows(nbRows-1).colwise().norm().minCoeff() << endl;
 	DataPoints outputCloud(
 		typename DataPoints::Features(input.features.rows(), nbPointsOut),
 		input.featureLabels
