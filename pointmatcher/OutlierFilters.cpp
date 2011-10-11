@@ -47,8 +47,7 @@ template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::NullFeatureOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
-	const Matches& input,
-	bool& iterate)
+	const Matches& input)
 {
 	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
 }
@@ -70,8 +69,7 @@ template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MaxDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
-	const Matches& input,
-	bool& iterate)
+	const Matches& input)
 {
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
@@ -104,8 +102,7 @@ template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MinDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
-	const Matches& input,
-	bool& iterate)
+	const Matches& input)
 {
 	
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
@@ -140,8 +137,7 @@ template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MedianDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
-	const Matches& input,
-	bool& iterate)
+	const Matches& input)
 {
 	const T median = input.getDistsQuantile(0.5);
 	
@@ -179,8 +175,7 @@ template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::TrimmedDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
-	const Matches& input,
-	bool& iterate)
+	const Matches& input)
 {
 	const T limit = input.getDistsQuantile(ratio);
 	
@@ -219,8 +214,7 @@ template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::VarTrimmedDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
-	const Matches& input,
-	bool& iterate)
+	const Matches& input)
 {
 	const T tunedRatio = optimizeInlierRatio(input);
 	LOG_INFO_STREAM("Optimized ratio: " << tunedRatio);
@@ -346,8 +340,7 @@ template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::NullDescriptorOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
-	const Matches& input,
-	bool& iterate)
+	const Matches& input)
 {
 	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
 }

@@ -43,8 +43,8 @@ struct NullMatcher: public Matcher
 		return "does nothing, return no matches";
 	}
 	
-	virtual void init(const DataPoints& filteredReference, bool& iterate);
-	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
+	virtual void init(const DataPoints& filteredReference);
+	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
 };
 
 struct KDTreeMatcher: public Matcher
@@ -74,8 +74,8 @@ protected:
 public:
 	KDTreeMatcher(const Parameters& params = Parameters());
 	virtual ~KDTreeMatcher();
-	virtual void init(const DataPoints& filteredReference, bool& iterate);
-	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate);
+	virtual void init(const DataPoints& filteredReference);
+	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
 };
 
 #endif // __POINTMATCHER_MATCHERS_H

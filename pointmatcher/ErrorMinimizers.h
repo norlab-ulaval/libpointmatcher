@@ -43,7 +43,7 @@ struct IdentityErrorMinimizer: ErrorMinimizer
 		return "does nothing";
 	}
 	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
+	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 };
 
 struct PointToPointErrorMinimizer: ErrorMinimizer
@@ -53,7 +53,7 @@ struct PointToPointErrorMinimizer: ErrorMinimizer
 		return "Point-to-point error. Based on SVD decomposition";
 	}
 	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
+	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 };
 
 struct PointToPlaneErrorMinimizer: public ErrorMinimizer
@@ -64,7 +64,7 @@ struct PointToPlaneErrorMinimizer: public ErrorMinimizer
 		return "Point-to-plane error (or point-to-line in 2D).";
 	}
 	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate);
+	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 };
 
 #endif // __POINTMATCHER_ERRORMINIMIZER_H

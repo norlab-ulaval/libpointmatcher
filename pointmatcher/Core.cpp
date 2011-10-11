@@ -129,7 +129,7 @@ void PointMatcher<T>::DataPointsFilters::init()
 }
 
 template<typename T>
-void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud, bool iterate)
+void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 {
 	DataPoints filteredCloud;
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
@@ -138,7 +138,7 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud, bool iterate)
 		if (pointsCount == 0)
 			throw ConvergenceError("no point to filter");
 		
-		filteredCloud = (*it)->filter(cloud, iterate);
+		filteredCloud = (*it)->filter(cloud);
 		swapDataPoints<T>(cloud, filteredCloud);
 	}
 }
@@ -172,8 +172,7 @@ template<typename T> template<typename F>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::compute(
 	const typename PointMatcher<T>::DataPoints& filteredReading,
 	const typename PointMatcher<T>::DataPoints& filteredReference,
-	const typename PointMatcher<T>::Matches& input,
-	bool& iterate) const
+	const typename PointMatcher<T>::Matches& input) const
 {
 	if (this->empty())
 	{
@@ -194,11 +193,11 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 	else
 	{
 		// apply filters, they should take care of infinite distances
-		OutlierWeights w = (*this->begin())->compute(filteredReading, filteredReference, input, iterate);
+		OutlierWeights w = (*this->begin())->compute(filteredReading, filteredReference, input);
 		if (this->size() > 1)
 		{
 			for (typename Vector::const_iterator it = (this->begin() + 1); it != this->end(); ++it)
-				w = w.array() * (*it)->compute(filteredReading, filteredReference, input, iterate).array();
+				w = w.array() * (*it)->compute(filteredReading, filteredReference, input).array();
 		}
 		return w;
 	}
@@ -398,15 +397,12 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	timer t; // Print how long take the algo
 	const int dim = referenceIn.features.rows();
-	bool iterate(true);
 	
 	// Apply reference filters
 	// reference is express in frame <refIn>
 	DataPoints reference(referenceIn);
 	this->keyframeDataPointsFilters.init();
-	this->keyframeDataPointsFilters.apply(reference, iterate);
-	if (!iterate)
-		return Matrix::Identity(dim, dim);
+	this->keyframeDataPointsFilters.apply(reference);
 	
 	// Create intermediate frame at the center of mass of reference pts cloud
 	//  this help to solve for rotations
@@ -422,14 +418,14 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		reference.features.row(i).array() -= meanReference(i);
 	
 	// Init matcher with reference points center on its mean
-	this->matcher->init(reference, iterate);
+	this->matcher->init(reference);
 
 	// Apply readings filters
 	// reading is express in frame <dataIn>
 	DataPoints reading(readingIn);
 	const int nbPtsReading = reading.features.cols();
 	this->readingDataPointsFilters.init();
-	this->readingDataPointsFilters.apply(reading, iterate);
+	this->readingDataPointsFilters.apply(reading);
 	
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
@@ -446,6 +442,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// the frame <refMean> is equivalent to the frame <iter(0)>
 	TransformationParameters T_iter = Matrix::Identity(dim, dim);
 	
+	bool iterate(true);
 	this->transformationCheckers.init(T_iter, iterate);
 
 	size_t iterationCount(0);
@@ -461,7 +458,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		
 		//-----------------------------
 		// Apply step filter
-		this->readingStepDataPointsFilters.apply(stepReading, iterate);
+		this->readingStepDataPointsFilters.apply(stepReading);
 		
 		//-----------------------------
 		// Transform Readings
@@ -470,17 +467,17 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		//-----------------------------
 		// Match to closest point in Reference
 		const Matches matches(
-			this->matcher->findClosests(stepReading, reference, iterate)
+			this->matcher->findClosests(stepReading, reference)
 		);
 		
 		//-----------------------------
 		// Detect outliers
 		const OutlierWeights featureOutlierWeights(
-			this->featureOutlierFilters.compute(stepReading, reference, matches, iterate)
+			this->featureOutlierFilters.compute(stepReading, reference, matches)
 		);
 		
 		const OutlierWeights descriptorOutlierWeights(
-			this->descriptorOutlierFilters.compute(stepReading, reference, matches, iterate)
+			this->descriptorOutlierFilters.compute(stepReading, reference, matches)
 		);
 		
 		assert(featureOutlierWeights.rows() == matches.ids.rows());
@@ -508,13 +505,11 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
-			stepReading, reference, outlierWeights, matches, iterate
-			) * T_iter;
+			stepReading, reference, outlierWeights, matches) * T_iter;
 		
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(
-		//	stepReading, reference, outlierWeights, matches, iterate
-		//);
+		//	stepReading, reference, outlierWeights, matches);
 		
 		// in test
 		
@@ -598,7 +593,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		// reference is express in frame <refIn>
 		bool iterate(true);
 		this->keyframeDataPointsFilters.init();
-		this->keyframeDataPointsFilters.apply(inputCloud, iterate);
+		this->keyframeDataPointsFilters.apply(inputCloud);
 		
 		// FIXE ME: this should be obsolet
 		if (!iterate)
@@ -623,7 +618,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		keyFrameCloud = inputCloud;
 		T_refIn_dataIn = Matrix::Identity(tDim, tDim);
 		
-		this->matcher->init(keyFrameCloud, iterate);
+		this->matcher->init(keyFrameCloud);
 		
 		keyFrameCreated = true;
 	
@@ -675,13 +670,12 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	timer t; // Print how long take the algo
 	t.restart();
 
-	bool iterate(true);
 	
 	// Apply readings filters
 	// reading is express in frame <dataIn>
 	DataPoints reading(inputCloud);
 	this->readingDataPointsFilters.init();
-	this->readingDataPointsFilters.apply(reading, iterate);
+	this->readingDataPointsFilters.apply(reading);
 	
 	pointCountIn.push_back(inputCloud.features.cols());
 	pointCountReading.push_back(reading.features.cols());
@@ -702,6 +696,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	// the frame <refMean> is equivalent to the frame <iter(0)>
 	TransformationParameters T_iter = Matrix::Identity(dim, dim);
 	
+	bool iterate(true);
 	this->transformationCheckers.init(T_iter, iterate);
 	
 	size_t iterationCount(0);
@@ -712,7 +707,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		
 		//-----------------------------
 		// Apply step filter
-		this->readingStepDataPointsFilters.apply(stepReading, iterate);
+		this->readingStepDataPointsFilters.apply(stepReading);
 		
 		//-----------------------------
 		// Transform Readings
@@ -721,7 +716,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		//-----------------------------
 		// Match to closest point in Reference
 		const Matches matches(
-			this->matcher->findClosests(stepReading, keyFrameCloud, iterate)
+			this->matcher->findClosests(stepReading, keyFrameCloud)
 		);
 		
 		//-----------------------------
@@ -729,21 +724,18 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		//cout << matches.ids.leftCols(10) << endl;
 		//cout << matches.dists.leftCols(10) << endl;
 		const OutlierWeights featureOutlierWeights(
-			this->featureOutlierFilters.compute(stepReading, keyFrameCloud, matches, iterate)
+			this->featureOutlierFilters.compute(stepReading, keyFrameCloud, matches)
 		);
 		
 
 		const OutlierWeights descriptorOutlierWeights(
-			this->descriptorOutlierFilters.compute(stepReading, keyFrameCloud, matches, iterate)
+			this->descriptorOutlierFilters.compute(stepReading, keyFrameCloud, matches)
 		);
 		
 		assert(featureOutlierWeights.rows() == matches.ids.rows());
 		assert(featureOutlierWeights.cols() == matches.ids.cols());
 		assert(descriptorOutlierWeights.rows() == matches.ids.rows());
 		assert(descriptorOutlierWeights.cols() == matches.ids.cols());
-		
-		//cout << "featureOutlierWeights: " << featureOutlierWeights << "\n";
-		//cout << "descriptorOutlierWeights: " << descriptorOutlierWeights << "\n";
 		
 		const OutlierWeights outlierWeights(
 			featureOutlierWeights * this->outlierMixingWeight +
@@ -761,8 +753,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
-			stepReading, keyFrameCloud, outlierWeights, matches, iterate
-			) * T_iter;
+			stepReading, keyFrameCloud, outlierWeights, matches) * T_iter;
 		
 		this->transformationCheckers.check(T_iter, iterate);
 		

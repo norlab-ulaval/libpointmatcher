@@ -43,7 +43,7 @@ struct NullFeatureOutlierFilter: public FeatureOutlierFilter
 		return "does nothing";
 	}
 	
-	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 };
 
 struct MaxDistOutlierFilter: public FeatureOutlierFilter
@@ -62,7 +62,7 @@ struct MaxDistOutlierFilter: public FeatureOutlierFilter
 	const T maxDist;
 	
 	MaxDistOutlierFilter(const Parameters& params = Parameters());
-	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 };
 
 struct MinDistOutlierFilter: public FeatureOutlierFilter
@@ -81,7 +81,7 @@ struct MinDistOutlierFilter: public FeatureOutlierFilter
 	const T minDist;
 	
 	MinDistOutlierFilter(const Parameters& params = Parameters()); 
-	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 };
 
 struct MedianDistOutlierFilter: public FeatureOutlierFilter 
@@ -100,7 +100,7 @@ struct MedianDistOutlierFilter: public FeatureOutlierFilter
 	const T factor;
 	
 	MedianDistOutlierFilter(const Parameters& params = Parameters());
-	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 };
 
 struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
@@ -119,7 +119,7 @@ struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
 	const T ratio;
 	
 	TrimmedDistOutlierFilter(const Parameters& params = Parameters());
-	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 };
 
 struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
@@ -142,7 +142,7 @@ struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
 	const T lambda;
 	
 	VarTrimmedDistOutlierFilter(const Parameters& params = Parameters());
-	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	
 private:
 	// return the optimized ratio
@@ -159,7 +159,7 @@ struct NullDescriptorOutlierFilter: public DescriptorOutlierFilter
 		return "does nothing";
 	}
 	
-	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate);
+	virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 };
 
 #endif // __POINTMATCHER_OUTLIERFILTERS_H

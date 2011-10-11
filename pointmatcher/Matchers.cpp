@@ -38,8 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // NullMatcher
 template<typename T>
 void PointMatcher<T>::NullMatcher::init(
-	const DataPoints& filteredReference,
-	bool& iterate)
+	const DataPoints& filteredReference)
 {
 	
 }
@@ -47,8 +46,7 @@ void PointMatcher<T>::NullMatcher::init(
 template<typename T>
 typename PointMatcher<T>::Matches PointMatcher<T>::NullMatcher::findClosests(
 	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	bool& iterate)
+	const DataPoints& filteredReference)
 {
 	return Matches();
 }
@@ -79,8 +77,7 @@ PointMatcher<T>::KDTreeMatcher::~KDTreeMatcher()
 
 template<typename T>
 void PointMatcher<T>::KDTreeMatcher::init(
-	const DataPoints& filteredReference,
-	bool& iterate)
+	const DataPoints& filteredReference)
 {
 	// build and populate NNS
 	if (featureNNS)
@@ -91,8 +88,7 @@ void PointMatcher<T>::KDTreeMatcher::init(
 template<typename T>
 typename PointMatcher<T>::Matches PointMatcher<T>::KDTreeMatcher::findClosests(
 	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	bool& iterate)
+	const DataPoints& filteredReference)
 {
 	
 	const int pointsCount(filteredReading.features.cols());

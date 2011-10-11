@@ -230,13 +230,13 @@ struct PointMatcher
 		DataPointsFilter(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		virtual ~DataPointsFilter() {}
 		virtual void init() {}
-		virtual DataPoints filter(const DataPoints& input, bool& iterate) = 0;
+		virtual DataPoints filter(const DataPoints& input) = 0;
 	};
 	
 	struct DataPointsFilters: public PointMatcherSupport::SharedPtrVector<DataPointsFilter>
 	{
 		void init();
-		void apply(DataPoints& cloud, bool iterate);
+		void apply(DataPoints& cloud);
 	};
 	typedef typename DataPointsFilters::iterator DataPointsFiltersIt;
 	typedef typename DataPointsFilters::const_iterator DataPointsFiltersConstIt;
@@ -258,8 +258,8 @@ struct PointMatcher
 		void resetVisitCount() { visitCounter = 0; }
 		unsigned long getVisitCount() const { return visitCounter; }
 		virtual ~Matcher() {}
-		virtual void init(const DataPoints& filteredReference, bool& iterate) = 0;
-		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference, bool& iterate) = 0;
+		virtual void init(const DataPoints& filteredReference) = 0;
+		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference) = 0;
 	};
 	
 	DEF_REGISTRAR(Matcher)
@@ -273,13 +273,13 @@ struct PointMatcher
 		FeatureOutlierFilter() {}
 		FeatureOutlierFilter(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		virtual ~FeatureOutlierFilter() {}
-		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) = 0;
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input) = 0;
 	};
 	
 	struct DescriptorOutlierFilter
 	{
 		virtual ~DescriptorOutlierFilter() {}
-		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) = 0;
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input) = 0;
 	};
 	
 	// Vector outlier filters
@@ -287,7 +287,7 @@ struct PointMatcher
 	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<F>
 	{
 		typedef PointMatcherSupport::SharedPtrVector<F> Vector;
-		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input, bool& iterate) const;
+		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input) const;
 	};
 	
 	typedef OutlierFilters<FeatureOutlierFilter> FeatureOutlierFilters;
@@ -318,7 +318,7 @@ struct PointMatcher
 		
 		ErrorMinimizer():pointUsedRatio(-1.),weightedPointUsedRatio(-1.) {}
 		virtual ~ErrorMinimizer() {}
-		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, bool& iterate) = 0;
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
 		T getPointUsedRatio() const { return pointUsedRatio; }
 		T getWeightedPointUsedRatio() const { return weightedPointUsedRatio; }
 		

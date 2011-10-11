@@ -47,8 +47,7 @@ using namespace PointMatcherSupport;
 // IdentityDataPointsFilter
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::IdentityDataPointsFilter::filter(
-	const DataPoints& input, 
-	bool& iterate)
+	const DataPoints& input)
 {
 	return input;
 }
@@ -67,7 +66,7 @@ PointMatcher<T>::MaxDistDataPointsFilter::MaxDistDataPointsFilter(const Paramete
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistDataPointsFilter::filter(const DataPoints& input)
 {
 	if (int(dim) >= input.features.rows())
 		throw InvalidParameter((boost::format("MaxDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
@@ -143,7 +142,7 @@ PointMatcher<T>::MinDistDataPointsFilter::MinDistDataPointsFilter(const Paramete
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistDataPointsFilter::filter(const DataPoints& input)
 {
 	if (int(dim) >= input.features.rows())
 		throw InvalidParameter((boost::format("MinDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
@@ -217,7 +216,7 @@ PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsF
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input)
 {
 	if (int(dim) >= input.features.rows())
 		throw InvalidParameter((boost::format("MaxQuantileOnAxisDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
@@ -311,7 +310,7 @@ struct HistElement
 };
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input)
 {
 	
 	const int nbPointsIn = input.features.cols();
@@ -469,8 +468,7 @@ PointMatcher<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(co
 // Compute
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFilter::filter(
-	const DataPoints& input, 
-	bool& iterate)
+	const DataPoints& input)
 {
 	std::cerr << "SurfaceNormalDataPointsFilter::preFilter" << std::endl;
 	typedef typename DataPoints::Features Features;
@@ -533,7 +531,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 		{ "knn", toParam(knn) },
 		{ "epsilon", toParam(epsilon) }
 	}));
-	matcher.init(input, iterate);
+	matcher.init(input);
 
 	Matches matches(typename Matches::Dists(knn, 1), typename Matches::Ids(knn, 1));
 	// Search for surrounding points
@@ -544,7 +542,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 		Features NN(featDim-1, knn);
 		
 		DataPoints singlePoint(input.features.col(i), input.featureLabels, Matrix(), Labels());
-		matches = matcher.findClosests(singlePoint, DataPoints(), iterate);
+		matches = matcher.findClosests(singlePoint, DataPoints());
 
 		// Mean of nearest neighbors (NN)
 		for(int j = 0; j < knn; j++)
@@ -685,8 +683,7 @@ PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDat
 // Compute
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::filter(
-	const DataPoints& input, 
-	bool& iterate)
+	const DataPoints& input)
 {
 	//std::cerr << "SamplingSurfaceNormalDataPointsFilter::preFilter " << input.features.cols() << std::endl;
 	typedef typename DataPoints::Features Features;
@@ -953,7 +950,7 @@ template struct PointMatcher<double>::SamplingSurfaceNormalDataPointsFilter;
 // OrientNormalsDataPointsFilter
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input, bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input)
 {
 	Matrix normals = input.getDescriptorByName("normals");
 
@@ -1063,7 +1060,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::RandomSamplingDataPointsFi
 
 // Pre filter
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::RandomSamplingDataPointsFilter::filter(const DataPoints& input,	bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::RandomSamplingDataPointsFilter::filter(const DataPoints& input)
 {
 	return randomSample(input);
 }
@@ -1144,7 +1141,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::FixstepSamplingDataPointsF
 
 // Pre filter
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::FixstepSamplingDataPointsFilter::filter(const DataPoints& input,	bool& iterate)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::FixstepSamplingDataPointsFilter::filter(const DataPoints& input)
 {
 	return fixstepSample(input);
 }

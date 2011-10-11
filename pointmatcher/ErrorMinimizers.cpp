@@ -59,8 +59,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::IdentityErro
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
-	const Matches& matches,
-	bool& iterate)
+	const Matches& matches)
 {
 	return TransformationParameters::Identity(filteredReading.features.rows(), filteredReading.features.rows());
 }
@@ -75,8 +74,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::PointToPoint
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
-	const Matches& matches,
-	bool& iterate)
+	const Matches& matches)
 {
 	typedef typename DataPoints::Features Features;
 	typedef typename Matches::Ids Ids;
@@ -170,8 +168,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::PointToPlane
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
-	const Matches& matches,
-	bool& iterate)
+	const Matches& matches)
 {
 	typedef typename DataPoints::Features Features;
 	typedef typename Matches::Ids Ids;

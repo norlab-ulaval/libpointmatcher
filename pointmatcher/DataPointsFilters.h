@@ -44,7 +44,7 @@ struct IdentityDataPointsFilter: public DataPointsFilter
 		return "does nothing";
 	}
 	
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 };
 
 //! Subsampling. Filter points beyond a maximum distance measured on a specific axis
@@ -67,7 +67,7 @@ struct MaxDistDataPointsFilter: public DataPointsFilter
 	
 	//! Constructor, uses parameter interface
 	MaxDistDataPointsFilter(const Parameters& params = Parameters());
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 };
 
 //! Subsampling. Filter points before a minimum distance measured on a specific axis
@@ -90,7 +90,7 @@ struct MinDistDataPointsFilter: public DataPointsFilter
 	
 	//! Constructor, uses parameter interface
 	MinDistDataPointsFilter(const Parameters& params = Parameters());
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 };
 
 //! Subsampling. Filter points beyond a maximum quantile measured on a specific axis
@@ -113,7 +113,7 @@ struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
 	
 	//! Constructor, uses parameter interface
 	MaxQuantileOnAxisDataPointsFilter(const Parameters& params = Parameters());
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 };
 
 //! Subsampling. Reduce the points number of a certain ration while trying to uniformize the density of the point cloud.
@@ -136,7 +136,7 @@ struct UniformizeDensityDataPointsFilter: public DataPointsFilter
 	
 	//! Constructor, uses parameter interface
 	UniformizeDensityDataPointsFilter(const Parameters& params = Parameters());
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 };
 
 //! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
@@ -169,7 +169,7 @@ struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 
 	SurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~SurfaceNormalDataPointsFilter() {};
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 };
 
 //! Sampling surface normals. First decimate the space until there is at most binSize points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
@@ -201,7 +201,7 @@ struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 public:
 	SamplingSurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~SamplingSurfaceNormalDataPointsFilter() {}
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 	
 protected:
 	struct BuildData
@@ -254,7 +254,7 @@ struct OrientNormalsDataPointsFilter: public DataPointsFilter
 		return "Normals. Reorient normals so that they all point in the same direction, with respect to coordinate 0.";
 	}
 	
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 };
 
 //! Random sampling
@@ -275,7 +275,7 @@ struct RandomSamplingDataPointsFilter: public DataPointsFilter
 	
 	RandomSamplingDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~RandomSamplingDataPointsFilter() {};
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 	
 private:
 	DataPoints randomSample(const DataPoints& input) const;
@@ -309,7 +309,7 @@ public:
 	FixstepSamplingDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~FixstepSamplingDataPointsFilter() {};
 	virtual void init();
-	virtual DataPoints filter(const DataPoints& input, bool& iterate);
+	virtual DataPoints filter(const DataPoints& input);
 private:
 	DataPoints fixstepSample(const DataPoints& input);
 };
