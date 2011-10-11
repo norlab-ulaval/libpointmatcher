@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
 project(libpointmatcher)
-option(COMPILE_SANDBOX "Set to ON to compile sandbox binaries" OFF)
 
 # c++ 0x
 #if("${CMAKE_CXX_COMPILER_ID}" MATCHES "clang") 
@@ -126,18 +125,6 @@ target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS}
 add_executable(list_modules examples/list_modules.cpp)
 target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
 
-# Sandbox programs
-if(COMPILE_SANDBOX)
-  add_executable(sandbox_icp sandbox/icp.cpp)
-  target_link_libraries(sandbox_icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
-
-  add_executable(sandbox_align_seq sandbox/align_sequence.cpp)
-  target_link_libraries(sandbox_align_seq pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
-
-  add_executable(sandbox_CSVtoVTK sandbox/convertCSVtoVTK.cpp)
-  target_link_libraries(sandbox_CSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
-
-endif(COMPILE_SANDBOX)
 
 if(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
   include_directories(${GTEST_INCLUDE_DIR})
