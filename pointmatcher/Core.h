@@ -159,7 +159,11 @@ struct PointMatcher
 			size_t span;
 			Label(const std::string& text = "", const size_t span = 0):text(text), span(span) {}
 		};
-		typedef std::vector<Label> Labels;
+		struct Labels: std::vector<Label>
+		{
+			typedef typename std::vector<Label>::const_iterator const_iterator;
+			bool contains(const std::string& text) const;
+		};
 		
 		// Constructor
 		DataPoints() {}

@@ -67,16 +67,19 @@ template struct PointMatcher<float>::TransformFeatures;
 template struct PointMatcher<double>::TransformFeatures;
 
 
-// TransformDescriptors
+// TransformNormals
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformDescriptors::compute(
+typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformNormals::compute(
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
 	typedef typename DataPoints::Descriptors Descriptors;
 	assert(parameters.rows() == parameters.cols());
-
+	
 	DataPoints transformedDataPoints(input);
+	
+	if (!input.descriptorLabels.contains("normals"))
+		return transformedDataPoints;
 
 	const int ptCount(input.descriptors.cols());
 
@@ -99,6 +102,6 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformDescriptors::comp
 	return transformedDataPoints;
 }
 
-template struct PointMatcher<float>::TransformDescriptors;
-template struct PointMatcher<double>::TransformDescriptors;
+template struct PointMatcher<float>::TransformNormals;
+template struct PointMatcher<double>::TransformNormals;
 

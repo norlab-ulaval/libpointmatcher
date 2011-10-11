@@ -48,7 +48,7 @@ struct TransformFeatures: public Transformation
 	virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
 };
 
-struct TransformDescriptors: Transformation
+struct TransformNormals: Transformation
 {
 	inline static const std::string description()
 	{
