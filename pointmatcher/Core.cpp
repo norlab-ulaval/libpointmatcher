@@ -60,6 +60,17 @@ namespace PointMatcherSupport
 // DataPoints
 
 template<typename T>
+bool PointMatcher<T>::DataPoints::Labels::contains(const std::string& text) const
+{
+	for (const_iterator it(this->begin()); it != this->end(); ++it)
+	{
+		if (it->text == text)
+			return true;
+	}
+	return false;
+}
+
+template<typename T>
 PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels):
 	features(features),
 	featureLabels(featureLabels)
@@ -238,6 +249,7 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->cleanup();
 	
 	this->transformations.push_back(new TransformFeatures());
+	this->transformations.push_back(new TransformNormals());
 	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter());
 	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter());
 	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter());
@@ -266,7 +278,9 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
 	createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
 	createModulesFromRegistrar("keyframeDataPointsFilters", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
-	createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations);
+	//createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations);
+	this->transformations.push_back(new TransformFeatures());
+	this->transformations.push_back(new TransformNormals());
 	createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher);
 	createModulesFromRegistrar("featureOutlierFilters", doc, pm.REG(FeatureOutlierFilter), featureOutlierFilters);
 	createModulesFromRegistrar("descriptorOutlierFilters", doc, pm.REG(DescriptorOutlierFilter), descriptorOutlierFilters);
@@ -805,7 +819,7 @@ template<typename T>
 PointMatcher<T>::PointMatcher()
 {
 	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformFeatures)
-	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformDescriptors)
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformNormals)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistDataPointsFilter)
