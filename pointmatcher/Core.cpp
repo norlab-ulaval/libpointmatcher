@@ -114,7 +114,6 @@ PointMatcher<T>::Matches::Matches(const Dists& dists, const Ids ids):
 template<typename T>
 T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 {
-	// TODO: check alignment and use matrix underlying storage when available
 	// build array
 	vector<T> values;
 	values.reserve(dists.rows() * dists.cols());
@@ -400,11 +399,15 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	const DataPoints& referenceIn,
 	const TransformationParameters& T_refIn_dataIn)
 {
-	assert(this->matcher);
-	assert(this->errorMinimizer);
-	assert(this->inspector);
-	assert(this->logger);
-	// FIXME: use exception
+	// Ensuring minimum definition of components
+	if (!this->matcher)
+		throw runtime_error("You must setup a matcher before running ICP");
+	if (!this->errorMinimizer)
+		throw runtime_error("You must setup an error minimizer before running ICP");
+	if (!this->inspector)
+		throw runtime_error("You must setup an inspector before running ICP");
+	if (!this->inspector)
+		throw runtime_error("You must setup a logger before running ICP");
 	
 	// local logger lies in thread-local storage, and we know that for the duration of the () operator, this->logger will not be changed by outside
 	localLogger = this->logger.get();
@@ -642,18 +645,19 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		LOG_WARNING_STREAM("Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)");
 }
 
-// WARNING: Reading and reference DataPoints will change!
-// TODO: Put those constant??
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& inputCloudIn)
 {
-	// Insuring minimum definition of components
-	assert(this->matcher);
-	assert(this->errorMinimizer);
-	assert(this->inspector);
-	assert(this->logger);
-	// FIXME: use exception
+	// Ensuring minimum definition of components
+	if (!this->matcher)
+		throw runtime_error("You must setup a matcher before running ICP");
+	if (!this->errorMinimizer)
+		throw runtime_error("You must setup an error minimizer before running ICP");
+	if (!this->inspector)
+		throw runtime_error("You must setup an inspector before running ICP");
+	if (!this->inspector)
+		throw runtime_error("You must setup a logger before running ICP");
 	
 	// local logger lies in thread-local storage, and we know that for the duration of the () operator, this->logger will not be changed by outside
 	localLogger = this->logger.get();

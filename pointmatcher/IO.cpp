@@ -95,8 +95,9 @@ typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
 		if(firstLine)
 		{
 			char tmpLine[1024];
+			char *brkt;
 			strcpy(tmpLine, line);
-			token = strtok(tmpLine, delimiters);
+			token = strtok_r(tmpLine, delimiters, &brkt);
 			while (token)
 			{
 				dim++;
@@ -107,7 +108,7 @@ typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
 					header.push_back(string(token));
 				}
 
-				token = strtok(NULL, delimiters); // FIXME: non reentrant, use strtok_r
+				token = strtok_r(NULL, delimiters, &brkt);
 			}
 		
 				
@@ -169,14 +170,14 @@ typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
 		}
 
 		// Load data!
-		token = strtok(line, delimiters);
+		char *brkt;
+		token = strtok_r(line, delimiters, &brkt);
 		int currentCol = 0;
 		while (token)
 		{
 			// Load data only if no text is on the line
 			if(!hasHeader)
 			{
-				//TODO: look for specific columns
 				if(currentCol == xCol)
 					xData.push_back(atof(token));
 				if(currentCol == yCol)
@@ -185,7 +186,7 @@ typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
 					zData.push_back(atof(token));
 			}
 
-			token = strtok(NULL, delimiters); // FIXME: non reentrant, use strtok_r
+			token = strtok_r(NULL, delimiters, &brkt);
 			currentCol++;
 		}
 		

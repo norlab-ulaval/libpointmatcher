@@ -159,7 +159,7 @@ struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 		});
 	}
 	
-	const int knn; // FIXME: shouldn't we put unsigned?
+	const unsigned knn;
 	const double epsilon;
 	const bool keepNormals;
 	const bool keepDensities;
@@ -191,7 +191,7 @@ struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 		});
 	}
 	
-	const int binSize; // FIXME: shouldn't we put unsigned?
+	const unsigned binSize;
 	const bool averageExistingDescriptors;
 	const bool keepNormals;
 	const bool keepDensities;

@@ -36,8 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_TRANSFORMATIONS_H
 #define __POINTMATCHER_TRANSFORMATIONS_H
 
-// FIXME: these namings are not very good
-
 struct TransformFeatures: public Transformation
 {
 	inline static const std::string description()

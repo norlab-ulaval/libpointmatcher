@@ -49,7 +49,7 @@ struct CounterTransformationChecker: public TransformationChecker
 		});
 	}
 	
-	const int maxIterationCount;
+	const unsigned maxIterationCount;
 	
 	CounterTransformationChecker(const Parameters& params = Parameters());
 	virtual void init(const TransformationParameters& parameters, bool& iterate);
@@ -104,7 +104,8 @@ struct BoundTransformationChecker: public TransformationChecker
 	const T maxTranslationNorm;
 	
 protected:
-	Quaternion initialRotation;
+	Quaternion initialRotation3D;
+	T initialRotation2D;
 	Vector initialTranslation;
 	
 public:

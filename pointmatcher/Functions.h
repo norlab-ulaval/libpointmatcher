@@ -44,4 +44,13 @@ static inline T anyabs(const T& v)
 		return v;
 }
 
+static inline T normalizeAngle(T v)
+{
+	while (v > M_PI)
+		v -= 2*M_PI;
+	while (v < -M_PI)
+		v += 2*M_PI;
+	return v;
+}
+
 #endif // __POINTMATCHER_FUNCTIONS_H

@@ -81,15 +81,15 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformNormals::compute(
 	if (!input.descriptorLabels.contains("normals"))
 		return transformedDataPoints;
 
-	const int ptCount(input.descriptors.cols());
+	const unsigned ptCount(input.descriptors.cols());
 
 	//NOTE: Only need rotation for descriptors (up to now...)
 	const Matrix R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
 
-	int descRow(0);
-	for(int unsigned i = 0; i < transformedDataPoints.descriptorLabels.size(); i++)
+	unsigned descRow(0);
+	for(unsigned i = 0; i < transformedDataPoints.descriptorLabels.size(); i++)
 	{
-		int span(input.descriptorLabels[i].span);
+		const unsigned span(input.descriptorLabels[i].span);
 		if(transformedDataPoints.descriptorLabels[i].text.compare("normals") == 0)
 		{
 			assert(span == parameters.rows()-1);

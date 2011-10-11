@@ -190,7 +190,6 @@ struct PointMatcher
 	{
 		typedef Matrix Dists;
 		typedef IntMatrix Ids;
-		// FIXME: shouldn't we have a matrix of pairs instead?
 	
 		Matches() {}
 		Matches(const Dists& dists, const Ids ids);
@@ -253,7 +252,7 @@ struct PointMatcher
 	
 	struct Matcher: public Parametrizable
 	{
-		// FIXME: this is a rather ugly way to do stats
+		//! number of points visited
 		unsigned long visitCounter;
 		
 		Matcher():visitCounter(0) {}
@@ -486,7 +485,6 @@ struct PointMatcher
 		PointMatcherSupport::Histogram<unsigned> pointCountTouched;
 		PointMatcherSupport::Histogram<double> overlapRatio;
 		
-		// TODO: dim should be removed
 		ICPSequence(const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
 		~ICPSequence();
 		

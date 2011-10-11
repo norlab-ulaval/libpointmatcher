@@ -545,7 +545,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 		matches = matcher.findClosests(singlePoint, DataPoints());
 
 		// Mean of nearest neighbors (NN)
-		for(int j = 0; j < knn; j++)
+		for(int j = 0; j < int(knn); j++)
 		{
 			const int refIndex(matches.ids(j));
 			const Vector v(input.features.block(0, refIndex, featDim-1, 1));
@@ -556,7 +556,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 		mean /= knn;
 		
 		// Covariance of nearest neighbors
-		for (int j = 0; j < knn; ++j)
+		for (int j = 0; j < int(knn); ++j)
 		{
 			//std::cout << "NN.col(j):\n" << NN.col(j) << std::endl;
 			//std::cout << "mean:\n" << mean << std::endl;
@@ -631,7 +631,6 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 		
 		if(keepEigenVectors)
 		{
-			//TODO: Watch for that serialization
 			for(int k=0; k < (featDim-1); k++)
 			{
 				newDescriptors.block(
@@ -762,7 +761,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SamplingSurfaceNormalDataP
 	);
 }
 
-// TODO: move into a file Utils.h
+
 template<typename T>
 size_t argMax(const typename PointMatcher<T>::Vector& v)
 {
@@ -783,7 +782,7 @@ template<typename T>
 void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
 {
 	const int count(last - first);
-	if (count <= binSize)
+	if (count <= int(binSize))
 	{
 		// compute for this range
 		fuseRange(data, first, last);
@@ -836,11 +835,7 @@ void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(BuildData
 	for (int i = 0; i < colCount; ++i)
 		d.col(i) = data.inputFeatures.block(0,data.indices[first+i],featDim-1, 1);
 	const Vector& mean = d.rowwise().sum() / T(colCount);
-	// FIXME: with Eigen3, do this:
-	//const Matrix& NN = (d.colwise() - mean);
-	Matrix NN(d);
-	for (int i = 0; i < NN.cols(); ++i)
-		NN.col(i) -= mean;
+	const Matrix& NN = (d.colwise() - mean);
 	data.outputFeatures.block(0, data.outputInsertionPoint, featDim-1,1) = mean;
 	data.outputFeatures(featDim-1, data.outputInsertionPoint) = 1;
 	
@@ -930,7 +925,6 @@ void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(BuildData
 	if(keepEigenVectors)
 	{
 		const int dimEigVectors((featDim-1)*(featDim-1));
-		//TODO: Watch for that serialization
 		for(int k=0; k < (featDim-1); k++)
 		{
 			data.outputDescriptors.block(

@@ -64,7 +64,7 @@ typename PointMatcher<T>::Vector PointMatcher<T>::TransformationChecker::matrixT
 template<typename T>
 PointMatcher<T>::CounterTransformationChecker::CounterTransformationChecker(const Parameters& params):
 	TransformationChecker("CounterTransformationChecker", CounterTransformationChecker::availableParameters(), params),
-	maxIterationCount(Parametrizable::get<int>("maxIterationCount")) // FIXME: should this be unsigned?
+	maxIterationCount(Parametrizable::get<unsigned>("maxIterationCount"))
 {
 	this->limits.setZero(1);
 	this->limits(0) = maxIterationCount;
@@ -194,18 +194,32 @@ template<typename T>
 void PointMatcher<T>::BoundTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values.setZero(2);
-	// FIXME: handle 2D case
-	assert(parameters.rows() == 4);
-	initialRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
+	if (parameters.rows() == 4)
+		initialRotation3D = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
+	else if (parameters.rows() == 3)
+		initialRotation2D = acos(parameters(0,0));
+	else
+		throw runtime_error("BoundTransformationChecker only works in 2D or 3D");
+		
 	initialTranslation = parameters.topRightCorner(parameters.rows()-1,1);
 }
 
 template<typename T>
 void PointMatcher<T>::BoundTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
-	const Quaternion currentRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
+	if (parameters.rows() == 4)
+	{
+		const Quaternion currentRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
+		this->values(0) = currentRotation.angularDistance(initialRotation3D);
+	}
+	else if (parameters.rows() == 3)
+	{
+		const T currentRotation(acos(parameters(0,0)));
+		this->values(0) = normalizeAngle(currentRotation - initialRotation2D);
+	}
+	else
+		assert(false);
 	const Vector currentTranslation = parameters.topRightCorner(parameters.rows()-1,1);
-	this->values(0) = currentRotation.angularDistance(initialRotation);
 	this->values(1) = (currentTranslation - initialTranslation).norm();
 	if (this->values(0) > this->limits(0) || this->values(1) > this->limits(1))
 	{

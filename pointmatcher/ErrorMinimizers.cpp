@@ -127,32 +127,17 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::PointToPoint
 	
 	Features centeredFeatureReading(keptFeatures.corner(TopLeft,  dimCount-1, pointsCount));
 	
-	// TODO: substraction should be done on row instead of col	
-	for (int i = 0; i < pointsCount; ++i)
-	{
-		centeredFeatureReading.col(i) -= meanOfReading;
-		associatedRef.col(i) -= meanOfAssociatedRef;
-	}
-	
-	// TODO: preprocess to move stuff to their center
-// 		const Matrix m(centeredFeatureReading * associatedRef.transpose());
-// 		const SVD<Matrix> svd(m);
-// 		const Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
-// 		const Vector trVector(meanOfAssociatedRef - rotMatrix * meanOfReading);
+	centeredFeatureReading.colwise() -= meanOfReading;
+	associatedRef.colwise() -= meanOfAssociatedRef;
 	
 	const Matrix m(associatedRef * centeredFeatureReading.transpose());
 	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
 	const Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
-	//cout << "meanOfAssociatedRef " << meanOfAssociatedRef << endl;
-	//cout << "meanOfReading " << meanOfReading << endl;
 	const Vector trVector(meanOfAssociatedRef - rotMatrix * meanOfReading);
-	//const Vector trVector(meanOfAssociatedRef - meanOfReading);
 	
 	Matrix result(Matrix::Identity(dimCount, dimCount));
 	result.corner(TopLeft, dimCount-1, dimCount-1) = rotMatrix;
 	result.corner(TopRight, dimCount-1, 1) = trVector;
-	
-	//cout << "delta transform :\n" << result << "\n";
 	
 	return result;
 }
@@ -264,7 +249,6 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(c
 	assert(A.cols() == B.cols());
 
 	// Expecting homogenous coord X eucl. coord
-	// TODO: maybe too specific...
 	assert(A.rows() -1 == B.rows());
 
 	// Expecting homogenous coordinates
