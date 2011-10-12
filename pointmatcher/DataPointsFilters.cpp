@@ -33,7 +33,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "DataPointsFilters.h"
+#include "Matchers.h"
+#include "Functions.h"
+
 #include <stdexcept>
 #include <algorithm>
 #include <boost/format.hpp>
@@ -46,19 +49,19 @@ using namespace PointMatcherSupport;
 
 // IdentityDataPointsFilter
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::IdentityDataPointsFilter::filter(
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::IdentityDataPointsFilter::filter(
 	const DataPoints& input)
 {
 	return input;
 }
 
-template struct PointMatcher<float>::IdentityDataPointsFilter;
-template struct PointMatcher<double>::IdentityDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::IdentityDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::IdentityDataPointsFilter;
 
 // MaxDistDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::MaxDistDataPointsFilter::MaxDistDataPointsFilter(const Parameters& params):
+DataPointsFiltersImpl<T>::MaxDistDataPointsFilter::MaxDistDataPointsFilter(const Parameters& params):
 	DataPointsFilter("MaxDistDataPointsFilter", MaxDistDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
 	maxDist(Parametrizable::get<T>("maxDist"))
@@ -66,7 +69,7 @@ PointMatcher<T>::MaxDistDataPointsFilter::MaxDistDataPointsFilter(const Paramete
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistDataPointsFilter::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPointsFilter::filter(const DataPoints& input)
 {
 	if (int(dim) >= input.features.rows())
 		throw InvalidParameter((boost::format("MaxDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
@@ -128,13 +131,13 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxDistDataPointsFilter::f
 	return outputCloud;
 }
 
-template struct PointMatcher<float>::MaxDistDataPointsFilter;
-template struct PointMatcher<double>::MaxDistDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::MaxDistDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::MaxDistDataPointsFilter;
 
 // MinDistDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::MinDistDataPointsFilter::MinDistDataPointsFilter(const Parameters& params):
+DataPointsFiltersImpl<T>::MinDistDataPointsFilter::MinDistDataPointsFilter(const Parameters& params):
 	DataPointsFilter("MinDistDataPointsFilter", MinDistDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
 	minDist(Parametrizable::get<T>("minDist"))
@@ -142,7 +145,7 @@ PointMatcher<T>::MinDistDataPointsFilter::MinDistDataPointsFilter(const Paramete
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistDataPointsFilter::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPointsFilter::filter(const DataPoints& input)
 {
 	if (int(dim) >= input.features.rows())
 		throw InvalidParameter((boost::format("MinDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
@@ -202,13 +205,13 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::MinDistDataPointsFilter::f
 	return outputCloud;
 }
 
-template struct PointMatcher<float>::MinDistDataPointsFilter;
-template struct PointMatcher<double>::MinDistDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::MinDistDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::MinDistDataPointsFilter;
 
 // MaxQuantileOnAxisDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsFilter(const Parameters& params):
+DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsFilter(const Parameters& params):
 	DataPointsFilter("MaxQuantileOnAxisDataPointsFilter", MaxQuantileOnAxisDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
 	ratio(Parametrizable::get<T>("ratio"))
@@ -216,7 +219,7 @@ PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::MaxQuantileOnAxisDataPointsF
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter::filter(const DataPoints& input)
 {
 	if (int(dim) >= input.features.rows())
 		throw InvalidParameter((boost::format("MaxQuantileOnAxisDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
@@ -278,14 +281,14 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::MaxQuantileOnAxisDataPoint
 	return outputCloud;
 }
 
-template struct PointMatcher<float>::MaxQuantileOnAxisDataPointsFilter;
-template struct PointMatcher<double>::MaxQuantileOnAxisDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::MaxQuantileOnAxisDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::MaxQuantileOnAxisDataPointsFilter;
 
 
 // UniformizeDensityDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(const Parameters& params):
+DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(const Parameters& params):
 	DataPointsFilter("UniformizeDensityDataPointsFilter", UniformizeDensityDataPointsFilter::availableParameters(), params),
 	ratio(Parametrizable::get<T>("ratio")),
 	nbBin(Parametrizable::get<unsigned>("nbBin"))
@@ -310,7 +313,7 @@ struct HistElement
 };
 
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input)
 {
 	
 	const int nbPointsIn = input.features.cols();
@@ -445,14 +448,14 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::UniformizeDensityDataPoint
 	return outputCloud;
 }
 
-template struct PointMatcher<float>::UniformizeDensityDataPointsFilter;
-template struct PointMatcher<double>::UniformizeDensityDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::UniformizeDensityDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::UniformizeDensityDataPointsFilter;
 
 
 // SurfaceNormalDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(const Parameters& params):
+DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(const Parameters& params):
 	DataPointsFilter("SurfaceNormalDataPointsFilter", SurfaceNormalDataPointsFilter::availableParameters(), params),
 	knn(Parametrizable::get<int>("knn")),
 	epsilon(Parametrizable::get<T>("epsilon")),
@@ -467,13 +470,17 @@ PointMatcher<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPointsFilter(co
 
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFilter::filter(
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input)
 {
-	std::cerr << "SurfaceNormalDataPointsFilter::preFilter" << std::endl;
 	typedef typename DataPoints::Features Features;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
+	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
+	typedef typename PointMatcher<T>::Matches Matches;
+	
+	std::cerr << "SurfaceNormalDataPointsFilter::preFilter" << std::endl;
+	// FIXME: remove cerr here and use logger
 	
 	const int pointsCount(input.features.cols());
 	const int featDim(input.features.rows());
@@ -660,15 +667,15 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::SurfaceNormalDataPointsFil
 	return DataPoints(input.features, input.featureLabels, newDescriptors, newDescriptorLabels);
 }
 
-template struct PointMatcher<float>::SurfaceNormalDataPointsFilter;
-template struct PointMatcher<double>::SurfaceNormalDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::SurfaceNormalDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::SurfaceNormalDataPointsFilter;
 
 
 // SamplingSurfaceNormalDataPointsFilter
 
 // Constructor
 template<typename T>
-PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(const Parameters& params):
+DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(const Parameters& params):
 	DataPointsFilter("SamplingSurfaceNormalDataPointsFilter", SamplingSurfaceNormalDataPointsFilter::availableParameters(), params),
 	binSize(Parametrizable::get<int>("binSize")),
 	averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
@@ -681,7 +688,7 @@ PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDat
 
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::filter(
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input)
 {
 	//std::cerr << "SamplingSurfaceNormalDataPointsFilter::preFilter " << input.features.cols() << std::endl;
@@ -779,7 +786,7 @@ size_t argMax(const typename PointMatcher<T>::Vector& v)
 }
 
 template<typename T>
-void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
+void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
 {
 	const int count(last - first);
 	if (count <= int(binSize))
@@ -824,7 +831,7 @@ void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(BuildData&
 }
 
 template<typename T>
-void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
+void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
 {
 	const int colCount(last-first);
 	const int featDim(data.inputFeatures.rows());
@@ -937,15 +944,17 @@ void PointMatcher<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(BuildData
 	++data.outputInsertionPoint;
 }
 
-template struct PointMatcher<float>::SamplingSurfaceNormalDataPointsFilter;
-template struct PointMatcher<double>::SamplingSurfaceNormalDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::SamplingSurfaceNormalDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::SamplingSurfaceNormalDataPointsFilter;
 
 
 // OrientNormalsDataPointsFilter
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input)
 {
+	typedef typename Eigen::Matrix<T, 3, 1> Vector3;
+	
 	Matrix normals = input.getDescriptorByName("normals");
 
 	if (normals.cols() == 0)
@@ -953,6 +962,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::OrientNormalsDataPointsFil
 		cerr << "Warning: cannot find normals in descriptors" << endl;
 		return input;
 	}
+	// FIXME: we should check the dimension as well
 	
 	const int nbPoints = input.features.cols();
 	const int nbNormals = input.descriptors.cols();
@@ -992,14 +1002,14 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::OrientNormalsDataPointsFil
 	return output;
 }
 
-template struct PointMatcher<float>::OrientNormalsDataPointsFilter;
-template struct PointMatcher<double>::OrientNormalsDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::OrientNormalsDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::OrientNormalsDataPointsFilter;
 
 
 // RandomSamplingDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(const Parameters& params):
+DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(const Parameters& params):
 	DataPointsFilter("RandomSamplingDataPointsFilter", RandomSamplingDataPointsFilter::availableParameters(), params),
 	prob(Parametrizable::get<double>("prob"))
 {
@@ -1007,7 +1017,7 @@ PointMatcher<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(
 
 // Sampling
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::RandomSamplingDataPointsFilter::randomSample(const DataPoints& input) const
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::randomSample(const DataPoints& input) const
 {
 	Eigen::Matrix<double, 1, Eigen::Dynamic> filter;
 	filter.setRandom(input.features.cols());
@@ -1054,19 +1064,19 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::RandomSamplingDataPointsFi
 
 // Pre filter
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::RandomSamplingDataPointsFilter::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::filter(const DataPoints& input)
 {
 	return randomSample(input);
 }
 
-template struct PointMatcher<float>::RandomSamplingDataPointsFilter;
-template struct PointMatcher<double>::RandomSamplingDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::RandomSamplingDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::RandomSamplingDataPointsFilter;
 
 
 // FixstepSamplingDataPointsFilter
 // Constructor
 template<typename T>
-PointMatcher<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(const Parameters& params):
+DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(const Parameters& params):
 	DataPointsFilter("FixstepSamplingDataPointsFilter", FixstepSamplingDataPointsFilter::availableParameters(), params),
 	startStep(Parametrizable::get<double>("startStep")),
 	endStep(Parametrizable::get<double>("endStep")),
@@ -1078,14 +1088,14 @@ PointMatcher<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilte
 
 
 template<typename T>
-void PointMatcher<T>::FixstepSamplingDataPointsFilter::init()
+void DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::init()
 {
 	step = startStep;
 }
 
 // Sampling
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::FixstepSamplingDataPointsFilter::fixstepSample(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::fixstepSample(const DataPoints& input)
 {
 	const int iStep(step);
 	//cerr << "FixstepSamplingDataPointsFilter::filter: stepping " << iStep << endl;
@@ -1135,11 +1145,11 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::FixstepSamplingDataPointsF
 
 // Pre filter
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::FixstepSamplingDataPointsFilter::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::filter(const DataPoints& input)
 {
 	return fixstepSample(input);
 }
 
-template struct PointMatcher<float>::FixstepSamplingDataPointsFilter;
-template struct PointMatcher<double>::FixstepSamplingDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::FixstepSamplingDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::FixstepSamplingDataPointsFilter;
 

@@ -36,46 +36,65 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_MATCHERS_H
 #define __POINTMATCHER_MATCHERS_H
 
-struct NullMatcher: public Matcher
+#include "Core.h"
+
+template<typename T>
+struct MatchersImpl
 {
-	inline static const std::string description()
-	{
-		return "does nothing, return no matches";
-	}
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParameterDoc ParameterDoc;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
 	
-	virtual void init(const DataPoints& filteredReference);
-	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
-};
-
-struct KDTreeMatcher: public Matcher
-{
-	inline static const std::string description()
-	{
-		return "This matcher matches a point from the reading to its closest neighbors in the reference.";
-	}
-	inline static const ParametersDoc availableParameters()
-	{
-		return ParametersDoc({
-			{ "knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned> },
-			{ "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> },
-			{ "searchType", "Nabo search type", "1", "0", "4", &P::Comp<unsigned> },
-			{ "maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>}
-		});
-	}
+	typedef typename Nabo::NearestNeighbourSearch<T> NNS;
+	typedef typename NNS::SearchType NNSearchType;
 	
-	const int knn;
-	const T epsilon;
-	const NNSearchType searchType;
-	const T maxDist;
+	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::Matcher Matcher;
+	typedef typename PointMatcher<T>::Matches Matches;
+	
+	struct NullMatcher: public Matcher
+	{
+		inline static const std::string description()
+		{
+			return "does nothing, return no matches";
+		}
+		
+		virtual void init(const DataPoints& filteredReference);
+		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
+	};
 
-protected:
-	NNS* featureNNS;
+	struct KDTreeMatcher: public Matcher
+	{
+		inline static const std::string description()
+		{
+			return "This matcher matches a point from the reading to its closest neighbors in the reference.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned> },
+				{ "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> },
+				{ "searchType", "Nabo search type", "1", "0", "4", &P::Comp<unsigned> },
+				{ "maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>}
+			});
+		}
+		
+		const int knn;
+		const T epsilon;
+		const NNSearchType searchType;
+		const T maxDist;
 
-public:
-	KDTreeMatcher(const Parameters& params = Parameters());
-	virtual ~KDTreeMatcher();
-	virtual void init(const DataPoints& filteredReference);
-	virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
-};
+	protected:
+		std::shared_ptr<NNS> featureNNS;
+
+	public:
+		KDTreeMatcher(const Parameters& params = Parameters());
+		virtual ~KDTreeMatcher();
+		virtual void init(const DataPoints& filteredReference);
+		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
+	};
+}; // MatchersImpl
 
 #endif // __POINTMATCHER_MATCHERS_H

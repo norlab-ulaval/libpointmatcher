@@ -33,12 +33,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "Transformations.h"
+
 #include <iostream>
 
 // TransformFeatures
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformFeatures::compute(
+typename PointMatcher<T>::DataPoints TransformationsImpl<T>::TransformFeatures::compute(
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
@@ -63,17 +64,19 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformFeatures::compute
 	return transformedDataPoints;
 }
 
-template struct PointMatcher<float>::TransformFeatures;
-template struct PointMatcher<double>::TransformFeatures;
+template struct TransformationsImpl<float>::TransformFeatures;
+template struct TransformationsImpl<double>::TransformFeatures;
 
 
 // TransformNormals
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformNormals::compute(
+typename PointMatcher<T>::DataPoints TransformationsImpl<T>::TransformNormals::compute(
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
 	typedef typename DataPoints::Descriptors Descriptors;
+	typedef typename PointMatcher<T>::Matrix Matrix;
+	
 	assert(parameters.rows() == parameters.cols());
 	
 	DataPoints transformedDataPoints(input);
@@ -102,6 +105,6 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::TransformNormals::compute(
 	return transformedDataPoints;
 }
 
-template struct PointMatcher<float>::TransformNormals;
-template struct PointMatcher<double>::TransformNormals;
+template struct TransformationsImpl<float>::TransformNormals;
+template struct TransformationsImpl<double>::TransformNormals;
 

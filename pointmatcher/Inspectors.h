@@ -36,77 +36,97 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_INSPECTORS_H
 #define __POINTMATCHER_INSPECTORS_H
 
-// Clearer name when no inspector is required
-struct NullInspector: public Inspector
+#include "Core.h"
+
+template<typename T>
+struct InspectorsImpl
 {
-	inline static const std::string description()
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParameterDoc ParameterDoc;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
+	
+	typedef typename PointMatcher<T>::Inspector Inspector;
+	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::Matches Matches;
+	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
+	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
+	typedef typename PointMatcher<T>::TransformationCheckers TransformationCheckers;
+	typedef typename PointMatcher<T>::Matrix Matrix;
+	
+	// Clearer name when no inspector is required
+	struct NullInspector: public Inspector
 	{
-		return "does nothing";
-	}
-};
+		inline static const std::string description()
+		{
+			return "does nothing";
+		}
+	};
 
-struct AbstractVTKInspector: public Inspector
-{
-protected:
-	virtual std::ostream* openStream(const std::string& role) = 0;
-	virtual std::ostream* openStream(const std::string& role, const size_t iterationCount) = 0;
-	virtual void closeStream(std::ostream* stream) = 0;
-	void dumpDataPoints(const DataPoints& data, std::ostream& stream);
-	void dumpMeshNodes(const DataPoints& data, std::ostream& stream);
-	void dumpDataLinks(const DataPoints& ref, const DataPoints& reading, 	const Matches& matches, const OutlierWeights& featureOutlierWeights, std::ostream& stream);
-	
-	std::ostream* streamIter;
-
-public:
-	AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
-	virtual void init() {};
-	virtual void dumpDataPoints(const DataPoints& cloud, const std::string& name);
-	virtual void dumpMeshNodes(const DataPoints& cloud, const std::string& name);
-	virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers);
-	virtual void finish(const size_t iterationCount);
-
-private:
-	void buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim);
-
-	void buildScalarStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
-	void buildScalarStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
-	
-	void buildNormalStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
-	void buildNormalStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
-	
-	void buildVectorStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
-	void buildVectorStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
-	
-	void buildTensorStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
-	void buildTensorStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
-
-	Matrix padWithZeros(const Matrix m, const int expectedRow, const int expectedCols); 
-};
-
-struct VTKFileInspector: public AbstractVTKInspector
-{
-	inline static const std::string description()
+	struct AbstractVTKInspector: public Inspector
 	{
-		return "Dump the different steps into VTK files.";
-	}
-	inline static const ParametersDoc availableParameters()
+	protected:
+		virtual std::ostream* openStream(const std::string& role) = 0;
+		virtual std::ostream* openStream(const std::string& role, const size_t iterationCount) = 0;
+		virtual void closeStream(std::ostream* stream) = 0;
+		void dumpDataPoints(const DataPoints& data, std::ostream& stream);
+		void dumpMeshNodes(const DataPoints& data, std::ostream& stream);
+		void dumpDataLinks(const DataPoints& ref, const DataPoints& reading, 	const Matches& matches, const OutlierWeights& featureOutlierWeights, std::ostream& stream);
+		
+		std::ostream* streamIter;
+
+	public:
+		AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
+		virtual void init() {};
+		virtual void dumpDataPoints(const DataPoints& cloud, const std::string& name);
+		virtual void dumpMeshNodes(const DataPoints& cloud, const std::string& name);
+		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers);
+		virtual void finish(const size_t iterationCount);
+
+	private:
+		void buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim);
+
+		void buildScalarStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
+		void buildScalarStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
+		
+		void buildNormalStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
+		void buildNormalStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
+		
+		void buildVectorStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
+		void buildVectorStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
+		
+		void buildTensorStream(std::ostream& stream, const std::string& name, const DataPoints& ref, const DataPoints& reading);
+		void buildTensorStream(std::ostream& stream, const std::string& name, const DataPoints& cloud);
+
+		Matrix padWithZeros(const Matrix m, const int expectedRow, const int expectedCols); 
+	};
+
+	struct VTKFileInspector: public AbstractVTKInspector
 	{
-		return ParametersDoc({
-			{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" }
-		});
-	}
-	
-	const std::string baseFileName;
-	
-protected:
-	virtual std::ostream* openStream(const std::string& role);
-	virtual std::ostream* openStream(const std::string& role, const size_t iterationCount);
-	virtual void closeStream(std::ostream* stream);
-	
-public:
-	VTKFileInspector(const Parameters& params = Parameters());
-	virtual void init();
-	virtual void finish(const size_t iterationCount);
-};
+		inline static const std::string description()
+		{
+			return "Dump the different steps into VTK files.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" }
+			});
+		}
+		
+		const std::string baseFileName;
+		
+	protected:
+		virtual std::ostream* openStream(const std::string& role);
+		virtual std::ostream* openStream(const std::string& role, const size_t iterationCount);
+		virtual void closeStream(std::ostream* stream);
+		
+	public:
+		VTKFileInspector(const Parameters& params = Parameters());
+		virtual void init();
+		virtual void finish(const size_t iterationCount);
+	};
+}; // InspectorsImpl
 
 #endif // __POINTMATCHER_INSPECTORS_H

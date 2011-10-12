@@ -69,6 +69,7 @@ namespace YAML
 
 namespace PointMatcherSupport
 {
+	//! A vector of std::shared_ptr<S> that behaves like a std::vector<S>
 	template<typename S>
 	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
 	{
@@ -91,12 +92,48 @@ namespace PointMatcherSupport
 		virtual std::ostream* warningStream() { return 0; }
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func) {}
 		
-		boost::mutex infoMutex;
-		boost::mutex warningMutex;
+		boost::mutex infoMutex; //! mutex to protect access to info stream
+		boost::mutex warningMutex; //! mutex to protect access to warning stream
 	};
+	
+	// macros holding the name of current function, send patches for your favourite compiler
+	#if defined(MSVC)
+		#define __POINTMATCHER_FUNCTION__ __FUNCSIG__
+	#elif defined(__GNUC__)
+		#define __POINTMATCHER_FUNCTION__ __PRETTY_FUNCTION__
+	#else
+		#define __POINTMATCHER_FUNCTION__ ""
+	#endif
+	
+	// macros for logging
+	#define LOG_INFO_STREAM(args) \
+	{ \
+		if (PointMatcherSupport::localLogger->hasInfoChannel()) { \
+			boost::mutex::scoped_lock lock(PointMatcherSupport::localLogger->infoMutex); \
+			PointMatcherSupport::localLogger->beginInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+			(*PointMatcherSupport::localLogger->infoStream()) << args; \
+			PointMatcherSupport::localLogger->finishInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+		} \
+	}
+	#define LOG_WARNING_STREAM(args) \
+	{ \
+		if (PointMatcherSupport::localLogger->hasWarningChannel()) { \
+			boost::mutex::scoped_lock lock(PointMatcherSupport::localLogger->warningMutex); \
+			PointMatcherSupport::localLogger->beginWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+			(*PointMatcherSupport::localLogger->warningStream()) << args; \
+			PointMatcherSupport::localLogger->finishWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+		} \
+	}
+	
+	// thread-local storage, send patches for your favourite compiler
+	#if defined(__GNUC__)
+	extern __thread Logger* localLogger;
+	#elif defined(_MSC_VER)
+	extern __declspec(thread) Logger* localLogger;
+	#else
+	extern thread_local Logger* localLogger;
+	#endif
 }
-
-#include "Logger.h"
 
 template<typename T>
 struct PointMatcher
@@ -123,20 +160,17 @@ struct PointMatcher
 	// ---------------------------------
 	
 	typedef T ScalarType;
-	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
-	typedef typename Eigen::Matrix<T, 3, 1> Vector3;
 	typedef std::vector<Vector, Eigen::aligned_allocator<Vector> > VectorVector;
 	typedef typename Eigen::Quaternion<T> Quaternion;
 	typedef std::vector<Quaternion, Eigen::aligned_allocator<Quaternion> > QuaternionVector;
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
-	typedef typename Eigen::Matrix<T, 3, 3> Matrix3;
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
-	typedef typename Nabo::NearestNeighbourSearch<T> NNS;
-	typedef typename NNS::SearchType NNSearchType;
 	
 	// alias for semantic reasons
 	typedef Matrix TransformationParameters;
+	
+	// alias for scope reasons
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
@@ -221,8 +255,6 @@ struct PointMatcher
 	typedef typename Transformations::iterator TransformationsIt;
 	typedef typename Transformations::const_iterator TransformationsConstIt;
 	
-	#include "Transformations.h"
-	
 	DEF_REGISTRAR(Transformation)
 	
 	// ---------------------------------
@@ -246,8 +278,6 @@ struct PointMatcher
 	
 	DEF_REGISTRAR(DataPointsFilter)
 	
-	#include "DataPointsFilters.h"
-	
 	// ---------------------------------
 	
 	struct Matcher: public Parametrizable
@@ -266,8 +296,6 @@ struct PointMatcher
 	};
 	
 	DEF_REGISTRAR(Matcher)
-	
-	#include "Matchers.h"	
 	
 	// ---------------------------------
 	
@@ -302,8 +330,6 @@ struct PointMatcher
 	
 	DEF_REGISTRAR(FeatureOutlierFilter)
 	DEF_REGISTRAR(DescriptorOutlierFilter)
-	
-	#include "OutlierFilters.h"
 
 	// ---------------------------------
 	
@@ -334,8 +360,6 @@ struct PointMatcher
 		T pointUsedRatio;
 		T weightedPointUsedRatio;
 	};
-	
-	#include "ErrorMinimizers.h"
 	
 	DEF_REGISTRAR(ErrorMinimizer)
 	
@@ -373,8 +397,6 @@ struct PointMatcher
 	};
 	typedef typename TransformationCheckers::iterator TransformationCheckersIt;
 	typedef typename TransformationCheckers::const_iterator TransformationCheckersConstIt;
-
-	#include "TransformationCheckers.h"
 	
 	DEF_REGISTRAR(TransformationChecker)
 
@@ -392,8 +414,6 @@ struct PointMatcher
 		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers) {}
 		virtual void finish(const size_t iterationCount) {}
 	};
-	
-	#include "Inspectors.h"
 	
 	DEF_REGISTRAR(Inspector) 
 	
@@ -522,8 +542,6 @@ struct PointMatcher
 		//! Create a new key frame
 		void createKeyFrame(DataPoints& inputCloud);
 	};
-	
-	#include "Functions.h"
 	
 	//! Constructor, fill registrars
 	PointMatcher();

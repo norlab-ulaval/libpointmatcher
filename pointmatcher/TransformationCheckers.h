@@ -36,83 +36,103 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_TRANSFORMATIONCHECKERS_H
 #define __POINTMATCHER_TRANSFORMATIONCHECKERS_H
 
-struct CounterTransformationChecker: public TransformationChecker
+#include "Core.h"
+
+template<typename T>
+struct TransformationCheckersImpl
 {
-	inline static const std::string description()
-	{
-		return "This checker stops the ICP loop after a certain number of iterations.";
-	}
-	inline static const ParametersDoc availableParameters()
-	{
-		return ParametersDoc({
-			{ "maxIterationCount", "maximum number of iterations ", "40", "0", "2147483647", &P::Comp<unsigned> }
-		});
-	}
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParameterDoc ParameterDoc;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
 	
-	const unsigned maxIterationCount;
+	typedef typename PointMatcher<T>::TransformationChecker TransformationChecker;
+	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
+	typedef typename PointMatcher<T>::Vector Vector;
+	typedef typename PointMatcher<T>::VectorVector VectorVector;
+	typedef typename PointMatcher<T>::Quaternion Quaternion;
+	typedef typename PointMatcher<T>::QuaternionVector QuaternionVector;
+	typedef typename PointMatcher<T>::Matrix Matrix;
 	
-	CounterTransformationChecker(const Parameters& params = Parameters());
-	virtual void init(const TransformationParameters& parameters, bool& iterate);
-	virtual void check(const TransformationParameters& parameters, bool& iterate);
-};
-
-struct ErrorTransformationChecker: public TransformationChecker
-{
-	inline static const std::string description()
+	struct CounterTransformationChecker: public TransformationChecker
 	{
-		return "This checker stops the ICP loop when the average transformation errors are below thresholds.";
-	}
-	inline static const ParametersDoc availableParameters()
-	{
-		return ParametersDoc({
-			{ "minDeltaRotErr", "threshold for rotation error (radian)", "0.001", "0.", "6.2831854", &P::Comp<T> },
-			{"minDeltaTransErr", "threshold for translation error", "0.01", "0.", "inf", &P::Comp<T> },
-			{ "tail", "number of iterations over which to average error", "3", "0", "2147483647", &P::Comp<unsigned> }
-		});
-	}
-	
-	const T minDeltaRotErr;
-	const T minDeltaTransErr;
-	const unsigned int tail;
-
-protected:
-	QuaternionVector rotations;
-	VectorVector translations;
-
-public:
-	ErrorTransformationChecker(const Parameters& params = Parameters());
-	
-	virtual void init(const TransformationParameters& parameters, bool& iterate);
-	virtual void check(const TransformationParameters& parameters, bool& iterate);
-};
-
-struct BoundTransformationChecker: public TransformationChecker
-{
-	inline static const std::string description()
-	{
-		return "This checker stops the ICP loop with an exception when the transformation values exceed bounds.";
-	}
-	inline static const ParametersDoc availableParameters()
-	{
-		return ParametersDoc({
-			{ "maxRotationNorm", "rotation bound", "1", "0", "inf", &P::Comp<T> },
-			{ "maxTranslationNorm", "translation bound", "1", "0", "inf", &P::Comp<T> }
-		});
-	}
+		inline static const std::string description()
+		{
+			return "This checker stops the ICP loop after a certain number of iterations.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "maxIterationCount", "maximum number of iterations ", "40", "0", "2147483647", &P::Comp<unsigned> }
+			});
+		}
 		
-	const T maxRotationNorm;
-	const T maxTranslationNorm;
-	
-protected:
-	Quaternion initialRotation3D;
-	T initialRotation2D;
-	Vector initialTranslation;
-	
-public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	BoundTransformationChecker(const Parameters& params = Parameters());
-	virtual void init(const TransformationParameters& parameters, bool& iterate);
-	virtual void check(const TransformationParameters& parameters, bool& iterate);
-};
+		const unsigned maxIterationCount;
+		
+		CounterTransformationChecker(const Parameters& params = Parameters());
+		virtual void init(const TransformationParameters& parameters, bool& iterate);
+		virtual void check(const TransformationParameters& parameters, bool& iterate);
+	};
+
+	struct ErrorTransformationChecker: public TransformationChecker
+	{
+		inline static const std::string description()
+		{
+			return "This checker stops the ICP loop when the average transformation errors are below thresholds.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "minDeltaRotErr", "threshold for rotation error (radian)", "0.001", "0.", "6.2831854", &P::Comp<T> },
+				{"minDeltaTransErr", "threshold for translation error", "0.01", "0.", "inf", &P::Comp<T> },
+				{ "tail", "number of iterations over which to average error", "3", "0", "2147483647", &P::Comp<unsigned> }
+			});
+		}
+		
+		const T minDeltaRotErr;
+		const T minDeltaTransErr;
+		const unsigned int tail;
+
+	protected:
+		QuaternionVector rotations;
+		VectorVector translations;
+
+	public:
+		ErrorTransformationChecker(const Parameters& params = Parameters());
+		
+		virtual void init(const TransformationParameters& parameters, bool& iterate);
+		virtual void check(const TransformationParameters& parameters, bool& iterate);
+	};
+
+	struct BoundTransformationChecker: public TransformationChecker
+	{
+		inline static const std::string description()
+		{
+			return "This checker stops the ICP loop with an exception when the transformation values exceed bounds.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "maxRotationNorm", "rotation bound", "1", "0", "inf", &P::Comp<T> },
+				{ "maxTranslationNorm", "translation bound", "1", "0", "inf", &P::Comp<T> }
+			});
+		}
+			
+		const T maxRotationNorm;
+		const T maxTranslationNorm;
+		
+	protected:
+		Quaternion initialRotation3D;
+		T initialRotation2D;
+		Vector initialTranslation;
+		
+	public:
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		BoundTransformationChecker(const Parameters& params = Parameters());
+		virtual void init(const TransformationParameters& parameters, bool& iterate);
+		virtual void check(const TransformationParameters& parameters, bool& iterate);
+	};
+}; // TransformationCheckersImpl
 
 #endif // __POINTMATCHER_TRANSFORMATIONCHECKERS_H

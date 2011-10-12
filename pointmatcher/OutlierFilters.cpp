@@ -33,7 +33,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "OutlierFilters.h"
+
 #include <algorithm>
 #include <vector>
 #include <iostream>
@@ -44,7 +45,7 @@ using namespace std;
 
 // NullFeatureOutlierFilter
 template<typename T>
-typename PointMatcher<T>::OutlierWeights PointMatcher<T>::NullFeatureOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::NullFeatureOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input)
@@ -52,13 +53,13 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::NullFeatureOutlierFilt
 	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
 }
 
-template struct PointMatcher<float>::NullFeatureOutlierFilter;
-template struct PointMatcher<double>::NullFeatureOutlierFilter;
+template struct OutlierFiltersImpl<float>::NullFeatureOutlierFilter;
+template struct OutlierFiltersImpl<double>::NullFeatureOutlierFilter;
 
 
 // MaxDistOutlierFilter
 template<typename T>
-PointMatcher<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Parameters& params):
+OutlierFiltersImpl<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Parameters& params):
 	FeatureOutlierFilter("MaxDistOutlierFilter", MaxDistOutlierFilter::availableParameters(), params),
 	maxDist(Parametrizable::get<T>("maxDist"))
 {
@@ -66,7 +67,7 @@ PointMatcher<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Parameters& pa
 
 
 template<typename T>
-typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MaxDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MaxDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input)
@@ -87,19 +88,19 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MaxDistOutlierFilter::
 	return w;
 }
 
-template struct PointMatcher<float>::MaxDistOutlierFilter;
-template struct PointMatcher<double>::MaxDistOutlierFilter;
+template struct OutlierFiltersImpl<float>::MaxDistOutlierFilter;
+template struct OutlierFiltersImpl<double>::MaxDistOutlierFilter;
 
 // MinDistOutlierFilter
 template<typename T>
-PointMatcher<T>::MinDistOutlierFilter::MinDistOutlierFilter(const Parameters& params):
+OutlierFiltersImpl<T>::MinDistOutlierFilter::MinDistOutlierFilter(const Parameters& params):
 	FeatureOutlierFilter("MinDistOutlierFilter", MinDistOutlierFilter::availableParameters(), params),
 	minDist(Parametrizable::get<T>("minDist"))
 {
 }
 
 template<typename T>
-typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MinDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MinDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input)
@@ -120,21 +121,21 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MinDistOutlierFilter::
 	return w;
 }
 
-template struct PointMatcher<float>::MinDistOutlierFilter;
-template struct PointMatcher<double>::MinDistOutlierFilter;
+template struct OutlierFiltersImpl<float>::MinDistOutlierFilter;
+template struct OutlierFiltersImpl<double>::MinDistOutlierFilter;
 
 
 
 // MedianDistOutlierFilter
 template<typename T>
-PointMatcher<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const Parameters& params):
+OutlierFiltersImpl<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const Parameters& params):
 	FeatureOutlierFilter("MedianDistOutlierFilter", MedianDistOutlierFilter::availableParameters(), params),
 	factor(Parametrizable::get<T>("factor"))
 {
 }
 
 template<typename T>
-typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MedianDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MedianDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input)
@@ -159,20 +160,20 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::MedianDistOutlierFilte
 	return w;
 }
 
-template struct PointMatcher<float>::MedianDistOutlierFilter;
-template struct PointMatcher<double>::MedianDistOutlierFilter;
+template struct OutlierFiltersImpl<float>::MedianDistOutlierFilter;
+template struct OutlierFiltersImpl<double>::MedianDistOutlierFilter;
 
 
 // TrimmedDistOutlierFilter
 template<typename T>
-PointMatcher<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const Parameters& params):
+OutlierFiltersImpl<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const Parameters& params):
 	FeatureOutlierFilter("TrimmedDistOutlierFilter", TrimmedDistOutlierFilter::availableParameters(), params),
 	ratio(Parametrizable::get<T>("ratio"))
 {
 }
 
 template<typename T>
-typename PointMatcher<T>::OutlierWeights PointMatcher<T>::TrimmedDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::TrimmedDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input)
@@ -197,12 +198,12 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::TrimmedDistOutlierFilt
 	return w;
 }
 
-template struct PointMatcher<float>::TrimmedDistOutlierFilter;
-template struct PointMatcher<double>::TrimmedDistOutlierFilter;
+template struct OutlierFiltersImpl<float>::TrimmedDistOutlierFilter;
+template struct OutlierFiltersImpl<double>::TrimmedDistOutlierFilter;
 
 
 template<typename T>
-PointMatcher<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const Parameters& params):
+OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const Parameters& params):
 	FeatureOutlierFilter("VarTrimmedDistOutlierFilter", VarTrimmedDistOutlierFilter::availableParameters(), params),
 	minRatio(Parametrizable::get<T>("minRatio")),
 	maxRatio(Parametrizable::get<T>("maxRatio")),
@@ -211,7 +212,7 @@ PointMatcher<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const 
 }
 
 template<typename T>
-typename PointMatcher<T>::OutlierWeights PointMatcher<T>::VarTrimmedDistOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input)
@@ -238,8 +239,11 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::VarTrimmedDistOutlierF
 }
 
 template<typename T>
-T PointMatcher<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matches& matches)
+T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matches& matches)
 {
+	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
+	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
+	
 	const int points_nbr = matches.dists.rows() * matches.dists.cols();
 	
 	// vector containing the squared distances of the matches
@@ -330,14 +334,14 @@ T PointMatcher<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const Matche
 	*/
 }
 
-template struct PointMatcher<float>::VarTrimmedDistOutlierFilter;
-template struct PointMatcher<double>::VarTrimmedDistOutlierFilter;
+template struct OutlierFiltersImpl<float>::VarTrimmedDistOutlierFilter;
+template struct OutlierFiltersImpl<double>::VarTrimmedDistOutlierFilter;
 
 
 
 // NullDescriptorOutlierFilter
 template<typename T>
-typename PointMatcher<T>::OutlierWeights PointMatcher<T>::NullDescriptorOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::NullDescriptorOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input)
@@ -345,6 +349,6 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::NullDescriptorOutlierF
 	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
 }
 
-template struct PointMatcher<float>::NullDescriptorOutlierFilter;
-template struct PointMatcher<double>::NullDescriptorOutlierFilter;
+template struct OutlierFiltersImpl<float>::NullDescriptorOutlierFilter;
+template struct OutlierFiltersImpl<double>::NullDescriptorOutlierFilter;
 

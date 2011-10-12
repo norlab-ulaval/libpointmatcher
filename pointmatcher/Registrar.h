@@ -153,13 +153,13 @@ namespace PointMatcherSupport
 	#define REG(name) name##Registrar
 	#define DEF_REGISTRAR(name) PointMatcherSupport::Registrar< name > name##Registrar;
 	#define DEF_REGISTRAR_IFACE(name, ifaceName) PointMatcherSupport::Registrar< ifaceName > name##Registrar;
-	#define ADD_TO_REGISTRAR(name, element) { \
+	#define ADD_TO_REGISTRAR(name, elementName, element) { \
 		typedef typename PointMatcherSupport::Registrar< name >::template GenericClassDescriptor< element > Desc; \
-		name##Registrar.reg(# element, new Desc() ); \
+		name##Registrar.reg(# elementName, new Desc() ); \
 	}
-	#define ADD_TO_REGISTRAR_NO_PARAM(name, element) { \
+	#define ADD_TO_REGISTRAR_NO_PARAM(name, elementName, element) { \
 		typedef typename PointMatcherSupport::Registrar< name >::template GenericClassDescriptorNoParam< element > Desc; \
-		name##Registrar.reg(# element, new Desc() ); \
+		name##Registrar.reg(# elementName, new Desc() ); \
 	}
 } // namespace PointMatcherSupport
 

@@ -36,21 +36,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_FUNCTIONS_H
 #define __POINTMATCHER_FUNCTIONS_H
 
-static inline T anyabs(const T& v)
+namespace PointMatcherSupport
 {
-	if (v < T(0))
-		return -v;
-	else
-		return v;
-}
+	template<typename T>
+	static inline T anyabs(const T& v)
+	{
+		if (v < T(0))
+			return -v;
+		else
+			return v;
+	}
 
-static inline T normalizeAngle(T v)
-{
-	while (v > M_PI)
-		v -= 2*M_PI;
-	while (v < -M_PI)
-		v += 2*M_PI;
-	return v;
-}
+	template<typename T>
+	static inline T normalizeAngle(T v)
+	{
+		while (v > M_PI)
+			v -= 2*M_PI;
+		while (v < -M_PI)
+			v += 2*M_PI;
+		return v;
+	}
+} // PointMatcherSupport
 
 #endif // __POINTMATCHER_FUNCTIONS_H

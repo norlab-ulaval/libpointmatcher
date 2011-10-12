@@ -96,8 +96,8 @@ int main(int argc, const char *argv[])
 	PM::TransformationParameters T = icp(data, ref);
 
 	// Transform data to express it in ref
-	PM::TransformFeatures transform;
-	PM::DataPoints data_out = transform.compute(data, T);
+	PM::DataPoints data_out(data);
+	icp.transformations.apply(data_out, T);
 	
 	// Safe files to see the results
 	saveVTK<PM::ScalarType>(ref, outputBaseFile + "_ref.vtk");

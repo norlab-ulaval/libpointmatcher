@@ -34,6 +34,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Core.h"
+
+#include "Logger.h"
+#include "Transformations.h"
+#include "DataPointsFilters.h"
+#include "Matchers.h"
+#include "OutlierFilters.h"
+#include "ErrorMinimizers.h"
+#include "TransformationCheckers.h"
+#include "Inspectors.h"
+
 #include <cassert>
 #include <iostream>
 #include <limits>
@@ -246,16 +256,16 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 {
 	this->cleanup();
 	
-	this->transformations.push_back(new TransformFeatures());
-	this->transformations.push_back(new TransformNormals());
-	this->readingDataPointsFilters.push_back(new RandomSamplingDataPointsFilter());
-	this->keyframeDataPointsFilters.push_back(new SamplingSurfaceNormalDataPointsFilter());
-	this->featureOutlierFilters.push_back(new TrimmedDistOutlierFilter());
-	this->matcher.reset(new KDTreeMatcher());
-	this->errorMinimizer.reset(new PointToPlaneErrorMinimizer());
-	this->transformationCheckers.push_back(new CounterTransformationChecker());
-	this->transformationCheckers.push_back(new ErrorTransformationChecker());
-	this->inspector.reset(new NullInspector);
+	this->transformations.push_back(new typename TransformationsImpl<T>::TransformFeatures());
+	this->transformations.push_back(new typename TransformationsImpl<T>::TransformNormals());
+	this->readingDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter());
+	this->keyframeDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter());
+	this->featureOutlierFilters.push_back(new typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter());
+	this->matcher.reset(new typename MatchersImpl<T>::KDTreeMatcher());
+	this->errorMinimizer.reset(new typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer());
+	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::CounterTransformationChecker());
+	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::ErrorTransformationChecker());
+	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
 	this->logger.reset(new NullLogger);
 	this->outlierMixingWeight = 1;
 }
@@ -277,8 +287,8 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
 	createModulesFromRegistrar("keyframeDataPointsFilters", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
 	//createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations);
-	this->transformations.push_back(new TransformFeatures());
-	this->transformations.push_back(new TransformNormals());
+	this->transformations.push_back(new typename TransformationsImpl<T>::TransformFeatures());
+	this->transformations.push_back(new typename TransformationsImpl<T>::TransformNormals());
 	createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher);
 	createModulesFromRegistrar("featureOutlierFilters", doc, pm.REG(FeatureOutlierFilter), featureOutlierFilters);
 	createModulesFromRegistrar("descriptorOutlierFilters", doc, pm.REG(DescriptorOutlierFilter), descriptorOutlierFilters);
@@ -813,43 +823,43 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 template<typename T>
 PointMatcher<T>::PointMatcher()
 {
-	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformFeatures)
-	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformNormals)
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformFeatures, typename TransformationsImpl<T>::TransformFeatures)
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformNormals, typename TransformationsImpl<T>::TransformNormals)
 	
-	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, MinDistDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, UniformizeDensityDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter)
-	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, OrientNormalsDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, RandomSamplingDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, FixstepSamplingDataPointsFilter)
+	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter, typename DataPointsFiltersImpl<T>::IdentityDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxDistDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MinDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MinDistDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, UniformizeDensityDataPointsFilter, typename DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter)
+	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, OrientNormalsDataPointsFilter, typename DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, RandomSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, FixstepSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter)
 	
-	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher)
-	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher)
+	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
+	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)
 	
-	ADD_TO_REGISTRAR_NO_PARAM(FeatureOutlierFilter, NullFeatureOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, MaxDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, MinDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, MedianDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, TrimmedDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, VarTrimmedDistOutlierFilter)
+	ADD_TO_REGISTRAR_NO_PARAM(FeatureOutlierFilter, NullFeatureOutlierFilter, typename OutlierFiltersImpl<T>::NullFeatureOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MaxDistOutlierFilter, typename OutlierFiltersImpl<T>::MaxDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MinDistOutlierFilter, typename OutlierFiltersImpl<T>::MinDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, MedianDistOutlierFilter, typename OutlierFiltersImpl<T>::MedianDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, TrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, VarTrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter)
 	
-	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, IdentityErrorMinimizer)
-	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointErrorMinimizer)
-	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPlaneErrorMinimizer)
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, IdentityErrorMinimizer, typename ErrorMinimizersImpl<T>::IdentityErrorMinimizer)
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointErrorMinimizer)
+	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPlaneErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer)
 	
-	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker)
-	ADD_TO_REGISTRAR(TransformationChecker, ErrorTransformationChecker)
-	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker)
+	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker, typename TransformationCheckersImpl<T>::CounterTransformationChecker)
+	ADD_TO_REGISTRAR(TransformationChecker, ErrorTransformationChecker, typename TransformationCheckersImpl<T>::ErrorTransformationChecker)
+	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker, typename TransformationCheckersImpl<T>::BoundTransformationChecker)
 	
-	ADD_TO_REGISTRAR_NO_PARAM(Inspector, NullInspector)
-	ADD_TO_REGISTRAR(Inspector, VTKFileInspector)
+	ADD_TO_REGISTRAR_NO_PARAM(Inspector, NullInspector, typename InspectorsImpl<T>::NullInspector)
+	ADD_TO_REGISTRAR(Inspector, VTKFileInspector, typename InspectorsImpl<T>::VTKFileInspector)
 	
-	ADD_TO_REGISTRAR_NO_PARAM(Logger, NullLogger)
-	ADD_TO_REGISTRAR(Logger, FileLogger)
+	ADD_TO_REGISTRAR_NO_PARAM(Logger, NullLogger, NullLogger)
+	ADD_TO_REGISTRAR(Logger, FileLogger, FileLogger)
 }
 
 template struct PointMatcher<float>;

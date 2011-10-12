@@ -36,24 +36,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_TRANSFORMATIONS_H
 #define __POINTMATCHER_TRANSFORMATIONS_H
 
-struct TransformFeatures: public Transformation
-{
-	inline static const std::string description()
-	{
-		return "transform features";
-	}
-	
-	virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
-};
+#include "Core.h"
 
-struct TransformNormals: Transformation
+template<typename T>
+struct TransformationsImpl
 {
-	inline static const std::string description()
-	{
-		return "rotate normals";
-	}
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParameterDoc ParameterDoc;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
 	
-	virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
-};
+	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
+	typedef typename PointMatcher<T>::Transformation Transformation;
+	
+	struct TransformFeatures: public Transformation
+	{
+		inline static const std::string description()
+		{
+			return "transform features";
+		}
+		
+		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
+	};
+
+	struct TransformNormals: public Transformation
+	{
+		inline static const std::string description()
+		{
+			return "rotate normals";
+		}
+		
+		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
+	};
+}; // TransformationsImpl
 
 #endif // __POINTMATCHER_TRANSFORMATION_H

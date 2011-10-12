@@ -33,9 +33,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "TransformationCheckers.h"
+
+#include "Functions.h"
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 template<typename T>
 typename PointMatcher<T>::Vector PointMatcher<T>::TransformationChecker::matrixToAngles(const TransformationParameters& parameters)
@@ -62,7 +65,7 @@ typename PointMatcher<T>::Vector PointMatcher<T>::TransformationChecker::matrixT
 //--------------------------------------
 // max iteration counter
 template<typename T>
-PointMatcher<T>::CounterTransformationChecker::CounterTransformationChecker(const Parameters& params):
+TransformationCheckersImpl<T>::CounterTransformationChecker::CounterTransformationChecker(const Parameters& params):
 	TransformationChecker("CounterTransformationChecker", CounterTransformationChecker::availableParameters(), params),
 	maxIterationCount(Parametrizable::get<unsigned>("maxIterationCount"))
 {
@@ -74,13 +77,13 @@ PointMatcher<T>::CounterTransformationChecker::CounterTransformationChecker(cons
 }
 
 template<typename T>
-void PointMatcher<T>::CounterTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::CounterTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values.setZero(1);
 }
 
 template<typename T>
-void PointMatcher<T>::CounterTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::CounterTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values(0)++;
 	
@@ -91,14 +94,14 @@ void PointMatcher<T>::CounterTransformationChecker::check(const TransformationPa
 		iterate = false;
 }
 
-template struct PointMatcher<float>::CounterTransformationChecker;
-template struct PointMatcher<double>::CounterTransformationChecker;
+template struct TransformationCheckersImpl<float>::CounterTransformationChecker;
+template struct TransformationCheckersImpl<double>::CounterTransformationChecker;
 
 
 //--------------------------------------
 // error
 template<typename T>
-PointMatcher<T>::ErrorTransformationChecker::ErrorTransformationChecker(const Parameters& params):
+TransformationCheckersImpl<T>::ErrorTransformationChecker::ErrorTransformationChecker(const Parameters& params):
 	TransformationChecker("ErrorTransformationChecker", ErrorTransformationChecker::availableParameters(), params),
 	minDeltaRotErr(Parametrizable::get<T>("minDeltaRotErr")),
 	minDeltaTransErr(Parametrizable::get<T>("minDeltaTransErr")),
@@ -116,7 +119,7 @@ PointMatcher<T>::ErrorTransformationChecker::ErrorTransformationChecker(const Pa
 }
 
 template<typename T>
-void PointMatcher<T>::ErrorTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::ErrorTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values.setZero(4);
 	
@@ -139,8 +142,10 @@ void PointMatcher<T>::ErrorTransformationChecker::init(const TransformationParam
 }
 
 template<typename T>
-void PointMatcher<T>::ErrorTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::ErrorTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
+	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
+	
 	rotations.push_back(Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3))));
 	translations.push_back(parameters.topRightCorner(parameters.rows()-1,1));
 	
@@ -168,14 +173,14 @@ void PointMatcher<T>::ErrorTransformationChecker::check(const TransformationPara
 		throw ConvergenceError("abs translation norm not a number");
 }
 
-template struct PointMatcher<float>::ErrorTransformationChecker;
-template struct PointMatcher<double>::ErrorTransformationChecker;
+template struct TransformationCheckersImpl<float>::ErrorTransformationChecker;
+template struct TransformationCheckersImpl<double>::ErrorTransformationChecker;
 
 //--------------------------------------
 // bound
 
 template<typename T>
-PointMatcher<T>::BoundTransformationChecker::BoundTransformationChecker(const Parameters& params):
+TransformationCheckersImpl<T>::BoundTransformationChecker::BoundTransformationChecker(const Parameters& params):
 	TransformationChecker("BoundTransformationChecker", BoundTransformationChecker::availableParameters(), params),
 	maxRotationNorm(Parametrizable::get<T>("maxRotationNorm")),
 	maxTranslationNorm(Parametrizable::get<T>("maxTranslationNorm"))
@@ -191,7 +196,7 @@ PointMatcher<T>::BoundTransformationChecker::BoundTransformationChecker(const Pa
 }
 
 template<typename T>
-void PointMatcher<T>::BoundTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::BoundTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values.setZero(2);
 	if (parameters.rows() == 4)
@@ -205,8 +210,10 @@ void PointMatcher<T>::BoundTransformationChecker::init(const TransformationParam
 }
 
 template<typename T>
-void PointMatcher<T>::BoundTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::BoundTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
+	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
+	
 	if (parameters.rows() == 4)
 	{
 		const Quaternion currentRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
@@ -231,5 +238,5 @@ void PointMatcher<T>::BoundTransformationChecker::check(const TransformationPara
 	}
 }
 
-template struct PointMatcher<float>::BoundTransformationChecker;
-template struct PointMatcher<double>::BoundTransformationChecker;
+template struct TransformationCheckersImpl<float>::BoundTransformationChecker;
+template struct TransformationCheckersImpl<double>::BoundTransformationChecker;

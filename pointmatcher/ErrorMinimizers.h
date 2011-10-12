@@ -36,35 +36,55 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_ERRORMINIMIZERS_H
 #define __POINTMATCHER_ERRORMINIMIZERS_H
 
-struct IdentityErrorMinimizer: ErrorMinimizer
-{
-	inline static const std::string description()
-	{
-		return "does nothing";
-	}
-	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
-};
+#include "Core.h"
 
-struct PointToPointErrorMinimizer: ErrorMinimizer
+template<typename T>
+struct ErrorMinimizersImpl
 {
-	inline static const std::string description()
-	{
-		return "Point-to-point error. Based on SVD decomposition";
-	}
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParameterDoc ParameterDoc;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
 	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
-};
+	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::Matches Matches;
+	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
+	typedef typename PointMatcher<T>::ErrorMinimizer ErrorMinimizer;
+	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
+	typedef typename PointMatcher<T>::Vector Vector;
+	typedef typename PointMatcher<T>::Matrix Matrix;
+	
+	struct IdentityErrorMinimizer: ErrorMinimizer
+	{
+		inline static const std::string description()
+		{
+			return "does nothing";
+		}
+		
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+	};
 
-struct PointToPlaneErrorMinimizer: public ErrorMinimizer
-{
-	inline static const std::string description()
+	struct PointToPointErrorMinimizer: ErrorMinimizer
 	{
-		// FIXME: should we improve doc here?
-		return "Point-to-plane error (or point-to-line in 2D).";
-	}
-	
-	virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
-};
+		inline static const std::string description()
+		{
+			return "Point-to-point error. Based on SVD decomposition";
+		}
+		
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+	};
+
+	struct PointToPlaneErrorMinimizer: public ErrorMinimizer
+	{
+		inline static const std::string description()
+		{
+			// FIXME: should we improve doc here?
+			return "Point-to-plane error (or point-to-line in 2D).";
+		}
+		
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+	};
+}; // ErrorMinimizersImpl
 
 #endif // __POINTMATCHER_ERRORMINIMIZER_H

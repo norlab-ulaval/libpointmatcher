@@ -33,7 +33,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "Logger.h"
+
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 

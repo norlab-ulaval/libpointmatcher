@@ -33,7 +33,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "Inspectors.h"
+
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -67,7 +68,7 @@ using namespace std;
 		ofs << " ";
 	}*/
 template<typename T>
-PointMatcher<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
+InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
 	Inspector(className,paramsDoc,params),
 	streamIter(0)
 {
@@ -75,7 +76,7 @@ PointMatcher<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string cl
 
 	
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& data, std::ostream& stream)
+void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& data, std::ostream& stream)
 {
 	const typename DataPoints::Features& features(data.features);
 	//const typename DataPoints::Descriptors& descriptors(data.descriptors);
@@ -107,7 +108,7 @@ void PointMatcher<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& dat
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& data, std::ostream& stream)
+void InspectorsImpl<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& data, std::ostream& stream)
 {
 	//const typename DataPoints::Features& features(data.features);
 	const typename DataPoints::Descriptors& descriptors(data.descriptors.transpose());
@@ -154,7 +155,7 @@ void PointMatcher<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& data
 
 // FIXME:rethink how we dump stuff (accumulate in a correctly-referenced table, and then dump?) and unify with previous
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::dumpDataLinks(
+void InspectorsImpl<T>::AbstractVTKInspector::dumpDataLinks(
 	const DataPoints& ref, 
 	const DataPoints& reading, 
 	const Matches& matches, 
@@ -214,7 +215,7 @@ void PointMatcher<T>::AbstractVTKInspector::dumpDataLinks(
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& filteredReference, const std::string& name)
+void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& filteredReference, const std::string& name)
 {
 	ostream* stream(openStream(name));
 	dumpDataPoints(filteredReference, *stream);
@@ -222,7 +223,7 @@ void PointMatcher<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& fil
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& filteredReference, const std::string& name)
+void InspectorsImpl<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& filteredReference, const std::string& name)
 {
 	ostream* stream(openStream(name));
 	dumpMeshNodes(filteredReference, *stream);
@@ -230,7 +231,7 @@ void PointMatcher<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& filt
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::dumpIteration(
+void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 	const size_t iterationCount,
 	const TransformationParameters& parameters,
 	const DataPoints& filteredReference,
@@ -289,7 +290,7 @@ void PointMatcher<T>::AbstractVTKInspector::dumpIteration(
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim)
+void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim)
 {
 	const Matrix desc(cloud.getDescriptorByName(nameTag));	
 
@@ -309,7 +310,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildGenericAttributeStream(std::ost
 	
 	
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
+void InspectorsImpl<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& cloud)
 {
@@ -317,7 +318,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stre
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stream,
+void InspectorsImpl<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& cloud)
 {
@@ -325,7 +326,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stre
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stream,
+void InspectorsImpl<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& cloud)
 {
@@ -333,7 +334,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stre
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stream,
+void InspectorsImpl<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& cloud)
 {
@@ -341,7 +342,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stre
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
+void InspectorsImpl<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& ref, 
 	const DataPoints& reading)
@@ -366,7 +367,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stre
 
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stream,
+void InspectorsImpl<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& ref, 
 	const DataPoints& reading)
@@ -390,7 +391,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildNormalStream(std::ostream& stre
 
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stream,
+void InspectorsImpl<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& ref, 
 	const DataPoints& reading)
@@ -414,7 +415,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildVectorStream(std::ostream& stre
 
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stream,
+void InspectorsImpl<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stream,
 	const std::string& name,
 	const DataPoints& ref, 
 	const DataPoints& reading)
@@ -437,7 +438,7 @@ void PointMatcher<T>::AbstractVTKInspector::buildTensorStream(std::ostream& stre
 }
 
 template<typename T>
-typename PointMatcher<T>::Matrix PointMatcher<T>::AbstractVTKInspector::padWithZeros(
+typename PointMatcher<T>::Matrix InspectorsImpl<T>::AbstractVTKInspector::padWithZeros(
 	const Matrix m,
 	const int expectedRow,
 	const int expectedCols)
@@ -457,7 +458,7 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::AbstractVTKInspector::padWithZ
 }
 
 template<typename T>
-void PointMatcher<T>::AbstractVTKInspector::finish(const size_t iterationCount)
+void InspectorsImpl<T>::AbstractVTKInspector::finish(const size_t iterationCount)
 {
 }
 
@@ -466,14 +467,14 @@ void PointMatcher<T>::AbstractVTKInspector::finish(const size_t iterationCount)
 // VTK File inspector
 
 template<typename T>
-PointMatcher<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
+InspectorsImpl<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
 	AbstractVTKInspector("VTKFileInspector", VTKFileInspector::availableParameters(), params),
 	baseFileName(Parametrizable::get<string>("baseFileName"))
 {
 }
 
 template<typename T>
-void PointMatcher<T>::VTKFileInspector::init()
+void InspectorsImpl<T>::VTKFileInspector::init()
 {
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
@@ -485,13 +486,13 @@ void PointMatcher<T>::VTKFileInspector::init()
 }
 
 template<typename T>
-void PointMatcher<T>::VTKFileInspector::finish(const size_t iterationCount)
+void InspectorsImpl<T>::VTKFileInspector::finish(const size_t iterationCount)
 {
 	closeStream(this->streamIter);
 }
 
 template<typename T>
-std::ostream* PointMatcher<T>::VTKFileInspector::openStream(const std::string& role)
+std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string& role)
 {
 	ostringstream oss;
 	oss << baseFileName << "-" << role << ".vtk";
@@ -502,7 +503,7 @@ std::ostream* PointMatcher<T>::VTKFileInspector::openStream(const std::string& r
 }
 
 template<typename T>
-std::ostream* PointMatcher<T>::VTKFileInspector::openStream(const std::string& role, const size_t iterationCount)
+std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string& role, const size_t iterationCount)
 {
 	ostringstream oss;
 	oss << baseFileName << "-" << role << "-" << iterationCount << ".vtk";
@@ -513,12 +514,12 @@ std::ostream* PointMatcher<T>::VTKFileInspector::openStream(const std::string& r
 }
 
 template<typename T>
-void PointMatcher<T>::VTKFileInspector::closeStream(std::ostream* stream)
+void InspectorsImpl<T>::VTKFileInspector::closeStream(std::ostream* stream)
 {
 	delete stream;
 }
 
 
 
-template struct PointMatcher<float>::VTKFileInspector;
-template struct PointMatcher<double>::VTKFileInspector;
+template struct InspectorsImpl<float>::VTKFileInspector;
+template struct InspectorsImpl<double>::VTKFileInspector;

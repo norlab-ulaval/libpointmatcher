@@ -33,60 +33,56 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "Matchers.h"
 
 // NullMatcher
 template<typename T>
-void PointMatcher<T>::NullMatcher::init(
+void MatchersImpl<T>::NullMatcher::init(
 	const DataPoints& filteredReference)
 {
 	
 }
 
 template<typename T>
-typename PointMatcher<T>::Matches PointMatcher<T>::NullMatcher::findClosests(
+typename PointMatcher<T>::Matches MatchersImpl<T>::NullMatcher::findClosests(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference)
 {
 	return Matches();
 }
 
-template struct PointMatcher<float>::NullMatcher;
-template struct PointMatcher<double>::NullMatcher;
+template struct MatchersImpl<float>::NullMatcher;
+template struct MatchersImpl<double>::NullMatcher;
 
 
 
 // KDTreeMatcher
 template<typename T>
-PointMatcher<T>::KDTreeMatcher::KDTreeMatcher(const Parameters& params):
+MatchersImpl<T>::KDTreeMatcher::KDTreeMatcher(const Parameters& params):
 	Matcher("KDTreeMatcher", KDTreeMatcher::availableParameters(), params),
 	knn(Parametrizable::get<int>("knn")),
 	epsilon(Parametrizable::get<T>("epsilon")),
 	searchType(NNSearchType(Parametrizable::get<int>("searchType"))),
-	maxDist(Parametrizable::get<T>("maxDist")),
-	featureNNS(0)
+	maxDist(Parametrizable::get<T>("maxDist"))
 {
 }
 
 template<typename T>
-PointMatcher<T>::KDTreeMatcher::~KDTreeMatcher()
+MatchersImpl<T>::KDTreeMatcher::~KDTreeMatcher()
 {
-	if(featureNNS);
-		delete featureNNS;
+
 }
 
 template<typename T>
-void PointMatcher<T>::KDTreeMatcher::init(
+void MatchersImpl<T>::KDTreeMatcher::init(
 	const DataPoints& filteredReference)
 {
 	// build and populate NNS
-	if (featureNNS)
-		delete featureNNS;
-	featureNNS = NNS::create(filteredReference.features, filteredReference.features.rows() - 1, searchType, NNS::TOUCH_STATISTICS);
+	featureNNS.reset( NNS::create(filteredReference.features, filteredReference.features.rows() - 1, searchType, NNS::TOUCH_STATISTICS));
 }
 
 template<typename T>
-typename PointMatcher<T>::Matches PointMatcher<T>::KDTreeMatcher::findClosests(
+typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeMatcher::findClosests(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference)
 {
@@ -102,5 +98,5 @@ typename PointMatcher<T>::Matches PointMatcher<T>::KDTreeMatcher::findClosests(
 	return matches;
 }
 
-template struct PointMatcher<float>::KDTreeMatcher;
-template struct PointMatcher<double>::KDTreeMatcher;
+template struct MatchersImpl<float>::KDTreeMatcher;
+template struct MatchersImpl<double>::KDTreeMatcher;

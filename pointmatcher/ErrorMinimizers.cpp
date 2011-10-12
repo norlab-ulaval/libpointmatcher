@@ -33,7 +33,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "ErrorMinimizers.h"
+
 #include "Eigen/SVD"
 #include <iostream>
 
@@ -55,7 +56,7 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& 
 
 // Identity Error Minimizer
 template<typename T>
-typename PointMatcher<T>::TransformationParameters PointMatcher<T>::IdentityErrorMinimizer::compute(
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::IdentityErrorMinimizer::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
@@ -64,13 +65,13 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::IdentityErro
 	return TransformationParameters::Identity(filteredReading.features.rows(), filteredReading.features.rows());
 }
 
-template struct PointMatcher<float>::IdentityErrorMinimizer;
-template struct PointMatcher<double>::IdentityErrorMinimizer;
+template struct ErrorMinimizersImpl<float>::IdentityErrorMinimizer;
+template struct ErrorMinimizersImpl<double>::IdentityErrorMinimizer;
 
 
 // Point To POINT ErrorMinimizer
 template<typename T>
-typename PointMatcher<T>::TransformationParameters PointMatcher<T>::PointToPointErrorMinimizer::compute(
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
@@ -142,19 +143,20 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::PointToPoint
 	return result;
 }
 
-template struct PointMatcher<float>::PointToPointErrorMinimizer;
-template struct PointMatcher<double>::PointToPointErrorMinimizer;
+template struct ErrorMinimizersImpl<float>::PointToPointErrorMinimizer;
+template struct ErrorMinimizersImpl<double>::PointToPointErrorMinimizer;
 
 
 // Point To PLANE ErrorMinimizer
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters PointMatcher<T>::PointToPlaneErrorMinimizer::compute(
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
 	const Matches& matches)
 {
+	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
 	typedef typename DataPoints::Features Features;
 	typedef typename Matches::Ids Ids;
 	
@@ -369,5 +371,5 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 }
 
 
-template struct PointMatcher<float>::PointToPlaneErrorMinimizer;
-template struct PointMatcher<double>::PointToPlaneErrorMinimizer;
+template struct ErrorMinimizersImpl<float>::PointToPlaneErrorMinimizer;
+template struct ErrorMinimizersImpl<double>::PointToPlaneErrorMinimizer;

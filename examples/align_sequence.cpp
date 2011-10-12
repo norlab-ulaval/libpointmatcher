@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
 	
 	
 	PM::DataPoints lastCloud, newCloud;
-	PM::TransformFeatures transform;
 	TP tp;
 	for (unsigned frameCounter = startId; frameCounter < endId; ++frameCounter)
 	{
@@ -109,7 +108,7 @@ int main(int argc, char *argv[])
 			//cout << "Transformation: "<< tp << endl;
 			cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 			
-			newCloud = transform.compute(newCloud, tp);
+			icp.transformations.apply(newCloud, tp);
 		}
 		catch (PM::ConvergenceError error)
 		{
