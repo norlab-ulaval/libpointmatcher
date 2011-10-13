@@ -154,7 +154,7 @@ namespace PointMatcherSupport
 				if (it->comp(val, it->minValue))
 					throw InvalidParameter((boost::format("Value %1% of parameter %2% in class %3% is smaller than minimum admissible value %4%") % val % paramName % className % it->minValue).str());
 				if (it->comp(it->maxValue, val))
-					throw InvalidParameter((boost::format("Value %1% of parameter %2% in class %3% is larger than maximum admissible value %4%") % val % paramName % className % it->minValue).str());
+					throw InvalidParameter((boost::format("Value %1% of parameter %2% in class %3% is larger than maximum admissible value %4%") % val % paramName % className % it->maxValue).str());
 				parameters[paramName] = val;
 			}
 			else

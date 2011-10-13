@@ -71,14 +71,14 @@ DataPointsFiltersImpl<T>::MaxDistDataPointsFilter::MaxDistDataPointsFilter(const
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPointsFilter::filter(const DataPoints& input)
 {
-	if (int(dim) >= input.features.rows())
-		throw InvalidParameter((boost::format("MaxDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
+	if (dim >= input.features.rows() - 1)
+		throw InvalidParameter((boost::format("MaxDistDataPointsFilter: Error, filtering on dimension number %1%, larger than authorized axis id %2%") % dim % (input.features.rows() - 2)).str());
 	
 	//TODO: should we do that in 2 passes or use conservativeResize?
 	const int nbPointsIn = input.features.cols();
 	const int nbRows = input.features.rows();
 	int nbPointsOut = 0;
-	if (dim == 3)
+	if (dim == -1)
 	{
 		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() < maxDist).count();
 	}
@@ -100,7 +100,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 	}
 	
 	int j = 0;
-	if(dim == 3) // Euclidian distance
+	if(dim == -1) // Euclidian distance
 	{
 		for (int i = 0; i < nbPointsIn; i++)
 		{

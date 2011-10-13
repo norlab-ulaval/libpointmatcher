@@ -55,6 +55,8 @@ public:
 	PM::DataPoints ref2D;
 	PM::DataPoints data2D;
 	
+	PM::TransformationParameters validT2d;
+	PM::TransformationParameters validT2dInv;
 	virtual void SetUp()
 	{
 		// Make available a VTK inspector for manual inspection
@@ -69,30 +71,35 @@ public:
 		dataPath = "../examples/data/";
 		ref2D =  loadCSV<PM::ScalarType>(dataPath + "2D_oneBox.csv");
 		data2D = loadCSV<PM::ScalarType>(dataPath + "2D_twoBoxes.csv");
+		
+		// Result of data express in ref (from visual inspection)
+		validT2d = PM::TransformationParameters(3,3);
+		validT2d <<  0.987498,  0.157629, 0.0859918,
+		            -0.157629,  0.987498,  0.203247,
+		                    0,         0,         1;
+		// Result of data express in ref (from visual inspection)
+		validT2dInv = PM::TransformationParameters(3,3);
+		validT2dInv <<   0.988049,  -0.154139, -0.0532977,
+		                 0.154139,   0.988049,   -0.20996,
+		                        0,          0,          1;
 	}
+
 	virtual void TearDown()
 	{	
 	}
 
-	void validate2dTransformation(PM::TransformationParameters T)
+	void validate2dTransformation(PM::TransformationParameters validT, PM::TransformationParameters testT)
 	{
-		PM::TransformationParameters Tvalid(3,3);
-		
-		// Result from visual inspection
-		Tvalid <<  0.987498,  0.157629, 0.0859918,
-		          -0.157629,  0.987498,  0.203247,
-		                  0,         0,         1;
+		int dim = validT.cols();
 
-		for(int i=0; i < Tvalid.rows(); i++)
-		{
-			for(int j=0; j < Tvalid.cols(); j++)
-			{
-				if(i != Tvalid.rows()-1)
-					EXPECT_NEAR(Tvalid(i,j), T(i,j), 0.001);
-				else
-					EXPECT_EQ(Tvalid(i,j), T(i,j));
-			}
-		}
+		auto validTrans = validT.block(0, dim-1, dim-1, 1).norm();
+		auto testTrans = testT.block(0, dim-1, dim-1, 1).norm();
+	
+		auto validAngle = acos(validT(0,0));
+		auto testAngle = acos(testT(0,0));
+		
+		EXPECT_NEAR(validTrans, testTrans, 0.01);
+		EXPECT_NEAR(validAngle, testAngle, 0.02);
 	}
 
 };
@@ -103,29 +110,80 @@ TEST_F(PointCloud2DTest, ICP_default)
 {
 	PM::ICP icp;
 	icp.setDefault();
-
+	
+	//icp.inspector.reset(vtkInspector);
+	//icp.logger.reset(console);
 	PM::TransformationParameters T = icp(data2D, ref2D);
-	std::cout << T << std::endl;
+	validate2dTransformation(validT2d, T);
 
-	validate2dTransformation(T);
-
-	icp.inspector.reset(vtkInspector);
-	icp.logger.reset(console);
+	//icp.inspector.reset(vtkInspector);
+	//icp.logger.reset(console);
 	PM::TransformationParameters T2 = icp(ref2D, data2D);
-	{
-	PM::TransformationParameters T3 = PM::TransformationParameters::Identity(4,4);
-	//__sync_synchronize();	
-	//std::cout << T2.inverse() << std::endl;
-	std::cout << T3.inverse() <<std::endl;
-	}
-	//T2.inverse();
-	//validate2dTransformation(T2.inverse());
+	validate2dTransformation(validT2dInv, T2);
+	//cout << "validT2d:\n" << validT2dInv << endl;
+	//cout << "T2:\n" << T2 << endl;
 }
 
+TEST_F(PointCloud2DTest, MaxDistDataPointsFilter)
+{
+	PM::TransformationParameters T;
 
+	PM::ICP icp;
+	icp.setDefault();
 
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter;
 
+	string mDist = "6";
+	params = PM::Parameters({{"dim","0"}, {"maxDist", mDist}});
+	
+	// Filter on x axis
+	params["dim"] = "0";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxDistDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+	
+	// Filter on y axis
+	params["dim"] = "1";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxDistDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+	
+	// Filter on z axis (not existing)
+	params["dim"] = "2";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxDistDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	EXPECT_ANY_THROW(icp(data2D, ref2D));
 
+	// Filter on a radius
+	params["dim"] = "-1";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxDistDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+	
+	// Parameter outside valid range
+	params["dim"] = "3";
+	EXPECT_ANY_THROW(
+		dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxDistDataPointsFilter", params)
+		);
+	
+}
 
 int main(int argc, char **argv)
 {

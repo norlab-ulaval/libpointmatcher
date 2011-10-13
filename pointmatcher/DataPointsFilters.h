@@ -74,12 +74,12 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, all=3", "3", "0", "2147483647", &P::Comp<unsigned> },
+				{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, radius=-1", "-1", "-1", "2", &P::Comp<int> },
 				{ "maxDist", "maximum distance authorized. All points beyond that will be filtered.", "1", "0", "inf", P::Comp<T> }
 			});
 		}
 
-		const unsigned dim;
+		const int dim;
 		const T maxDist;
 		
 		//! Constructor, uses parameter interface
@@ -199,7 +199,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "binSize", "limit over which a box is splitted in two", "10", "3", "2147483647", &P::Comp<unsigned> },
+				{ "binSize", "limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> },
 				{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
 				{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" },
 				{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" },
@@ -284,7 +284,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "prob", "probability to keep a point, one over decimation factor ", "0.5", "0", "1", &P::Comp<T> }
+				{ "prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T> }
 			});
 		}
 		
