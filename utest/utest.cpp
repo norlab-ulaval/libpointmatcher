@@ -38,23 +38,58 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 using namespace Eigen;
+using namespace std;
 
 // Utility classes
-class PointCloud2DTest: public ::testing::Test
+class PointCloud2DTest: public testing::Test
 {
+
+public:
 	typedef PointMatcher<float> PM;
-
-protected:
-	static void SetUpTestCase()
+	
+	PM pm;
+	PM::Inspector* vtkInspector;
+	
+	std::string dataPath;
+	PM::DataPoints ref2D;
+	PM::DataPoints data2D;
+	
+	virtual void SetUp()
 	{
-
-		std::string dataPath = "../example/data/";
-		//ref =  loadCSV<PM::ScalarType>(dataPath + "2D_oneBox.csv");
-		//data = loadCSV<PM::ScalarType>(dataPath + "2D_twoBoxes.csv");
+		// Make available a VTK inspector for manual inspection
+		vtkInspector = pm.InspectorRegistrar.create(
+			"VTKFileInspector", 
+			PM::Parameters({{"baseFileName","./tmp/utest"}})
+			);
+		
+		dataPath = "../examples/data/";
+		ref2D =  loadCSV<PM::ScalarType>(dataPath + "2D_oneBox.csv");
+		data2D = loadCSV<PM::ScalarType>(dataPath + "2D_twoBoxes.csv");
+	}
+	virtual void TearDown()
+	{	
 	}
 
-	static PM::DataPoints* ref;
-	static PM::DataPoints* data;
+	void validate2dTransformation(PM::TransformationParameters T)
+	{
+		PM::TransformationParameters Tvalid(3,3);
+		
+		// Result from visual inspection
+		Tvalid <<  0.987498,  0.157629, 0.0859918,
+		          -0.157629,  0.987498,  0.203247,
+		                  0,         0,         1;
+
+		for(int i=0; i < Tvalid.rows(); i++)
+		{
+			for(int j=0; j < Tvalid.cols(); j++)
+			{
+				if(i != Tvalid.rows()-1)
+					EXPECT_NEAR(Tvalid(i,j), T(i,j), 0.001);
+				else
+					EXPECT_EQ(Tvalid(i,j), T(i,j));
+			}
+		}
+	}
 
 };
 
@@ -62,37 +97,23 @@ protected:
 
 TEST_F(PointCloud2DTest, ICP_default)
 {
-	typedef PointMatcher<float> PM;
 
-	std::string dataPath = "../examples/data/";
-	
-	PM::DataPoints ref =  loadCSV<PM::ScalarType>(dataPath + "2D_oneBox.csv");
-	PM::DataPoints data = loadCSV<PM::ScalarType>(dataPath + "2D_twoBoxes.csv");
-		
 	PM::ICP icp;
 	icp.setDefault();
+	icp.inspector.reset(vtkInspector);
 
-	icp(data, ref);
+	PM::TransformationParameters T = icp(data2D, ref2D);
+	std::cout << T << std::endl;
 
-	//TODO: add proper evaluation of the answer
-	EXPECT_TRUE(0);
+	validate2dTransformation(T);
+
+	//T = icp(ref2D, data2D);
+	std::cout << T.inverse() << std::endl;
+	
 }
 
 
-TEST(Sandbox, vector2Eigen)
-{
 
-	std::vector<float> vec;
-	vec.push_back(4);
-	vec.push_back(2);
-	vec.push_back(1);
-
-	std::sort(vec.begin(), vec.end());
-
-	Map<RowVectorXf> v(&vec[0], vec.size());
-	//std::cout << v << std::endl;
-	//std::cout << v.array().inverse() << std::endl;
-}
 
 
 

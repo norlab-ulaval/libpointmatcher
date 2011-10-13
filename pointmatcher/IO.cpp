@@ -38,19 +38,39 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <stdexcept>
 #include <ctype.h>
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/operations.hpp"
+
 
 
 using namespace std;
 
+//! @brief Load comma separated values (csv) file
+//! @param fileName a string containing the path and the file name
+//! 
+//! This loader has 3 behaviors since there is not official standard for
+//! csv files. A 2D or 3D point cloud will be created automatically if:
+//!   - there is an header with columns named x, y and optionnaly z
+//!   - there is only 2 or 3 columns in the file
+//!
+//! Otherwise, the user is asked to enter column id manually which might 
+//! block automatic processing.
+//!
+//! @todo Add support to load descriptors (ex. color, ids, etc.)
 template<typename T>
 typename PointMatcher<T>::DataPoints loadCSV(const std::string& fileName)
 {
+	boost::filesystem::path fullPath(fileName);
+
+
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
-		throw runtime_error(string("Cannot open file ") + fileName);
+		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
 	return loadCSV<T>(ifs);
 }
 
+//! @brief Load comma separated values (csv) file
+//! @see loadCSV()
 template<typename T>
 typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
 {

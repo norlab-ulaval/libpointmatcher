@@ -120,7 +120,7 @@ namespace PointMatcherSupport
 		}
 		
 		//! Create an instance
-		Interface* create(const std::string& name, const Parametrizable::Parameters& params) const
+		Interface* create(const std::string& name, const Parametrizable::Parameters& params = Parametrizable::Parameters()) const
 		{
 			return getDescriptor(name)->createInstance(params);
 		}

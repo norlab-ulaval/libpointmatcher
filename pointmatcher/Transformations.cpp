@@ -95,7 +95,7 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::TransformNormals::c
 		const unsigned span(input.descriptorLabels[i].span);
 		if(transformedDataPoints.descriptorLabels[i].text.compare("normals") == 0)
 		{
-			assert(span == parameters.rows()-1);
+			assert(int(span) == parameters.rows()-1);
 			transformedDataPoints.descriptors.block(descRow, 0, span, ptCount) = 
 				R * input.descriptors.block(descRow, 0, span, ptCount);
 		}

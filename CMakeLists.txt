@@ -118,10 +118,10 @@ add_executable(icp_simple examples/icp_simple.cpp)
 target_link_libraries(icp_simple pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
 
 add_executable(align_sequence examples/align_sequence.cpp)
-target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
+target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
 
 add_executable(convertCSVtoVTK examples/convertCSVtoVTK.cpp)
-target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
+target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
 
 add_executable(list_modules examples/list_modules.cpp)
 target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
@@ -130,7 +130,7 @@ target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${
 if(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
   include_directories(${GTEST_INCLUDE_DIR})
   add_executable(utest utest/utest.cpp)
-  target_link_libraries(utest pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${GTEST_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
+  target_link_libraries(utest pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${GTEST_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
 else(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
   message("Google test (gtest) not found - Skipping unit tests")
 endif(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
