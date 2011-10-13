@@ -541,7 +541,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		// in test
 		
 		this->transformationCheckers.check(T_iter, iterate);
-		
+	
+		cout << T_iter << endl;
 		++iterationCount;
 	}
 	

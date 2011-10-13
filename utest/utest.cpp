@@ -49,6 +49,7 @@ public:
 	
 	PM pm;
 	PM::Inspector* vtkInspector;
+	PointMatcherSupport::Logger* console;
 	
 	std::string dataPath;
 	PM::DataPoints ref2D;
@@ -62,6 +63,9 @@ public:
 			PM::Parameters({{"baseFileName","./tmp/utest"}})
 			);
 		
+		// Make available a console logger for manual inspection
+		console = pm.LoggerRegistrar.create("FileLogger");
+
 		dataPath = "../examples/data/";
 		ref2D =  loadCSV<PM::ScalarType>(dataPath + "2D_oneBox.csv");
 		data2D = loadCSV<PM::ScalarType>(dataPath + "2D_twoBoxes.csv");
@@ -97,19 +101,25 @@ public:
 
 TEST_F(PointCloud2DTest, ICP_default)
 {
-
 	PM::ICP icp;
 	icp.setDefault();
-	icp.inspector.reset(vtkInspector);
 
 	PM::TransformationParameters T = icp(data2D, ref2D);
 	std::cout << T << std::endl;
 
 	validate2dTransformation(T);
 
-	//T = icp(ref2D, data2D);
-	std::cout << T.inverse() << std::endl;
-	
+	icp.inspector.reset(vtkInspector);
+	icp.logger.reset(console);
+	PM::TransformationParameters T2 = icp(ref2D, data2D);
+	{
+	PM::TransformationParameters T3 = PM::TransformationParameters::Identity(4,4);
+	//__sync_synchronize();	
+	//std::cout << T2.inverse() << std::endl;
+	std::cout << T3.inverse() <<std::endl;
+	}
+	//T2.inverse();
+	//validate2dTransformation(T2.inverse());
 }
 
 
