@@ -91,9 +91,9 @@ int main(int argc, char *argv[])
 			abort();
 
 		if(extension == "vtk")
-			newCloud = loadVTK<PM::ScalarType>(ifs);
+			newCloud = PM::loadVTK(ifs);
 		else if (extension == "csv")
-			newCloud = loadCSV<PM::ScalarType>(ifs);
+			newCloud = PM::loadCSV(ifs);
 		else
 		{
 			cerr << "Unkowned extension" << endl;
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 		}
 		
 		cout << "outputFileName: " << outputFileName << endl;
-		saveVTK<PM::ScalarType>(newCloud, outputFileName);
+		PM::saveVTK(newCloud, outputFileName);
 	}
 	return 0;
 }

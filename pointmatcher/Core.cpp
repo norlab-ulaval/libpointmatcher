@@ -114,7 +114,17 @@ typename PointMatcher<T>::DataPoints::Descriptors PointMatcher<T>::DataPoints::g
 	return Descriptors();
 }
 
+template<typename T>
+void swapDataPoints(typename PointMatcher<T>::DataPoints& a, typename PointMatcher<T>::DataPoints& b)
+{
+	a.features.swap(b.features);
+	swap(a.featureLabels, b.featureLabels);
+	a.descriptors.swap(b.descriptors);
+	swap(a.descriptorLabels, b.descriptorLabels);
+}
+
 // Matches
+
 template<typename T>
 PointMatcher<T>::Matches::Matches(const Dists& dists, const Ids ids):
 	dists(dists),

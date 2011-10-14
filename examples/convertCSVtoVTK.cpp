@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	DataPoints d = loadCSV<float>(argv[1]);
+	DataPoints d = PM::loadCSV(argv[1]);
 	
 	// Example for subsampling
 	//PM::SamplingSurfaceNormalDataPointsFilter subsample(100);
@@ -62,8 +62,7 @@ int main(int argc, char *argv[])
 	
 	d.features = T * d.features;
 	
-	
-	saveCSV<float>(d, argv[2]);
+	PM::saveCSV(d, argv[2]);
 	
 	return 0;
 }
