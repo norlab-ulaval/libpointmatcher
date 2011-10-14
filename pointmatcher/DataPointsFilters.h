@@ -275,7 +275,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the center of the point cloud.", "1"}
+				{ "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the center of the point cloud).", "1"}
 			});
 		}
 

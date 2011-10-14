@@ -980,7 +980,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsData
 		Vector vecP = -input.features.block(0, i, dim-1, 1);
 		Vector vecN = normals.col(i);
 		scalar = vecP.dot(vecN);
-		
+
 		// Swap normal
 		if(towardCenter)
 		{

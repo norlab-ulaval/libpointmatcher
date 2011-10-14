@@ -44,9 +44,9 @@ namespace PointMatcherSupport
 	
 	Bibliography bibliography()
 	{
-		return {
+		return Bibliography({
 			{ "Phillips2007VarTrimmed",
-				{
+				StringMap({
 					{ "type", "inproceedings" },
 					{ "title", "Outlier robust ICP for minimizing fractional RMSD" },
 					{ "author", "Phillips, J.M. and Liu, R. and Tomasi, C." },
@@ -56,10 +56,10 @@ namespace PointMatcherSupport
 					{ "publisher", "IEEE Press" },
 					{ "doi", "10.1109/3DIM.2007.39" },
 					{ "fulltext", "http://x86.cs.duke.edu/~tomasi/papers/phillips/phillips3DIM07.pdf" }
-				} 
+				})
 			},
 			{ "Chetverikov2002Trimmed", 
-				{
+				StringMap({
 					{ "type", "inproceedings" },
 					{ "title", "The Trimmed Iterative Closest Point Algorithm" },
 					{ "author", "Chetverikov, D. and Svirko, D. and Stepanov, D. and Krsek, P." },
@@ -69,9 +69,9 @@ namespace PointMatcherSupport
 					{ "publisher", "IEEE Press" },
 					{ "doi", "10.1109/ICPR.2002.1047997 " },
 					{ "fulltext", "http://hci.iwr.uni-heidelberg.de/publications/dip/2002/ICPR2002/DATA/10_1_03.PDF"}
-				}
+				})
 			}
-		};
+		});
 	}
 	
 	static StringVector splitString(const string& text, char delim)

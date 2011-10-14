@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
+// TODO: avoid global!
+std::string dataPath;
 
 // Utility classes
 class PointCloud2DTest: public testing::Test
@@ -52,7 +54,6 @@ public:
 	PM::Inspector* vtkInspector;
 	Logger* console;
 	
-	std::string dataPath;
 	PM::DataPoints ref2D;
 	PM::DataPoints data2D;
 	
@@ -63,13 +64,12 @@ public:
 		// Make available a VTK inspector for manual inspection
 		vtkInspector = pm.InspectorRegistrar.create(
 			"VTKFileInspector", 
-			PM::Parameters({{"baseFileName","./tmp/utest"}})
+			PM::Parameters({{"baseFileName","./unitTest"}})
 			);
 		
 		// Make available a console logger for manual inspection
 		console = pm.LoggerRegistrar.create("FileLogger");
 
-		dataPath = "../examples/data/";
 		ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
 		data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
 		
@@ -412,7 +412,7 @@ TEST_F(PointCloud2DTest, OrientNormalsDataPointsFilter)
 	icp.setDefault();
 
 	// Visual validation
-	icp.inspector.reset(vtkInspector);
+	//icp.inspector.reset(vtkInspector);
 
 	PM::Parameters params;
 	PM::DataPointsFilter* dataPointFilter1;
@@ -423,8 +423,9 @@ TEST_F(PointCloud2DTest, OrientNormalsDataPointsFilter)
 			"SurfaceNormalDataPointsFilter");
 
 	// Filter to test, shouldn't affect the results
+	params = PM::Parameters({{"towardCenter", toParam(false)}});
 	dataPointFilter2 = pm.DataPointsFilterRegistrar.create(
-			"OrientNormalsDataPointsFilter");
+			"OrientNormalsDataPointsFilter", params);
 	
 	icp.readingDataPointsFilters.clear();
 	icp.readingDataPointsFilters.push_back(dataPointFilter1);
@@ -436,6 +437,19 @@ TEST_F(PointCloud2DTest, OrientNormalsDataPointsFilter)
 
 int main(int argc, char **argv)
 {
+	dataPath = "";
+	for(int i=1; i < argc; i++)
+	{
+		if(strcmp(argv[i], "--path") == 0 && i+1 < argc)
+				dataPath = argv[i+1];
+	}
+
+	if(dataPath == "")
+	{
+		cerr << "Missing the flag --path ./path/to/examples\n Please give the path to the test data folder which should be included with the source code. The folder is named 'examples'." << endl;
+		return -1;
+	}
+
 	testing::GTEST_FLAG(print_time) = true;
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
