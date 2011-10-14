@@ -93,7 +93,7 @@ namespace PointMatcherSupport
 		return res;
 	}
 	
-	std::string getAndReplaceBibEntries(const std::string& text, BibIndices& indices, StringVector& entries, bool rosWikiAnchor)
+	std::string getAndReplaceBibEntries(const std::string& text, BibIndices& indices, StringVector& entries, BibMode::Mode mode)
 	{
 		string newText;
 		const StringVector words(splitString(text, ' '));
@@ -104,7 +104,7 @@ namespace PointMatcherSupport
 			const size_t p(word.find('}'));
 			if ((l > 7) && (word.substr(0, 6) == "\\cite{") && (p != string::npos))
 			{
-				if (rosWikiAnchor)
+				if (mode == BibMode::ROSWIKI)
 					newText += "&#91;";
 				else
 					newText += '[';
@@ -112,7 +112,7 @@ namespace PointMatcherSupport
 				for (size_t j = 0; j < keys.size(); ++j)
 				{
 					const string key(keys[j]);
-					if (rosWikiAnchor)
+					if (mode == BibMode::ROSWIKI)
 						newText += "[[#" + key + "|";
 					if (indices.contains(key))
 					{
@@ -125,12 +125,12 @@ namespace PointMatcherSupport
 						indices[key] = index;
 						newText += boost::lexical_cast<string>(index+1);
 					}
-					if (rosWikiAnchor)
+					if (mode == BibMode::ROSWIKI)
 						newText += "]]";
 					if (j+1 != keys.size())
 						newText += ',';
 				}
-				if (rosWikiAnchor)
+				if (mode == BibMode::ROSWIKI)
 					newText += "&#93;";
 				else
 					newText += ']';
@@ -141,6 +141,9 @@ namespace PointMatcherSupport
 			if (i+1 != words.size())
 				newText += ' ';
 		}
-		return newText;
+		if (mode == BibMode::BIBTEX)
+			return text;
+		else
+			return newText;
 	}
 }; // PointMatcherSupport
