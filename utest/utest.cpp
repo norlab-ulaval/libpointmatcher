@@ -134,6 +134,7 @@ TEST_F(PointCloud2DTest, MaxDistDataPointsFilter)
 	PM::Parameters params;
 	PM::DataPointsFilter* dataPointFilter;
 
+	// Max dist has been selected to not affect the points
 	string mDist = "6";
 	params = PM::Parameters({{"dim","0"}, {"maxDist", mDist}});
 	
@@ -185,8 +186,231 @@ TEST_F(PointCloud2DTest, MaxDistDataPointsFilter)
 	
 }
 
+
+TEST_F(PointCloud2DTest, MinDistDataPointsFilter)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter;
+
+	// Min dist has been selected to not affect the points too much
+	string mDist = "0.05";
+	params = PM::Parameters({{"dim","0"}, {"minDist", mDist}});
+	
+	// Filter on x axis
+	params["dim"] = "0";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MinDistDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+	
+	// Filter on y axis
+	params["dim"] = "1";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MinDistDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+	
+	// Filter on z axis (not existing)
+	params["dim"] = "2";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MinDistDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	EXPECT_ANY_THROW(icp(data2D, ref2D));
+
+	// Filter on a radius
+	params["dim"] = "-1";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MinDistDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+	
+	// Parameter outside valid range
+	params["dim"] = "3";
+	EXPECT_ANY_THROW(
+		dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MinDistDataPointsFilter", params)
+		);
+	
+}
+
+TEST_F(PointCloud2DTest, MaxQuantileOnAxisDataPointsFilter)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter;
+
+	// Ratio has been selected to not affect the points too much
+	string ratio = "0.95";
+	params = PM::Parameters({{"dim","0"}, {"ratio", ratio}});
+	
+	// Filter on x axis
+	params["dim"] = "0";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxQuantileOnAxisDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+
+	// Filter on y axis
+	params["dim"] = "1";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxQuantileOnAxisDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+
+	// Filter on z axis (not existing)
+	params["dim"] = "2";
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxQuantileOnAxisDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	EXPECT_ANY_THROW(icp(data2D, ref2D));
+
+
+	// Parameter outside valid range
+	params["dim"] = "3";
+	EXPECT_ANY_THROW(
+		dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"MaxQuantileOnAxisDataPointsFilter", params)
+		);
+
+}
+
+
+TEST_F(PointCloud2DTest, UniformizeDensityDataPointsFilter)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter;
+
+	// Ratio has been selected to not affect the points too much
+	vector<double> ratio = vector<double>({0.1, 0.15, 0.2});
+
+	for(unsigned i=0; i < ratio.size(); i++)
+	{
+		ostringstream strs;
+		strs.str("");
+		strs << ratio[i];
+		params = PM::Parameters({{"ratio", strs.str()}, {"nbBin", "20"}});
+		
+		dataPointFilter = pm.DataPointsFilterRegistrar.create(
+				"UniformizeDensityDataPointsFilter", params);
+		
+		icp.readingDataPointsFilters.clear();
+		icp.readingDataPointsFilters.push_back(dataPointFilter);
+		T = icp(data2D, ref2D);
+		validate2dTransformation(validT2d, T);
+
+		const double nbInitPts = data2D.features.cols();
+		const double nbRemainingPts = icp.getNbPrefilteredReadingPts();
+		EXPECT_NEAR(nbRemainingPts/nbInitPts, 1-ratio[i], 0.05);
+	}
+}
+
+TEST_F(PointCloud2DTest, SurfaceNormalDataPointsFilter)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector.reset(vtkInspector);
+
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter;
+
+	// This filter create descriptor, so parameters should'nt impact results
+	params = PM::Parameters({
+		{"knn", "5"}, 
+		{"epsilon", "0.1"}, 
+		{"keepNormals", "1"},
+		{"keepDensities", "1"},
+		{"keepEigenValues", "1"},
+		{"keepEigenVectors", "1" },
+		{"keepMatchedIds" , "1" }
+		});
+	// FIXME: the parameter keepMatchedIds seems to do nothing...
+
+	// Filter on x axis
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"SurfaceNormalDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
+
+TEST_F(PointCloud2DTest, SamplingSurfaceNormalDataPointsFilter)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector.reset(vtkInspector);
+
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter;
+
+	// This filter create descriptor, so parameters should'nt impact results
+	params = PM::Parameters({
+		{"binSize", "5"}, 
+		{"averageExistingDescriptors", "1"}, 
+		{"keepNormals", "1"},
+		{"keepDensities", "1"},
+		{"keepEigenValues", "1"},
+		{"keepEigenVectors", "1" },
+		{"keepMatchedIds" , "1" }
+		});
+		
+	// Filter on x axis
+	dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"SamplingSurfaceNormalDataPointsFilter", params);
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter);
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
+
+//TODO: next is OrientNormalsDataPointsFilter
+
 int main(int argc, char **argv)
 {
+	testing::GTEST_FLAG(print_time) = true;
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }

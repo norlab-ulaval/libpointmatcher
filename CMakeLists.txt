@@ -128,7 +128,7 @@ target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${
 
 
 if(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
-  include_directories(${GTEST_INCLUDE_DIR})
+	include_directories(${GTEST_INCLUDE_DIR})
   add_executable(utest utest/utest.cpp)
   target_link_libraries(utest pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${GTEST_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
 else(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)

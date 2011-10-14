@@ -69,7 +69,7 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Subsampling. Filter points beyond a maximum distance measured on a specific axis.";
+			return "Subsampling. Filter points beyond a maximum distance measured on a specific axis. If dim is set to -1, points are filtered based on a maximum radius.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
@@ -92,17 +92,17 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Subsampling. Filter points before a minimum distance measured on a specific axis.";
+			return "Subsampling. Filter points before a minimum distance measured on a specific axis. If dim is set to -1, points are filtered based on a minimum radius.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, all=3", "3", "0", "2147483647", &P::Comp<unsigned> },
+				{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, radius=-1", "-1", "-1", "2", &P::Comp<int> },
 				{ "minDist", "minimum distance authorized. All points before that will be filtered.", "1", "0", "inf", &P::Comp<T> }
 			});
 		}
 		
-		const unsigned dim;
+		const int dim;
 		const T minDist;
 		
 		//! Constructor, uses parameter interface
@@ -120,7 +120,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2147483647", &P::Comp<unsigned> },
+				{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2", &P::Comp<unsigned> },
 				{ "ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "0.9999999", &P::Comp<T>}
 			});
 		}
@@ -133,7 +133,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 	};
 
-	//! Subsampling. Reduce the points number of a certain ration while trying to uniformize the density of the point cloud.
+	//! Subsampling. Reduce the points number of a certain ratio while trying to uniformize the density of the point cloud.
 	struct UniformizeDensityDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
@@ -144,7 +144,7 @@ struct DataPointsFiltersImpl
 		{
 			return ParametersDoc({
 				{"ratio", "targeted reduction ratio", "0.5", "0.0000001", "0.9999999", &P::Comp<T>},
-				{ "nbBin", "number of bin used to estimate the probability distribution of the density.", "1", "1", "2147483647", &P::Comp<unsigned> }
+				{ "nbBin", "number of bin used to estimate the probability distribution of the density.", "10", "1", "2147483647", &P::Comp<unsigned> }
 			});
 		}
 		
@@ -198,6 +198,7 @@ struct DataPointsFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
+			//FIXME: clarify binSize and averageExistingDescriptors
 			return ParametersDoc({
 				{ "binSize", "limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> },
 				{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
@@ -268,7 +269,7 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Normals. Reorient normals so that they all point in the same direction, with respect to coordinate 0.";
+			return "Normals. Reorient normals so that they all point in the same direction, with respect to the origin of the point cloud.";
 		}
 		
 		virtual DataPoints filter(const DataPoints& input);

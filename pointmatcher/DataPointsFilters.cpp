@@ -147,13 +147,13 @@ DataPointsFiltersImpl<T>::MinDistDataPointsFilter::MinDistDataPointsFilter(const
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPointsFilter::filter(const DataPoints& input)
 {
-	if (int(dim) >= input.features.rows())
-		throw InvalidParameter((boost::format("MinDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % input.features.rows()).str());
+	if (dim >= input.features.rows() - 1)
+		throw InvalidParameter((boost::format("MinDistDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % (input.features.rows() - 2)).str());
 	
 	const int nbPointsIn = input.features.cols();
 	const int nbRows = input.features.rows();
 	int nbPointsOut = 0;
-	if (dim == 3)
+	if (dim == -1)
 	{
 		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() > minDist).count();
 	}
@@ -175,7 +175,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 	}
 	
 	int j = 0;
-	if(dim == 3) // Euclidian distance
+	if(dim == -1) // Euclidian distance
 	{
 		for (int i = 0; i < nbPointsIn; i++)
 		{
@@ -478,9 +478,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	typedef typename DataPoints::Labels Labels;
 	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
 	typedef typename PointMatcher<T>::Matches Matches;
-	
-	std::cerr << "SurfaceNormalDataPointsFilter::preFilter" << std::endl;
-	// FIXME: remove cerr here and use logger
 	
 	const int pointsCount(input.features.cols());
 	const int featDim(input.features.rows());

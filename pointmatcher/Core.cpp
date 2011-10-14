@@ -227,7 +227,9 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
 	outlierMixingWeight(0.5),
-	logger(new NullLogger)
+	logger(new NullLogger),
+	nbPrefilteredReadingPts(0),
+	nbPrefilteredKeyframePts(0)
 {}
 
 template<typename T>
@@ -475,8 +477,10 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	size_t iterationCount(0);
 	
 	LOG_INFO_STREAM("PointMatcher::icp - preprocess took " << t.elapsed() << " [s]");
-	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << reference.features.cols());
-	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << reading.features.cols());
+	this->nbPrefilteredKeyframePts = reference.features.cols();
+	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << this->nbPrefilteredKeyframePts);
+	this->nbPrefilteredReadingPts = reading.features.cols();
+	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << this->nbPrefilteredReadingPts);
 	t.restart();
 	
 	while (iterate)
@@ -688,6 +692,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	DataPoints inputCloud(inputCloudIn);
 	
 	// initial keyframe
+	// FIXME: merge haskeyFrame and dim
 	keyFrameCreated = false;
 	if (!hasKeyFrame())
 	{

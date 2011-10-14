@@ -449,8 +449,18 @@ struct PointMatcher
 		
 		//! Construct an ICP algorithm from a YAML file
 		void loadFromYaml(std::istream& in);
+
+		//! Return the remaining number of points in reading after prefiltering but before the iterative process
+		unsigned getNbPrefilteredReadingPts(){return nbPrefilteredReadingPts;};
+		//! Return the remaining number of points in the keyframe after prefiltering but before the iterative process
+		unsigned getNbPrefilteredKeyframePts(){return nbPrefilteredKeyframePts;};
 		
 	protected:
+		//! Remaining number of points after prefiltering but before the iterative process
+		unsigned nbPrefilteredReadingPts;
+		//! Remaining number of points after prefiltering but before the iterative process
+		unsigned nbPrefilteredKeyframePts;
+
 		//! Protected contstructor, to prevent the creation of this object
 		ICPChainBase();
 		//! Clean chain up, empty all filters and delete associated objects
