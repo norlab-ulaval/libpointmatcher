@@ -58,8 +58,18 @@ namespace PointMatcherSupport
 	typedef StringMapMap Bibliography;
 	typedef ConvenientMap<std::string, unsigned> BibIndices;
 	
+	namespace BibMode
+	{
+		enum Mode
+		{
+			NORMAL=0,
+			ROSWIKI=1,
+			BIBTEX=2
+		};
+	}
+	
 	Bibliography bibliography();
-	std::string getAndReplaceBibEntries(const std::string& text, BibIndices& indices, StringVector& entries, bool rosWikiAnchor);
+	std::string getAndReplaceBibEntries(const std::string& text, BibIndices& indices, StringVector& entries, BibMode::Mode mode);
 }; // PointMatcherSupport
 
 #endif // __POINTMATCHER_BIBLIOGRAPHY_H
