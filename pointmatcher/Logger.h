@@ -44,7 +44,7 @@ namespace PointMatcherSupport
 	{
 		inline static const std::string description()
 		{
-			return "does not log anything";
+			return "Does not log anything.";
 		}
 	};
 	
@@ -52,7 +52,7 @@ namespace PointMatcherSupport
 	{
 		inline static const std::string description()
 		{
-			return "Log using std::stream";
+			return "Log using std::stream.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{

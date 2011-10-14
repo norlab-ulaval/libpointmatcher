@@ -55,7 +55,7 @@ struct TransformationsImpl
 	{
 		inline static const std::string description()
 		{
-			return "transform features";
+			return "Transform features.";
 		}
 		
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
@@ -65,7 +65,7 @@ struct TransformationsImpl
 	{
 		inline static const std::string description()
 		{
-			return "rotate normals";
+			return "Rotate normals.";
 		}
 		
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;

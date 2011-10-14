@@ -34,67 +34,158 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
+#include "pointmatcher/Bibliography.h"
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 typedef PointMatcherSupport::Parametrizable::ParametersDoc ParametersDoc;
+typedef PointMatcherD PM;
 
-void dumpWiki(const ParametersDoc& paramsDoc)
+struct Bib
 {
-	cout << endl;
-	for (auto it = paramsDoc.cbegin(); it != paramsDoc.cend(); ++it)
+	BibIndices indices;
+	StringVector entries;
+	Bibliography biblio;
+	
+	Bib():biblio(bibliography()) {}
+	void dump() const;
+	void dumpWiki() const;
+};
+
+void Bib::dump() const
+{
+	for (size_t i = 0; i < entries.size(); ++i)
 	{
-		cout << "`" << it->name << "` (default: `" << it->defaultValue << "`";
-		if (!it->minValue.empty())
-			cout << ", min: `" << it->minValue << "`";
-		if (!it->maxValue.empty())
-			cout << ", max: `" << it->maxValue << "`";
-		cout << ")" << endl;
-		cout << endl;
-		cout << " . " << it->doc << endl;
+		const string& entryName(entries[i]);
+		if (!biblio.contains(entryName))
+			throw runtime_error(string("Broken bibliography, missing entry " + entryName));
+		const StringMap& entry(biblio.get(entryName));
+		
+		cout << "[" << i+1 << "]";
+		if (entry.contains("title"))
+			cout << " " << entry.get("title") << ".";
+		if (entry.contains("author"))
+			cout << " " << entry.get("author") << "";
+		if (entry.contains("booktitle"))
+			cout << " In " << entry.get("booktitle") << ".";
+		if (entry.contains("journal"))
+			cout << " " << entry.get("journal") << ".";
+		if (entry.contains("pages"))
+			cout << " " << entry.get("pages") << ".";
+		if (entry.contains("year"))
+			cout << " " << entry.get("year") << ".";
+		cout << endl << endl;
+	}
+}
+
+void Bib::dumpWiki() const
+{
+	for (size_t i = 0; i < entries.size(); ++i)
+	{
+		const string& entryName(entries[i]);
+		if (!biblio.contains(entryName))
+			throw runtime_error(string("Broken bibliography, missing entry " + entryName));
+		const StringMap& entry(biblio.get(entryName));
+		
+		cout << " * " << "<<Anchor(" << entryName << ")>>[" << i+1 << "] -";
+		if (entry.contains("title"))
+			cout << " '''" << entry.get("title") << ".'''";
+		if (entry.contains("author"))
+			cout << " " << entry.get("author") << "";
+		if (entry.contains("booktitle"))
+			cout << " ''In " << entry.get("booktitle") << ".''";
+		if (entry.contains("journal"))
+			cout << " " << entry.get("journal") << ".";
+		if (entry.contains("pages"))
+			cout << " " << entry.get("pages") << ".";
+		if (entry.contains("year"))
+			cout << " " << entry.get("year") << ".";
+		if (entry.contains("doi"))
+			cout << " DOI: [[http://dx.doi.org/" << entry.get("doi") << "|" << entry.get("doi") << "]].";
+		if (entry.contains("fulltext"))
+			cout << " [[" << entry.get("fulltext") << "|full text]].";
 		cout << endl;
 	}
 }
 
-#define DUMP_REGISTRAR_CONTENT(name, wiki) \
-{ \
-	if (wiki) \
-		cout << "==== " << # name << " ====\n" << endl; \
-	else \
-		cout << "* " << # name << " *\n" << endl; \
-	for (auto it = pm.REG(name).begin(); it != pm.REG(name).end(); ++it) \
-	{ \
-		if (wiki) \
-			cout << "===== " << it->first << " =====\n" << endl; \
-		else \
-			cout << it->first << endl; \
-		cout << it->second->description() << endl; \
-		if (wiki) \
-			dumpWiki(it->second->availableParameters()); \
-		else \
-			cout << it->second->availableParameters(); \
-		cout << endl; \
-	} \
-	cout << endl; \
+void dumpWiki(const ParametersDoc& paramsDoc)
+{
+	cout << endl;
+	if (!paramsDoc.empty())
+		for (auto it = paramsDoc.cbegin(); it != paramsDoc.cend(); ++it)
+		{
+			cout << "`" << it->name << "` (default: `" << it->defaultValue << "`";
+			if (!it->minValue.empty())
+				cout << ", min: `" << it->minValue << "`";
+			if (!it->maxValue.empty())
+				cout << ", max: `" << it->maxValue << "`";
+			cout << ")" << endl;
+			cout << endl;
+			cout << " . " << it->doc << endl;
+			cout << endl;
+		}
+	else
+		cout << " . no parameters" << endl;
 }
+
+template<typename R>
+void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, Bib& bib, bool wiki)
+{
+	if (wiki)
+		cout << "=== " << name << " ===\n" << endl;
+	else
+		cout << "* " << name << " *\n" << endl;
+	for (auto it = registrar.begin(); it != registrar.end(); ++it)
+	{
+		if (wiki)
+			cout << "==== " << it->first << " ====\n" << endl;
+		else
+			cout << it->first << endl;
+		
+		cout << getAndReplaceBibEntries(it->second->description(), bib.indices, bib.entries, wiki) << endl;
+		if (wiki)
+			dumpWiki(it->second->availableParameters());
+		else
+			cout << it->second->availableParameters();
+		cout << endl;
+	}
+	cout << endl;
+}
+
+
+#define DUMP_REGISTRAR_CONTENT(pm, name, bib, wiki) \
+	dumpRegistrar(pm, pm.REG(name), # name, bib, wiki);
 
 int main(int argc, char *argv[])
 {
-	PointMatcherD pm;
-	bool wiki(false);
+	PM pm;
+	Bib bib;
 	
+	bool wiki(false);
 	if (argc == 2 && string(argv[1]) == "--roswiki")
 		wiki = true;
 	
-	DUMP_REGISTRAR_CONTENT(Transformation, wiki)
-	DUMP_REGISTRAR_CONTENT(DataPointsFilter, wiki)
-	DUMP_REGISTRAR_CONTENT(Matcher, wiki)
-	DUMP_REGISTRAR_CONTENT(FeatureOutlierFilter, wiki)
-	DUMP_REGISTRAR_CONTENT(DescriptorOutlierFilter, wiki)
-	DUMP_REGISTRAR_CONTENT(ErrorMinimizer, wiki)
-	DUMP_REGISTRAR_CONTENT(TransformationChecker, wiki)
-	DUMP_REGISTRAR_CONTENT(Inspector, wiki)
-	DUMP_REGISTRAR_CONTENT(Logger, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, Transformation, bib, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, DataPointsFilter, bib, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, Matcher, bib, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, FeatureOutlierFilter, bib, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, DescriptorOutlierFilter, bib, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, ErrorMinimizer, bib, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, TransformationChecker, bib, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, Inspector, bib, wiki)
+	DUMP_REGISTRAR_CONTENT(pm, Logger, bib, wiki)
+	
+	if (wiki)
+	{
+		cout << "=== Bibliography ===" << endl << endl;
+		bib.dumpWiki();
+	}
+	else
+	{
+		cout << "* Bibliography *" << endl << endl;
+		bib.dump();
+	}
 	
 	return 0;
 }

@@ -86,7 +86,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(std::istream& is)
 	int dim(0);
 	bool firstLine(true);
 	bool hasHeader(false);
-	typename DataPoints::Labels labels;
+	Labels labels;
 	int xCol(-1);
 	int yCol(-1);
 	int zCol(-1);

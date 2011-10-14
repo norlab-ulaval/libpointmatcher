@@ -58,7 +58,7 @@ struct MatchersImpl
 	{
 		inline static const std::string description()
 		{
-			return "does nothing, return no matches";
+			return "Does nothing, returns no match.";
 		}
 		
 		virtual void init(const DataPoints& filteredReference);

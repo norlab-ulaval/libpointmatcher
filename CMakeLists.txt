@@ -100,6 +100,7 @@ add_library(pointmatcher
 	pointmatcher/TransformationCheckers.cpp
 	pointmatcher/Inspectors.cpp
 	pointmatcher/IO.cpp
+	pointmatcher/Bibliography.cpp
 )
 install(TARGETS pointmatcher ARCHIVE DESTINATION lib)
 install(FILES
