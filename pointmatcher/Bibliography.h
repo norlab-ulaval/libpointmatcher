@@ -33,36 +33,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_IO_H
-#define __POINTMATCHER_IO_H
+#ifndef __POINTMATCHER_BIBLIOGRAPHY_H
+#define __POINTMATCHER_BIBLIOGRAPHY_H
 
-#include "Core.h"
+#include <map>
 #include <string>
-#include <iostream>
+#include <vector>
+#include <stdexcept>
 
-template<typename T>
-typename PointMatcher<T>::DataPoints loadCSV(const std::string& fileName);
+namespace PointMatcherSupport
+{
+	template <typename K, typename V>
+	struct ConvenientMap: public std::map<K, V>
+	{
+		ConvenientMap():std::map<K, V>() {}
+		ConvenientMap(std::initializer_list<typename std::map<K, V>::value_type> list):std::map<K, V>(list) {}
+		bool contains(const K& k) const { auto it(this->find(k)); return (it!=this->end()); }
+		V get(const K& k) const { auto it(this->find(k)); if (it!=this->end()) return it->second; else throw std::runtime_error("unknown key"); }
+	};
+	
+	typedef std::vector<std::string> StringVector;
+	typedef ConvenientMap<std::string, std::string> StringMap;
+	typedef ConvenientMap<std::string, StringMap> StringMapMap;
+	typedef StringMapMap Bibliography;
+	typedef ConvenientMap<std::string, unsigned> BibIndices;
+	
+	Bibliography bibliography();
+	std::string getAndReplaceBibEntries(const std::string& text, BibIndices& indices, StringVector& entries, bool rosWikiAnchor);
+}; // PointMatcherSupport
 
-template<typename T>
-typename PointMatcher<T>::DataPoints loadCSV(std::istream& is);
+#endif // __POINTMATCHER_BIBLIOGRAPHY_H
 
-template<typename T>
-void saveCSV(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName);
-
-template<typename T>
-void saveCSV(const typename PointMatcher<T>::DataPoints& data, std::ostream& os);
-
-
-template<typename T>
-typename PointMatcher<T>::DataPoints loadVTK(const std::string& fileName);
-
-template<typename T>
-typename PointMatcher<T>::DataPoints loadVTK(std::istream& is);
-
-template<typename T>
-void saveVTK(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName);
-
-template<typename T>
-void saveVTK(const typename PointMatcher<T>::DataPoints& data, std::ostream& os);
-
-#endif // __POINTMATCHER_IO_H

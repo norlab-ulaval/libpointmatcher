@@ -58,7 +58,7 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "does nothing";
+			return "Does nothing.";
 		}
 		
 		virtual DataPoints filter(const DataPoints& input);

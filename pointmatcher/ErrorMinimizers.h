@@ -59,7 +59,7 @@ struct ErrorMinimizersImpl
 	{
 		inline static const std::string description()
 		{
-			return "does nothing";
+			return "Does nothing.";
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
@@ -69,7 +69,7 @@ struct ErrorMinimizersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Point-to-point error. Based on SVD decomposition";
+			return "Point-to-point error. Based on SVD decomposition.";
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);

@@ -60,7 +60,7 @@ struct InspectorsImpl
 	{
 		inline static const std::string description()
 		{
-			return "does nothing";
+			return "Does nothing.";
 		}
 	};
 

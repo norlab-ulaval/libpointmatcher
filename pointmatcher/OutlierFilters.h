@@ -57,7 +57,7 @@ struct OutlierFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "does nothing";
+			return "Does nothing.";
 		}
 		
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
@@ -124,7 +124,7 @@ struct OutlierFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Hard rejection threshold using quantile. This filter considers as inlier a certain percentage of the links with the smallest norms. Based on: D Chetverikov, \"The Trimmed Iterative Closest Point Algorithm\" (2002)";
+			return "Hard rejection threshold using quantile. This filter considers as inlier a certain percentage of the links with the smallest norms. Based on \\cite{Chetverikov2002Trimmed}.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
@@ -143,7 +143,7 @@ struct OutlierFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Hard rejection threshold using quantile and variable ratio. Based on: J. M. Phillips and al., \"Outlier Robust ICP for Minimizing Fractional RMSD\" (2007)";
+			return "Hard rejection threshold using quantile and variable ratio. Based on \\cite{Phillips2007VarTrimmed}.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
