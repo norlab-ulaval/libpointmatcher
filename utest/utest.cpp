@@ -69,8 +69,8 @@ public:
 		console = pm.LoggerRegistrar.create("FileLogger");
 
 		dataPath = "../examples/data/";
-		ref2D =  loadCSV<PM::ScalarType>(dataPath + "2D_oneBox.csv");
-		data2D = loadCSV<PM::ScalarType>(dataPath + "2D_twoBoxes.csv");
+		ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
+		data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
 		
 		// Result of data express in ref (from visual inspection)
 		validT2d = PM::TransformationParameters(3,3);

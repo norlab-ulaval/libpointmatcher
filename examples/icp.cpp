@@ -64,13 +64,13 @@ int main(int argc, const char *argv[])
 	PM::DataPoints data;
 	if(isCSV)
 	{
-		ref = loadCSV<PM::ScalarType>(refFile);
-		data = loadCSV<PM::ScalarType>(dataFile);
+		ref = PM::loadCSV(refFile);
+		data = PM::loadCSV(dataFile);
 	}
 	else
 	{
-		ref = loadVTK<PM::ScalarType>(refFile);
-		data= loadVTK<PM::ScalarType>(dataFile);
+		ref = PM::loadVTK(refFile);
+		data= PM::loadVTK(dataFile);
 	}
 
 	// Create the default ICP algorithm
@@ -100,9 +100,9 @@ int main(int argc, const char *argv[])
 	icp.transformations.apply(data_out, T);
 	
 	// Safe files to see the results
-	saveVTK<PM::ScalarType>(ref, outputBaseFile + "_ref.vtk");
-	saveVTK<PM::ScalarType>(data, outputBaseFile + "_data_in.vtk");
-	saveVTK<PM::ScalarType>(data_out, outputBaseFile + "_data_out.vtk");
+	PM::saveVTK(ref, outputBaseFile + "_ref.vtk");
+	PM::saveVTK(data, outputBaseFile + "_data_in.vtk");
+	PM::saveVTK(data_out, outputBaseFile + "_data_out.vtk");
 	cout << "Final transformation:" << endl << T << endl;
 
 	return 0;

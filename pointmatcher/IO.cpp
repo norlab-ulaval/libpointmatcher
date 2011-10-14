@@ -33,7 +33,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "IO.h"
+#include "Core.h"
+
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -58,7 +59,7 @@ using namespace std;
 //!
 //! @todo Add support to load descriptors (ex. color, ids, etc.)
 template<typename T>
-typename PointMatcher<T>::DataPoints loadCSV(const std::string& fileName)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(const std::string& fileName)
 {
 	boost::filesystem::path fullPath(fileName);
 
@@ -66,17 +67,16 @@ typename PointMatcher<T>::DataPoints loadCSV(const std::string& fileName)
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
 		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
-	return loadCSV<T>(ifs);
+	return loadCSV(ifs);
 }
 
 //! @brief Load comma separated values (csv) file
 //! @see loadCSV()
 template<typename T>
-typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(std::istream& is)
 {
-	typedef typename PointMatcher<T>::DataPoints DataPoints;
-	typedef typename DataPoints::Labels Labels;
 	typedef typename DataPoints::Label Label;
+	typedef typename DataPoints::Labels Labels;
 	
 	vector<T> xData;
 	vector<T> yData;
@@ -86,7 +86,7 @@ typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
 	int dim(0);
 	bool firstLine(true);
 	bool hasHeader(false);
-	Labels labels;
+	typename DataPoints::Labels labels;
 	int xCol(-1);
 	int yCol(-1);
 	int zCol(-1);
@@ -258,21 +258,21 @@ typename PointMatcher<T>::DataPoints loadCSV(std::istream& is)
 }
 
 template
-PointMatcher<float>::DataPoints loadCSV<float>(const std::string& fileName);
+PointMatcher<float>::DataPoints PointMatcher<float>::loadCSV(const std::string& fileName);
 template
-PointMatcher<double>::DataPoints loadCSV<double>(const std::string& fileName);
+PointMatcher<double>::DataPoints PointMatcher<double>::loadCSV(const std::string& fileName);
 
 template<typename T>
-void saveCSV(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName)
+void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
-	saveCSV<T>(data, ofs);
+	saveCSV(data, ofs);
 }
 
 template<typename T>
-void saveCSV(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
+void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
 {
 	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
 	
@@ -300,27 +300,26 @@ void saveCSV(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
 }
 
 template
-void saveCSV<float>(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
+void PointMatcher<float>::saveCSV(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
 template
-void saveCSV<double>(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+void PointMatcher<double>::saveCSV(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
 
 template<typename T>
-typename PointMatcher<T>::DataPoints loadVTK(const std::string& fileName)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(const std::string& fileName)
 {
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
-	return loadVTK<T>(ifs);
+	return loadVTK(ifs);
 }
 
 template<typename T>
-typename PointMatcher<T>::DataPoints loadVTK(std::istream& is)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 {
-	typedef typename PointMatcher<T>::DataPoints DataPoints;
-	typedef typename DataPoints::Descriptors Descriptors;
 	typedef typename DataPoints::Features Features;
-	typedef typename DataPoints::Labels Labels;
+	typedef typename DataPoints::Descriptors Descriptors;
 	typedef typename DataPoints::Label Label;
+	typedef typename DataPoints::Labels Labels;
 	
 	// parse header
 	string line;
@@ -401,24 +400,27 @@ typename PointMatcher<T>::DataPoints loadVTK(std::istream& is)
 }
 
 template
-PointMatcher<float>::DataPoints loadVTK<float>(const std::string& fileName);
+PointMatcher<float>::DataPoints PointMatcher<float>::loadVTK(const std::string& fileName);
 template
-PointMatcher<double>::DataPoints loadVTK<double>(const std::string& fileName);
+PointMatcher<double>::DataPoints PointMatcher<double>::loadVTK(const std::string& fileName);
 
 
 template<typename T>
-void saveVTK(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName)
+void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileName)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
-	saveVTK<T>(data, ofs);
+	saveVTK(data, ofs);
 }
 
 template<typename T>
-void saveVTK(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
+void PointMatcher<T>::saveVTK(const DataPoints& data, std::ostream& os)
 {
-	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
+	typedef typename DataPoints::Features Features;
+	typedef typename DataPoints::Descriptors Descriptors;
+	typedef typename DataPoints::Label Label;
+	typedef typename DataPoints::Labels Labels;
 	
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
@@ -490,6 +492,6 @@ void saveVTK(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
 }
 
 template
-void saveVTK<float>(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
+void PointMatcher<float>::saveVTK(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
 template
-void saveVTK<double>(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+void PointMatcher<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);

@@ -38,6 +38,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Core.h"
 #include "TypeAliases.h"
-#include "IO.h"
 
 #endif // __POINTMATCHER_H

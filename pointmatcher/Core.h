@@ -217,6 +217,26 @@ struct PointMatcher
 	};
 	
 	// ---------------------------------
+	// IO functions
+	// ---------------------------------
+	
+	// CSV
+	
+	static DataPoints loadCSV(const std::string& fileName);
+	static DataPoints loadCSV(std::istream& is);
+
+	static void saveCSV(const DataPoints& data, const std::string& fileName);
+	static void saveCSV(const DataPoints& data, std::ostream& os);
+
+	// VTK
+	
+	static DataPoints loadVTK(const std::string& fileName);
+	static DataPoints loadVTK(std::istream& is);
+
+	static void saveVTK(const DataPoints& data, const std::string& fileName);
+	static void saveVTK(const DataPoints& data, std::ostream& os);
+	
+	// ---------------------------------
 	// intermediate types
 	// ---------------------------------
 	
@@ -546,16 +566,6 @@ struct PointMatcher
 	//! Constructor, fill registrars
 	PointMatcher();
 }; // PointMatcher<T>
-
-
-template<typename T>
-void swapDataPoints(typename PointMatcher<T>::DataPoints& a, typename PointMatcher<T>::DataPoints& b)
-{
-	a.features.swap(b.features);
-	swap(a.featureLabels, b.featureLabels);
-	a.descriptors.swap(b.descriptors);
-	swap(a.descriptorLabels, b.descriptorLabels);
-}
 
 #endif // __POINTMATCHER_CORE_H
 
