@@ -944,41 +944,53 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 template struct DataPointsFiltersImpl<float>::SamplingSurfaceNormalDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SamplingSurfaceNormalDataPointsFilter;
 
+// OrientNormalsDataPointsFilter
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::OrientNormalsDataPointsFilter(const Parameters& params):
+	DataPointsFilter("OrientNormalsDataPointsFilter", OrientNormalsDataPointsFilter::availableParameters(), params),
+	towardCenter(Parametrizable::get<double>("towardCenter"))
+{
+}
 
 // OrientNormalsDataPointsFilter
 // Compute
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input)
 {
-	typedef typename Eigen::Matrix<T, 3, 1> Vector3;
+	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
 	
 	Matrix normals = input.getDescriptorByName("normals");
 
 	if (normals.cols() == 0)
 	{
-		cerr << "Warning: cannot find normals in descriptors" << endl;
+		LOG_INFO_STREAM("Warning: cannot find normals in descriptors");
 		return input;
 	}
-	// FIXME: we should check the dimension as well
 	
 	const int nbPoints = input.features.cols();
+	const int dim = input.features.rows();
 	const int nbNormals = input.descriptors.cols();
 	assert(nbPoints == nbNormals);
 
-	Matrix points = input.features.block(0, 0, 3, nbPoints);
-	
 	double scalar;
 	for (int i = 0; i < nbPoints; i++)
 	{
 		// Check normal orientation
-		Vector3 vecP = -points.col(i);
-		Vector3 vecN = normals.col(i);
+		Vector vecP = -input.features.block(0, i, dim-1, 1);
+		Vector vecN = normals.col(i);
 		scalar = vecP.dot(vecN);
-		//if (scalar < 0)
-		if (scalar > 0)
+		
+		// Swap normal
+		if(towardCenter)
 		{
-			// Swap normal
-			normals.col(i) = -vecN;
+			if (scalar < 0)
+				normals.col(i) = -vecN;
+		}
+		else
+		{
+			if (scalar > 0)
+				normals.col(i) = -vecN;
 		}
 	}
 

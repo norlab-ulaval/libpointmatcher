@@ -51,10 +51,6 @@ int main(int argc, char *argv[])
 	
 	DataPoints d = PM::loadCSV(argv[1]);
 	
-	// Example for subsampling
-	//PM::SamplingSurfaceNormalDataPointsFilter subsample(100);
-	//d = subsample.filter(d, true);
-	
 	// Example of moving 3D points
 	Eigen::Matrix4f T;
 	T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;

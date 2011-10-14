@@ -272,7 +272,18 @@ struct DataPointsFiltersImpl
 			return "Normals. Reorient normals so that they all point in the same direction, with respect to the origin of the point cloud.";
 		}
 		
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the center of the point cloud.", "1"}
+			});
+		}
+
+		OrientNormalsDataPointsFilter(const Parameters& params = Parameters());
+		virtual ~OrientNormalsDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
+
+		const bool towardCenter;
 	};
 
 	//! Random sampling

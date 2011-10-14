@@ -37,8 +37,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "gtest/gtest.h"
 #include <string>
 
-using namespace Eigen;
 using namespace std;
+using namespace PointMatcherSupport;
+
 
 // Utility classes
 class PointCloud2DTest: public testing::Test
@@ -49,7 +50,7 @@ public:
 	
 	PM pm;
 	PM::Inspector* vtkInspector;
-	PointMatcherSupport::Logger* console;
+	Logger* console;
 	
 	std::string dataPath;
 	PM::DataPoints ref2D;
@@ -220,7 +221,8 @@ TEST_F(PointCloud2DTest, MinDistDataPointsFilter)
 	icp.readingDataPointsFilters.push_back(dataPointFilter);
 	T = icp(data2D, ref2D);
 	validate2dTransformation(validT2d, T);
-	
+
+	//TODO: move that to specific 2D test
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
 	dataPointFilter = pm.DataPointsFilterRegistrar.create(
@@ -318,10 +320,7 @@ TEST_F(PointCloud2DTest, UniformizeDensityDataPointsFilter)
 
 	for(unsigned i=0; i < ratio.size(); i++)
 	{
-		ostringstream strs;
-		strs.str("");
-		strs << ratio[i];
-		params = PM::Parameters({{"ratio", strs.str()}, {"nbBin", "20"}});
+		params = PM::Parameters({{"ratio", toParam(ratio[i])}, {"nbBin", "20"}});
 		
 		dataPointFilter = pm.DataPointsFilterRegistrar.create(
 				"UniformizeDensityDataPointsFilter", params);
@@ -385,7 +384,7 @@ TEST_F(PointCloud2DTest, SamplingSurfaceNormalDataPointsFilter)
 	PM::Parameters params;
 	PM::DataPointsFilter* dataPointFilter;
 
-	// This filter create descriptor, so parameters should'nt impact results
+	// This filter create descriptor AND subsample
 	params = PM::Parameters({
 		{"binSize", "5"}, 
 		{"averageExistingDescriptors", "1"}, 
@@ -396,7 +395,6 @@ TEST_F(PointCloud2DTest, SamplingSurfaceNormalDataPointsFilter)
 		{"keepMatchedIds" , "1" }
 		});
 		
-	// Filter on x axis
 	dataPointFilter = pm.DataPointsFilterRegistrar.create(
 			"SamplingSurfaceNormalDataPointsFilter", params);
 	
@@ -406,7 +404,35 @@ TEST_F(PointCloud2DTest, SamplingSurfaceNormalDataPointsFilter)
 	validate2dTransformation(validT2d, T);
 }
 
-//TODO: next is OrientNormalsDataPointsFilter
+TEST_F(PointCloud2DTest, OrientNormalsDataPointsFilter)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	icp.inspector.reset(vtkInspector);
+
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter1;
+	PM::DataPointsFilter* dataPointFilter2;
+	
+	// Used to create normal for reading point cloud
+	dataPointFilter1 = pm.DataPointsFilterRegistrar.create(
+			"SurfaceNormalDataPointsFilter");
+
+	// Filter to test, shouldn't affect the results
+	dataPointFilter2 = pm.DataPointsFilterRegistrar.create(
+			"OrientNormalsDataPointsFilter");
+	
+	icp.readingDataPointsFilters.clear();
+	icp.readingDataPointsFilters.push_back(dataPointFilter1);
+	icp.readingDataPointsFilters.push_back(dataPointFilter2);
+	
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
 
 int main(int argc, char **argv)
 {
