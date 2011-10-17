@@ -1092,7 +1092,7 @@ DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPo
 	stepMult(Parametrizable::get<double>("stepMult")),
 	step(startStep)
 {
-	cout << "Using FixstepSamplingDataPointsFilter with startStep=" << startStep << ", endStep=" << endStep << ", stepMult=" << stepMult << endl; 
+	LOG_INFO_STREAM( "Using FixstepSamplingDataPointsFilter with startStep=" << startStep << ", endStep=" << endStep << ", stepMult=" << stepMult); 
 }
 
 

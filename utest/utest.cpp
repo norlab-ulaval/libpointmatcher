@@ -435,6 +435,70 @@ TEST_F(PointCloud2DTest, OrientNormalsDataPointsFilter)
 	validate2dTransformation(validT2d, T);
 }
 
+
+TEST_F(PointCloud2DTest, RandomSamplingDataPointsFilter)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector.reset(vtkInspector);
+
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter;
+	
+	
+	vector<double> prob = {0.80, 0.85, 0.90, 0.95};
+	for(unsigned i=0; i<prob.size(); i++)
+	{
+		// Try to avoid to low value for the reduction to avoid under sampling
+		params = PM::Parameters({{"prob", toParam(prob[i])}});
+		
+		dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"RandomSamplingDataPointsFilter", params);
+	
+		icp.readingDataPointsFilters.clear();
+		icp.readingDataPointsFilters.push_back(dataPointFilter);
+		
+		T = icp(data2D, ref2D);
+		validate2dTransformation(validT2d, T);
+	}
+}
+
+
+TEST_F(PointCloud2DTest, FixstepSamplingDataPointsFilter)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector.reset(vtkInspector);
+
+	PM::Parameters params;
+	PM::DataPointsFilter* dataPointFilter;
+	
+	
+	vector<unsigned> steps = {1, 2, 3};
+	for(unsigned i=0; i<steps.size(); i++)
+	{
+		// Try to avoid to low value for the reduction to avoid under sampling
+		params = PM::Parameters({{"startStep", toParam(steps[i])},});
+		
+		dataPointFilter = pm.DataPointsFilterRegistrar.create(
+			"RandomSamplingDataPointsFilter", params);
+	
+		icp.readingDataPointsFilters.clear();
+		icp.readingDataPointsFilters.push_back(dataPointFilter);
+		
+		T = icp(data2D, ref2D);
+		validate2dTransformation(validT2d, T);
+	}
+}
+
 int main(int argc, char **argv)
 {
 	dataPath = "";
