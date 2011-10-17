@@ -67,7 +67,7 @@ struct OutlierFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "This filter considers as outlier links whose norms are above a threshold.";
+			return "This filter considers as outlier links whose norms are above a fix threshold.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{

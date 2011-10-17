@@ -67,8 +67,6 @@ public:
 			)
 		);
 		
-		// Make available a console logger for manual inspection
-
 		ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
 		data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
 		
@@ -514,32 +512,42 @@ TEST_F(PointCloud2DTest, KDTreeMatcher)
 
 	PM::ICP icp;
 	icp.setDefault();
+	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
 
 	// Visual validation
-	icp.inspector = vtkInspector;
+	//icp.inspector = vtkInspector;
 
 	PM::Parameters params;
 	PM::Matcher* matcher;
 
 	vector<unsigned> knn = {1, 2, 3};
-	vector<double> epsilon = {0.0, 1.0};
+	vector<double> epsilon = {0.0, 0.2};
+	vector<double> maxDist = {1.0, 0.5};
 
-	// Used to create normal for reading point cloud
-	params = PM::Parameters({
-		{"knn", "3"}, 
-		{"epsilon", "1"}, 
-		{"searchType", "1"},
-		{"maxDist", "0.5"},
-		});
-	
-	matcher = pm.MatcherRegistrar.create(
-			"KDTreeMatcher", params);
+	for(unsigned i=0; i < knn.size(); i++)
+	{
+		for(unsigned j=0; j < epsilon.size(); j++)
+		{
+			for(unsigned k=0; k < maxDist.size(); k++)
+			{
+				// Used to create normal for reading point cloud
+				params = PM::Parameters({
+					{"knn", toParam(knn[i])}, // remove end parenthesis for bug
+					{"epsilon", toParam(epsilon[j])}, 
+					{"searchType", "1"},
+					{"maxDist", toParam(maxDist[k])},
+					});
+				
+				matcher = pm.MatcherRegistrar.create(
+						"KDTreeMatcher", params);
 
-	
-	icp.matcher.reset(matcher);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+				icp.matcher.reset(matcher);
+				
+				T = icp(data2D, ref2D);
+				validate2dTransformation(validT2d, T);
+			}
+		}
+	}
 }
 
 

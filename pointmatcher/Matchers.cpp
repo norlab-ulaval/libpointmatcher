@@ -65,6 +65,7 @@ MatchersImpl<T>::KDTreeMatcher::KDTreeMatcher(const Parameters& params):
 	searchType(NNSearchType(Parametrizable::get<int>("searchType"))),
 	maxDist(Parametrizable::get<T>("maxDist"))
 {
+	LOG_INFO_STREAM("KDTreeMatcher initialized with knn=" << knn << ", epsilon=" << epsilon << ", searchType=" << searchType << " and maxDist=" << maxDist);
 }
 
 template<typename T>
