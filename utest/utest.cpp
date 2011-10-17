@@ -107,6 +107,9 @@ public:
 };
 
 
+//---------------------------
+// DataFilter modules
+//---------------------------
 
 TEST_F(PointCloud2DTest, ICP_default)
 {
@@ -500,6 +503,64 @@ TEST_F(PointCloud2DTest, FixStepSamplingDataPointsFilter)
 		validate2dTransformation(validT2d, T);
 	}
 }
+
+//---------------------------
+// Matching modules
+//---------------------------
+
+TEST_F(PointCloud2DTest, KDTreeMatcher)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	icp.inspector = vtkInspector;
+
+	PM::Parameters params;
+	PM::Matcher* matcher;
+
+	vector<unsigned> knn = {1, 2, 3};
+	vector<double> epsilon = {0.0, 1.0};
+
+	// Used to create normal for reading point cloud
+	params = PM::Parameters({
+		{"knn", "3"}, 
+		{"epsilon", "1"}, 
+		{"searchType", "1"},
+		{"maxDist", "0.5"},
+		});
+	
+	matcher = pm.MatcherRegistrar.create(
+			"KDTreeMatcher", params);
+
+	
+	icp.matcher.reset(matcher);
+	
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
+
+
+//---------------------------
+// Outlier modules
+//---------------------------
+
+// TODO
+
+//---------------------------
+// Error modules
+//---------------------------
+
+// TODO
+
+//---------------------------
+// Transformation Checker modules
+//---------------------------
+
+// TODO
+
 
 int main(int argc, char **argv)
 {

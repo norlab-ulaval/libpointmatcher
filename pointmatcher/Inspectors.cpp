@@ -190,22 +190,28 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataLinks(
 		// reading pt
 		stream << readingFeatures.transpose() << "\n";
 	}
-
+	const int knn = matches.ids.rows();
 	
-	stream << "LINES " << readingPtCount << " "  << readingPtCount * 3 << "\n";
+	stream << "LINES " << readingPtCount*knn << " "  << readingPtCount*knn * 3 << "\n";
 	//int j = 0;
-	for (int i = 0; i < readingPtCount; ++i)
+	for(int k = 0; k < knn; k++) // knn
 	{
-		stream << "2 " << refPtCount + i << " " << matches.ids(0, i) << "\n";
+		for (int i = 0; i < readingPtCount; ++i)
+		{
+			stream << "2 " << refPtCount + i << " " << matches.ids(k, i) << "\n";
+		}
 	}
 
-	stream << "CELL_DATA " << readingPtCount << "\n";
+	stream << "CELL_DATA " << readingPtCount*knn << "\n";
 	stream << "SCALARS outlier float 1\n";
 	stream << "LOOKUP_TABLE default\n";
 	//stream << "LOOKUP_TABLE alphaOutlier\n";
-	for (int i = 0; i < readingPtCount; ++i)
+	for(int k = 0; k < knn; k++) // knn
 	{
-		stream << featureOutlierWeights(0, i) << "\n";
+		for (int i = 0; i < readingPtCount; ++i) //nb pts
+		{
+			stream << featureOutlierWeights(k, i) << "\n";
+		}
 	}
 
 	//stream << "LOOKUP_TABLE alphaOutlier 2\n";

@@ -292,15 +292,12 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 	typedef typename Matches::Ids Ids;
 	typedef typename Matches::Dists Dists;
 	
-	// Up to now, only deal with one column of match (one match per reading point)
-	// TODO: deal with multiple columns
 	assert(matches.ids.rows() > 0);
-	assert(matches.ids.rows() == 1);
 	assert(matches.ids.cols() > 0);
-	assert(matches.ids.cols() == requestedPts.features.cols());
+	assert(matches.ids.cols() == requestedPts.features.cols()); //nbpts
+	assert(outlierWeights.rows() == matches.ids.rows());  // knn
 	
-	//cout << "w:\n" << outlierWeights << endl;
-	
+	const int knn = outlierWeights.rows();
 	const int dimFeat = requestedPts.features.rows();
 	const int dimReqDesc = requestedPts.descriptors.rows();
 
@@ -320,21 +317,25 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 
 	int j = 0;
 	weightedPointUsedRatio = 0;
-	for (int i = 0; i < requestedPts.features.cols(); ++i)
+	for(int k = 0; k < knn; k++) // knn
 	{
-		if (outlierWeights(0,i) != 0.0)
+		for (int i = 0; i < requestedPts.features.cols(); ++i) //nb pts
 		{
-			if(dimReqDesc > 0)
-				keptDesc.col(j) = requestedPts.descriptors.col(i);
-			
-			keptFeat.col(j) = requestedPts.features.col(i);
-			keptMatches.ids(0, j) = matches.ids(0, i);
-			keptMatches.dists(0, j) = matches.dists(0, i);
-			keptWeights(0,j) = outlierWeights(0,i);
-			++j;
-			weightedPointUsedRatio += outlierWeights(0,i);
+			if (outlierWeights(k,i) != 0.0)
+			{
+				if(dimReqDesc > 0)
+					keptDesc.col(j) = requestedPts.descriptors.col(i);
+				
+				keptFeat.col(j) = requestedPts.features.col(i);
+				keptMatches.ids(0, j) = matches.ids(k, i);
+				keptMatches.dists(0, j) = matches.dists(k, i);
+				keptWeights(0,j) = outlierWeights(k,i);
+				++j;
+				weightedPointUsedRatio += outlierWeights(k,i);
+			}
 		}
 	}
+
 	pointUsedRatio = double(j)/double(requestedPts.features.cols());
 	weightedPointUsedRatio /= double(requestedPts.features.cols());
 	

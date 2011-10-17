@@ -190,8 +190,6 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::TrimmedDistOutli
 				w(y, x) = 0;
 			else
 				w(y, x) = 1;
-			//if (w(y, x) == 0)
-			//	cout << "rejeting long dist " <<  input.dists(y, x) << " on median " << median << endl;
 		}
 	}
 	
@@ -277,61 +275,7 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	//cout << "Optimized ratio: " << optRatio << endl;
 	
 	return optRatio;
-	
 
-	// Old implementation
-	/*
-	std::vector<T> dist2s;
-	
-	for (int i=0; i < points_nbr; ++i)
-	{
-		dist2s.push_back(matches.dists(0, i));
-	}
-
-	// sort the squared distance with increasing order
-	std::sort(dist2s.begin(), dist2s.end());
-	
-	// vector containing the FRMS values ( 1/ratio^lambda * square_root[ 1/nbr_of_selected_points * sum_over_selected_points(squared_distances)] )
-	std::vector<T> FRMSs;
-	T lastSum = 0;
-	//const int minEl = floor(this->min_*points_nbr);
-	//const int maxEl = floor(this->max_*points_nbr);
-
-	for (int i=0; i<minEl; ++i)
-	{
-		lastSum += dist2s.at(i);
-	}
-
-	// compute the FRMS starting with min ratio until the max ratio
-	for (int i=0; i<(maxEl - minEl); ++i)
-	{
-		int currEl = i + minEl;
-		T f = ((T) (currEl))/((T) points_nbr);
-		T deno = pow(f ,this->lambda_);
-		T FRMS_s = pow(1/deno,2)*1/(currEl)*(lastSum+dist2s.at(currEl));
-		FRMSs.push_back(FRMS_s);
-		//cout << FRMS_s - FRMS(i);
-	}
-
-	T smallestValue(std::numeric_limits<T>::max());
-	int idx = 0;
-
-	// search for the smallest FRMS to select the best ratio
-	// NOTE:
-	// There might be a more "elegant" and faster approach to find the smallest value
-	// like http://en.wikipedia.org/wiki/Newton%27s_method_in_optimization
-	// we just have to make sure that the FRMS function does not have any local minima
-	for(unsigned int i=0; i<FRMSs.size(); ++i)
-	{
-		if (FRMSs.at(i) < smallestValue)
-		{
-		   smallestValue = FRMSs.at(i);
-		   idx = (int) i;
-		}
-	}
-
-	return (float) (idx + minEl)/( (float) points_nbr);
-	*/
 }
 
 template struct OutlierFiltersImpl<float>::VarTrimmedDistOutlierFilter;
