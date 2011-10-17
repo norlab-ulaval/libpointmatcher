@@ -36,7 +36,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_LOGGER_H
 #define __POINTMATCHER_LOGGER_H
 
-#include "Core.h"
+#include "PointMatcher.h"
+
+#include <fstream>
 
 namespace PointMatcherSupport
 {

@@ -33,13 +33,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_TYPE_ALIASES_H
-#define __POINTMATCHER_TYPE_ALIASES_H
+#include "Timer.h"
 
-#include "Core.h"
-
-typedef PointMatcher<float> PointMatcherF;
-typedef PointMatcher<double> PointMatcherD;
-
-#endif // __POINTMATCHER_TYPE_ALIASES_H
+#ifdef _POSIX_TIMERS
+namespace PointMatcherSupport
+{
+	timer::timer():
+		_start_time(curTime())
+	{
+	} 
+	
+	void timer::restart()
+	{
+		_start_time = curTime();
+	}
+	
+	double timer::elapsed() const
+	{
+		return  double(curTime() - _start_time) / double(1000000000);
+	}
+	
+	timer::Time timer::curTime() const
+	{
+		struct timespec ts;
+		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
+		return Time(ts.tv_sec) * Time(1000000000) + Time(ts.tv_nsec);
+	}
+} // namespace PointMatcherSupport
+#endif // _POSIX_TIMERS
 

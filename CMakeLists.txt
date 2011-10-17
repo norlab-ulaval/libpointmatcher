@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
+include (CheckSymbolExists)
+
 project(libpointmatcher)
 
 # c++ 0x
@@ -25,6 +27,9 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 # - N1984: auto-typed variables (gcc, clang)
 
 #include(UseDoxygen)
+
+# initially
+set(EXTRA_LIBS "")
 
 # boost
 find_package(Boost COMPONENTS thread system filesystem REQUIRED)
@@ -65,7 +70,7 @@ else (WIN32)
 endif (WIN32)
 # if found, add
 if (OPENCL_LIBRARIES)
-	set(EXTRA_LIBS ${OPENCL_LIBRARIES})
+	set(EXTRA_LIBS ${EXTRA_LIBS} ${OPENCL_LIBRARIES})
 endif (OPENCL_LIBRARIES)
 
 # yaml-cpp
@@ -83,12 +88,20 @@ if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 	add_definitions(-DHAVE_YAML_CPP)
 endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 
+# link rt support if POSIX timers are used
+check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
+if (POSIX_TIMERS)
+	set(EXTRA_LIBS ${EXTRA_LIBS} rt)
+endif (POSIX_TIMERS)
+
 # include all libs so far
 include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 add_definitions(-Wall)
 
 # main pointmatcher lib
 add_library(pointmatcher
+	pointmatcher/Timer.cpp
+	pointmatcher/Histogram.cpp
 	pointmatcher/Parametrizable.cpp
 	pointmatcher/Logger.cpp
 	pointmatcher/Core.cpp
@@ -105,9 +118,9 @@ add_library(pointmatcher
 install(TARGETS pointmatcher ARCHIVE DESTINATION lib)
 install(FILES
 	pointmatcher/PointMatcher.h
-	pointmatcher/TypeAliases.h
-	pointmatcher/Core.h
-	pointmatcher/IO.h
+	pointmatcher/Histogram.h
+	pointmatcher/Parametrizable.h
+	pointmatcher/Registrar.h
 	DESTINATION include/pointmatcher
 )
 
