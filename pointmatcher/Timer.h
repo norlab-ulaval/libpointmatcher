@@ -36,11 +36,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_TIMER_H
 #define __POINTMATCHER_TIMER_H
 
-#include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
 
+#ifdef _POSIX_TIMERS
 namespace PointMatcherSupport
 {
-	/*
+	/**
 		High-precision timer class, using gettimeofday().
 		The interface is a subset of the one boost::timer provides,
 		but the implementation is much more precise
@@ -48,21 +50,29 @@ namespace PointMatcherSupport
 	*/
 	struct timer
 	{
+		//! 64-bit time
 		typedef unsigned long long Time;
 		
-		timer():_start_time(curTime()){ } 
-		void restart() { _start_time = curTime(); }
-		double elapsed() const                  // return elapsed time in seconds
-		{ return  double(curTime() - _start_time) / double(1000000000); }
+		//! Create and start the timer
+		timer();
+		//! Restart the counter
+		void restart();
+		//! Return elapsed time in seconds
+		double elapsed() const;
 
 	private:
-		Time curTime() const {
-			struct timespec ts;
-			clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
-			return Time(ts.tv_sec) * Time(1000000000) + Time(ts.tv_nsec);
-		}
-		Time _start_time;
+		//! Return time at call
+		Time curTime() const;
+		
+		Time _start_time; //! time when counter started
 	};
 } // namespace PointMatcherSupport
+#else // _POSIX_TIMERS
+#include <boost/timer.hpp>
+namespace PointMatcherSupport
+{
+	typedef boost::timer timer;
+}
+#endif // _POSIX_TIMERS
 
 #endif // __POINTMATCHER_TIMER_H
