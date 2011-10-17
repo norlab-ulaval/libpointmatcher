@@ -41,7 +41,7 @@ using namespace PointMatcherSupport;
 using namespace PointMatcherSupport::BibMode;
 
 typedef PointMatcherSupport::Parametrizable::ParametersDoc ParametersDoc;
-typedef PointMatcherD PM;
+typedef PointMatcher<double> PM;
 
 struct Bib
 {

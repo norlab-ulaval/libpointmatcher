@@ -105,9 +105,9 @@ add_library(pointmatcher
 install(TARGETS pointmatcher ARCHIVE DESTINATION lib)
 install(FILES
 	pointmatcher/PointMatcher.h
-	pointmatcher/TypeAliases.h
-	pointmatcher/Core.h
-	pointmatcher/IO.h
+	pointmatcher/Histogram.h
+	pointmatcher/Parametrizable.h
+	pointmatcher/Registrar.h
 	DESTINATION include/pointmatcher
 )
 

@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Core.h"
+#include "PointMatcher.h"
 
 #include <iostream>
 #include <fstream>
@@ -41,8 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctype.h>
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
-
-
 
 using namespace std;
 
