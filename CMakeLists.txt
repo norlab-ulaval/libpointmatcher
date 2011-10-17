@@ -101,6 +101,7 @@ add_definitions(-Wall)
 # main pointmatcher lib
 add_library(pointmatcher
 	pointmatcher/Timer.cpp
+	pointmatcher/Histogram.cpp
 	pointmatcher/Parametrizable.cpp
 	pointmatcher/Logger.cpp
 	pointmatcher/Core.cpp

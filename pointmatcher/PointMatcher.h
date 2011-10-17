@@ -50,10 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <limits>
 #include <memory>
-#include <stdint.h>
 
 #include "Histogram.h"
 #include "Timer.h"

@@ -44,9 +44,13 @@ namespace PointMatcherSupport
 {
 	/**
 		High-precision timer class, using gettimeofday().
+		
 		The interface is a subset of the one boost::timer provides,
 		but the implementation is much more precise
 		on systems where clock() has low precision, such as glibc.
+		
+		This code gets compiled if _POSIX_TIMERS is set,
+		generally in time.h or unistd.h
 	*/
 	struct timer
 	{
