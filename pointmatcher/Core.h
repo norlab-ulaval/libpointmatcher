@@ -91,9 +91,6 @@ namespace PointMatcherSupport
 		virtual void beginWarningEntry(const char *file, unsigned line, const char *func) {}
 		virtual std::ostream* warningStream() { return 0; }
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func) {}
-		
-		boost::mutex infoMutex; //! mutex to protect access to info stream
-		boost::mutex warningMutex; //! mutex to protect access to warning stream
 	};
 	
 	// macros holding the name of current function, send patches for your favourite compiler
@@ -108,31 +105,31 @@ namespace PointMatcherSupport
 	// macros for logging
 	#define LOG_INFO_STREAM(args) \
 	{ \
-		if (PointMatcherSupport::localLogger->hasInfoChannel()) { \
-			boost::mutex::scoped_lock lock(PointMatcherSupport::localLogger->infoMutex); \
-			PointMatcherSupport::localLogger->beginInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
-			(*PointMatcherSupport::localLogger->infoStream()) << args; \
-			PointMatcherSupport::localLogger->finishInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+		boost::mutex::scoped_lock lock(PointMatcherSupport::loggerMutex); \
+		if (PointMatcherSupport::logger.get() && \
+			PointMatcherSupport::logger->hasInfoChannel()) { \
+			PointMatcherSupport::logger->beginInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+			(*PointMatcherSupport::logger->infoStream()) << args; \
+			PointMatcherSupport::logger->finishInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
 		} \
 	}
 	#define LOG_WARNING_STREAM(args) \
 	{ \
-		if (PointMatcherSupport::localLogger->hasWarningChannel()) { \
-			boost::mutex::scoped_lock lock(PointMatcherSupport::localLogger->warningMutex); \
-			PointMatcherSupport::localLogger->beginWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
-			(*PointMatcherSupport::localLogger->warningStream()) << args; \
-			PointMatcherSupport::localLogger->finishWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+		boost::mutex::scoped_lock lock(PointMatcherSupport::loggerMutex); \
+		if (PointMatcherSupport::logger.get() && \
+			PointMatcherSupport::logger->hasWarningChannel()) { \
+			PointMatcherSupport::logger->beginWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+			(*PointMatcherSupport::logger->warningStream()) << args; \
+			PointMatcherSupport::logger->finishWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
 		} \
 	}
 	
-	// thread-local storage, send patches for your favourite compiler
-	#if defined(__GNUC__)
-	extern __thread Logger* localLogger;
-	#elif defined(_MSC_VER)
-	extern __declspec(thread) Logger* localLogger;
-	#else
-	extern thread_local Logger* localLogger;
-	#endif
+	//! Mutex to protect creation and deletion of logger
+	extern boost::mutex loggerMutex;
+	//! Logger pointer
+	extern std::shared_ptr<Logger> logger;
+	//! Set a new logger
+	void setLogger(Logger* newLogger);
 }
 
 template<typename T>
@@ -460,7 +457,6 @@ struct PointMatcher
 		TransformationCheckers transformationCheckers;
 		std::shared_ptr<Inspector> inspector;
 		T outlierMixingWeight;
-		std::shared_ptr<PointMatcherSupport::Logger> logger;
 		
 		virtual ~ICPChainBase();
 		

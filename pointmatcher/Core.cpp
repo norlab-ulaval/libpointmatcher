@@ -57,14 +57,14 @@ using namespace PointMatcherSupport;
 
 namespace PointMatcherSupport
 {
-	// send patches for your favourite compiler
-	#if defined(__GNUC__)
-	__thread Logger* localLogger;
-	#elif defined(_MSC_VER)
-	__declspec(thread) Logger* localLogger;
-	#else
-	thread_local Logger* localLogger;
-	#endif
+	boost::mutex loggerMutex;
+	std::shared_ptr<Logger> logger;
+	
+	void setLogger(Logger* newLogger)
+	{
+		boost::mutex::scoped_lock lock(loggerMutex);
+		logger.reset(newLogger);
+	}
 }
 
 // DataPoints
@@ -237,7 +237,6 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
 	outlierMixingWeight(0.5),
-	logger(new NullLogger),
 	nbPrefilteredReadingPts(0),
 	nbPrefilteredKeyframePts(0)
 {}
@@ -260,7 +259,6 @@ void PointMatcher<T>::ICPChainBase::cleanup()
 	errorMinimizer.reset();
 	transformationCheckers.clear();
 	inspector.reset();
-	logger.reset();
 }
 
 template<typename T>
@@ -278,7 +276,6 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::CounterTransformationChecker());
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::ErrorTransformationChecker());
 	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
-	this->logger.reset(new NullLogger);
 	this->outlierMixingWeight = 1;
 }
 
@@ -307,7 +304,10 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer);
 	createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers);
 	createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector);
-	createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger);
+	{
+		boost::mutex::scoped_lock lock(loggerMutex);
+		createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger);
+	}
 	
 	if (doc.FindValue("outlierMixingWeight"))
 		outlierMixingWeight = doc["outlierMixingWeight"].to<typeof(outlierMixingWeight)>();
@@ -430,9 +430,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		throw runtime_error("You must setup an inspector before running ICP");
 	if (!this->inspector)
 		throw runtime_error("You must setup a logger before running ICP");
-	
-	// local logger lies in thread-local storage, and we know that for the duration of the () operator, this->logger will not be changed by outside
-	localLogger = this->logger.get();
 	
 	timer t; // Print how long take the algo
 	const int dim = referenceIn.features.rows();
@@ -683,9 +680,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	if (!this->inspector)
 		throw runtime_error("You must setup a logger before running ICP");
 	
-	// local logger lies in thread-local storage, and we know that for the duration of the () operator, this->logger will not be changed by outside
-	localLogger = this->logger.get();
-
 	// Initialization at the first point cloud received
 	if(this->dim == -1)
 	{
