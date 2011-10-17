@@ -34,9 +34,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
-#include <cassert>
-#include <iostream>
+
 #include "boost/filesystem.hpp"
+
+#include <cassert>
+#include <fstream>
 
 using namespace std;
 

@@ -38,6 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
+#include <fstream>
+
 namespace PointMatcherSupport
 {
 	struct NullLogger: public Logger

@@ -43,14 +43,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Eigen/StdVector"
 #include "Eigen/Eigen"
 #include "Eigen/Geometry"
+
 #include "nabo/nabo.h"
+
 #include <boost/thread/mutex.hpp>
-//#include <boost/thread.hpp>
+
 #include <stdexcept>
 #include <limits>
 #include <iostream>
-#include <fstream>
-#include <limits>
+#include <ostream>
 #include <memory>
 
 #include "Histogram.h"
