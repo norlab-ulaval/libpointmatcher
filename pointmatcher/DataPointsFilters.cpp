@@ -1082,32 +1082,31 @@ template struct DataPointsFiltersImpl<float>::RandomSamplingDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::RandomSamplingDataPointsFilter;
 
 
-// FixstepSamplingDataPointsFilter
+// FixStepSamplingDataPointsFilter
 // Constructor
 template<typename T>
-DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::FixstepSamplingDataPointsFilter(const Parameters& params):
-	DataPointsFilter("FixstepSamplingDataPointsFilter", FixstepSamplingDataPointsFilter::availableParameters(), params),
-	startStep(Parametrizable::get<double>("startStep")),
-	endStep(Parametrizable::get<double>("endStep")),
+DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter::FixStepSamplingDataPointsFilter(const Parameters& params):
+	DataPointsFilter("FixStepSamplingDataPointsFilter", FixStepSamplingDataPointsFilter::availableParameters(), params),
+	startStep(Parametrizable::get<unsigned>("startStep")),
+	endStep(Parametrizable::get<unsigned>("endStep")),
 	stepMult(Parametrizable::get<double>("stepMult")),
 	step(startStep)
 {
-	LOG_INFO_STREAM( "Using FixstepSamplingDataPointsFilter with startStep=" << startStep << ", endStep=" << endStep << ", stepMult=" << stepMult); 
+	LOG_INFO_STREAM( "Using FixStepSamplingDataPointsFilter with startStep=" << startStep << ", endStep=" << endStep << ", stepMult=" << stepMult); 
 }
 
 
 template<typename T>
-void DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::init()
+void DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter::init()
 {
 	step = startStep;
 }
 
 // Sampling
 template<typename T>
-typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::fixstepSample(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter::fixstepSample(const DataPoints& input)
 {
 	const int iStep(step);
-	//cerr << "FixstepSamplingDataPointsFilter::filter: stepping " << iStep << endl;
 	const int nbPointsIn = input.features.cols();
 	const int phase(rand() % iStep);
 	const int nbPointsOut = ((nbPointsIn - phase) + iStep - 1) / iStep;
@@ -1154,11 +1153,11 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixstepSamplingDa
 
 // Pre filter
 template<typename T>
-typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixstepSamplingDataPointsFilter::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter::filter(const DataPoints& input)
 {
 	return fixstepSample(input);
 }
 
-template struct DataPointsFiltersImpl<float>::FixstepSamplingDataPointsFilter;
-template struct DataPointsFiltersImpl<double>::FixstepSamplingDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::FixStepSamplingDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::FixStepSamplingDataPointsFilter;
 

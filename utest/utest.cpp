@@ -51,8 +51,8 @@ public:
 	typedef PointMatcher<float> PM;
 	
 	PM pm;
-	PM::Inspector* vtkInspector;
-	Logger* console;
+	shared_ptr<PM::Inspector> vtkInspector;
+	shared_ptr<Logger> console;
 	
 	PM::DataPoints ref2D;
 	PM::DataPoints data2D;
@@ -62,13 +62,14 @@ public:
 	virtual void SetUp()
 	{
 		// Make available a VTK inspector for manual inspection
-		vtkInspector = pm.InspectorRegistrar.create(
+		vtkInspector.reset(pm.InspectorRegistrar.create(
 			"VTKFileInspector", 
 			PM::Parameters({{"baseFileName","./unitTest"}})
-			);
+			)
+		);
 		
 		// Make available a console logger for manual inspection
-		console = pm.LoggerRegistrar.create("FileLogger");
+		console.reset(pm.LoggerRegistrar.create("FileLogger"));
 
 		ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
 		data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
@@ -88,6 +89,8 @@ public:
 	virtual void TearDown()
 	{	
 	}
+
+
 
 	void validate2dTransformation(PM::TransformationParameters validT, PM::TransformationParameters testT)
 	{
@@ -112,8 +115,8 @@ TEST_F(PointCloud2DTest, ICP_default)
 	PM::ICP icp;
 	icp.setDefault();
 	
-	//icp.inspector.reset(vtkInspector);
-	//icp.logger.reset(console);
+	//icp.inspector = vtkInspector;
+	//icp.logger = console;
 	PM::TransformationParameters T = icp(data2D, ref2D);
 	validate2dTransformation(validT2d, T);
 
@@ -468,7 +471,7 @@ TEST_F(PointCloud2DTest, RandomSamplingDataPointsFilter)
 }
 
 
-TEST_F(PointCloud2DTest, FixstepSamplingDataPointsFilter)
+TEST_F(PointCloud2DTest, FixStepSamplingDataPointsFilter)
 {
 	PM::TransformationParameters T;
 
@@ -476,7 +479,7 @@ TEST_F(PointCloud2DTest, FixstepSamplingDataPointsFilter)
 	icp.setDefault();
 
 	// Visual validation
-	//icp.inspector.reset(vtkInspector);
+	icp.inspector = vtkInspector;
 
 	PM::Parameters params;
 	PM::DataPointsFilter* dataPointFilter;
@@ -486,10 +489,10 @@ TEST_F(PointCloud2DTest, FixstepSamplingDataPointsFilter)
 	for(unsigned i=0; i<steps.size(); i++)
 	{
 		// Try to avoid to low value for the reduction to avoid under sampling
-		params = PM::Parameters({{"startStep", toParam(steps[i])},});
+		params = PM::Parameters({{"startStep", toParam(steps[i])}});
 		
 		dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"RandomSamplingDataPointsFilter", params);
+			"FixStepSamplingDataPointsFilter", params);
 	
 		icp.readingDataPointsFilters.clear();
 		icp.readingDataPointsFilters.push_back(dataPointFilter);

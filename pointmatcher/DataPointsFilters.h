@@ -311,7 +311,7 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Systematic sampling, with variation over time
-	struct FixstepSamplingDataPointsFilter: public DataPointsFilter
+	struct FixStepSamplingDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
@@ -322,21 +322,21 @@ struct DataPointsFiltersImpl
 			return ParametersDoc({
 				{ "startStep", "initial number of point to skip (initial decimation factor)", "10", "1", "2147483647", &P::Comp<unsigned> },
 				{ "endStep", "maximal or minimal number of points to skip (final decimation factor)", "10", "1", "2147483647", &P::Comp<unsigned> },
-				{ "stepMult", "multiplication factor to compute the new decimation factor for each iteration", "1", "0.0000001", "inf", &P::Comp<T> }
+				{ "stepMult", "multiplication factor to compute the new decimation factor for each iteration", "1", "0.0000001", "inf", &P::Comp<double> }
 			});
 		}
 		
 		// number of steps to skip
-		const double startStep;
-		const double endStep;
+		const unsigned startStep;
+		const unsigned endStep;
 		const double stepMult;
 
 	protected:
 		double step;
 		
 	public:
-		FixstepSamplingDataPointsFilter(const Parameters& params = Parameters());
-		virtual ~FixstepSamplingDataPointsFilter() {};
+		FixStepSamplingDataPointsFilter(const Parameters& params = Parameters());
+		virtual ~FixStepSamplingDataPointsFilter() {};
 		virtual void init();
 		virtual DataPoints filter(const DataPoints& input);
 	private:
