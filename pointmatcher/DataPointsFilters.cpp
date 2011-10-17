@@ -441,7 +441,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensity
 	}
 
 	// Reduce the point cloud size
-	outputCloud.features.conservativeResize(Eigen::NoChange, j+1);
+	outputCloud.features.conservativeResize(Eigen::NoChange, j);
 	if (outputCloud.descriptors.cols() > 0)
 			outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
 	

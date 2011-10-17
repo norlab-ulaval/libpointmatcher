@@ -130,6 +130,7 @@ namespace PointMatcherSupport
 	extern std::shared_ptr<Logger> logger;
 	//! Set a new logger
 	void setLogger(Logger* newLogger);
+	
 }
 
 template<typename T>

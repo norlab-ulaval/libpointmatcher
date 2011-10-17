@@ -52,7 +52,6 @@ public:
 	
 	PM pm;
 	shared_ptr<PM::Inspector> vtkInspector;
-	shared_ptr<Logger> console;
 	
 	PM::DataPoints ref2D;
 	PM::DataPoints data2D;
@@ -69,7 +68,6 @@ public:
 		);
 		
 		// Make available a console logger for manual inspection
-		console.reset(pm.LoggerRegistrar.create("FileLogger"));
 
 		ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
 		data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
@@ -116,12 +114,13 @@ TEST_F(PointCloud2DTest, ICP_default)
 	icp.setDefault();
 	
 	//icp.inspector = vtkInspector;
-	//icp.logger = console;
+	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+	
 	PM::TransformationParameters T = icp(data2D, ref2D);
 	validate2dTransformation(validT2d, T);
 
 	//icp.inspector.reset(vtkInspector);
-	//icp.logger.reset(console);
+	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
 	PM::TransformationParameters T2 = icp(ref2D, data2D);
 	validate2dTransformation(validT2dInv, T2);
 	//cout << "validT2d:\n" << validT2dInv << endl;
@@ -479,7 +478,7 @@ TEST_F(PointCloud2DTest, FixStepSamplingDataPointsFilter)
 	icp.setDefault();
 
 	// Visual validation
-	icp.inspector = vtkInspector;
+	//icp.inspector = vtkInspector;
 
 	PM::Parameters params;
 	PM::DataPointsFilter* dataPointFilter;

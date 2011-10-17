@@ -65,6 +65,7 @@ namespace PointMatcherSupport
 		boost::mutex::scoped_lock lock(loggerMutex);
 		logger.reset(newLogger);
 	}
+	
 }
 
 // DataPoints
