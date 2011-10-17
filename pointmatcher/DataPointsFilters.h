@@ -311,32 +311,32 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Systematic sampling, with variation over time
-	struct FixstepSamplingDataPointsFilter: public DataPointsFilter
+	struct FixStepSamplingDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
-			return "Subsampling. This filter reduces the size of the point cloud by only keeping one point over step ones; with step varying in time from startStep to endStep, each iteration getting multiplied by stepMult.";
+			return "Subsampling. This filter reduces the size of the point cloud by only keeping one point over step ones; with step varying in time from startStep to endStep, each iteration getting multiplied by stepMult. If use as prefilter (i.e. before the iterations), only startStep is used.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "startStep", "initial number of point to skip (initial decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> },
-				{ "endStep", "maximal or minimal number of points to skip (final decimation factor)", "10", "0.0000001", "inf", &P::Comp<T> },
-				{ "stepMult", "multiplication factor to compute the new decimation factor for each iteration", "1", "0.0000001", "inf", &P::Comp<T> }
+				{ "startStep", "initial number of point to skip (initial decimation factor)", "10", "1", "2147483647", &P::Comp<unsigned> },
+				{ "endStep", "maximal or minimal number of points to skip (final decimation factor)", "10", "1", "2147483647", &P::Comp<unsigned> },
+				{ "stepMult", "multiplication factor to compute the new decimation factor for each iteration", "1", "0.0000001", "inf", &P::Comp<double> }
 			});
 		}
 		
 		// number of steps to skip
-		const double startStep;
-		const double endStep;
+		const unsigned startStep;
+		const unsigned endStep;
 		const double stepMult;
 
 	protected:
 		double step;
 		
 	public:
-		FixstepSamplingDataPointsFilter(const Parameters& params = Parameters());
-		virtual ~FixstepSamplingDataPointsFilter() {};
+		FixStepSamplingDataPointsFilter(const Parameters& params = Parameters());
+		virtual ~FixStepSamplingDataPointsFilter() {};
 		virtual void init();
 		virtual DataPoints filter(const DataPoints& input);
 	private:
