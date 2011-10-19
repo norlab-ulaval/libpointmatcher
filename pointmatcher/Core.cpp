@@ -451,8 +451,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// Reajust reference position: 
 	// from here reference is express in frame <refMean>
 	// Shortcut to do T_refIn_refMean.inverse() * reference
-	for(int i=0; i < dim-1; i++)
-		reference.features.row(i).array() -= meanReference(i);
+	reference.features.topRows(dim-1).colwise() -= meanReference.head(dim-1);
 	
 	// Init matcher with reference points center on its mean
 	this->matcher->init(reference);
@@ -630,13 +629,8 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 	{
 		// Apply reference filters
 		// reference is express in frame <refIn>
-		bool iterate(true);
 		this->keyframeDataPointsFilters.init();
 		this->keyframeDataPointsFilters.apply(inputCloud);
-		
-		// FIXE ME: this should be obsolet
-		if (!iterate)
-			return;
 		
 		pointCountKeyFrame.push_back(inputCloud.features.cols());
 
@@ -650,9 +644,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		// Reajust reference position (only translations): 
 		// from here reference is express in frame <refMean>
 		// Shortcut to do T_refIn_refMean.inverse() * reference
-		for(int i=0; i < tDim-1; i++)
-			inputCloud.features.row(i).array() -= meanKeyframe(i);
-		
+		inputCloud.features.topRows(dim-1).colwise() -= meanKeyframe.head(dim-1);
 	
 		keyFrameCloud = inputCloud;
 		T_refIn_dataIn = Matrix::Identity(tDim, tDim);

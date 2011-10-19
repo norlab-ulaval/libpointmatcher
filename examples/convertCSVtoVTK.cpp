@@ -48,17 +48,28 @@ int main(int argc, char *argv[])
 		cerr << "Usage " << argv[0] << " INPUT.csv OUTPUT.vtk\n";
 		return 1;
 	}
-	
+
+	PM pm;
 	DataPoints d = PM::loadCSV(argv[1]);
+	PM::DataPointsFilter* dataPointFilter1;
+	PM::DataPointsFilter* dataPointFilter2;
+	dataPointFilter1 = pm.DataPointsFilterRegistrar.create("SamplingSurfaceNormalDataPointsFilter");
+	dataPointFilter2 = pm.DataPointsFilterRegistrar.create("OrientNormalsDataPointsFilter");
 	
+	dataPointFilter1->init();
+	dataPointFilter2->init();
+
+	d = dataPointFilter1->filter(d);
+	d = dataPointFilter2->filter(d);
+
 	// Example of moving 3D points
-	Eigen::Matrix4f T;
-	T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;
-	cout << "Moving points using: " << endl << T << endl;
+	//Eigen::Matrix4f T;
+	//T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;
+	//cout << "Moving points using: " << endl << T << endl;
 	
-	d.features = T * d.features;
+	//d.features = T * d.features;
 	
-	PM::saveCSV(d, argv[2]);
+	PM::saveVTK(d, argv[2]);
 	
 	return 0;
 }

@@ -157,6 +157,7 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
+	//TODO: ref.: Chen 91, Object Modeling by Registration of Multiple Range Images
 	struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
@@ -190,6 +191,7 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Sampling surface normals. First decimate the space until there is at most binSize points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
+	//FIXME: the name of the normals field is "triangle_normals"
 	struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
@@ -287,6 +289,7 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Random sampling
+	//TODO: ref: Masuda 96, Registration and Integration of Multiple Range Image for 3D Model
 	struct RandomSamplingDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
