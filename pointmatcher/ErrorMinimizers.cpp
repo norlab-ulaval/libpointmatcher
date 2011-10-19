@@ -82,59 +82,25 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	assert(matches.ids.rows() > 0);
 
-	//TODO: use generic functions here (see pointToPlane)
-
-	// for now, kept only features of first row whose weights are above 0.5
-	//cout << "w:\n" << outlierWeights << endl;
-	int pointsCount(0);
-	for (int i = 0; i < filteredReading.features.cols(); ++i)
-		if (outlierWeights(0,i) >= 0.5)
-			++pointsCount;
-	//cout << "selected " << pointsCount << " out of " << filteredReading.features.cols() << endl;
-	assert(matches.ids.rows() == 1);
-	Features keptFeatures(filteredReading.features.rows(), pointsCount);
-	Ids keptIds(1, pointsCount);
-	int j = 0;
-	this->weightedPointUsedRatio = 0;
-	for (int i = 0; i < filteredReading.features.cols(); ++i)
-	{
-		if (outlierWeights(0,i) != 0.0)
-		{
-			keptFeatures.col(j) = filteredReading.features.col(i);
-			keptIds(0, j) = matches.ids(0, i);
-			++j;
-			this->weightedPointUsedRatio += outlierWeights(0,i);
-		}
-	}
-	this->pointUsedRatio = double(j)/double(filteredReading.features.cols());
-	this->weightedPointUsedRatio /= double(filteredReading.features.cols());
+	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
 	
 	// now minimize on kept points
-	const int dimCount(keptFeatures.rows());
-	Vector meanOfReading(Vector::Zero(dimCount-1));
-	Vector meanOfAssociatedRef(Vector::Zero(dimCount-1));
-	Features associatedRef(dimCount-1, pointsCount);
+	const int dimCount(mPts.reading.features.rows());
+	const int ptsCount(mPts.reading.features.cols()); //But point cloud have now the same number of (matched) point
+
+	// Compute the mean of each point cloud
+	const Vector meanReading = mPts.reading.features.rowwise().sum() / ptsCount;
+	const Vector meanReference = mPts.reference.features.rowwise().sum() / ptsCount;
 	
-	for (int i = 0; i < pointsCount; ++i)
-	{
-		meanOfReading += keptFeatures.block(0, i, dimCount-1, 1);
-		const int refIndex(keptIds(0, i));
-		const Vector v(filteredReference.features.block(0, refIndex, dimCount-1, 1));
-		associatedRef.col(i) = v;
-		meanOfAssociatedRef += v;
-	}
-	meanOfReading /= pointsCount;
-	meanOfAssociatedRef /= pointsCount;
-	
-	Features centeredFeatureReading(keptFeatures.corner(TopLeft,  dimCount-1, pointsCount));
-	
-	centeredFeatureReading.colwise() -= meanOfReading;
-	associatedRef.colwise() -= meanOfAssociatedRef;
-	
-	const Matrix m(associatedRef * centeredFeatureReading.transpose());
+	// Remove the mean from the point clouds
+	mPts.reading.features.colwise() -= meanReading;
+	mPts.reference.features.colwise() -= meanReference;
+
+	// Singular Value Decomposition
+	const Matrix m(mPts.reference.features.topRows(dimCount-1) * mPts.reading.features.topRows(dimCount-1).transpose());
 	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
 	const Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
-	const Vector trVector(meanOfAssociatedRef - rotMatrix * meanOfReading);
+	const Vector trVector(meanReference.head(dimCount-1)- rotMatrix * meanReading.head(dimCount-1));
 	
 	Matrix result(Matrix::Identity(dimCount, dimCount));
 	result.corner(TopLeft, dimCount-1, dimCount-1) = rotMatrix;
@@ -243,7 +209,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	return mOut; 
 }
 
-
+//! Helpper funtion doing the cross product in 3D and a pseudo cross product in 2D
 template<typename T>
 typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(const Matrix& A, const Matrix& B)
 {
@@ -279,7 +245,8 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(c
 }
 
 
-
+//! Helper function outputting pair of points from the reference and 
+//! the reading based on the matching matrix
 template<typename T>
 typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMinimizer::getMatchedPoints(
 		const DataPoints& requestedPts,
@@ -336,8 +303,9 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 		}
 	}
 
-	pointUsedRatio = double(j)/double(requestedPts.features.cols());
-	weightedPointUsedRatio /= double(requestedPts.features.cols());
+	//FIXME: This is not true with multiple knn
+	this->pointUsedRatio = double(j)/double(requestedPts.features.cols());
+	this->weightedPointUsedRatio /= double(requestedPts.features.cols());
 	
 	assert(dimFeat == sourcePts.features.rows());
 	const int dimSourDesc = sourcePts.descriptors.rows();

@@ -98,8 +98,8 @@ public:
 		auto validAngle = acos(validT(0,0));
 		auto testAngle = acos(testT(0,0));
 		
-		EXPECT_NEAR(validTrans, testTrans, 0.01);
-		EXPECT_NEAR(validAngle, testAngle, 0.02);
+		EXPECT_NEAR(validTrans, testTrans, 0.02);
+		EXPECT_NEAR(validAngle, testAngle, 0.05);
 	}
 
 };
@@ -488,7 +488,7 @@ TEST_F(PointCloud2DTest, FixStepSamplingDataPointsFilter)
 	vector<unsigned> steps = {1, 2, 3};
 	for(unsigned i=0; i<steps.size(); i++)
 	{
-		// Try to avoid to low value for the reduction to avoid under sampling
+		// Try to avoid too low value for the reduction to avoid under sampling
 		params = PM::Parameters({{"startStep", toParam(steps[i])}});
 		
 		dataPointFilter = pm.DataPointsFilterRegistrar.create(
@@ -530,7 +530,6 @@ TEST_F(PointCloud2DTest, KDTreeMatcher)
 		{
 			for(unsigned k=0; k < maxDist.size(); k++)
 			{
-				// Used to create normal for reading point cloud
 				params = PM::Parameters({
 					{"knn", toParam(knn[i])}, // remove end parenthesis for bug
 					{"epsilon", toParam(epsilon[j])}, 
@@ -561,7 +560,50 @@ TEST_F(PointCloud2DTest, KDTreeMatcher)
 // Error modules
 //---------------------------
 
-// TODO
+TEST_F(PointCloud2DTest, PointToPointErrorMinimizer)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector = vtkInspector;
+
+	PM::ErrorMinimizer* errorMin;
+	
+	icp.readingDataPointsFilters.clear();
+	icp.keyframeDataPointsFilters.clear();
+	
+	errorMin = pm.ErrorMinimizerRegistrar.create(
+		"PointToPointErrorMinimizer");
+
+	icp.errorMinimizer.reset(errorMin);
+	
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
+
+TEST_F(PointCloud2DTest, PointToPlaneErrorMinimizer)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector = vtkInspector;
+
+	PM::ErrorMinimizer* errorMin;
+	
+	errorMin = pm.ErrorMinimizerRegistrar.create(
+		"PointToPlaneErrorMinimizer");
+
+	icp.errorMinimizer.reset(errorMin);
+	
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
 
 //---------------------------
 // Transformation Checker modules
@@ -569,7 +611,9 @@ TEST_F(PointCloud2DTest, KDTreeMatcher)
 
 // TODO
 
-
+//---------------------------
+// Main
+//---------------------------
 int main(int argc, char **argv)
 {
 	dataPath = "";
