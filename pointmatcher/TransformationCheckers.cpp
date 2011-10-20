@@ -101,25 +101,25 @@ template struct TransformationCheckersImpl<double>::CounterTransformationChecker
 //--------------------------------------
 // error
 template<typename T>
-TransformationCheckersImpl<T>::ErrorTransformationChecker::ErrorTransformationChecker(const Parameters& params):
-	TransformationChecker("ErrorTransformationChecker", ErrorTransformationChecker::availableParameters(), params),
-	minDeltaRotErr(Parametrizable::get<T>("minDeltaRotErr")),
-	minDeltaTransErr(Parametrizable::get<T>("minDeltaTransErr")),
-	tail(Parametrizable::get<unsigned>("tail"))
+TransformationCheckersImpl<T>::DifferentialTransformationChecker::DifferentialTransformationChecker(const Parameters& params):
+	TransformationChecker("DifferentialTransformationChecker", DifferentialTransformationChecker::availableParameters(), params),
+	minDiffRotErr(Parametrizable::get<T>("minDiffRotErr")),
+	minDiffTransErr(Parametrizable::get<T>("minDiffTransErr")),
+	smoothLength(Parametrizable::get<unsigned>("smoothLength"))
 {
 	this->limits.setZero(2);
-	this->limits(0) = minDeltaRotErr;
-	this->limits(1) = minDeltaTransErr;
+	this->limits(0) = minDiffRotErr;
+	this->limits(1) = minDiffTransErr;
 	
-	this->valueNames.push_back("Mean abs delta translation err");
-	this->valueNames.push_back("Mean abs delta rotation err");
-	this->limitNames.push_back("Min delta translation err");
-	this->limitNames.push_back("Min delta rotation err");
+	this->valueNames.push_back("Mean abs differential trans err");
+	this->valueNames.push_back("Mean abs differential rot err");
+	this->limitNames.push_back("Min differential translation err");
+	this->limitNames.push_back("Min differential rotation err");
 
 }
 
 template<typename T>
-void TransformationCheckersImpl<T>::ErrorTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::DifferentialTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
 	this->values.setZero(4);
 	
@@ -142,7 +142,7 @@ void TransformationCheckersImpl<T>::ErrorTransformationChecker::init(const Trans
 }
 
 template<typename T>
-void TransformationCheckersImpl<T>::ErrorTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
+void TransformationCheckersImpl<T>::DifferentialTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
 	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
 	
@@ -150,15 +150,16 @@ void TransformationCheckersImpl<T>::ErrorTransformationChecker::check(const Tran
 	translations.push_back(parameters.topRightCorner(parameters.rows()-1,1));
 	
 	this->values.setZero(4);
-	if(rotations.size() > tail)
+	if(rotations.size() > smoothLength)
 	{
-		for(size_t i = rotations.size()-1; i >= rotations.size()-tail; i--)
+		for(size_t i = rotations.size()-1; i >= rotations.size()-smoothLength; i--)
 		{
+			//Compute the mean derivative
 			this->values(0) += anyabs(rotations[i].angularDistance(rotations[i-1]));
 			this->values(1) += anyabs((translations[i] - translations[i-1]).norm());
 		}
 
-		this->values /= tail;
+		this->values /= smoothLength;
 
 		if(this->values(0) < this->limits(0) && this->values(1) < this->limits(1))
 			iterate = false;
@@ -173,8 +174,8 @@ void TransformationCheckersImpl<T>::ErrorTransformationChecker::check(const Tran
 		throw ConvergenceError("abs translation norm not a number");
 }
 
-template struct TransformationCheckersImpl<float>::ErrorTransformationChecker;
-template struct TransformationCheckersImpl<double>::ErrorTransformationChecker;
+template struct TransformationCheckersImpl<float>::DifferentialTransformationChecker;
+template struct TransformationCheckersImpl<double>::DifferentialTransformationChecker;
 
 //--------------------------------------
 // bound

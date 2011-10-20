@@ -75,31 +75,31 @@ struct TransformationCheckersImpl
 		virtual void check(const TransformationParameters& parameters, bool& iterate);
 	};
 
-	struct ErrorTransformationChecker: public TransformationChecker
+	struct DifferentialTransformationChecker: public TransformationChecker
 	{
 		inline static const std::string description()
 		{
-			return "This checker stops the ICP loop when the average transformation errors are below thresholds.";
+			return "This checker stops the ICP loop when the relative motions (i.e. abs(currentIter - lastIter)) of rotation and translation components are below a fix thresholds. This allows to stop the iteration when the point cloud is stabilized. Smoothing can be applied to avoid oscillations.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "minDeltaRotErr", "threshold for rotation error (radian)", "0.001", "0.", "6.2831854", &P::Comp<T> },
-				{"minDeltaTransErr", "threshold for translation error", "0.001", "0.", "inf", &P::Comp<T> },
-				{ "tail", "number of iterations over which to average error", "3", "0", "2147483647", &P::Comp<unsigned> }
+				{ "minDiffRotErr", "threshold for rotation error (radian)", "0.001", "0.", "6.2831854", &P::Comp<T> },
+				{"minDiffTransErr", "threshold for translation error", "0.001", "0.", "inf", &P::Comp<T> },
+				{ "smoothLength", "number of iterations over which to average the differencial error", "3", "0", "2147483647", &P::Comp<unsigned> }
 			});
 		}
 		
-		const T minDeltaRotErr;
-		const T minDeltaTransErr;
-		const unsigned int tail;
+		const T minDiffRotErr;
+		const T minDiffTransErr;
+		const unsigned int smoothLength;
 
 	protected:
 		QuaternionVector rotations;
 		VectorVector translations;
 
 	public:
-		ErrorTransformationChecker(const Parameters& params = Parameters());
+		DifferentialTransformationChecker(const Parameters& params = Parameters());
 		
 		virtual void init(const TransformationParameters& parameters, bool& iterate);
 		virtual void check(const TransformationParameters& parameters, bool& iterate);

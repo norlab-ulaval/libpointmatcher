@@ -275,7 +275,7 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->matcher.reset(new typename MatchersImpl<T>::KDTreeMatcher());
 	this->errorMinimizer.reset(new typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer());
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::CounterTransformationChecker());
-	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::ErrorTransformationChecker());
+	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::DifferentialTransformationChecker());
 	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
 	this->outlierMixingWeight = 1;
 }
@@ -854,7 +854,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPlaneErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer)
 	
 	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker, typename TransformationCheckersImpl<T>::CounterTransformationChecker)
-	ADD_TO_REGISTRAR(TransformationChecker, ErrorTransformationChecker, typename TransformationCheckersImpl<T>::ErrorTransformationChecker)
+	ADD_TO_REGISTRAR(TransformationChecker, DifferentialTransformationChecker, typename TransformationCheckersImpl<T>::DifferentialTransformationChecker)
 	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker, typename TransformationCheckersImpl<T>::BoundTransformationChecker)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Inspector, NullInspector, typename InspectorsImpl<T>::NullInspector)

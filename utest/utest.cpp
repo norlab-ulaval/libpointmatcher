@@ -740,7 +740,94 @@ TEST_F(PointCloud2DTest, PointToPlaneErrorMinimizer)
 // Transformation Checker modules
 //---------------------------
 
-// TODO
+TEST_F(PointCloud2DTest, CounterTransformationChecker)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector = vtkInspector;
+
+	PM::Parameters params;
+	PM::TransformationChecker* transformCheck;
+	
+	params = PM::Parameters({{"maxIterationCount", toParam(20)}});
+
+	transformCheck = pm.TransformationCheckerRegistrar.create(
+		"CounterTransformationChecker", params);
+	
+	icp.transformationCheckers.clear();
+	icp.transformationCheckers.push_back(transformCheck);
+	
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
+
+TEST_F(PointCloud2DTest, DifferentialTransformationChecker)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector = vtkInspector;
+
+	PM::Parameters params;
+	PM::TransformationChecker* transformCheck;
+	
+	params = PM::Parameters({
+		{"minDiffRotErr", toParam(0.0001)},
+		{"minDiffTransErr", toParam(0.0001)},
+		{"smoothLength", toParam(4)}
+	});
+
+	transformCheck = pm.TransformationCheckerRegistrar.create(
+		"DifferentialTransformationChecker", params);
+	
+	icp.transformationCheckers.clear();
+	icp.transformationCheckers.push_back(transformCheck);
+	
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
+
+TEST_F(PointCloud2DTest, BoundTransformationChecker)
+{
+	PM::TransformationParameters T;
+
+	PM::ICP icp;
+	icp.setDefault();
+
+	// Visual validation
+	//icp.inspector = vtkInspector;
+
+	PM::Parameters params;
+	PM::TransformationChecker* transformCheck1;
+	PM::TransformationChecker* transformCheck2;
+	
+	params = PM::Parameters({
+		{"maxRotationNorm", toParam(1.0)},
+		{"maxTranslationNorm", toParam(1.0)}
+	});
+	
+	transformCheck1 = pm.TransformationCheckerRegistrar.create(
+		"CounterTransformationChecker");
+	transformCheck2 = pm.TransformationCheckerRegistrar.create(
+		"BoundTransformationChecker", params);
+	
+	// Since that transChecker is trigger when the distance is growing
+	// and that we do not expect that to happen in the test dataset, we
+	// keep the Counter to get out of the looop
+	icp.transformationCheckers.clear();
+	icp.transformationCheckers.push_back(transformCheck1);
+	icp.transformationCheckers.push_back(transformCheck2);
+	
+	T = icp(data2D, ref2D);
+	validate2dTransformation(validT2d, T);
+}
 
 //---------------------------
 // Main
