@@ -40,320 +40,234 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
-// TODO: avoid global!
+// TODO: avoid global by using testing::Environment
+typedef PointMatcher<float> PM;
 std::string dataPath;
 
-// Utility classes
-class PointCloud2DTest: public testing::Test
-{
+PM::DataPoints ref2D;
+PM::DataPoints data2D;
+PM::DataPoints ref3D;
+PM::DataPoints data3D;
+PM::TransformationParameters validT2d;
+PM::TransformationParameters validT3d;
 
+
+class IcpHelper: public testing::Test
+{
 public:
-	typedef PointMatcher<float> PM;
 	
 	PM pm;
-	shared_ptr<PM::Inspector> vtkInspector;
+	PM::ICP icp;
 	
-	PM::DataPoints ref2D;
-	PM::DataPoints data2D;
-	
-	PM::TransformationParameters validT2d;
-	PM::TransformationParameters validT2dInv;
-	virtual void SetUp()
+	PM::Parameters params;
+
+	virtual void dumpVTK()
 	{
 		// Make available a VTK inspector for manual inspection
-		vtkInspector.reset(pm.InspectorRegistrar.create(
+		icp.inspector.reset(pm.InspectorRegistrar.create(
 			"VTKFileInspector", 
 			PM::Parameters({{"baseFileName","./unitTest"}})
 			)
 		);
-		
-		ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
-		data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
-		
-		// Result of data express in ref (from visual inspection)
-		validT2d = PM::TransformationParameters(3,3);
-		validT2d <<  0.987498,  0.157629, 0.0859918,
-		            -0.157629,  0.987498,  0.203247,
-		                    0,         0,         1;
-		// Result of data express in ref (from visual inspection)
-		validT2dInv = PM::TransformationParameters(3,3);
-		validT2dInv <<   0.988049,  -0.154139, -0.0532977,
-		                 0.154139,   0.988049,   -0.20996,
-		                        0,          0,          1;
 	}
-
-	virtual void TearDown()
-	{	
-	}
-
-
-
-	void validate2dTransformation(PM::TransformationParameters validT, PM::TransformationParameters testT)
-	{
-		int dim = validT.cols();
-
-		auto validTrans = validT.block(0, dim-1, dim-1, 1).norm();
-		auto testTrans = testT.block(0, dim-1, dim-1, 1).norm();
 	
-		auto validAngle = acos(validT(0,0));
-		auto testAngle = acos(testT(0,0));
+	void validate2dTransformation()
+	{
+		const PM::TransformationParameters testT = icp(data2D, ref2D);
+		const int dim = validT2d.cols();
+
+		const auto validTrans = validT2d.block(0, dim-1, dim-1, 1).norm();
+		const auto testTrans = testT.block(0, dim-1, dim-1, 1).norm();
+	
+		const auto validAngle = acos(validT2d(0,0));
+		const auto testAngle = acos(testT(0,0));
 		
 		EXPECT_NEAR(validTrans, testTrans, 0.05);
 		EXPECT_NEAR(validAngle, testAngle, 0.05);
 	}
-
 };
 
+// Utility classes
+class PointCloud2DTest: public IcpHelper
+{
+
+public:
+
+	// Will be called for every tests
+	virtual void SetUp()
+	{
+		icp.setDefault();
+		// Uncomment for consol outputs
+		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+	}
+
+	// Will be called for every tests
+	virtual void TearDown()
+	{	
+	}
+};
+
+
+//---------------------------
+// Generic tests
+//---------------------------
+
+TEST_F(PointCloud2DTest, ICP_default)
+{
+	validate2dTransformation();
+}
 
 //---------------------------
 // DataFilter modules
 //---------------------------
 
-TEST_F(PointCloud2DTest, ICP_default)
+// Utility classes
+class DataFilterTest: public IcpHelper
 {
-	PM::ICP icp;
-	icp.setDefault();
-	
-	//icp.inspector = vtkInspector;
-	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
-	
-	PM::TransformationParameters T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
 
-	//icp.inspector.reset(vtkInspector);
-	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
-	PM::TransformationParameters T2 = icp(ref2D, data2D);
-	validate2dTransformation(validT2dInv, T2);
-	//cout << "validT2d:\n" << validT2dInv << endl;
-	//cout << "T2:\n" << T2 << endl;
-}
+public:
 
-TEST_F(PointCloud2DTest, MaxDistDataPointsFilter)
+	PM::DataPointsFilter* testedDataPointFilter;
+
+	// Will be called for every tests
+	virtual void SetUp()
+	{
+		icp.setDefault();
+		// Uncomment for consol outputs
+		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		
+		// We'll test the filters on reading point cloud
+		icp.readingDataPointsFilters.clear();
+	}
+
+	// Will be called for every tests
+	virtual void TearDown()	{}
+
+	void addFilter(string name, PM::Parameters params)
+	{
+		testedDataPointFilter = 
+			pm.DataPointsFilterRegistrar.create(name, params);
+	
+		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
+	}
+};
+
+TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter;
-
 	// Max dist has been selected to not affect the points
-	string mDist = "6";
-	params = PM::Parameters({{"dim","0"}, {"maxDist", mDist}});
+	params = PM::Parameters({{"dim","0"}, {"maxDist", toParam(6.0)}});
 	
 	// Filter on x axis
 	params["dim"] = "0";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxDistDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("MaxDistDataPointsFilter", params);
+	validate2dTransformation();
 	
 	// Filter on y axis
 	params["dim"] = "1";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxDistDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("MaxDistDataPointsFilter", params);
+	validate2dTransformation();	
 	
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxDistDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	EXPECT_ANY_THROW(icp(data2D, ref2D));
-
+	addFilter("MaxDistDataPointsFilter", params);
+	EXPECT_ANY_THROW(validate2dTransformation());
+	
 	// Filter on a radius
 	params["dim"] = "-1";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxDistDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("MaxDistDataPointsFilter", params);
+	validate2dTransformation();	
 	
 	// Parameter outside valid range
 	params["dim"] = "3";
-	EXPECT_ANY_THROW(
-		dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxDistDataPointsFilter", params)
-		);
+	//TODO: specify the exception, move that to GenericTest
+	EXPECT_ANY_THROW(addFilter("MaxDistDataPointsFilter", params));
 	
 }
 
 
-TEST_F(PointCloud2DTest, MinDistDataPointsFilter)
+TEST_F(DataFilterTest, MinDistDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter;
-
 	// Min dist has been selected to not affect the points too much
-	string mDist = "0.05";
-	params = PM::Parameters({{"dim","0"}, {"minDist", mDist}});
+	params = PM::Parameters({{"dim","0"}, {"minDist", toParam(0.05)}});
 	
 	// Filter on x axis
 	params["dim"] = "0";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MinDistDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("MinDistDataPointsFilter", params);
+	validate2dTransformation();	
 	
 	// Filter on y axis
 	params["dim"] = "1";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MinDistDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
-
+	addFilter("MinDistDataPointsFilter", params);
+	validate2dTransformation();	
+	
 	//TODO: move that to specific 2D test
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MinDistDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	EXPECT_ANY_THROW(icp(data2D, ref2D));
-
+	addFilter("MinDistDataPointsFilter", params);
+	EXPECT_ANY_THROW(validate2dTransformation());
+	
 	// Filter on a radius
 	params["dim"] = "-1";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MinDistDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
-	
-	// Parameter outside valid range
-	params["dim"] = "3";
-	EXPECT_ANY_THROW(
-		dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MinDistDataPointsFilter", params)
-		);
-	
+	addFilter("MinDistDataPointsFilter", params);
+	validate2dTransformation();	
+		
 }
 
-TEST_F(PointCloud2DTest, MaxQuantileOnAxisDataPointsFilter)
+TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter;
-
 	// Ratio has been selected to not affect the points too much
 	string ratio = "0.95";
 	params = PM::Parameters({{"dim","0"}, {"ratio", ratio}});
 	
 	// Filter on x axis
 	params["dim"] = "0";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxQuantileOnAxisDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
-
+	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
+	validate2dTransformation();	
+	
 	// Filter on y axis
 	params["dim"] = "1";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxQuantileOnAxisDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
-
+	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
+	validate2dTransformation();	
+	
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxQuantileOnAxisDataPointsFilter", params);
-	
 	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	EXPECT_ANY_THROW(icp(data2D, ref2D));
-
-
-	// Parameter outside valid range
-	params["dim"] = "3";
-	EXPECT_ANY_THROW(
-		dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"MaxQuantileOnAxisDataPointsFilter", params)
-		);
-
+	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
+	EXPECT_ANY_THROW(validate2dTransformation());	
 }
 
 
-TEST_F(PointCloud2DTest, UniformizeDensityDataPointsFilter)
+TEST_F(DataFilterTest, UniformizeDensityDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter;
-
 	// Ratio has been selected to not affect the points too much
 	vector<double> ratio = vector<double>({0.1, 0.15});
 
 	for(unsigned i=0; i < ratio.size(); i++)
 	{
 		params = PM::Parameters({{"ratio", toParam(ratio[i])}, {"nbBin", "20"}});
-		
-		dataPointFilter = pm.DataPointsFilterRegistrar.create(
-				"UniformizeDensityDataPointsFilter", params);
-		
 		icp.readingDataPointsFilters.clear();
-		icp.readingDataPointsFilters.push_back(dataPointFilter);
-		T = icp(data2D, ref2D);
-		validate2dTransformation(validT2d, T);
+		addFilter("UniformizeDensityDataPointsFilter", params);
+		validate2dTransformation();	
 
 		const double nbInitPts = data2D.features.cols();
 		const double nbRemainingPts = icp.getNbPrefilteredReadingPts();
-
 		// FIXME: 10% seems of seems a little bit high
 		EXPECT_NEAR(nbRemainingPts/nbInitPts, 1-ratio[i], 0.10);
 	}
 }
 
-TEST_F(PointCloud2DTest, SurfaceNormalDataPointsFilter)
+TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector.reset(vtkInspector);
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter;
-
 	// This filter create descriptor, so parameters should'nt impact results
 	params = PM::Parameters({
 		{"knn", "5"}, 
@@ -366,29 +280,13 @@ TEST_F(PointCloud2DTest, SurfaceNormalDataPointsFilter)
 		});
 	// FIXME: the parameter keepMatchedIds seems to do nothing...
 
-	// Filter on x axis
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"SurfaceNormalDataPointsFilter", params);
-	
-	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("SurfaceNormalDataPointsFilter", params);
+	validate2dTransformation();	
+
 }
 
-TEST_F(PointCloud2DTest, SamplingSurfaceNormalDataPointsFilter)
+TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector.reset(vtkInspector);
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter;
-
 	// This filter create descriptor AND subsample
 	params = PM::Parameters({
 		{"binSize", "5"}, 
@@ -399,129 +297,88 @@ TEST_F(PointCloud2DTest, SamplingSurfaceNormalDataPointsFilter)
 		{"keepEigenVectors", "1" },
 		{"keepMatchedIds" , "1" }
 		});
-		
-	dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"SamplingSurfaceNormalDataPointsFilter", params);
 	
-	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter);
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
+	validate2dTransformation();	
+
 }
 
-TEST_F(PointCloud2DTest, OrientNormalsDataPointsFilter)
+TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector.reset(vtkInspector);
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter1;
-	PM::DataPointsFilter* dataPointFilter2;
-	
 	// Used to create normal for reading point cloud
-	dataPointFilter1 = pm.DataPointsFilterRegistrar.create(
+	PM::DataPointsFilter* extraDataPointFilter;
+	extraDataPointFilter = pm.DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter");
-
-	// Filter to test, shouldn't affect the results
+	icp.readingDataPointsFilters.push_back(extraDataPointFilter);
+	
 	params = PM::Parameters({{"towardCenter", toParam(false)}});
-	dataPointFilter2 = pm.DataPointsFilterRegistrar.create(
-			"OrientNormalsDataPointsFilter", params);
-	
-	icp.readingDataPointsFilters.clear();
-	icp.readingDataPointsFilters.push_back(dataPointFilter1);
-	icp.readingDataPointsFilters.push_back(dataPointFilter2);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("OrientNormalsDataPointsFilter", params);
+	validate2dTransformation();	
+
 }
 
 
-TEST_F(PointCloud2DTest, RandomSamplingDataPointsFilter)
+TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector.reset(vtkInspector);
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter;
-	
-	
 	vector<double> prob = {0.80, 0.85, 0.90, 0.95};
 	for(unsigned i=0; i<prob.size(); i++)
 	{
 		// Try to avoid to low value for the reduction to avoid under sampling
 		params = PM::Parameters({{"prob", toParam(prob[i])}});
-		
-		dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"RandomSamplingDataPointsFilter", params);
-	
 		icp.readingDataPointsFilters.clear();
-		icp.readingDataPointsFilters.push_back(dataPointFilter);
-		
-		T = icp(data2D, ref2D);
-		validate2dTransformation(validT2d, T);
+		addFilter("RandomSamplingDataPointsFilter", params);
+		validate2dTransformation();	
 	}
 }
 
 
-TEST_F(PointCloud2DTest, FixStepSamplingDataPointsFilter)
+TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector = vtkInspector;
-
-	PM::Parameters params;
-	PM::DataPointsFilter* dataPointFilter;
-	
-	
 	vector<unsigned> steps = {1, 2, 3};
 	for(unsigned i=0; i<steps.size(); i++)
 	{
 		// Try to avoid too low value for the reduction to avoid under sampling
 		params = PM::Parameters({{"startStep", toParam(steps[i])}});
-		
-		dataPointFilter = pm.DataPointsFilterRegistrar.create(
-			"FixStepSamplingDataPointsFilter", params);
-	
 		icp.readingDataPointsFilters.clear();
-		icp.readingDataPointsFilters.push_back(dataPointFilter);
-		
-		T = icp(data2D, ref2D);
-		validate2dTransformation(validT2d, T);
+		addFilter("FixStepSamplingDataPointsFilter", params);
+		validate2dTransformation();	
 	}
 }
 
 //---------------------------
-// Matching modules
+// Matcher modules
 //---------------------------
 
-TEST_F(PointCloud2DTest, KDTreeMatcher)
+// Utility classes
+class MatcherTest: public IcpHelper
 {
-	PM::TransformationParameters T;
 
-	PM::ICP icp;
-	icp.setDefault();
-	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+public:
 
-	// Visual validation
-	//icp.inspector = vtkInspector;
+	PM::Matcher* testedMatcher;
 
-	PM::Parameters params;
-	PM::Matcher* matcher;
+	// Will be called for every tests
+	virtual void SetUp()
+	{
+		icp.setDefault();
+		// Uncomment for consol outputs
+		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+	}
 
+	// Will be called for every tests
+	virtual void TearDown(){}
+
+	void addFilter(string name, PM::Parameters params)
+	{
+		testedMatcher = 
+			pm.MatcherRegistrar.create(name, params);
+		icp.matcher.reset(testedMatcher);
+	}
+
+};
+
+TEST_F(MatcherTest, KDTreeMatcher)
+{
 	vector<unsigned> knn = {1, 2, 3};
 	vector<double> epsilon = {0.0, 0.2};
 	vector<double> maxDist = {1.0, 0.5};
@@ -538,14 +395,9 @@ TEST_F(PointCloud2DTest, KDTreeMatcher)
 					{"searchType", "1"},
 					{"maxDist", toParam(maxDist[k])},
 					});
-				
-				matcher = pm.MatcherRegistrar.create(
-						"KDTreeMatcher", params);
-
-				icp.matcher.reset(matcher);
-				
-				T = icp(data2D, ref2D);
-				validate2dTransformation(validT2d, T);
+			
+				addFilter("KDTreeMatcher", params);
+				validate2dTransformation();
 			}
 		}
 	}
@@ -556,277 +408,199 @@ TEST_F(PointCloud2DTest, KDTreeMatcher)
 // Outlier modules
 //---------------------------
 
-TEST_F(PointCloud2DTest, MaxDistOutlierFilter)
+// Utility classes
+class FeatureOutlierFilterTest: public IcpHelper
 {
-	PM::TransformationParameters T;
+public:
+	PM::FeatureOutlierFilter* testedOutlierFilter;
 
-	PM::ICP icp;
-	icp.setDefault();
+	// Will be called for every tests
+	virtual void SetUp()
+	{
+		icp.setDefault();
+		// Uncomment for consol outputs
+		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		
+		icp.featureOutlierFilters.clear();
+	}
 
-	// Visual validation
-	//icp.inspector = vtkInspector;
+	// Will be called for every tests
+	virtual void TearDown(){}
 
-	PM::Parameters params;
-	PM::FeatureOutlierFilter* outlierFilter;
+	void addFilter(string name, PM::Parameters params)
+	{
+		testedOutlierFilter = 
+			pm.FeatureOutlierFilterRegistrar.create(name, params);
+		icp.featureOutlierFilters.push_back(testedOutlierFilter);
+	}
+
+};
+
+
+TEST_F(FeatureOutlierFilterTest, MaxDistOutlierFilter)
+{
+	params = PM::Parameters({{"maxDist", toParam(0.02)}});
+	addFilter("MaxDistOutlierFilter", params);
+	validate2dTransformation();
+}
+
+
+TEST_F(FeatureOutlierFilterTest, MinDistOutlierFilter)
+{
+	// Since not sure how useful is that filter, we keep the 
+	// MaxDistOutlierFilter with it
+	PM::FeatureOutlierFilter* extraOutlierFilter;
 	
 	params = PM::Parameters({{"maxDist", toParam(0.02)}});
-
-	outlierFilter = pm.FeatureOutlierFilterRegistrar.create(
-		"MaxDistOutlierFilter", params);
-	
-	icp.featureOutlierFilters.clear();
-	icp.featureOutlierFilters.push_back(outlierFilter);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
-}
-
-TEST_F(PointCloud2DTest, MinDistOutlierFilter)
-{
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	icp.inspector = vtkInspector;
-
-	PM::Parameters params;
-	PM::FeatureOutlierFilter* outlierFilter;
+	extraOutlierFilter = 
+			pm.FeatureOutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
+	icp.featureOutlierFilters.push_back(extraOutlierFilter);	
 	
 	params = PM::Parameters({{"minDist", toParam(0.002)}});
-
-	outlierFilter = pm.FeatureOutlierFilterRegistrar.create(
-		"MinDistOutlierFilter", params);
-
-	// Since not sure how useful is that filter, we keep the one by default
-	// and add that one over it
-	icp.featureOutlierFilters.push_back(outlierFilter);
+	addFilter("MinDistOutlierFilter", params);
 	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	validate2dTransformation();
 }
 
-TEST_F(PointCloud2DTest, MedianDistOutlierFilter)
+
+TEST_F(FeatureOutlierFilterTest, MedianDistOutlierFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector = vtkInspector;
-
-	PM::Parameters params;
-	PM::FeatureOutlierFilter* outlierFilter;
-	
 	params = PM::Parameters({{"factor", toParam(3.5)}});
-
-	outlierFilter = pm.FeatureOutlierFilterRegistrar.create(
-		"MedianDistOutlierFilter", params);
-	
-	icp.featureOutlierFilters.clear();
-	icp.featureOutlierFilters.push_back(outlierFilter);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("MedianDistOutlierFilter", params);
+	validate2dTransformation();
 }
 
 
-TEST_F(PointCloud2DTest, TrimmedDistOutlierFilter)
+TEST_F(FeatureOutlierFilterTest, TrimmedDistOutlierFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector = vtkInspector;
-
-	PM::Parameters params;
-	PM::FeatureOutlierFilter* outlierFilter;
-	
 	params = PM::Parameters({{"ratio", toParam(0.85)}});
-
-	outlierFilter = pm.FeatureOutlierFilterRegistrar.create(
-		"TrimmedDistOutlierFilter", params);
-	
-	icp.featureOutlierFilters.clear();
-	icp.featureOutlierFilters.push_back(outlierFilter);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("TrimmedDistOutlierFilter", params);
+	validate2dTransformation();
 }
 
 
-TEST_F(PointCloud2DTest, VarTrimmedDistOutlierFilter)
+TEST_F(FeatureOutlierFilterTest, VarTrimmedDistOutlierFilter)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	icp.inspector = vtkInspector;
-
-	PM::Parameters params;
-	PM::FeatureOutlierFilter* outlierFilter;
-	
 	params = PM::Parameters({
-		{"minRatio", toParam(0.75)},
-		{"maxRatio", toParam(0.90)},
-		{"lambda", toParam(0.4)},
+		{"minRatio", toParam(0.60)},
+		{"maxRatio", toParam(0.80)},
+		{"lambda", toParam(0.9)},
 	});
-
-	outlierFilter = pm.FeatureOutlierFilterRegistrar.create(
-		"VarTrimmedDistOutlierFilter", params);
-	
-	icp.featureOutlierFilters.clear();
-	icp.featureOutlierFilters.push_back(outlierFilter);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("VarTrimmedDistOutlierFilter", params);
+	validate2dTransformation();
 }
+
 //---------------------------
 // Error modules
 //---------------------------
 
-TEST_F(PointCloud2DTest, PointToPointErrorMinimizer)
+// Utility classes
+class ErrorMinimizerTest: public IcpHelper
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector = vtkInspector;
-
+public:
 	PM::ErrorMinimizer* errorMin;
-	
-	icp.readingDataPointsFilters.clear();
-	icp.keyframeDataPointsFilters.clear();
-	
-	errorMin = pm.ErrorMinimizerRegistrar.create(
-		"PointToPointErrorMinimizer");
 
-	icp.errorMinimizer.reset(errorMin);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	// Will be called for every tests
+	virtual void SetUp()
+	{
+		icp.setDefault();
+		// Uncomment for consol outputs
+		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+	}
+
+	// Will be called for every tests
+	virtual void TearDown(){}
+
+	void addFilter(string name)
+	{
+		errorMin = pm.ErrorMinimizerRegistrar.create(name);
+		icp.errorMinimizer.reset(errorMin);
+	}
+};
+
+
+TEST_F(ErrorMinimizerTest, PointToPointErrorMinimizer)
+{
+	addFilter("PointToPointErrorMinimizer");	
+	validate2dTransformation();
 }
 
-TEST_F(PointCloud2DTest, PointToPlaneErrorMinimizer)
+TEST_F(ErrorMinimizerTest, PointToPlaneErrorMinimizer)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector = vtkInspector;
-
-	PM::ErrorMinimizer* errorMin;
-	
-	errorMin = pm.ErrorMinimizerRegistrar.create(
-		"PointToPlaneErrorMinimizer");
-
-	icp.errorMinimizer.reset(errorMin);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("PointToPlaneErrorMinimizer");	
+	validate2dTransformation();
 }
 
 //---------------------------
 // Transformation Checker modules
 //---------------------------
 
-TEST_F(PointCloud2DTest, CounterTransformationChecker)
+// Utility classes
+class TransformationCheckerTest: public IcpHelper
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector = vtkInspector;
-
-	PM::Parameters params;
+public:
 	PM::TransformationChecker* transformCheck;
-	
-	params = PM::Parameters({{"maxIterationCount", toParam(20)}});
 
-	transformCheck = pm.TransformationCheckerRegistrar.create(
-		"CounterTransformationChecker", params);
-	
-	icp.transformationCheckers.clear();
-	icp.transformationCheckers.push_back(transformCheck);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	// Will be called for every tests
+	virtual void SetUp()
+	{
+		icp.setDefault();
+		// Uncomment for consol outputs
+		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		
+		icp.transformationCheckers.clear();
+	}
+
+	// Will be called for every tests
+	virtual void TearDown(){}
+
+	void addFilter(string name, PM::Parameters params)
+	{
+		transformCheck = 
+			pm.TransformationCheckerRegistrar.create(name, params);
+		
+		icp.transformationCheckers.push_back(transformCheck);
+	}
+};
+
+
+TEST_F(TransformationCheckerTest, CounterTransformationChecker)
+{
+	params = PM::Parameters({{"maxIterationCount", toParam(20)}});
+	addFilter("CounterTransformationChecker", params);
+	validate2dTransformation();
 }
 
-TEST_F(PointCloud2DTest, DifferentialTransformationChecker)
+TEST_F(TransformationCheckerTest, DifferentialTransformationChecker)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector = vtkInspector;
-
-	PM::Parameters params;
-	PM::TransformationChecker* transformCheck;
-	
 	params = PM::Parameters({
-		{"minDiffRotErr", toParam(0.0001)},
-		{"minDiffTransErr", toParam(0.0001)},
+		{"minDiffRotErr", toParam(0.001)},
+		{"minDiffTransErr", toParam(0.001)},
 		{"smoothLength", toParam(4)}
 	});
-
-	transformCheck = pm.TransformationCheckerRegistrar.create(
-		"DifferentialTransformationChecker", params);
 	
-	icp.transformationCheckers.clear();
-	icp.transformationCheckers.push_back(transformCheck);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("DifferentialTransformationChecker", params);
+	validate2dTransformation();
 }
 
-TEST_F(PointCloud2DTest, BoundTransformationChecker)
+TEST_F(TransformationCheckerTest, BoundTransformationChecker)
 {
-	PM::TransformationParameters T;
-
-	PM::ICP icp;
-	icp.setDefault();
-
-	// Visual validation
-	//icp.inspector = vtkInspector;
-
-	PM::Parameters params;
-	PM::TransformationChecker* transformCheck1;
-	PM::TransformationChecker* transformCheck2;
+	// Since that transChecker is trigger when the distance is growing
+	// and that we do not expect that to happen in the test dataset, we
+	// keep the Counter to get out of the looop	
+	PM::TransformationChecker* extraTransformCheck;
 	
 	params = PM::Parameters({
 		{"maxRotationNorm", toParam(1.0)},
 		{"maxTranslationNorm", toParam(1.0)}
 	});
 	
-	transformCheck1 = pm.TransformationCheckerRegistrar.create(
+	extraTransformCheck = pm.TransformationCheckerRegistrar.create(
 		"CounterTransformationChecker");
-	transformCheck2 = pm.TransformationCheckerRegistrar.create(
-		"BoundTransformationChecker", params);
+	icp.transformationCheckers.push_back(extraTransformCheck);
 	
-	// Since that transChecker is trigger when the distance is growing
-	// and that we do not expect that to happen in the test dataset, we
-	// keep the Counter to get out of the looop
-	icp.transformationCheckers.clear();
-	icp.transformationCheckers.push_back(transformCheck1);
-	icp.transformationCheckers.push_back(transformCheck2);
-	
-	T = icp(data2D, ref2D);
-	validate2dTransformation(validT2d, T);
+	addFilter("BoundTransformationChecker", params);
+	validate2dTransformation();
 }
 
 //---------------------------
@@ -846,6 +620,17 @@ int main(int argc, char **argv)
 		cerr << "Missing the flag --path ./path/to/examples/data\n Please give the path to the test data folder which should be included with the source code. The folder is named 'examples/data'." << endl;
 		return -1;
 	}
+
+	// Load point cloud for all test
+	ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
+	data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
+	
+	// Result of data express in ref (from visual inspection)
+	validT2d = PM::TransformationParameters(3,3);
+	validT2d <<  0.987498,  0.157629, 0.0859918,
+				-0.157629,  0.987498,  0.203247,
+						0,         0,         1;
+
 
 	testing::GTEST_FLAG(print_time) = true;
 	testing::InitGoogleTest(&argc, argv);
