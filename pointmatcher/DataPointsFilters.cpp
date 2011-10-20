@@ -37,7 +37,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Matchers.h"
 #include "Functions.h"
 
-#include <stdexcept>
 #include <algorithm>
 #include <boost/format.hpp>
 
@@ -72,8 +71,11 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPointsFilter::filter(const DataPoints& input)
 {
 	if (dim >= input.features.rows() - 1)
-		throw InvalidParameter((boost::format("MaxDistDataPointsFilter: Error, filtering on dimension number %1%, larger than authorized axis id %2%") % dim % (input.features.rows() - 2)).str());
-	
+	{
+		throw InvalidParameter(
+			(boost::format("MaxDistDataPointsFilter: Error, filtering on dimension number %1%, larger than authorized axis id %2%") % dim % (input.features.rows() - 2)).str());
+	}
+
 	//TODO: should we do that in 2 passes or use conservativeResize?
 	const int nbPointsIn = input.features.cols();
 	const int nbRows = input.features.rows();

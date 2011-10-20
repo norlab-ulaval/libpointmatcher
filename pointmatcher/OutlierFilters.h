@@ -46,6 +46,7 @@ struct OutlierFiltersImpl
 	typedef Parametrizable::Parameters Parameters;
 	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
+	typedef Parametrizable::InvalidParameter InvalidParameter;
 	
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::Matches Matches;
@@ -82,6 +83,7 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
+	//FIXME: is that useful in any case?
 	struct MinDistOutlierFilter: public FeatureOutlierFilter
 	{
 		inline static const std::string description()
@@ -101,6 +103,7 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
+	//TODO: ref: Diebel et al., An ICP variant using a point-to-line metric, 2004
 	struct MedianDistOutlierFilter: public FeatureOutlierFilter 
 	{
 		inline static const std::string description()

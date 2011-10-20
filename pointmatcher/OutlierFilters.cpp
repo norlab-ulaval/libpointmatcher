@@ -207,6 +207,10 @@ OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(
 	maxRatio(Parametrizable::get<T>("maxRatio")),
 	lambda(Parametrizable::get<T>("lambda"))
 {
+	if (this->minRatio >= this->maxRatio)
+	{
+		throw InvalidParameter((boost::format("VarTrimmedDistOutlierFilter: minRatio (%1%) should be smaller than maxRatio (%2%)") % minRatio % maxRatio).str());
+	}
 }
 
 template<typename T>
