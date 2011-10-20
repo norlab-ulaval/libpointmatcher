@@ -65,24 +65,21 @@ struct ErrorMinimizersImpl
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 	};
 
-	//TODO: ref: P. Besl and N. McKay: A Method for Registration of 3-D Shapes. Pattern	Analysis and Machine Intelligence, IEEE Transactions, 1992
 	struct PointToPointErrorMinimizer: ErrorMinimizer
 	{
 		inline static const std::string description()
 		{
-			return "Point-to-point error. Based on SVD decomposition.";
+			return "Point-to-point error. Based on SVD decomposition. Based on \\cite{Besl1992Point2Point}.";
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 	};
 
-	//TODO: ref: Y. Chen and G. Medioni: Object Modeling by Registration of Multiple Range Images. Proc. of the IEEE International Conference on Robotics and Automation, 1991
 	struct PointToPlaneErrorMinimizer: public ErrorMinimizer
 	{
 		inline static const std::string description()
 		{
-			// FIXME: should we improve doc here?
-			return "Point-to-plane error (or point-to-line in 2D).";
+			return "Point-to-plane error (or point-to-line in 2D). Based on \\cite{Chen1991Point2Plane}";
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);

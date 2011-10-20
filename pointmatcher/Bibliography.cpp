@@ -70,7 +70,60 @@ namespace PointMatcherSupport
 					{ "doi", "10.1109/ICPR.2002.1047997 " },
 					{ "fulltext", "http://hci.iwr.uni-heidelberg.de/publications/dip/2002/ICPR2002/DATA/10_1_03.PDF"}
 				})
+			},
+			{ "Besl1992Point2Point", 
+				StringMap({
+					{ "type", "inproceedings" },
+					{ "title", "A Method for Registration of 3-D Shapes" },
+					{ "author", "Besl, P.J. and McKay, H.D." },
+					{ "booktitle", "Pattern Analysis and Machine Intelligence, IEEE Transactions" },
+					{ "year", "1992" },
+					{ "pages", "239--256" },
+					{ "publisher", "IEEE Press" },
+					{ "doi", "10.1109/34.121791" },
+					{ "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=121791"}
+				})
+			},
+			{ "Chen1991Point2Plane", 
+				StringMap({
+					{ "type", "inproceedings" },
+					{ "title", "Object modeling by registration of multiple range images" },
+					{ "author", "Chen, Y. and Medioni, G." },
+					{ "booktitle", "Robotics and Automation, 1991. Proceedings., 1991 IEEE International Conference on" },
+					{ "year", "1991" },
+					{ "pages", "2724--2729" },
+					{ "publisher", "IEEE Press" },
+					{ "doi", "10.1109/ROBOT.1991.132043" },
+					{ "fulltext", "http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=132043"}
+				})
+			},
+			{ "Masuda1996Random", 
+				StringMap({
+					{ "type", "inproceedings" },
+					{ "title", "Registration and integration of multiple range images for 3-D model construction" },
+					{ "author", "Masuda, T. and Sakaue, K. and Yokoya, N." },
+					{ "booktitle", "Pattern Recognition, 1996., Proceedings of the 13th International Conference on" },
+					{ "year", "1996" },
+					{ "pages", "879--883" },
+					{ "publisher", "IEEE Press" },
+					{ "doi", "10.1109/ICPR.1996.546150" },
+					{ "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=546150"}
+				})
+			},
+			{ "Diebel2004Median", 
+				StringMap({
+					{ "type", "inproceedings" },
+					{ "title", "Simultaneous Localization and Mapping with Active Stereo Vision" },
+					{ "author", "Diebel, J. and Reutersward, K. and Thrun, S. and Davis, J. and Gupta, R." },
+					{ "booktitle", "Intelligent Robots and Systems, 2004. (IROS 2004). Proceedings. 2004 IEEE/RSJ International Conference on" },
+					{ "year", "2004" },
+					{ "pages", "3436--3443" },
+					{ "publisher", "IEEE Press" },
+					{ "doi", "10.1109/IROS.2004.1389948" },
+					{ "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1389948"}
+				})
 			}
+
 		});
 	}
 	

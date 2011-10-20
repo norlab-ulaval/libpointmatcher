@@ -79,7 +79,7 @@ struct TransformationCheckersImpl
 	{
 		inline static const std::string description()
 		{
-			return "This checker stops the ICP loop when the relative motions (i.e. abs(currentIter - lastIter)) of rotation and translation components are below a fix thresholds. This allows to stop the iteration when the point cloud is stabilized. Smoothing can be applied to avoid oscillations.";
+			return "This checker stops the ICP loop when the relative motions (i.e. abs(currentIter - lastIter)) of rotation and translation components are below a fix thresholds. This allows to stop the iteration when the point cloud is stabilized. Smoothing can be applied to avoid oscillations. Inspired by \\cite{Chetverikov2002Trimmed}.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{

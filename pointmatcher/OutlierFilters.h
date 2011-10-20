@@ -103,12 +103,11 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
-	//TODO: ref: Diebel et al., An ICP variant using a point-to-line metric, 2004
 	struct MedianDistOutlierFilter: public FeatureOutlierFilter 
 	{
 		inline static const std::string description()
 		{
-			return "This filter considers as outlier links whose norms are above the median link norms times a factor.";
+			return "This filter considers as outlier links whose norms are above the median link norms times a factor. Based on \\cite{Diebel2004Median}.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{

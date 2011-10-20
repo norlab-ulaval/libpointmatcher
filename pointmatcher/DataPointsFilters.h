@@ -157,7 +157,6 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
-	//TODO: ref.: Chen 91, Object Modeling by Registration of Multiple Range Images
 	struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
@@ -289,12 +288,11 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Random sampling
-	//TODO: ref: Masuda 96, Registration and Integration of Multiple Range Image for 3D Model
 	struct RandomSamplingDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
-			return "Subsampling. This filter reduces the size of the point cloud by randomly dropping points.";
+			return "Subsampling. This filter reduces the size of the point cloud by randomly dropping points. Based on \\cite{Masuda1996Random}";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
