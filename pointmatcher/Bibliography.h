@@ -69,7 +69,7 @@ namespace PointMatcherSupport
 		BibIndices indices;
 		StringVector entries;
 		
-		CurrentBibliography(Mode mode);
+		CurrentBibliography(Mode mode = NORMAL);
 		void dump(std::ostream& os) const;
 	
 	private:
