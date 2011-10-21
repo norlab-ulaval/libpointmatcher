@@ -38,104 +38,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace PointMatcherSupport;
-using namespace PointMatcherSupport::BibMode;
 
 typedef PointMatcherSupport::Parametrizable::ParametersDoc ParametersDoc;
 typedef PointMatcher<double> PM;
-
-struct Bib
-{
-	BibIndices indices;
-	StringVector entries;
-	Bibliography biblio;
-	
-	Bib():biblio(bibliography()) {}
-	void dump() const;
-	void dumpWiki() const;
-	void dumpBibtex() const;
-};
-
-void Bib::dump() const
-{
-	for (size_t i = 0; i < entries.size(); ++i)
-	{
-		const string& entryName(entries[i]);
-		if (!biblio.contains(entryName))
-			throw runtime_error(string("Broken bibliography, missing entry " + entryName));
-		const StringMap& entry(biblio.get(entryName));
-		
-		cout << "[" << i+1 << "]";
-		if (entry.contains("title"))
-			cout << " " << entry.get("title") << ".";
-		if (entry.contains("author"))
-			cout << " " << entry.get("author") << "";
-		if (entry.contains("booktitle"))
-			cout << " In " << entry.get("booktitle") << ".";
-		if (entry.contains("journal"))
-			cout << " " << entry.get("journal") << ".";
-		if (entry.contains("pages"))
-			cout << " " << entry.get("pages") << ".";
-		if (entry.contains("year"))
-			cout << " " << entry.get("year") << ".";
-		cout << endl << endl;
-	}
-}
-
-void Bib::dumpWiki() const
-{
-	for (size_t i = 0; i < entries.size(); ++i)
-	{
-		const string& entryName(entries[i]);
-		if (!biblio.contains(entryName))
-			throw runtime_error(string("Broken bibliography, missing entry " + entryName));
-		const StringMap& entry(biblio.get(entryName));
-		
-		cout << " * " << "<<Anchor(" << entryName << ")>>[" << i+1 << "] -";
-		if (entry.contains("title"))
-			cout << " '''" << entry.get("title") << ".'''";
-		if (entry.contains("author"))
-			cout << " " << entry.get("author") << "";
-		if (entry.contains("booktitle"))
-			cout << " ''In " << entry.get("booktitle") << ".''";
-		if (entry.contains("journal"))
-			cout << " " << entry.get("journal") << ".";
-		if (entry.contains("pages"))
-			cout << " " << entry.get("pages") << ".";
-		if (entry.contains("year"))
-			cout << " " << entry.get("year") << ".";
-		if (entry.contains("doi"))
-			cout << " DOI: [[http://dx.doi.org/" << entry.get("doi") << "|" << entry.get("doi") << "]].";
-		if (entry.contains("fulltext"))
-			cout << " [[" << entry.get("fulltext") << "|full text]].";
-		cout << endl;
-	}
-}
-
-void Bib::dumpBibtex() const
-{
-	for (size_t i = 0; i < entries.size(); ++i)
-	{
-		const string& entryName(entries[i]);
-		if (!biblio.contains(entryName))
-			throw runtime_error(string("Broken bibliography, missing entry " + entryName));
-		const StringMap& entry(biblio.get(entryName));
-		
-		cout << "@" << entry.get("type") << "{" << entryName << endl;
-		if (entry.contains("title"))
-			cout << "\ttitle={" << entry.get("title") << "}," << endl;
-		if (entry.contains("author"))
-			cout << "\tauthor={" << entry.get("author") << "}," << endl;
-		if (entry.contains("booktitle"))
-			cout << "\tbooktitle={" << entry.get("booktitle") << "}," << endl;
-		if (entry.contains("journal"))
-			cout << "\tjournal={" << entry.get("journal") << "}," << endl;
-		if (entry.contains("pages"))
-			cout << "\tpages={" << entry.get("pages") << "}," << endl;
-		if (entry.contains("year"))
-			cout << "\tyear={" << entry.get("year") << "}," << endl;
-		cout << "}" << endl << endl;
-	}
-}
 
 void dumpWiki(const ParametersDoc& paramsDoc)
 {
@@ -158,21 +63,21 @@ void dumpWiki(const ParametersDoc& paramsDoc)
 }
 
 template<typename R>
-void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, Bib& bib, Mode mode)
+void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, CurrentBibliography& bib)
 {
-	if (mode == ROSWIKI)
+	if (bib.mode == CurrentBibliography::ROSWIKI)
 		cout << "=== " << name << " ===\n" << endl;
 	else
 		cout << "* " << name << " *\n" << endl;
 	for (auto it = registrar.begin(); it != registrar.end(); ++it)
 	{
-		if (mode == ROSWIKI)
+		if (bib.mode == CurrentBibliography::ROSWIKI)
 			cout << "==== " << it->first << " ====\n" << endl;
 		else
 			cout << it->first << endl;
 		
-		cout << getAndReplaceBibEntries(it->second->description(), bib.indices, bib.entries, mode) << endl;
-		if (mode == ROSWIKI)
+		cout << getAndReplaceBibEntries(it->second->description(), bib) << endl;
+		if (bib.mode == CurrentBibliography::ROSWIKI)
 			dumpWiki(it->second->availableParameters());
 		else
 			cout << it->second->availableParameters();
@@ -182,50 +87,49 @@ void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, Bi
 }
 
 
-#define DUMP_REGISTRAR_CONTENT(pm, name, bib, mode) \
-	dumpRegistrar(pm, pm.REG(name), # name, bib, mode);
+#define DUMP_REGISTRAR_CONTENT(pm, name, bib) \
+	dumpRegistrar(pm, pm.REG(name), # name, bib);
 
 int main(int argc, char *argv[])
 {
 	PM pm;
-	Bib bib;
 	
-	Mode mode(NORMAL);
+	// choose bibliography mode
+	CurrentBibliography::Mode mode(CurrentBibliography::NORMAL);
 	if (argc == 2)
 	{
 		const string cmd(argv[1]);
 		if (cmd == "--roswiki")
-			mode = ROSWIKI;
+			mode = CurrentBibliography::ROSWIKI;
 		else if (cmd == "--bibtex")
-			mode = BIBTEX;
+			mode = CurrentBibliography::BIBTEX;
 	}
+	CurrentBibliography bib(mode);
 	
-	DUMP_REGISTRAR_CONTENT(pm, Transformation, bib, mode)
-	DUMP_REGISTRAR_CONTENT(pm, DataPointsFilter, bib, mode)
-	DUMP_REGISTRAR_CONTENT(pm, Matcher, bib, mode)
-	DUMP_REGISTRAR_CONTENT(pm, FeatureOutlierFilter, bib, mode)
-	DUMP_REGISTRAR_CONTENT(pm, DescriptorOutlierFilter, bib, mode)
-	DUMP_REGISTRAR_CONTENT(pm, ErrorMinimizer, bib, mode)
-	DUMP_REGISTRAR_CONTENT(pm, TransformationChecker, bib, mode)
-	DUMP_REGISTRAR_CONTENT(pm, Inspector, bib, mode)
-	DUMP_REGISTRAR_CONTENT(pm, Logger, bib, mode)
+	DUMP_REGISTRAR_CONTENT(pm, Transformation, bib)
+	DUMP_REGISTRAR_CONTENT(pm, DataPointsFilter, bib)
+	DUMP_REGISTRAR_CONTENT(pm, Matcher, bib)
+	DUMP_REGISTRAR_CONTENT(pm, FeatureOutlierFilter, bib)
+	DUMP_REGISTRAR_CONTENT(pm, DescriptorOutlierFilter, bib)
+	DUMP_REGISTRAR_CONTENT(pm, ErrorMinimizer, bib)
+	DUMP_REGISTRAR_CONTENT(pm, TransformationChecker, bib)
+	DUMP_REGISTRAR_CONTENT(pm, Inspector, bib)
+	DUMP_REGISTRAR_CONTENT(pm, Logger, bib)
 	
 	switch (mode)
 	{
-		case NORMAL:
+		case CurrentBibliography::NORMAL:
 		cout << "* Bibliography *" << endl << endl;
-		bib.dump();
 		break;
 		
-		case ROSWIKI:
+		case CurrentBibliography::ROSWIKI:
 		cout << "=== Bibliography ===" << endl << endl;
-		bib.dumpWiki();
 		break;
 		
-		case BIBTEX:
-		bib.dumpBibtex();
+		default:
 		break;
 	}
+	bib.dump(cout);
 	
 	return 0;
 }
