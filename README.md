@@ -55,18 +55,18 @@ Test
 
 In 2D:
 
-	./icp ${SRC_DIR}/examples/data/2D_oneBox.csv ${SRC_DIR}/examples/data/data/2D_twoBoxes.csv
+	examples/pmicp ${SRC_DIR}/examples/data/2D_oneBox.csv ${SRC_DIR}/examples/data/data/2D_twoBoxes.csv
 
 In 3D:
 
-	./icp ${SRC_DIR}/examples/data/car_cloud401.csv ${SRC_DIR}/examples/data/car_cloud400.csv
+	examples/pmicp ${SRC_DIR}/examples/data/car_cloud401.csv ${SRC_DIR}/examples/data/car_cloud400.csv
 
 Use [Paraview] to view the results.
 On [Ubuntu], you can install [Paraview] with `sudo apt-get install paraview`.
 
 You can list the available modules with:
 
-	./list_modules
+	examples/pmicp -l
 
 If you have compiled libpointmatcher with [yaml-cpp] enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the `./icp` command using the `--config` switch. An example file is available in `data/examples/default.yaml`.
 
@@ -89,10 +89,11 @@ Citing
 If you use libpointmatcher in an academic contest, please cite the following publication:
 
 	@INPROCEEDINGS{pomerleau11tracking,
-		author = {F Pomerleau and S Magnenat and F Colas and M Liu and R Siegwart},
+		author = {François Pomerleau and Stéphane Magnenat and Francis Colas and Ming Liu and Roland Siegwart},
 		title = {Tracking a Depth Camera: Parameter Exploration for Fast ICP},
 		booktitle = {Proc. of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
 		publisher = {IEEE Press},
+		pages = {3824--3829},
 		year = {2011}
 	}
 
