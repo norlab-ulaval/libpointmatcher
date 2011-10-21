@@ -66,6 +66,11 @@ namespace YAML
 }
 #endif // HAVE_YAML_CPP
 
+//! version of the Pointmatcher library as string
+#define POINTMATCHER_VERSION "0.9.0"
+//! version of the Pointmatcher library as an int
+#define POINTMATCHER_VERSION_INT "900"
+
 namespace PointMatcherSupport
 {
 	//! A vector of std::shared_ptr<S> that behaves like a std::vector<S>
