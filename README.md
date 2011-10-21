@@ -68,7 +68,7 @@ You can list the available modules with:
 
 	examples/pmicp -l
 
-If you have compiled libpointmatcher with [yaml-cpp] enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the `./icp` command using the `--config` switch. An example file is available in `data/examples/default.yaml`.
+If you have compiled libpointmatcher with [yaml-cpp] enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the `pmicp` command using the `--config` switch. An example file is available in `data/examples/default.yaml`.
 
 
 Developing
