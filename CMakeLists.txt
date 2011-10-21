@@ -36,7 +36,9 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 # - N2672: Initializer lists (gcc)
 # - N1984: auto-typed variables (gcc, clang)
 
-#include(UseDoxygen)
+# Documentation
+set(DOXYFILE_LATEX false)
+include(UseDoxygen)
 
 # initially
 set(EXTRA_LIBS "")
@@ -137,6 +139,10 @@ else(SHARED_LIBS)
 	install(TARGETS pointmatcher ARCHIVE DESTINATION lib)
 endif(SHARED_LIBS)
 set_target_properties(pointmatcher PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 1)
+
+# create doc before installing
+set(DOC_INSTALL_TARGET "share/doc/${PROJECT_NAME}/api" CACHE STRING "Target where to install doxygen documentation")
+add_dependencies(pointmatcher doc)
 install(FILES
 	pointmatcher/PointMatcher.h
 	pointmatcher/Histogram.h
@@ -145,6 +151,7 @@ install(FILES
 	DESTINATION include/pointmatcher
 )
 install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
 
 # Example programs
 add_subdirectory(examples)
