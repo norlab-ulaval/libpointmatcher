@@ -792,6 +792,9 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(B
 	{
 		// compute for this range
 		fuseRange(data, first, last);
+		// TODO: make another filter that creates constant-density clouds,
+		// typically by stopping recursion after the median of the bounding cuboid
+		// is below a threshold, or that the number of points falls under a threshold
 		return;
 	}
 	
@@ -864,6 +867,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	}
 	else
 	{
+		// FIXME: handle this case when indeed can get a normal
 		return;
 		//std::cout << "WARNING: Matrix C needed for eigen decomposition is degenerated. Expected cause: no noise in data" << std::endl;
 	}
