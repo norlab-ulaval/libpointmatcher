@@ -64,7 +64,11 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(const std::string&
 
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
+#if BOOST_FILESYSTEM_VERSION >= 3
+		throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).native_file_string());
+#else
 		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
+#endif
 	return loadCSV(ifs);
 }
 

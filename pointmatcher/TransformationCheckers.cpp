@@ -168,9 +168,9 @@ void TransformationCheckersImpl<T>::DifferentialTransformationChecker::check(con
 	//std::cout << "Abs Rotation: " << this->values(0) << " / " << this->limits(0) << std::endl;
 	//std::cout << "Abs Translation: " << this->values(1) << " / " << this->limits(1) << std::endl;
 	
-	if (isnan(this->values(0)))
+	if (std::isnan(this->values(0)))
 		throw ConvergenceError("abs rotation norm not a number");
-	if (isnan(this->values(1)))
+	if (std::isnan(this->values(1)))
 		throw ConvergenceError("abs translation norm not a number");
 }
 
