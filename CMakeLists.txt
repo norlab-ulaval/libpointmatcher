@@ -4,6 +4,16 @@ include (CheckSymbolExists)
 
 project(libpointmatcher)
 
+# Extract version from header
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+execute_process(
+	COMMAND grep "POINTMATCHER_VERSION " pointmatcher/PointMatcher.h
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	OUTPUT_VARIABLE PROJECT_VERSION
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+string(REGEX REPLACE ".*\"(.*)\".*" "\\1" PROJECT_VERSION "${PROJECT_VERSION}" )
+
 # c++ 0x
 #if("${CMAKE_CXX_COMPILER_ID}" MATCHES "clang") 
 #	set(CMAKE_COMPILER_IS_CLANGXX)
@@ -59,19 +69,22 @@ find_library(GTEST_LIBRARY gtest
     /usr/lib/
 )
 
-# look for OpenCL library
-if (WIN32)
-	find_library(OPENCL_LIBRARIES opencl64)
-	if (!OPENCL_LIBRARIES)
-		find_library(OPENCL_LIBRARIES opencl32)
-	endif (!OPENCL_LIBRARIES)
-else (WIN32)
-	find_library(OPENCL_LIBRARIES OpenCL ENV LD_LIBRARY_PATH)
-endif (WIN32)
-# if found, add
-if (OPENCL_LIBRARIES)
-	set(EXTRA_LIBS ${EXTRA_LIBS} ${OPENCL_LIBRARIES})
-endif (OPENCL_LIBRARIES)
+# optionally, look for OpenCL library
+set(USE_OPEN_CL "false" CACHE BOOL "Set to ON to look for OpenCL, if your libnabo was compiled with CL support")
+if (USE_OPEN_CL)
+	if (WIN32)
+		find_library(OPENCL_LIBRARIES opencl64)
+		if (!OPENCL_LIBRARIES)
+			find_library(OPENCL_LIBRARIES opencl32)
+		endif (!OPENCL_LIBRARIES)
+	else (WIN32)
+		find_library(OPENCL_LIBRARIES OpenCL ENV LD_LIBRARY_PATH)
+	endif (WIN32)
+	# if found, add
+	if (OPENCL_LIBRARIES)
+		set(EXTRA_LIBS ${EXTRA_LIBS} ${OPENCL_LIBRARIES})
+	endif (OPENCL_LIBRARIES)
+endif(USE_OPEN_CL)
 
 # yaml-cpp
 find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
@@ -98,8 +111,8 @@ endif (POSIX_TIMERS)
 include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 add_definitions(-Wall)
 
-# main pointmatcher lib
-add_library(pointmatcher
+# Pointmatcher lib and install
+set(POINTMATCHER_SRC
 	pointmatcher/Timer.cpp
 	pointmatcher/Histogram.cpp
 	pointmatcher/Parametrizable.cpp
@@ -115,7 +128,15 @@ add_library(pointmatcher
 	pointmatcher/IO.cpp
 	pointmatcher/Bibliography.cpp
 )
-install(TARGETS pointmatcher ARCHIVE DESTINATION lib)
+set(SHARED_LIBS "false" CACHE BOOL "To build shared (true) or static (false) library")
+if (SHARED_LIBS)
+	add_library(pointmatcher SHARED ${POINTMATCHER_SRC})
+	install(TARGETS pointmatcher LIBRARY DESTINATION lib)
+else(SHARED_LIBS)
+	add_library(pointmatcher ${POINTMATCHER_SRC})
+	install(TARGETS pointmatcher ARCHIVE DESTINATION lib)
+endif(SHARED_LIBS)
+set_target_properties(pointmatcher PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 1)
 install(FILES
 	pointmatcher/PointMatcher.h
 	pointmatcher/Histogram.h
@@ -123,28 +144,10 @@ install(FILES
 	pointmatcher/Registrar.h
 	DESTINATION include/pointmatcher
 )
+install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
 
 # Example programs
-add_executable(icp examples/icp.cpp)
-target_link_libraries(icp pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
-
-add_executable(icp_simple examples/icp_simple.cpp)
-target_link_libraries(icp_simple pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} rt)
-
-add_executable(align_sequence examples/align_sequence.cpp)
-target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
-
-add_executable(convertCSVtoVTK examples/convertCSVtoVTK.cpp)
-target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
-
-add_executable(list_modules examples/list_modules.cpp)
-target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_THREAD_LIBRARY} rt)
-
-
-if(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
-	include_directories(${GTEST_INCLUDE_DIR})
-  add_executable(utest utest/utest.cpp)
-  target_link_libraries(utest pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${GTEST_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} rt)
-else(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
-  message("Google test (gtest) not found - Skipping unit tests")
-endif(GTEST_INCLUDE_DIR AND GTEST_LIBRARY)
+add_subdirectory(examples)
+# Unit testing
+enable_testing()
+add_subdirectory(utest)
