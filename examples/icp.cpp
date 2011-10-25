@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
+#include "pointmatcher/Bibliography.h"
 
 #include "boost/filesystem.hpp"
 
@@ -42,7 +43,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-void validateArgs(const int argc, const char *argv[], bool& isCSV, string&, string&);
+typedef PointMatcher<float> PM;
+typedef PM::Parameters Parameters;
+typedef PointMatcherSupport::CurrentBibliography CurrentBibliography;
+
+void listModules();
+int validateArgs(const int argc, const char *argv[], bool& isCSV, string&, string&);
 void usage(const char *argv[]);
 
 /**
@@ -54,12 +60,13 @@ int main(int argc, const char *argv[])
 	bool isCSV = true;
 	string configFile;
 	string outputBaseFile("test");
-	validateArgs(argc, argv, isCSV, configFile, outputBaseFile);
+	const int ret = validateArgs(argc, argv, isCSV, configFile, outputBaseFile);
+	if (ret > 0)
+		return ret;
+	else if (ret < 0)
+		return 0;
 	const char *refFile(argv[argc-2]);
 	const char *dataFile(argv[argc-1]);
-	
-	typedef PointMatcher<float> PM;
-	typedef PM::Parameters Parameters;
 	
 	// Load point clouds
 	PM::DataPoints ref;
@@ -110,13 +117,64 @@ int main(int argc, const char *argv[])
 	return 0;
 }
 
-
-void validateArgs(const int argc, const char *argv[], bool& isCSV, string& configFile, string& outputBaseFile)
+template<typename R>
+void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, CurrentBibliography& bib)
 {
-	if (argc < 3)
+	cout << "* " << name << " *\n" << endl;
+	for (auto it = registrar.begin(); it != registrar.end(); ++it)
 	{
-		cerr << "Not enough arguments, usage:"; usage(argv); exit(1);
+		cout << it->first << endl;
+		cout << getAndReplaceBibEntries(it->second->description(), bib) << endl;
+		cout << it->second->availableParameters() << endl;
 	}
+	cout << endl;
+}
+
+#define DUMP_REGISTRAR_CONTENT(pm, name, bib) \
+	dumpRegistrar(pm, pm.REG(name), # name, bib);
+
+void listModules()
+{
+	const PM pm;
+	CurrentBibliography bib;
+	
+	DUMP_REGISTRAR_CONTENT(pm, Transformation, bib)
+	DUMP_REGISTRAR_CONTENT(pm, DataPointsFilter, bib)
+	DUMP_REGISTRAR_CONTENT(pm, Matcher, bib)
+	DUMP_REGISTRAR_CONTENT(pm, FeatureOutlierFilter, bib)
+	DUMP_REGISTRAR_CONTENT(pm, DescriptorOutlierFilter, bib)
+	DUMP_REGISTRAR_CONTENT(pm, ErrorMinimizer, bib)
+	DUMP_REGISTRAR_CONTENT(pm, TransformationChecker, bib)
+	DUMP_REGISTRAR_CONTENT(pm, Inspector, bib)
+	DUMP_REGISTRAR_CONTENT(pm, Logger, bib)
+	
+	cout << "* Bibliography *" << endl << endl;
+	bib.dump(cout);
+}
+
+int validateArgs(const int argc, const char *argv[], bool& isCSV, string& configFile, string& outputBaseFile)
+{
+	if (argc == 1)
+	{
+		cerr << "Not enough arguments, usage:";
+		usage(argv);
+		return 1;
+	}
+	else if (argc == 2)
+	{
+		if (string(argv[1]) == "-l")
+		{
+			listModules();
+			return -1; // we use -1 to say that we wish to quit but in a normal way
+		}
+		else
+		{
+			cerr << "Wrong option, usage:";
+			usage(argv);
+			return 2;
+		}
+	}
+	
 	const int endOpt(argc - 2);
 	for (int i = 1; i < endOpt; i += 2)
 	{
@@ -161,11 +219,16 @@ void validateArgs(const int argc, const char *argv[], bool& isCSV, string& confi
 	}
 
 	isCSV = (dataExt == ".csv");
+	return 0;
 }
 
 void usage(const char *argv[])
 {
+	cerr << endl << endl;
+	cerr << "* To list modules:" << endl;
+	cerr << "  " << argv[0] << " -l" << endl;
 	cerr << endl;
+	cerr << "* To run ICP:" << endl;
 	cerr << "  " << argv[0] << " [OPTIONS] reference.csv reading.csv" << endl;
 	cerr << endl;
 	cerr << "OPTIONS can be a combination of:" << endl;

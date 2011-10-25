@@ -37,12 +37,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/lexical_cast.hpp>
 #include <iostream>
+#include <cassert>
 
 namespace PointMatcherSupport
 {
 	using namespace std;
 	
-	Bibliography bibliography()
+	static Bibliography bibliography()
 	{
 		return Bibliography({
 			{ "Phillips2007VarTrimmed",
@@ -127,6 +128,106 @@ namespace PointMatcherSupport
 		});
 	}
 	
+	CurrentBibliography::CurrentBibliography(Mode mode):
+		mode(mode)
+	{}
+	
+	void CurrentBibliography::dump(std::ostream& os) const
+	{
+		switch (mode)
+		{
+			case NORMAL: dumpText(os); break;
+			case ROSWIKI: dumpWiki(os); break;
+			case BIBTEX: dumpBibtex(os); break;
+			default: assert(false); break;
+		};
+	}
+	
+	void CurrentBibliography::dumpText(std::ostream& os) const
+	{
+		Bibliography biblio(bibliography());
+		for (size_t i = 0; i < entries.size(); ++i)
+		{
+			const string& entryName(entries[i]);
+			if (!biblio.contains(entryName))
+				throw runtime_error(string("Broken bibliography, missing entry " + entryName));
+			const StringMap& entry(biblio.get(entryName));
+			
+			os << "[" << i+1 << "]";
+			if (entry.contains("title"))
+				os << " " << entry.get("title") << ".";
+			if (entry.contains("author"))
+				os << " " << entry.get("author") << "";
+			if (entry.contains("booktitle"))
+				os << " In " << entry.get("booktitle") << ".";
+			if (entry.contains("journal"))
+				os << " " << entry.get("journal") << ".";
+			if (entry.contains("pages"))
+				os << " " << entry.get("pages") << ".";
+			if (entry.contains("year"))
+				os << " " << entry.get("year") << ".";
+			os << endl << endl;
+		}
+	}
+
+	void CurrentBibliography::dumpWiki(std::ostream& os) const
+	{
+		Bibliography biblio(bibliography());
+		for (size_t i = 0; i < entries.size(); ++i)
+		{
+			const string& entryName(entries[i]);
+			if (!biblio.contains(entryName))
+				throw runtime_error(string("Broken bibliography, missing entry " + entryName));
+			const StringMap& entry(biblio.get(entryName));
+			
+			os << " * " << "<<Anchor(" << entryName << ")>>[" << i+1 << "] -";
+			if (entry.contains("title"))
+				os << " '''" << entry.get("title") << ".'''";
+			if (entry.contains("author"))
+				os << " " << entry.get("author") << "";
+			if (entry.contains("booktitle"))
+				os << " ''In " << entry.get("booktitle") << ".''";
+			if (entry.contains("journal"))
+				os << " " << entry.get("journal") << ".";
+			if (entry.contains("pages"))
+				os << " " << entry.get("pages") << ".";
+			if (entry.contains("year"))
+				os << " " << entry.get("year") << ".";
+			if (entry.contains("doi"))
+				os << " DOI: [[http://dx.doi.org/" << entry.get("doi") << "|" << entry.get("doi") << "]].";
+			if (entry.contains("fulltext"))
+				os << " [[" << entry.get("fulltext") << "|full text]].";
+			os << endl;
+		}
+	}
+
+	void CurrentBibliography::dumpBibtex(std::ostream& os) const
+	{
+		Bibliography biblio(bibliography());
+		for (size_t i = 0; i < entries.size(); ++i)
+		{
+			const string& entryName(entries[i]);
+			if (!biblio.contains(entryName))
+				throw runtime_error(string("Broken bibliography, missing entry " + entryName));
+			const StringMap& entry(biblio.get(entryName));
+			
+			os << "@" << entry.get("type") << "{" << entryName << endl;
+			if (entry.contains("title"))
+				os << "\ttitle={" << entry.get("title") << "}," << endl;
+			if (entry.contains("author"))
+				os << "\tauthor={" << entry.get("author") << "}," << endl;
+			if (entry.contains("booktitle"))
+				os << "\tbooktitle={" << entry.get("booktitle") << "}," << endl;
+			if (entry.contains("journal"))
+				os << "\tjournal={" << entry.get("journal") << "}," << endl;
+			if (entry.contains("pages"))
+				os << "\tpages={" << entry.get("pages") << "}," << endl;
+			if (entry.contains("year"))
+				os << "\tyear={" << entry.get("year") << "}," << endl;
+			os << "}" << endl << endl;
+		}
+	}
+	
 	static StringVector splitString(const string& text, char delim)
 	{
 		StringVector res;
@@ -146,8 +247,12 @@ namespace PointMatcherSupport
 		return res;
 	}
 	
-	std::string getAndReplaceBibEntries(const std::string& text, BibIndices& indices, StringVector& entries, BibMode::Mode mode)
+	std::string getAndReplaceBibEntries(const std::string& text, CurrentBibliography& curBib)
 	{
+		CurrentBibliography::Mode mode(curBib.mode);
+		BibIndices& indices(curBib.indices);
+		StringVector& entries(curBib.entries);
+		
 		string newText;
 		const StringVector words(splitString(text, ' '));
 		for (size_t i = 0; i < words.size(); ++i)
@@ -157,7 +262,7 @@ namespace PointMatcherSupport
 			const size_t p(word.find('}'));
 			if ((l > 7) && (word.substr(0, 6) == "\\cite{") && (p != string::npos))
 			{
-				if (mode == BibMode::ROSWIKI)
+				if (mode == CurrentBibliography::ROSWIKI)
 					newText += "&#91;";
 				else
 					newText += '[';
@@ -165,7 +270,7 @@ namespace PointMatcherSupport
 				for (size_t j = 0; j < keys.size(); ++j)
 				{
 					const string key(keys[j]);
-					if (mode == BibMode::ROSWIKI)
+					if (mode == CurrentBibliography::ROSWIKI)
 						newText += "[[#" + key + "|";
 					if (indices.contains(key))
 					{
@@ -178,12 +283,12 @@ namespace PointMatcherSupport
 						indices[key] = index;
 						newText += boost::lexical_cast<string>(index+1);
 					}
-					if (mode == BibMode::ROSWIKI)
+					if (mode == CurrentBibliography::ROSWIKI)
 						newText += "]]";
 					if (j+1 != keys.size())
 						newText += ',';
 				}
-				if (mode == BibMode::ROSWIKI)
+				if (mode == CurrentBibliography::ROSWIKI)
 					newText += "&#93;";
 				else
 					newText += ']';
@@ -194,7 +299,7 @@ namespace PointMatcherSupport
 			if (i+1 != words.size())
 				newText += ' ';
 		}
-		if (mode == BibMode::BIBTEX)
+		if (mode == CurrentBibliography::BIBTEX)
 			return text;
 		else
 			return newText;

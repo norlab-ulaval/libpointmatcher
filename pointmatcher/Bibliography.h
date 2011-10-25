@@ -58,18 +58,28 @@ namespace PointMatcherSupport
 	typedef StringMapMap Bibliography;
 	typedef ConvenientMap<std::string, unsigned> BibIndices;
 	
-	namespace BibMode
+	struct CurrentBibliography
 	{
 		enum Mode
 		{
 			NORMAL=0,
 			ROSWIKI=1,
 			BIBTEX=2
-		};
-	}
+		} mode;
+		BibIndices indices;
+		StringVector entries;
+		
+		CurrentBibliography(Mode mode = NORMAL);
+		void dump(std::ostream& os) const;
 	
-	Bibliography bibliography();
-	std::string getAndReplaceBibEntries(const std::string& text, BibIndices& indices, StringVector& entries, BibMode::Mode mode);
+	private:
+		void dumpText(std::ostream& os) const;
+		void dumpWiki(std::ostream& os) const;
+		void dumpBibtex(std::ostream& os) const;
+	};
+	
+	std::string getAndReplaceBibEntries(const std::string&, CurrentBibliography& curBib);
+	
 }; // PointMatcherSupport
 
 #endif // __POINTMATCHER_BIBLIOGRAPHY_H
