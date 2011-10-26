@@ -278,7 +278,7 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::DifferentialTransformationChecker());
 	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
 	this->outlierMixingWeight = 1;
-}
+} 
 
 template<typename T>
 void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)

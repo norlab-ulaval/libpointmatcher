@@ -131,7 +131,7 @@ struct OutlierFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "ratio", "percentage to keep", "0.75", "0.0000001", "0.9999999", &P::Comp<T>}
+				{ "ratio", "percentage to keep", "0.85", "0.0000001", "0.9999999", &P::Comp<T>}
 			});
 		}
 		

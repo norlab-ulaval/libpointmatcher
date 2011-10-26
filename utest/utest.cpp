@@ -85,10 +85,33 @@ public:
 		EXPECT_NEAR(validTrans, testTrans, 0.05);
 		EXPECT_NEAR(validAngle, testAngle, 0.05);
 	}
+
+	void validate3dTransformation()
+	{
+		//dumpVTK();
+
+		const PM::TransformationParameters testT = icp(data3D, ref3D);
+		const int dim = validT2d.cols();
+
+		const auto validTrans = validT3d.block(0, dim-1, dim-1, 1).norm();
+		const auto testTrans = testT.block(0, dim-1, dim-1, 1).norm();
+	
+		const auto testRotation = Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(testT.topLeftCorner(3,3)));
+		const auto validRotation = Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(validT3d.topLeftCorner(3,3)));
+		
+		const auto angleDist = validRotation.angularDistance(testRotation);
+		
+		//cout << testT << endl;
+		//cout << "angleDist: " << angleDist << endl;
+		//cout << "transDist: " << abs(validTrans-testTrans) << endl;
+		EXPECT_NEAR(validTrans, testTrans, 0.1);
+		EXPECT_NEAR(angleDist, 0.0, 0.1);
+
+	}
 };
 
 // Utility classes
-class PointCloud2DTest: public IcpHelper
+class GenericTest: public IcpHelper
 {
 
 public:
@@ -112,9 +135,10 @@ public:
 // Generic tests
 //---------------------------
 
-TEST_F(PointCloud2DTest, ICP_default)
+TEST_F(GenericTest, ICP_default)
 {
 	validate2dTransformation();
+	validate3dTransformation();
 }
 
 //---------------------------
@@ -162,24 +186,28 @@ TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
 	validate2dTransformation();
+	validate3dTransformation();
 	
 	// Filter on y axis
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 	
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
 	EXPECT_ANY_THROW(validate2dTransformation());
+	validate3dTransformation();
 	
 	// Filter on a radius
 	params["dim"] = "-1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 	
 	// Parameter outside valid range
 	params["dim"] = "3";
@@ -199,12 +227,14 @@ TEST_F(DataFilterTest, MinDistDataPointsFilter)
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 	
 	// Filter on y axis
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 	
 	//TODO: move that to specific 2D test
 	// Filter on z axis (not existing)
@@ -212,12 +242,14 @@ TEST_F(DataFilterTest, MinDistDataPointsFilter)
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
 	EXPECT_ANY_THROW(validate2dTransformation());
+	validate3dTransformation();
 	
 	// Filter on a radius
 	params["dim"] = "-1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 		
 }
 
@@ -232,18 +264,21 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 	
 	// Filter on y axis
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 	
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
 	EXPECT_ANY_THROW(validate2dTransformation());	
+	validate3dTransformation();
 }
 
 
@@ -263,6 +298,9 @@ TEST_F(DataFilterTest, UniformizeDensityDataPointsFilter)
 		const double nbRemainingPts = icp.getNbPrefilteredReadingPts();
 		// FIXME: 10% seems of seems a little bit high
 		EXPECT_NEAR(nbRemainingPts/nbInitPts, 1-ratio[i], 0.10);
+		
+		validate3dTransformation();
+		//TODO: add expectation on the reduction
 	}
 }
 
@@ -282,6 +320,7 @@ TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 
 	addFilter("SurfaceNormalDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 
 }
 
@@ -300,6 +339,7 @@ TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 	
 	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 
 }
 
@@ -314,6 +354,7 @@ TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 	params = PM::Parameters({{"towardCenter", toParam(false)}});
 	addFilter("OrientNormalsDataPointsFilter", params);
 	validate2dTransformation();	
+	validate3dTransformation();
 
 }
 
@@ -328,6 +369,7 @@ TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 		icp.readingDataPointsFilters.clear();
 		addFilter("RandomSamplingDataPointsFilter", params);
 		validate2dTransformation();	
+		validate3dTransformation();
 	}
 }
 
@@ -342,6 +384,7 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 		icp.readingDataPointsFilters.clear();
 		addFilter("FixStepSamplingDataPointsFilter", params);
 		validate2dTransformation();	
+		validate3dTransformation();
 	}
 }
 
@@ -398,6 +441,7 @@ TEST_F(MatcherTest, KDTreeMatcher)
 			
 				addFilter("KDTreeMatcher", params);
 				validate2dTransformation();
+				validate3dTransformation();
 			}
 		}
 	}
@@ -437,37 +481,62 @@ public:
 };
 
 
-TEST_F(FeatureOutlierFilterTest, MaxDistOutlierFilter)
+//No commun parameters were found for 2D and 3D, tests are splited
+TEST_F(FeatureOutlierFilterTest, MaxDistOutlierFilter2D)
 {
-	params = PM::Parameters({{"maxDist", toParam(0.02)}});
+	params = PM::Parameters({{"maxDist", toParam(0.015)}});//0.02
 	addFilter("MaxDistOutlierFilter", params);
 	validate2dTransformation();
 }
 
+TEST_F(FeatureOutlierFilterTest, MaxDistOutlierFilter3D)
+{
+	params = PM::Parameters({{"maxDist", toParam(0.1)}});
+	addFilter("MaxDistOutlierFilter", params);
+	validate3dTransformation();
+}
 
-TEST_F(FeatureOutlierFilterTest, MinDistOutlierFilter)
+//No commun parameters were found for 2D and 3D, tests are splited
+TEST_F(FeatureOutlierFilterTest, MinDistOutlierFilter2D)
 {
 	// Since not sure how useful is that filter, we keep the 
 	// MaxDistOutlierFilter with it
 	PM::FeatureOutlierFilter* extraOutlierFilter;
 	
-	params = PM::Parameters({{"maxDist", toParam(0.02)}});
+	params = PM::Parameters({{"maxDist", toParam(0.015)}});
 	extraOutlierFilter = 
 			pm.FeatureOutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
 	icp.featureOutlierFilters.push_back(extraOutlierFilter);	
 	
-	params = PM::Parameters({{"minDist", toParam(0.002)}});
+	params = PM::Parameters({{"minDist", toParam(0.0002)}});
 	addFilter("MinDistOutlierFilter", params);
 	
 	validate2dTransformation();
 }
 
+TEST_F(FeatureOutlierFilterTest, MinDistOutlierFilter3D)
+{
+	// Since not sure how useful is that filter, we keep the 
+	// MaxDistOutlierFilter with it
+	PM::FeatureOutlierFilter* extraOutlierFilter;
+	
+	params = PM::Parameters({{"maxDist", toParam(0.1)}});
+	extraOutlierFilter = 
+			pm.FeatureOutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
+	icp.featureOutlierFilters.push_back(extraOutlierFilter);	
+	
+	params = PM::Parameters({{"minDist", toParam(0.0002)}});
+	addFilter("MinDistOutlierFilter", params);
+	
+	validate3dTransformation();
+}
 
 TEST_F(FeatureOutlierFilterTest, MedianDistOutlierFilter)
 {
 	params = PM::Parameters({{"factor", toParam(3.5)}});
 	addFilter("MedianDistOutlierFilter", params);
 	validate2dTransformation();
+	validate3dTransformation();
 }
 
 
@@ -476,6 +545,7 @@ TEST_F(FeatureOutlierFilterTest, TrimmedDistOutlierFilter)
 	params = PM::Parameters({{"ratio", toParam(0.85)}});
 	addFilter("TrimmedDistOutlierFilter", params);
 	validate2dTransformation();
+	validate3dTransformation();
 }
 
 
@@ -488,6 +558,7 @@ TEST_F(FeatureOutlierFilterTest, VarTrimmedDistOutlierFilter)
 	});
 	addFilter("VarTrimmedDistOutlierFilter", params);
 	validate2dTransformation();
+	validate3dTransformation();
 }
 
 //---------------------------
@@ -523,12 +594,14 @@ TEST_F(ErrorMinimizerTest, PointToPointErrorMinimizer)
 {
 	addFilter("PointToPointErrorMinimizer");	
 	validate2dTransformation();
+	validate3dTransformation();
 }
 
 TEST_F(ErrorMinimizerTest, PointToPlaneErrorMinimizer)
 {
 	addFilter("PointToPlaneErrorMinimizer");	
 	validate2dTransformation();
+	validate3dTransformation();
 }
 
 //---------------------------
@@ -624,13 +697,21 @@ int main(int argc, char **argv)
 	// Load point cloud for all test
 	ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
 	data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
+	ref3D =  PM::loadCSV(dataPath + "car_cloud400.csv");
+	data3D = PM::loadCSV(dataPath + "car_cloud401.csv");
 	
+
 	// Result of data express in ref (from visual inspection)
 	validT2d = PM::TransformationParameters(3,3);
 	validT2d <<  0.987498,  0.157629, 0.0859918,
 				-0.157629,  0.987498,  0.203247,
 						0,         0,         1;
 
+	validT3d = PM::TransformationParameters(4,4);
+	validT3d <<   0.982304,   0.166685,  -0.0854066,  0.0446816,
+	 			 -0.150189,   0.973488,   0.172524,   0.191998,
+	   			  0.111899,  -0.156644,   0.981296,  -0.0356313,
+	              0,          0,          0,          1;
 
 	testing::GTEST_FLAG(print_time) = true;
 	testing::InitGoogleTest(&argc, argv);
