@@ -55,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include "Histogram.h"
-#include "Timer.h"
 #include "Parametrizable.h"
 #include "Registrar.h"
 

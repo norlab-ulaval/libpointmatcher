@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "PointMatcher.h"
+#include "Timer.h"
 
 #include "Logger.h"
 #include "Transformations.h"
