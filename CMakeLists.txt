@@ -148,6 +148,7 @@ install(FILES
 	pointmatcher/Histogram.h
 	pointmatcher/Parametrizable.h
 	pointmatcher/Registrar.h
+	pointmatcher/Timer.h
 	DESTINATION include/pointmatcher
 )
 install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
