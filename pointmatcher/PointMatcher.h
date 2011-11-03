@@ -54,7 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ostream>
 #include <memory>
 
-#include "Histogram.h"
 #include "Parametrizable.h"
 #include "Registrar.h"
 
@@ -397,9 +396,23 @@ struct PointMatcher
 		// 
 		virtual ~Inspector() {}
 		virtual void init() {};
+		
+		// performance statistics
+		virtual void statKeyFrameDuration(double duration) {}
+		virtual void statConvergenceDuration(double duration) {}
+		virtual void statIterationsCount(unsigned count) {}
+		virtual void statPointCountIn(unsigned count) {}
+		virtual void statPointCountReading(unsigned count) {}
+		virtual void statPointCountKeyFrame(unsigned count) {}
+		virtual void statPointCountTouched(unsigned count) {}
+		virtual void statOverlapRatio(double ratio) {}
+		
+		// data statistics 
 		virtual void dumpFilteredReference(const DataPoints& filteredReference) {}
 		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers) {}
 		virtual void finish(const size_t iterationCount) {}
+		
+		
 	};
 	
 	DEF_REGISTRAR(Inspector) 
@@ -491,16 +504,6 @@ struct PointMatcher
 	struct ICPSequence: ICPChainBase
 	{
 		T ratioToSwitchKeyframe;
-		
-		PointMatcherSupport::Histogram<double> keyFrameDuration;
-		PointMatcherSupport::Histogram<double> convergenceDuration;
-		PointMatcherSupport::Histogram<unsigned> iterationsCount;
-		PointMatcherSupport::Histogram<unsigned> pointCountIn;
-		PointMatcherSupport::Histogram<unsigned> pointCountReading;
-		PointMatcherSupport::Histogram<unsigned> pointCountKeyFrame;
-		PointMatcherSupport::Histogram<unsigned> pointCountTouched;
-		PointMatcherSupport::Histogram<double> overlapRatio;
-		// TODO: add helper in inspector, put this in inspector
 		
 		ICPSequence(const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
 		~ICPSequence();

@@ -575,14 +575,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 template<typename T>
 PointMatcher<T>::ICPSequence::ICPSequence(const std::string& filePrefix, const bool dumpStdErrOnExit):
 	ratioToSwitchKeyframe(0.8),
-	keyFrameDuration(16, "key_frame_duration", filePrefix, dumpStdErrOnExit),
-	convergenceDuration(16, "convergence_duration", filePrefix, dumpStdErrOnExit),
-	iterationsCount(16, "iterations_count", filePrefix, dumpStdErrOnExit),
-	pointCountIn(16, "point_count_in", filePrefix, dumpStdErrOnExit),
-	pointCountReading(16, "point_count_reading", filePrefix, dumpStdErrOnExit),
-	pointCountKeyFrame(16, "point_count_key_frame", filePrefix, dumpStdErrOnExit),
-	pointCountTouched(16, "point_count_touched", filePrefix, dumpStdErrOnExit),
-	overlapRatio(16, "overlap_ratio", filePrefix, dumpStdErrOnExit),
 	dim(-1),
 	keyFrameCreated(false)
 {
@@ -634,7 +626,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		this->keyframeDataPointsFilters.init();
 		this->keyframeDataPointsFilters.apply(inputCloud);
 		
-		pointCountKeyFrame.push_back(inputCloud.features.cols());
+		this->inspector->statPointCountKeyFrame(inputCloud.features.cols());
 
 
 		// Create intermediate frame at the center of mass of reference pts cloud
@@ -655,7 +647,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		
 		keyFrameCreated = true;
 	
-		keyFrameDuration.push_back(t.elapsed());
+		this->inspector->statKeyFrameDuration(t.elapsed());
 	}
 	else
 		LOG_WARNING_STREAM("Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)");
@@ -709,8 +701,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
 	
-	pointCountIn.push_back(inputCloud.features.cols());
-	pointCountReading.push_back(reading.features.cols());
+	this->inspector->statPointCountIn(inputCloud.features.cols());
+	this->inspector->statPointCountReading(reading.features.cols());
 	
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
@@ -793,8 +785,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 
 		++iterationCount;
 	}
-	iterationsCount.push_back(iterationCount);
-	pointCountTouched.push_back(this->matcher->getVisitCount());
+	this->inspector->statIterationsCount(iterationCount);
+	this->inspector->statPointCountTouched(this->matcher->getVisitCount());
 	this->matcher->resetVisitCount();
 	this->inspector->finish(iterationCount);
 	
@@ -807,7 +799,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	// T_refIn_refMean remove the temperary frame added during initialization
 	T_refIn_dataIn = T_refIn_refMean * T_iter * T_refMean_dataIn;
 	
-	overlapRatio.push_back(this->errorMinimizer->getWeightedPointUsedRatio());
+	this->inspector->statOverlapRatio(this->errorMinimizer->getWeightedPointUsedRatio());
 	
 	if (this->errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
 	{
@@ -816,7 +808,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		this->createKeyFrame(inputCloud);
 	}
 	
-	convergenceDuration.push_back(t.elapsed());
+	this->inspector->statConvergenceDuration(t.elapsed());
 	
 	//cout << "keyFrameTransform: " << endl << keyFrameTransform << endl;
 	//cout << "T_refIn_dataIn: " << endl << T_refIn_dataIn << endl;

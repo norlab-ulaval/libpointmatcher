@@ -145,7 +145,6 @@ set(DOC_INSTALL_TARGET "share/doc/${PROJECT_NAME}/api" CACHE STRING "Target wher
 add_dependencies(pointmatcher doc)
 install(FILES
 	pointmatcher/PointMatcher.h
-	pointmatcher/Histogram.h
 	pointmatcher/Parametrizable.h
 	pointmatcher/Registrar.h
 	pointmatcher/Timer.h

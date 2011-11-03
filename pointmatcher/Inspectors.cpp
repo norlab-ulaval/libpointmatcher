@@ -42,6 +42,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+template<typename T>
+InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
+	Inspector(className,paramsDoc,params),
+	keyFrameDuration(16, "key_frame_duration", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
+	convergenceDuration(16, "convergence_duration", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
+	iterationsCount(16, "iterations_count", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
+	pointCountIn(16, "point_count_in", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
+	pointCountReading(16, "point_count_reading", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
+	pointCountKeyFrame(16, "point_count_key_frame", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
+	pointCountTouched(16, "point_count_touched", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
+	overlapRatio(16, "overlap_ratio", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit"))
+{
+}
+
 /*
 	// This code creates a header according to information from the datapoints
 	std::ofstream ofs(fileName.c_str());
@@ -69,7 +83,7 @@ using namespace std;
 	}*/
 template<typename T>
 InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
-	Inspector(className,paramsDoc,params),
+	PerformanceInspector(className,paramsDoc,params),
 	streamIter(0)
 {
 }
