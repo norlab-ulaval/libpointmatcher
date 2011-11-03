@@ -244,7 +244,7 @@ struct DataPointsFiltersImpl
 				const int pointsCount(inputFeatures.cols());
 				indices.reserve(pointsCount);
 				for (int i = 0; i < pointsCount; ++i)
-					indices[i] = i;
+					indices.push_back(i);
 			}
 		};
 		

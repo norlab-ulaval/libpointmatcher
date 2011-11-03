@@ -746,7 +746,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	
 	// we keep build data on stack for reentrant behaviour
 	BuildData buildData(input.features, input.descriptors, finalDescDim);
-	
+
 	// build the new point cloud
 	buildNew(
 		buildData,
@@ -843,8 +843,8 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	Matrix d(featDim-1, colCount);
 	for (int i = 0; i < colCount; ++i)
 		d.col(i) = data.inputFeatures.block(0,data.indices[first+i],featDim-1, 1);
-	const Vector& mean = d.rowwise().sum() / T(colCount);
-	const Matrix& NN = (d.colwise() - mean);
+	const Vector mean = d.rowwise().sum() / T(colCount);
+	const Matrix NN = (d.colwise() - mean);
 	data.outputFeatures.block(0, data.outputInsertionPoint, featDim-1,1) = mean;
 	data.outputFeatures(featDim-1, data.outputInsertionPoint) = 1;
 	
