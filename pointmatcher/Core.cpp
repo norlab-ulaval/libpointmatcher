@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "PointMatcher.h"
+#include "PointMatcherPrivate.h"
 #include "Timer.h"
 
 #include "Logger.h"
@@ -204,7 +205,7 @@ template<typename T> template<typename F>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::compute(
 	const typename PointMatcher<T>::DataPoints& filteredReading,
 	const typename PointMatcher<T>::DataPoints& filteredReference,
-	const typename PointMatcher<T>::Matches& input) const
+	const typename PointMatcher<T>::Matches& input)
 {
 	if (this->empty())
 	{
@@ -239,8 +240,8 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
 	outlierMixingWeight(0.5),
-	nbPrefilteredReadingPts(0),
-	nbPrefilteredKeyframePts(0)
+	prefilteredReadingPtsCount(0),
+	prefilteredKeyframePtsCount(0)
 {}
 
 template<typename T>
@@ -485,10 +486,10 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	size_t iterationCount(0);
 	
 	LOG_INFO_STREAM("PointMatcher::icp - preprocess took " << t.elapsed() << " [s]");
-	this->nbPrefilteredKeyframePts = reference.features.cols();
-	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << this->nbPrefilteredKeyframePts);
-	this->nbPrefilteredReadingPts = reading.features.cols();
-	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << this->nbPrefilteredReadingPts);
+	this->prefilteredKeyframePtsCount = reference.features.cols();
+	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << this->prefilteredKeyframePtsCount);
+	this->prefilteredReadingPtsCount = reading.features.cols();
+	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << this->prefilteredReadingPtsCount);
 	t.restart();
 	
 	while (iterate)

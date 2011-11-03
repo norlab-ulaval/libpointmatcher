@@ -96,44 +96,8 @@ namespace PointMatcherSupport
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func) {}
 	};
 	
-	// macros holding the name of current function, send patches for your favourite compiler
-	#if defined(MSVC)
-		#define __POINTMATCHER_FUNCTION__ __FUNCSIG__
-	#elif defined(__GNUC__)
-		#define __POINTMATCHER_FUNCTION__ __PRETTY_FUNCTION__
-	#else
-		#define __POINTMATCHER_FUNCTION__ ""
-	#endif
-	
-	// macros for logging
-	#define LOG_INFO_STREAM(args) \
-	{ \
-		boost::mutex::scoped_lock lock(PointMatcherSupport::loggerMutex); \
-		if (PointMatcherSupport::logger.get() && \
-			PointMatcherSupport::logger->hasInfoChannel()) { \
-			PointMatcherSupport::logger->beginInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
-			(*PointMatcherSupport::logger->infoStream()) << args; \
-			PointMatcherSupport::logger->finishInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
-		} \
-	}
-	#define LOG_WARNING_STREAM(args) \
-	{ \
-		boost::mutex::scoped_lock lock(PointMatcherSupport::loggerMutex); \
-		if (PointMatcherSupport::logger.get() && \
-			PointMatcherSupport::logger->hasWarningChannel()) { \
-			PointMatcherSupport::logger->beginWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
-			(*PointMatcherSupport::logger->warningStream()) << args; \
-			PointMatcherSupport::logger->finishWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
-		} \
-	}
-	
-	//! Mutex to protect creation and deletion of logger
-	extern boost::mutex loggerMutex;
-	//! Logger pointer
-	extern std::shared_ptr<Logger> logger;
 	//! Set a new logger
 	void setLogger(Logger* newLogger);
-	
 }
 
 template<typename T>
@@ -339,7 +303,7 @@ struct PointMatcher
 	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<F>
 	{
 		typedef PointMatcherSupport::SharedPtrVector<F> Vector;
-		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input) const;
+		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 	
 	typedef OutlierFilters<FeatureOutlierFilter> FeatureOutlierFilters;
@@ -374,7 +338,7 @@ struct PointMatcher
 		
 	protected:
 		// helper functions
-		Matrix crossProduct(const Matrix& A, const Matrix& B);
+		static Matrix crossProduct(const Matrix& A, const Matrix& B);
 		ErrorElements getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
 		
 	protected:
@@ -407,6 +371,7 @@ struct PointMatcher
 		const StringVector& getLimitNames() const { return limitNames; }
 		const StringVector& getValueNames() const { return valueNames; }
 		
+	protected:
 		static Vector matrixToAngles(const TransformationParameters& parameters);
 	};
 	
@@ -425,6 +390,7 @@ struct PointMatcher
 	
 	struct Inspector: public Parametrizable
 	{
+		
 		Inspector() {}
 		Inspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
 		
@@ -471,15 +437,15 @@ struct PointMatcher
 		void loadFromYaml(std::istream& in);
 
 		//! Return the remaining number of points in reading after prefiltering but before the iterative process
-		unsigned getNbPrefilteredReadingPts(){return nbPrefilteredReadingPts;};
+		unsigned getPrefilteredReadingPtsCount() const {return prefilteredReadingPtsCount;};
 		//! Return the remaining number of points in the keyframe after prefiltering but before the iterative process
-		unsigned getNbPrefilteredKeyframePts(){return nbPrefilteredKeyframePts;};
+		unsigned getPrefilteredKeyframePtsCount() const {return prefilteredKeyframePtsCount;};
 		
 	protected:
 		//! Remaining number of points after prefiltering but before the iterative process
-		unsigned nbPrefilteredReadingPts;
+		unsigned prefilteredReadingPtsCount;
 		//! Remaining number of points after prefiltering but before the iterative process
-		unsigned nbPrefilteredKeyframePts;
+		unsigned prefilteredKeyframePtsCount;
 
 		//! Protected contstructor, to prevent the creation of this object
 		ICPChainBase();
@@ -534,6 +500,7 @@ struct PointMatcher
 		PointMatcherSupport::Histogram<unsigned> pointCountKeyFrame;
 		PointMatcherSupport::Histogram<unsigned> pointCountTouched;
 		PointMatcherSupport::Histogram<double> overlapRatio;
+		// TODO: add helper in inspector, put this in inspector
 		
 		ICPSequence(const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
 		~ICPSequence();

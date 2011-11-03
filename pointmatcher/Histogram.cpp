@@ -99,6 +99,8 @@ namespace PointMatcherSupport
 	template<typename T>
 	void Histogram<T>::computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
 	{
+		typedef typename std::vector<T>::iterator Iterator;
+		
 		//assert(this->size() > 0);
 		if(this->size() > 0)
 		{
