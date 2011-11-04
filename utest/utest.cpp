@@ -295,7 +295,7 @@ TEST_F(DataFilterTest, UniformizeDensityDataPointsFilter)
 		validate2dTransformation();	
 
 		const double nbInitPts = data2D.features.cols();
-		const double nbRemainingPts = icp.getNbPrefilteredReadingPts();
+		const double nbRemainingPts = icp.getPrefilteredReadingPtsCount();
 		// FIXME: 10% seems of seems a little bit high
 		EXPECT_NEAR(nbRemainingPts/nbInitPts, 1-ratio[i], 0.10);
 		

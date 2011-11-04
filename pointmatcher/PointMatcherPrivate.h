@@ -33,33 +33,46 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_HISTOGRAM_H
-#define __POINTMATCHER_HISTOGRAM_H
-
-#include <vector>
-#include <string>
-#include <stdint.h>
+#ifndef __POINTMATCHER_PRIVATE_H
+#define __POINTMATCHER_PRIVATE_H
 
 namespace PointMatcherSupport
 {
-	template<typename T>
-	struct Histogram: public std::vector<T>
-	{
-		const size_t binCount;
-		const std::string name;
-		const std::string filePrefix;
-		const bool dumpStdErrOnExit;
-		
-		Histogram(const size_t binCount, const std::string& name, const std::string& 
-		filePrefix, const bool dumpStdErrOnExit);
-		
-		virtual ~Histogram();
-		
-		//! This function compute statistics and writes them into the variables passed as reference
-		void computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC);
-		
-		void dumpStats(std::ostream& os);
-	};
-} // namespace PointMatcherSupport
+	//! Mutex to protect creation and deletion of logger
+	extern boost::mutex loggerMutex;
+	//! Logger pointer
+	extern std::shared_ptr<Logger> logger;
+	
+	// macros holding the name of current function, send patches for your favourite compiler
+	#if defined(MSVC)
+		#define __POINTMATCHER_FUNCTION__ __FUNCSIG__
+	#elif defined(__GNUC__)
+		#define __POINTMATCHER_FUNCTION__ __PRETTY_FUNCTION__
+	#else
+		#define __POINTMATCHER_FUNCTION__ ""
+	#endif
+	
+	// macros for logging
+	#define LOG_INFO_STREAM(args) \
+	{ \
+		boost::mutex::scoped_lock lock(PointMatcherSupport::loggerMutex); \
+		if (PointMatcherSupport::logger.get() && \
+			PointMatcherSupport::logger->hasInfoChannel()) { \
+			PointMatcherSupport::logger->beginInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+			(*PointMatcherSupport::logger->infoStream()) << args; \
+			PointMatcherSupport::logger->finishInfoEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+		} \
+	}
+	#define LOG_WARNING_STREAM(args) \
+	{ \
+		boost::mutex::scoped_lock lock(PointMatcherSupport::loggerMutex); \
+		if (PointMatcherSupport::logger.get() && \
+			PointMatcherSupport::logger->hasWarningChannel()) { \
+			PointMatcherSupport::logger->beginWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+			(*PointMatcherSupport::logger->warningStream()) << args; \
+			PointMatcherSupport::logger->finishWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
+		} \
+	}
+};
 
-#endif // __POINTMATCHER_HISTOGRAM_H
+#endif // __POINTMATCHER_PRIVATE_H

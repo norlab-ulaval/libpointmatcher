@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "DataPointsFilters.h"
+#include "PointMatcherPrivate.h"
 #include "Matchers.h"
 #include "Functions.h"
 

@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "PointMatcher.h"
+#include "PointMatcherPrivate.h"
 #include "Timer.h"
 
 #include "Logger.h"
@@ -204,7 +205,7 @@ template<typename T> template<typename F>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::compute(
 	const typename PointMatcher<T>::DataPoints& filteredReading,
 	const typename PointMatcher<T>::DataPoints& filteredReference,
-	const typename PointMatcher<T>::Matches& input) const
+	const typename PointMatcher<T>::Matches& input)
 {
 	if (this->empty())
 	{
@@ -239,8 +240,8 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
 	outlierMixingWeight(0.5),
-	nbPrefilteredReadingPts(0),
-	nbPrefilteredKeyframePts(0)
+	prefilteredReadingPtsCount(0),
+	prefilteredKeyframePtsCount(0)
 {}
 
 template<typename T>
@@ -485,10 +486,10 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	size_t iterationCount(0);
 	
 	LOG_INFO_STREAM("PointMatcher::icp - preprocess took " << t.elapsed() << " [s]");
-	this->nbPrefilteredKeyframePts = reference.features.cols();
-	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << this->nbPrefilteredKeyframePts);
-	this->nbPrefilteredReadingPts = reading.features.cols();
-	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << this->nbPrefilteredReadingPts);
+	this->prefilteredKeyframePtsCount = reference.features.cols();
+	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << this->prefilteredKeyframePtsCount);
+	this->prefilteredReadingPtsCount = reading.features.cols();
+	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << this->prefilteredReadingPtsCount);
 	t.restart();
 	
 	while (iterate)
@@ -632,7 +633,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		this->keyframeDataPointsFilters.init();
 		this->keyframeDataPointsFilters.apply(inputCloud);
 		
-		pointCountKeyFrame.push_back(inputCloud.features.cols());
+		this->inspector->statPointCountKeyFrame(inputCloud.features.cols());
 
 
 		// Create intermediate frame at the center of mass of reference pts cloud
@@ -653,7 +654,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		
 		keyFrameCreated = true;
 	
-		keyFrameDuration.push_back(t.elapsed());
+		this->inspector->statKeyFrameDuration(t.elapsed());
 	}
 	else
 		LOG_WARNING_STREAM("Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)");
@@ -714,8 +715,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
 	
-	pointCountIn.push_back(inputCloud.features.cols());
-	pointCountReading.push_back(reading.features.cols());
+	this->inspector->statPointCountIn(inputCloud.features.cols());
+	this->inspector->statPointCountReading(reading.features.cols());
 	
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
@@ -798,8 +799,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 
 		++iterationCount;
 	}
-	iterationsCount.push_back(iterationCount);
-	pointCountTouched.push_back(this->matcher->getVisitCount());
+	this->inspector->statIterationsCount(iterationCount);
+	this->inspector->statPointCountTouched(this->matcher->getVisitCount());
 	this->matcher->resetVisitCount();
 	this->inspector->finish(iterationCount);
 	
@@ -812,7 +813,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	// T_refIn_refMean remove the temperary frame added during initialization
 	T_refIn_dataIn = T_refIn_refMean * T_iter * T_refMean_dataIn;
 	
-	overlapRatio.push_back(this->errorMinimizer->getWeightedPointUsedRatio());
+	this->inspector->statOverlapRatio(this->errorMinimizer->getWeightedPointUsedRatio());
 	
 	if (this->errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
 	{
@@ -821,7 +822,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		this->createKeyFrame(inputCloud);
 	}
 	
-	convergenceDuration.push_back(t.elapsed());
+	this->inspector->statConvergenceDuration(t.elapsed());
 	
 	//cout << "keyFrameTransform: " << endl << keyFrameTransform << endl;
 	//cout << "T_refIn_dataIn: " << endl << T_refIn_dataIn << endl;

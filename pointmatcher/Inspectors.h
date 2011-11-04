@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_INSPECTORS_H
 
 #include "PointMatcher.h"
+#include "Histogram.h"
 
 template<typename T>
 struct InspectorsImpl
@@ -63,8 +64,33 @@ struct InspectorsImpl
 			return "Does nothing.";
 		}
 	};
+	
+	struct PerformanceInspector: public Inspector
+	{
+	protected:
+		PointMatcherSupport::Histogram<double> keyFrameDuration;
+		PointMatcherSupport::Histogram<double> convergenceDuration;
+		PointMatcherSupport::Histogram<unsigned> iterationsCount;
+		PointMatcherSupport::Histogram<unsigned> pointCountIn;
+		PointMatcherSupport::Histogram<unsigned> pointCountReading;
+		PointMatcherSupport::Histogram<unsigned> pointCountKeyFrame;
+		PointMatcherSupport::Histogram<unsigned> pointCountTouched;
+		PointMatcherSupport::Histogram<double> overlapRatio;
+	
+	public:
+		PerformanceInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
+		
+		virtual void statKeyFrameDuration(double duration) { keyFrameDuration.push_back(duration); }
+		virtual void statConvergenceDuration(double duration) { convergenceDuration.push_back(duration); }
+		virtual void statIterationsCount(unsigned count) { iterationsCount.push_back(count); }
+		virtual void statPointCountIn(unsigned count) { pointCountIn.push_back(count); }
+		virtual void statPointCountReading(unsigned count) { pointCountReading.push_back(count); }
+		virtual void statPointCountKeyFrame(unsigned count) { pointCountKeyFrame.push_back(count); }
+		virtual void statPointCountTouched(unsigned count) { pointCountTouched.push_back(count); }
+		virtual void statOverlapRatio(double ratio) { overlapRatio.push_back(ratio); }
+	};
 
-	struct AbstractVTKInspector: public Inspector
+	struct AbstractVTKInspector: public PerformanceInspector
 	{
 	protected:
 		virtual std::ostream* openStream(const std::string& role) = 0;
@@ -111,7 +137,8 @@ struct InspectorsImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" }
+				{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" },
+				{ "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" }
 			});
 		}
 		

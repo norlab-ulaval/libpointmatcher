@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Matchers.h"
+#include "PointMatcherPrivate.h"
 
 // NullMatcher
 template<typename T>

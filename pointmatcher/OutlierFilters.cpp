@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "OutlierFilters.h"
+#include "PointMatcherPrivate.h"
 
 #include <algorithm>
 #include <vector>
