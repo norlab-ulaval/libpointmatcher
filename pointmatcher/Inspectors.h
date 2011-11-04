@@ -73,7 +73,7 @@ struct InspectorsImpl
 		HistogramMap stats;
 	
 	public:
-		PerformanceInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
+		PerformanceInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		
 		virtual void addStat(const std::string& name, double data);
 		virtual void dumpStats(std::ostream& stream);
@@ -92,7 +92,7 @@ struct InspectorsImpl
 		std::ostream* streamIter;
 
 	public:
-		AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
+		AbstractVTKInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual void init() {};
 		virtual void dumpDataPoints(const DataPoints& cloud, const std::string& name);
 		virtual void dumpMeshNodes(const DataPoints& cloud, const std::string& name);

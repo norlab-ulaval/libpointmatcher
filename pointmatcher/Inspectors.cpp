@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 template<typename T>
-InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
+InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 	Inspector(className,paramsDoc,params)
 {
 }
@@ -101,7 +101,7 @@ void InspectorsImpl<T>::PerformanceInspector::dumpStats(std::ostream& stream)
 		ofs << " ";
 	}*/
 template<typename T>
-InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
+InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 	PerformanceInspector(className,paramsDoc,params),
 	streamIter(0)
 {
