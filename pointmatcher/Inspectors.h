@@ -68,26 +68,15 @@ struct InspectorsImpl
 	struct PerformanceInspector: public Inspector
 	{
 	protected:
-		PointMatcherSupport::Histogram<double> keyFrameDuration;
-		PointMatcherSupport::Histogram<double> convergenceDuration;
-		PointMatcherSupport::Histogram<unsigned> iterationsCount;
-		PointMatcherSupport::Histogram<unsigned> pointCountIn;
-		PointMatcherSupport::Histogram<unsigned> pointCountReading;
-		PointMatcherSupport::Histogram<unsigned> pointCountKeyFrame;
-		PointMatcherSupport::Histogram<unsigned> pointCountTouched;
-		PointMatcherSupport::Histogram<double> overlapRatio;
+		typedef PointMatcherSupport::Histogram<double> Histogram;
+		typedef std::map<std::string, Histogram> HistogramMap;
+		HistogramMap stats;
 	
 	public:
 		PerformanceInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
 		
-		virtual void statKeyFrameDuration(double duration) { keyFrameDuration.push_back(duration); }
-		virtual void statConvergenceDuration(double duration) { convergenceDuration.push_back(duration); }
-		virtual void statIterationsCount(unsigned count) { iterationsCount.push_back(count); }
-		virtual void statPointCountIn(unsigned count) { pointCountIn.push_back(count); }
-		virtual void statPointCountReading(unsigned count) { pointCountReading.push_back(count); }
-		virtual void statPointCountKeyFrame(unsigned count) { pointCountKeyFrame.push_back(count); }
-		virtual void statPointCountTouched(unsigned count) { pointCountTouched.push_back(count); }
-		virtual void statOverlapRatio(double ratio) { overlapRatio.push_back(ratio); }
+		virtual void addStat(const std::string& name, double data);
+		virtual void dumpStats(std::ostream& stream);
 	};
 
 	struct AbstractVTKInspector: public PerformanceInspector

@@ -44,16 +44,35 @@ using namespace std;
 
 template<typename T>
 InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
-	Inspector(className,paramsDoc,params),
-	keyFrameDuration(16, "key_frame_duration", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
-	convergenceDuration(16, "convergence_duration", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
-	iterationsCount(16, "iterations_count", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
-	pointCountIn(16, "point_count_in", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
-	pointCountReading(16, "point_count_reading", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
-	pointCountKeyFrame(16, "point_count_key_frame", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
-	pointCountTouched(16, "point_count_touched", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit")),
-	overlapRatio(16, "overlap_ratio", Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit"))
+	Inspector(className,paramsDoc,params)
 {
+}
+
+template<typename T>
+void InspectorsImpl<T>::PerformanceInspector::addStat(const std::string& name, double data)
+{
+	HistogramMap::iterator it(stats.find(name));
+	if (it == stats.end())
+		it = stats.insert(
+			HistogramMap::value_type(name, 
+				Histogram(16, name, Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit"))
+			)
+		).first;
+	it->second.push_back(data);
+}
+
+template<typename T>
+void InspectorsImpl<T>::PerformanceInspector::dumpStats(std::ostream& stream)
+{
+	// Note: this dump format will most probably change in the future
+	for (auto it(stats.begin()); it != stats.end(); ++it)
+	{
+		it->second.dumpStats(stream);
+		auto jt(it);
+		++jt;
+		if (jt != stats.end())
+			stream << " * ";
+	}
 }
 
 /*

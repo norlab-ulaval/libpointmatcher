@@ -72,7 +72,7 @@ namespace PointMatcherSupport
 	Uncomment once most people have gcc >= 4.5
 	Shame on bug  9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050)
 	template<typename S>
-	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const S defaultValue, const S minValue, const S maxValue):
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const S defaultValue, const S minValue, const S maxValue):
 		name(name),
 		doc(doc),
 		defaultValue(boost::lexical_cast<string>(defaultValue)), 
@@ -82,7 +82,7 @@ namespace PointMatcherSupport
 	{}
 	
 	template<typename S>
-	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const S defaultValue):
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const S defaultValue):
 		name(name),
 		doc(doc),
 		defaultValue(boost::lexical_cast<string>(defaultValue)), 
@@ -92,7 +92,7 @@ namespace PointMatcherSupport
 	{}
 	*/
 	
-	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue, const std::string minValue, const std::string maxValue, LexicalComparison comp):
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue, const std::string& minValue, const std::string& maxValue, LexicalComparison comp):
 		name(name),
 		doc(doc),
 		defaultValue(defaultValue), 
@@ -101,7 +101,7 @@ namespace PointMatcherSupport
 		comp(comp)
 	{}
 	
-	Parametrizable::ParameterDoc::ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue):
+	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue):
 		name(name),
 		doc(doc),
 		defaultValue(boost::lexical_cast<string>(defaultValue)), 
@@ -139,7 +139,7 @@ namespace PointMatcherSupport
 	*/
 	
 	Parametrizable::Parametrizable(
-		const std::string className, const ParametersDoc paramsDoc, const Parameters& params):
+		const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 		className(className),
 		parametersDoc(paramsDoc)
 	{

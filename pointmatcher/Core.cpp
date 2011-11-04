@@ -625,8 +625,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		this->keyframeDataPointsFilters.init();
 		this->keyframeDataPointsFilters.apply(inputCloud);
 		
-		this->inspector->statPointCountKeyFrame(inputCloud.features.cols());
-
+		this->inspector->addStat("PointCountKeyFrame", inputCloud.features.cols());
 
 		// Create intermediate frame at the center of mass of reference pts cloud
 		//  this help to solve for rotations
@@ -646,7 +645,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		
 		keyFrameCreated = true;
 	
-		this->inspector->statKeyFrameDuration(t.elapsed());
+		this->inspector->addStat("KeyFrameDuration", t.elapsed());
 	}
 	else
 		LOG_WARNING_STREAM("Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)");
@@ -707,8 +706,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
 	
-	this->inspector->statPointCountIn(inputCloud.features.cols());
-	this->inspector->statPointCountReading(reading.features.cols());
+	this->inspector->addStat("PointCountIn", inputCloud.features.cols());
+	this->inspector->addStat("PointCountReading", reading.features.cols());
 	
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
@@ -791,8 +790,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 
 		++iterationCount;
 	}
-	this->inspector->statIterationsCount(iterationCount);
-	this->inspector->statPointCountTouched(this->matcher->getVisitCount());
+	this->inspector->addStat("IterationsCount", iterationCount);
+	this->inspector->addStat("PointCountTouched", this->matcher->getVisitCount());
 	this->matcher->resetVisitCount();
 	this->inspector->finish(iterationCount);
 	
@@ -805,7 +804,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	// T_refIn_refMean remove the temperary frame added during initialization
 	T_refIn_dataIn = T_refIn_refMean * T_iter * T_refMean_dataIn;
 	
-	this->inspector->statOverlapRatio(this->errorMinimizer->getWeightedPointUsedRatio());
+	this->inspector->addStat("OverlapRatio", this->errorMinimizer->getWeightedPointUsedRatio());
 	
 	if (this->errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
 	{
@@ -814,7 +813,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		this->createKeyFrame(inputCloud);
 	}
 	
-	this->inspector->statConvergenceDuration(t.elapsed());
+	this->inspector->addStat("ConvergenceDuration", t.elapsed());
 	
 	//cout << "keyFrameTransform: " << endl << keyFrameTransform << endl;
 	//cout << "T_refIn_dataIn: " << endl << T_refIn_dataIn << endl;

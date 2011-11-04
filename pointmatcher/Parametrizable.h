@@ -110,12 +110,12 @@ namespace PointMatcherSupport
 			something that work on gcc 4.4.
 			
 			template<typename S>
-			ParameterDoc(const std::string name, const std::string doc, const S defaultValue, const S minValue, const S maxValue = std::numeric_limits<S>::max());
+			ParameterDoc(const std::string& name, const std::string& doc, const S defaultValue, const S minValue, const S maxValue = std::numeric_limits<S>::max());
 			template<typename S>
-			ParameterDoc(const std::string name, const std::string doc, const S defaultValue);
+			ParameterDoc(const std::string& name, const std::string& doc, const S defaultValue);
 			*/
-			ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue, const std::string minValue, const std::string maxValue, LexicalComparison comp);
-			ParameterDoc(const std::string name, const std::string doc, const std::string defaultValue);
+			ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue, const std::string& minValue, const std::string& maxValue, LexicalComparison comp);
+			ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue);
 			
 			friend std::ostream& operator<< (std::ostream& o, const ParameterDoc& p);
 		};
@@ -144,7 +144,7 @@ namespace PointMatcherSupport
 		Parameters parameters;
 		
 		Parametrizable():className("unknown") {}
-		Parametrizable(const std::string className, const ParametersDoc paramsDoc, const Parameters& params);
+		Parametrizable(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~Parametrizable(){}
 		
 		std::string getParamValueString(const std::string& paramName) const;
