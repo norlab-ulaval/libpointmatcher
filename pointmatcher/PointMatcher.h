@@ -556,7 +556,6 @@ struct PointMatcher
 		#endif // HAVE_YAML_CPP
 		
 	private:
-		int dim; //!< dimension of point clouds to process. Homogeneous coordinates are used, so expecting 3 or 4 
 		bool keyFrameCreated; //!< true if the key frame was created at least once
 		DataPoints keyFrameCloud; //!< point cloud of the keyframe
 		TransformationParameters keyFrameTransform; //!< pose of keyframe

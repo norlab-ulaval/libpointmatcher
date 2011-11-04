@@ -582,7 +582,6 @@ PointMatcher<T>::ICPSequence::ICPSequence(const std::string& filePrefix, const b
 	pointCountKeyFrame(16, "point_count_key_frame", filePrefix, dumpStdErrOnExit),
 	pointCountTouched(16, "point_count_touched", filePrefix, dumpStdErrOnExit),
 	overlapRatio(16, "overlap_ratio", filePrefix, dumpStdErrOnExit),
-	dim(-1),
 	keyFrameCreated(false)
 {
 }
@@ -622,7 +621,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 {
 	timer t; // Print how long take the algo
 	t.restart();
-	const int tDim(keyFrameTransform.rows());
+	const int dim(keyFrameTransform.rows());
 	const int ptCount(inputCloud.features.cols());
 	
 	// update keyframe
@@ -648,7 +647,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		inputCloud.features.topRows(dim-1).colwise() -= meanKeyframe.head(dim-1);
 	
 		keyFrameCloud = inputCloud;
-		T_refIn_dataIn = Matrix::Identity(tDim, tDim);
+		T_refIn_dataIn = Matrix::Identity(dim, dim);
 		
 		this->matcher->init(keyFrameCloud);
 		
@@ -674,28 +673,35 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	if (!this->inspector)
 		throw runtime_error("You must setup a logger before running ICP");
 	
-	// Initialization at the first point cloud received
-	if(this->dim == -1)
-	{
-		this->dim = inputCloudIn.features.rows();
-		assert(this->dim == 3 || this->dim == 4);
-
-		keyFrameTransform = Matrix::Identity(this->dim, this->dim);
-		T_refIn_refMean = Matrix::Identity(this->dim, this->dim);
-		T_refIn_dataIn = Matrix::Identity(this->dim, this->dim);
-		lastTransformInv = Matrix::Identity(this->dim, this->dim);
-	}
-	
 	lastTransformInv = getTransform().inverse();
 	DataPoints inputCloud(inputCloudIn);
 	
+	const int dim = inputCloudIn.features.rows();
+	
 	// initial keyframe
-	// FIXME: merge haskeyFrame and dim
 	keyFrameCreated = false;
 	if (!hasKeyFrame())
 	{
+		const int ptCount = inputCloudIn.features.cols();
+		
+		if(!(dim == 3 || dim == 4))
+			throw runtime_error("Point cloud should be 2D or 3D in homogeneous coordinates");
+		if (ptCount == 0)
+			return Matrix::Identity(dim, dim);
+		
+		// Initialize transformation matrices
+		keyFrameTransform = Matrix::Identity(dim, dim);
+		T_refIn_refMean = Matrix::Identity(dim, dim);
+		T_refIn_dataIn = Matrix::Identity(dim, dim);
+		lastTransformInv = Matrix::Identity(dim, dim);
+
 		this->createKeyFrame(inputCloud);
 		return T_refIn_dataIn;
+	}
+	else
+	{
+		if(inputCloudIn.features.rows() != keyFrameTransform.rows())
+			throw runtime_error((boost::format("Point cloud shouldn't change dimensions. Homogeneous dimension was %1% and is now %2%.") % keyFrameTransform.rows() % inputCloudIn.features.rows()).str());
 	}
 	
 	timer t; // Print how long take the algo
