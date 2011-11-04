@@ -575,14 +575,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 template<typename T>
 PointMatcher<T>::ICPSequence::ICPSequence(const std::string& filePrefix, const bool dumpStdErrOnExit):
 	ratioToSwitchKeyframe(0.8),
-	keyFrameDuration(16, "key_frame_duration", filePrefix, dumpStdErrOnExit),
-	convergenceDuration(16, "convergence_duration", filePrefix, dumpStdErrOnExit),
-	iterationsCount(16, "iterations_count", filePrefix, dumpStdErrOnExit),
-	pointCountIn(16, "point_count_in", filePrefix, dumpStdErrOnExit),
-	pointCountReading(16, "point_count_reading", filePrefix, dumpStdErrOnExit),
-	pointCountKeyFrame(16, "point_count_key_frame", filePrefix, dumpStdErrOnExit),
-	pointCountTouched(16, "point_count_touched", filePrefix, dumpStdErrOnExit),
-	overlapRatio(16, "overlap_ratio", filePrefix, dumpStdErrOnExit),
 	keyFrameCreated(false)
 {
 }
