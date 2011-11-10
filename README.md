@@ -47,8 +47,7 @@ This out-of-source build is a nice feature of [CMake] under Unixes.
 If [Eigen], [libnabo] or [yaml-cpp] are not installed system-wide, you might have to tell [CMake] where to find them.
 You can do this with a command-line tool, `ccmake`, or with a graphical tool, `cmake-gui`.
 Please read the [CMake documentation] for more information.
-Note that if you have [ROS] (Diamondback or later) installed, Eigen 3 should be availabe in the path `/opt/ros/diamondback/stacks/geometry/eigen/include`.
-
+Note that if you have [ROS] (Diamondback) installed, Eigen 3 should be availabe in the path `/opt/ros/diamondback/stacks/geometry/eigen/include`.
 
 Test
 ====
