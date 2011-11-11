@@ -573,7 +573,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 }
 
 template<typename T>
-PointMatcher<T>::ICPSequence::ICPSequence(const std::string& filePrefix, const bool dumpStdErrOnExit):
+PointMatcher<T>::ICPSequence::ICPSequence():
 	ratioToSwitchKeyframe(0.8),
 	keyFrameCreated(false)
 {

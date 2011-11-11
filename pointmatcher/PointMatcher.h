@@ -499,7 +499,7 @@ struct PointMatcher
 	{
 		T ratioToSwitchKeyframe;
 		
-		ICPSequence(const std::string& filePrefix = "", const bool dumpStdErrOnExit = false);
+		ICPSequence();
 		~ICPSequence();
 		
 		TransformationParameters operator()(const DataPoints& inputCloudIn);
