@@ -165,6 +165,7 @@ template<typename T>
 void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 {
 	DataPoints filteredCloud;
+
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
 	{
 		const int pointsCount(cloud.features.cols());
@@ -173,6 +174,7 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 		
 		filteredCloud = (*it)->filter(cloud);
 		swapDataPoints<T>(cloud, filteredCloud);
+		LOG_INFO_STREAM("in: " << pointsCount << " pts -> out: " << cloud.features.cols());
 	}
 }
 
@@ -837,6 +839,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, OrientNormalsDataPointsFilter, typename DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, RandomSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, FixStepSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, ShadowDataPointsFilter, typename DataPointsFiltersImpl<T>::ShadowDataPointsFilter)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)

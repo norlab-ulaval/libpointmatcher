@@ -53,13 +53,23 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPointsFilter DataPointsFilter;
 	
-	//! Identidy, does nothing
+	//! Identity, does nothing
 	struct IdentityDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
 			return "Does nothing.";
 		}
+		
+		//inline static const ParametersDoc availableParameters()
+		//{
+		//	return ParametersDoc({
+		//		{ "param1", "Description of the parameter", "defaultValue", "minValue", "maxValue", type of the parameter },
+		//		{ "param2", "Description of the parameter", "defaultValue", "minValue", "maxValue", type of the parameter }
+		//	});
+		//}
+		//! Constructor, uses parameter interface
+		//IdentityDataPointsFilter(const Parameters& params = Parameters());
 		
 		virtual DataPoints filter(const DataPoints& input);
 	};
@@ -276,7 +286,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the center of the point cloud).", "1"}
+				{ "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the center of the point cloud).", "1", "0", "1", &P::Comp<bool>}
 			});
 		}
 
@@ -343,6 +353,32 @@ struct DataPointsFiltersImpl
 	private:
 		DataPoints fixstepSample(const DataPoints& input);
 	};
+
+	//! Shadow filter, remove ghost points appearing on edges
+	struct ShadowDataPointsFilter: public DataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			return "Remove ghost points appearing on edge discontinuties. Assume that the origine of the point cloud is close to where the laser center was. Requires surface normal for every points";
+		}
+		
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "eps", "Small angle (in rad) around which a normal shoudn't be observable", "0.009", "0.0", "3.1416", &P::Comp<T> }
+			});
+		}
+
+	protected:
+		T eps;
+
+	public:
+		//! Constructor, uses parameter interface
+		ShadowDataPointsFilter(const Parameters& params = Parameters());
+		
+		virtual DataPoints filter(const DataPoints& input);
+	};
+
 }; // DataPointsFiltersImpl
 
 #endif // __POINTMATCHER_DATAPOINTSFILTERS_H

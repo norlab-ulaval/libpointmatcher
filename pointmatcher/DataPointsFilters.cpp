@@ -956,7 +956,7 @@ template struct DataPointsFiltersImpl<double>::SamplingSurfaceNormalDataPointsFi
 template<typename T>
 DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::OrientNormalsDataPointsFilter(const Parameters& params):
 	DataPointsFilter("OrientNormalsDataPointsFilter", OrientNormalsDataPointsFilter::availableParameters(), params),
-	towardCenter(Parametrizable::get<double>("towardCenter"))
+	towardCenter(Parametrizable::get<bool>("towardCenter"))
 {
 }
 
@@ -1167,4 +1167,64 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDa
 
 template struct DataPointsFiltersImpl<float>::FixStepSamplingDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::FixStepSamplingDataPointsFilter;
+
+// ShadowDataPointsFilter
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::ShadowDataPointsFilter::ShadowDataPointsFilter(const Parameters& params):
+	DataPointsFilter("ShadowDataPointsFilter", ShadowDataPointsFilter::availableParameters(), params),
+	eps(sin(Parametrizable::get<T>("eps")))
+{
+}
+
+
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ShadowDataPointsFilter::filter(
+	const DataPoints& input)
+{
+	const int dim = input.features.rows();
+	
+	DataPoints outputCloud;
+
+	// Force normals to be computed
+	if (input.getDescriptorByName("normals").cols() == 0)
+	{
+		LOG_INFO_STREAM("Warning: no normals found. Will force computation with default parameters");
+
+		auto normalFilter = new typename DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter;
+		outputCloud = normalFilter->filter(input);
+	}
+	else
+	{
+		outputCloud = input;	
+	}
+
+	const Matrix normals = outputCloud.getDescriptorByName("normals");
+	int j = 0;
+
+	for(int i=0; i < input.features.cols(); i++)
+	{
+		const Vector normal = normals.col(i).normalized();
+		const Vector point = input.features.block(0, i, dim-1, 1).normalized();
+		
+		const T value = anyabs(normal.dot(point));
+
+		if(value > eps) // test to keep the points
+		{
+			outputCloud.features.col(j) = input.features.col(i);
+			outputCloud.descriptors.col(j) = input.descriptors.col(i);
+			
+			j++;
+		}
+	}
+
+	outputCloud.features.conservativeResize(Eigen::NoChange, j);
+	outputCloud.descriptors.conservativeResize(Eigen::NoChange, j);
+	
+	return outputCloud;
+}
+
+template struct DataPointsFiltersImpl<float>::ShadowDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::ShadowDataPointsFilter;
+
 
