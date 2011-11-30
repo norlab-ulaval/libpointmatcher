@@ -85,7 +85,7 @@ Please use [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/i
 Citing
 ======
 
-If you use libpointmatcher in an academic contest, please cite the following publication:
+If you use libpointmatcher in an academic context, please cite the following publication:
 
 	@INPROCEEDINGS{pomerleau11tracking,
 		author = {François Pomerleau and Stéphane Magnenat and Francis Colas and Ming Liu and Roland Siegwart},
