@@ -238,12 +238,11 @@ void usage(const char *argv[])
 	cerr << "--config YAML_CONFIG_FILE  Load the config from a YAML file (default: default parameters)" << endl;
 	cerr << "--output FILENAME          Name of output files (default: test)" << endl;
 	cerr << endl;
-	cerr << "Running this program will create 3 vtk ouptput files: ./test_ref.vtk, ./test_data_in.vtk and ./test_data_out.vtk" << endl;
+	cerr << "Running this program with a VTKFileInspector as Inspector will create three" << endl;
+	cerr << "vtk ouptput files: ./test_ref.vtk, ./test_data_in.vtk and ./test_data_out.vtk" << endl;
 	cerr << endl << "2D Example:" << endl;
-	cerr << "  " << argv[0] << " ../examples/data/2D_twoBoxes.csv ../examples/data/2D_oneBox.csv" << endl;
+	cerr << "  " << argv[0] << " examples/data/2D_twoBoxes.csv examples/data/2D_oneBox.csv" << endl;
 	cerr << endl << "3D Example:" << endl;
-	cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
-	cerr << endl;
-	cerr << "You can list available modules using the \"list_modules\" command" << endl;
+	cerr << "  " << argv[0] << " examples/data/car_cloud400.csv examples/data/car_cloud401.csv" << endl;
 	cerr << endl;
 }

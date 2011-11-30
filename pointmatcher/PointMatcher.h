@@ -57,6 +57,117 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parametrizable.h"
 #include "Registrar.h"
 
+/*! 
+	\file PointMatcher.h
+	\brief public interface
+*/
+
+/*!
+\mainpage libpointmatcher
+
+from http://github.com/ethz-asl/libpointmatcher by François Pomerleau and Stéphane Magnenat (http://stephane.magnenat.net), ASL-ETHZ, Switzerland (http://www.asl.ethz.ch)
+
+libpointmatcher is a modular ICP library, useful for robotics and computer vision. This help assumes that libpointmatcher is already installed, if not, please read the \c README.md file at the top-level of the source tree.
+
+\section Test
+
+To test, you can use the \c pmicp command provided in the \c example directory, or installed system-wide with the \c -bin deb package.
+
+In 2D:
+\code
+pmicp ${SRC_DIR}/examples/data/2D_oneBox.csv ${SRC_DIR}/examples/data/data/2D_twoBoxes.csv
+\endcode
+In 3D:
+\code
+pmicp ${SRC_DIR}/examples/data/car_cloud401.csv ${SRC_DIR}/examples/data/car_cloud400.csv
+\endcode
+Use \ref Paraview to view the results. On \ref Ubuntu, you can install Paraview with:
+\code
+sudo apt-get install paraview
+\endcode
+
+You can list the available modules with:
+\code
+pmicp -l
+\endcode
+
+If you have compiled libpointmatcher with \ref yaml-cpp enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the \c pmicp command using the \c--config switch. An example file is available in \c data/examples/default.yaml.
+
+\section DevelopingUsing Developing using libpointmatcher
+
+If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and icp (in \c example/icp_simple.cpp and \c example/icp.cpp). You can see how loading/saving of data files work by looking at convertCSVtoVTK (\c example/convertCSVtoVTK.cpp). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (\c example/align_sequence.cpp).
+
+\section DevelopingSelf Extending libpointmatcher
+
+You can also extend libpointmatcher relatively easily, by adding new modules. The file PointMatcher.h is the most important file, it defines the interfaces for all module types, as well as the ICP algorithms. Each interface is an inner class of the PointMatcher class, which is templatized on the scalar type. Instanciation is forced in \c Core.cpp for float and double scalar types. There are different types of modules corresponding to the different bricks of the ICP algorithm. The modules themselves are defined in their own files, for instance data-point filters live in the \c DataPointFilters.h/\c.cpp files. You can read a description of the ICP chain architecture in our \ref icppaper "IROS paper". Then, start from the documentation of PointMatcher to see the different interfaces, and then read the source code of the existing modules for the interface you are interested in, to get an idea of what you have to implement.
+
+All modules have a common way to get parameters at initialization, and feature a self-documentation mechanism. This allows to configure the ICP chain from external descriptions such as \ref yaml-cpp "yaml files".
+
+\section CreatingNewDataPointFilter Example: creating a new module of type DataPointsFilter
+
+You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "DataPointsFilter": \c DataPointsFilter.h, \c DataPointsFilter.cpp and \c Core.cpp. The easiest way is to start by copying and renaming \c IdentityDataPointsFilter, and then to modify it.
+
+- In \c DataPointsFilter.h, copy the declaration of the struct \c IdentityDataPointsFilter at the end of the file,
+- Rename the pasted structure with the new filter name,
+- Fill the \c description() function with a short explanation of the filter's action,
+- If you need parameters for the filter:
+	- Uncomment the \c availableParameters() function and filled the description, default, min, max values as string,
+	- The types of the parameters are used to properly cast the string value and can be:  &P::Comp<T>, &P::Comp<int>, &P::Comp<unsigned>, etc. See \c DataPointsFilters.h for examples,
+	- Uncomment and rename the constructor.
+
+- In \c DataPointsFilter.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the predeclaration (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct 
+\c DataPointsFiltersImpl<double>::YourFilter;),
+- Add the constructor if needed,
+- At this stage, you should let the implementation of the filter function to hold only the statement that returns the input.
+
+- In \c Core.cpp, search for \c "ADD_TO_REGISTRAR(DataPointsFilter,",
+- You should see all available \c dataPointfilter there. At the end of that block, add your filter.
+
+- Compile.
+
+- Test if your new module is available with the \c pmicp \c -l command, which lists the documentation of all modules. You should be able to find yours in the output.
+
+- Go back to \c DataPointFilter.cpp and code the \c filter() function.
+
+\section BugReporting Bug reporting
+
+Please use <a href="http://github.com/ethz-asl/libpointmatcher/issues">github's issue tracker</a> to report bugs.
+
+\section Citing
+
+If you use libpointmatcher in an academic context, please cite the following publication:
+\code
+@INPROCEEDINGS{pomerleau11tracking,
+	author = {François Pomerleau and Stéphane Magnenat and Francis Colas and Ming Liu and Roland Siegwart},
+	title = {Tracking a Depth Camera: Parameter Exploration for Fast ICP},
+	booktitle = {Proc. of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+	publisher = {IEEE Press},
+	pages = {3824--3829},
+	year = {2011}
+}
+\endcode
+
+\section License
+
+libpointmatcher is released under a permissive BSD license.
+
+\section References
+
+- \anchor icppaper IROS paper: http://publications.asl.ethz.ch/files/pomerleau11tracking.pdf
+- \anchor Eigen Eigen: http://eigen.tuxfamily.org
+- \anchor libnabo libnabo: http://github.com/ethz-asl/libnabo
+- \anchor yaml-cpp yaml-cpp: http://code.google.com/p/yaml-cpp/
+- \anchor CMake CMake: http://www.cmake.org
+- \anchor Boost Boost: http://www.boost.org
+- \anchor Ubuntu Ubuntu: http://www.ubuntu.com
+- \anchor CMake CMake: http://www.cmake.org
+- \anchor CMakeDoc CMake documentation: http://www.cmake.org/cmake/help/cmake2.6docs.html
+- \anchor git git: http://git-scm.com
+- \anchor ROS ROS: http://www.ros.org/
+- \anchor Paraview Paraview: http://www.paraview.org/
+
+*/
+
 #ifdef HAVE_YAML_CPP
 namespace YAML
 {
@@ -69,6 +180,7 @@ namespace YAML
 //! version of the Pointmatcher library as an int
 #define POINTMATCHER_VERSION_INT "900"
 
+//! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
 {
 	//! A vector of std::shared_ptr<S> that behaves like a std::vector<S>
@@ -78,7 +190,7 @@ namespace PointMatcherSupport
 		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
 	};
 	
-	// The logger holds one mutex for each type of output, making the log macros thread safe
+	//! The logger interface, used to output warnings and informations
 	struct Logger: public Parametrizable
 	{
 		Logger() {}
@@ -95,10 +207,11 @@ namespace PointMatcherSupport
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func) {}
 	};
 	
-	//! Set a new logger
+	//! Set a new logger, protected by a mutex
 	void setLogger(Logger* newLogger);
 }
 
+//! Functions and classes that are dependant on scalar type are defined in this templatized class
 template<typename T>
 struct PointMatcher
 {

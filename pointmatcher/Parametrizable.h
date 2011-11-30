@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/lexical_cast.hpp>
 #include <limits>
 
+
 namespace PointMatcherSupport
 {
 	// improvements over boost::lexical_cast that can handle "inf", "-inf", "Nan" for float and doubles
