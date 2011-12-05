@@ -148,17 +148,17 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Subsampling. Reduce the points number of a certain ration while trying to uniformize the density of the point cloud.";
+			return "Subsampling. Reduce the points number while trying to uniformize the density of the point cloud.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{"ratio", "targeted reduction ratio", "0.5", "0.0000001", "0.9999999", &P::Comp<T>},
-				{ "nbBin", "number of bin used to estimate the probability distribution of the density.", "10", "1", "2147483647", &P::Comp<unsigned> }
+				{"aggressivity", "how aggressively high density points should be subsampled.", "0.5", "0.0000001", "0.9999999", &P::Comp<T>},
+				{ "nbBin", "number of bin used to estimate the probability distribution of the density.", "15", "1", "2147483647", &P::Comp<unsigned> }
 			});
 		}
 		
-		const T ratio;
+		const T aggressivity;
 		const unsigned nbBin;
 		
 		//! Constructor, uses parameter interface
@@ -209,9 +209,9 @@ struct DataPointsFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			//FIXME: clarify binSize and averageExistingDescriptors
 			return ParametersDoc({
-				{ "binSize", "limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> },
+				{ "ratio", "targeted reduction ratio", "0.5", "0.0000001", "0.9999999", &P::Comp<T> },
+				{ "binSize", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> },
 				{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
 				{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" },
 				{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" },
@@ -220,12 +220,14 @@ struct DataPointsFiltersImpl
 			});
 		}
 		
+		const T ratio;
 		const unsigned binSize;
 		const bool averageExistingDescriptors;
 		const bool keepNormals;
 		const bool keepDensities;
 		const bool keepEigenValues;
 		const bool keepEigenVectors;
+		
 		
 	public:
 		SamplingSurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
@@ -243,13 +245,15 @@ struct DataPointsFiltersImpl
 			Matrix outputFeatures;
 			Matrix outputDescriptors;
 			int outputInsertionPoint;
+			int unfitPointsCount;
 			
 			BuildData(const Matrix& inputFeatures, const Matrix& inputDescriptors, const int finalDescDim):
 				inputFeatures(inputFeatures),
 				inputDescriptors(inputDescriptors),
 				outputFeatures(inputFeatures.rows(), inputFeatures.cols()),
 				outputDescriptors(finalDescDim, inputFeatures.cols()),
-				outputInsertionPoint(0)
+				outputInsertionPoint(0),
+				unfitPointsCount(0)
 			{
 				const int pointsCount(inputFeatures.cols());
 				indices.reserve(pointsCount);
@@ -365,7 +369,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "eps", "Small angle (in rad) around which a normal shoudn't be observable", "0.009", "0.0", "3.1416", &P::Comp<T> }
+				{ "eps", "Small angle (in rad) around which a normal shoudn't be observable", "0.1", "0.0", "3.1416", &P::Comp<T> }
 			});
 		}
 

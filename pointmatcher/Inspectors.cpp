@@ -115,7 +115,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	//const typename DataPoints::Descriptors& descriptors(data.descriptors);
 	
 	stream << "# vtk DataFile Version 3.0\n";
-	stream << "comment\n";
+	stream << "File created by libpointmatcher\n";
 	stream << "ASCII\n";
 	stream << "DATASET POLYDATA\n";
 	stream << "POINTS " << features.cols() << " float\n";
@@ -137,6 +137,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	buildNormalStream(stream, "normals", data);
 	buildVectorStream(stream, "eigValues", data);
 	buildTensorStream(stream, "eigVectors", data);
+	//TODO: add support for colors
 
 }
 
@@ -533,8 +534,16 @@ void InspectorsImpl<T>::VTKFileInspector::finish(const size_t iterationCount)
 template<typename T>
 std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string& role)
 {
+	string filteredStr = role;
+	if(role.substr(role.size()-4,4) == ".vtk")
+		filteredStr = role.substr(0, role.size()-4);
+
 	ostringstream oss;
-	oss << baseFileName << "-" << role << ".vtk";
+	if(baseFileName != "")
+		oss << baseFileName << "-" << filteredStr << ".vtk";
+	else
+		oss << filteredStr << ".vtk";
+
 	ofstream* file = new ofstream(oss.str().c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if repository exist.");
