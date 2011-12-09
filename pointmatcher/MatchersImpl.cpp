@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Matchers.h"
+#include "MatchersImpl.h"
 #include "PointMatcherPrivate.h"
 
 // NullMatcher

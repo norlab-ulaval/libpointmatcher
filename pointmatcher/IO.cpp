@@ -264,8 +264,9 @@ PointMatcher<float>::DataPoints PointMatcher<float>::loadCSV(const std::string& 
 template
 PointMatcher<double>::DataPoints PointMatcher<double>::loadCSV(const std::string& fileName);
 
+//! Save point cloud to a file as CSV
 template<typename T>
-void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName)
+void PointMatcher<T>::saveCSV(const DataPoints& data, const std::string& fileName)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
@@ -273,10 +274,11 @@ void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, 
 	saveCSV(data, ofs);
 }
 
+//! Save point cloud to a stream as CSV
 template<typename T>
-void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
+void PointMatcher<T>::saveCSV(const DataPoints& data, std::ostream& os)
 {
-	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
+	typedef typename DataPoints::Descriptors Descriptors;
 	
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
@@ -302,10 +304,11 @@ void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, 
 }
 
 template
-void PointMatcher<float>::saveCSV(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
+void PointMatcher<float>::saveCSV(const DataPoints& data, const std::string& fileName);
 template
-void PointMatcher<double>::saveCSV(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+void PointMatcher<double>::saveCSV(const DataPoints& data, const std::string& fileName);
 
+//! Load point cloud from a file as VTK
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(const std::string& fileName)
 {
@@ -315,6 +318,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(const std::string&
 	return loadVTK(ifs);
 }
 
+//! Load point cloud from a stream as VTK
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 {
@@ -406,7 +410,7 @@ PointMatcher<float>::DataPoints PointMatcher<float>::loadVTK(const std::string& 
 template
 PointMatcher<double>::DataPoints PointMatcher<double>::loadVTK(const std::string& fileName);
 
-
+//! Save point cloud to a file as VTK
 template<typename T>
 void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileName)
 {
@@ -416,6 +420,7 @@ void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileNam
 	saveVTK(data, ofs);
 }
 
+//! Save point cloud to a stream as VTK
 template<typename T>
 void PointMatcher<T>::saveVTK(const DataPoints& data, std::ostream& os)
 {
@@ -494,6 +499,6 @@ void PointMatcher<T>::saveVTK(const DataPoints& data, std::ostream& os)
 }
 
 template
-void PointMatcher<float>::saveVTK(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
+void PointMatcher<float>::saveVTK(const DataPoints& data, const std::string& fileName);
 template
-void PointMatcher<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+void PointMatcher<double>::saveVTK(const DataPoints& data, const std::string& fileName);

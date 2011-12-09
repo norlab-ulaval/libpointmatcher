@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Inspectors.h"
+#include "InspectorsImpl.h"
 
 #include <cassert>
 #include <iostream>

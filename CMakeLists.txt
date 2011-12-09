@@ -118,17 +118,18 @@ set(POINTMATCHER_SRC
 	pointmatcher/Timer.cpp
 	pointmatcher/Histogram.cpp
 	pointmatcher/Parametrizable.cpp
-	pointmatcher/Logger.cpp
 	pointmatcher/Core.cpp
-	pointmatcher/DataPointsFilters.cpp
-	pointmatcher/Matchers.cpp
-	pointmatcher/OutlierFilters.cpp
-	pointmatcher/ErrorMinimizers.cpp
-	pointmatcher/Transformations.cpp
-	pointmatcher/TransformationCheckers.cpp
-	pointmatcher/Inspectors.cpp
+	pointmatcher/ErrorMinimizer.cpp
 	pointmatcher/IO.cpp
 	pointmatcher/Bibliography.cpp
+	pointmatcher/LoggerImpl.cpp
+	pointmatcher/DataPointsFiltersImpl.cpp
+	pointmatcher/MatchersImpl.cpp
+	pointmatcher/OutlierFiltersImpl.cpp
+	pointmatcher/ErrorMinimizersImpl.cpp
+	pointmatcher/TransformationsImpl.cpp
+	pointmatcher/TransformationCheckersImpl.cpp
+	pointmatcher/InspectorsImpl.cpp
 )
 set(SHARED_LIBS "false" CACHE BOOL "To build shared (true) or static (false) library")
 if (SHARED_LIBS)

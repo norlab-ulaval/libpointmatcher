@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "TransformationCheckers.h"
+#include "TransformationCheckersImpl.h"
 
 #include "Functions.h"
 

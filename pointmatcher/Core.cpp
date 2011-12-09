@@ -37,14 +37,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcherPrivate.h"
 #include "Timer.h"
 
-#include "Logger.h"
-#include "Transformations.h"
-#include "DataPointsFilters.h"
-#include "Matchers.h"
-#include "OutlierFilters.h"
-#include "ErrorMinimizers.h"
-#include "TransformationCheckers.h"
-#include "Inspectors.h"
+#include "LoggerImpl.h"
+#include "TransformationsImpl.h"
+#include "DataPointsFiltersImpl.h"
+#include "MatchersImpl.h"
+#include "OutlierFiltersImpl.h"
+#include "ErrorMinimizersImpl.h"
+#include "TransformationCheckersImpl.h"
+#include "InspectorsImpl.h"
 
 #include <cassert>
 #include <iostream>
@@ -62,16 +62,17 @@ namespace PointMatcherSupport
 	boost::mutex loggerMutex;
 	std::shared_ptr<Logger> logger;
 	
+	//! Set a new logger, protected by a mutex
 	void setLogger(Logger* newLogger)
 	{
 		boost::mutex::scoped_lock lock(loggerMutex);
 		logger.reset(newLogger);
 	}
-	
 }
 
 // DataPoints
 
+//! Return whether there is a label named text
 template<typename T>
 bool PointMatcher<T>::DataPoints::Labels::contains(const std::string& text) const
 {
@@ -83,12 +84,26 @@ bool PointMatcher<T>::DataPoints::Labels::contains(const std::string& text) cons
 	return false;
 }
 
+//! Construct a label from a given name and number of data dimensions it spans
+template<typename T>
+PointMatcher<T>::DataPoints::Label::Label(const std::string& text, const size_t span):
+	text(text),
+	span(span)
+{}
+
+//! Construct an empty point cloud
+template<typename T>
+PointMatcher<T>::DataPoints::DataPoints()
+{}
+
+//! Construct a point cloud from existing features without any descriptor
 template<typename T>
 PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels):
 	features(features),
 	featureLabels(featureLabels)
 {}
 
+//! Construct a point cloud from existing features and descriptors
 template<typename T>
 PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels):
 	features(features),
@@ -97,6 +112,7 @@ PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& 
 	descriptorLabels(descriptorLabels)
 {}
 
+//! Get descriptor by name, return a matrix containing only the resquested descriptor
 template<typename T>
 typename PointMatcher<T>::DataPoints::Descriptors PointMatcher<T>::DataPoints::getDescriptorByName(const std::string& name) const
 {
@@ -128,12 +144,18 @@ void swapDataPoints(typename PointMatcher<T>::DataPoints& a, typename PointMatch
 
 // Matches
 
+//! Construct empty matches
+template<typename T>
+PointMatcher<T>::Matches::Matches() {}
+
+//! Construct matches from distances to and identifiers of closest points
 template<typename T>
 PointMatcher<T>::Matches::Matches(const Dists& dists, const Ids ids):
 	dists(dists),
 	ids(ids)
 {}
 
+//! Get the distance at the T-ratio closest point
 template<typename T>
 T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 {
@@ -152,6 +174,60 @@ T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 	return values[values.size() * quantile];
 }
 
+// Transformation
+
+//! Construct without parameter
+template<typename T>
+PointMatcher<T>::Transformation::Transformation()
+{}
+
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::Transformation::Transformation(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params)
+{}
+
+//! virtual destructor
+template<typename T>
+PointMatcher<T>::Transformation::~Transformation()
+{} 
+
+//! Apply this chain to cloud, using parameters, mutates cloud
+template<typename T>
+void PointMatcher<T>::Transformations::apply(DataPoints& cloud, const TransformationParameters& parameters) const
+{
+	DataPoints transformedCloud;
+	for (TransformationsConstIt it = this->begin(); it != this->end(); ++it)
+	{
+		transformedCloud = (*it)->compute(cloud, parameters);
+		swapDataPoints<T>(cloud, transformedCloud);
+	}
+}
+
+// DataPointsFilter
+
+//! Construct without parameter
+template<typename T>
+PointMatcher<T>::DataPointsFilter::DataPointsFilter()
+{} 
+
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::DataPointsFilter::DataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params)
+{}
+
+//! virtual destructor
+template<typename T>
+PointMatcher<T>::DataPointsFilter::~DataPointsFilter()
+{} 
+
+//! Init this filter
+template<typename T>
+void PointMatcher<T>::DataPointsFilter::init()
+{}
+
+//! Init the chain
 template<typename T>
 void PointMatcher<T>::DataPointsFilters::init()
 {
@@ -161,6 +237,7 @@ void PointMatcher<T>::DataPointsFilters::init()
 	}
 }
 
+//! Apply this chain to cloud, mutates cloud
 template<typename T>
 void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 {
@@ -176,31 +253,64 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 	}
 }
 
+// Matcher
+
+//! Construct without parameter
 template<typename T>
-void PointMatcher<T>::Transformations::apply(DataPoints& cloud, const TransformationParameters& parameters) const
+PointMatcher<T>::Matcher::Matcher():
+	visitCounter(0)
+{}
+
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::Matcher::Matcher(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params),
+	visitCounter(0)
+{}
+
+//! virtual destructor
+template<typename T>
+PointMatcher<T>::Matcher::~Matcher()
+{}
+
+//! Reset the visit counter
+template<typename T>
+void PointMatcher<T>::Matcher::resetVisitCount()
 {
-	DataPoints transformedCloud;
-	for (TransformationsConstIt it = this->begin(); it != this->end(); ++it)
-	{
-		transformedCloud = (*it)->compute(cloud, parameters);
-		swapDataPoints<T>(cloud, transformedCloud);
-	}
+	visitCounter = 0;
 }
 
+//! Return the visit counter
 template<typename T>
-void PointMatcher<T>::TransformationCheckers::init(const TransformationParameters& parameters, bool& iterate)
+unsigned long PointMatcher<T>::Matcher::getVisitCount() const
 {
-	for (TransformationCheckersIt it = this->begin(); it != this->end(); ++it)
-		(*it)->init(parameters, iterate);
+	return visitCounter;
 }
 
-template<typename T>
-void PointMatcher<T>::TransformationCheckers::check(const TransformationParameters& parameters, bool& iterate)
-{
-	for (TransformationCheckersIt it = this->begin(); it != this->end(); ++it)
-		(*it)->check(parameters, iterate);
-}
+// OutlierFilter
 
+//! Construct without parameter
+template<typename T>
+PointMatcher<T>::FeatureOutlierFilter::FeatureOutlierFilter()
+{}
+
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::FeatureOutlierFilter::FeatureOutlierFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params)
+{}
+
+//! virtual destructor
+template<typename T>
+PointMatcher<T>::FeatureOutlierFilter::~FeatureOutlierFilter()
+{}
+
+//! virtual destructor
+template<typename T>
+PointMatcher<T>::DescriptorOutlierFilter::~DescriptorOutlierFilter()
+{} 
+
+//! Apply outlier-detection chain
 template<typename T> template<typename F>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::compute(
 	const typename PointMatcher<T>::DataPoints& filteredReading,
@@ -236,7 +346,72 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 	}
 }
 
+// ErrorMinimizer, see ErrorMinimizers.cpp
 
+// TranformationCheckers
+
+template<typename T>
+void PointMatcher<T>::TransformationCheckers::init(const TransformationParameters& parameters, bool& iterate)
+{
+	for (TransformationCheckersIt it = this->begin(); it != this->end(); ++it)
+		(*it)->init(parameters, iterate);
+}
+
+template<typename T>
+void PointMatcher<T>::TransformationCheckers::check(const TransformationParameters& parameters, bool& iterate)
+{
+	for (TransformationCheckersIt it = this->begin(); it != this->end(); ++it)
+		(*it)->check(parameters, iterate);
+}
+
+// Inspector
+
+//! Construct without parameter
+template<typename T>
+PointMatcher<T>::Inspector::Inspector()
+{}
+
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::Inspector::Inspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params)
+{}
+
+//! virtual destructor
+template<typename T>
+PointMatcher<T>::Inspector::~Inspector()
+{}
+
+//! Start a new ICP operation or sequence
+template<typename T>
+void PointMatcher<T>::Inspector::init()
+{}
+
+// performance statistics
+template<typename T>
+void PointMatcher<T>::Inspector::addStat(const std::string& name, double data)
+{}
+
+template<typename T>
+void PointMatcher<T>::Inspector::dumpStats(std::ostream& stream)
+{}
+
+// data statistics 
+template<typename T>
+void PointMatcher<T>::Inspector::dumpFilteredReference(const DataPoints& filteredReference)
+{}
+
+template<typename T>
+void PointMatcher<T>::Inspector::dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers)
+{}
+
+template<typename T>
+void PointMatcher<T>::Inspector::finish(const size_t iterationCount)
+{}
+
+// algorithms
+
+//! Protected contstructor, to prevent the creation of this object
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
 	outlierMixingWeight(0.5),
@@ -244,11 +419,13 @@ PointMatcher<T>::ICPChainBase::ICPChainBase():
 	prefilteredKeyframePtsCount(0)
 {}
 
+//! virtual desctructor
 template<typename T>
 PointMatcher<T>::ICPChainBase::~ICPChainBase()
 {
 }
 
+//! Clean chain up, empty all filters and delete associated objects
 template<typename T>
 void PointMatcher<T>::ICPChainBase::cleanup()
 {
@@ -264,6 +441,7 @@ void PointMatcher<T>::ICPChainBase::cleanup()
 	inspector.reset();
 }
 
+//! Construct an ICP algorithm that works in most of the cases
 template<typename T>
 void PointMatcher<T>::ICPChainBase::setDefault()
 {
@@ -280,8 +458,9 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::DifferentialTransformationChecker());
 	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
 	this->outlierMixingWeight = 1;
-} 
+}
 
+//! Construct an ICP algorithm from a YAML file
 template<typename T>
 void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 {
@@ -320,6 +499,20 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	#else // HAVE_YAML_CPP
 	throw runtime_error("Yaml support not compiled in. Install yaml-cpp, configure build and recompile.");
 	#endif // HAVE_YAML_CPP
+}
+
+//! Return the remaining number of points in reading after prefiltering but before the iterative process
+template<typename T>
+unsigned PointMatcher<T>::ICPChainBase::getPrefilteredReadingPtsCount() const
+{
+	return prefilteredReadingPtsCount;
+}
+
+//! Return the remaining number of points in the keyframe after prefiltering but before the iterative process
+template<typename T>
+unsigned PointMatcher<T>::ICPChainBase::getPrefilteredKeyframePtsCount() const
+{
+	return prefilteredReadingPtsCount;
 }
 
 #ifdef HAVE_YAML_CPP
@@ -388,17 +581,7 @@ typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar
 
 #endif // HAVE_YAML_CPP
 
-template<typename T>
-PointMatcher<T>::ICP::ICP()
-{
-}
-
-template<typename T>
-PointMatcher<T>::ICP::~ICP()
-{
-}
-
-
+//! Perform ICP and return optimised transformation matrix
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operator ()(
 	const DataPoints& readingIn,
@@ -409,6 +592,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operato
 	return this->compute(readingIn, referenceIn, identity);
 }
 
+//! Perform ICP from initial guess and return optimised transformation matrix
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operator ()(
 	const DataPoints& readingIn,
@@ -418,6 +602,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operato
 	return this->compute(readingIn, referenceIn, initialTransformationParameters);
 }
 
+//! Perform ICP from initial guess and return optimised transformation matrix
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute(
 	const DataPoints& readingIn,
@@ -572,6 +757,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
 }
 
+//! Construct a ICP sequence with ratioToSwitchKeyframe to 0.8
 template<typename T>
 PointMatcher<T>::ICPSequence::ICPSequence():
 	ratioToSwitchKeyframe(0.8),
@@ -579,11 +765,51 @@ PointMatcher<T>::ICPSequence::ICPSequence():
 {
 }
 
+//! destructor
 template<typename T>
 PointMatcher<T>::ICPSequence::~ICPSequence()
 {
 }
 
+//! Return the latest transform
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::getTransform() const
+{
+	return keyFrameTransform * T_refIn_dataIn;
+}
+
+//! Return the difference between the latest transform and the previous one
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::getDeltaTransform() const
+{
+	return lastTransformInv * getTransform();
+}
+
+//! Return whether a keyframe was create at last () call
+template<typename T>
+bool PointMatcher<T>::ICPSequence::keyFrameCreatedAtLastCall() const
+{
+	return keyFrameCreated;
+}
+
+//! Return whether the object currently holds a keyframe
+template<typename T>
+bool PointMatcher<T>::ICPSequence::hasKeyFrame() const
+{
+	return (keyFrameCloud.features.cols() != 0);
+}
+
+//! Drop current key frame, create a new one with inputCloud, reset transformations
+template<typename T>
+void PointMatcher<T>::ICPSequence::resetTracking(DataPoints& inputCloud)
+{
+	const int tDim(keyFrameTransform.rows());
+	createKeyFrame(inputCloud);
+	keyFrameTransform = Matrix::Identity(tDim, tDim);
+	lastTransformInv = Matrix::Identity(tDim, tDim);
+}
+
+//! Set default working values
 template<typename T>
 void PointMatcher<T>::ICPSequence::setDefault()
 {
@@ -600,15 +826,7 @@ void PointMatcher<T>::ICPSequence::loadAdditionalYAMLContent(YAML::Node& doc)
 }
 #endif // HAVE_YAML_CPP
 
-template<typename T>
-void PointMatcher<T>::ICPSequence::resetTracking(DataPoints& inputCloud)
-{
-	const int tDim(keyFrameTransform.rows());
-	createKeyFrame(inputCloud);
-	keyFrameTransform = Matrix::Identity(tDim, tDim);
-	lastTransformInv = Matrix::Identity(tDim, tDim);
-}
-
+//! Create a new key frame
 template<typename T>
 void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 {
@@ -651,6 +869,7 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		LOG_WARNING_STREAM("Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)");
 }
 
+//! Apply ICP to cloud inputCloudIn, create a new keyframe if none is present or if the ratio of matching points is below ratioToSwitchKeyframe.
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& inputCloudIn)
@@ -821,6 +1040,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	return keyFrameTransform * T_refIn_dataIn;
 }
 
+//! Constructor, populates the registrars
 template<typename T>
 PointMatcher<T>::PointMatcher()
 {

@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Transformations.h"
+#include "TransformationsImpl.h"
 
 #include <iostream>
 

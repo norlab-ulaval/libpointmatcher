@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace PointMatcherSupport
 {
-	// improvements over boost::lexical_cast that can handle "inf", "-inf", "Nan" for float and doubles
+	//! A lexical casting function that is an improvements over boost::lexical_cast that can handle "inf", "-inf", "Nan" for float and doubles
 	template<typename Target>
 	inline Target lexical_cast_scalar_to_string(const std::string& arg)
 	{
@@ -60,33 +60,39 @@ namespace PointMatcherSupport
 			return boost::lexical_cast<Target>(arg);
 	}
 	
+	//! General case of lexical cast, use boost
 	template<typename Target, typename Source>
 	inline Target lexical_cast(const Source& arg)
 	{
 		return boost::lexical_cast<Target>(arg);
 	}
 	
+	//! Special case of lexical cast to float, use lexical_cast_scalar_to_string
 	template<>
 	inline float lexical_cast(const std::string& arg) { return lexical_cast_scalar_to_string<float>(arg); }
+	//! Special case of lexical cast to float, use lexical_cast_scalar_to_string
 	template<>
 	inline double lexical_cast(const std::string& arg) { return lexical_cast_scalar_to_string<double>(arg); }
 	
 	//
 	
+	//! Return the a string value using lexical_cast
 	template<typename S>
 	std::string toParam(const S& value)
 	{
 		return lexical_cast<std::string>(value);
 	}
 	
+	//! The superclass of classes that are constructed using generic parameters. This class provides the parameter storage and fetching mechanism
 	struct Parametrizable
 	{
+		//! An exception thrown when one tries to fetch the value of an unexisting parameter
 		struct InvalidParameter: std::runtime_error
 		{
 			InvalidParameter(const std::string& reason):runtime_error(reason) {}
 		};
 		
-		//! return whether a is smaller than b
+		//! Return whether a is smaller than b
 		typedef bool(*LexicalComparison)(std::string a, std::string b);
 		
 		template<typename S>
@@ -95,6 +101,7 @@ namespace PointMatcherSupport
 			return lexical_cast<S>(a) < lexical_cast<S>(b);
 		}
 		
+		//! The documentation of a parameter
 		struct ParameterDoc
 		{
 			std::string name;
@@ -108,7 +115,7 @@ namespace PointMatcherSupport
 			This code is beautiful, this code is correct, this code does not work ;-(
 			Blame gcc bug 9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050), shame
 			on them forever and beyond. People being laaaazzzy adopters, I'm forced to use
-			something that work on gcc 4.4.
+			something that works on gcc 4.4.
 			
 			template<typename S>
 			ParameterDoc(const std::string& name, const std::string& doc, const S defaultValue, const S minValue, const S maxValue = std::numeric_limits<S>::max());
@@ -121,6 +128,7 @@ namespace PointMatcherSupport
 			friend std::ostream& operator<< (std::ostream& o, const ParameterDoc& p);
 		};
 		
+		//! The documentation of all parameters
 		struct ParametersDoc : public std::vector<ParameterDoc>
 		{
 			ParametersDoc(std::initializer_list<ParameterDoc> list):std::vector<ParameterDoc>(list){}

@@ -41,12 +41,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace PointMatcherSupport
 {
+	//! A factor for subclasses of Interface
 	template<typename Interface>
 	struct Registrar
 	{
 	public:
 		typedef Interface TargetType;
 		
+		//! The interface for class descriptors
 		struct ClassDescriptor
 		{
 			virtual ~ClassDescriptor() {}
@@ -55,6 +57,7 @@ namespace PointMatcherSupport
 			virtual const Parametrizable::ParametersDoc availableParameters() const = 0;
 		};
 		
+		//! A descriptor for a class C that provides parameters
 		template<typename C>
 		struct GenericClassDescriptor: public ClassDescriptor
 		{
@@ -72,6 +75,7 @@ namespace PointMatcherSupport
 			}
 		};
 		
+		//! A descriptor for a class C that does not provide any parameter
 		template<typename C>
 		struct GenericClassDescriptorNoParam: public ClassDescriptor
 		{
