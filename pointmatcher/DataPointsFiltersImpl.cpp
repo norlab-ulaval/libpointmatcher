@@ -205,6 +205,9 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 		}
 	}
 	assert(j == nbPointsOut);
+	
+	LOG_INFO_STREAM("MinDistDataPointsFilter- pts in: " << nbPointsIn << " pts out: " << j << " (-" << 100-(j/double(nbPointsIn))*100 << "\%)");
+	
 	return outputCloud;
 }
 
@@ -293,7 +296,7 @@ template struct DataPointsFiltersImpl<double>::MaxQuantileOnAxisDataPointsFilter
 template<typename T>
 DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(const Parameters& params):
 	DataPointsFilter("UniformizeDensityDataPointsFilter", UniformizeDensityDataPointsFilter::availableParameters(), params),
-	ratio(Parametrizable::get<T>("ratio")),
+	aggressivity(Parametrizable::get<T>("aggressivity")),
 	nbBin(Parametrizable::get<unsigned>("nbBin"))
 {
 }
@@ -319,14 +322,30 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input)
 {
 	
-	const int nbPointsIn = input.features.cols();
-	const int nbPointsOut = nbPointsIn * ratio;
+	
+	DataPoints outputCloud;
+	
+	// Force normals to be computed
+	if (input.getDescriptorByName("densities").cols() == 0)
+	{
+		LOG_INFO_STREAM("UniformizeDensityDataPointsFilter - WARNING: no densities found. Will force computation with default parameters");
 
+		auto normalFilter = new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter(Parameters({{"ratio", "0.0001"}, {"binSize", "5"}, {"keepNormals", "0"}, {"keepDensities", "1"}}));
+		outputCloud = normalFilter->filter(input);
+	}
+	else
+	{
+		outputCloud = input;	
+	}
+
+	const int nbPointsIn = outputCloud.features.cols();
+
+	const Matrix densities = outputCloud.getDescriptorByName("densities");
 	typename DataPoints::Descriptors origineDistance(1, nbPointsIn);
 	origineDistance = input.features.colwise().norm();
 
-	const T minDist = origineDistance.minCoeff();
-	const T maxDist = origineDistance.maxCoeff();
+	const T minDist = densities.minCoeff();
+	const T maxDist = densities.maxCoeff();
 	const T delta = (maxDist - minDist)/(T)nbBin;
 
 	typename DataPoints::Descriptors binId(1, nbPointsIn);
@@ -343,7 +362,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensity
 	// Associate a bin per point and cumulate the histogram
 	for (int i=0; i < nbPointsIn; i++)
 	{
-		unsigned id = (origineDistance(i)-minDist)/delta;
+		unsigned id = (densities(i)-minDist)/delta;
 
 		// validate last interval
 		if(id == nbBin)
@@ -355,50 +374,22 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensity
 		
 	}
 	
-	//cout << "count:" << endl;
-	//for(int i=0; i<hist.size(); i++)
-	//{
-	//	cout << hist[i].count << ", ";	
-	//}
-	
-	
-	// Sort histogram based on count
-	std::sort(hist.begin(), hist.end(), HistElement::largestCountFirst);
-	
-	// Search for maximum nb points per bin respecting the ratio constraint
-	int theta = 0;
-	assert(nbBin>0);
-	for(unsigned j=0; j < (nbBin-1); j++)
+	/*cout << endl << "count:" << endl;
+	for(unsigned i=0; i<hist.size(); i++)
 	{
-		int totalDiff = 0;
-		for(unsigned i=0; i <= j; i++ )
-		{
-			totalDiff += hist[i].count - hist[j+1].count;
-		}
-
-		if(totalDiff > nbPointsOut)
-		{
-			int fullBinCount = 0;
-			for(unsigned i=0; i <= j; i++ )
-			{
-				fullBinCount += hist[i].count;
-			}
-
-			theta = ((T)fullBinCount - (ratio)*(T)nbPointsIn)/(j+1);
-			break;
-		}
+		cout << hist[i].count << ", ";	
 	}
+	*/
 
-	assert(theta != 0);
-
+	const unsigned startingBin = nbBin*(1-aggressivity);
 	
-
 	// Compute the acceptance ratio per bin
 	for(unsigned i=0; i<nbBin ; i++)
 	{
-		if(hist[i].count != 0)
+		if(hist[i].count != 0 && i >= startingBin)
 		{
-			hist[i].ratio = (float)theta/(float)hist[i].count;
+			hist[i].ratio = 1 - double(i-startingBin)/double(nbBin-startingBin);
+			hist[i].ratio *= hist[i].ratio; // square
 		}
 		else
 		{
@@ -406,28 +397,14 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensity
 		}
 	}
 	
-	//cout << "ratio:" << endl;
-	//for(int i=0; i<hist.size(); i++)
-	//{
-	//	cout << hist[i].ratio << ", ";	
-	//}
-	//cout << endl;
-	
-	// Sort back histogram based on id
-	std::sort(hist.begin(), hist.end(), HistElement::smallestIdFirst);
-	
-
-	// build output values
-	DataPoints outputCloud(
-		typename DataPoints::Features(input.features.rows(), nbPointsIn),
-		input.featureLabels
-	);
-	if (input.descriptors.cols() > 0)
+	/*cout << endl << "ratio:" << endl;
+	for(unsigned i=0; i<hist.size(); i++)
 	{
-		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsIn);
-		outputCloud.descriptorLabels = input.descriptorLabels;
+		cout << hist[i].ratio << ", ";	
 	}
-	
+	cout << endl;
+	*/
+
 	// fill output values
 	int j = 0;
 	for (int i = 0; i < nbPointsIn; i++)
@@ -436,17 +413,21 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensity
 		const float r = (float)std::rand()/(float)RAND_MAX;
 		if (r < hist[id].ratio)
 		{
-			outputCloud.features.col(j) = input.features.col(i);
+			outputCloud.features.col(j) = outputCloud.features.col(i);
 			if (outputCloud.descriptors.cols() > 0)
-				outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
 			j++;
 		}
+		
 	}
+
 
 	// Reduce the point cloud size
 	outputCloud.features.conservativeResize(Eigen::NoChange, j);
 	if (outputCloud.descriptors.cols() > 0)
 			outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
+
+	LOG_INFO_STREAM("UniformizeDensityDataPointsFilter - pts in: " << nbPointsIn << " pts out: " << j << " (-" << 100 - (j/double(nbPointsIn)*100) << "\%)");
 	
 	return outputCloud;
 }
@@ -677,6 +658,7 @@ template struct DataPointsFiltersImpl<double>::SurfaceNormalDataPointsFilter;
 template<typename T>
 DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(const Parameters& params):
 	DataPointsFilter("SamplingSurfaceNormalDataPointsFilter", SamplingSurfaceNormalDataPointsFilter::availableParameters(), params),
+	ratio(Parametrizable::get<T>("ratio")),
 	binSize(Parametrizable::get<int>("binSize")),
 	averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
 	keepNormals(Parametrizable::get<bool>("keepNormals")),
@@ -758,6 +740,13 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	);
 	
 	//std::cerr << "SamplingSurfaceNormalDataPointsFilter::preFilter done " << buildData.outputInsertionPoint << std::endl;
+	
+	const int ptsOut = buildData.outputInsertionPoint;
+
+	LOG_INFO_STREAM("SamplingSurfaceNormalDataPointsFilter - pts in: " << pointsCount << " pts out: " << ptsOut << " (-" << 100-(ptsOut/double(pointsCount))*100 << "\%)");
+	
+	if(buildData.unfitPointsCount != 0)
+		LOG_INFO_STREAM("SamplingSurfaceNormalDataPointsFilter - Coudn't compute normal for " << buildData.unfitPointsCount << " pts.");
 	
 	// return the new point cloud
 	return DataPoints(
@@ -846,33 +835,41 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 		d.col(i) = data.inputFeatures.block(0,data.indices[first+i],featDim-1, 1);
 	const Vector mean = d.rowwise().sum() / T(colCount);
 	const Matrix NN = (d.colwise() - mean);
-	data.outputFeatures.block(0, data.outputInsertionPoint, featDim-1,1) = mean;
-	data.outputFeatures(featDim-1, data.outputInsertionPoint) = 1;
+	
 	
 	// compute covariance
-	/*const Eigen::Matrix<T, 3, 3> C(NN * NN.transpose());
-	Eigen::Matrix<T, 3, 1> eigenVa = Eigen::Matrix<T, 3, 1>::Identity();
-	Eigen::Matrix<T, 3, 3> eigenVe = Eigen::Matrix<T, 3, 3>::Identity();*/
 	const Matrix C(NN * NN.transpose());
 	Vector eigenVa = Vector::Identity(featDim-1, 1);
 	Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
 	// Ensure that the matrix is suited for eigenvalues calculation
-	if(C.fullPivHouseholderQr().rank() == featDim-1)
+	if(keepNormals || keepEigenValues || keepEigenVectors)
 	{
-		Eigen::EigenSolver<Matrix> solver(C);
-		
-		eigenVa = solver.eigenvalues().real();
-		eigenVe = solver.eigenvectors().real();
-		//eigenVa = Eigen::EigenSolver<Eigen::Matrix<T,3,3> >(C).eigenvalues().real();
-		//eigenVe = Eigen::EigenSolver<Eigen::Matrix<T,3,3> >(C).eigenvectors().real();
-	}
-	else
-	{
-		// FIXME: handle this case when indeed can get a normal
-		return;
-		//std::cout << "WARNING: Matrix C needed for eigen decomposition is degenerated. Expected cause: no noise in data" << std::endl;
+		if(C.fullPivHouseholderQr().rank() == featDim-1)
+		{
+			Eigen::EigenSolver<Matrix> solver(C);
+			
+			eigenVa = solver.eigenvalues().real();
+			eigenVe = solver.eigenvectors().real();
+		}
+		else
+		{
+			// FIXME: handle this case when indeed can get a normal
+			data.unfitPointsCount += colCount;
+			return;
+		}
 	}
 	
+	// Create descriptor block that will be associate to all point in this bin
+	const int dimOldDesc = data.inputDescriptors.rows();
+	const int dimNormals = featDim-1;
+	const int dimDensity = 1;
+	const int dimEigValues = featDim-1;
+	const int dimEigVectors = (featDim-1)*(featDim-1);
+	const int maxDescDim = 
+		dimOldDesc+dimNormals+dimDensity+dimEigValues+dimEigVectors;
+	
+	Vector binDescriptor(maxDescDim);
+
 	// average the existing descriptors
 	int insertDim(0);
 	if (averageExistingDescriptors && (data.inputDescriptors.rows() != 0))
@@ -880,18 +877,13 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 		Vector newDesc(data.inputDescriptors.rows());
 		for (int i = 0; i < colCount; ++i)
 			newDesc += data.inputDescriptors.block(0,data.indices[first+i],data.inputDescriptors.rows(), 1);
-		data.outputDescriptors.block(0, data.outputInsertionPoint, data.inputDescriptors.rows(), 1) =
-			newDesc / T(colCount);
-		insertDim += data.inputDescriptors.rows();
-		/*cerr << "averaging desc:\n";
-		cerr << data.inputDescriptors.block(0, first, data.inputDescriptors.rows(), colCount) << endl;
-		cerr << data.inputDescriptors.block(0, first, data.inputDescriptors.rows(), colCount).rowwise().sum() << endl;
-		cerr << data.outputDescriptors.block(0, data.outputInsertionPoint, data.inputDescriptors.rows(), 1) << endl;*/
+		//data.outputDescriptors.block(0, data.outputInsertionPoint, data.inputDescriptors.rows(), 1) =
+		binDescriptor.segment(0, dimOldDesc) = newDesc / T(colCount);
+		insertDim += dimOldDesc;
 	}
 	
 	if(keepNormals)
 	{
-		const int dimNormals(featDim-1);
 		// Keep the smallest eigenvector as surface normal
 		int smallestId(0);
 		T smallestValue(numeric_limits<T>::max());
@@ -903,49 +895,61 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 				smallestValue = eigenVa(j);
 			}
 		}
-		data.outputDescriptors.block(insertDim, data.outputInsertionPoint, dimNormals, 1) =
-			eigenVe.col(smallestId);
+		//data.outputDescriptors.block(insertDim, data.outputInsertionPoint, dimNormals, 1) =
+		//	eigenVe.col(smallestId);
+		binDescriptor.segment(insertDim, dimNormals) = eigenVe.col(smallestId);
 		insertDim += dimNormals;
 	}
 
 	if(keepDensities)
 	{
-		//TODO: set lambda to a realistic value (based on sensor)
-		//TODO: debug here: volume too low 
-		const T epsilon(0.005);
+		//TODO: Insure that this estimation is correct	
+		T volume = std::pow(NN.colwise().norm().maxCoeff(), 3);
 
-		//T volume(eigenVa(0)+lambda);
-		T volume(eigenVa(0));
-		for(int j = 1; j < eigenVa.rows(); j++)
-		{
-			volume *= eigenVa(j);
-		}
-		data.outputDescriptors(insertDim, data.outputInsertionPoint) =
-			T(colCount)/(volume + epsilon);
-		insertDim += 1;
+		//data.outputDescriptors(insertDim, data.outputInsertionPoint) =
+		//	std::log(1 + T(colCount)/(volume+0.000001));
+		
+		binDescriptor(insertDim) = 	std::log(1 + T(colCount)/(volume+0.000001));
+		insertDim += dimDensity;
 	}
 	
 	if(keepEigenValues)
 	{
-		const int dimEigValues(featDim-1);
-		data.outputDescriptors.block(insertDim, data.outputInsertionPoint, dimEigValues, 1) = 
-			eigenVa;
+		//data.outputDescriptors.block(insertDim, data.outputInsertionPoint, dimEigValues, 1) = 
+		//	eigenVa;
+		binDescriptor.segment(insertDim, dimEigValues) = eigenVa;
 		insertDim += dimEigValues;
 	}
 	
 	if(keepEigenVectors)
 	{
-		const int dimEigVectors((featDim-1)*(featDim-1));
+		// Serialization of the matrix
 		for(int k=0; k < (featDim-1); k++)
 		{
-			data.outputDescriptors.block(
-				insertDim +  k*(featDim-1), data.outputInsertionPoint, (featDim-1), 1) = 
+			//data.outputDescriptors.block(
+			//	insertDim +  k*(featDim-1), data.outputInsertionPoint, (featDim-1), 1) = 
+			//		(eigenVe.row(k).transpose().cwise() * eigenVa);
+			binDescriptor.segment(insertDim + k*(featDim-1), (featDim-1)) = 
 					(eigenVe.row(k).transpose().cwise() * eigenVa);
 		}
 		insertDim += dimEigVectors;
 	}
 	
-	++data.outputInsertionPoint;
+	binDescriptor.conservativeResize(insertDim);
+
+	// Filter points randomly
+	for(int i=0; i<colCount; i++)
+	{
+		const float r = (float)std::rand()/(float)RAND_MAX;
+		if(r > ratio)
+		{
+			data.outputFeatures.col(data.outputInsertionPoint) = 
+				data.inputFeatures.col(data.indices[first+i]);
+			data.outputDescriptors.col(data.outputInsertionPoint) = 
+				binDescriptor;
+			++data.outputInsertionPoint;
+		}
+	}
 }
 
 template struct DataPointsFiltersImpl<float>::SamplingSurfaceNormalDataPointsFilter;
@@ -956,7 +960,7 @@ template struct DataPointsFiltersImpl<double>::SamplingSurfaceNormalDataPointsFi
 template<typename T>
 DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::OrientNormalsDataPointsFilter(const Parameters& params):
 	DataPointsFilter("OrientNormalsDataPointsFilter", OrientNormalsDataPointsFilter::availableParameters(), params),
-	towardCenter(Parametrizable::get<double>("towardCenter"))
+	towardCenter(Parametrizable::get<bool>("towardCenter"))
 {
 }
 
@@ -1072,9 +1076,11 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDat
 			}
 		}
 	}
-
-	//std::cout << "RandomSampling: size after: " << filteredFeat.cols() << std::endl;
 	
+	const int nbPointsIn = input.features.cols();
+	const int nbPointsOut = filteredFeat.cols();
+	LOG_INFO_STREAM("RandomSamplingDataPointsFilter - pts in: " << nbPointsIn << " pts out: " << nbPointsOut << " (-" << 100 - (nbPointsOut/double(nbPointsIn)*100) << "\%)");
+
 	return DataPoints(filteredFeat, input.featureLabels, filteredDesc, input.descriptorLabels);
 }
 
@@ -1167,4 +1173,67 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDa
 
 template struct DataPointsFiltersImpl<float>::FixStepSamplingDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::FixStepSamplingDataPointsFilter;
+
+// ShadowDataPointsFilter
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::ShadowDataPointsFilter::ShadowDataPointsFilter(const Parameters& params):
+	DataPointsFilter("ShadowDataPointsFilter", ShadowDataPointsFilter::availableParameters(), params),
+	eps(sin(Parametrizable::get<T>("eps")))
+{
+}
+
+
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ShadowDataPointsFilter::filter(
+	const DataPoints& input)
+{
+	const int dim = input.features.rows();
+	
+	DataPoints outputCloud;
+
+	// Force normals to be computed
+	if (input.getDescriptorByName("normals").cols() == 0)
+	{
+		LOG_INFO_STREAM("ShadowDataPointsFilter - Warning: no normals found. Will force computation with default parameters");
+
+		auto normalFilter = new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter(Parameters({{"ratio", "0.0001"}, {"binSize", "5"}, {"keepNormals", "1"}, {"keepDensities", "1"}}));
+		outputCloud = normalFilter->filter(input);
+	}
+	else
+	{
+		outputCloud = input;	
+	}
+
+	const Matrix normals = outputCloud.getDescriptorByName("normals");
+	int j = 0;
+
+	for(int i=0; i < outputCloud.features.cols(); i++)
+	{
+		const Vector normal = normals.col(i).normalized();
+		const Vector point = outputCloud.features.block(0, i, dim-1, 1).normalized();
+		
+		const T value = anyabs(normal.dot(point));
+
+		if(value > eps) // test to keep the points
+		{
+			outputCloud.features.col(j) = outputCloud.features.col(i);
+			outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
+			
+			j++;
+		}
+	}
+
+	outputCloud.features.conservativeResize(Eigen::NoChange, j);
+	outputCloud.descriptors.conservativeResize(Eigen::NoChange, j);
+
+	const int nbPointsIn = input.features.cols();
+	const int nbPointsOut = outputCloud.features.cols();
+	LOG_INFO_STREAM("ShadowDataPointsFilter - pts in: " << nbPointsIn << " pts out: " << nbPointsOut << " (-" << 100 - (nbPointsOut/double(nbPointsIn)*100) << "\%)");
+	return outputCloud;
+}
+
+template struct DataPointsFiltersImpl<float>::ShadowDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::ShadowDataPointsFilter;
+
 

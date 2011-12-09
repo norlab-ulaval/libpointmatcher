@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "PointMatcher.h"
+#include "Inspectors.h"
 
 #include <iostream>
 #include <fstream>
@@ -414,13 +415,20 @@ PointMatcher<double>::DataPoints PointMatcher<double>::loadVTK(const std::string
 template<typename T>
 void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileName)
 {
-	ofstream ofs(fileName.c_str());
-	if (!ofs.good())
-		throw runtime_error(string("Cannot open file ") + fileName);
-	saveVTK(data, ofs);
+	Parameters param({{"baseFileName", ""}});
+	typedef typename InspectorsImpl<T>::VTKFileInspector VTKInspector;
+	VTKInspector vtkInspector(param);
+	vtkInspector.dumpDataPoints(data, fileName);
+	
+
+	//ofstream ofs(fileName.c_str());
+	//if (!ofs.good())
+	//	throw runtime_error(string("Cannot open file ") + fileName);
+	//saveVTK(data, ofs);
 }
 
 //! Save point cloud to a stream as VTK
+// TODO: clean that, not used anymore
 template<typename T>
 void PointMatcher<T>::saveVTK(const DataPoints& data, std::ostream& os)
 {
@@ -440,7 +448,7 @@ void PointMatcher<T>::saveVTK(const DataPoints& data, std::ostream& os)
 	
 	// write header
 	os << "# vtk DataFile Version 3.0\n";
-	os << "data\n";
+	os << "File created by libpointmatcher\n";
 	os << "ASCII\n";
 	os << "DATASET POLYDATA\n";
 	
