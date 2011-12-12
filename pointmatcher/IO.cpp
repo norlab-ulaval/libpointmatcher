@@ -45,6 +45,117 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+template<typename T>
+void PointMatcher<T>::validateStream(const std::string& fileName, std::istream& ifs)
+{
+	boost::filesystem::path fullPath(fileName);
+
+	if (!ifs.good())
+#if BOOST_FILESYSTEM_VERSION >= 3
+		throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).native());
+#else
+		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
+#endif
+
+}
+
+template
+void PointMatcher<float>::validateStream(const std::string& fileName, std::istream& ifs);
+template
+void PointMatcher<double>::validateStream(const std::string& fileName, std::istream& ifs);
+
+template<typename T>
+std::vector<string> PointMatcher<T>::csvLineToVector(const char* line)
+{
+	std::vector<string> parsedLine;
+	char delimiters[] = " \t,;";
+	char *token;
+	char tmpLine[1024];
+	char *brkt;
+	strcpy(tmpLine, line);
+	token = strtok_r(tmpLine, delimiters, &brkt);
+	while (token)
+	{
+		parsedLine.push_back(string(token));
+		token = strtok_r(NULL, delimiters, &brkt);
+	}
+
+	return parsedLine;
+}
+
+template<typename T>
+typename PointMatcher<T>::CsvElements PointMatcher<T>::parseCsvWithHeader(const std::string& fileName)
+{
+	ifstream is(fileName.c_str());
+	
+	validateStream(fileName, is);
+
+
+	unsigned elementCount=0;
+	std::map<string, unsigned> keywordCols;
+	CsvElements data;
+
+	bool firstLine(true);
+	unsigned lineCount=0;
+	while (!is.eof())
+	{
+		char line[1024];
+		is.getline(line, sizeof(line));
+		line[sizeof(line)-1] = 0;
+
+		if(firstLine)
+		{
+			std::vector<string> header = csvLineToVector(line);	
+				
+			elementCount = header.size();
+			for(unsigned int i = 0; i < elementCount; i++)
+			{
+				keywordCols[header[i]] = i;
+			}
+
+			firstLine = false;
+		}
+		else // load the rest of the file
+		{
+			std::vector<string> parsedLine = csvLineToVector(line);
+			if(parsedLine.size() != elementCount && parsedLine.size() !=0)
+			{
+				stringstream errorMsg;
+				errorMsg << "Error at line " << lineCount+1 << ": expecting " << elementCount << " columns but read " << parsedLine.size() << " elements.";
+				throw runtime_error(errorMsg.str());	
+			}
+
+			for(unsigned int i = 0; i < parsedLine.size(); i++)
+			{
+				for(auto it=keywordCols.begin(); it!=keywordCols.end(); it++)
+				{
+					if(i == (*it).second)
+					{
+						data[(*it).first].push_back(parsedLine[i]);	
+					}
+				}
+			}
+		}
+
+		lineCount++;
+	}
+	
+	// Use for debug
+	/*
+	for(auto it=data.begin(); it!=data.end(); it++)
+	{
+		cout << "--------------------------" << endl;
+		cout << "Header: " << (*it).first << endl;
+		for(unsigned i=0; i<(*it).second.size(); i++)
+		{
+			cout << (*it).second[i] << endl;
+		}
+	}
+	*/
+
+	return data;
+}
+
 //! @brief Load comma separated values (csv) file
 //! @param fileName a string containing the path and the file name
 //! 
@@ -60,16 +171,10 @@ using namespace std;
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(const std::string& fileName)
 {
-	boost::filesystem::path fullPath(fileName);
-
-
 	ifstream ifs(fileName.c_str());
-	if (!ifs.good())
-#if BOOST_FILESYSTEM_VERSION >= 3
-		throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).native());
-#else
-		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
-#endif
+	
+	validateStream(fileName, ifs);
+
 	return loadCSV(ifs);
 }
 
@@ -416,92 +521,45 @@ void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileNam
 	VTKInspector vtkInspector(param);
 	vtkInspector.dumpDataPoints(data, fileName);
 	
-
-	//ofstream ofs(fileName.c_str());
-	//if (!ofs.good())
-	//	throw runtime_error(string("Cannot open file ") + fileName);
-	//saveVTK(data, ofs);
 }
 
-// TODO: clean that, not use anymore
-template<typename T>
-void PointMatcher<T>::saveVTK(const DataPoints& data, std::ostream& os)
-{
-	typedef typename DataPoints::Features Features;
-	typedef typename DataPoints::Descriptors Descriptors;
-	typedef typename DataPoints::Label Label;
-	typedef typename DataPoints::Labels Labels;
-	
-	const int pointCount(data.features.cols());
-	const int dimCount(data.features.rows());
-	
-	if (pointCount == 0)
-	{
-		cerr << "Warning, no points, doing nothing" << endl;
-		return;
-	}
-	
-	// write header
-	os << "# vtk DataFile Version 3.0\n";
-	os << "File created by libpointmatcher\n";
-	os << "ASCII\n";
-	os << "DATASET POLYDATA\n";
-	
-	// write points
-	os << "POINTS " << pointCount << " float\n";
-	for (int p = 0; p < pointCount; ++p)
-	{
-		for (int i = 0; i < dimCount-1; ++i)
-		{
-			os << data.features(i, p) << " ";
-			if(i == 1 && dimCount-1 == 2)
-				os << " 0";
-		}
-		os << "\n";
-	}
-	os << "VERTICES " << pointCount << " " << pointCount * 2 << "\n";
-	for (int i = 0; i < pointCount; ++i)
-	{
-		os << "1 " << i << "\n";
-	}
-	/*os << "VERTICES " << pointCount << " " << pointCount + 1 << "\n";
-	os << pointCount;
-	for (size_t i = 0; i < pointCount; ++i)
-		os << " " << i;
-	os << "\n";*/
-
-	os << "POINT_DATA " << pointCount << "\n";
-	
-	Descriptors colors = data.getDescriptorByName("color");
-	if (colors.cols() != 0)
-	{
-		//cerr << "Warning: cannot find color in descriptors" << endl;
-		assert(colors.cols() == pointCount);
-		assert(colors.rows() == 4);
-	
-		// write colors
-		os << "COLOR_SCALARS lut 4\n";
-		for (int p = 0; p < pointCount; ++p)
-		{
-			os << colors(0, p) << " " << colors(1, p) << " " << colors(2, p) << " " << colors(3, p) << "\n";
-		}
-	}
-
-	Descriptors normals = data.getDescriptorByName("normals");
-	if (normals.cols() != 0)
-	{
-		assert(normals.cols() == pointCount);
-		assert(normals.rows() == 3);
-
-		os << "NORMALS triangle_normals float\n";
-		for (int p = 0; p < pointCount; ++p)
-		{
-			os << normals(0, p) << " " << normals(1, p) << " " << normals(2, p) << "\n";
-		}
-	}
-}
 
 template
 void PointMatcher<float>::saveVTK(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
 template
 void PointMatcher<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+
+
+
+template<typename T>
+typename PointMatcher<T>::FileList PointMatcher<T>::loadList(const std::string& fileName)
+{
+
+	const string parentPath = 
+		boost::filesystem::path(fileName).parent_path().file_string();
+	
+	CsvElements data = parseCsvWithHeader(fileName);
+	
+	FileList list;
+	if(data.find("Reading") != data.end())
+	{
+		std::vector<string> readingName = data["Reading"];
+
+		for(unsigned i=0; i<readingName.size(); i++)
+		{
+			FileInfo info;
+			info.readingPath = parentPath+"/"+readingName[i];
+			info.fileExtension = boost::filesystem::path(readingName[i]).extension();
+			list.push_back(info);
+		}
+	}
+
+
+	
+	return list;
+}
+
+template
+PointMatcher<float>::FileList PointMatcher<float>::loadList(const std::string& fileName);
+template
+PointMatcher<double>::FileList PointMatcher<double>::loadList(const std::string& fileName);

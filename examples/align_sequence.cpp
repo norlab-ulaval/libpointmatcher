@@ -38,11 +38,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <boost/format.hpp>
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/operations.hpp"
+
 
 using namespace std;
 
 void validateArgs(int argc, char *argv[]);
 void setupArgs(int argc, char *argv[], unsigned int& startId, unsigned int& endId, string& extension);
+vector<string> loadYamlFile(string listFileName);
 
 /**
   * Code example for ICP taking a sequence of point clouds relatively close 
@@ -52,55 +56,40 @@ int main(int argc, char *argv[])
 {
 	validateArgs(argc, argv);
 
-	unsigned int startId, endId;
-	string extension = "vtk";
-	setupArgs(argc, argv, startId, endId, extension);
-	
-	
-
 	typedef PointMatcher<float> PM;
+	typedef PM::TransformationParameters TP;
+	typedef PM::DataPoints DP;
+
+	string outputFileName(argv[0]);
 	
-	const string inputBaseFileName(argv[1]);
-	const string outputBaseFileName(argv[2]);
+	PM pm;
 	
 	// Main algorithm definition
 	PM::ICPSequence icp;
 
-	icp.setDefault();
+	// load YAML config
+	ifstream ifs(argv[1]);
+	PM::validateStream(argv[1], ifs);
+	icp.loadFromYaml(ifs);
 
-	typedef PM::TransformationParameters TP;
-	typedef PM::DataPoints DP;
-	
-	
+	PM::FileList list = PM::loadList(argv[2]);
+		
 	PM::DataPoints lastCloud, newCloud;
 	TP tp;
-	for (unsigned frameCounter = startId; frameCounter < endId; ++frameCounter)
+
+	for(unsigned i=0; i < list.size(); i++)
 	{
-		const string inputFileName((boost::format("%s.%05d.%s") % inputBaseFileName % frameCounter % extension).str());
-		const string outputFileName((boost::format("%s.%05d.vtk") % outputBaseFileName % frameCounter).str());
-
-		ifstream ifs(inputFileName.c_str());
-		if (!ifs.good())
-		{
-			cout << "Stopping at frame " << frameCounter << endl;
-			cout << "No file named " << inputFileName << endl;
-			break;
-		}
-
-		if(frameCounter == 3)
-			abort();
-
-		if(extension == "vtk")
-			newCloud = PM::loadVTK(ifs);
-		else if (extension == "csv")
-			newCloud = PM::loadCSV(ifs);
+		if(list[i].fileExtension == ".vtk")
+			newCloud = PM::loadVTK(list[i].readingPath);
+		else if(list[i].fileExtension == ".csv")
+			newCloud = PM::loadCSV(list[i].readingPath);
 		else
 		{
-			cerr << "Unkowned extension" << endl;
+			cout << "Only VTK or CSV files are supported" << endl;
 			abort();
 		}
 		
-		// call icp
+		// call ICP
 		try 
 		{
 			tp = icp(newCloud);
@@ -117,20 +106,25 @@ int main(int argc, char *argv[])
 			cout << "Reseting tracking" << endl;
 			icp.resetTracking(newCloud);
 		}
+
+		stringstream outputFileNameIter;
+		outputFileNameIter << outputFileName << "_" << i;
 		
-		cout << "outputFileName: " << outputFileName << endl;
-		PM::saveVTK(newCloud, outputFileName);
+		cout << "outputFileName: " << outputFileNameIter << endl;
+		PM::saveVTK(newCloud, outputFileNameIter.str());
+
 	}
+
 	return 0;
 }
 
 void validateArgs(int argc, char *argv[])
 {
-	if (!(argc == 3 || argc == 5 || argc == 6))
+	if (!(argc == 3))
 	{
-		cerr << "Error in command line, usage " << argv[0] << " inputBaseFileName outputBaseFileName [startId endId] [-csv]" << endl;
+		cerr << "Error in command line, usage " << argv[0] << " icpConfiguration.yaml listOfFiles.csv" << endl;
 		cerr << endl << "Example:" << endl;
-		cerr << argv[0] << " ../examples/data/cloud ./cloud_out" << endl << endl;
+		cerr << argv[0] << " ../examples/data/default.yaml ../examples/data/carCloudList.csv" << endl << endl;
 
 		abort();
 	}

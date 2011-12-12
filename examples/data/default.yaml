@@ -26,10 +26,10 @@ errorMinimizer:
 transformationCheckers:
   - CounterTransformationChecker:
       maxIterationCount: 40
-  - ErrorTransformationChecker:
-      minDeltaRotErr: 0.001
-      minDeltaTransErr: 0.01
-      tail: 4   
+  - DifferentialTransformationChecker:
+      minDiffRotErr: 0.001
+      minDiffTransErr: 0.01
+      smoothLength: 4   
       
 inspector:
   NullInspector

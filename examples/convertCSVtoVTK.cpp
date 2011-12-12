@@ -38,8 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 
 using namespace std;
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DataPoints;
+using namespace PointMatcherSupport;
 
 int main(int argc, char *argv[])
 {
@@ -49,18 +48,34 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	typedef PointMatcher<float> PM;
+	typedef PM::DataPoints DataPoints;
+
 	PM pm;
+	
+	setLogger(pm.LoggerRegistrar.create("FileLogger"));
 	DataPoints d = PM::loadCSV(argv[1]);
 	PM::DataPointsFilter* dataPointFilter1;
 	PM::DataPointsFilter* dataPointFilter2;
-	dataPointFilter1 = pm.DataPointsFilterRegistrar.create("SamplingSurfaceNormalDataPointsFilter");
-	dataPointFilter2 = pm.DataPointsFilterRegistrar.create("OrientNormalsDataPointsFilter");
+	PM::DataPointsFilter* dataPointFilter3;
+	PM::DataPointsFilter* dataPointFilter4;
+
+	dataPointFilter1 = pm.DataPointsFilterRegistrar.create("MinDistDataPointsFilter", PM::Parameters({{"minDist", "0.45"}}));
+	dataPointFilter2 = pm.DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", PM::Parameters({{"prob", "0.5"}}));
+
+	dataPointFilter3 = pm.DataPointsFilterRegistrar.create("UniformizeDensityDataPointsFilter");
+
+	dataPointFilter4 = pm.DataPointsFilterRegistrar.create("ShadowDataPointsFilter", PM::Parameters({{"eps", "0.1"}}));
 	
 	dataPointFilter1->init();
 	dataPointFilter2->init();
+	dataPointFilter3->init();
+	dataPointFilter4->init();
 
 	d = dataPointFilter1->filter(d);
 	d = dataPointFilter2->filter(d);
+	d = dataPointFilter3->filter(d);
+	d = dataPointFilter4->filter(d);
 
 	// Example of moving 3D points
 	//Eigen::Matrix4f T;

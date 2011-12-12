@@ -296,7 +296,12 @@ struct PointMatcher
 	// ---------------------------------
 	// IO functions
 	// ---------------------------------
-	
+	typedef std::map<std::string, std::vector<std::string>> CsvElements;
+
+	static void validateStream(const std::string& fileName, std::istream& is);
+	static std::vector<std::string> csvLineToVector(const char* line);
+	static CsvElements parseCsvWithHeader(const std::string& fileName);
+
 	// CSV
 	
 	static DataPoints loadCSV(const std::string& fileName);
@@ -311,8 +316,28 @@ struct PointMatcher
 	static DataPoints loadVTK(std::istream& is);
 
 	static void saveVTK(const DataPoints& data, const std::string& fileName);
-	static void saveVTK(const DataPoints& data, std::ostream& os);
 	
+	struct FileInfo 
+	{
+		std::string readingPath;
+		std::string referencePath;
+		std::string fileExtension;
+		TransformationParameters initTransformation;
+		Eigen::Matrix<T, 3, 1> gravity;
+
+		FileInfo(std::string readingPath="", std::string referencePath="", std::string fileExtension="", TransformationParameters initTransformation=TransformationParameters::Identity(3,3), Vector grativity=Eigen::Matrix<T,3,1>::Identity()):
+			readingPath(readingPath),
+			referencePath(referencePath),
+			fileExtension(fileExtension),
+			initTransformation(initTransformation),
+			gravity(gravity)
+			{};
+	};
+
+	typedef std::vector<FileInfo> FileList;
+
+	static FileList loadList(const std::string& fileName);
+
 	// ---------------------------------
 	// intermediate types
 	// ---------------------------------

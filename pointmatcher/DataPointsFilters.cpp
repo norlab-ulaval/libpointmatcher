@@ -660,6 +660,7 @@ DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurface
 	DataPointsFilter("SamplingSurfaceNormalDataPointsFilter", SamplingSurfaceNormalDataPointsFilter::availableParameters(), params),
 	ratio(Parametrizable::get<T>("ratio")),
 	binSize(Parametrizable::get<int>("binSize")),
+	samplingMethod(Parametrizable::get<int>("samplingMethod")),
 	averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
 	keepNormals(Parametrizable::get<bool>("keepNormals")),
 	keepDensities(Parametrizable::get<bool>("keepDensities")),
@@ -938,17 +939,28 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	binDescriptor.conservativeResize(insertDim);
 
 	// Filter points randomly
-	for(int i=0; i<colCount; i++)
+	if(samplingMethod == 0)
 	{
-		const float r = (float)std::rand()/(float)RAND_MAX;
-		if(r > ratio)
+		for(int i=0; i<colCount; i++)
 		{
-			data.outputFeatures.col(data.outputInsertionPoint) = 
-				data.inputFeatures.col(data.indices[first+i]);
-			data.outputDescriptors.col(data.outputInsertionPoint) = 
-				binDescriptor;
-			++data.outputInsertionPoint;
+			const float r = (float)std::rand()/(float)RAND_MAX;
+			if(r > ratio)
+			{
+				data.outputFeatures.col(data.outputInsertionPoint) = 
+					data.inputFeatures.col(data.indices[first+i]);
+				data.outputDescriptors.col(data.outputInsertionPoint) = 
+					binDescriptor;
+				++data.outputInsertionPoint;
+			}
 		}
+	}
+	else
+	{
+		data.outputFeatures.col(data.outputInsertionPoint).topRows(featDim-1) = mean;
+		data.outputFeatures(featDim-1, data.outputInsertionPoint) = 1;
+		data.outputDescriptors.col(data.outputInsertionPoint) = 
+					binDescriptor;
+		++data.outputInsertionPoint;
 	}
 }
 
