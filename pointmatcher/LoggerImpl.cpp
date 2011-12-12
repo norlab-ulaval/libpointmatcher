@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Logger.h"
+#include "LoggerImpl.h"
 
 #include <iostream>
 #include <fstream>

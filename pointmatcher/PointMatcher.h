@@ -91,7 +91,7 @@ You can list the available modules with:
 pmicp -l
 \endcode
 
-If you have compiled libpointmatcher with \ref yaml-cpp enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the \c pmicp command using the \c--config switch. An example file is available in \c data/examples/default.yaml.
+If you have compiled libpointmatcher with \ref yaml-cpp enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the \c pmicp command using the \c --config switch. An example file is available in \c data/examples/default.yaml.
 
 \section DevelopingUsing Developing using libpointmatcher
 
@@ -99,23 +99,23 @@ If you wish to develop using libpointmatcher, you can start by looking at the so
 
 \section DevelopingSelf Extending libpointmatcher
 
-You can also extend libpointmatcher relatively easily, by adding new modules. The file PointMatcher.h is the most important file, it defines the interfaces for all module types, as well as the ICP algorithms. Each interface is an inner class of the PointMatcher class, which is templatized on the scalar type. Instanciation is forced in \c Core.cpp for float and double scalar types. There are different types of modules corresponding to the different bricks of the ICP algorithm. The modules themselves are defined in their own files, for instance data-point filters live in the \c DataPointFilters.h/\c.cpp files. You can read a description of the ICP chain architecture in our \ref icppaper "IROS paper". Then, start from the documentation of PointMatcher to see the different interfaces, and then read the source code of the existing modules for the interface you are interested in, to get an idea of what you have to implement.
+You can also extend libpointmatcher relatively easily, by adding new modules. The file PointMatcher.h is the most important file, it defines the interfaces for all module types, as well as the ICP algorithms. Each interface is an inner class of the PointMatcher class, which is templatized on the scalar type. Instanciation is forced in \c Core.cpp for float and double scalar types. There are different types of modules corresponding to the different bricks of the ICP algorithm. The modules themselves are defined in their own files, for instance data-point filters live in the \c DataPointFilters.h/\c .cpp files. You can read a description of the ICP chain architecture in our \ref icppaper "IROS paper". Then, start from the documentation of PointMatcher to see the different interfaces, and then read the source code of the existing modules for the interface you are interested in, to get an idea of what you have to implement.
 
 All modules have a common way to get parameters at initialization, and feature a self-documentation mechanism. This allows to configure the ICP chain from external descriptions such as \ref yaml-cpp "yaml files".
 
-\section CreatingNewDataPointFilter Example: creating a new module of type DataPointsFilter
+\subsection CreatingNewDataPointFilter Example: creating a new module of type DataPointsFilter
 
-You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "DataPointsFilter": \c DataPointsFilter.h, \c DataPointsFilter.cpp and \c Core.cpp. The easiest way is to start by copying and renaming \c IdentityDataPointsFilter, and then to modify it.
+You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "DataPointsFilter": \c DataPointsFiltersImpl.h, \c DataPointsFiltersImpl.cpp and \c Core.cpp. The easiest way is to start by copying and renaming \c IdentityDataPointsFilter, and then to modify it.
 
-- In \c DataPointsFilter.h, copy the declaration of the struct \c IdentityDataPointsFilter at the end of the file,
+- In \c DataPointsFiltersImpl.h, copy the declaration of the struct \c IdentityDataPointsFilter at the end of the file,
 - Rename the pasted structure with the new filter name,
 - Fill the \c description() function with a short explanation of the filter's action,
 - If you need parameters for the filter:
 	- Uncomment the \c availableParameters() function and filled the description, default, min, max values as string,
-	- The types of the parameters are used to properly cast the string value and can be:  &P::Comp<T>, &P::Comp<int>, &P::Comp<unsigned>, etc. See \c DataPointsFilters.h for examples,
+	- The types of the parameters are used to properly cast the string value and can be:  \c &P::Comp<T>, \c &P::Comp<int>, \c &P::Comp<unsigned>, etc. See \c DataPointsFiltersImpl.h for examples,
 	- Uncomment and rename the constructor.
 
-- In \c DataPointsFilter.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the predeclaration (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct 
+- In \c DataPointsFiltersImpl.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the predeclaration (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct 
 \c DataPointsFiltersImpl<double>::YourFilter;),
 - Add the constructor if needed,
 - At this stage, you should let the implementation of the filter function to hold only the statement that returns the input.
@@ -128,6 +128,15 @@ You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "Dat
 - Test if your new module is available with the \c pmicp \c -l command, which lists the documentation of all modules. You should be able to find yours in the output.
 
 - Go back to \c DataPointFilter.cpp and code the \c filter() function.
+
+\subsection CodingStyle Coding Style
+
+One shall:
+- indent with tabs,
+- put {} on single lines (\ref Allman_style "Allman coding style"),
+- use \ref CamelCase "camel case" with classes beginning with Capitals and members with a small letter.
+
+For documentation, one shall document classes and data members inside the header file and methods at the implementation location.
 
 \section BugReporting Bug reporting
 
@@ -165,6 +174,8 @@ libpointmatcher is released under a permissive BSD license.
 - \anchor git git: http://git-scm.com
 - \anchor ROS ROS: http://www.ros.org/
 - \anchor Paraview Paraview: http://www.paraview.org/
+- \anchor Allman_style Allman coding style: http://en.wikipedia.org/wiki/Indent_style#Allman_style
+- \anchor CamelCase Camel case style: http://en.wikipedia.org/wiki/CamelCase
 
 */
 
@@ -187,6 +198,7 @@ namespace PointMatcherSupport
 	template<typename S>
 	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
 	{
+		//! Add an instance of S to the vector, take ownership
 		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
 	};
 	
@@ -207,7 +219,6 @@ namespace PointMatcherSupport
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func) {}
 	};
 	
-	//! Set a new logger, protected by a mutex
 	void setLogger(Logger* newLogger);
 }
 
@@ -219,16 +230,19 @@ struct PointMatcher
 	// macros for constants
 	// ---------------------------------
 	
+	//! The smallest value larger than 0
 	#define ZERO_PLUS_EPS (0. + std::numeric_limits<double>::epsilon())
+	//! The largest value smaller than 1
 	#define ONE_MINUS_EPS (1. - std::numeric_limits<double>::epsilon())
 	
 	// ---------------------------------
 	// exceptions
 	// ---------------------------------
 	
-	// point matcher does not converge
+	//! Point matcher did not converge
 	struct ConvergenceError: std::runtime_error
 	{
+		//! Construct the exception with an error message
 		ConvergenceError(const std::string& reason):runtime_error(reason) {}
 	};
 	
@@ -236,61 +250,67 @@ struct PointMatcher
 	// eigen and nabo-based types
 	// ---------------------------------
 	
+	//! The scalar type
 	typedef T ScalarType;
+	//! A vector over ScalarType
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
+	//! A vector of vector over ScalarType, not a matrix
 	typedef std::vector<Vector, Eigen::aligned_allocator<Vector> > VectorVector;
+	//! A quaternion over ScalarType
 	typedef typename Eigen::Quaternion<T> Quaternion;
+	//! A vector of quaternions over ScalarType
 	typedef std::vector<Quaternion, Eigen::aligned_allocator<Quaternion> > QuaternionVector;
+	//! A dense matrix over ScalarType
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
+	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	
-	// alias for semantic reasons
+	//! The parameters of a transformation; a dense matrix over ScalarType
 	typedef Matrix TransformationParameters;
 	
 	// alias for scope reasons
-	typedef PointMatcherSupport::Parametrizable Parametrizable;
-	typedef PointMatcherSupport::Parametrizable P;
-	typedef Parametrizable::Parameters Parameters;
-	typedef Parametrizable::ParameterDoc ParameterDoc;
-	typedef Parametrizable::ParametersDoc ParametersDoc;
-	typedef Parametrizable::InvalidParameter InvalidParameter;
+	typedef PointMatcherSupport::Parametrizable Parametrizable; //!< alias
+	typedef Parametrizable::Parameters Parameters; //!< alias
+	typedef Parametrizable::ParameterDoc ParameterDoc; //!< alias
+	typedef Parametrizable::ParametersDoc ParametersDoc; //!< alias
+	typedef Parametrizable::InvalidParameter InvalidParameter; //!< alias
 	
 	// ---------------------------------
 	// input types
 	// ---------------------------------
 	
+	//! A point cloud
 	struct DataPoints
 	{
+		//! Feature points of size (dims+1) x ptcount
 		typedef Matrix Features;
+		//! Descriptor points of size descriptor_dims x ptcount
 		typedef Matrix Descriptors;
 		
+		//! The name for a certain number of dim
 		struct Label
 		{
-			std::string text;
-			size_t span;
-			Label(const std::string& text = "", const size_t span = 0):text(text), span(span) {}
+			std::string text; //!< name of the label
+			size_t span; //!< number of data dimensions the label spans
+			Label(const std::string& text = "", const size_t span = 0);
 		};
+		//! A vector of Label
 		struct Labels: std::vector<Label>
 		{
-			typedef typename std::vector<Label>::const_iterator const_iterator;
+			typedef typename std::vector<Label>::const_iterator const_iterator; //!< alias
 			bool contains(const std::string& text) const;
 		};
 		
-		// Constructor
-		DataPoints() {}
-		// Constructor
+		DataPoints();
 		DataPoints(const Features& features, const Labels& featureLabels);
-		// Constructor
 		DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels);
 		
-		// Get descriptor by name
-		// Return a matrix containing only the resquested descriptor
 		Descriptors getDescriptorByName(const std::string& name) const;
 		
-		Features features;
-		Labels featureLabels;
-		Descriptors descriptors;
-		Labels descriptorLabels;
+		Features features; //!< features of points in the cloud
+		Labels featureLabels; //!< labels of features
+		Descriptors descriptors; //!< descriptors of points in the cloud, might be empty
+		Labels descriptorLabels; //!< labels of descriptors
 	};
 	
 	// ---------------------------------
@@ -342,77 +362,88 @@ struct PointMatcher
 	// intermediate types
 	// ---------------------------------
 	
+	//! Result of Matcher::findClosests
 	struct Matches
 	{
-		typedef Matrix Dists;
-		typedef IntMatrix Ids;
+		typedef Matrix Dists; //!< Squared distances to closest points, dense matrix of ScalarType
+		typedef IntMatrix Ids; //!< Identifiers of closest points, dense matrix of integers
 	
-		Matches() {}
+		Matches();
 		Matches(const Dists& dists, const Ids ids);
 		
-		Dists dists;
-		Ids ids;
+		Dists dists; //!< squared distances to closest points
+		Ids ids; //!< identifiers of closest points
 		
 		T getDistsQuantile(const T quantile) const;
 	};
 
+	//! Weights resulting of the application of FeatureOutlierFilter or DescriptorOutlierFilter; a dense matrix over ScalarType
 	typedef Matrix OutlierWeights;
 	
 	// ---------------------------------
 	// types of processing bricks
 	// ---------------------------------
 	
+	//! A function that transforms points and their descriptor given parameters
 	struct Transformation: public Parametrizable
 	{
-		Transformation(){}
-		Transformation(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
-		virtual ~Transformation() {}
-		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0;
+		Transformation();
+		Transformation(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+		virtual ~Transformation();
+		
+		//! Transform input using parameters
+		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0; 
 	};
 	
+	//! A chain of Transformation
 	struct Transformations: public PointMatcherSupport::SharedPtrVector<Transformation>
 	{
 		void apply(DataPoints& cloud, const TransformationParameters& parameters) const;
 	};
-	typedef typename Transformations::iterator TransformationsIt;
-	typedef typename Transformations::const_iterator TransformationsConstIt;
+	typedef typename Transformations::iterator TransformationsIt; //!< alias
+	typedef typename Transformations::const_iterator TransformationsConstIt; //!< alias
 	
 	DEF_REGISTRAR(Transformation)
 	
 	// ---------------------------------
 	
+	//! A data filter takes a point cloud as input, transforms it, and produces another point cloud as output.
 	struct DataPointsFilter: public Parametrizable
 	{
-		DataPointsFilter(){}
-		DataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
-		virtual ~DataPointsFilter() {}
-		virtual void init() {}
+		DataPointsFilter();
+		DataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+		virtual ~DataPointsFilter();
+		virtual void init();
+		
+		//! Apply this filter to input
 		virtual DataPoints filter(const DataPoints& input) = 0;
 	};
 	
+	//! A chain of DataPointsFilter
 	struct DataPointsFilters: public PointMatcherSupport::SharedPtrVector<DataPointsFilter>
 	{
 		void init();
 		void apply(DataPoints& cloud);
 	};
-	typedef typename DataPointsFilters::iterator DataPointsFiltersIt;
-	typedef typename DataPointsFilters::const_iterator DataPointsFiltersConstIt;
+	typedef typename DataPointsFilters::iterator DataPointsFiltersIt; //!< alias
+	typedef typename DataPointsFilters::const_iterator DataPointsFiltersConstIt; //!< alias
 	
 	DEF_REGISTRAR(DataPointsFilter)
 	
 	// ---------------------------------
 	
+	//! A matcher links points in the reading to points in the reference
 	struct Matcher: public Parametrizable
 	{
-		//! number of points visited
-		unsigned long visitCounter;
+		unsigned long visitCounter; //!< number of points visited
 		
-		Matcher():visitCounter(0) {}
-		Matcher(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params),visitCounter(0) {}
+		Matcher();
+		Matcher(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+		virtual ~Matcher();
 		
-		void resetVisitCount() { visitCounter = 0; }
-		unsigned long getVisitCount() const { return visitCounter; }
-		virtual ~Matcher() {}
+		void resetVisitCount();
+		unsigned long getVisitCount() const;
+		
 		virtual void init(const DataPoints& filteredReference) = 0;
 		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference) = 0;
 	};
@@ -421,57 +452,73 @@ struct PointMatcher
 	
 	// ---------------------------------
 	
+	//! A feature outlier filter removes links between points in reading and their matched points in reference, depending on some criteria on the features. Points with no link will be ignored in the subsequent minimization step.
 	struct FeatureOutlierFilter: public Parametrizable
 	{
-		FeatureOutlierFilter() {}
-		FeatureOutlierFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
-		virtual ~FeatureOutlierFilter() {}
+		FeatureOutlierFilter();
+		FeatureOutlierFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+		
+		virtual ~FeatureOutlierFilter();
+		
+		//! Detect outliers using features
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input) = 0;
 	};
 	
+	//! A descriptor outlier filter removes links between points in reading and their matched points in reference, depending on some criteria on the descriptors. Points with no link will be ignored in the subsequent minimization step.
 	struct DescriptorOutlierFilter
 	{
-		virtual ~DescriptorOutlierFilter() {}
+		virtual ~DescriptorOutlierFilter();
+		
+		//! Detect outliers using descriptors
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input) = 0;
 	};
 	
-	// Vector outlier filters
+	//! A chain of outlier filters of type F
 	template<typename F>
 	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<F>
 	{
-		typedef PointMatcherSupport::SharedPtrVector<F> Vector;
+		typedef PointMatcherSupport::SharedPtrVector<F> Vector; //!< alias
+		
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 	
+	//! A chain of FeatureOutlierFilter
 	typedef OutlierFilters<FeatureOutlierFilter> FeatureOutlierFilters;
+	//! A chain of DescriptorOutlierFilter
 	typedef OutlierFilters<DescriptorOutlierFilter> DescriptorOutlierFilters;
-	typedef typename FeatureOutlierFilters::const_iterator FeatureOutlierFiltersConstIt;
-	typedef typename FeatureOutlierFilters::iterator FeatureOutlierFiltersIt;
-	typedef typename DescriptorOutlierFilters::const_iterator DescriptorOutlierFiltersConstIt;
-	typedef typename DescriptorOutlierFilters::iterator DescriptorOutlierFiltersIt;
+	typedef typename FeatureOutlierFilters::const_iterator FeatureOutlierFiltersConstIt; //!< alias
+	typedef typename FeatureOutlierFilters::iterator FeatureOutlierFiltersIt; //!< alias
+	typedef typename DescriptorOutlierFilters::const_iterator DescriptorOutlierFiltersConstIt; //!< alias
+	typedef typename DescriptorOutlierFilters::iterator DescriptorOutlierFiltersIt; //!< alias
 	
 	DEF_REGISTRAR(FeatureOutlierFilter)
 	DEF_REGISTRAR(DescriptorOutlierFilter)
 
 	// ---------------------------------
 	
+	//! An error minimizer will compute a transformation matrix such as to minimize the error between the reading and the reference. 
 	struct ErrorMinimizer: public Parametrizable
 	{
+		//! A structure holding data ready for minimization. The data are "normalized", for instance there are no point with 0 weight, etc.
 		struct ErrorElements
 		{
-			DataPoints reading;
-			DataPoints reference;
-			OutlierWeights weights;
-			Matches matches;
+			DataPoints reading; //!< reading point cloud
+			DataPoints reference; //!< reference point cloud
+			OutlierWeights weights; //!< weights for every association
+			Matches matches; //!< associations
 
 			ErrorElements(const DataPoints& reading, const DataPoints reference, const OutlierWeights weights, const Matches matches);
 		};
 		
-		ErrorMinimizer():pointUsedRatio(-1.),weightedPointUsedRatio(-1.) {}
-		virtual ~ErrorMinimizer() {}
+		ErrorMinimizer();
+		virtual ~ErrorMinimizer();
+		
+		T getPointUsedRatio() const;
+		T getWeightedPointUsedRatio() const;
+		
+		//! Find the parameters that minimize the error
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
-		T getPointUsedRatio() const { return pointUsedRatio; }
-		T getWeightedPointUsedRatio() const { return weightedPointUsedRatio; }
+		
 		
 	protected:
 		// helper functions
@@ -479,14 +526,15 @@ struct PointMatcher
 		ErrorElements getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
 		
 	protected:
-		T pointUsedRatio;
-		T weightedPointUsedRatio;
+		T pointUsedRatio; //!< the ratio of how many points where used for error minimization
+		T weightedPointUsedRatio; //!< the ratio of how many points where used (with weight) for error minimization
 	};
 	
 	DEF_REGISTRAR(ErrorMinimizer)
 	
 	// ---------------------------------
 	
+	//! A transformation checker can stop the iteration depending on some conditions.
 	struct TransformationChecker: public Parametrizable
 	{
 	protected:
@@ -512,39 +560,38 @@ struct PointMatcher
 		static Vector matrixToAngles(const TransformationParameters& parameters);
 	};
 	
-	// Vector of transformation checker
+	//! A chain of TransformationChecker
 	struct TransformationCheckers: public PointMatcherSupport::SharedPtrVector<TransformationChecker>
 	{
 		void init(const TransformationParameters& parameters, bool& iterate);
 		void check(const TransformationParameters& parameters, bool& iterate);
 	};
-	typedef typename TransformationCheckers::iterator TransformationCheckersIt;
-	typedef typename TransformationCheckers::const_iterator TransformationCheckersConstIt;
+	typedef typename TransformationCheckers::iterator TransformationCheckersIt; //!< alias
+	typedef typename TransformationCheckers::const_iterator TransformationCheckersConstIt; //!< alias
 	
 	DEF_REGISTRAR(TransformationChecker)
 
 	// ---------------------------------
 	
+	//! An inspector allows to log data at the different steps, for analysis.
 	struct Inspector: public Parametrizable
 	{
 		
-		Inspector() {}
-		Inspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
+		Inspector();
+		Inspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		
 		// 
-		virtual ~Inspector() {}
-		virtual void init() {};
+		virtual ~Inspector();
+		virtual void init();
 		
 		// performance statistics
-		virtual void addStat(const std::string& name, double data) {}
-		virtual void dumpStats(std::ostream& stream) {}
+		virtual void addStat(const std::string& name, double data);
+		virtual void dumpStats(std::ostream& stream);
 		
 		// data statistics 
-		virtual void dumpFilteredReference(const DataPoints& filteredReference) {}
-		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers) {}
-		virtual void finish(const size_t iterationCount) {}
-		
-		
+		virtual void dumpFilteredReference(const DataPoints& filteredReference);
+		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers);
+		virtual void finish(const size_t iterationCount);
 	};
 	
 	DEF_REGISTRAR(Inspector) 
@@ -557,44 +604,36 @@ struct PointMatcher
 	
 	// algorithms
 	
-	// stuff common to all ICP algorithms
+	//! Stuff common to all ICP algorithms
 	struct ICPChainBase
 	{
 	public:
-		DataPointsFilters readingDataPointsFilters;
-		DataPointsFilters readingStepDataPointsFilters;
-		DataPointsFilters keyframeDataPointsFilters;
-		Transformations transformations;
-		std::shared_ptr<Matcher> matcher;
-		FeatureOutlierFilters featureOutlierFilters;
-		DescriptorOutlierFilters descriptorOutlierFilters;
-		std::shared_ptr<ErrorMinimizer> errorMinimizer;
-		TransformationCheckers transformationCheckers;
-		std::shared_ptr<Inspector> inspector;
-		T outlierMixingWeight;
+		DataPointsFilters readingDataPointsFilters; //!< filters for reading, applied once
+		DataPointsFilters readingStepDataPointsFilters; //!< filters for reading, applied at each step
+		DataPointsFilters keyframeDataPointsFilters; //!< filters for keyframe
+		Transformations transformations; //!< transformations
+		std::shared_ptr<Matcher> matcher; //!< matcher
+		FeatureOutlierFilters featureOutlierFilters; //!< outlier filters on features
+		DescriptorOutlierFilters descriptorOutlierFilters; //!< outlier filters on descriptors
+		std::shared_ptr<ErrorMinimizer> errorMinimizer; //!< error minimizer
+		TransformationCheckers transformationCheckers; //!< transformation checkers
+		std::shared_ptr<Inspector> inspector; //!< inspector
+		T outlierMixingWeight; //!< weighting ratio of feature vs outlier filters
 		
 		virtual ~ICPChainBase();
-		
-		//! Construct an ICP algorithm that works in most of the cases
+
 		virtual void setDefault();
 		
-		//! Construct an ICP algorithm from a YAML file
 		void loadFromYaml(std::istream& in);
-
-		//! Return the remaining number of points in reading after prefiltering but before the iterative process
-		unsigned getPrefilteredReadingPtsCount() const {return prefilteredReadingPtsCount;};
-		//! Return the remaining number of points in the keyframe after prefiltering but before the iterative process
-		unsigned getPrefilteredKeyframePtsCount() const {return prefilteredKeyframePtsCount;};
+		unsigned getPrefilteredReadingPtsCount() const;
+		unsigned getPrefilteredKeyframePtsCount() const;
 		
 	protected:
-		//! Remaining number of points after prefiltering but before the iterative process
-		unsigned prefilteredReadingPtsCount;
-		//! Remaining number of points after prefiltering but before the iterative process
-		unsigned prefilteredKeyframePtsCount;
+		unsigned prefilteredReadingPtsCount; //!< remaining number of points after prefiltering but before the iterative process
+		unsigned prefilteredKeyframePtsCount; //!< remaining number of points after prefiltering but before the iterative process
 
-		//! Protected contstructor, to prevent the creation of this object
 		ICPChainBase();
-		//! Clean chain up, empty all filters and delete associated objects
+		
 		void cleanup();
 		
 		#ifdef HAVE_YAML_CPP
@@ -611,12 +650,9 @@ struct PointMatcher
 		#endif // HAVE_YAML_CPP
 	};
 	
-	// ICP algorithm
+	//! ICP algorithm
 	struct ICP: ICPChainBase
 	{
-		ICP();
-		~ICP();
-		
 		TransformationParameters operator()(
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn);
@@ -632,25 +668,24 @@ struct PointMatcher
 			const TransformationParameters& initialTransformationParameters);
 	};
 	
-	// ICP sequence, with keyframing
+	//! ICP alogrithm, taking a sequence of clouds and using keyframing
 	struct ICPSequence: ICPChainBase
 	{
-		T ratioToSwitchKeyframe;
+		T ratioToSwitchKeyframe; //!< when the ratio of matching points is below this, create a new keyframe
 		
 		ICPSequence();
 		~ICPSequence();
 		
 		TransformationParameters operator()(const DataPoints& inputCloudIn);
 	
-		TransformationParameters getTransform() const { return keyFrameTransform * T_refIn_dataIn; }
-		TransformationParameters getDeltaTransform() const { return lastTransformInv * getTransform(); }
-		bool keyFrameCreatedAtLastCall() const { return keyFrameCreated; }
-		bool hasKeyFrame() const { return (keyFrameCloud.features.cols() != 0); }
+		TransformationParameters getTransform() const;
+		TransformationParameters getDeltaTransform() const;
+		bool keyFrameCreatedAtLastCall() const;
+		bool hasKeyFrame() const;
+		
+		void resetTracking(DataPoints& inputCloud);
 		
 		virtual void setDefault();
-		
-		//! Drop current key frame, create a new one with inputCloud, reset transformations
-		void resetTracking(DataPoints& inputCloud);
 		
 	protected:
 		#ifdef HAVE_YAML_CPP
@@ -670,7 +705,6 @@ struct PointMatcher
 
 		TransformationParameters lastTransformInv; //!< inv of previous computed transform (using getTransform())
 		
-		//! Create a new key frame
 		void createKeyFrame(DataPoints& inputCloud);
 	};
 	

@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "PointMatcher.h"
-#include "Inspectors.h"
+#include "InspectorsImpl.h"
 
 #include <iostream>
 #include <fstream>
@@ -82,6 +82,12 @@ std::vector<string> PointMatcher<T>::csvLineToVector(const char* line)
 
 	return parsedLine;
 }
+
+template
+std::vector<string> PointMatcher<float>::csvLineToVector(const char* line);
+template
+std::vector<string> PointMatcher<double>::csvLineToVector(const char* line);
+
 
 template<typename T>
 typename PointMatcher<T>::CsvElements PointMatcher<T>::parseCsvWithHeader(const std::string& fileName)
@@ -155,6 +161,12 @@ typename PointMatcher<T>::CsvElements PointMatcher<T>::parseCsvWithHeader(const 
 
 	return data;
 }
+
+template
+PointMatcher<float>::CsvElements PointMatcher<float>::parseCsvWithHeader(const std::string& fileName);
+template
+PointMatcher<double>::CsvElements PointMatcher<double>::parseCsvWithHeader(const std::string& fileName);
+
 
 //! @brief Load comma separated values (csv) file
 //! @param fileName a string containing the path and the file name
@@ -370,8 +382,9 @@ PointMatcher<float>::DataPoints PointMatcher<float>::loadCSV(const std::string& 
 template
 PointMatcher<double>::DataPoints PointMatcher<double>::loadCSV(const std::string& fileName);
 
+//! Save point cloud to a file as CSV
 template<typename T>
-void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, const std::string& fileName)
+void PointMatcher<T>::saveCSV(const DataPoints& data, const std::string& fileName)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
@@ -379,10 +392,11 @@ void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, 
 	saveCSV(data, ofs);
 }
 
+//! Save point cloud to a stream as CSV
 template<typename T>
-void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, std::ostream& os)
+void PointMatcher<T>::saveCSV(const DataPoints& data, std::ostream& os)
 {
-	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
+	typedef typename DataPoints::Descriptors Descriptors;
 	
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
@@ -408,10 +422,11 @@ void PointMatcher<T>::saveCSV(const typename PointMatcher<T>::DataPoints& data, 
 }
 
 template
-void PointMatcher<float>::saveCSV(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
+void PointMatcher<float>::saveCSV(const DataPoints& data, const std::string& fileName);
 template
-void PointMatcher<double>::saveCSV(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+void PointMatcher<double>::saveCSV(const DataPoints& data, const std::string& fileName);
 
+//! Load point cloud from a file as VTK
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(const std::string& fileName)
 {
@@ -421,6 +436,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(const std::string&
 	return loadVTK(ifs);
 }
 
+//! Load point cloud from a stream as VTK
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 {
@@ -512,7 +528,7 @@ PointMatcher<float>::DataPoints PointMatcher<float>::loadVTK(const std::string& 
 template
 PointMatcher<double>::DataPoints PointMatcher<double>::loadVTK(const std::string& fileName);
 
-
+//! Save point cloud to a file as VTK
 template<typename T>
 void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileName)
 {
@@ -530,7 +546,7 @@ template
 void PointMatcher<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
 
 
-
+//! Load a list of path from a CSV file. The header must contain "Reading".
 template<typename T>
 typename PointMatcher<T>::FileList PointMatcher<T>::loadList(const std::string& fileName)
 {
