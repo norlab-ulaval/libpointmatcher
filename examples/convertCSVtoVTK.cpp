@@ -59,23 +59,46 @@ int main(int argc, char *argv[])
 	PM::DataPointsFilter* dataPointFilter2;
 	PM::DataPointsFilter* dataPointFilter3;
 	PM::DataPointsFilter* dataPointFilter4;
+	PM::DataPointsFilter* dataPointFilter5;
+	PM::DataPointsFilter* dataPointFilter6;
 
-	dataPointFilter1 = pm.DataPointsFilterRegistrar.create("MinDistDataPointsFilter", PM::Parameters({{"minDist", "0.45"}}));
-	dataPointFilter2 = pm.DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", PM::Parameters({{"prob", "0.5"}}));
+	dataPointFilter1 = pm.DataPointsFilterRegistrar.create(
+		"MinDistDataPointsFilter", PM::Parameters({
+			{"minDist", "0.45"}
+			}));
+	dataPointFilter2 = pm.DataPointsFilterRegistrar.create(
+		"RandomSamplingDataPointsFilter", PM::Parameters({
+			{"prob", "0.95"}
+			}));
 
-	dataPointFilter3 = pm.DataPointsFilterRegistrar.create("UniformizeDensityDataPointsFilter");
-
-	dataPointFilter4 = pm.DataPointsFilterRegistrar.create("ShadowDataPointsFilter", PM::Parameters({{"eps", "0.1"}}));
+	dataPointFilter3 = pm.DataPointsFilterRegistrar.create(
+		"SamplingSurfaceNormalDataPointsFilter", PM::Parameters({
+			{"ratio", "0.0001"},
+			{"binSize", "20"},
+			{"keepNormals", "1"},
+			{"keepDensities", "1"},
+			}));
 	
-	dataPointFilter1->init();
-	dataPointFilter2->init();
-	dataPointFilter3->init();
-	dataPointFilter4->init();
+	dataPointFilter4 = pm.DataPointsFilterRegistrar.create(
+		"OrientNormalsDataPointsFilter"
+		);
 
-	d = dataPointFilter1->filter(d);
-	d = dataPointFilter2->filter(d);
+	dataPointFilter5 = pm.DataPointsFilterRegistrar.create(
+		"UniformizeDensityDataPointsFilter"
+		);
+
+	dataPointFilter6 = pm.DataPointsFilterRegistrar.create(
+		"ShadowDataPointsFilter", PM::Parameters({
+			{"eps", "0.1"}
+			}));
+
+	
+	//d = dataPointFilter1->filter(d);
+	//d = dataPointFilter2->filter(d);
 	d = dataPointFilter3->filter(d);
 	d = dataPointFilter4->filter(d);
+	//d = dataPointFilter5->filter(d);
+	//d = dataPointFilter6->filter(d);
 
 	// Example of moving 3D points
 	//Eigen::Matrix4f T;

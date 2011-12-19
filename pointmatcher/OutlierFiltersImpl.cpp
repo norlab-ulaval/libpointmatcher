@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "OutlierFiltersImpl.h"
 #include "PointMatcherPrivate.h"
+#include "Functions.h"
 
 #include <algorithm>
 #include <vector>
@@ -42,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 
 using namespace std;
-
+using namespace PointMatcherSupport;
 
 // NullFeatureOutlierFilter
 template<typename T>
@@ -200,7 +201,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::TrimmedDistOutli
 template struct OutlierFiltersImpl<float>::TrimmedDistOutlierFilter;
 template struct OutlierFiltersImpl<double>::TrimmedDistOutlierFilter;
 
-
+// VarTrimmedDistOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const Parameters& params):
 	FeatureOutlierFilter("VarTrimmedDistOutlierFilter", VarTrimmedDistOutlierFilter::availableParameters(), params),
@@ -285,6 +286,67 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 
 template struct OutlierFiltersImpl<float>::VarTrimmedDistOutlierFilter;
 template struct OutlierFiltersImpl<double>::VarTrimmedDistOutlierFilter;
+
+// SurfaceNormalOutlierFilter
+template<typename T>
+OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter::SurfaceNormalOutlierFilter(const Parameters& params):
+	FeatureOutlierFilter("SurfaceNormalOutlierFilter", SurfaceNormalOutlierFilter::availableParameters(), params),
+	eps(cos(Parametrizable::get<T>("maxAngle"))),
+	warningPrinted(false)
+{
+	//waring: eps is change to cos(maxAngle)!
+}
+
+template<typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter::compute(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const Matches& input)
+{
+
+	const Matrix normalsReading = filteredReading.getDescriptorByName("normals");
+	const Matrix normalsReference = filteredReference.getDescriptorByName("normals");
+	
+	// select weight from median
+	OutlierWeights w(input.dists.rows(), input.dists.cols());
+
+	if(normalsReading.cols() != 0 && normalsReference.cols() != 0)
+	{
+		for (int x = 0; x < w.cols(); ++x) // pts in reading
+		{
+			const Vector normalRead = normalsReading.col(x).normalized();
+
+			for (int y = 0; y < w.rows(); ++y) // knn 
+			{
+				const int idRef = input.ids(y, x);
+
+				const Vector normalRef = normalsReference.col(idRef).normalized();
+
+				const T value = anyabs(normalRead.dot(normalRef));
+
+				if(value < eps) // test to keep the points
+					w(y, x) = 0;
+				else
+					w(y, x) = 1;			
+			}
+		}
+	}
+	else
+	{
+		if(warningPrinted == false)
+		{
+			LOG_INFO_STREAM("SurfaceNormalOutlierFilter: surface normals not available. Skipping filtering");
+			warningPrinted = true;
+		}
+
+		w = Matrix::Ones(input.dists.rows(), input.dists.cols());
+	}
+	//abort();
+	return w;
+}
+
+template struct OutlierFiltersImpl<float>::SurfaceNormalOutlierFilter;
+template struct OutlierFiltersImpl<double>::SurfaceNormalOutlierFilter;
 
 
 

@@ -1070,6 +1070,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(FeatureOutlierFilter, MedianDistOutlierFilter, typename OutlierFiltersImpl<T>::MedianDistOutlierFilter)
 	ADD_TO_REGISTRAR(FeatureOutlierFilter, TrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter)
 	ADD_TO_REGISTRAR(FeatureOutlierFilter, VarTrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter)
+	ADD_TO_REGISTRAR(FeatureOutlierFilter, SurfaceNormalOutlierFilter, typename OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, IdentityErrorMinimizer, typename ErrorMinimizersImpl<T>::IdentityErrorMinimizer)
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointErrorMinimizer)

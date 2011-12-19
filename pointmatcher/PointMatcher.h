@@ -306,6 +306,7 @@ struct PointMatcher
 		DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels);
 		
 		Descriptors getDescriptorByName(const std::string& name) const;
+		//bool isDescriptorExist(const std::string& name) const;
 		
 		Features features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features
@@ -318,9 +319,12 @@ struct PointMatcher
 	// ---------------------------------
 	typedef std::map<std::string, std::vector<std::string>> CsvElements;
 
-	static void validateStream(const std::string& fileName, std::istream& is);
+	static void validateFile(const std::string& fileName);
 	static std::vector<std::string> csvLineToVector(const char* line);
 	static CsvElements parseCsvWithHeader(const std::string& fileName);
+
+	//Should it be here?
+	static DataPoints concatenateDataPoints(const DataPoints dp1, const DataPoints dp2);
 
 	// CSV
 	
@@ -345,7 +349,7 @@ struct PointMatcher
 		TransformationParameters initTransformation;
 		Eigen::Matrix<T, 3, 1> gravity;
 
-		FileInfo(std::string readingPath="", std::string referencePath="", std::string fileExtension="", TransformationParameters initTransformation=TransformationParameters::Identity(3,3), Vector grativity=Eigen::Matrix<T,3,1>::Identity()):
+		FileInfo(std::string readingPath="", std::string referencePath="", std::string fileExtension="", TransformationParameters initTransformation=TransformationParameters::Identity(3,3), Vector grativity=Eigen::Matrix<T,3,1>::Zero()):
 			readingPath(readingPath),
 			referencePath(referencePath),
 			fileExtension(fileExtension),

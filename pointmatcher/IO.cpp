@@ -42,14 +42,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctype.h>
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
+#include "boost/lexical_cast.hpp"
 
 using namespace std;
 
 template<typename T>
-void PointMatcher<T>::validateStream(const std::string& fileName, std::istream& ifs)
+void PointMatcher<T>::validateFile(const std::string& fileName)
 {
 	boost::filesystem::path fullPath(fileName);
 
+	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
 #if BOOST_FILESYSTEM_VERSION >= 3
 		throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).native());
@@ -60,9 +62,9 @@ void PointMatcher<T>::validateStream(const std::string& fileName, std::istream& 
 }
 
 template
-void PointMatcher<float>::validateStream(const std::string& fileName, std::istream& ifs);
+void PointMatcher<float>::validateFile(const std::string& fileName);
 template
-void PointMatcher<double>::validateStream(const std::string& fileName, std::istream& ifs);
+void PointMatcher<double>::validateFile(const std::string& fileName);
 
 template<typename T>
 std::vector<string> PointMatcher<T>::csvLineToVector(const char* line)
@@ -94,7 +96,7 @@ typename PointMatcher<T>::CsvElements PointMatcher<T>::parseCsvWithHeader(const 
 {
 	ifstream is(fileName.c_str());
 	
-	validateStream(fileName, is);
+	validateFile(fileName);
 
 
 	unsigned elementCount=0;
@@ -167,6 +169,30 @@ PointMatcher<float>::CsvElements PointMatcher<float>::parseCsvWithHeader(const s
 template
 PointMatcher<double>::CsvElements PointMatcher<double>::parseCsvWithHeader(const std::string& fileName);
 
+//!brief Merge two DataPoints
+template<typename T>
+typename PointMatcher<T>::DataPoints PointMatcher<T>::concatenateDataPoints(const DataPoints dp1, const DataPoints dp2)
+{
+	const int nbPoints1 = dp1.features.cols();
+	const int nbPoints2 = dp2.features.cols();
+	const int nbPointsTotal = nbPoints1 + nbPoints2;
+
+	const int dim = dp1.features.rows();
+	
+	typename DataPoints::Features combinedFeat(dim, nbPointsTotal);
+	combinedFeat.leftCols(nbPoints1) = dp1.features;
+	combinedFeat.rightCols(nbPoints2) = dp2.features;
+
+
+	// We explicitly remove descriptors
+	return DataPoints(combinedFeat, dp1.featureLabels);
+}
+
+template
+PointMatcher<float>::DataPoints PointMatcher<float>::concatenateDataPoints(const DataPoints dp1, const DataPoints dp2);
+template
+PointMatcher<double>::DataPoints PointMatcher<double>::concatenateDataPoints(const DataPoints dp1, const DataPoints dp2);
+
 
 //! @brief Load comma separated values (csv) file
 //! @param fileName a string containing the path and the file name
@@ -185,7 +211,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(const std::string&
 {
 	ifstream ifs(fileName.c_str());
 	
-	validateStream(fileName, ifs);
+	validateFile(fileName);
 
 	return loadCSV(ifs);
 }
@@ -556,21 +582,106 @@ typename PointMatcher<T>::FileList PointMatcher<T>::loadList(const std::string& 
 	
 	CsvElements data = parseCsvWithHeader(fileName);
 	
+	// Look for 3D transformation (4x4)
+	bool found3dTrans = true;
+	for(unsigned i=0; i<4; i++)
+	{
+		for(unsigned j=0; j<4; j++)
+		{
+			stringstream transName;
+			transName << "T" << i << j;
+			found3dTrans = found3dTrans && (data.find(transName.str()) != data.end());
+		}
+	}
+	
+	// Look for 2D transformation (3x3)
+	bool found2dTrans = true;
+	for(unsigned i=0; i<3; i++)
+	{
+		for(unsigned j=0; j<3; j++)
+		{
+			stringstream transName;
+			transName << "T" << i << j;
+			found2dTrans = found2dTrans && (data.find(transName.str()) != data.end());
+		}
+	}
+
+	if(found3dTrans)
+		found2dTrans = false;
+
 	FileList list;
 	if(data.find("Reading") != data.end())
 	{
 		std::vector<string> readingName = data["Reading"];
+		const unsigned lineCount = readingName.size();
 
-		for(unsigned i=0; i<readingName.size(); i++)
+		// for every lines
+		for(unsigned line=0; line<lineCount; line++)
 		{
 			FileInfo info;
-			info.readingPath = parentPath+"/"+readingName[i];
-			info.fileExtension = boost::filesystem::path(readingName[i]).extension();
+			// Reading info
+			info.readingPath = parentPath+"/"+readingName[line];
+			validateFile(info.readingPath);
+			info.fileExtension = boost::filesystem::path(readingName[line]).extension();
+			
+			// Initial transformation in 3D
+			if(found3dTrans)
+			{
+				TransformationParameters transformation = TransformationParameters::Identity(4,4);
+				for(unsigned i=0; i<4; i++)
+				{
+					for(unsigned j=0; j<4; j++)
+					{
+						stringstream transName;
+						transName << "T" << i << j;
+						const T value = boost::lexical_cast<T> (data[transName.str()][line]);
+						transformation(i,j) = value;
+					}
+				}
+				info.initTransformation = transformation;
+			}
+			
+			// Initial transformation in 2D
+			if(found2dTrans)
+			{
+				TransformationParameters transformation = TransformationParameters::Identity(3,3);
+				for(unsigned i=0; i<3; i++)
+				{
+					for(unsigned j=0; j<3; j++)
+					{
+						stringstream transName;
+						transName << "T" << i << j;
+						const T value = boost::lexical_cast<T> (data[transName.str()][line]);
+						transformation(i,j) = value;
+					}
+				}
+				info.initTransformation = transformation;
+			}
+			
+			// Build the list
 			list.push_back(info);
 		}
 	}
+	else
+	{
+		stringstream errorMsg;
+		errorMsg << "Error transfering CSV to structure: The header should at least contain Reading.";
+		throw runtime_error(errorMsg.str());
+	}
 
 
+	// Debug: Print the list
+	/*for(unsigned i=0; i<list.size(); i++)
+	{
+		cout << "\n--------------------------" << endl;
+		cout << "Sequence " << i << ":" << endl;
+		cout << "Reading path: " << list[i].readingPath << endl;
+		cout << "Reference path: " << list[i].referencePath << endl;
+		cout << "Extension: " << list[i].fileExtension << endl;
+		cout << "Tranformation:\n" << list[i].initTransformation << endl;
+		cout << "Grativity:\n" << list[i].gravity << endl;
+	}
+	*/
 	
 	return list;
 }

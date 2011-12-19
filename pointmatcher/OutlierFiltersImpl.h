@@ -53,6 +53,8 @@ struct OutlierFiltersImpl
 	typedef typename PointMatcher<T>::FeatureOutlierFilter FeatureOutlierFilter;
 	typedef typename PointMatcher<T>::DescriptorOutlierFilter DescriptorOutlierFilter;
 	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
+	typedef typename PointMatcher<T>::Matrix Matrix;	
+	typedef typename PointMatcher<T>::Vector Vector;
 	
 	struct NullFeatureOutlierFilter: public FeatureOutlierFilter
 	{
@@ -167,7 +169,28 @@ struct OutlierFiltersImpl
 		// return the optimized ratio
 		T optimizeInlierRatio(const Matches& matches);
 	};
+	
+	
+	// ---------------------------------
+	struct SurfaceNormalOutlierFilter: public FeatureOutlierFilter
+	{
+		inline static const std::string description()
+		{
+			return "Hard rejection threshold using the angle between the surface normal vector of the reading and the reference. If normal vectors or not in the descriptor for both of the point clouds, does nothing.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "maxAngle", "Maximum authorised angle between the 2 surface normals (in radian)", "1.57", "0.0", "3.1416", &P::Comp<T>}
+			});
+		}
 
+		const T eps;
+		bool warningPrinted;
+		
+		SurfaceNormalOutlierFilter(const Parameters& params = Parameters());
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+	};
 	// ---------------------------------
 
 	struct NullDescriptorOutlierFilter: public DescriptorOutlierFilter

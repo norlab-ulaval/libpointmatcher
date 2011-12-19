@@ -330,7 +330,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensity
 	{
 		LOG_INFO_STREAM("UniformizeDensityDataPointsFilter - WARNING: no densities found. Will force computation with default parameters");
 
-		auto normalFilter = new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter(Parameters({{"ratio", "0.0001"}, {"binSize", "5"}, {"keepNormals", "0"}, {"keepDensities", "1"}}));
+		auto normalFilter = new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter(Parameters({{"ratio", "0.001"}, {"binSize", "7"}, {"keepNormals", "0"}, {"keepDensities", "1"}}));
 		outputCloud = normalFilter->filter(input);
 	}
 	else
@@ -1193,6 +1193,7 @@ DataPointsFiltersImpl<T>::ShadowDataPointsFilter::ShadowDataPointsFilter(const P
 	DataPointsFilter("ShadowDataPointsFilter", ShadowDataPointsFilter::availableParameters(), params),
 	eps(sin(Parametrizable::get<T>("eps")))
 {
+	//waring: maxAngle is change to sin(maxAngle)!
 }
 
 

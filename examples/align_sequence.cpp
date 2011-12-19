@@ -69,11 +69,11 @@ int main(int argc, char *argv[])
 
 	// load YAML config
 	ifstream ifs(argv[1]);
-	PM::validateStream(argv[1], ifs);
+	PM::validateFile(argv[1]);
 	icp.loadFromYaml(ifs);
 
 	PM::FileList list = PM::loadList(argv[2]);
-		
+
 	PM::DataPoints lastCloud, newCloud;
 	TP tp;
 
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 		stringstream outputFileNameIter;
 		outputFileNameIter << outputFileName << "_" << i;
 		
-		cout << "outputFileName: " << outputFileNameIter << endl;
+		cout << "outputFileName: " << outputFileNameIter.str() << endl;
 		PM::saveVTK(newCloud, outputFileNameIter.str());
 
 	}
