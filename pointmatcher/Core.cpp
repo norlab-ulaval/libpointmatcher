@@ -1,4 +1,3 @@
-// kate: replace-tabs off; indent-width 4; indent-mode normal
 // vim: ts=4:sw=4:noexpandtab
 /*
 
@@ -112,6 +111,113 @@ PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& 
 	descriptorLabels(descriptorLabels)
 {}
 
+//! Add an other point cloud after the current one
+template<typename T>
+void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
+{
+	const int nbPoints1 = this->features.cols();
+	const int nbPoints2 = dp.features.cols();
+	const int nbPointsTotal = nbPoints1 + nbPoints2;
+
+	const int dimFeat = this->features.rows();
+	if(dimFeat != dp.features.rows())
+	{
+		stringstream errorMsg;
+		errorMsg << "Cannot concatenate DataPoints because the dimension of the features are not the same. Actual dimension: " << dimFeat << " New dimension: " << dp.features.rows(); 
+		throw runtime_error(errorMsg.str());
+	}
+	
+	typename DataPoints::Features combinedFeat(dimFeat, nbPointsTotal);
+	combinedFeat.leftCols(nbPoints1) = this->features;
+	combinedFeat.rightCols(nbPoints2) = dp.features;
+
+
+	DataPoints dpOut(combinedFeat, this->featureLabels);	
+	
+	for(unsigned i = 0; i < this->descriptorLabels.size(); i++)
+	{
+		const string name = this->descriptorLabels[i].text;
+		const int dimDesc = this->descriptorLabels[i].span;
+		if(dp.isDescriptorExist(name, dimDesc) == true)
+		{
+			typename DataPoints::Descriptors mergedDesc(dimDesc, nbPointsTotal);
+			mergedDesc.leftCols(nbPoints1) = this->getDescriptorByName(name);
+			mergedDesc.rightCols(nbPoints2) = dp.getDescriptorByName(name);
+
+			dpOut.addDescriptor(name, mergedDesc);
+		}
+	}
+
+	this->features.swap(dpOut.features);
+	this->featureLabels = dpOut.featureLabels;
+	this->descriptors.swap(dpOut.descriptors);
+	this->descriptorLabels = dpOut.descriptorLabels;
+}
+
+//! Get descriptor by name, return a matrix containing only the resquested descriptor
+template<typename T>
+void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, Descriptors newDescriptor)
+{
+	const int newDescDim = newDescriptor.rows();
+	const int newPointCount = newDescriptor.cols();
+	const int descDim = getDescriptorDimension(name);
+	const int pointCount = features.cols();
+
+	if(newDescriptor.rows() == 0)
+		return;
+
+	// Replace if the descriptor exists
+	if(isDescriptorExist(name) == true)
+	{
+		if(descDim == newDescDim)
+		{
+			// Ensure that the number of points in the point cloud and in the descriptor are the same
+			if(pointCount == newPointCount)
+			{
+				const int row = getDescriptorStartingRow(name);
+				descriptors.block(row, 0, descDim, pointCount) = newDescriptor;
+			}
+			else
+			{
+				stringstream errorMsg;
+				errorMsg << "The descriptor " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << "new: " << newPointCount;
+				throw runtime_error(errorMsg.str());
+			}
+		}
+		else
+		{
+			stringstream errorMsg;
+			errorMsg << "The descriptor " << name << " already exists but could not be added because the dimension is not the same. Old dim: " << descDim << " new: " << newDescDim;
+			throw runtime_error(errorMsg.str());
+		}
+	}
+	else // Add at the end if it is a new descriptor
+	{
+		if(pointCount == newPointCount)
+		{
+			const int totalDim = descriptors.rows() + newDescDim;
+
+			Descriptors appendDesc(totalDim, pointCount);
+			Descriptors tmpDescriptors(descriptors);
+			if(descriptors.rows() > 0)
+				appendDesc.topRows(descriptors.rows()) = tmpDescriptors;
+			
+			appendDesc.bottomRows(newDescDim) = newDescriptor;
+
+			descriptors.resize(totalDim, pointCount);
+			descriptors = appendDesc;
+			descriptorLabels.push_back(Label(name, newDescDim));
+		}
+		else
+		{
+			stringstream errorMsg;
+			errorMsg << "The descriptor " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << " new: " << newPointCount;
+			throw runtime_error(errorMsg.str());
+		}
+	}
+
+}
+
 //! Get descriptor by name, return a matrix containing only the resquested descriptor
 template<typename T>
 typename PointMatcher<T>::DataPoints::Descriptors PointMatcher<T>::DataPoints::getDescriptorByName(const std::string& name) const
@@ -131,6 +237,79 @@ typename PointMatcher<T>::DataPoints::Descriptors PointMatcher<T>::DataPoints::g
 	}
 
 	return Descriptors();
+}
+
+//! Look if a descriptor with a given name exist
+template<typename T>
+bool PointMatcher<T>::DataPoints::isDescriptorExist(const std::string& name) const
+{
+	
+	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	{
+		if(descriptorLabels[i].text.compare(name) == 0)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+//! Look if a descriptor with a given name and dimension exist
+template<typename T>
+bool PointMatcher<T>::DataPoints::isDescriptorExist(const std::string& name, const unsigned dim) const
+{
+	
+	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	{
+		if(descriptorLabels[i].text.compare(name) == 0)
+		{
+			if(descriptorLabels[i].span == dim)
+				return true;
+			else
+				return false;
+		}
+	}
+
+	return false;
+}
+
+//! Return the dimension of a descriptor with a given name. Return 0 if the name is not found
+template<typename T>
+int PointMatcher<T>::DataPoints::getDescriptorDimension(const std::string& name) const
+{
+	
+	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	{
+		if(descriptorLabels[i].text.compare(name) == 0)
+		{
+			return descriptorLabels[i].span;
+		}
+	}
+
+	return 0;
+}
+
+
+//! Return the starting row of a descriptor with a given name. Return 0 if the name is not found
+template<typename T>
+int PointMatcher<T>::DataPoints::getDescriptorStartingRow(const std::string& name) const
+{
+	
+	int row(0);
+	
+	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	{
+		const int span(descriptorLabels[i].span);
+		if(descriptorLabels[i].text.compare(name) == 0)
+		{
+			return row;
+		}
+
+		row += span;
+	}
+
+	return 0;
 }
 
 template<typename T>

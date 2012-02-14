@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 void validateArgs(int argc, char *argv[]);
 void setupArgs(int argc, char *argv[], unsigned int& startId, unsigned int& endId, string& extension);
@@ -59,13 +60,14 @@ int main(int argc, char *argv[])
 	typedef PointMatcher<float> PM;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DP;
+	const int maxMapPointCount = 200000;
 
 	string outputFileName(argv[0]);
 	
 	PM pm;
 	
 	// Main algorithm definition
-	PM::ICPSequence icp;
+	PM::ICP icp;
 
 	// load YAML config
 	ifstream ifs(argv[1]);
@@ -74,11 +76,12 @@ int main(int argc, char *argv[])
 
 	PM::FileList list = PM::loadList(argv[2]);
 
-	PM::DataPoints lastCloud, newCloud;
+	PM::DataPoints mapPointCloud, newCloud;
 	TP tp;
 
 	for(unsigned i=0; i < list.size(); i++)
 	{
+		cout << "---------------------\nLoading: " << list[i].readingPath << endl; 
 		if(list[i].fileExtension == ".vtk")
 			newCloud = PM::loadVTK(list[i].readingPath);
 		else if(list[i].fileExtension == ".csv")
@@ -89,30 +92,56 @@ int main(int argc, char *argv[])
 			abort();
 		}
 		
-		// call ICP
-		try 
+		if(mapPointCloud.features.rows() == 0)
 		{
-			tp = icp(newCloud);
-			//tp = icp.getDeltaTransform();
-			//cout << "Transformation: "<< tp << endl;
-			cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
+			mapPointCloud = newCloud;
+		}
+		else
+		{
+
+			// call ICP
+			try 
+			{
+				tp = icp(mapPointCloud, newCloud);
+				//tp = icp.getDeltaTransform();
+				//cout << "Transformation: "<< tp << endl;
+				cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
+				
+				newCloud.features = tp.inverse()*newCloud.features;
+				
+				PM::DataPointsFilter* uniformSubsample;
+				PM::Parameters params;
+				params = PM::Parameters({{"aggressivity", toParam(0.35)}});
+				uniformSubsample = pm.DataPointsFilterRegistrar.create("UniformizeDensityDataPointsFilter", params);
+				
+				// Merge point clouds to map			
+				mapPointCloud.concatenate(newCloud);
+				mapPointCloud = uniformSubsample->filter(mapPointCloud);
+
+				// Controle the size of the point cloud
+				const double probToKeep = maxMapPointCount/(double)mapPointCloud.features.cols();
+				if(probToKeep < 1.0)
+				{
+					PM::DataPointsFilter* randSubsample;
+					params = PM::Parameters({{"prob", toParam(probToKeep)}});
+					randSubsample = pm.DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
+					mapPointCloud = randSubsample->filter(mapPointCloud);
+				}
+			}
+			catch (PM::ConvergenceError error)
+			{
+				cout << "ERROR PM::ICP failed to converge: " << endl;
+				cout << "   " << error.what() << endl;
+				//cout << "Reseting tracking" << endl;
+				//icp.resetTracking(newCloud);
+			}
+
+			stringstream outputFileNameIter;
+			outputFileNameIter << outputFileName << "_" << i;
 			
-			icp.transformations.apply(newCloud, tp);
+			cout << "outputFileName: " << outputFileNameIter.str() << endl;
+			PM::saveVTK(mapPointCloud, outputFileNameIter.str());
 		}
-		catch (PM::ConvergenceError error)
-		{
-			cout << "ERROR PM::ICP failed to converge: " << endl;
-			cout << "   " << error.what() << endl;
-			cout << "Reseting tracking" << endl;
-			icp.resetTracking(newCloud);
-		}
-
-		stringstream outputFileNameIter;
-		outputFileNameIter << outputFileName << "_" << i;
-		
-		cout << "outputFileName: " << outputFileNameIter.str() << endl;
-		PM::saveVTK(newCloud, outputFileNameIter.str());
-
 	}
 
 	return 0;

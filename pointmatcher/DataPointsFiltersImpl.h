@@ -51,6 +51,7 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::Matrix Matrix;	
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
 	typedef typename PointMatcher<T>::DataPointsFilter DataPointsFilter;
 	
 	//! Identity, does nothing
@@ -197,6 +198,10 @@ struct DataPointsFiltersImpl
 		SurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~SurfaceNormalDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
+
+		static Vector computeNormal(const Vector eigenVa, const Matrix eigenVe);
+		static T computeDensity(const Matrix NN);
+		static Vector serializeEigVec(const Matrix eigenVe);
 	};
 
 	//! Sampling surface normals. First decimate the space until there is at most binSize points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
@@ -246,14 +251,18 @@ struct DataPointsFiltersImpl
 			const Matrix& inputDescriptors;
 			Matrix outputFeatures;
 			Matrix outputDescriptors;
+			Descriptors normals;
+			Descriptors densities;
+			Descriptors eigValues;
+			Descriptors eigVectors;
 			int outputInsertionPoint;
 			int unfitPointsCount;
 			
-			BuildData(const Matrix& inputFeatures, const Matrix& inputDescriptors, const int finalDescDim):
+			BuildData(const Matrix& inputFeatures, const Matrix& inputDescriptors):
 				inputFeatures(inputFeatures),
 				inputDescriptors(inputDescriptors),
 				outputFeatures(inputFeatures.rows(), inputFeatures.cols()),
-				outputDescriptors(finalDescDim, inputFeatures.cols()),
+				outputDescriptors(inputDescriptors.rows(), inputDescriptors.cols()),
 				outputInsertionPoint(0),
 				unfitPointsCount(0)
 			{
@@ -261,6 +270,14 @@ struct DataPointsFiltersImpl
 				indices.reserve(pointsCount);
 				for (int i = 0; i < pointsCount; ++i)
 					indices.push_back(i);
+			}
+
+			Matrix getResizedMatrix(const Matrix input) const
+			{
+				if(input.rows() != 0)
+					return input.leftCols(outputInsertionPoint);
+				else
+					return input;
 			}
 		};
 		

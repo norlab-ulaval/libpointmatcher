@@ -108,15 +108,18 @@ int main(int argc, char *argv[])
 		newCloud = randSubsample->filter(newCloud);
 		
 		// Build filter to remove shadow points and down sample
-		params = PM::Parameters({{"binSize", "20"},{"epsilon", "5"}, {"ratio", "0.25"}});
+		params = PM::Parameters({{"binSize", "20"},{"epsilon", "5"}, {"ratio", "0.15"}, {"keepNormals","1"}});
 		PM::DataPointsFilter* normalFilter;
 		normalFilter = pm.DataPointsFilterRegistrar.create("SamplingSurfaceNormalDataPointsFilter", params);
 		newCloud = normalFilter->filter(newCloud);
 
+		PM::DataPointsFilter* orientNormalFilter;
+		orientNormalFilter = pm.DataPointsFilterRegistrar.create("OrientNormalsDataPointsFilter", PM::Parameters({{"towardCenter", "1"}}));
+		newCloud = orientNormalFilter->filter(newCloud);
 
-		PM::DataPointsFilter* shadowFilter;
-		shadowFilter = pm.DataPointsFilterRegistrar.create("ShadowDataPointsFilter");
-		newCloud = shadowFilter->filter(newCloud);
+		//PM::DataPointsFilter* shadowFilter;
+		//shadowFilter = pm.DataPointsFilterRegistrar.create("ShadowDataPointsFilter");
+		//newCloud = shadowFilter->filter(newCloud);
 
 		// Transforme pointCloud
 		newCloud.features = T * newCloud.features;
@@ -131,7 +134,7 @@ int main(int argc, char *argv[])
 
 			// Control point density
 			PM::DataPointsFilter* uniformSubsample;
-			params = PM::Parameters({{"aggressivity", toParam(0.15)}});
+			params = PM::Parameters({{"aggressivity", toParam(0.25)}});
 			uniformSubsample = pm.DataPointsFilterRegistrar.create("UniformizeDensityDataPointsFilter", params);
 			
 			mapCloud = uniformSubsample->filter(mapCloud);
@@ -152,8 +155,8 @@ int main(int argc, char *argv[])
 		outputFileNameIter << boost::filesystem::path(outputFileName).stem() << "_" << i;
 		
 		cout << "Number of points: " << mapCloud.features.cols() << endl;
-		cout << "OutputFileName: " << outputFileNameIter.str() << endl;
 		PM::saveVTK(mapCloud, outputFileNameIter.str());
+		cout << "OutputFileName: " << outputFileNameIter.str() << endl;
 
 	}
 

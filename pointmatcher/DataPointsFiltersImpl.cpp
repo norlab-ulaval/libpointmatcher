@@ -325,7 +325,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensity
 	
 	DataPoints outputCloud;
 	
-	// Force normals to be computed
+	// Force densities to be computed
 	if (input.getDescriptorByName("densities").cols() == 0)
 	{
 		LOG_INFO_STREAM("UniformizeDensityDataPointsFilter - WARNING: no densities found. Will force computation with default parameters");
@@ -458,6 +458,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	const DataPoints& input)
 {
 	typedef typename DataPoints::Features Features;
+	typedef typename DataPoints::Descriptors Descriptors;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
@@ -475,46 +476,33 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 		throw std::runtime_error("Error, descritor labels do not match descriptor data");
 	
 	// Reserve memory for new descriptors
-	int finalDim(insertDim);
 	const int dimNormals(featDim-1);
 	const int dimDensities(1);
 	const int dimEigValues(featDim-1);
 	const int dimEigVectors((featDim-1)*(featDim-1));
 	const int dimMatchedIds(knn); 
-	Labels newDescriptorLabels(input.descriptorLabels);
 
+	Descriptors normals;
+	Descriptors densities;
+	Descriptors eigenValues;
+	Descriptors eigenVectors;
+	Descriptors matchedValues;
 	if (keepNormals)
-	{
-		newDescriptorLabels.push_back(Label("normals", dimNormals));
-		finalDim += dimNormals;
-	}
+		normals.resize(dimNormals, pointsCount);
 
 	if (keepDensities)
-	{
-		newDescriptorLabels.push_back(Label("densities", dimDensities));
-		finalDim += dimDensities;
-	}
+		densities.resize(dimDensities, pointsCount);
 
 	if (keepEigenValues)
-	{
-		newDescriptorLabels.push_back(Label("eigValues", dimEigValues));
-		finalDim += dimEigValues;
-	}
+		eigenValues.resize(dimEigValues, pointsCount);
 
 	if (keepEigenVectors)
-	{
-		newDescriptorLabels.push_back(Label("eigVectors", dimEigVectors));
-		finalDim += dimEigVectors;
-	}
+		eigenVectors.resize(dimEigVectors, pointsCount);
 	
 	if (keepMatchedIds)
-	{
-		newDescriptorLabels.push_back(Label("matchedIds", dimMatchedIds));
-		finalDim += dimMatchedIds;
-	}
+		matchedValues.resize(dimMatchedIds, pointsCount);
 
-	Matrix newDescriptors(finalDim, pointsCount);
-	
+	// Build kd-tree
 	KDTreeMatcher matcher(Parameters({
 		{ "knn", toParam(knn) },
 		{ "epsilon", toParam(epsilon) }
@@ -522,130 +510,117 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	matcher.init(input);
 
 	Matches matches(typename Matches::Dists(knn, 1), typename Matches::Ids(knn, 1));
-	// Search for surrounding points
+	
+	// Search for surrounding points and compute descriptors
 	int degenerateCount(0);
 	for (int i = 0; i < pointsCount; ++i)
 	{
-		Vector mean(Vector::Zero(featDim-1));
-		Features NN(featDim-1, knn);
-		
-		DataPoints singlePoint(input.features.col(i), input.featureLabels, Matrix(), Labels());
+		const DataPoints singlePoint(input.features.col(i), input.featureLabels, Matrix(), Labels());
 		matches = matcher.findClosests(singlePoint, DataPoints());
 
 		// Mean of nearest neighbors (NN)
+		Matrix d(featDim-1, knn);
 		for(int j = 0; j < int(knn); j++)
 		{
 			const int refIndex(matches.ids(j));
-			const Vector v(input.features.block(0, refIndex, featDim-1, 1));
-			NN.col(j) = v;
-			mean += v;
+			d.col(j) = input.features.block(0, refIndex, featDim-1, 1);
 		}
 
-		mean /= knn;
-		
-		// Covariance of nearest neighbors
-		for (int j = 0; j < int(knn); ++j)
-		{
-			//std::cout << "NN.col(j):\n" << NN.col(j) << std::endl;
-			//std::cout << "mean:\n" << mean << std::endl;
-			NN.col(j) -= mean;
-		}
+		const Vector mean = d.rowwise().sum() / T(knn);
+		const Matrix NN = d.colwise() - mean;
 		
 		const Matrix C(NN * NN.transpose());
 		Vector eigenVa = Vector::Identity(featDim-1, 1);
 		Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
 		// Ensure that the matrix is suited for eigenvalues calculation
-		if(C.fullPivHouseholderQr().rank() == featDim-1)
+		if(keepNormals || keepEigenValues || keepEigenVectors)
 		{
-			
-			const Eigen::EigenSolver<Matrix> solver(C);
-			eigenVa = solver.eigenvalues().real();
-			eigenVe = solver.eigenvectors().real();
-			
-			//eigenVa = Eigen::EigenSolver<Matrix>(C).eigenvalues().real();
-			//eigenVe = Eigen::EigenSolver<Matrix>(C).eigenvectors().real();
-		}
-		else
-		{
-			//TODO: solve without noise..
-			//std::cout << "WARNING: Matrix C needed for eigen decomposition is degenerated. Expected cause: no noise in data" << std::endl;
-			++degenerateCount;
+			if(C.fullPivHouseholderQr().rank() == featDim-1)
+			{
+				const Eigen::EigenSolver<Matrix> solver(C);
+				eigenVa = solver.eigenvalues().real();
+				eigenVe = solver.eigenvectors().real();
+			}
+			else
+			{
+				//TODO: solve without noise..
+				//std::cout << "WARNING: Matrix C needed for eigen decomposition is degenerated. Expected cause: no noise in data" << std::endl;
+				++degenerateCount;
+			}
 		}
 		
-		int posCount(insertDim);
 		if(keepNormals)
-		{
-			// Keep the smallest eigenvector as surface normal
-			int smallestId(0);
-			T smallestValue(numeric_limits<T>::max());
-			for(int j = 0; j < dimNormals; j++)
-			{
-				if (eigenVa(j) < smallestValue)
-				{
-					smallestId = j;
-					smallestValue = eigenVa(j);
-				}
-			}
-			
-			newDescriptors.block(posCount, i, dimNormals, 1) = 
-			//eigenVe.row(smallestId).transpose();
-			eigenVe.col(smallestId);
-			posCount += dimNormals;
-		}
+			normals.col(i) = computeNormal(eigenVa, eigenVe);
 
 		if(keepDensities)
-		{
-			//TODO: set lambda to a realistic value (based on sensor)
-			//TODO: debug here: volume too low 
-			//TODO: change name epsilon to avoid confusion with kdtree
-			const double epsilon(0.005);
-
-			//T volume(eigenVa(0)+lambda);
-			T volume(eigenVa(0));
-			for(int j = 1; j < eigenVa.rows(); j++)
-			{
-				volume *= eigenVa(j);
-			}
-			newDescriptors(posCount, i) = knn/(volume + epsilon);
-			posCount += dimDensities;
-		}
+			densities(i) = computeDensity(NN);
 
 		if(keepEigenValues)
-		{
-			newDescriptors.block(posCount, i, featDim-1, 1) = 
-				eigenVa;
-			posCount += dimEigValues;
-		}
+			eigenValues.col(i) = eigenVa;
 		
 		if(keepEigenVectors)
-		{
-			for(int k=0; k < (featDim-1); k++)
-			{
-				newDescriptors.block(
-					posCount + k*(featDim-1), i, (featDim-1), 1) = 
-						(eigenVe.row(k).transpose().cwise() * eigenVa);
-			}
-			
-			posCount += dimEigVectors;
-		}
+			eigenVectors.col(i) = serializeEigVec(eigenVe);
 		
-		if(keepMatchedIds)
-		{
-			// BUG: cannot used .cast<T>() on dynamic matrices...
-			for(int k=0; k < dimMatchedIds; k++)
-			{
-				newDescriptors(posCount + k, i) = (T)matches.ids(k);
-			}
-			
-			posCount += dimMatchedIds;
-		}
 	}
 	if (degenerateCount)
 	{
 		LOG_WARNING_STREAM("WARNING: Matrix C needed for eigen decomposition was degenerated in " << degenerateCount << " points over " << pointsCount << " (" << float(degenerateCount)*100.f/float(pointsCount) << " %)");
 	}
+
+	DataPoints output = input;
+	output.addDescriptor("normals", normals);
+	output.addDescriptor("densities", densities);
+	output.addDescriptor("eigValues", eigenValues);
+	output.addDescriptor("eigVectors", eigenVectors);
 	
-	return DataPoints(input.features, input.featureLabels, newDescriptors, newDescriptorLabels);
+	return output;
+}
+
+template<typename T>
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::computeNormal(const Vector eigenVa, const Matrix eigenVe)
+{
+	// Keep the smallest eigenvector as surface normal
+	int smallestId(0);
+	T smallestValue(numeric_limits<T>::max());
+	for(int j = 0; j < eigenVe.cols(); j++)
+	{
+		if (eigenVa(j) < smallestValue)
+		{
+			smallestId = j;
+			smallestValue = eigenVa(j);
+		}
+	}
+	
+	return eigenVe.col(smallestId);
+}
+
+template<typename T>
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::serializeEigVec(const Matrix eigenVe)
+{
+	// serialize row major
+	const int eigenVeDim = eigenVe.cols();
+	Vector output(eigenVeDim*eigenVeDim);
+	for(int k=0; k < eigenVe.cols(); k++)
+	{
+		output.segment(k*eigenVeDim, eigenVeDim) = 
+			eigenVe.row(k).transpose();
+	}
+
+	return output;
+}
+
+template<typename T>
+T DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::computeDensity(const Matrix NN)
+{
+	//volume in decimeter
+	T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff()*10.0, 3);
+	//const T minVolume = 4.18e-9; // minimum of volume of one millimeter radius
+	const T minVolume = 0.42; // minimum of volume of one centimeter radius (in dm^3)
+
+	if(volume < minVolume) 		
+		volume = minVolume;
+		
+	return T(NN.cols())/(volume);
 }
 
 template struct DataPointsFiltersImpl<float>::SurfaceNormalDataPointsFilter;
@@ -674,7 +649,6 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input)
 {
-	//std::cerr << "SamplingSurfaceNormalDataPointsFilter::preFilter " << input.features.cols() << std::endl;
 	typedef typename DataPoints::Features Features;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
@@ -697,39 +671,26 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	}
 	
 	// Reserve memory for new descriptors
-	int finalDescDim(insertDim);
 	const int dimNormals(featDim-1);
 	const int dimDensities(1);
 	const int dimEigValues(featDim-1);
 	const int dimEigVectors((featDim-1)*(featDim-1));
-	Labels outputDescriptorLabels(input.descriptorLabels);
-
-	if (keepNormals)
-	{
-		outputDescriptorLabels.push_back(Label("normals", dimNormals));
-		finalDescDim += dimNormals;
-	}
-
-	if (keepDensities)
-	{
-		outputDescriptorLabels.push_back(Label("densities", dimDensities));
-		finalDescDim += dimDensities;
-	}
-
-	if (keepEigenValues)
-	{
-		outputDescriptorLabels.push_back(Label("eigValues", dimEigValues));
-		finalDescDim += dimEigValues;
-	}
-
-	if (keepEigenVectors)
-	{
-		outputDescriptorLabels.push_back(Label("eigVectors", dimEigVectors));
-		finalDescDim += dimEigVectors;
-	}
 	
 	// we keep build data on stack for reentrant behaviour
-	BuildData buildData(input.features, input.descriptors, finalDescDim);
+	BuildData buildData(input.features, input.descriptors);
+
+
+	if (keepNormals)
+		buildData.normals.resize(dimNormals, pointsCount);
+
+	if (keepDensities)
+		buildData.densities.resize(dimDensities, pointsCount);
+
+	if (keepEigenValues)
+		buildData.eigValues.resize(dimEigValues, pointsCount);
+
+	if (keepEigenVectors)
+		buildData.eigVectors.resize(dimEigVectors, pointsCount);
 
 	// build the new point cloud
 	buildNew(
@@ -740,8 +701,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 		input.features.rowwise().maxCoeff()
 	);
 	
-	//std::cerr << "SamplingSurfaceNormalDataPointsFilter::preFilter done " << buildData.outputInsertionPoint << std::endl;
-	
 	const int ptsOut = buildData.outputInsertionPoint;
 
 	LOG_INFO_STREAM("SamplingSurfaceNormalDataPointsFilter - pts in: " << pointsCount << " pts out: " << ptsOut << " (-" << 100-(ptsOut/double(pointsCount))*100 << "\%)");
@@ -749,13 +708,33 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	if(buildData.unfitPointsCount != 0)
 		LOG_INFO_STREAM("SamplingSurfaceNormalDataPointsFilter - Coudn't compute normal for " << buildData.unfitPointsCount << " pts.");
 	
+	// Build the filtered point cloud
+	DataPoints output;
+	if(buildData.outputDescriptors.cols() == 0)
+	{
+		output = DataPoints(
+			buildData.outputFeatures.leftCols(ptsOut),
+			input.featureLabels
+		);
+	}
+	else
+	{
+		output = DataPoints(
+			buildData.outputFeatures.leftCols(ptsOut),
+			input.featureLabels,
+			buildData.outputDescriptors.leftCols(ptsOut),
+			input.descriptorLabels
+		);
+	}
+
+	// Add or replace new descriptors
+	output.addDescriptor("normals", buildData.getResizedMatrix(buildData.normals));
+	output.addDescriptor("densities", buildData.getResizedMatrix(buildData.densities));
+	output.addDescriptor("eigValues", buildData.getResizedMatrix(buildData.eigValues));
+	output.addDescriptor("eigVectors", buildData.getResizedMatrix(buildData.eigVectors));
+	
 	// return the new point cloud
-	return DataPoints(
-		buildData.outputFeatures.corner(Eigen::TopLeft, buildData.outputFeatures.rows(), buildData.outputInsertionPoint),
-		input.featureLabels,
-		buildData.outputDescriptors.corner(Eigen::TopLeft, buildData.outputDescriptors.rows(), buildData.outputInsertionPoint),
-		outputDescriptorLabels
-	);
+	return output;
 }
 
 
@@ -796,8 +775,6 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(B
 	const int rightCount(count/2);
 	const int leftCount(count - rightCount);
 	assert(last - rightCount == first + leftCount);
-	
-	//cerr << "cutting on dim " << cutDim << " at " << leftCount << endl;
 	
 	// sort, hack std::nth_element
 	std::nth_element(
@@ -847,97 +824,48 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	{
 		if(C.fullPivHouseholderQr().rank() == featDim-1)
 		{
-			Eigen::EigenSolver<Matrix> solver(C);
-			
+			const Eigen::EigenSolver<Matrix> solver(C);
 			eigenVa = solver.eigenvalues().real();
 			eigenVe = solver.eigenvectors().real();
 		}
 		else
 		{
-			// FIXME: handle this case when indeed can get a normal
 			data.unfitPointsCount += colCount;
 			return;
 		}
 	}
-	
-	// Create descriptor block that will be associate to all point in this bin
-	const int dimOldDesc = data.inputDescriptors.rows();
-	const int dimNormals = featDim-1;
-	const int dimDensity = 1;
-	const int dimEigValues = featDim-1;
-	const int dimEigVectors = (featDim-1)*(featDim-1);
-	const int maxDescDim = 
-		dimOldDesc+dimNormals+dimDensity+dimEigValues+dimEigVectors;
-	
-	Vector binDescriptor(maxDescDim);
 
 	// average the existing descriptors
-	int insertDim(0);
-	if (averageExistingDescriptors && (data.inputDescriptors.rows() != 0))
+	Vector mergedDesc;
+	if(data.inputDescriptors.cols() != 0)
 	{
-		Vector newDesc(data.inputDescriptors.rows());
-		for (int i = 0; i < colCount; ++i)
-			newDesc += data.inputDescriptors.block(0,data.indices[first+i],data.inputDescriptors.rows(), 1);
-		//data.outputDescriptors.block(0, data.outputInsertionPoint, data.inputDescriptors.rows(), 1) =
-		binDescriptor.segment(0, dimOldDesc) = newDesc / T(colCount);
-		insertDim += dimOldDesc;
+		mergedDesc.resize(data.inputDescriptors.rows());
+
+		if (averageExistingDescriptors)
+		{
+			for (int i = 0; i < colCount; ++i)
+				mergedDesc += data.inputDescriptors.col(data.indices[first+i]);
+			
+			mergedDesc = mergedDesc / T(colCount);
+		}
+		else // just take the first one
+			mergedDesc = data.inputDescriptors.col(data.indices[first]);
 	}
-	
+
+	Vector normal;
 	if(keepNormals)
-	{
-		// Keep the smallest eigenvector as surface normal
-		int smallestId(0);
-		T smallestValue(numeric_limits<T>::max());
-		for(int j = 0; j < dimNormals; j++)
-		{
-			if (eigenVa(j) < smallestValue)
-			{
-				smallestId = j;
-				smallestValue = eigenVa(j);
-			}
-		}
-		//data.outputDescriptors.block(insertDim, data.outputInsertionPoint, dimNormals, 1) =
-		//	eigenVe.col(smallestId);
-		binDescriptor.segment(insertDim, dimNormals) = eigenVe.col(smallestId);
-		insertDim += dimNormals;
-	}
+		normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
 
+	T densitie;
 	if(keepDensities)
-	{
-		//TODO: Insure that this estimation is correct	
-		T volume = std::pow(NN.colwise().norm().maxCoeff(), 3);
-
-		//data.outputDescriptors(insertDim, data.outputInsertionPoint) =
-		//	std::log(1 + T(colCount)/(volume+0.000001));
-		
-		binDescriptor(insertDim) = 	std::log(1 + T(colCount)/(volume+0.000001));
-		insertDim += dimDensity;
-	}
+		densitie = SurfaceNormalDataPointsFilter::computeDensity(NN);	
 	
-	if(keepEigenValues)
-	{
-		//data.outputDescriptors.block(insertDim, data.outputInsertionPoint, dimEigValues, 1) = 
-		//	eigenVa;
-		binDescriptor.segment(insertDim, dimEigValues) = eigenVa;
-		insertDim += dimEigValues;
-	}
+	//if(keepEigenValues) nothing to do
 	
+	Vector serialEigVector;
 	if(keepEigenVectors)
-	{
-		// Serialization of the matrix
-		for(int k=0; k < (featDim-1); k++)
-		{
-			//data.outputDescriptors.block(
-			//	insertDim +  k*(featDim-1), data.outputInsertionPoint, (featDim-1), 1) = 
-			//		(eigenVe.row(k).transpose().cwise() * eigenVa);
-			binDescriptor.segment(insertDim + k*(featDim-1), (featDim-1)) = 
-					(eigenVe.row(k).transpose().cwise() * eigenVa);
-		}
-		insertDim += dimEigVectors;
-	}
+		serialEigVector = SurfaceNormalDataPointsFilter::serializeEigVec(eigenVe);
 	
-	binDescriptor.conservativeResize(insertDim);
-
 	// Filter points randomly
 	if(samplingMethod == 0)
 	{
@@ -946,10 +874,25 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 			const float r = (float)std::rand()/(float)RAND_MAX;
 			if(r > ratio)
 			{
+				// Keep points with their descriptors
 				data.outputFeatures.col(data.outputInsertionPoint) = 
 					data.inputFeatures.col(data.indices[first+i]);
-				data.outputDescriptors.col(data.outputInsertionPoint) = 
-					binDescriptor;
+				if(data.outputDescriptors.cols() != 0)
+				{
+					data.outputDescriptors.col(data.outputInsertionPoint) = 
+						data.inputDescriptors.col(data.indices[first+i]);
+				}
+
+				// Build new descriptor in paralelle to be merge at the end
+				if(keepNormals)
+					data.normals.col(data.outputInsertionPoint) = normal;
+				if(keepDensities)
+					data.densities(data.outputInsertionPoint) = densitie;
+				if(keepEigenValues)
+					data.eigValues.col(data.outputInsertionPoint) = eigenVa;
+				if(keepEigenVectors)
+					data.eigVectors.col(data.outputInsertionPoint) = serialEigVector;
+
 				++data.outputInsertionPoint;
 			}
 		}
@@ -958,8 +901,20 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	{
 		data.outputFeatures.col(data.outputInsertionPoint).topRows(featDim-1) = mean;
 		data.outputFeatures(featDim-1, data.outputInsertionPoint) = 1;
-		data.outputDescriptors.col(data.outputInsertionPoint) = 
-					binDescriptor;
+		
+		if(data.inputDescriptors.rows() != 0)
+			data.outputDescriptors.col(data.outputInsertionPoint) = mergedDesc;
+		
+		// Build new descriptor in paralelle to be merge at the end
+		if(keepNormals)
+			data.normals.col(data.outputInsertionPoint) = normal;
+		if(keepDensities)
+			data.densities(data.outputInsertionPoint) = densitie;
+		if(keepEigenValues)
+			data.eigValues.col(data.outputInsertionPoint) = eigenVa;
+		if(keepEigenVectors)
+			data.eigVectors.col(data.outputInsertionPoint) = serialEigVector;
+		
 		++data.outputInsertionPoint;
 	}
 }

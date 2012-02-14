@@ -76,10 +76,13 @@ std::vector<string> PointMatcher<T>::csvLineToVector(const char* line)
 	char *brkt;
 	strcpy(tmpLine, line);
 	token = strtok_r(tmpLine, delimiters, &brkt);
-	while (token)
+	if(line[0] != '%') // Jump line if it's commented
 	{
-		parsedLine.push_back(string(token));
-		token = strtok_r(NULL, delimiters, &brkt);
+		while (token)
+		{
+			parsedLine.push_back(string(token));
+			token = strtok_r(NULL, delimiters, &brkt);
+		}
 	}
 
 	return parsedLine;
@@ -168,31 +171,6 @@ template
 PointMatcher<float>::CsvElements PointMatcher<float>::parseCsvWithHeader(const std::string& fileName);
 template
 PointMatcher<double>::CsvElements PointMatcher<double>::parseCsvWithHeader(const std::string& fileName);
-
-//!brief Merge two DataPoints
-template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::concatenateDataPoints(const DataPoints dp1, const DataPoints dp2)
-{
-	const int nbPoints1 = dp1.features.cols();
-	const int nbPoints2 = dp2.features.cols();
-	const int nbPointsTotal = nbPoints1 + nbPoints2;
-
-	const int dim = dp1.features.rows();
-	
-	typename DataPoints::Features combinedFeat(dim, nbPointsTotal);
-	combinedFeat.leftCols(nbPoints1) = dp1.features;
-	combinedFeat.rightCols(nbPoints2) = dp2.features;
-
-
-	// We explicitly remove descriptors
-	return DataPoints(combinedFeat, dp1.featureLabels);
-}
-
-template
-PointMatcher<float>::DataPoints PointMatcher<float>::concatenateDataPoints(const DataPoints dp1, const DataPoints dp2);
-template
-PointMatcher<double>::DataPoints PointMatcher<double>::concatenateDataPoints(const DataPoints dp1, const DataPoints dp2);
-
 
 //! @brief Load comma separated values (csv) file
 //! @param fileName a string containing the path and the file name

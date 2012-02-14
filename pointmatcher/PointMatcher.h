@@ -305,8 +305,13 @@ struct PointMatcher
 		DataPoints(const Features& features, const Labels& featureLabels);
 		DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels);
 		
+		void concatenate(const DataPoints dp);
+		void addDescriptor(const std::string& name, Descriptors newDescriptor);
 		Descriptors getDescriptorByName(const std::string& name) const;
-		//bool isDescriptorExist(const std::string& name) const;
+		bool isDescriptorExist(const std::string& name) const;
+		bool isDescriptorExist(const std::string& name, const unsigned dim) const;
+		int getDescriptorDimension(const std::string& name) const;
+		int getDescriptorStartingRow(const std::string& name) const;
 		
 		Features features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features
@@ -349,7 +354,7 @@ struct PointMatcher
 		TransformationParameters initTransformation;
 		Eigen::Matrix<T, 3, 1> gravity;
 
-		FileInfo(std::string readingPath="", std::string referencePath="", std::string fileExtension="", TransformationParameters initTransformation=TransformationParameters::Identity(3,3), Vector grativity=Eigen::Matrix<T,3,1>::Zero()):
+		FileInfo(std::string readingPath="", std::string referencePath="", std::string fileExtension="", TransformationParameters initTransformation=TransformationParameters(), Vector grativity=Eigen::Matrix<T,3,1>::Zero()):
 			readingPath(readingPath),
 			referencePath(referencePath),
 			fileExtension(fileExtension),

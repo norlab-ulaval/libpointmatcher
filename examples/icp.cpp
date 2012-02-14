@@ -103,9 +103,10 @@ int main(int argc, const char *argv[])
 		}
 		icp.loadFromYaml(ifs);
 	}
-
+	
 	// Compute the transformation to express data in ref
 	PM::TransformationParameters T = icp(data, ref);
+	cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 
 	// Transform data to express it in ref
 	PM::DataPoints data_out(data);
