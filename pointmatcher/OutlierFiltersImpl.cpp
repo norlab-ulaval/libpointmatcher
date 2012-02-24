@@ -184,14 +184,22 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::TrimmedDistOutli
 	
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
+	int j=0;
+	int k=0;
 	for (int x = 0; x < w.cols(); ++x)
 	{
 		for (int y = 0; y < w.rows(); ++y)
 		{
 			if (input.dists(y, x) > limit)
+			{
 				w(y, x) = 0;
+				j++;
+			}
 			else
+			{
 				w(y, x) = 1;
+				k++;
+			}
 		}
 	}
 	

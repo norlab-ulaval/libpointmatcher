@@ -523,6 +523,7 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 			for (typename Vector::const_iterator it = (this->begin() + 1); it != this->end(); ++it)
 				w = w.array() * (*it)->compute(filteredReading, filteredReference, input).array();
 		}
+
 		return w;
 	}
 }
@@ -893,11 +894,13 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		
 		//cout << "featureOutlierWeights: " << featureOutlierWeights << "\n";
 		//cout << "descriptorOutlierWeights: " << descriptorOutlierWeights << "\n";
-		
-		const OutlierWeights outlierWeights(
-			featureOutlierWeights * this->outlierMixingWeight +
-			descriptorOutlierWeights * (1 - this->outlierMixingWeight)
-		);
+	
+		//TODO: fix weighting design issue
+		const OutlierWeights outlierWeights(featureOutlierWeights); 
+		//const OutlierWeights outlierWeights(
+		//	featureOutlierWeights * this->outlierMixingWeight +
+		//	descriptorOutlierWeights * (1 - this->outlierMixingWeight)
+		//);
 		
 
 		//-----------------------------

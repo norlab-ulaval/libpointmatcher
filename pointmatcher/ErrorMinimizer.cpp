@@ -137,7 +137,7 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 	// Count points with no weights
 	const int pointsCount = (outlierWeights.cwise() != 0.0).count();
 	if (pointsCount == 0)
-		throw ConvergenceError("no point to minimize");
+		throw ConvergenceError("ErrorMnimizer: no point to minimize");
 
 	Features keptFeat(dimFeat, pointsCount);
 	
@@ -168,6 +168,8 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 			}
 		}
 	}
+
+	assert(j == pointsCount);
 
 	//FIXME: This is not true with multiple knn
 	this->pointUsedRatio = double(j)/double(requestedPts.features.cols());
