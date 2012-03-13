@@ -3,7 +3,7 @@ How to create a new DataPointFilter:
 You'll need to modify 3 files to add a new DataPointFilter: <DataPointFilter.h>, <DataPointFilter.cpp> and <Core.cpp>
 The easiest way is to start with IdentityDataPointsFilter as an example.
 
-- In <DataPointFilter.h>, copy the declaration of the struct IdentityDataPointsFilter at the end of the file.
+- In <DataPointFilterImp.h>, copy the declaration of the struct IdentityDataPointsFilter at the end of the file.
 - Rename the pasted structure with the new filter name
 - Fill the description() function with short explaination of the filter
 - If you need parameters for the filter:
@@ -11,7 +11,7 @@ The easiest way is to start with IdentityDataPointsFilter as an example.
 		- types of the parameter are use to properly cast the string value and can be:  &P::Comp<T>, &P::Comp<int>, &P::Comp<unsigned>, etc.
 		- uncomment and rename the constructor
 
-- In <DataPointFilter.cpp>, copy the implementation of IdentityDataPointsFilter at the end of the file including the predeclaration (i.e. template struct DataPointsFiltersImpl<float>::YourFilter; and template struct DataPointsFiltersImpl<double>::YourFilter;)
+- In <DataPointFilterImp.cpp>, copy the implementation of IdentityDataPointsFilter at the end of the file including the predeclaration (i.e. template struct DataPointsFiltersImpl<float>::YourFilter; and template struct DataPointsFiltersImpl<double>::YourFilter;)
 - Add the constructor if needed
 - At this stage, you shoud let the filter function only with the return input;
 

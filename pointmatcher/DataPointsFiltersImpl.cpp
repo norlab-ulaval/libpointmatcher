@@ -856,7 +856,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	if(keepNormals)
 		normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
 
-	T densitie;
+	T densitie = 0;
 	if(keepDensities)
 		densitie = SurfaceNormalDataPointsFilter::computeDensity(NN);	
 	

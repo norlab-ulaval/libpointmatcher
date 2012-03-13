@@ -402,6 +402,29 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 	};
 
+	//! Sick LMS-xxx noise model
+	struct SickNoiseDataPointsFilter: public DataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			//TODO: finish here
+			return "Add a 1D descriptor that would represent the noise radius.";
+		}
+		
+		//inline static const ParametersDoc availableParameters()
+		//{
+		//	return ParametersDoc({
+		//		{ "param1", "Description of the parameter", "defaultValue", "minValue", "maxValue", type of the parameter },
+		//		{ "param2", "Description of the parameter", "defaultValue", "minValue", "maxValue", type of the parameter }
+		//	});
+		//}
+		//! Constructor, uses parameter interface
+		//IdentityDataPointsFilter(const Parameters& params = Parameters());
+		
+		virtual DataPoints filter(const DataPoints& input);
+	};
+
+
 }; // DataPointsFiltersImpl
 
 #endif // __POINTMATCHER_DATAPOINTSFILTERS_H
