@@ -53,11 +53,11 @@ void PointMatcher<T>::validateFile(const std::string& fileName)
 
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
-#if BOOST_FILESYSTEM_VERSION >= 3
+	#if BOOST_FILESYSTEM_VERSION >= 3
 		throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).native());
-#else
+	#else
 		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
-#endif
+	#endif
 
 }
 
@@ -554,9 +554,11 @@ void PointMatcher<double>::saveVTK(const PointMatcher<double>::DataPoints& data,
 template<typename T>
 typename PointMatcher<T>::FileList PointMatcher<T>::loadList(const std::string& fileName)
 {
-
-	const string parentPath = 
-		boost::filesystem::path(fileName).parent_path().file_string();
+	#if BOOST_FILESYSTEM_VERSION >= 3
+	const string parentPath = boost::filesystem::path(fileName).parent_path().string();
+	#else
+	const string parentPath = boost::filesystem::path(fileName).parent_path().file_string();
+	#endif
 	
 	CsvElements data = parseCsvWithHeader(fileName);
 	
@@ -600,7 +602,11 @@ typename PointMatcher<T>::FileList PointMatcher<T>::loadList(const std::string& 
 			// Reading info
 			info.readingPath = parentPath+"/"+readingName[line];
 			validateFile(info.readingPath);
+			#if BOOST_FILESYSTEM_VERSION >= 3
+			info.fileExtension = boost::filesystem::path(readingName[line]).extension().string();
+			#else
 			info.fileExtension = boost::filesystem::path(readingName[line]).extension();
+			#endif
 			
 			// Initial transformation in 3D
 			if(found3dTrans)

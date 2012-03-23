@@ -44,7 +44,7 @@ include(UseDoxygen)
 set(EXTRA_LIBS "")
 
 # boost
-find_package(Boost COMPONENTS thread system filesystem REQUIRED)
+find_package(Boost COMPONENTS thread filesystem system REQUIRED)
 
 # eigen 3
 find_path(EIGEN_INCLUDE_DIR Eigen/Core
