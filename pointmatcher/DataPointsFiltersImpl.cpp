@@ -1205,3 +1205,53 @@ template struct DataPointsFiltersImpl<float>::ShadowDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::ShadowDataPointsFilter;
 
 
+//SimpleSensorNoiseDataPointsFilter 
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::SimpleSensorNoiseDataPointsFilter(const Parameters& params):
+	DataPointsFilter("SimpleSensorNoiseDataPointsFilter", SimpleSensorNoiseDataPointsFilter::availableParameters(), params),
+	sensorType(Parametrizable::get<unsigned>("sensorType")),
+	gain(Parametrizable::get<T>("gain"))
+{
+	std::vector<string> sensorNames = {"SickLMS"};
+	if (sensorType >= sensorNames.size())
+	{
+		throw InvalidParameter(
+			(boost::format("SimpleSensorNoiseDataPointsFilter: Error, sensorType id %1% does not exist.") % sensorType).str());
+	}
+
+	LOG_INFO_STREAM("SimpleSensorNoiseDataPointsFilter - using sensor noise model: " << sensorNames[sensorType]);
+}
+
+
+
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::filter(
+	const DataPoints& input)
+{
+	typedef typename Eigen::Array<T, 2, Eigen::Dynamic> Array2rows;
+	const int nbPoints = input.features.cols();
+	const int dim = input.features.rows();
+	DataPoints outputCloud = input;
+	Descriptors noise;
+	noise.resize(1, nbPoints);
+
+	if(sensorType == 0)
+	{
+		const T minRadius = 0.01; // in meter
+		const T beamAngle = 0.01745; // in rad
+		Array2rows evalNoise = Array2rows::Constant(2, nbPoints, minRadius);
+		evalNoise.row(0) =  sin(beamAngle) * input.features.topRows(dim-1).colwise().norm();
+
+		noise = evalNoise.colwise().maxCoeff();
+	}
+
+	outputCloud.addDescriptor("simpleSensorNoise", noise);
+
+	return outputCloud;
+}
+
+template struct DataPointsFiltersImpl<float>::SimpleSensorNoiseDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::SimpleSensorNoiseDataPointsFilter;
+
+

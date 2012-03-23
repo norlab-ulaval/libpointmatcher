@@ -1242,6 +1242,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, RandomSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, FixStepSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, ShadowDataPointsFilter, typename DataPointsFiltersImpl<T>::ShadowDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, SimpleSensorNoiseDataPointsFilter, typename DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)

@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
 	PM::DataPointsFilter* dataPointFilter4;
 	PM::DataPointsFilter* dataPointFilter5;
 	PM::DataPointsFilter* dataPointFilter6;
+	PM::DataPointsFilter* dataPointFilter7;
 
 	dataPointFilter1 = pm.DataPointsFilterRegistrar.create(
 		"MinDistDataPointsFilter", PM::Parameters({
@@ -92,13 +93,18 @@ int main(int argc, char *argv[])
 			{"eps", "0.1"}
 			}));
 
-	
+	dataPointFilter7 = pm.DataPointsFilterRegistrar.create(
+		"SimpleSensorNoiseDataPointsFilter", PM::Parameters({
+			{"sensorType", "0"}
+			}));
+
 	//d = dataPointFilter1->filter(d);
 	//d = dataPointFilter2->filter(d);
 	d = dataPointFilter3->filter(d);
 	d = dataPointFilter4->filter(d);
 	//d = dataPointFilter5->filter(d);
 	//d = dataPointFilter6->filter(d);
+	d = dataPointFilter7->filter(d);
 
 	// Example of moving 3D points
 	//Eigen::Matrix4f T;

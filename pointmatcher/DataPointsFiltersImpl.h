@@ -403,23 +403,26 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Sick LMS-xxx noise model
-	struct SickNoiseDataPointsFilter: public DataPointsFilter
+	struct SimpleSensorNoiseDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
-			//TODO: finish here
-			return "Add a 1D descriptor that would represent the noise radius.";
+			return "Add a 1D descriptor named <sensorNoise> that would represent the noise radius expressed in meter based on SICK LMS specifications.";
 		}
 		
-		//inline static const ParametersDoc availableParameters()
-		//{
-		//	return ParametersDoc({
-		//		{ "param1", "Description of the parameter", "defaultValue", "minValue", "maxValue", type of the parameter },
-		//		{ "param2", "Description of the parameter", "defaultValue", "minValue", "maxValue", type of the parameter }
-		//	});
-		//}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "sensorType", "Type of the sensor used. Choices: 0=SickLMS", "0", "0", "2147483647", &P::Comp<unsigned> },
+				{ "gain", "If the point cloud is coming from an untrusty source, you can use the gain to augment the uncertainty", "1", "1", "inf", &P::Comp<T> }
+			});
+		}
+	protected:
+		const unsigned sensorType;
+		const T gain;
+	public:
 		//! Constructor, uses parameter interface
-		//IdentityDataPointsFilter(const Parameters& params = Parameters());
+		SimpleSensorNoiseDataPointsFilter(const Parameters& params = Parameters());
 		
 		virtual DataPoints filter(const DataPoints& input);
 	};

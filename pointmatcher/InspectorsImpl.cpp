@@ -136,6 +136,8 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	buildScalarStream(stream, "densities", data);
 	buildScalarStream(stream, "obstacles", data);
 	buildScalarStream(stream, "inclination", data);
+	buildScalarStream(stream, "groupId", data);
+	buildScalarStream(stream, "simpleSensorNoise", data);
 	buildNormalStream(stream, "normals", data);
 	buildVectorStream(stream, "eigValues", data);
 	buildTensorStream(stream, "eigVectors", data);
