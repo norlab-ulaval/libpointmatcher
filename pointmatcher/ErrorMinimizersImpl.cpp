@@ -34,12 +34,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ErrorMinimizersImpl.h"
+#include "PointMatcherPrivate.h"
+#include "Functions.h"
 
 #include "Eigen/SVD"
 #include <iostream>
 
 using namespace Eigen;
 using namespace std;
+using namespace PointMatcherSupport;
 
 // Identity Error Minimizer
 template<typename T>
@@ -94,6 +97,34 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	result.corner(TopRight, dimCount-1, 1) = trVector;
 	
 	return result;
+}
+
+template<typename T>
+T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
+{
+	const int nbPoints = this->lastErrorElements.reading.features.cols();
+	if(nbPoints == 0)
+	{
+		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
+	}
+
+	const Matrix noise(this->lastErrorElements.reading.getDescriptorByName("simpleSensorNoise"));
+
+	if(noise.cols() == 0)
+	{
+		LOG_INFO_STREAM("PointToPointErrorMinimizer - warning, no sensor noise found. Using best estimat given outlier rejection instead.");
+		return this->weightedPointUsedRatio;
+	}
+
+	int count = 0;
+	for(int i=0; i < nbPoints; i++)
+	{
+		const T dist = (this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i)).norm();
+		if(dist < noise(i))
+			count++;
+	}
+
+	return count/nbPoints;
 }
 
 template struct ErrorMinimizersImpl<float>::PointToPointErrorMinimizer;
@@ -196,6 +227,40 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	return mOut; 
 }
 
+template<typename T>
+T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
+{
+	const int nbPoints = this->lastErrorElements.reading.features.cols();
+	const int dim = this->lastErrorElements.reading.features.rows();
+	if(nbPoints == 0)
+	{
+		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
+	}
+
+	const Matrix noises(this->lastErrorElements.reading.getDescriptorByName("simpleSensorNoise"));
+	const Matrix normals(this->lastErrorElements.reading.getDescriptorByName("normals"));
+
+	if(noises.cols() == 0 || normals.cols() == 0)
+	{
+		LOG_INFO_STREAM("PointToPointErrorMinimizer - warning, no sensor noise or normals found. Using best estimate given outlier rejection instead.");
+		return this->weightedPointUsedRatio;
+	}
+
+	int count = 0;
+	for(int i=0; i < nbPoints; i++)
+	{
+		if(this->lastErrorElements.matches.dists(0, i) != numeric_limits<T>::infinity())
+		{
+			const Vector d = this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i);
+			const Vector n = normals.col(i);
+			const T projectionDist = d.head(dim-1).dot(n.normalized());
+			if(anyabs(projectionDist) < noises(i))
+				count++;
+		}
+	}
+
+	return (T)count/(T)nbPoints;
+}
 
 template struct ErrorMinimizersImpl<float>::PointToPlaneErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::PointToPlaneErrorMinimizer;

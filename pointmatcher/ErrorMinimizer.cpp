@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "PointMatcher.h"
+#include "PointMatcherPrivate.h"
 
 //! Construct without parameter
 template<typename T>
@@ -72,6 +73,14 @@ T PointMatcher<T>::ErrorMinimizer::getPointUsedRatio() const
 template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getWeightedPointUsedRatio() const
 {
+	return weightedPointUsedRatio;
+}
+
+//! If not redefined by child class, return the ratio of how many points where used (with weight) for error minimization
+template<typename T>
+T PointMatcher<T>::ErrorMinimizer::getOverlap() const
+{
+	LOG_INFO_STREAM("ErrorMinimizer - warning, no specific method to compute overlap was provided for the ErrorMinimizer used.");
 	return weightedPointUsedRatio;
 }
 
@@ -203,7 +212,8 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 	associatedPts.descriptors = associatedDesc;
 	associatedPts.descriptorLabels = sourcePts.descriptorLabels;
 
-	return ErrorElements(keptPts, associatedPts, keptWeights, keptMatches);
+	this->lastErrorElements = ErrorElements(keptPts, associatedPts, keptWeights, keptMatches);
+	return lastErrorElements;
 }
 
 template struct PointMatcher<float>;

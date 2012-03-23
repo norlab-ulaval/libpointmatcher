@@ -73,6 +73,7 @@ struct ErrorMinimizersImpl
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getOverlap() const;
 	};
 
 	struct PointToPlaneErrorMinimizer: public ErrorMinimizer
@@ -83,6 +84,7 @@ struct ErrorMinimizersImpl
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getOverlap() const;
 	};
 }; // ErrorMinimizersImpl
 

@@ -516,7 +516,7 @@ struct PointMatcher
 			OutlierWeights weights; //!< weights for every association
 			Matches matches; //!< associations
 
-			ErrorElements(const DataPoints& reading, const DataPoints reference, const OutlierWeights weights, const Matches matches);
+			ErrorElements(const DataPoints& reading=DataPoints(), const DataPoints reference = DataPoints(), const OutlierWeights weights = OutlierWeights(), const Matches matches = Matches());
 		};
 		
 		ErrorMinimizer();
@@ -524,6 +524,7 @@ struct PointMatcher
 		
 		T getPointUsedRatio() const;
 		T getWeightedPointUsedRatio() const;
+		virtual T getOverlap() const;
 		
 		//! Find the parameters that minimize the error
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
@@ -537,6 +538,7 @@ struct PointMatcher
 	protected:
 		T pointUsedRatio; //!< the ratio of how many points where used for error minimization
 		T weightedPointUsedRatio; //!< the ratio of how many points where used (with weight) for error minimization
+		ErrorElements lastErrorElements; //!< Memory of the last error computed
 	};
 	
 	DEF_REGISTRAR(ErrorMinimizer)
