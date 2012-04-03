@@ -43,24 +43,14 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::TransformFeatures::
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
-	typedef typename DataPoints::Features Features;
-	
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 	
-	DataPoints transformedDataPoints(
-		Features(input.features.rows(), input.features.cols()),
-		input.featureLabels,
-		input.descriptors,
-		input.descriptorLabels
-	);
-	Features& transformedFeatures(transformedDataPoints.features);
-	
-	for (int i = 0; i < transformedFeatures.cols(); ++i)
-	{
-		transformedFeatures.col(i) = parameters * input.features.col(i);
-	}
-	
+	DataPoints transformedDataPoints = input;
+		
+	// Apply the transformation
+	transformedDataPoints.features = parameters * input.features;
+
 	return transformedDataPoints;
 }
 
@@ -81,26 +71,13 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::TransformNormals::c
 	
 	DataPoints transformedDataPoints(input);
 	
-	if (!input.descriptorLabels.contains("normals"))
+	if (!input.isDescriptorExist("normals"))
 		return transformedDataPoints;
 
-	const unsigned ptCount(input.descriptors.cols());
-
-	//NOTE: Only need rotation for descriptors (up to now...)
 	const Matrix R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
 
-	unsigned descRow(0);
-	for(unsigned i = 0; i < transformedDataPoints.descriptorLabels.size(); i++)
-	{
-		const unsigned span(input.descriptorLabels[i].span);
-		if(transformedDataPoints.descriptorLabels[i].text.compare("normals") == 0)
-		{
-			assert(int(span) == parameters.rows()-1);
-			transformedDataPoints.descriptors.block(descRow, 0, span, ptCount) = 
-				R * input.descriptors.block(descRow, 0, span, ptCount);
-		}
-		descRow += input.descriptorLabels[i].span;
-	}
+	const Descriptors normals = input.getDescriptorByName("normals");
+	transformedDataPoints.addDescriptor("normals", R*normals);
 	
 	return transformedDataPoints;
 }
