@@ -578,6 +578,10 @@ template<typename T>
 void PointMatcher<T>::Inspector::dumpStats(std::ostream& stream)
 {}
 
+template<typename T>
+void PointMatcher<T>::Inspector::dumpStatsHeader(std::ostream& stream)
+{}
+
 // data statistics 
 template<typename T>
 void PointMatcher<T>::Inspector::dumpFilteredReference(const DataPoints& filteredReference)

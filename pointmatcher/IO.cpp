@@ -85,9 +85,10 @@ template struct PointMatcher<double>::FileInfo;
 	The supported tags are:
 	- reading: file name of the reading point cloud
 	- reference: file name of the reference point cloud
+	- config: file name of the YAML configuration of the ICP chain
 	- iTxy: initial transformation, coordinate x,y
 	- gTxy: ground-truth transformation, coordinate x,y
-	Note that the header must at least contain "Reading".
+	Note that the header must at least contain "reading".
 */
 template<typename T>
 PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName)
@@ -119,7 +120,7 @@ PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName)
 	if (readingIt == data.end())
 		throw runtime_error("Error transfering CSV to structure: The header should at least contain \"reading\".");
 	CsvElements::const_iterator referenceIt(data.find("reference"));
-	CsvElements::const_iterator configIt(data.find("reference"));
+	CsvElements::const_iterator configIt(data.find("config"));
 	
 	// Load reading
 	const std::vector<string>& readingFileNames = readingIt->second;

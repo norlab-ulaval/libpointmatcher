@@ -604,6 +604,7 @@ struct PointMatcher
 		// performance statistics
 		virtual void addStat(const std::string& name, double data);
 		virtual void dumpStats(std::ostream& stream);
+		virtual void dumpStatsHeader(std::ostream& stream);
 		
 		// data statistics 
 		virtual void dumpFilteredReference(const DataPoints& filteredReference);

@@ -59,6 +59,7 @@ namespace PointMatcherSupport
 		void computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC);
 		
 		void dumpStats(std::ostream& os);
+		void dumpStatsHeader(std::ostream& os) const;
 	};
 } // namespace PointMatcherSupport
 

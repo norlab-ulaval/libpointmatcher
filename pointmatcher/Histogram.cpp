@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include <limits>
 #include <algorithm>
+#include <boost/format.hpp>
 
 namespace PointMatcherSupport
 {
@@ -166,11 +167,27 @@ namespace PointMatcherSupport
 		uint64_t bins[binCount];
 		uint64_t maxBinC;
 		computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, bins, maxBinC);
-		os << meanV << " " << varV << " " << medianV << " " << lowQt << " " << highQt << " " << minV << " " << maxV << " " << binCount << " ";
+		os << meanV << ", " << varV << ", " << medianV << ", " << lowQt << ", " << highQt << ", " << minV << ", " << maxV << ", " << binCount << ", ";
 		
 		for (size_t i = 0; i < binCount; ++i)
-			os << bins[i] << " ";
+			os << bins[i] << ", ";
 		os << maxBinC;
+	}
+	
+	template<typename T>
+	void Histogram<T>::dumpStatsHeader(std::ostream& os) const
+	{
+		os << name + "_mean, ";
+		os << name + "_var, ";
+		os << name + "_median, ";
+		os << name + "_low_quartile, ";
+		os << name + "_high_quartile, ";
+		os << name + "_min_value, ";
+		os << name + "_max_value, ";
+		os << name + "_bin_count, ";
+		for (size_t i = 0; i < binCount; ++i)
+			os << (boost::format("%1%_bin_%2%,") % name % i).str();
+		os << name + "_max_elements_per_bin ";
 	}
 	
 	template struct Histogram<unsigned>;

@@ -77,6 +77,7 @@ struct InspectorsImpl
 		
 		virtual void addStat(const std::string& name, double data);
 		virtual void dumpStats(std::ostream& stream);
+		virtual void dumpStatsHeader(std::ostream& stream);
 	};
 
 	struct AbstractVTKInspector: public PerformanceInspector

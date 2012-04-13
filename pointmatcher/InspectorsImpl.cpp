@@ -71,7 +71,20 @@ void InspectorsImpl<T>::PerformanceInspector::dumpStats(std::ostream& stream)
 		auto jt(it);
 		++jt;
 		if (jt != stats.end())
-			stream << " * ";
+			stream << ", ";
+	}
+}
+
+template<typename T>
+void InspectorsImpl<T>::PerformanceInspector::dumpStatsHeader(std::ostream& stream)
+{
+	for (auto it(stats.begin()); it != stats.end(); ++it)
+	{
+		it->second.dumpStatsHeader(stream);
+		auto jt(it);
+		++jt;
+		if (jt != stats.end())
+			stream << ", ";
 	}
 }
 
