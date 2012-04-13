@@ -67,6 +67,18 @@ struct InspectorsImpl
 	
 	struct PerformanceInspector: public Inspector
 	{
+		inline static const std::string description()
+		{
+			return "Keep statistics on performance.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "baseFileName", "base file name for the statistics files ", "point-matcher-output" },
+				{ "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" }
+			});
+		}
+		
 	protected:
 		typedef PointMatcherSupport::Histogram<double> Histogram;
 		typedef std::map<std::string, Histogram> HistogramMap;
@@ -74,6 +86,7 @@ struct InspectorsImpl
 	
 	public:
 		PerformanceInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+		PerformanceInspector(const Parameters& params);
 		
 		virtual void addStat(const std::string& name, double data);
 		virtual void dumpStats(std::ostream& stream);

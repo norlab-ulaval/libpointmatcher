@@ -49,6 +49,11 @@ InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string&
 }
 
 template<typename T>
+InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const Parameters& params):
+	Inspector("PerformanceInspector", PerformanceInspector::availableParameters(), params)
+{}
+
+template<typename T>
 void InspectorsImpl<T>::PerformanceInspector::addStat(const std::string& name, double data)
 {
 	HistogramMap::iterator it(stats.find(name));
@@ -87,6 +92,9 @@ void InspectorsImpl<T>::PerformanceInspector::dumpStatsHeader(std::ostream& stre
 			stream << ", ";
 	}
 }
+
+template struct InspectorsImpl<float>::PerformanceInspector;
+template struct InspectorsImpl<double>::PerformanceInspector;
 
 /*
 	// This code creates a header according to information from the datapoints

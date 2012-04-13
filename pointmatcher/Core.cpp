@@ -809,10 +809,10 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	if (!this->inspector)
 		throw runtime_error("You must setup a logger before running ICP");
 	
+	this->inspector->init();
+	
 	timer t; // Print how long take the algo
 	const int dim = referenceIn.features.rows();
-	
-	this->inspector->init();
 	
 	// Apply reference filters
 	// reference is express in frame <refIn>
@@ -1289,6 +1289,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(TransformationChecker, BoundTransformationChecker, typename TransformationCheckersImpl<T>::BoundTransformationChecker)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Inspector, NullInspector, typename InspectorsImpl<T>::NullInspector)
+	ADD_TO_REGISTRAR(Inspector, PerformanceInspector, typename InspectorsImpl<T>::PerformanceInspector)
 	ADD_TO_REGISTRAR(Inspector, VTKFileInspector, typename InspectorsImpl<T>::VTKFileInspector)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Logger, NullLogger, NullLogger)
