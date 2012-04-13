@@ -118,18 +118,36 @@ PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName)
 	CsvElements::const_iterator readingIt(data.find("reading"));
 	if (readingIt == data.end())
 		throw runtime_error("Error transfering CSV to structure: The header should at least contain \"reading\".");
+	CsvElements::const_iterator referenceIt(data.find("reference"));
+	CsvElements::const_iterator configIt(data.find("reference"));
 	
 	// Load reading
-	const std::vector<string>& readingName = readingIt->second;
-	const unsigned lineCount = readingName.size();
+	const std::vector<string>& readingFileNames = readingIt->second;
+	const unsigned lineCount = readingFileNames.size();
+	boost::optional<std::vector<string> > referenceFileNames;
+	boost::optional<std::vector<string> > configFileNames;
+	if (referenceIt != data.end())
+	{
+		referenceFileNames = referenceIt->second;
+		assert (referenceFileNames->size() == lineCount);
+	}
+	if (configIt != data.end())
+	{
+		configFileNames = configIt->second;
+		assert (configFileNames->size() == lineCount);
+	}
 
 	// for every lines
 	for(unsigned line=0; line<lineCount; line++)
 	{
 		FileInfo info;
-		// Reading info
-		info.readingFileName = parentPath+"/"+readingName[line];
-		validateFile(info.readingFileName);
+		
+		// Files
+		info.readingFileName = localToGlobalFileName(parentPath, readingFileNames[line]);
+		if (referenceFileNames)
+			info.referenceFileName = localToGlobalFileName(parentPath, (*referenceFileNames)[line]);
+		if (configFileNames)
+			info.configFileName = localToGlobalFileName(parentPath, (*configFileNames)[line]);
 		
 		// Load transformations
 		if(found3dInitialTrans)
@@ -157,6 +175,23 @@ PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName)
 		cout << "Grativity:\n" << list[i].gravity << endl;
 	}
 	*/
+}
+
+template<typename T>
+std::string PointMatcher<T>::FileInfoVector::localToGlobalFileName(const std::string& parentPath, const std::string& fileName)
+{
+	std::string globalFileName(fileName);
+	if (!boost::filesystem::exists(globalFileName))
+	{
+		const boost::filesystem::path globalFilePath(boost::filesystem::path(parentPath) /  boost::filesystem::path(fileName));
+		#if BOOST_FILESYSTEM_VERSION >= 3
+		globalFileName = globalFilePath.string();
+		#else
+		globalFileName = globalFilePath.file_string();
+		#endif
+	}
+	validateFile(globalFileName);
+	return globalFileName;
 }
 
 //! Return whether there is a valid transformation named prefix in data

@@ -368,6 +368,7 @@ struct PointMatcher
 		FileInfoVector(const std::string& fileName);
 	
 	protected:
+		std::string localToGlobalFileName(const std::string& path, const std::string& fileName);
 		bool findTransform(const CsvElements& data, const std::string& prefix, unsigned dim);
 		TransformationParameters getTransform(const CsvElements& data, const std::string& prefix, unsigned dim, unsigned line);
 	};
