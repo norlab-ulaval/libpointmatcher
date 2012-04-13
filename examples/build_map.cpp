@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 	typedef PM::DataPoints DP;
 
 	// Process arguments
-	PM::FileList list = PM::loadList(argv[1]);
+	PM::FileInfoVector list(argv[1]);
 	const unsigned totalPointCount = boost::lexical_cast<unsigned>(argv[2]);	
 	string outputFileName(argv[3]);
 	
@@ -78,10 +78,10 @@ int main(int argc, char *argv[])
 
 	for(unsigned i=0; i < list.size(); i++)
 	{
-		if(list[i].fileExtension == ".vtk")
-			newCloud = PM::loadVTK(list[i].readingPath);
-		else if(list[i].fileExtension == ".csv")
-			newCloud = PM::loadCSV(list[i].readingPath);
+		if(list[i].readingExtension() == ".vtk")
+			newCloud = PM::loadVTK(list[i].readingFileName);
+		else if(list[i].readingExtension() == ".csv")
+			newCloud = PM::loadCSV(list[i].readingFileName);
 		else
 		{
 			cout << "Only VTK or CSV files are supported" << endl;
@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
 
 		cout << "Point cloud loaded" << endl;
 	
-		if(list[i].initTransformation.rows() != 0)
-			T = list[i].initTransformation;
+		if(list[i].initialTransformation.rows() != 0)
+			T = list[i].initialTransformation;
 		
 		PM::Parameters params;
 		
@@ -101,13 +101,13 @@ int main(int argc, char *argv[])
 		newCloud = removeScanner->filter(newCloud);
 
 
-		// Accelerate the process and disolve lines
+		// Accelerate the process and dissolve lines
 		PM::DataPointsFilter* randSubsample;
 		params = PM::Parameters({{"prob", toParam(0.75)}});
 		randSubsample = pm.DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
 		newCloud = randSubsample->filter(newCloud);
 		
-		// Build filter to remove shadow points and down sample
+		// Build filter to remove shadow points and down-sample
 		params = PM::Parameters({{"binSize", "20"},{"epsilon", "5"}, {"ratio", "0.15"}, {"keepNormals","1"}});
 		PM::DataPointsFilter* normalFilter;
 		normalFilter = pm.DataPointsFilterRegistrar.create("SamplingSurfaceNormalDataPointsFilter", params);

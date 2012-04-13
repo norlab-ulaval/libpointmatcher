@@ -74,18 +74,18 @@ int main(int argc, char *argv[])
 	PM::validateFile(argv[1]);
 	icp.loadFromYaml(ifs);
 
-	PM::FileList list = PM::loadList(argv[2]);
+	PM::FileInfoVector list(argv[2]);
 
 	PM::DataPoints mapPointCloud, newCloud;
 	TP tp;
 
 	for(unsigned i=0; i < list.size(); i++)
 	{
-		cout << "---------------------\nLoading: " << list[i].readingPath << endl; 
-		if(list[i].fileExtension == ".vtk")
-			newCloud = PM::loadVTK(list[i].readingPath);
-		else if(list[i].fileExtension == ".csv")
-			newCloud = PM::loadCSV(list[i].readingPath);
+		cout << "---------------------\nLoading: " << list[i].readingFileName << endl; 
+		if(list[i].readingExtension() == ".vtk")
+			newCloud = PM::loadVTK(list[i].readingFileName);
+		else if(list[i].readingExtension() == ".csv")
+			newCloud = PM::loadCSV(list[i].readingFileName);
 		else
 		{
 			cout << "Only VTK or CSV files are supported" << endl;

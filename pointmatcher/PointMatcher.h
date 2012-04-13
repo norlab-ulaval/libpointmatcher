@@ -346,26 +346,31 @@ struct PointMatcher
 
 	static void saveVTK(const DataPoints& data, const std::string& fileName);
 	
+	//! Information required to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo 
 	{
-		std::string readingPath;
-		std::string referencePath;
-		std::string fileExtension;
-		TransformationParameters initTransformation;
+		std::string readingFileName;
+		std::string referenceFileName;
+		std::string configFileName;
+		TransformationParameters initialTransformation;
+		TransformationParameters groundTruthTransformation;
 		Eigen::Matrix<T, 3, 1> gravity;
 
-		FileInfo(std::string readingPath="", std::string referencePath="", std::string fileExtension="", TransformationParameters initTransformation=TransformationParameters(), Vector grativity=Eigen::Matrix<T,3,1>::Zero()):
-			readingPath(readingPath),
-			referencePath(referencePath),
-			fileExtension(fileExtension),
-			initTransformation(initTransformation),
-			gravity(gravity)
-			{};
+		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& grativity=Eigen::Matrix<T,3,1>::Zero());
+		
+		std::string readingExtension() const;
+		std::string referenceExtension() const;
 	};
 
-	typedef std::vector<FileInfo> FileList;
-
-	static FileList loadList(const std::string& fileName);
+	//! A vector of file info, to be used in batch
+	struct FileInfoVector: public std::vector<FileInfo>
+	{
+		FileInfoVector(const std::string& fileName);
+	
+	protected:
+		bool findTransform(const CsvElements& data, const std::string& prefix, unsigned dim);
+		TransformationParameters getTransform(const CsvElements& data, const std::string& prefix, unsigned dim, unsigned line);
+	};
 
 	// ---------------------------------
 	// intermediate types

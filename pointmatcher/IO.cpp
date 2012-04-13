@@ -47,6 +47,159 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 template<typename T>
+PointMatcher<T>::FileInfo::FileInfo(const std::string& readingFileName, const std::string& referenceFileName, const std::string& configFileName, const TransformationParameters& initialTransformation, const TransformationParameters& groundTruthTransformation, const Vector& grativity):
+	readingFileName(readingFileName),
+	referenceFileName(referenceFileName),
+	configFileName(configFileName),
+	initialTransformation(initialTransformation),
+	groundTruthTransformation(groundTruthTransformation),
+	gravity(gravity)
+{}
+
+template<typename T>
+std::string PointMatcher<T>::FileInfo::readingExtension() const
+{
+	#if BOOST_FILESYSTEM_VERSION >= 3
+	return boost::filesystem::path(readingFileName).extension().string();
+	#else
+	return boost::filesystem::path(readingFileName).extension();
+	#endif
+}
+
+template<typename T>
+std::string PointMatcher<T>::FileInfo::referenceExtension() const
+{
+	#if BOOST_FILESYSTEM_VERSION >= 3
+	return boost::filesystem::path(referenceFileName).extension().string();
+	#else
+	return boost::filesystem::path(referenceFileName).extension();
+	#endif
+}
+
+template struct PointMatcher<float>::FileInfo;
+template struct PointMatcher<double>::FileInfo;
+
+
+//! Load a vector of FileInfo from a CSV file.
+/**
+	The supported tags are:
+	- reading: file name of the reading point cloud
+	- reference: file name of the reference point cloud
+	- iTxy: initial transformation, coordinate x,y
+	- gTxy: ground-truth transformation, coordinate x,y
+	Note that the header must at least contain "Reading".
+*/
+template<typename T>
+PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName)
+{
+	#if BOOST_FILESYSTEM_VERSION >= 3
+	const string parentPath = boost::filesystem::path(fileName).parent_path().string();
+	#else
+	const string parentPath = boost::filesystem::path(fileName).parent_path().file_string();
+	#endif
+	
+	const CsvElements data = parseCsvWithHeader(fileName);
+	
+	// Look for transformations
+	const bool found3dInitialTrans(findTransform(data, "iT", 3));
+	bool found2dInitialTrans(findTransform(data, "iT", 2));
+	const bool found3dGroundTruthTrans(findTransform(data, "gT", 3));
+	bool found2dGroundTruthTrans(findTransform(data, "gT", 2));
+	if (found3dInitialTrans)
+		found2dInitialTrans = false;
+	if (found3dGroundTruthTrans)
+		found2dGroundTruthTrans = false;
+	
+	// Check for consistency
+	if (found3dInitialTrans && found2dGroundTruthTrans)
+		throw runtime_error("Initial transformation is in 3D but ground-truth is in 2D");
+	if (found2dInitialTrans && found3dGroundTruthTrans)
+		throw runtime_error("Initial transformation is in 2D but ground-truth is in 3D");
+	CsvElements::const_iterator readingIt(data.find("reading"));
+	if (readingIt == data.end())
+		throw runtime_error("Error transfering CSV to structure: The header should at least contain \"reading\".");
+	
+	// Load reading
+	const std::vector<string>& readingName = readingIt->second;
+	const unsigned lineCount = readingName.size();
+
+	// for every lines
+	for(unsigned line=0; line<lineCount; line++)
+	{
+		FileInfo info;
+		// Reading info
+		info.readingFileName = parentPath+"/"+readingName[line];
+		validateFile(info.readingFileName);
+		
+		// Load transformations
+		if(found3dInitialTrans)
+			info.initialTransformation = getTransform(data, "iT", 3, line);
+		if(found2dInitialTrans)
+			info.initialTransformation = getTransform(data, "iT", 2, line);
+		if(found3dGroundTruthTrans)
+			info.groundTruthTransformation = getTransform(data, "gT", 3, line);
+		if(found2dGroundTruthTrans)
+			info.groundTruthTransformation = getTransform(data, "gT", 2, line);
+		
+		// Build the list
+		push_back(info);
+	}
+	
+	// Debug: Print the list
+	/*for(unsigned i=0; i<list.size(); i++)
+	{
+		cout << "\n--------------------------" << endl;
+		cout << "Sequence " << i << ":" << endl;
+		cout << "Reading path: " << list[i].readingFileName << endl;
+		cout << "Reference path: " << list[i].referenceFileName << endl;
+		cout << "Extension: " << list[i].fileExtension << endl;
+		cout << "Tranformation:\n" << list[i].initialTransformation << endl;
+		cout << "Grativity:\n" << list[i].gravity << endl;
+	}
+	*/
+}
+
+//! Return whether there is a valid transformation named prefix in data
+template<typename T>
+bool PointMatcher<T>::FileInfoVector::findTransform(const CsvElements& data, const std::string& prefix, unsigned dim)
+{
+	bool found(true);
+	for(unsigned i=0; i<dim+1; i++)
+	{
+		for(unsigned j=0; j<dim+1; j++)
+		{
+			stringstream transName;
+			transName << prefix << i << j;
+			found = found && (data.find(transName.str()) != data.end());
+		}
+	}
+	return found;
+}
+
+//! Return the transformation named prefix from data
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::FileInfoVector::getTransform(const CsvElements& data, const std::string& prefix, unsigned dim, unsigned line)
+{
+	TransformationParameters transformation(TransformationParameters::Identity(dim+1, dim+1));
+	for(unsigned i=0; i<dim+1; i++)
+	{
+		for(unsigned j=0; j<dim+1; j++)
+		{
+			stringstream transName;
+			transName << prefix << i << j;
+			CsvElements::const_iterator colIt(data.find(transName.str()));
+			const T value = boost::lexical_cast<T> (colIt->second[line]);
+			transformation(i,j) = value;
+		}
+	}
+	return transformation;
+}
+
+template struct PointMatcher<float>::FileInfoVector;
+template struct PointMatcher<double>::FileInfoVector;
+
+
+template<typename T>
 void PointMatcher<T>::validateFile(const std::string& fileName)
 {
 	boost::filesystem::path fullPath(fileName);
@@ -549,128 +702,3 @@ void PointMatcher<float>::saveVTK(const PointMatcher<float>::DataPoints& data, c
 template
 void PointMatcher<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
 
-
-//! Load a list of path from a CSV file. The header must contain "Reading".
-template<typename T>
-typename PointMatcher<T>::FileList PointMatcher<T>::loadList(const std::string& fileName)
-{
-	#if BOOST_FILESYSTEM_VERSION >= 3
-	const string parentPath = boost::filesystem::path(fileName).parent_path().string();
-	#else
-	const string parentPath = boost::filesystem::path(fileName).parent_path().file_string();
-	#endif
-	
-	CsvElements data = parseCsvWithHeader(fileName);
-	
-	// Look for 3D transformation (4x4)
-	bool found3dTrans = true;
-	for(unsigned i=0; i<4; i++)
-	{
-		for(unsigned j=0; j<4; j++)
-		{
-			stringstream transName;
-			transName << "T" << i << j;
-			found3dTrans = found3dTrans && (data.find(transName.str()) != data.end());
-		}
-	}
-	
-	// Look for 2D transformation (3x3)
-	bool found2dTrans = true;
-	for(unsigned i=0; i<3; i++)
-	{
-		for(unsigned j=0; j<3; j++)
-		{
-			stringstream transName;
-			transName << "T" << i << j;
-			found2dTrans = found2dTrans && (data.find(transName.str()) != data.end());
-		}
-	}
-
-	if(found3dTrans)
-		found2dTrans = false;
-
-	FileList list;
-	if(data.find("Reading") != data.end())
-	{
-		std::vector<string> readingName = data["Reading"];
-		const unsigned lineCount = readingName.size();
-
-		// for every lines
-		for(unsigned line=0; line<lineCount; line++)
-		{
-			FileInfo info;
-			// Reading info
-			info.readingPath = parentPath+"/"+readingName[line];
-			validateFile(info.readingPath);
-			#if BOOST_FILESYSTEM_VERSION >= 3
-			info.fileExtension = boost::filesystem::path(readingName[line]).extension().string();
-			#else
-			info.fileExtension = boost::filesystem::path(readingName[line]).extension();
-			#endif
-			
-			// Initial transformation in 3D
-			if(found3dTrans)
-			{
-				TransformationParameters transformation = TransformationParameters::Identity(4,4);
-				for(unsigned i=0; i<4; i++)
-				{
-					for(unsigned j=0; j<4; j++)
-					{
-						stringstream transName;
-						transName << "T" << i << j;
-						const T value = boost::lexical_cast<T> (data[transName.str()][line]);
-						transformation(i,j) = value;
-					}
-				}
-				info.initTransformation = transformation;
-			}
-			
-			// Initial transformation in 2D
-			if(found2dTrans)
-			{
-				TransformationParameters transformation = TransformationParameters::Identity(3,3);
-				for(unsigned i=0; i<3; i++)
-				{
-					for(unsigned j=0; j<3; j++)
-					{
-						stringstream transName;
-						transName << "T" << i << j;
-						const T value = boost::lexical_cast<T> (data[transName.str()][line]);
-						transformation(i,j) = value;
-					}
-				}
-				info.initTransformation = transformation;
-			}
-			
-			// Build the list
-			list.push_back(info);
-		}
-	}
-	else
-	{
-		stringstream errorMsg;
-		errorMsg << "Error transfering CSV to structure: The header should at least contain Reading.";
-		throw runtime_error(errorMsg.str());
-	}
-
-
-	// Debug: Print the list
-	/*for(unsigned i=0; i<list.size(); i++)
-	{
-		cout << "\n--------------------------" << endl;
-		cout << "Sequence " << i << ":" << endl;
-		cout << "Reading path: " << list[i].readingPath << endl;
-		cout << "Reference path: " << list[i].referencePath << endl;
-		cout << "Extension: " << list[i].fileExtension << endl;
-		cout << "Tranformation:\n" << list[i].initTransformation << endl;
-		cout << "Grativity:\n" << list[i].gravity << endl;
-	}
-	*/
-	
-	return list;
-}
-
-template
-PointMatcher<float>::FileList PointMatcher<float>::loadList(const std::string& fileName);
-template
-PointMatcher<double>::FileList PointMatcher<double>::loadList(const std::string& fileName);
