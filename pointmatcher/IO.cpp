@@ -94,14 +94,22 @@ template struct PointMatcher<double>::FileInfo;
 	Note that the header must at least contain "reading".
 */
 template<typename T>
-PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName, std::string parentPath)
+PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName, std::string dataPath, std::string configPath)
 {
-	if (parentPath.empty())
+	if (dataPath.empty())
 	{
 		#if BOOST_FILESYSTEM_VERSION >= 3
-		parentPath = boost::filesystem::path(fileName).parent_path().string();
+		dataPath = boost::filesystem::path(fileName).parent_path().string();
 		#else
-		parentPath = boost::filesystem::path(fileName).parent_path().file_string();
+		dataPath = boost::filesystem::path(fileName).parent_path().file_string();
+		#endif
+	}
+	if (configPath.empty())
+	{
+		#if BOOST_FILESYSTEM_VERSION >= 3
+		configPath = boost::filesystem::path(fileName).parent_path().string();
+		#else
+		configPath = boost::filesystem::path(fileName).parent_path().file_string();
 		#endif
 	}
 	
@@ -150,11 +158,11 @@ PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName, std
 		FileInfo info;
 		
 		// Files
-		info.readingFileName = localToGlobalFileName(parentPath, readingFileNames[line]);
+		info.readingFileName = localToGlobalFileName(dataPath, readingFileNames[line]);
 		if (referenceFileNames)
-			info.referenceFileName = localToGlobalFileName(parentPath, (*referenceFileNames)[line]);
+			info.referenceFileName = localToGlobalFileName(dataPath, (*referenceFileNames)[line]);
 		if (configFileNames)
-			info.configFileName = localToGlobalFileName(parentPath, (*configFileNames)[line]);
+			info.configFileName = localToGlobalFileName(configPath, (*configFileNames)[line]);
 		
 		// Load transformations
 		if(found3dInitialTrans)
