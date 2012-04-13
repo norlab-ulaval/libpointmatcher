@@ -82,7 +82,10 @@ template struct PointMatcher<double>::FileInfo;
 
 //! Load a vector of FileInfo from a CSV file.
 /**
-	The supported tags are:
+	@param fileName name of the CSV file
+	@param parentPath path relative to which to resolve the reference to relative paths in the CSV, use the path of the CSV file if empty.
+	
+	The first line of the CSV file must contain a header. The supported tags are:
 	- reading: file name of the reading point cloud
 	- reference: file name of the reference point cloud
 	- config: file name of the YAML configuration of the ICP chain
@@ -91,13 +94,16 @@ template struct PointMatcher<double>::FileInfo;
 	Note that the header must at least contain "reading".
 */
 template<typename T>
-PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName)
+PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName, std::string parentPath)
 {
-	#if BOOST_FILESYSTEM_VERSION >= 3
-	const string parentPath = boost::filesystem::path(fileName).parent_path().string();
-	#else
-	const string parentPath = boost::filesystem::path(fileName).parent_path().file_string();
-	#endif
+	if (parentPath.empty())
+	{
+		#if BOOST_FILESYSTEM_VERSION >= 3
+		parentPath = boost::filesystem::path(fileName).parent_path().string();
+		#else
+		parentPath = boost::filesystem::path(fileName).parent_path().file_string();
+		#endif
+	}
 	
 	const CsvElements data = parseCsvWithHeader(fileName);
 	

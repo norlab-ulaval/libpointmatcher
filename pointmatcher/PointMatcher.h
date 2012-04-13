@@ -365,7 +365,7 @@ struct PointMatcher
 	//! A vector of file info, to be used in batch
 	struct FileInfoVector: public std::vector<FileInfo>
 	{
-		FileInfoVector(const std::string& fileName);
+		FileInfoVector(const std::string& fileName, std::string parentPath = "");
 	
 	protected:
 		std::string localToGlobalFileName(const std::string& path, const std::string& fileName);
