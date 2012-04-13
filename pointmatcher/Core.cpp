@@ -570,14 +570,18 @@ void PointMatcher<T>::Inspector::init()
 {}
 
 // performance statistics
+
+//! Add a value for statistics name, create it if new
 template<typename T>
 void PointMatcher<T>::Inspector::addStat(const std::string& name, double data)
 {}
 
+//! Dump all statistics in CSV format
 template<typename T>
 void PointMatcher<T>::Inspector::dumpStats(std::ostream& stream)
 {}
 
+//! Dump header for all statistics
 template<typename T>
 void PointMatcher<T>::Inspector::dumpStatsHeader(std::ostream& stream)
 {}
@@ -808,6 +812,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	timer t; // Print how long take the algo
 	const int dim = referenceIn.features.rows();
 	
+	this->inspector->init();
+	
 	// Apply reference filters
 	// reference is express in frame <refIn>
 	DataPoints reference(referenceIn);
@@ -844,8 +850,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	// Prepare reading filters used in the loop 
 	this->readingStepDataPointsFilters.init();
-
-	this->inspector->init();
 	
 	// Since reading and reference are express in <refMean>
 	// the frame <refMean> is equivalent to the frame <iter(0)>
@@ -855,6 +859,12 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	this->transformationCheckers.init(T_iter, iterate);
 
 	size_t iterationCount(0);
+	
+	this->inspector->addStat("PreprocessingDuration", t.elapsed());
+	this->inspector->addStat("PointCountReadingIn", readingIn.features.cols());
+	this->inspector->addStat("PointCountReading", reading.features.cols());
+	this->inspector->addStat("PointCountReferenceIn", referenceIn.features.cols());
+	this->inspector->addStat("PointCountReference", reference.features.cols());
 	
 	LOG_INFO_STREAM("PointMatcher::icp - preprocess took " << t.elapsed() << " [s]");
 	this->prefilteredKeyframePtsCount = reference.features.cols();
@@ -931,9 +941,14 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		++iterationCount;
 	}
 	
+	this->inspector->addStat("IterationsCount", iterationCount);
+	this->inspector->addStat("PointCountTouched", this->matcher->getVisitCount());
+	this->matcher->resetVisitCount();
+	this->inspector->addStat("OverlapRatio", this->errorMinimizer->getWeightedPointUsedRatio());
+	this->inspector->addStat("ConvergenceDuration", t.elapsed());
 	this->inspector->finish(iterationCount);
 	
-	LOG_INFO_STREAM("msa::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]");
+	LOG_INFO_STREAM("PointMatcher::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]");
 	
 	// Move transformation back to original coordinate (without center of mass)
 	// T_iter is equivalent to: T_iter(i+1)_iter(0)
@@ -1077,10 +1092,13 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	const int dim = inputCloudIn.features.rows();
 	
+	this->inspector->init();
+	
 	// initial keyframe
 	keyFrameCreated = false;
 	if (!hasKeyFrame())
 	{
+		timer t;
 		const int ptCount = inputCloudIn.features.cols();
 		
 		if(!(dim == 3 || dim == 4))
@@ -1095,6 +1113,9 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		lastTransformInv = Matrix::Identity(dim, dim);
 
 		this->createKeyFrame(inputCloud);
+		
+		this->inspector->addStat("KeyframingDuration", t.elapsed());
+		
 		return T_refIn_dataIn;
 	}
 	else
@@ -1104,8 +1125,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	}
 	
 	timer t; // Print how long take the algo
-	t.restart();
-
 	
 	// Apply readings filters
 	// reading is express in frame <dataIn>
@@ -1113,8 +1132,10 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
 	
+	this->inspector->addStat("PreprocessingDuration", t.elapsed());
 	this->inspector->addStat("PointCountIn", inputCloud.features.cols());
 	this->inspector->addStat("PointCountReading", reading.features.cols());
+	t.restart();
 	
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
@@ -1125,8 +1146,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	//cout << "T_refMean_dataIn: " << endl << T_refMean_dataIn << endl;
 	// Prepare reading filters used in the loop 
 	this->readingStepDataPointsFilters.init();
-	
-	this->inspector->init();
 	
 	// Since reading and reference are express in <refMean>
 	// the frame <refMean> is equivalent to the frame <iter(0)>
@@ -1197,10 +1216,13 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 
 		++iterationCount;
 	}
+	
 	this->inspector->addStat("IterationsCount", iterationCount);
 	this->inspector->addStat("PointCountTouched", this->matcher->getVisitCount());
 	this->matcher->resetVisitCount();
-	this->inspector->finish(iterationCount);
+	this->inspector->addStat("OverlapRatio", this->errorMinimizer->getWeightedPointUsedRatio());
+	this->inspector->addStat("ConvergenceDuration", t.elapsed());
+	t.restart();
 	
 	// Move transformation back to original coordinate (without center of mass)
 	// T_iter is equivalent to: T_iter(i+1)_iter(0)
@@ -1211,16 +1233,15 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	// T_refIn_refMean remove the temperary frame added during initialization
 	T_refIn_dataIn = T_refIn_refMean * T_iter * T_refMean_dataIn;
 	
-	this->inspector->addStat("OverlapRatio", this->errorMinimizer->getWeightedPointUsedRatio());
-	
 	if (this->errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
 	{
 		// new keyframe
 		keyFrameTransform *= T_refIn_dataIn;
 		this->createKeyFrame(inputCloud);
+		this->inspector->addStat("KeyframingDuration", t.elapsed());
 	}
 	
-	this->inspector->addStat("ConvergenceDuration", t.elapsed());
+	this->inspector->finish(iterationCount);
 	
 	//cout << "keyFrameTransform: " << endl << keyFrameTransform << endl;
 	//cout << "T_refIn_dataIn: " << endl << T_refIn_dataIn << endl;
