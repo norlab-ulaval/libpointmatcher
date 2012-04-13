@@ -63,16 +63,28 @@ int main(int argc, char *argv[])
 	typedef PM::DataPoints DP;
 
 	// Process arguments
-	PM::FileInfoVector list(argv[1]);
-	string outputFileName(argv[2]);
-	
+	PM::FileInfoVector list(argv[2]);
+	string outputFileName(argv[3]);
+	std::fstream resultFile;
+	resultFile.open(outputFileName, fstream::out);
+	if (!resultFile.good())
+	{
+		  cerr << "Error, invalid file " << outputFileName << endl;
+		  abort();
+	}
 	
 	PM pm;
 	
 	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
 	
 	PM::DataPoints refCloud, readCloud;
-	TP T = TP::Identity(4,4);
+	
+	//TODO: handle 2D
+	TP Tinit = TP::Identity(4,4);
+	TP Ttruth = TP::Identity(4,4);
+	TP Tout = TP::Identity(4,4);
+	PM::ICP icp;
+	//icp.inspector->dumpStatsHeader(resultFile);
 
 	for(unsigned i=0; i < list.size(); i++)
 	{
@@ -81,19 +93,33 @@ int main(int argc, char *argv[])
 		refCloud = PM::loadCSV(list[i].referenceFileName);
 		cout << "Reference cloud " << list[i].referenceFileName << " loaded" << endl;
 	
+		ifstream ifs(list[i].configFileName);
+		icp.loadFromYaml(ifs);
+
 		if(list[i].initialTransformation.rows() != 0)
-			T = list[i].initialTransformation;
-		
+			Tinit = list[i].initialTransformation;
+		if(list[i].groundTruthTransformation.rows() != 0)
+			Ttruth = list[i].groundTruthTransformation;
+
+		Tout = icp(refCloud, readCloud, Tinit);
+
+		// define errors
+
+		// Output results
+		icp.inspector->dumpStatsHeader(resultFile);
+		icp.inspector->dumpStats(resultFile);
 	}
+
+	resultFile.close();
 
 	return 0;
 }
 
 void validateArgs(int argc, char *argv[])
 {
-	if (!(argc == 3))
+	if (!(argc == 4))
 	{
-		cerr << "Error in command line, usage " << argv[0] << " experimentFileName.csv resultFileName.csv" << endl;
+		cerr << "Error in command line, usage " << argv[0] << " /path/To/Data/ experimentFileName.csv resultFileName.csv" << endl;
 		abort();
 	}
 }
