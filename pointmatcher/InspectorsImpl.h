@@ -74,7 +74,7 @@ struct InspectorsImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "baseFileName", "base file name for the statistics files ", "point-matcher-output" },
+				{ "baseFileName", "base file name for the statistics files (if empty, disabled)", "" },
 				{ "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" }
 			});
 		}

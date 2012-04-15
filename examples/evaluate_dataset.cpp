@@ -45,9 +45,160 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
-void validateArgs(int argc, char *argv[]);
-void setupArgs(int argc, char *argv[], unsigned int& startId, unsigned int& endId, string& extension);
-vector<string> loadYamlFile(string listFileName);
+
+class EvaluateDataset
+{
+public:
+	typedef PointMatcher<float> PM;
+	typedef PM::TransformationParameters TP;
+	typedef PM::DataPoints DataPoints;
+	
+	EvaluateDataset(const string& dataPath, const string& configPath, const string& evalFileName);
+	~EvaluateDataset();
+
+	void testAll();
+private:
+	void validateFileInfo(PM::FileInfo fileInfo);
+
+	PM::FileInfoVector list;
+	std::fstream resultFile;
+	PM pm;
+};
+
+
+EvaluateDataset::EvaluateDataset(const string& evalFileName, const string& dataPath, const string& configPath):
+	list(evalFileName, dataPath, configPath)
+{
+	string outputFileName = "evalResults.csv";
+//#if BOOST_FILESYSTEM_VERSION >= 3
+//	dataPath = boost::filesystem::path(fileName).parent_path().string();
+//#else
+//	dataPath = boost::filesystem::path(fileName).parent_path().file_string();
+//#endif
+	resultFile.open(outputFileName, fstream::out);
+	
+	if (!resultFile.good())
+	{
+		  cerr << "Error, invalid file " << outputFileName << endl;
+		  abort();
+	}
+	
+	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+}
+
+void EvaluateDataset::testAll()
+{
+	
+	PM::DataPoints refCloud, readCloud;
+
+	// Ensure that all required columns are there
+	validateFileInfo(list[0]);
+
+	// Start evaluation
+	for(unsigned i=0; i < list.size(); i++)
+	{
+		// Load point clouds
+		//TODO: handle vtk
+		readCloud = PM::loadCSV(list[i].readingFileName);
+		cout << "Reading cloud " << list[i].readingFileName << " loaded" << endl;
+		refCloud = PM::loadCSV(list[i].referenceFileName);
+		cout << "Reference cloud " << list[i].referenceFileName << " loaded" << endl;
+	
+		// Build ICP based on config file
+		PM::ICP icp;
+		ifstream ifs(list[i].configFileName);
+		icp.loadFromYaml(ifs);
+
+		const TP Tinit = list[i].initialTransformation;
+		const TP Ttruth = list[i].groundTruthTransformation;
+		
+		bool failedToConverge = false;
+		TP Tresult = TP::Identity(4,4);
+		// Apply ICP
+		try
+		{
+			Tresult = icp(readCloud, refCloud, Tinit);
+		}
+		catch (PM::ConvergenceError error)
+		{
+			cout << "ICP failed to converge" << endl;
+			failedToConverge = true;
+		}
+		icp.inspector->addStat("failed", failedToConverge);
+
+		// Define errors
+		// TODO: only working in 3D up to now
+		const TP Terr = Ttruth * Tresult.inverse();
+
+		// Translation
+		Eigen::Vector3f trans(Terr.topRightCorner(3,1));
+		const float errTrans = trans.norm();
+		icp.inspector->addStat("e_x", trans.x());
+		icp.inspector->addStat("e_y", trans.y());
+		icp.inspector->addStat("e_z", trans.z());
+		icp.inspector->addStat("e_trans", errTrans);
+		cout << "Error in translation: " << errTrans << " m" << endl;
+		
+		// Rotation
+		Eigen::Quaternionf quat(Eigen::Matrix3f(Terr.topLeftCorner(3,3)));
+		quat.normalize();
+		const float errRot = 2 * acos(quat.normalized().w());
+		icp.inspector->addStat("e_qx", quat.x());
+		icp.inspector->addStat("e_qy", quat.y());
+		icp.inspector->addStat("e_qz", quat.z());
+		icp.inspector->addStat("e_qw", quat.w());
+		icp.inspector->addStat("e_rot", errRot);
+		cout << "Error in rotation: " << (errRot*180)/M_PI << " deg or " << errRot << " rad" << endl;
+		
+		// Output results
+		if (i == 0)
+		{
+			icp.inspector->dumpStatsHeader(resultFile);
+			resultFile << endl;
+		}
+
+		icp.inspector->dumpStats(resultFile);
+		resultFile << endl;
+	}
+}
+
+void EvaluateDataset::validateFileInfo(PM::FileInfo fileInfo)
+{
+	if(fileInfo.initialTransformation.rows() == 0)
+	{
+		cout << "Missing columns representing initial transformation \"iTxy\"" << endl;
+		abort();
+	}
+
+	if(fileInfo.groundTruthTransformation.rows() == 0)
+	{
+		cout << "Missing columns representing ground truth transformation \"gTxy\"" << endl;
+		abort();
+	}
+
+	if(fileInfo.readingFileName == "")
+	{
+		cout << "Missing column named \"reading\"" << endl;
+		abort();
+	}
+
+	if(fileInfo.referenceFileName == "")
+	{
+		cout << "Missing column named \"reference\"" << endl;
+		abort();
+	}
+
+	if(fileInfo.configFileName == "")
+	{
+		cout << "Missing column named \"config\"" << endl;
+		abort();
+	}
+}
+
+EvaluateDataset::~EvaluateDataset()
+{
+	resultFile.close();
+}
 
 /**
   * Code example for ICP evaluation taking pairs of scan with  
@@ -56,71 +207,15 @@ vector<string> loadYamlFile(string listFileName);
   */
 int main(int argc, char *argv[])
 {
-	validateArgs(argc, argv);
-
-	typedef PointMatcher<float> PM;
-	typedef PM::TransformationParameters TP;
-	typedef PM::DataPoints DP;
-
-	// Process arguments
-	PM::FileInfoVector list(argv[2]);
-	string outputFileName(argv[3]);
-	std::fstream resultFile;
-	resultFile.open(outputFileName, fstream::out);
-	if (!resultFile.good())
-	{
-		  cerr << "Error, invalid file " << outputFileName << endl;
-		  abort();
-	}
-	
-	PM pm;
-	
-	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
-	
-	PM::DataPoints refCloud, readCloud;
-	
-	//TODO: handle 2D
-	TP Tinit = TP::Identity(4,4);
-	TP Ttruth = TP::Identity(4,4);
-	TP Tout = TP::Identity(4,4);
-	PM::ICP icp;
-	//icp.inspector->dumpStatsHeader(resultFile);
-
-	for(unsigned i=0; i < list.size(); i++)
-	{
-		readCloud = PM::loadCSV(list[i].readingFileName);
-		cout << "Reading cloud " << list[i].readingFileName << " loaded" << endl;
-		refCloud = PM::loadCSV(list[i].referenceFileName);
-		cout << "Reference cloud " << list[i].referenceFileName << " loaded" << endl;
-	
-		ifstream ifs(list[i].configFileName);
-		icp.loadFromYaml(ifs);
-
-		if(list[i].initialTransformation.rows() != 0)
-			Tinit = list[i].initialTransformation;
-		if(list[i].groundTruthTransformation.rows() != 0)
-			Ttruth = list[i].groundTruthTransformation;
-
-		Tout = icp(refCloud, readCloud, Tinit);
-
-		// define errors
-
-		// Output results
-		icp.inspector->dumpStatsHeader(resultFile);
-		icp.inspector->dumpStats(resultFile);
-	}
-
-	resultFile.close();
-
-	return 0;
-}
-
-void validateArgs(int argc, char *argv[])
-{
 	if (!(argc == 4))
 	{
-		cerr << "Error in command line, usage " << argv[0] << " /path/To/Data/ experimentFileName.csv resultFileName.csv" << endl;
+		cerr << "Error in command line, usage " << argv[0] << " experimentFileName.csv /path/To/Data/ /path/To/Config/ resultFileName.csv" << endl;
 		abort();
-	}
+	}	
+	
+	EvaluateDataset evaluation(argv[1], argv[2], argv[3]);
+	evaluation.testAll();
+
+	return 0;
 }
 

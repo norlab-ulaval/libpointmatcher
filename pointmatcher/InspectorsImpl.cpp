@@ -60,7 +60,7 @@ void InspectorsImpl<T>::PerformanceInspector::addStat(const std::string& name, d
 	if (it == stats.end())
 		it = stats.insert(
 			HistogramMap::value_type(name, 
-				Histogram(16, name, Parametrizable::get<string>("baseFileName")+".stat.", Parametrizable::get<bool>("dumpPerfOnExit"))
+				Histogram(16, name, Parametrizable::get<string>("baseFileName"), Parametrizable::get<bool>("dumpPerfOnExit"))
 			)
 		).first;
 	it->second.push_back(data);

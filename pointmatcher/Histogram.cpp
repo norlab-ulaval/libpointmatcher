@@ -62,10 +62,10 @@ namespace PointMatcherSupport
 		T meanV, varV, medianV, lowQt, highQt, minV, maxV;
 		uint64_t bins[binCount];
 		uint64_t maxBinC;
-		if (dumpStdErrOnExit || filePrefix.size() > 0)
+		if (dumpStdErrOnExit || !filePrefix.empty())
 			computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, bins, maxBinC);
 		
-		if (filePrefix.size() > 0)
+		if (!filePrefix.empty())
 		{
 			std::cerr << "writing to " << (filePrefix + name) << std::endl;
 			std::ofstream ofs((filePrefix + name).c_str());
