@@ -17,7 +17,7 @@ Perturbation poses
 Perturbation poses are used to generate initial guess around the ground truth pose of the reading scan.
 
 You can either generate your own using: 
-$ ./examples/generate_random_poses nbPose  dx dy dz droll dpitch dyaw
+$ ./tools/generate_random_poses nbPose  dx dy dz droll dpitch dyaw
 
 - or -
 
@@ -34,9 +34,9 @@ If you want to test a dataset against a single configuration, you can do so manu
 If you want to test a dataset against multiple parameters:
 1) Copy ./examples/data/default.yaml to a file that will be uses as a template (ex.: randomSampling.yaml)
 2) Generate multiple configuration files using:
-$ ./examples/generate_icp_config.py template.yaml sectionName moduleName paramName paramMin paramStep paramMax <int>
+$ ./tools/generate_icp_config.py template.yaml sectionName moduleName paramName paramMin paramStep paramMax <int>
 Example:
-./examples/generate_icp_config.py randomSampling.yaml readingDataPointsFilters RandomSamplingDataPointsFilter prob 0.05 0.01 0.08
+./tools/generate_icp_config.py randomSampling.yaml readingDataPointsFilters RandomSamplingDataPointsFilter prob 0.05 0.01 0.08
 
 This will generate configuration files at the same location than the template.yaml file
 3) Copy those newly generated configuration files in a specific folder (ex.: ./randomSamplingConfig)
@@ -45,9 +45,9 @@ This will generate configuration files at the same location than the template.ya
 Buid an experiment list file
 ----------------------
 To generate an experiment list that will combined all scans with all ICP configurations and all initial poses, you can use:
-$ ./examples/generate_experiment.py /local/PointCloud/path namePattern /icp/Config/path namePattern groundTruthFileName.csv posePerturbationsFileName.csv <steps> <direction>
+$ ./tools/generate_experiment.py /local/PointCloud/path namePattern /icp/Config/path namePattern groundTruthFileName.csv posePerturbationsFileName.csv <steps> <direction>
 Example:
-$ ./examples/generate_experiment.py ./stairs_csv_local Hokuyo_ ./randomSamplingConfig randomSampling_prob pose_scanner_leica.csv easyInitPosesTemplate.csv
+$ ./tools/generate_experiment.py ./stairs_csv_local Hokuyo_ ./randomSamplingConfig randomSampling_prob pose_scanner_leica.csv easyInitPosesTemplate.csv
 
 This will generate a file named experiment_XXX.csv where you executed the script. Renamed the file for further use (ex.: experiment_stairSamplingEasy.csv)
 
@@ -55,7 +55,7 @@ This will generate a file named experiment_XXX.csv where you executed the script
 Launch all tests
 ----------------------
 Finally, all experiments can be launch using:
-$ ./examples/evaluate_dataset experimentFileName.csv /path/To/Data/ /path/To/Config/ resultFileName.csv
+$ ./tools/evaluate_dataset experimentFileName.csv /path/To/Data/ /path/To/Config/ resultFileName.csv
 Example:
-$ ./examples/evaluate_dataset experiment_stairSamplingEasy.csv ./stairs_csv_local ./randomSamplingConfig results_stairSamplingEasy.csv
+$ ./tools/evaluate_dataset experiment_stairSamplingEasy.csv ./stairs_csv_local ./randomSamplingConfig results_stairSamplingEasy.csv
 
