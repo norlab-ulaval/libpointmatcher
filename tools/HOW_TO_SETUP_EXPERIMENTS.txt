@@ -49,13 +49,15 @@ $ ./tools/generate_experiment.py /local/PointCloud/path namePattern /icp/Config/
 Example:
 $ ./tools/generate_experiment.py ./stairs_csv_local Hokuyo_ ./randomSamplingConfig randomSampling_prob pose_scanner_leica.csv easyInitPosesTemplate.csv
 
-This will generate a file named experiment_XXX.csv where you executed the script. Renamed the file for further use (ex.: experiment_stairSamplingEasy.csv)
+This will generate a file named setup_XXX.csv where you executed the script. Renamed the file for further use (ex.: setup_stairSamplingEasy.csv)
 
 ----------------------
 Launch all tests
 ----------------------
 Finally, all experiments can be launch using:
-$ ./tools/evaluate_dataset experimentFileName.csv /path/To/Data/ /path/To/Config/ resultFileName.csv
+$ ./tools/evaluate_dataset experimentFileName.csv /path/To/Data/ /path/To/Config/
 Example:
-$ ./tools/evaluate_dataset experiment_stairSamplingEasy.csv ./stairs_csv_local ./randomSamplingConfig results_stairSamplingEasy.csv
+$ ./tools/evaluate_dataset setup_stairSamplingEasy.csv ./stairs_csv_local ./randomSamplingConfig
+
+The results will be recorded in results_XXX.csv
 

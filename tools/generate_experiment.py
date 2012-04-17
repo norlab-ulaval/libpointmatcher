@@ -82,7 +82,7 @@ def main():
 		perturbationList.append(T)
 
 	# Build the final csv file with all the combined information
-	expFile = open('experiment_XXX.csv', 'w')
+	expFile = open('setup_XXX.csv', 'w')
 	csvExp = csv.writer(expFile, lineterminator='\n')
 	header = ['reading', 'reference', 'config']
 	header = add_T_header(header, 'iT')

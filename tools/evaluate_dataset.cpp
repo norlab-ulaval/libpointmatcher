@@ -69,7 +69,7 @@ private:
 EvaluateDataset::EvaluateDataset(const string& evalFileName, const string& dataPath, const string& configPath):
 	list(evalFileName, dataPath, configPath)
 {
-	string outputFileName = "evalResults.csv";
+	string outputFileName = "results_XXX.csv";
 //#if BOOST_FILESYSTEM_VERSION >= 3
 //	dataPath = boost::filesystem::path(fileName).parent_path().string();
 //#else
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 {
 	if (!(argc == 4))
 	{
-		cerr << "Error in command line, usage " << argv[0] << " experimentFileName.csv /path/To/Data/ /path/To/Config/ resultFileName.csv" << endl;
+		cerr << "Error in command line, usage " << argv[0] << " experimentFileName.csv /path/To/Data/ /path/To/Config/" << endl;
 		abort();
 	}	
 	
