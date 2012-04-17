@@ -17,7 +17,7 @@ Perturbation poses
 Perturbation poses are used to generate initial guess around the ground truth pose of the reading scan.
 
 You can either generate your own using: 
-$ ./tools/generate_random_poses nbPose  dx dy dz droll dpitch dyaw
+$ ./tools/generate_random_poses fileName nbPose  dx dy dz droll dpitch dyaw
 
 - or -
 
