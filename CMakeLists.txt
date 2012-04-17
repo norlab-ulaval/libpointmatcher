@@ -156,6 +156,9 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL
 
 # Example programs
 add_subdirectory(examples)
+# Tool programs
+add_subdirectory(tools)
+
 # Unit testing
 enable_testing()
 add_subdirectory(utest)

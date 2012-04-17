@@ -355,17 +355,17 @@ typename PointMatcher<T>::CsvElements PointMatcher<T>::parseCsvWithHeader(const 
 	}
 	
 	// Use for debug
-	/*
-	for(auto it=data.begin(); it!=data.end(); it++)
-	{
-		cout << "--------------------------" << endl;
-		cout << "Header: " << (*it).first << endl;
-		for(unsigned i=0; i<(*it).second.size(); i++)
-		{
-			cout << (*it).second[i] << endl;
-		}
-	}
-	*/
+	
+	//for(auto it=data.begin(); it!=data.end(); it++)
+	//{
+	//	cout << "--------------------------" << endl;
+	//	cout << "Header: |" << (*it).first << "|" << endl;
+	//	//for(unsigned i=0; i<(*it).second.size(); i++)
+	//	//{
+	//	//	cout << (*it).second[i] << endl;
+	//	//}
+	//}
+	
 
 	return data;
 }

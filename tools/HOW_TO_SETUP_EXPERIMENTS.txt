@@ -1,0 +1,61 @@
+Francois Pomerleau - April 16, 2012
+
+This file describes how to generate an experiment to test different ICP configurations with multiple initial starting position.
+
+----------------------
+Download a dataset
+----------------------
+Dataset can be download here: http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:laserregistration
+1) Select one environment
+2) Download the files in the section "Point Clouds in Scanner Coordinates"
+3) Uncompress the archive in a specific folder (ex.: ./stairs_csv_local)
+4) Download the ground truth file named "pose_scanner_leica.csv".
+
+----------------------
+Perturbation poses
+----------------------
+Perturbation poses are used to generate initial guess around the ground truth pose of the reading scan.
+
+You can either generate your own using: 
+$ ./examples/generate_random_poses nbPose  dx dy dz droll dpitch dyaw
+
+- or -
+
+For a fair comparison with passed experiment, you can use one of the predefined file:
+- easyInitPosesTemplate.csv   : 50 poses withing +/- 0.5 m in all translations and +/- 20 deg for all rotations
+- mediumInitPosesTemplate.csv : 50 poses withing +/- 1.0 m in all translations and +/- 45 deg for all rotations
+- hardInitPosesTemplate.csv   : 50 poses withing +/- 3.0 m in all translations and +/- 90 deg for all rotations
+
+----------------------
+ICP configuration files
+----------------------
+If you want to test a dataset against a single configuration, you can do so manually by copying ./examples/data/default.yaml and changing the appropriate line.
+
+If you want to test a dataset against multiple parameters:
+1) Copy ./examples/data/default.yaml to a file that will be uses as a template (ex.: randomSampling.yaml)
+2) Generate multiple configuration files using:
+$ ./examples/generate_icp_config.py template.yaml sectionName moduleName paramName paramMin paramStep paramMax <int>
+Example:
+./examples/generate_icp_config.py randomSampling.yaml readingDataPointsFilters RandomSamplingDataPointsFilter prob 0.05 0.01 0.08
+
+This will generate configuration files at the same location than the template.yaml file
+3) Copy those newly generated configuration files in a specific folder (ex.: ./randomSamplingConfig)
+
+----------------------
+Buid an experiment list file
+----------------------
+To generate an experiment list that will combined all scans with all ICP configurations and all initial poses, you can use:
+$ ./examples/generate_experiment.py /local/PointCloud/path namePattern /icp/Config/path namePattern groundTruthFileName.csv posePerturbationsFileName.csv <steps> <direction>
+Example:
+$ ./examples/generate_experiment.py ./stairs_csv_local Hokuyo_ ./randomSamplingConfig randomSampling_prob pose_scanner_leica.csv easyInitPosesTemplate.csv
+
+This will generate a file named experiment_XXX.csv where you executed the script. Renamed the file for further use (ex.: experiment_stairSamplingEasy.csv)
+
+----------------------
+Launch all tests
+----------------------
+Finally, all experiments can be launch using:
+$ ./examples/evaluate_dataset experimentFileName.csv /path/To/Data/ /path/To/Config/ resultFileName.csv
+Example:
+$ ./examples/evaluate_dataset experiment_stairSamplingEasy.csv ./stairs_csv_local ./randomSamplingConfig results_stairSamplingEasy.csv
+
