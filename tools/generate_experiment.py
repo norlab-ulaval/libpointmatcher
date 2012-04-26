@@ -31,6 +31,14 @@ def add_T_values(l, T):
 				l.append("%.6f" % (T[x,y]))
 		return l
 
+def load_T(name, row):
+	T = matrix(eye(4))
+	for x in range(0,4):
+		for y in range(0,4):
+			T[x,y] = float(row[name+str(x)+str(y)])
+
+	return T
+
 def main():
 
 	if len(sys.argv) < 7 or len(sys.argv) > 9:
@@ -75,11 +83,7 @@ def main():
 	csvPerturbations = csv.DictReader(open(posePerturbationsFileName), skipinitialspace=True)
 	perturbationList = list()
 	for row in csvPerturbations:
-		T = matrix(eye(4))
-		for x in range(0,4):
-			for y in range(0,4):
-				T[x,y] = float(row['iT'+str(x)+str(y)])
-		perturbationList.append(T)
+		perturbationList.append(load_T('iT', row))
 
 	# Build the final csv file with all the combined information
 	expFile = open('setup_XXX.csv', 'w')
@@ -87,6 +91,7 @@ def main():
 	header = ['reading', 'reference', 'config']
 	header = add_T_header(header, 'iT')
 	header = add_T_header(header, 'gT')
+	header = add_T_header(header, 'pT')
 	csvExp.writerow(header)
 	for i in range(0,len(pointCloudFiles)):
 		for config in icpConfigFiles:
@@ -97,12 +102,13 @@ def main():
 					rowText = [pointCloudFiles[readId], pointCloudFiles[refId], config]
 					gT = linalg.inv(truthTransformList[refId]) * truthTransformList[readId]
 					iT = pT * gT
-					rowText = add_T_values(rowText, iT)
-					rowText = add_T_values(rowText, gT)
+					rowText = add_T_values(rowText, iT)#initial transform
+					rowText = add_T_values(rowText, gT)#ground truth
+					rowText = add_T_values(rowText, pT)#perturbation
 					csvExp.writerow(rowText)
 
 
-	print "\n" + str(len(pointCloudFiles)*len(icpConfigFiles)*len(perturbationList)) + " experiments generated in experiement_XXX.csv\n"
+	print "\n" + str(len(pointCloudFiles)*len(icpConfigFiles)*len(perturbationList)) + " experiments generated in setup_XXX.csv\n"
 	expFile.close()
 
 if __name__=="__main__":

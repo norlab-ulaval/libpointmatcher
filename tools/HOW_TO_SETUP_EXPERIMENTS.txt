@@ -22,9 +22,10 @@ $ ./tools/generate_random_poses fileName nbPose  dx dy dz droll dpitch dyaw
 - or -
 
 For a fair comparison with passed experiment, you can use one of the predefined file:
-- easyInitPosesTemplate.csv   : 50 poses withing +/- 0.5 m in all translations and +/- 20 deg for all rotations
-- mediumInitPosesTemplate.csv : 50 poses withing +/- 1.0 m in all translations and +/- 45 deg for all rotations
-- hardInitPosesTemplate.csv   : 50 poses withing +/- 3.0 m in all translations and +/- 90 deg for all rotations
+- veryEasyInitPosesTemplate.csv: 50 poses withing +/- 0.1 m in all translations and +/- 10 deg for all rotations
+- easyInitPosesTemplate.csv    : 50 poses withing +/- 0.5 m in all translations and +/- 20 deg for all rotations
+- mediumInitPosesTemplate.csv  : 50 poses withing +/- 1.0 m in all translations and +/- 45 deg for all rotations
+- hardInitPosesTemplate.csv    : 50 poses withing +/- 3.0 m in all translations and +/- 90 deg for all rotations
 
 ----------------------
 ICP configuration files

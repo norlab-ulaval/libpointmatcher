@@ -872,7 +872,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 		for(int i=0; i<colCount; i++)
 		{
 			const float r = (float)std::rand()/(float)RAND_MAX;
-			if(r > ratio)
+			if(r < ratio)
 			{
 				// Keep points with their descriptors
 				data.outputFeatures.col(data.outputInsertionPoint) = 
