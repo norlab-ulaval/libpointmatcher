@@ -50,13 +50,12 @@ struct OutlierFiltersImpl
 	
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::Matches Matches;
-	typedef typename PointMatcher<T>::FeatureOutlierFilter FeatureOutlierFilter;
-	typedef typename PointMatcher<T>::DescriptorOutlierFilter DescriptorOutlierFilter;
+	typedef typename PointMatcher<T>::OutlierFilter OutlierFilter;
 	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
 	typedef typename PointMatcher<T>::Matrix Matrix;	
 	typedef typename PointMatcher<T>::Vector Vector;
 	
-	struct NullFeatureOutlierFilter: public FeatureOutlierFilter
+	struct NullOutlierFilter: public OutlierFilter
 	{
 		inline static const std::string description()
 		{
@@ -66,7 +65,7 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
-	struct MaxDistOutlierFilter: public FeatureOutlierFilter
+	struct MaxDistOutlierFilter: public OutlierFilter
 	{
 		inline static const std::string description()
 		{
@@ -86,7 +85,7 @@ struct OutlierFiltersImpl
 	};
 
 	//FIXME: is that useful in any case?
-	struct MinDistOutlierFilter: public FeatureOutlierFilter
+	struct MinDistOutlierFilter: public OutlierFilter
 	{
 		inline static const std::string description()
 		{
@@ -105,7 +104,7 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
-	struct MedianDistOutlierFilter: public FeatureOutlierFilter 
+	struct MedianDistOutlierFilter: public OutlierFilter 
 	{
 		inline static const std::string description()
 		{
@@ -124,7 +123,7 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
-	struct TrimmedDistOutlierFilter: public FeatureOutlierFilter
+	struct TrimmedDistOutlierFilter: public OutlierFilter
 	{
 		inline static const std::string description()
 		{
@@ -143,7 +142,7 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
-	struct VarTrimmedDistOutlierFilter: public FeatureOutlierFilter
+	struct VarTrimmedDistOutlierFilter: public OutlierFilter
 	{
 		inline static const std::string description()
 		{
@@ -172,7 +171,7 @@ struct OutlierFiltersImpl
 	
 	
 	// ---------------------------------
-	struct SurfaceNormalOutlierFilter: public FeatureOutlierFilter
+	struct SurfaceNormalOutlierFilter: public OutlierFilter
 	{
 		inline static const std::string description()
 		{
@@ -189,17 +188,6 @@ struct OutlierFiltersImpl
 		bool warningPrinted;
 		
 		SurfaceNormalOutlierFilter(const Parameters& params = Parameters());
-		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
-	};
-	// ---------------------------------
-
-	struct NullDescriptorOutlierFilter: public DescriptorOutlierFilter
-	{
-		inline static const std::string description()
-		{
-			return "does nothing";
-		}
-		
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 }; // OutlierFiltersImpl

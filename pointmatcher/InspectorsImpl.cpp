@@ -302,14 +302,12 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 	const DataPoints& filteredReference,
 	const DataPoints& reading,
 	const Matches& matches,
-	const OutlierWeights& featureOutlierWeights,
-	const OutlierWeights& descriptorOutlierWeights, 
+	const OutlierWeights& outlierWeights, 
 	const TransformationCheckers& transCheck)
 {
 	ostream* streamLinks(openStream("link", iterationCount));
-	dumpDataLinks(filteredReference, reading, matches, featureOutlierWeights, *streamLinks);
+	dumpDataLinks(filteredReference, reading, matches, outlierWeights, *streamLinks);
 	closeStream(streamLinks);
-	
 
 	ostream* streamRead(openStream("reading", iterationCount));
 	dumpDataPoints(reading, *streamRead);

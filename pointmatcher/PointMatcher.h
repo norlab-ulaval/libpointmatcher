@@ -392,7 +392,7 @@ struct PointMatcher
 		T getDistsQuantile(const T quantile) const;
 	};
 
-	//! Weights resulting of the application of FeatureOutlierFilter or DescriptorOutlierFilter; a dense matrix over ScalarType
+	//! Weights resulting of the application of OutlierFilter or DescriptorOutlierFilter; a dense matrix over ScalarType
 	typedef Matrix OutlierWeights;
 	
 	// ---------------------------------
@@ -467,47 +467,29 @@ struct PointMatcher
 	
 	// ---------------------------------
 	
-	//! A feature outlier filter removes links between points in reading and their matched points in reference, depending on some criteria on the features. Points with no link will be ignored in the subsequent minimization step.
-	struct FeatureOutlierFilter: public Parametrizable
+	//! An outlier filter removes links between points in reading and their matched points in reference, depending on some criteria. Points with no link will be ignored in the subsequent minimization step.
+	struct OutlierFilter: public Parametrizable
 	{
-		FeatureOutlierFilter();
-		FeatureOutlierFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+		OutlierFilter();
+		OutlierFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		
-		virtual ~FeatureOutlierFilter();
+		virtual ~OutlierFilter();
 		
 		//! Detect outliers using features
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input) = 0;
 	};
 	
-	//! A descriptor outlier filter removes links between points in reading and their matched points in reference, depending on some criteria on the descriptors. Points with no link will be ignored in the subsequent minimization step.
-	struct DescriptorOutlierFilter
-	{
-		virtual ~DescriptorOutlierFilter();
-		
-		//! Detect outliers using descriptors
-		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input) = 0;
-	};
 	
 	//! A chain of outlier filters of type F
-	template<typename F>
-	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<F>
+	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<OutlierFilter>
 	{
-		typedef PointMatcherSupport::SharedPtrVector<F> Vector; //!< alias
-		
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 	
-	//! A chain of FeatureOutlierFilter
-	typedef OutlierFilters<FeatureOutlierFilter> FeatureOutlierFilters;
-	//! A chain of DescriptorOutlierFilter
-	typedef OutlierFilters<DescriptorOutlierFilter> DescriptorOutlierFilters;
-	typedef typename FeatureOutlierFilters::const_iterator FeatureOutlierFiltersConstIt; //!< alias
-	typedef typename FeatureOutlierFilters::iterator FeatureOutlierFiltersIt; //!< alias
-	typedef typename DescriptorOutlierFilters::const_iterator DescriptorOutlierFiltersConstIt; //!< alias
-	typedef typename DescriptorOutlierFilters::iterator DescriptorOutlierFiltersIt; //!< alias
+	typedef typename OutlierFilters::const_iterator OutlierFiltersConstIt; //!< alias
+	typedef typename OutlierFilters::iterator OutlierFiltersIt; //!< alias
 	
-	DEF_REGISTRAR(FeatureOutlierFilter)
-	DEF_REGISTRAR(DescriptorOutlierFilter)
+	DEF_REGISTRAR(OutlierFilter)
 
 	// ---------------------------------
 	
@@ -608,7 +590,7 @@ struct PointMatcher
 		
 		// data statistics 
 		virtual void dumpFilteredReference(const DataPoints& filteredReference);
-		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers);
+		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers);
 		virtual void finish(const size_t iterationCount);
 	};
 	
@@ -631,12 +613,10 @@ struct PointMatcher
 		DataPointsFilters keyframeDataPointsFilters; //!< filters for keyframe
 		Transformations transformations; //!< transformations
 		std::shared_ptr<Matcher> matcher; //!< matcher
-		FeatureOutlierFilters featureOutlierFilters; //!< outlier filters on features
-		DescriptorOutlierFilters descriptorOutlierFilters; //!< outlier filters on descriptors
+		OutlierFilters outlierFilters; //!< outlier filters
 		std::shared_ptr<ErrorMinimizer> errorMinimizer; //!< error minimizer
 		TransformationCheckers transformationCheckers; //!< transformation checkers
 		std::shared_ptr<Inspector> inspector; //!< inspector
-		T outlierMixingWeight; //!< weighting ratio of feature vs outlier filters
 		
 		virtual ~ICPChainBase();
 
