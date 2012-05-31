@@ -359,11 +359,13 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim)
 {
-	const auto desc(cloud.getDescriptorViewByName(nameTag));	
-
+	if (!cloud.isDescriptorExist(nameTag))
+		return;
+		
+	const auto desc(cloud.getDescriptorViewByName(nameTag));
 	assert(desc.rows() <= forcedDim);
 
-	if(desc.rows() != 0 && desc.rows() != 0)
+	if(desc.rows() != 0)
 	{
 		stream << attribute << " " << nameTag << " float\n";
 		if(attribute.compare("SCALARS") == 0)
