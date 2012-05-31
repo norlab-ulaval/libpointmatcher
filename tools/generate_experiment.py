@@ -77,7 +77,7 @@ def main():
 		truthTransformList.append(T)
 
 	if len(pointCloudFiles) != len(truthTransformList):
-		sys.exit('ERROR: number of point cloud file ('+len(pointCloudFiles)+') is different than number of ground truth transformations ('+len(truthTransformList)+')')
+		sys.exit('ERROR: number of point cloud file ('+str(len(pointCloudFiles))+') is different than number of ground truth transformations ('+str(len(truthTransformList))+')')
 
 	# Load csv file with perturbation poses
 	csvPerturbations = csv.DictReader(open(posePerturbationsFileName), skipinitialspace=True)

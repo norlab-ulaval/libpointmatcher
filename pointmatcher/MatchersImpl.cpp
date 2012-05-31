@@ -102,3 +102,51 @@ typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeMatcher::findClosests(
 
 template struct MatchersImpl<float>::KDTreeMatcher;
 template struct MatchersImpl<double>::KDTreeMatcher;
+
+// KDTreeVarDistMatcher
+template<typename T>
+MatchersImpl<T>::KDTreeVarDistMatcher::KDTreeVarDistMatcher(const Parameters& params):
+	Matcher("KDTreeVarDistMatcher", KDTreeVarDistMatcher::availableParameters(), params),
+	knn(Parametrizable::get<int>("knn")),
+	epsilon(Parametrizable::get<T>("epsilon")),
+	searchType(NNSearchType(Parametrizable::get<int>("searchType"))),
+	maxDistField(Parametrizable::getParamValueString("maxDistField"))
+{
+	LOG_INFO_STREAM("KDTreeVarDsitMatcher initialized with knn=" << knn << ", epsilon=" << epsilon << ", searchType=" << searchType << " and maxDistField=" << maxDistField);
+}
+
+template<typename T>
+MatchersImpl<T>::KDTreeVarDistMatcher::~KDTreeVarDistMatcher()
+{
+
+}
+
+template<typename T>
+void MatchersImpl<T>::KDTreeVarDistMatcher::init(
+	const DataPoints& filteredReference)
+{
+	// build and populate NNS
+	featureNNS.reset( NNS::create(filteredReference.features, filteredReference.features.rows() - 1, searchType, NNS::TOUCH_STATISTICS));
+}
+
+template<typename T>
+typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeVarDistMatcher::findClosests(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference)
+{
+	
+	const int pointsCount(filteredReading.features.cols());
+	Matches matches(
+		typename Matches::Dists(knn, pointsCount),
+		typename Matches::Ids(knn, pointsCount)
+	);
+	
+	const auto maxDists(filteredReading.getDescriptorViewByName(maxDistField));
+	
+	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, maxDists.transpose(), knn, epsilon, NNS::ALLOW_SELF_MATCH);
+
+	return matches;
+}
+
+template struct MatchersImpl<float>::KDTreeVarDistMatcher;
+template struct MatchersImpl<double>::KDTreeVarDistMatcher;

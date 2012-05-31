@@ -3,3 +3,6 @@ target_link_libraries(evaluate_dataset pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS
 
 add_executable(generate_random_poses generate_random_poses.cpp)
 target_link_libraries(generate_random_poses ${EXTRA_LIBS} ${Boost_LIBRARIES})
+
+add_executable(compute_overlap compute_overlap.cpp)
+target_link_libraries(compute_overlap pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})

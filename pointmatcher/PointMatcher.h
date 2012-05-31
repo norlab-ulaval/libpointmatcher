@@ -397,6 +397,7 @@ struct PointMatcher
 	
 		Matches();
 		Matches(const Dists& dists, const Ids ids);
+		Matches(const int knn, const int pointsCount);
 		
 		Dists dists; //!< squared distances to closest points
 		Ids ids; //!< identifiers of closest points

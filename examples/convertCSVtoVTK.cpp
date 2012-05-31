@@ -55,64 +55,7 @@ int main(int argc, char *argv[])
 	
 	setLogger(pm.LoggerRegistrar.create("FileLogger"));
 	DataPoints d = PM::loadCSV(argv[1]);
-	PM::DataPointsFilter* dataPointFilter1;
-	PM::DataPointsFilter* dataPointFilter2;
-	PM::DataPointsFilter* dataPointFilter3;
-	PM::DataPointsFilter* dataPointFilter4;
-	PM::DataPointsFilter* dataPointFilter5;
-	PM::DataPointsFilter* dataPointFilter6;
-	PM::DataPointsFilter* dataPointFilter7;
-
-	dataPointFilter1 = pm.DataPointsFilterRegistrar.create(
-		"MinDistDataPointsFilter", PM::Parameters({
-			{"minDist", "0.45"}
-			}));
-	dataPointFilter2 = pm.DataPointsFilterRegistrar.create(
-		"RandomSamplingDataPointsFilter", PM::Parameters({
-			{"prob", "0.95"}
-			}));
-
-	dataPointFilter3 = pm.DataPointsFilterRegistrar.create(
-		"SamplingSurfaceNormalDataPointsFilter", PM::Parameters({
-			{"ratio", "0.0001"},
-			{"binSize", "20"},
-			{"keepNormals", "1"},
-			{"keepDensities", "1"},
-			}));
-	
-	dataPointFilter4 = pm.DataPointsFilterRegistrar.create(
-		"OrientNormalsDataPointsFilter"
-		);
-
-	dataPointFilter5 = pm.DataPointsFilterRegistrar.create(
-		"UniformizeDensityDataPointsFilter"
-		);
-
-	dataPointFilter6 = pm.DataPointsFilterRegistrar.create(
-		"ShadowDataPointsFilter", PM::Parameters({
-			{"eps", "0.1"}
-			}));
-
-	dataPointFilter7 = pm.DataPointsFilterRegistrar.create(
-		"SimpleSensorNoiseDataPointsFilter", PM::Parameters({
-			{"sensorType", "0"}
-			}));
-
-	//d = dataPointFilter1->filter(d);
-	//d = dataPointFilter2->filter(d);
-	d = dataPointFilter3->filter(d);
-	d = dataPointFilter4->filter(d);
-	//d = dataPointFilter5->filter(d);
-	//d = dataPointFilter6->filter(d);
-	d = dataPointFilter7->filter(d);
-
-	// Example of moving 3D points
-	//Eigen::Matrix4f T;
-	//T << 0.98106,	0.17298,	-0.08715, 0.1, -0.15610,	0.97247,	0.17298, 0.2, 0.11468,	-0.15610,	0.98106, 0, 0,0,0,1;
-	//cout << "Moving points using: " << endl << T << endl;
-	
-	//d.features = T * d.features;
-	
+		
 	PM::saveVTK(d, argv[2]);
 	
 	return 0;

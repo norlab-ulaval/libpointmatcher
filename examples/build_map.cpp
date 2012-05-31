@@ -76,6 +76,63 @@ int main(int argc, char *argv[])
 	PM::DataPoints lastCloud, newCloud;
 	TP T = TP::Identity(4,4);
 
+	// Define transformation chain
+	PM::Transformations transformations;
+	PM::Transformation* transformPoints;
+	transformPoints = pm.TransformationRegistrar.create("TransformFeatures");
+	PM::Transformation* transformNormals;
+	transformNormals = pm.TransformationRegistrar.create("TransformNormals");
+	
+	transformations.push_back(transformPoints);
+	transformations.push_back(transformNormals);
+
+	// Define filters for later use
+	PM::DataPointsFilter* removeScanner;
+	removeScanner = pm.DataPointsFilterRegistrar.create(
+		"MinDistDataPointsFilter", PM::Parameters({
+			{"minDist", "1.0"}
+			}));
+	
+	PM::DataPointsFilter* randSubsample;
+	randSubsample = pm.DataPointsFilterRegistrar.create(
+		"RandomSamplingDataPointsFilter", PM::Parameters({
+			{"prob", toParam(0.65)}
+			}));
+
+	PM::DataPointsFilter* normalFilter;
+	normalFilter = pm.DataPointsFilterRegistrar.create(
+		"SurfaceNormalDataPointsFilter", PM::Parameters({
+			{"binSize", "10"},
+			{"epsilon", "5"}, 
+			{"keepNormals","1"},
+			{"keepDensities","0"}
+			}));
+
+	PM::DataPointsFilter* densityFilter;
+	densityFilter= pm.DataPointsFilterRegistrar.create(
+		"SurfaceNormalDataPointsFilter", PM::Parameters({
+			{"binSize", "10"},
+			{"epsilon", "5"}, 
+			{"keepNormals","0"},
+			{"keepDensities","1"}
+			}));
+
+	PM::DataPointsFilter* orientNormalFilter;
+	orientNormalFilter = pm.DataPointsFilterRegistrar.create(
+		"OrientNormalsDataPointsFilter", PM::Parameters({
+			{"towardCenter", "1"}
+			}));
+
+	PM::DataPointsFilter* uniformSubsample;
+	uniformSubsample = pm.DataPointsFilterRegistrar.create(
+		"MaxDensityDataPointsFilter", PM::Parameters({
+			{"maxDensity", toParam(30)}
+			}));
+	
+	PM::DataPointsFilter* shadowFilter;
+	shadowFilter = pm.DataPointsFilterRegistrar.create(
+		"ShadowDataPointsFilter");
+
 	for(unsigned i=0; i < list.size(); i++)
 	{
 		if(list[i].readingExtension() == ".vtk")
@@ -90,39 +147,30 @@ int main(int argc, char *argv[])
 
 		cout << "Point cloud loaded" << endl;
 	
-		if(list[i].initialTransformation.rows() != 0)
-			T = list[i].initialTransformation;
-		
+		if(list[i].groundTruthTransformation.rows() != 0)
+			T = list[i].groundTruthTransformation;
+		else
+		{
+			cout << "ERROR: the field gTXX (ground truth) is required" << endl;
+			abort();
+		}
+
 		PM::Parameters params;
 		
 		// Remove the scanner
-		PM::DataPointsFilter* removeScanner;
-		removeScanner = pm.DataPointsFilterRegistrar.create("MinDistDataPointsFilter", PM::Parameters({{"minDist", "1.0"}}));
 		newCloud = removeScanner->filter(newCloud);
 
 
 		// Accelerate the process and dissolve lines
-		PM::DataPointsFilter* randSubsample;
-		params = PM::Parameters({{"prob", toParam(0.75)}});
-		randSubsample = pm.DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
 		newCloud = randSubsample->filter(newCloud);
 		
 		// Build filter to remove shadow points and down-sample
-		params = PM::Parameters({{"binSize", "20"},{"epsilon", "5"}, {"ratio", "0.15"}, {"keepNormals","1"}});
-		PM::DataPointsFilter* normalFilter;
-		normalFilter = pm.DataPointsFilterRegistrar.create("SamplingSurfaceNormalDataPointsFilter", params);
 		newCloud = normalFilter->filter(newCloud);
-
-		PM::DataPointsFilter* orientNormalFilter;
-		orientNormalFilter = pm.DataPointsFilterRegistrar.create("OrientNormalsDataPointsFilter", PM::Parameters({{"towardCenter", "1"}}));
 		newCloud = orientNormalFilter->filter(newCloud);
-
-		//PM::DataPointsFilter* shadowFilter;
-		//shadowFilter = pm.DataPointsFilterRegistrar.create("ShadowDataPointsFilter");
-		//newCloud = shadowFilter->filter(newCloud);
+		newCloud = shadowFilter->filter(newCloud);
 
 		// Transforme pointCloud
-		newCloud.features = T * newCloud.features;
+		transformations.apply(newCloud, T);
 
 		if(i==0)
 		{
@@ -131,23 +179,28 @@ int main(int argc, char *argv[])
 		else
 		{
 			mapCloud.concatenate(newCloud);
-
-			// Control point density
-			PM::DataPointsFilter* uniformSubsample;
-			params = PM::Parameters({{"aggressivity", toParam(0.25)}});
-			uniformSubsample = pm.DataPointsFilterRegistrar.create("UniformizeDensityDataPointsFilter", params);
 			
-			mapCloud = uniformSubsample->filter(mapCloud);
+			
 
 			// Control point cloud size
-			const double probToKeep = totalPointCount/(double)mapCloud.features.cols();
+			double probToKeep = totalPointCount/(double)mapCloud.features.cols();
 			if(probToKeep < 1)
 			{
-				cout << "Randomly keep " << probToKeep*100 << "\% points" << endl; 
 				
-				params = PM::Parameters({{"prob", toParam(probToKeep)}});
-				randSubsample = pm.DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
-				mapCloud = randSubsample->filter(mapCloud);
+				mapCloud = densityFilter->filter(mapCloud);
+				mapCloud = uniformSubsample->filter(mapCloud);
+
+				probToKeep = totalPointCount/(double)mapCloud.features.cols();
+				
+				if(probToKeep < 1)
+				{
+					cout << "Randomly keep " << probToKeep*100 << "\% points" << endl; 
+					randSubsample = pm.DataPointsFilterRegistrar.create(
+						"RandomSamplingDataPointsFilter", PM::Parameters({
+							{"prob", toParam(probToKeep)}
+							}));
+					mapCloud = randSubsample->filter(mapCloud);
+				}
 			}
 		}
 
@@ -157,8 +210,16 @@ int main(int argc, char *argv[])
 		cout << "Number of points: " << mapCloud.features.cols() << endl;
 		PM::saveVTK(mapCloud, outputFileNameIter.str());
 		cout << "OutputFileName: " << outputFileNameIter.str() << endl;
-
 	}
+	
+	mapCloud = densityFilter->filter(mapCloud);
+	mapCloud = uniformSubsample->filter(mapCloud);
+	
+	mapCloud = densityFilter->filter(mapCloud);
+	
+	cout << "Number of points: " << mapCloud.features.cols() << endl;
+	PM::saveVTK(mapCloud, outputFileName);
+	cout << "OutputFileName: " << outputFileName << endl;
 
 	return 0;
 }

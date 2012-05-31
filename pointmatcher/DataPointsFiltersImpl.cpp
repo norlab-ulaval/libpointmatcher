@@ -83,7 +83,8 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 	int nbPointsOut = 0;
 	if (dim == -1)
 	{
-		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() < maxDist).count();
+		const T absMaxDist = anyabs(maxDist);
+		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() < absMaxDist).count();
 	}
 	else
 	{
@@ -107,7 +108,8 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 	{
 		for (int i = 0; i < nbPointsIn; i++)
 		{
-			if (input.features.col(i).head(nbRows-1).norm() < maxDist)
+			const T absMaxDist = anyabs(maxDist);
+			if (input.features.col(i).head(nbRows-1).norm() < absMaxDist)
 			{
 				outputCloud.features.col(j) = input.features.col(i);
 				if (outputCloud.descriptors.cols() > 0)
@@ -120,7 +122,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 	{
 		for (int i = 0; i < nbPointsIn; i++)
 		{
-			if (anyabs(input.features(dim, i)) < maxDist)
+			if ((input.features(dim, i)) < maxDist)
 			{
 				outputCloud.features.col(j) = input.features.col(i);
 				if (outputCloud.descriptors.cols() > 0)
@@ -158,11 +160,12 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 	int nbPointsOut = 0;
 	if (dim == -1)
 	{
-		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() > minDist).count();
+		const T absMinDist = anyabs(minDist);
+		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() > absMinDist).count();
 	}
 	else
 	{
-		nbPointsOut = (input.features.row(dim).array().abs() > minDist).count();
+		nbPointsOut = (input.features.row(dim).array() > minDist).count();
 	}
 
 	DataPoints outputCloud(
@@ -180,9 +183,10 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 	int j = 0;
 	if(dim == -1) // Euclidian distance
 	{
+		const T absMinDist = anyabs(minDist);
 		for (int i = 0; i < nbPointsIn; i++)
 		{
-			if (input.features.col(i).head(nbRows-1).norm() > minDist)
+			if (input.features.col(i).head(nbRows-1).norm() > absMinDist)
 			{
 				outputCloud.features.col(j) = input.features.col(i);
 				if (outputCloud.descriptors.cols() > 0)
@@ -195,7 +199,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 	{
 		for (int i = 0; i < nbPointsIn; i++)
 		{
-			if (anyabs(input.features(dim, i)) > minDist)
+			if ((input.features(dim, i)) > minDist)
 			{
 				outputCloud.features.col(j) = input.features.col(i);
 				if (outputCloud.descriptors.cols() > 0)
@@ -331,8 +335,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensity
 	const int nbPointsIn = outputCloud.features.cols();
 
 	const Matrix densities = outputCloud.getDescriptorCopyByName("densities");
-	typename DataPoints::Descriptors origineDistance(1, nbPointsIn);
-	origineDistance = input.features.colwise().norm();
 
 	const T minDist = densities.minCoeff();
 	const T maxDist = densities.maxCoeff();
@@ -426,6 +428,81 @@ template struct DataPointsFiltersImpl<float>::UniformizeDensityDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::UniformizeDensityDataPointsFilter;
 
 
+// MaxDensityDataPointsFilter
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::MaxDensityDataPointsFilter(const Parameters& params):
+	DataPointsFilter("MaxDensityDataPointsFilter", MaxDensityDataPointsFilter::availableParameters(), params),
+	maxDensity(Parametrizable::get<T>("maxDensity"))
+{
+}
+
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::filter(const DataPoints& input)
+{
+	// Force densities to be computed
+	if (!input.isDescriptorExist("densities"))
+	{
+		throw std::runtime_error("MaxDensityDataPointsFilter - WARNING: no densities found. Will force computation with default parameters");
+	}
+
+	DataPoints outputCloud = input;
+	const int nbPointsIn = outputCloud.features.cols();
+
+	const auto densities(outputCloud.getDescriptorViewByName("densities"));
+
+	const T lastDensity = densities.maxCoeff();
+
+	const int nbSaturatedPts = (densities.cwise() == lastDensity).count();
+
+	// fill output values
+	int j = 0;
+	for (int i = 0; i < nbPointsIn; i++)
+	{
+		const T density(densities(0,i));
+		if (density > maxDensity)
+		{
+			const float r = (float)std::rand()/(float)RAND_MAX;
+			float accepRatio = maxDensity/density;
+			
+			// Handle saturation value of density
+			if (density == lastDensity)
+			{
+				accepRatio = accepRatio * (1-nbSaturatedPts/nbPointsIn);	
+			}
+
+			if (r < accepRatio)
+			{
+				outputCloud.features.col(j) = outputCloud.features.col(i);
+				if (outputCloud.descriptors.cols() > 0)
+					outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
+				j++;
+			}
+		}
+		else
+		{
+			outputCloud.features.col(j) = outputCloud.features.col(i);
+				if (outputCloud.descriptors.cols() > 0)
+					outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
+				j++;
+		}
+	}
+
+	// Reduce the point cloud size
+	outputCloud.features.conservativeResize(Eigen::NoChange, j);
+	if (outputCloud.descriptors.cols() > 0)
+			outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
+
+	LOG_INFO_STREAM("MaxDensityDataPointsFilter - pts in: " << nbPointsIn << " pts out: " << j << " (-" << 100 - (j/double(nbPointsIn)*100) << "\%)");
+	
+	return outputCloud;
+}
+
+template struct DataPointsFiltersImpl<float>::MaxDensityDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::MaxDensityDataPointsFilter;
+
+
+
 // SurfaceNormalDataPointsFilter
 // Constructor
 template<typename T>
@@ -499,20 +576,19 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	}));
 	matcher.init(input);
 
-	Matches matches(typename Matches::Dists(knn, 1), typename Matches::Ids(knn, 1));
+	Matches matches(typename Matches::Dists(knn, pointsCount), typename Matches::Ids(knn, pointsCount));
+	matches = matcher.findClosests(input, DataPoints());
+
 	
 	// Search for surrounding points and compute descriptors
 	int degenerateCount(0);
 	for (int i = 0; i < pointsCount; ++i)
 	{
-		const DataPoints singlePoint(input.features.col(i), input.featureLabels, Matrix(), Labels());
-		matches = matcher.findClosests(singlePoint, DataPoints());
-
 		// Mean of nearest neighbors (NN)
 		Matrix d(featDim-1, knn);
 		for(int j = 0; j < int(knn); j++)
 		{
-			const int refIndex(matches.ids(j));
+			const int refIndex(matches.ids(j,i));
 			d.col(j) = input.features.block(0, refIndex, featDim-1, 1);
 		}
 
@@ -605,10 +681,10 @@ T DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::computeDensity(const 
 	//volume in decimeter
 	T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff()*10.0, 3);
 	//const T minVolume = 4.18e-9; // minimum of volume of one millimeter radius
-	const T minVolume = 0.42; // minimum of volume of one centimeter radius (in dm^3)
+	//const T minVolume = 0.42; // minimum of volume of one centimeter radius (in dm^3)
 
-	if(volume < minVolume) 		
-		volume = minVolume;
+	//if(volume < minVolume) 		
+	//	volume = minVolume;
 		
 	return T(NN.cols())/(volume);
 }
