@@ -53,6 +53,7 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
 	typedef typename PointMatcher<T>::DataPointsFilter DataPointsFilter;
+	typedef typename PointMatcher<T>::DataPoints::InvalidDescriptor InvalidDescriptor;
 	
 	//! Identity, does nothing
 	struct IdentityDataPointsFilter: public DataPointsFilter
@@ -392,10 +393,8 @@ struct DataPointsFiltersImpl
 			});
 		}
 
-	protected:
-		T eps;
+		const T eps;
 
-	public:
 		//! Constructor, uses parameter interface
 		ShadowDataPointsFilter(const Parameters& params = Parameters());
 		
@@ -417,16 +416,41 @@ struct DataPointsFiltersImpl
 				{ "gain", "If the point cloud is coming from an untrusty source, you can use the gain to augment the uncertainty", "1", "1", "inf", &P::Comp<T> }
 			});
 		}
-	protected:
+	
 		const unsigned sensorType;
 		const T gain;
-	public:
+		
 		//! Constructor, uses parameter interface
 		SimpleSensorNoiseDataPointsFilter(const Parameters& params = Parameters());
 		
 		virtual DataPoints filter(const DataPoints& input);
 	};
-
+	
+	//! Extract observation direction
+	struct ObservationDirectionDataPointsFilter: public DataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			return "Observation direction. This filter extracts observation directions (vector from point to sensor), considering a sensor at position (x,y,z).";
+		}
+		
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "x", "x-coordinate of sensor", "0" },
+				{ "y", "y-coordinate of sensor", "0" },
+				{ "z", "z-coordinate of sensor", "0" },
+			});
+		}
+	
+		const T centerX;
+		const T centerY;
+		const T centerZ;
+	
+		//! Constructor, uses parameter interface
+		ObservationDirectionDataPointsFilter(const Parameters& params = Parameters());
+		virtual DataPoints filter(const DataPoints& input);
+	};
 
 }; // DataPointsFiltersImpl
 

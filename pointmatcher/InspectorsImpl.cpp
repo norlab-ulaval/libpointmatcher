@@ -355,7 +355,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim)
 {
-	const Matrix desc(cloud.getDescriptorByName(nameTag));	
+	const auto desc(cloud.getDescriptorViewByName(nameTag));	
 
 	assert(desc.rows() <= forcedDim);
 
@@ -370,8 +370,6 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::o
 	}
 }
 
-	
-	
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::buildScalarStream(std::ostream& stream,
 	const std::string& name,

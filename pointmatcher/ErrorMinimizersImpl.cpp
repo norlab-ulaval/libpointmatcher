@@ -108,9 +108,9 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
 	}
 
-	const Matrix noise(this->lastErrorElements.reading.getDescriptorByName("simpleSensorNoise"));
+	const auto noises(this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
 
-	if(noise.cols() == 0)
+	if(noises.cols() == 0)
 	{
 		LOG_INFO_STREAM("PointToPointErrorMinimizer - warning, no sensor noise found. Using best estimat given outlier rejection instead.");
 		return this->weightedPointUsedRatio;
@@ -120,7 +120,7 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 	for(int i=0; i < nbPoints; i++)
 	{
 		const T dist = (this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i)).norm();
-		if(dist < noise(i))
+		if(dist < noises(0,i))
 			count++;
 	}
 
@@ -151,7 +151,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
 	const typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
 	
-	const Matrix normalRef = mPts.reference.getDescriptorByName("normals");
+	const auto normalRef(mPts.reference.getDescriptorViewByName("normals"));
 
 	// Normal vector must be precalculated to use this error. Use appropriate input filter.
 	assert(normalRef.rows() > 0);
@@ -237,8 +237,8 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
 	}
 
-	const Matrix noises(this->lastErrorElements.reading.getDescriptorByName("simpleSensorNoise"));
-	const Matrix normals(this->lastErrorElements.reading.getDescriptorByName("normals"));
+	const auto noises(this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
+	const auto normals(this->lastErrorElements.reading.getDescriptorViewByName("normals"));
 
 	if(noises.cols() == 0 || normals.cols() == 0)
 	{
@@ -254,7 +254,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 			const Vector d = this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i);
 			const Vector n = normals.col(i);
 			const T projectionDist = d.head(dim-1).dot(n.normalized());
-			if(anyabs(projectionDist) < noises(i))
+			if(anyabs(projectionDist) < noises(0,i))
 				count++;
 		}
 	}

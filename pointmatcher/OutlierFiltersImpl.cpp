@@ -311,9 +311,8 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 	const DataPoints& filteredReference,
 	const Matches& input)
 {
-
-	const Matrix normalsReading = filteredReading.getDescriptorByName("normals");
-	const Matrix normalsReference = filteredReference.getDescriptorByName("normals");
+	const auto normalsReading(filteredReading.getDescriptorViewByName("normals"));
+	const auto normalsReference(filteredReference.getDescriptorViewByName("normals"));
 	
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
@@ -335,7 +334,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 				if(value < eps) // test to keep the points
 					w(y, x) = 0;
 				else
-					w(y, x) = 1;			
+					w(y, x) = 1;
 			}
 		}
 	}

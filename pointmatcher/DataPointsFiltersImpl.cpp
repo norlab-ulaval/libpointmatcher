@@ -321,26 +321,16 @@ struct HistElement
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input)
 {
-	
-	
-	DataPoints outputCloud;
-	
 	// Force densities to be computed
-	if (input.getDescriptorByName("densities").cols() == 0)
+	if (!input.isDescriptorExist("densities"))
 	{
-		LOG_INFO_STREAM("UniformizeDensityDataPointsFilter - WARNING: no densities found. Will force computation with default parameters");
-
-		auto normalFilter = new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter(Parameters({{"ratio", "0.001"}, {"binSize", "7"}, {"keepNormals", "0"}, {"keepDensities", "1"}}));
-		outputCloud = normalFilter->filter(input);
+		throw InvalidDescriptor("UniformizeDensityDataPointsFilter: Error, no densities found.");
 	}
-	else
-	{
-		outputCloud = input;	
-	}
-
+	
+	DataPoints outputCloud(input);
 	const int nbPointsIn = outputCloud.features.cols();
 
-	const Matrix densities = outputCloud.getDescriptorByName("densities");
+	const Matrix densities = outputCloud.getDescriptorCopyByName("densities");
 	typename DataPoints::Descriptors origineDistance(1, nbPointsIn);
 	origineDistance = input.features.colwise().norm();
 
@@ -473,7 +463,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	for(unsigned int i = 0; i < input.descriptorLabels.size(); i++)
 		insertDim += input.descriptorLabels[i].span;
 	if (insertDim != descDim)
-		throw std::runtime_error("Error, descritor labels do not match descriptor data");
+		throw std::runtime_error("SurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
 	
 	// Reserve memory for new descriptors
 	const int dimNormals(featDim-1);
@@ -667,7 +657,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 		for(unsigned int i = 0; i < input.descriptorLabels.size(); i++)
 			insertDim += input.descriptorLabels[i].span;
 		if (insertDim != descDim)
-			throw std::runtime_error("Error, descriptor labels do not match descriptor data");
+			throw std::runtime_error("SamplingSurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
 	}
 	
 	// Reserve memory for new descriptors
@@ -936,16 +926,14 @@ DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::OrientNormalsDataPoints
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input)
 {
-	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
-	
-	Matrix normals = input.getDescriptorByName("normals");
-
-	if (normals.cols() == 0)
+	if (!input.isDescriptorExist("normals"))
 	{
-		LOG_INFO_STREAM("Warning: cannot find normals in descriptors");
-		return input;
+		throw InvalidDescriptor("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors");
 	}
 	
+	DataPoints output(input);
+	auto normals(output.getDescriptorViewByName("normals"));
+
 	const int nbPoints = input.features.cols();
 	const int dim = input.features.rows();
 	const int nbNormals = input.descriptors.cols();
@@ -970,20 +958,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsData
 			if (scalar > 0)
 				normals.col(i) = -vecN;
 		}
-	}
-
-	// Update descriptor
-	DataPoints output = input;
-	int row(0);
-	for (unsigned int j = 0; j < input.descriptorLabels.size(); j++)
-	{
-		const int span(input.descriptorLabels[j].span);
-		if (input.descriptorLabels[j].text.compare("normals") == 0)
-		{
-			output.descriptors.block(row, 0, span, nbNormals) = normals;
-			break;
-		}
-		row += span;
 	}
 
 	return output;
@@ -1156,24 +1130,16 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ShadowDataPointsFilter::filter(
 	const DataPoints& input)
 {
-	const int dim = input.features.rows();
+	// Check if normals are present
+	if (!input.isDescriptorExist("normals"))
+	{
+		throw InvalidDescriptor("ShadowDataPointsFilter, Error: cannot find normals in descriptors");
+	}
 	
-	DataPoints outputCloud;
-
-	// Force normals to be computed
-	if (input.getDescriptorByName("normals").cols() == 0)
-	{
-		LOG_INFO_STREAM("ShadowDataPointsFilter - Warning: no normals found. Will force computation with default parameters");
-
-		auto normalFilter = new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter(Parameters({{"ratio", "0.0001"}, {"binSize", "5"}, {"keepNormals", "1"}, {"keepDensities", "1"}}));
-		outputCloud = normalFilter->filter(input);
-	}
-	else
-	{
-		outputCloud = input;	
-	}
-
-	const Matrix normals = outputCloud.getDescriptorByName("normals");
+	const int dim = input.features.rows();
+	DataPoints outputCloud(input);
+	
+	const auto normals(outputCloud.getDescriptorViewByName("normals"));
 	int j = 0;
 
 	for(int i=0; i < outputCloud.features.cols(); i++)
@@ -1205,7 +1171,7 @@ template struct DataPointsFiltersImpl<float>::ShadowDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::ShadowDataPointsFilter;
 
 
-//SimpleSensorNoiseDataPointsFilter 
+// SimpleSensorNoiseDataPointsFilter 
 // Constructor
 template<typename T>
 DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::SimpleSensorNoiseDataPointsFilter(const Parameters& params):
@@ -1254,4 +1220,53 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SimpleSensorNoise
 template struct DataPointsFiltersImpl<float>::SimpleSensorNoiseDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SimpleSensorNoiseDataPointsFilter;
 
+// ObservationDirectionDataPointsFilter
+// Constructor
 
+template<typename T>
+DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter::ObservationDirectionDataPointsFilter(const Parameters& params):
+	DataPointsFilter("ObservationDirectionDataPointsFilter", ObservationDirectionDataPointsFilter::availableParameters(), params),
+	centerX(Parametrizable::get<T>("x")),
+	centerY(Parametrizable::get<T>("y")),
+	centerZ(Parametrizable::get<T>("z"))
+{
+}
+
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter::filter(const DataPoints& input)
+{
+	const int dim(input.features.rows() - 1);
+	if (dim != 2 && dim != 3)
+	{
+		throw std::runtime_error(
+			(boost::format("ObservationDirectionDataPointsFilter: Error, works only in 2 or 3 dimensions, cloud has %1% dimensions.") % dim).str()
+		);
+	}
+	
+	// TODO
+	/*
+	for (int i = 0; i < nbPoints; i++)
+	{
+		// Check normal orientation
+		Vector vecP = -input.features.block(0, i, dim-1, 1);
+		Vector vecN = normals.col(i);
+		scalar = vecP.dot(vecN);
+
+		// Swap normal
+		if(towardCenter)
+		{
+			if (scalar < 0)
+				normals.col(i) = -vecN;
+		}
+		else
+		{
+			if (scalar > 0)
+				normals.col(i) = -vecN;
+		}
+	}*/
+	
+	return input;
+}
+
+template struct DataPointsFiltersImpl<float>::ObservationDirectionDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::ObservationDirectionDataPointsFilter;

@@ -141,8 +141,8 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
 		if(dp.isDescriptorExist(name, dimDesc) == true)
 		{
 			typename DataPoints::Descriptors mergedDesc(dimDesc, nbPointsTotal);
-			mergedDesc.leftCols(nbPoints1) = this->getDescriptorByName(name);
-			mergedDesc.rightCols(nbPoints2) = dp.getDescriptorByName(name);
+			mergedDesc.leftCols(nbPoints1) = this->getDescriptorViewByName(name);
+			mergedDesc.rightCols(nbPoints2) = dp.getDescriptorViewByName(name);
 
 			dpOut.addDescriptor(name, mergedDesc);
 		}
@@ -218,25 +218,56 @@ void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, Descrip
 
 }
 
-//! Get descriptor by name, return a matrix containing only the resquested descriptor
+//! Get descriptor by name, return a matrix containing a copy of the requested descriptor
 template<typename T>
-typename PointMatcher<T>::DataPoints::Descriptors PointMatcher<T>::DataPoints::getDescriptorByName(const std::string& name) const
+typename PointMatcher<T>::DataPoints::Descriptors PointMatcher<T>::DataPoints::getDescriptorCopyByName(const std::string& name) const
 {
 	int row(0);
 	
 	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
 	{
 		const int span(descriptorLabels[i].span);
-		if(descriptorLabels[i].text.compare(name) == 0)
-		{
-			return descriptors.block(row, 0, 
-					span, descriptors.cols());
-		}
-
+		if (descriptorLabels[i].text == name)
+			return descriptors.block(row, 0, span, descriptors.cols());
 		row += span;
 	}
 
 	return Descriptors();
+}
+
+//! Get a const view on a descriptor by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::ConstDescriptorView PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name) const
+{
+	int row(0);
+	
+	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	{
+		const int span(descriptorLabels[i].span);
+		if (descriptorLabels[i].text == name)
+			return descriptors.block(row, 0, span, descriptors.cols());
+		row += span;
+	}
+	
+	throw InvalidDescriptor("Descriptor " + name + " not found");
+}
+
+
+//! Get a view on a descriptor by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::DescriptorView PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name)
+{
+	int row(0);
+	
+	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	{
+		const int span(descriptorLabels[i].span);
+		if (descriptorLabels[i].text == name)
+			return descriptors.block(row, 0, span, descriptors.cols());
+		row += span;
+	}
+	
+	throw InvalidDescriptor("Descriptor " + name + " not found");
 }
 
 //! Look if a descriptor with a given name exist

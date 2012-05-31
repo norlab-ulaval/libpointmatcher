@@ -286,6 +286,10 @@ struct PointMatcher
 		typedef Matrix Features;
 		//! Descriptor points of size descriptor_dims x ptcount
 		typedef Matrix Descriptors;
+		//! A view on a descriptor
+		typedef Eigen::Block<Descriptors> DescriptorView;
+		//! A view on a const descriptor
+		typedef const Eigen::Block<const Descriptors> ConstDescriptorView;
 		
 		//! The name for a certain number of dim
 		struct Label
@@ -301,13 +305,21 @@ struct PointMatcher
 			bool contains(const std::string& text) const;
 		};
 		
+		//! An exception thrown when one tries to access an unexisting descriptor
+		struct InvalidDescriptor: std::runtime_error
+		{
+			InvalidDescriptor(const std::string& reason):runtime_error(reason) {}
+		};
+		
 		DataPoints();
 		DataPoints(const Features& features, const Labels& featureLabels);
 		DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels);
 		
 		void concatenate(const DataPoints dp);
 		void addDescriptor(const std::string& name, Descriptors newDescriptor);
-		Descriptors getDescriptorByName(const std::string& name) const;
+		Descriptors getDescriptorCopyByName(const std::string& name) const;
+		ConstDescriptorView getDescriptorViewByName(const std::string& name) const;
+		DescriptorView getDescriptorViewByName(const std::string& name);
 		bool isDescriptorExist(const std::string& name) const;
 		bool isDescriptorExist(const std::string& name, const unsigned dim) const;
 		int getDescriptorDimension(const std::string& name) const;

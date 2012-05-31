@@ -76,7 +76,7 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::TransformNormals::c
 
 	const Matrix R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
 
-	const Descriptors normals = input.getDescriptorByName("normals");
+	const auto normals(input.getDescriptorViewByName("normals"));
 	transformedDataPoints.addDescriptor("normals", R*normals);
 	
 	return transformedDataPoints;
