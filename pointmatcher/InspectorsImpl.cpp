@@ -164,6 +164,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	buildNormalStream(stream, "normals", data);
 	buildVectorStream(stream, "eigValues", data);
 	buildTensorStream(stream, "eigVectors", data);
+	buildVectorStream(stream, "observationDirections", data);
 	//TODO: add support for colors
 
 }
@@ -212,6 +213,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& da
 	//buildNormalStream(stream, "normals", data);
 	//buildVectorStream(stream, "eigValues", data);
 	//buildTensorStream(stream, "eigVectors", data);
+	//buildVectorStream(stream, "observationDirections", data);
 }
 
 // FIXME:rethink how we dump stuff (accumulate in a correctly-referenced table, and then dump?) and unify with previous
