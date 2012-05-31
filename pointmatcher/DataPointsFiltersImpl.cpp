@@ -1186,7 +1186,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ObservationDirect
 	
 	DataPoints outputCloud(input);
 	outputCloud.allocateDescriptor("observationDirections", dim);
-	auto observationDirections(outputCloud.getDescriptorViewByName("normals"));
+	auto observationDirections(outputCloud.getDescriptorViewByName("observationDirections"));
 	
 	for (int i = 0; i < input.features.cols(); i++)
 	{
