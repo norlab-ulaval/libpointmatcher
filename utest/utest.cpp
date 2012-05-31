@@ -453,10 +453,10 @@ TEST_F(MatcherTest, KDTreeMatcher)
 //---------------------------
 
 // Utility classes
-class FeatureOutlierFilterTest: public IcpHelper
+class OutlierFilterTest: public IcpHelper
 {
 public:
-	PM::FeatureOutlierFilter* testedOutlierFilter;
+	PM::OutlierFilter* testedOutlierFilter;
 
 	// Will be called for every tests
 	virtual void SetUp()
@@ -465,7 +465,7 @@ public:
 		// Uncomment for consol outputs
 		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
 		
-		icp.featureOutlierFilters.clear();
+		icp.outlierFilters.clear();
 	}
 
 	// Will be called for every tests
@@ -474,22 +474,22 @@ public:
 	void addFilter(string name, PM::Parameters params)
 	{
 		testedOutlierFilter = 
-			pm.FeatureOutlierFilterRegistrar.create(name, params);
-		icp.featureOutlierFilters.push_back(testedOutlierFilter);
+			pm.OutlierFilterRegistrar.create(name, params);
+		icp.outlierFilters.push_back(testedOutlierFilter);
 	}
 
 };
 
 
 //No commun parameters were found for 2D and 3D, tests are splited
-TEST_F(FeatureOutlierFilterTest, MaxDistOutlierFilter2D)
+TEST_F(OutlierFilterTest, MaxDistOutlierFilter2D)
 {
 	params = PM::Parameters({{"maxDist", toParam(0.015)}});//0.02
 	addFilter("MaxDistOutlierFilter", params);
 	validate2dTransformation();
 }
 
-TEST_F(FeatureOutlierFilterTest, MaxDistOutlierFilter3D)
+TEST_F(OutlierFilterTest, MaxDistOutlierFilter3D)
 {
 	params = PM::Parameters({{"maxDist", toParam(0.1)}});
 	addFilter("MaxDistOutlierFilter", params);
@@ -497,16 +497,16 @@ TEST_F(FeatureOutlierFilterTest, MaxDistOutlierFilter3D)
 }
 
 //No commun parameters were found for 2D and 3D, tests are splited
-TEST_F(FeatureOutlierFilterTest, MinDistOutlierFilter2D)
+TEST_F(OutlierFilterTest, MinDistOutlierFilter2D)
 {
 	// Since not sure how useful is that filter, we keep the 
 	// MaxDistOutlierFilter with it
-	PM::FeatureOutlierFilter* extraOutlierFilter;
+	PM::OutlierFilter* extraOutlierFilter;
 	
 	params = PM::Parameters({{"maxDist", toParam(0.015)}});
 	extraOutlierFilter = 
-			pm.FeatureOutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
-	icp.featureOutlierFilters.push_back(extraOutlierFilter);	
+			pm.OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
+	icp.outlierFilters.push_back(extraOutlierFilter);	
 	
 	params = PM::Parameters({{"minDist", toParam(0.0002)}});
 	addFilter("MinDistOutlierFilter", params);
@@ -514,16 +514,16 @@ TEST_F(FeatureOutlierFilterTest, MinDistOutlierFilter2D)
 	validate2dTransformation();
 }
 
-TEST_F(FeatureOutlierFilterTest, MinDistOutlierFilter3D)
+TEST_F(OutlierFilterTest, MinDistOutlierFilter3D)
 {
 	// Since not sure how useful is that filter, we keep the 
 	// MaxDistOutlierFilter with it
-	PM::FeatureOutlierFilter* extraOutlierFilter;
+	PM::OutlierFilter* extraOutlierFilter;
 	
 	params = PM::Parameters({{"maxDist", toParam(0.1)}});
 	extraOutlierFilter = 
-			pm.FeatureOutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
-	icp.featureOutlierFilters.push_back(extraOutlierFilter);	
+			pm.OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
+	icp.outlierFilters.push_back(extraOutlierFilter);	
 	
 	params = PM::Parameters({{"minDist", toParam(0.0002)}});
 	addFilter("MinDistOutlierFilter", params);
@@ -531,7 +531,7 @@ TEST_F(FeatureOutlierFilterTest, MinDistOutlierFilter3D)
 	validate3dTransformation();
 }
 
-TEST_F(FeatureOutlierFilterTest, MedianDistOutlierFilter)
+TEST_F(OutlierFilterTest, MedianDistOutlierFilter)
 {
 	params = PM::Parameters({{"factor", toParam(3.5)}});
 	addFilter("MedianDistOutlierFilter", params);
@@ -540,7 +540,7 @@ TEST_F(FeatureOutlierFilterTest, MedianDistOutlierFilter)
 }
 
 
-TEST_F(FeatureOutlierFilterTest, TrimmedDistOutlierFilter)
+TEST_F(OutlierFilterTest, TrimmedDistOutlierFilter)
 {
 	params = PM::Parameters({{"ratio", toParam(0.85)}});
 	addFilter("TrimmedDistOutlierFilter", params);
@@ -549,7 +549,7 @@ TEST_F(FeatureOutlierFilterTest, TrimmedDistOutlierFilter)
 }
 
 
-TEST_F(FeatureOutlierFilterTest, VarTrimmedDistOutlierFilter)
+TEST_F(OutlierFilterTest, VarTrimmedDistOutlierFilter)
 {
 	params = PM::Parameters({
 		{"minRatio", toParam(0.60)},

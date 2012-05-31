@@ -479,28 +479,23 @@ unsigned long PointMatcher<T>::Matcher::getVisitCount() const
 
 //! Construct without parameter
 template<typename T>
-PointMatcher<T>::FeatureOutlierFilter::FeatureOutlierFilter()
+PointMatcher<T>::OutlierFilter::OutlierFilter()
 {}
 
 //! Construct with parameters
 template<typename T>
-PointMatcher<T>::FeatureOutlierFilter::FeatureOutlierFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+PointMatcher<T>::OutlierFilter::OutlierFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 	Parametrizable(className,paramsDoc,params)
 {}
 
 //! virtual destructor
 template<typename T>
-PointMatcher<T>::FeatureOutlierFilter::~FeatureOutlierFilter()
+PointMatcher<T>::OutlierFilter::~OutlierFilter()
 {}
 
-//! virtual destructor
-template<typename T>
-PointMatcher<T>::DescriptorOutlierFilter::~DescriptorOutlierFilter()
-{} 
-
 //! Apply outlier-detection chain
-template<typename T> template<typename F>
-typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::compute(
+template<typename T>
+typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters::compute(
 	const typename PointMatcher<T>::DataPoints& filteredReading,
 	const typename PointMatcher<T>::DataPoints& filteredReference,
 	const typename PointMatcher<T>::Matches& input)
@@ -527,7 +522,7 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters<F>::com
 		OutlierWeights w = (*this->begin())->compute(filteredReading, filteredReference, input);
 		if (this->size() > 1)
 		{
-			for (typename Vector::const_iterator it = (this->begin() + 1); it != this->end(); ++it)
+			for (OutlierFiltersConstIt it = (this->begin() + 1); it != this->end(); ++it)
 				w = w.array() * (*it)->compute(filteredReading, filteredReference, input).array();
 		}
 
@@ -599,7 +594,7 @@ void PointMatcher<T>::Inspector::dumpFilteredReference(const DataPoints& filtere
 {}
 
 template<typename T>
-void PointMatcher<T>::Inspector::dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers)
+void PointMatcher<T>::Inspector::dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers)
 {}
 
 template<typename T>
@@ -611,7 +606,6 @@ void PointMatcher<T>::Inspector::finish(const size_t iterationCount)
 //! Protected contstructor, to prevent the creation of this object
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
-	outlierMixingWeight(0.5),
 	prefilteredReadingPtsCount(0),
 	prefilteredKeyframePtsCount(0)
 {}
@@ -631,8 +625,7 @@ void PointMatcher<T>::ICPChainBase::cleanup()
 	readingStepDataPointsFilters.clear();
 	keyframeDataPointsFilters.clear();
 	matcher.reset();
-	featureOutlierFilters.clear();
-	descriptorOutlierFilters.clear();
+	outlierFilters.clear();
 	errorMinimizer.reset();
 	transformationCheckers.clear();
 	inspector.reset();
@@ -648,13 +641,12 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->transformations.push_back(new typename TransformationsImpl<T>::TransformNormals());
 	this->readingDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter());
 	this->keyframeDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter());
-	this->featureOutlierFilters.push_back(new typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter());
+	this->outlierFilters.push_back(new typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter());
 	this->matcher.reset(new typename MatchersImpl<T>::KDTreeMatcher());
 	this->errorMinimizer.reset(new typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer());
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::CounterTransformationChecker());
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::DifferentialTransformationChecker());
 	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
-	this->outlierMixingWeight = 1;
 }
 
 //! Construct an ICP algorithm from a YAML file
@@ -678,8 +670,7 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	this->transformations.push_back(new typename TransformationsImpl<T>::TransformFeatures());
 	this->transformations.push_back(new typename TransformationsImpl<T>::TransformNormals());
 	createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher);
-	createModulesFromRegistrar("featureOutlierFilters", doc, pm.REG(FeatureOutlierFilter), featureOutlierFilters);
-	createModulesFromRegistrar("descriptorOutlierFilters", doc, pm.REG(DescriptorOutlierFilter), descriptorOutlierFilters);
+	createModulesFromRegistrar("outlierFilters", doc, pm.REG(OutlierFilter), outlierFilters);
 	createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer);
 	createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers);
 	createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector);
@@ -687,9 +678,6 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 		boost::mutex::scoped_lock lock(loggerMutex);
 		createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger);
 	}
-	
-	if (doc.FindValue("outlierMixingWeight"))
-		outlierMixingWeight = doc["outlierMixingWeight"].to<typeof(outlierMixingWeight)>();
 	
 	loadAdditionalYAMLContent(doc);
 	
@@ -900,34 +888,20 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		
 		//-----------------------------
 		// Detect outliers
-		const OutlierWeights featureOutlierWeights(
-			this->featureOutlierFilters.compute(stepReading, reference, matches)
+		const OutlierWeights outlierWeights(
+			this->outlierFilters.compute(stepReading, reference, matches)
 		);
 		
-		const OutlierWeights descriptorOutlierWeights(
-			this->descriptorOutlierFilters.compute(stepReading, reference, matches)
-		);
+		assert(outlierWeights.rows() == matches.ids.rows());
+		assert(outlierWeights.cols() == matches.ids.cols());
 		
-		assert(featureOutlierWeights.rows() == matches.ids.rows());
-		assert(featureOutlierWeights.cols() == matches.ids.cols());
-		assert(descriptorOutlierWeights.rows() == matches.ids.rows());
-		assert(descriptorOutlierWeights.cols() == matches.ids.cols());
-		
-		//cout << "featureOutlierWeights: " << featureOutlierWeights << "\n";
-		//cout << "descriptorOutlierWeights: " << descriptorOutlierWeights << "\n";
+		//cout << "outlierWeights: " << outlierWeights << "\n";
 	
-		//TODO: fix weighting design issue
-		const OutlierWeights outlierWeights(featureOutlierWeights); 
-		//const OutlierWeights outlierWeights(
-		//	featureOutlierWeights * this->outlierMixingWeight +
-		//	descriptorOutlierWeights * (1 - this->outlierMixingWeight)
-		//);
 		
-
 		//-----------------------------
 		// Dump
 		this->inspector->dumpIteration(
-			iterationCount, T_iter, reference, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, this->transformationCheckers
+			iterationCount, T_iter, reference, stepReading, matches, outlierWeights, this->transformationCheckers
 		);
 		
 		//-----------------------------
@@ -1185,29 +1159,18 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		// Detect outliers
 		//cout << matches.ids.leftCols(10) << endl;
 		//cout << matches.dists.leftCols(10) << endl;
-		const OutlierWeights featureOutlierWeights(
-			this->featureOutlierFilters.compute(stepReading, keyFrameCloud, matches)
-		);
-		
-
-		const OutlierWeights descriptorOutlierWeights(
-			this->descriptorOutlierFilters.compute(stepReading, keyFrameCloud, matches)
-		);
-		
-		assert(featureOutlierWeights.rows() == matches.ids.rows());
-		assert(featureOutlierWeights.cols() == matches.ids.cols());
-		assert(descriptorOutlierWeights.rows() == matches.ids.rows());
-		assert(descriptorOutlierWeights.cols() == matches.ids.cols());
-		
 		const OutlierWeights outlierWeights(
-			featureOutlierWeights * this->outlierMixingWeight +
-			descriptorOutlierWeights * (1 - this->outlierMixingWeight)
+			this->outlierFilters.compute(stepReading, keyFrameCloud, matches)
 		);
+		
 
+		assert(outlierWeights.rows() == matches.ids.rows());
+		assert(outlierWeights.cols() == matches.ids.cols());
+		
 		//-----------------------------
 		// Dump
 		this->inspector->dumpIteration(
-			iterationCount, T_iter, keyFrameCloud, stepReading, matches, featureOutlierWeights, descriptorOutlierWeights, this->transformationCheckers
+			iterationCount, T_iter, keyFrameCloud, stepReading, matches, outlierWeights, this->transformationCheckers
 		);
 		
 		//-----------------------------
@@ -1281,13 +1244,13 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeVarDistMatcher, typename MatchersImpl<T>::KDTreeVarDistMatcher)
 	
-	ADD_TO_REGISTRAR_NO_PARAM(FeatureOutlierFilter, NullFeatureOutlierFilter, typename OutlierFiltersImpl<T>::NullFeatureOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, MaxDistOutlierFilter, typename OutlierFiltersImpl<T>::MaxDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, MinDistOutlierFilter, typename OutlierFiltersImpl<T>::MinDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, MedianDistOutlierFilter, typename OutlierFiltersImpl<T>::MedianDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, TrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, VarTrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter)
-	ADD_TO_REGISTRAR(FeatureOutlierFilter, SurfaceNormalOutlierFilter, typename OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter)
+	ADD_TO_REGISTRAR_NO_PARAM(OutlierFilter, NullOutlierFilter, typename OutlierFiltersImpl<T>::NullOutlierFilter)
+	ADD_TO_REGISTRAR(OutlierFilter, MaxDistOutlierFilter, typename OutlierFiltersImpl<T>::MaxDistOutlierFilter)
+	ADD_TO_REGISTRAR(OutlierFilter, MinDistOutlierFilter, typename OutlierFiltersImpl<T>::MinDistOutlierFilter)
+	ADD_TO_REGISTRAR(OutlierFilter, MedianDistOutlierFilter, typename OutlierFiltersImpl<T>::MedianDistOutlierFilter)
+	ADD_TO_REGISTRAR(OutlierFilter, TrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter)
+	ADD_TO_REGISTRAR(OutlierFilter, VarTrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter)
+	ADD_TO_REGISTRAR(OutlierFilter, SurfaceNormalOutlierFilter, typename OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, IdentityErrorMinimizer, typename ErrorMinimizersImpl<T>::IdentityErrorMinimizer)
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointErrorMinimizer)

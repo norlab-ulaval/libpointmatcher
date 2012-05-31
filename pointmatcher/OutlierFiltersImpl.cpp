@@ -45,9 +45,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
-// NullFeatureOutlierFilter
+// NullOutlierFilter
 template<typename T>
-typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::NullFeatureOutlierFilter::compute(
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::NullOutlierFilter::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
 	const Matches& input)
@@ -55,14 +55,14 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::NullFeatureOutli
 	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
 }
 
-template struct OutlierFiltersImpl<float>::NullFeatureOutlierFilter;
-template struct OutlierFiltersImpl<double>::NullFeatureOutlierFilter;
+template struct OutlierFiltersImpl<float>::NullOutlierFilter;
+template struct OutlierFiltersImpl<double>::NullOutlierFilter;
 
 
 // MaxDistOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter("MaxDistOutlierFilter", MaxDistOutlierFilter::availableParameters(), params),
+	OutlierFilter("MaxDistOutlierFilter", MaxDistOutlierFilter::availableParameters(), params),
 	maxDist(Parametrizable::get<T>("maxDist"))
 {
 }
@@ -96,7 +96,7 @@ template struct OutlierFiltersImpl<double>::MaxDistOutlierFilter;
 // MinDistOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::MinDistOutlierFilter::MinDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter("MinDistOutlierFilter", MinDistOutlierFilter::availableParameters(), params),
+	OutlierFilter("MinDistOutlierFilter", MinDistOutlierFilter::availableParameters(), params),
 	minDist(Parametrizable::get<T>("minDist"))
 {
 }
@@ -131,7 +131,7 @@ template struct OutlierFiltersImpl<double>::MinDistOutlierFilter;
 // MedianDistOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::MedianDistOutlierFilter::MedianDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter("MedianDistOutlierFilter", MedianDistOutlierFilter::availableParameters(), params),
+	OutlierFilter("MedianDistOutlierFilter", MedianDistOutlierFilter::availableParameters(), params),
 	factor(Parametrizable::get<T>("factor"))
 {
 }
@@ -169,7 +169,7 @@ template struct OutlierFiltersImpl<double>::MedianDistOutlierFilter;
 // TrimmedDistOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::TrimmedDistOutlierFilter::TrimmedDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter("TrimmedDistOutlierFilter", TrimmedDistOutlierFilter::availableParameters(), params),
+	OutlierFilter("TrimmedDistOutlierFilter", TrimmedDistOutlierFilter::availableParameters(), params),
 	ratio(Parametrizable::get<T>("ratio"))
 {
 }
@@ -212,7 +212,7 @@ template struct OutlierFiltersImpl<double>::TrimmedDistOutlierFilter;
 // VarTrimmedDistOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::VarTrimmedDistOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter("VarTrimmedDistOutlierFilter", VarTrimmedDistOutlierFilter::availableParameters(), params),
+	OutlierFilter("VarTrimmedDistOutlierFilter", VarTrimmedDistOutlierFilter::availableParameters(), params),
 	minRatio(Parametrizable::get<T>("minRatio")),
 	maxRatio(Parametrizable::get<T>("maxRatio")),
 	lambda(Parametrizable::get<T>("lambda"))
@@ -298,7 +298,7 @@ template struct OutlierFiltersImpl<double>::VarTrimmedDistOutlierFilter;
 // SurfaceNormalOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter::SurfaceNormalOutlierFilter(const Parameters& params):
-	FeatureOutlierFilter("SurfaceNormalOutlierFilter", SurfaceNormalOutlierFilter::availableParameters(), params),
+	OutlierFilter("SurfaceNormalOutlierFilter", SurfaceNormalOutlierFilter::availableParameters(), params),
 	eps(cos(Parametrizable::get<T>("maxAngle"))),
 	warningPrinted(false)
 {
@@ -356,18 +356,4 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 template struct OutlierFiltersImpl<float>::SurfaceNormalOutlierFilter;
 template struct OutlierFiltersImpl<double>::SurfaceNormalOutlierFilter;
 
-
-
-// NullDescriptorOutlierFilter
-template<typename T>
-typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::NullDescriptorOutlierFilter::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const Matches& input)
-{
-	return OutlierWeights::Constant(input.ids.rows(), input.ids.cols(), 1);
-}
-
-template struct OutlierFiltersImpl<float>::NullDescriptorOutlierFilter;
-template struct OutlierFiltersImpl<double>::NullDescriptorOutlierFilter;
 

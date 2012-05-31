@@ -110,7 +110,7 @@ struct InspectorsImpl
 		virtual void init() {};
 		virtual void dumpDataPoints(const DataPoints& cloud, const std::string& name);
 		virtual void dumpMeshNodes(const DataPoints& cloud, const std::string& name);
-		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& featureOutlierWeights, const OutlierWeights& descriptorOutlierWeights, const TransformationCheckers& transformationCheckers);
+		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers);
 		virtual void finish(const size_t iterationCount);
 
 	private:
