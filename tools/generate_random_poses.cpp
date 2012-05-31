@@ -38,7 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <time.h>
-
+#include <boost/random.hpp>
+#include <boost/random/normal_distribution.hpp>
 
 using namespace std;
 using namespace Eigen;
@@ -58,6 +59,9 @@ int main(int argc, char *argv[])
 		abort();
 	}
 	
+	boost::mt19937 eng(time(0)); // See how to seed that
+	typedef boost::normal_distribution<float> NormalsDist;
+
 	srand(time(NULL));
 	std::fstream outFile;
 	outFile.open(argv[1], fstream::out);
@@ -69,6 +73,16 @@ int main(int argc, char *argv[])
 	const float droll = atof(argv[6]);
 	const float dpitch = atof(argv[7]);
 	const float dyaw = atof(argv[8]);
+
+	typedef boost::variate_generator<boost::mt19937&, NormalsDist> RandGenerator;
+	RandGenerator rand_normal_x(eng, NormalsDist(0.0, dx));
+	RandGenerator rand_normal_roll(eng, NormalsDist(0.0, droll));
+
+	RandGenerator rand_normal_y(eng, NormalsDist(0.0, dy));
+	RandGenerator rand_normal_z(eng, NormalsDist(0.0, dz));
+	RandGenerator rand_normal_pitch(eng, NormalsDist(0.0, dpitch));
+	RandGenerator rand_normal_yaw(eng, NormalsDist(0.0, dyaw));
+
 
 	//cout << nbPose << " " << dx << " " << dy << " " << dz << " " << droll << " " << dpitch << " " << dyaw << endl;
 
@@ -85,12 +99,18 @@ int main(int argc, char *argv[])
 	{
 		// convention roll, pitch, yaw (1,2,3)
 		Matrix3f rot;
-		rot = AngleAxisf(floatRand(droll), Vector3f::UnitX())
-		    * AngleAxisf(floatRand(dyaw), Vector3f::UnitY())
-				* AngleAxisf(floatRand(dpitch), Vector3f::UnitZ());
-		const float x = floatRand(dx);
-		const float y = floatRand(dy);
-		const float z = floatRand(dz);
+		rot = AngleAxisf(rand_normal_roll(), Vector3f::UnitX())
+		    * AngleAxisf(rand_normal_yaw(), Vector3f::UnitY())
+			* AngleAxisf(rand_normal_pitch(), Vector3f::UnitZ());
+		const float x = rand_normal_x();
+		const float y = rand_normal_y();
+		const float z = rand_normal_z();
+		//rot = AngleAxisf(rand_uniform(droll), Vector3f::UnitX())
+		//    * AngleAxisf(rand_uniform(dyaw), Vector3f::UnitY())
+		//	* AngleAxisf(rand_uniform(dpitch), Vector3f::UnitZ());
+		//const float x = rand_uniform(dx);
+		//const float y = rand_uniform(dy);
+		//const float z = rand_uniform(dz);
 		outFile << rot(0,0) << ", " << rot(0,1) << ", " << rot(0,2) << ", " << x << ", "
 	          << rot(1,0) << ", " << rot(1,1) << ", " << rot(1,2) << ", " << y << ", "
 		        << rot(2,0) << ", " << rot(2,1) << ", " << rot(2,2) << ", " << z << ", "
@@ -103,7 +123,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-const float floatRand(float val)
+const float rand_uniform(float val)
 {
 	return ((2*rand()-RAND_MAX) / (float)RAND_MAX)*val;
 }

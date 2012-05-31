@@ -86,7 +86,7 @@ struct DataPointsFiltersImpl
 		{
 			return ParametersDoc({
 				{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, radius=-1", "-1", "-1", "2", &P::Comp<int> },
-				{ "maxDist", "maximum distance authorized. All points beyond that will be filtered.", "1", "0", "inf", P::Comp<T> }
+				{ "maxDist", "maximum distance authorized. If dim is set to -1 (radius), the absolute value of minDist will be used. All points beyond that will be filtered.", "1", "-inf", "inf", P::Comp<T> }
 			});
 		}
 
@@ -109,7 +109,7 @@ struct DataPointsFiltersImpl
 		{
 			return ParametersDoc({
 				{ "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, radius=-1", "-1", "-1", "2", &P::Comp<int> },
-				{ "minDist", "minimum distance authorized. All points before that will be filtered.", "1", "0", "inf", &P::Comp<T> }
+				{ "minDist", "minimum value authorized. If dim is set to -1 (radius), the absolute value of minDist will be used. All points before that will be filtered.", "1", "-inf", "inf", &P::Comp<T> }
 			});
 		}
 		
@@ -144,7 +144,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 	};
 
-	//! Subsampling. Reduce the points number of a certain ratio while trying to uniformize the density of the point cloud.
+	//! Subsampling. OBSOLECTE. Reduce the points number of a certain ratio while trying to uniformize the density of the point cloud.
 	struct UniformizeDensityDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
@@ -154,7 +154,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{"aggressivity", "how aggressively high density points should be subsampled.", "0.5", "0.0000001", "0.9999999", &P::Comp<T>},
+				{"aggressivity", "how aggressively high density points should be subsampled.", "0.5", "0.0000001", "0.99999", &P::Comp<T>},
 				{ "nbBin", "number of bin used to estimate the probability distribution of the density.", "15", "1", "2147483647", &P::Comp<unsigned> }
 			});
 		}
@@ -164,6 +164,27 @@ struct DataPointsFiltersImpl
 		
 		//! Constructor, uses parameter interface
 		UniformizeDensityDataPointsFilter(const Parameters& params = Parameters());
+		virtual DataPoints filter(const DataPoints& input);
+	};
+
+	//! Subsampling. Reduce the points number by randomly removing points with a dentsity higher than a treshold.
+	struct MaxDensityDataPointsFilter: public DataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			return "Subsampling. Reduce the points number by randomly removing points with a density highler than a treshold.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{"maxDensity", "Maximum density of points to target. Unit: number of points per dm^3.", "10", "0.0000001", "inf", &P::Comp<T>}
+			});
+		}
+		
+		const T maxDensity;
+		
+		//! Constructor, uses parameter interface
+		MaxDensityDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
 	};
 

@@ -67,15 +67,13 @@ int main(int argc, char *argv[])
 		"MinDistDataPointsFilter", PM::Parameters({
 			{"minDist", "0.45"}
 			}));
-	dataPointFilter2 = pm.DataPointsFilterRegistrar.create(
-		"RandomSamplingDataPointsFilter", PM::Parameters({
-			{"prob", "0.95"}
-			}));
+	
 
 	dataPointFilter3 = pm.DataPointsFilterRegistrar.create(
 		"SamplingSurfaceNormalDataPointsFilter", PM::Parameters({
-			{"ratio", "0.0001"},
+			{"ratio", "0.8"},
 			{"binSize", "20"},
+			{"samplingMethod", "1"},
 			{"keepNormals", "1"},
 			{"keepDensities", "1"},
 			}));
@@ -84,9 +82,7 @@ int main(int argc, char *argv[])
 		"OrientNormalsDataPointsFilter"
 		);
 
-	dataPointFilter5 = pm.DataPointsFilterRegistrar.create(
-		"UniformizeDensityDataPointsFilter"
-		);
+	
 
 	dataPointFilter6 = pm.DataPointsFilterRegistrar.create(
 		"ShadowDataPointsFilter", PM::Parameters({
@@ -98,13 +94,37 @@ int main(int argc, char *argv[])
 			{"sensorType", "0"}
 			}));
 
+	PM::DataPointsFilter* subSample;
+	subSample= pm.DataPointsFilterRegistrar.create(
+		"RandomSamplingDataPointsFilter", PM::Parameters({
+			{"prob", "0.1"}
+			}));
+
+	PM::DataPointsFilter* maxDensity;
+	maxDensity = pm.DataPointsFilterRegistrar.create(
+		"MaxDensityDataPointsFilter"
+		);
+	
+	PM::DataPointsFilter* computeDensity;
+	computeDensity = pm.DataPointsFilterRegistrar.create(
+		"SurfaceNormalDataPointsFilter", PM::Parameters({
+			{"knn", "20"},
+			{"keepDensities", "1"}
+		}));
+
+
 	//d = dataPointFilter1->filter(d);
 	//d = dataPointFilter2->filter(d);
-	d = dataPointFilter3->filter(d);
-	d = dataPointFilter4->filter(d);
+	//d = dataPointFilter3->filter(d);
+	//d = dataPointFilter4->filter(d);
 	//d = dataPointFilter5->filter(d);
 	//d = dataPointFilter6->filter(d);
-	d = dataPointFilter7->filter(d);
+	//d = dataPointFilter7->filter(d);
+	
+	//d = subSample->filter(d);
+	d = computeDensity->filter(d);
+	//d = maxDensity->filter(d);
+	//d = computeDensity->filter(d);
 
 	// Example of moving 3D points
 	//Eigen::Matrix4f T;

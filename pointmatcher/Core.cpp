@@ -334,6 +334,13 @@ PointMatcher<T>::Matches::Matches(const Dists& dists, const Ids ids):
 	ids(ids)
 {}
 
+//! Construct uninitialized matches from number of closest points (knn) and number of points (pointsCount)
+template<typename T>
+PointMatcher<T>::Matches::Matches(const int knn, const int pointsCount):
+	dists(Dists(knn, pointsCount)),
+	ids(Ids(knn, pointsCount))
+{}
+
 //! Get the distance at the T-ratio closest point
 template<typename T>
 T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
@@ -1261,6 +1268,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, MinDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MinDistDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, UniformizeDensityDataPointsFilter, typename DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, MaxDensityDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, OrientNormalsDataPointsFilter, typename DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter)
@@ -1271,6 +1279,7 @@ PointMatcher<T>::PointMatcher()
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)
+	ADD_TO_REGISTRAR(Matcher, KDTreeVarDistMatcher, typename MatchersImpl<T>::KDTreeVarDistMatcher)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(FeatureOutlierFilter, NullFeatureOutlierFilter, typename OutlierFiltersImpl<T>::NullFeatureOutlierFilter)
 	ADD_TO_REGISTRAR(FeatureOutlierFilter, MaxDistOutlierFilter, typename OutlierFiltersImpl<T>::MaxDistOutlierFilter)
