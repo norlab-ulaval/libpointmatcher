@@ -154,21 +154,48 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
 	this->descriptorLabels = dpOut.descriptorLabels;
 }
 
-//! Get descriptor by name, return a matrix containing only the resquested descriptor
+//! Makes sure a descriptor of a given name exists, if present, check its dimensions
+template<typename T>
+void PointMatcher<T>::DataPoints::allocateDescriptor(const std::string& name, const unsigned dim)
+{
+	if (isDescriptorExist(name))
+	{
+		const int descDim(getDescriptorDimension(name));
+		if (descDim != int(dim))
+		{
+			throw runtime_error(
+				(boost::format("The existing descriptor %1% has dimension %2%, different than requested dimension %3%") % name % descDim % dim).str()
+			);
+		}
+	}
+	else
+	{
+		const int oldDescDim(descriptors.rows());
+		const int totalDim(oldDescDim + dim);
+		const int pointCount(features.cols());
+		Descriptors tmpDescriptors(descriptors);
+		descriptors.resize(totalDim, pointCount);
+		descriptors.topRows(oldDescDim) = tmpDescriptors;
+		descriptorLabels.push_back(Label(name, dim));
+	}
+}
+
+//! Add a descriptor by name, remove if exists
 template<typename T>
 void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, Descriptors newDescriptor)
 {
 	const int newDescDim = newDescriptor.rows();
 	const int newPointCount = newDescriptor.cols();
-	const int descDim = getDescriptorDimension(name);
 	const int pointCount = features.cols();
 
-	if(newDescriptor.rows() == 0)
+	if (newDescriptor.rows() == 0)
 		return;
 
 	// Replace if the descriptor exists
-	if(isDescriptorExist(name) == true)
+	if (isDescriptorExist(name))
 	{
+		const int descDim = getDescriptorDimension(name);
+		
 		if(descDim == newDescDim)
 		{
 			// Ensure that the number of points in the point cloud and in the descriptor are the same
@@ -195,17 +222,12 @@ void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, Descrip
 	{
 		if(pointCount == newPointCount)
 		{
-			const int totalDim = descriptors.rows() + newDescDim;
-
-			Descriptors appendDesc(totalDim, pointCount);
+			const int oldDescDim(descriptors.rows());
+			const int totalDim = oldDescDim + newDescDim;
 			Descriptors tmpDescriptors(descriptors);
-			if(descriptors.rows() > 0)
-				appendDesc.topRows(descriptors.rows()) = tmpDescriptors;
-			
-			appendDesc.bottomRows(newDescDim) = newDescriptor;
-
 			descriptors.resize(totalDim, pointCount);
-			descriptors = appendDesc;
+			descriptors.topRows(oldDescDim) = tmpDescriptors;
+			descriptors.bottomRows(newDescDim) = newDescriptor;
 			descriptorLabels.push_back(Label(name, newDescDim));
 		}
 		else
@@ -274,13 +296,10 @@ typename PointMatcher<T>::DataPoints::DescriptorView PointMatcher<T>::DataPoints
 template<typename T>
 bool PointMatcher<T>::DataPoints::isDescriptorExist(const std::string& name) const
 {
-	
 	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
 	{
-		if(descriptorLabels[i].text.compare(name) == 0)
-		{
+		if (descriptorLabels[i].text == name)
 			return true;
-		}
 	}
 
 	return false;
@@ -290,12 +309,11 @@ bool PointMatcher<T>::DataPoints::isDescriptorExist(const std::string& name) con
 template<typename T>
 bool PointMatcher<T>::DataPoints::isDescriptorExist(const std::string& name, const unsigned dim) const
 {
-	
 	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
 	{
-		if(descriptorLabels[i].text.compare(name) == 0)
+		if (descriptorLabels[i].text == name)
 		{
-			if(descriptorLabels[i].span == dim)
+			if (descriptorLabels[i].span == dim)
 				return true;
 			else
 				return false;
@@ -309,13 +327,10 @@ bool PointMatcher<T>::DataPoints::isDescriptorExist(const std::string& name, con
 template<typename T>
 int PointMatcher<T>::DataPoints::getDescriptorDimension(const std::string& name) const
 {
-	
 	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
 	{
-		if(descriptorLabels[i].text.compare(name) == 0)
-		{
+		if (descriptorLabels[i].text == name)
 			return descriptorLabels[i].span;
-		}
 	}
 
 	return 0;
@@ -326,17 +341,13 @@ int PointMatcher<T>::DataPoints::getDescriptorDimension(const std::string& name)
 template<typename T>
 int PointMatcher<T>::DataPoints::getDescriptorStartingRow(const std::string& name) const
 {
-	
 	int row(0);
 	
 	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
 	{
 		const int span(descriptorLabels[i].span);
-		if(descriptorLabels[i].text.compare(name) == 0)
-		{
+		if(descriptorLabels[i].text == name)
 			return row;
-		}
-
 		row += span;
 	}
 
@@ -1261,7 +1272,6 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxDistDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MinDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MinDistDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter)
-	ADD_TO_REGISTRAR(DataPointsFilter, UniformizeDensityDataPointsFilter, typename DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxDensityDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SamplingSurfaceNormalDataPointsFilter, typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter)

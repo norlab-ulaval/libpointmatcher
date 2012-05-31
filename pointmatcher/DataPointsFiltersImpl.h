@@ -53,6 +53,7 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
 	typedef typename PointMatcher<T>::DataPointsFilter DataPointsFilter;
+	typedef typename PointMatcher<T>::DataPoints::DescriptorView DescriptorView;
 	typedef typename PointMatcher<T>::DataPoints::InvalidDescriptor InvalidDescriptor;
 	
 	//! Identity, does nothing
@@ -142,29 +143,6 @@ struct DataPointsFiltersImpl
 		
 		//! Constructor, uses parameter interface
 		MaxQuantileOnAxisDataPointsFilter(const Parameters& params = Parameters());
-		virtual DataPoints filter(const DataPoints& input);
-	};
-
-	//! Subsampling. OBSOLECTE. Reduce the points number of a certain ratio while trying to uniformize the density of the point cloud.
-	struct UniformizeDensityDataPointsFilter: public DataPointsFilter
-	{
-		inline static const std::string description()
-		{
-			return "Subsampling. Reduce the points number while trying to uniformize the density of the point cloud.";
-		}
-		inline static const ParametersDoc availableParameters()
-		{
-			return ParametersDoc({
-				{"aggressivity", "how aggressively high density points should be subsampled.", "0.5", "0.0000001", "0.99999", &P::Comp<T>},
-				{ "nbBin", "number of bin used to estimate the probability distribution of the density.", "15", "1", "2147483647", &P::Comp<unsigned> }
-			});
-		}
-		
-		const T aggressivity;
-		const unsigned nbBin;
-		
-		//! Constructor, uses parameter interface
-		UniformizeDensityDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
 	};
 

@@ -295,139 +295,6 @@ template struct DataPointsFiltersImpl<float>::MaxQuantileOnAxisDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::MaxQuantileOnAxisDataPointsFilter;
 
 
-// UniformizeDensityDataPointsFilter
-// Constructor
-template<typename T>
-DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter::UniformizeDensityDataPointsFilter(const Parameters& params):
-	DataPointsFilter("UniformizeDensityDataPointsFilter", UniformizeDensityDataPointsFilter::availableParameters(), params),
-	aggressivity(Parametrizable::get<T>("aggressivity")),
-	nbBin(Parametrizable::get<unsigned>("nbBin"))
-{
-}
-
-// Structure for histogram (created for UniformizeDensityDataPointsFilter)
-struct HistElement 
-{
-	int count;
-	int id;
-	float ratio;
-	HistElement():count(0), id(-1), ratio(1.0){};
-	static bool largestCountFirst(const HistElement h1, const HistElement h2)
-	{
-		return (h1.count > h2.count);	
-	};
-	static bool smallestIdFirst(const HistElement h1, const HistElement h2)
-	{
-		return (h1.id < h2.id);	
-	};
-};
-
-template<typename T>
-typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::UniformizeDensityDataPointsFilter::filter(const DataPoints& input)
-{
-	// Force densities to be computed
-	if (!input.isDescriptorExist("densities"))
-	{
-		throw InvalidDescriptor("UniformizeDensityDataPointsFilter: Error, no densities found.");
-	}
-	
-	DataPoints outputCloud(input);
-	const int nbPointsIn = outputCloud.features.cols();
-
-	const Matrix densities = outputCloud.getDescriptorCopyByName("densities");
-
-	const T minDist = densities.minCoeff();
-	const T maxDist = densities.maxCoeff();
-	const T delta = (maxDist - minDist)/(T)nbBin;
-
-	typename DataPoints::Descriptors binId(1, nbPointsIn);
-	
-	std::vector<HistElement> hist;
-	hist.resize(nbBin);
-
-	// Initialize ids (useful to backtrack after sorting)
-	for(unsigned i=0; i < nbBin; i++)
-	{
-		hist[i].id = i;	
-	}
-
-	// Associate a bin per point and cumulate the histogram
-	for (int i=0; i < nbPointsIn; i++)
-	{
-		unsigned id = (densities(i)-minDist)/delta;
-
-		// validate last interval
-		if(id == nbBin)
-			id = nbBin-1;
-
-		hist[id].count = hist[id].count + 1;
-
-		binId(i) = id;
-		
-	}
-	
-	/*cout << endl << "count:" << endl;
-	for(unsigned i=0; i<hist.size(); i++)
-	{
-		cout << hist[i].count << ", ";	
-	}
-	*/
-
-	const unsigned startingBin = nbBin*(1-aggressivity);
-	
-	// Compute the acceptance ratio per bin
-	for(unsigned i=0; i<nbBin ; i++)
-	{
-		if(hist[i].count != 0 && i >= startingBin)
-		{
-			hist[i].ratio = 1 - double(i-startingBin)/double(nbBin-startingBin);
-			hist[i].ratio *= hist[i].ratio; // square
-		}
-		else
-		{
-			hist[i].ratio = 1.0;
-		}
-	}
-	
-	/*cout << endl << "ratio:" << endl;
-	for(unsigned i=0; i<hist.size(); i++)
-	{
-		cout << hist[i].ratio << ", ";	
-	}
-	cout << endl;
-	*/
-
-	// fill output values
-	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
-	{
-		const int id = binId(i);
-		const float r = (float)std::rand()/(float)RAND_MAX;
-		if (r < hist[id].ratio)
-		{
-			outputCloud.features.col(j) = outputCloud.features.col(i);
-			if (outputCloud.descriptors.cols() > 0)
-				outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
-			j++;
-		}
-		
-	}
-
-
-	// Reduce the point cloud size
-	outputCloud.features.conservativeResize(Eigen::NoChange, j);
-	if (outputCloud.descriptors.cols() > 0)
-			outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
-
-	LOG_INFO_STREAM("UniformizeDensityDataPointsFilter - pts in: " << nbPointsIn << " pts out: " << j << " (-" << 100 - (j/double(nbPointsIn)*100) << "\%)");
-	
-	return outputCloud;
-}
-
-template struct DataPointsFiltersImpl<float>::UniformizeDensityDataPointsFilter;
-template struct DataPointsFiltersImpl<double>::UniformizeDensityDataPointsFilter;
-
-
 // MaxDensityDataPointsFilter
 // Constructor
 template<typename T>
@@ -443,7 +310,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPoi
 	// Force densities to be computed
 	if (!input.isDescriptorExist("densities"))
 	{
-		throw std::runtime_error("MaxDensityDataPointsFilter - WARNING: no densities found. Will force computation with default parameters");
+		throw std::runtime_error("MaxDensityDataPointsFilter: Error, no densities found.");
 	}
 
 	DataPoints outputCloud = input;
@@ -547,28 +414,42 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	const int dimDensities(1);
 	const int dimEigValues(featDim-1);
 	const int dimEigVectors((featDim-1)*(featDim-1));
-	const int dimMatchedIds(knn); 
+	//const int dimMatchedIds(knn); 
 
-	Descriptors normals;
-	Descriptors densities;
-	Descriptors eigenValues;
-	Descriptors eigenVectors;
-	Descriptors matchedValues;
-	if (keepNormals)
-		normals.resize(dimNormals, pointsCount);
-
-	if (keepDensities)
-		densities.resize(dimDensities, pointsCount);
-
-	if (keepEigenValues)
-		eigenValues.resize(dimEigValues, pointsCount);
-
-	if (keepEigenVectors)
-		eigenVectors.resize(dimEigVectors, pointsCount);
+	boost::optional<DescriptorView> normals;
+	boost::optional<DescriptorView> densities;
+	boost::optional<DescriptorView> eigenValues;
+	boost::optional<DescriptorView> eigenVectors;
+	boost::optional<DescriptorView> matchedValues;
 	
-	if (keepMatchedIds)
-		matchedValues.resize(dimMatchedIds, pointsCount);
-
+	DataPoints output(input);
+	if (keepNormals)
+	{
+		output.allocateDescriptor("normals", dimNormals);
+		normals = output.getDescriptorViewByName("normals");
+	}
+	if (keepDensities)
+	{
+		output.allocateDescriptor("densities", dimDensities);
+		densities = output.getDescriptorViewByName("densities");
+	}
+	if (keepEigenValues)
+	{
+		output.allocateDescriptor("eigValues", dimEigValues);
+		eigenValues = output.getDescriptorViewByName("eigValues");
+	}
+	if (keepEigenVectors)
+	{
+		output.allocateDescriptor("eigVectors", dimEigVectors);
+		eigenVectors = output.getDescriptorViewByName("eigVectors");
+	}
+	// TODO: implement keepMatchedIds
+// 	if (keepMatchedIds)
+// 	{
+// 		output.allocateDescriptor("normals", dimMatchedIds);
+// 		matchedValues = output.getDescriptorViewByName("normals");
+// 	}
+	
 	// Build kd-tree
 	KDTreeMatcher matcher(Parameters({
 		{ "knn", toParam(knn) },
@@ -578,7 +459,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 
 	Matches matches(typename Matches::Dists(knn, pointsCount), typename Matches::Ids(knn, pointsCount));
 	matches = matcher.findClosests(input, DataPoints());
-
 	
 	// Search for surrounding points and compute descriptors
 	int degenerateCount(0);
@@ -616,28 +496,18 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 		}
 		
 		if(keepNormals)
-			normals.col(i) = computeNormal(eigenVa, eigenVe);
-
+			normals->col(i) = computeNormal(eigenVa, eigenVe);
 		if(keepDensities)
-			densities(i) = computeDensity(NN);
-
+			(*densities)(0, i) = computeDensity(NN);
 		if(keepEigenValues)
-			eigenValues.col(i) = eigenVa;
-		
+			eigenValues->col(i) = eigenVa;
 		if(keepEigenVectors)
-			eigenVectors.col(i) = serializeEigVec(eigenVe);
-		
+			eigenVectors->col(i) = serializeEigVec(eigenVe);
 	}
 	if (degenerateCount)
 	{
 		LOG_WARNING_STREAM("WARNING: Matrix C needed for eigen decomposition was degenerated in " << degenerateCount << " points over " << pointsCount << " (" << float(degenerateCount)*100.f/float(pointsCount) << " %)");
 	}
-
-	DataPoints output = input;
-	output.addDescriptor("normals", normals);
-	output.addDescriptor("densities", densities);
-	output.addDescriptor("eigValues", eigenValues);
-	output.addDescriptor("eigVectors", eigenVectors);
 	
 	return output;
 }
@@ -744,7 +614,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	
 	// we keep build data on stack for reentrant behaviour
 	BuildData buildData(input.features, input.descriptors);
-
 
 	if (keepNormals)
 		buildData.normals.resize(dimNormals, pointsCount);
@@ -1003,9 +872,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input)
 {
 	if (!input.isDescriptorExist("normals"))
-	{
 		throw InvalidDescriptor("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors");
-	}
 	
 	DataPoints output(input);
 	auto normals(output.getDescriptorViewByName("normals"));
@@ -1274,9 +1141,9 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SimpleSensorNoise
 	typedef typename Eigen::Array<T, 2, Eigen::Dynamic> Array2rows;
 	const int nbPoints = input.features.cols();
 	const int dim = input.features.rows();
-	DataPoints outputCloud = input;
-	Descriptors noise;
-	noise.resize(1, nbPoints);
+	DataPoints outputCloud(input);
+	outputCloud.allocateDescriptor("simpleSensorNoise", 1);
+	auto noise(outputCloud.getDescriptorViewByName("simpleSensorNoise"));
 
 	if(sensorType == 0)
 	{
@@ -1287,8 +1154,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SimpleSensorNoise
 
 		noise = evalNoise.colwise().maxCoeff();
 	}
-
-	outputCloud.addDescriptor("simpleSensorNoise", noise);
 
 	return outputCloud;
 }
