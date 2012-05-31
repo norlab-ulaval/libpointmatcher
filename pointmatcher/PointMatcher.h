@@ -324,7 +324,7 @@ struct PointMatcher
 		
 		void concatenate(const DataPoints dp);
 		void allocateDescriptor(const std::string& name, const unsigned dim);
-		void addDescriptor(const std::string& name, Descriptors newDescriptor);
+		void addDescriptor(const std::string& name, const Descriptors& newDescriptor);
 		Descriptors getDescriptorCopyByName(const std::string& name) const;
 		ConstDescriptorView getDescriptorViewByName(const std::string& name) const;
 		DescriptorView getDescriptorViewByName(const std::string& name);

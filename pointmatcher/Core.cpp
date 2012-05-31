@@ -199,7 +199,7 @@ void PointMatcher<T>::DataPoints::allocateDescriptor(const std::string& name, co
 
 //! Add a descriptor by name, remove if exists
 template<typename T>
-void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, Descriptors newDescriptor)
+void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, const Descriptors& newDescriptor)
 {
 	const int newDescDim = newDescriptor.rows();
 	const int newPointCount = newDescriptor.cols();
@@ -243,7 +243,8 @@ void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, Descrip
 			const int totalDim = oldDescDim + newDescDim;
 			Descriptors tmpDescriptors(descriptors);
 			descriptors.resize(totalDim, pointCount);
-			descriptors.topRows(oldDescDim) = tmpDescriptors;
+			if (oldDescDim > 0)
+				descriptors.topRows(oldDescDim) = tmpDescriptors;
 			descriptors.bottomRows(newDescDim) = newDescriptor;
 			descriptorLabels.push_back(Label(name, newDescDim));
 		}
