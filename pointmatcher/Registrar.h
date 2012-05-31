@@ -39,6 +39,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parametrizable.h"
 #include <boost/format.hpp>
 
+#ifdef HAVE_YAML_CPP
+	#include "yaml-cpp/yaml.h"
+#endif // HAVE_YAML_CPP
+
 namespace PointMatcherSupport
 {
 	//! A factor for subclasses of Interface
@@ -128,6 +132,38 @@ namespace PointMatcherSupport
 		{
 			return getDescriptor(name)->createInstance(params);
 		}
+		
+		#ifdef HAVE_YAML_CPP
+		
+		//! Create an instance from a YAML node
+		Interface* createFromYAML(const YAML::Node& module) const
+		{
+			Parametrizable::Parameters params;
+			std::string name;
+			
+			if (module.size() != 1)
+			{
+				// parameter-less entry
+				name = module.to<std::string>();
+			}
+			else
+			{
+				// get parameters
+				YAML::Iterator mapIt(module.begin());
+				mapIt.first() >> name;
+				for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
+				{
+					std::string key, value;
+					paramIt.first() >> key;
+					paramIt.second() >> value;
+					params[key] = value;
+				}
+			}
+			
+			return create(name, params);
+		}
+		
+		#endif // HAVE_YAML_CPP
 		
 		//! Get the description of a class
 		const std::string getDescription(const std::string& name) const

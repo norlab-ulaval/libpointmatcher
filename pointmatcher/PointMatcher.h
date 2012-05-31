@@ -179,13 +179,6 @@ libpointmatcher is released under a permissive BSD license.
 
 */
 
-#ifdef HAVE_YAML_CPP
-namespace YAML
-{
-	class Node;
-}
-#endif // HAVE_YAML_CPP
-
 //! version of the Pointmatcher library as string
 #define POINTMATCHER_VERSION "0.9.0"
 //! version of the Pointmatcher library as an int
@@ -458,6 +451,8 @@ struct PointMatcher
 	//! A chain of DataPointsFilter
 	struct DataPointsFilters: public PointMatcherSupport::SharedPtrVector<DataPointsFilter>
 	{
+		DataPointsFilters();
+		DataPointsFilters(std::istream& in);
 		void init();
 		void apply(DataPoints& cloud);
 	};
@@ -664,8 +659,8 @@ struct PointMatcher
 		template<typename R>
 		void createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
 		
-		template<typename R>
-		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);
+		/*template<typename R>
+		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);*/
 		#endif // HAVE_YAML_CPP
 	};
 	

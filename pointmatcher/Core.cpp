@@ -49,10 +49,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <limits>
 
-#ifdef HAVE_YAML_CPP
-	#include "yaml-cpp/yaml.h"
-#endif // HAVE_YAML_CPP
-
 using namespace std;
 using namespace PointMatcherSupport;
 
@@ -474,6 +470,32 @@ template<typename T>
 void PointMatcher<T>::DataPointsFilter::init()
 {}
 
+//! Construct an empty chain
+template<typename T>
+PointMatcher<T>::DataPointsFilters::DataPointsFilters()
+{}
+
+//! Construct a chain from a YAML file
+template<typename T>
+PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in)
+{
+	#ifdef HAVE_YAML_CPP
+	
+	YAML::Parser parser(in);
+	YAML::Node doc;
+	parser.GetNextDocument(doc);
+	
+	PointMatcher<T> pm;
+	
+	for(YAML::Iterator moduleIt = doc.begin(); moduleIt != doc.end(); ++moduleIt)
+	{
+		const YAML::Node& module(*moduleIt);
+		push_back(pm.REG(DataPointsFilter).createFromYAML(module));
+	}
+	
+	#endif // HAVE_YAML_CPP
+}
+
 //! Init the chain
 template<typename T>
 void PointMatcher<T>::DataPointsFilters::init()
@@ -772,7 +794,8 @@ void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string
 		for(YAML::Iterator moduleIt = reg->begin(); moduleIt != reg->end(); ++moduleIt)
 		{
 			const YAML::Node& module(*moduleIt);
-			modules.push_back(createModuleFromRegistrar(module, registrar));
+			modules.push_back(registrar.createFromYAML(module));
+			//modules.push_back(createModuleFromRegistrar(module, registrar));
 		}
 	}
 }
@@ -785,12 +808,13 @@ void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string&
 	if (reg)
 	{
 		cout << regName << endl;
-		module.reset(createModuleFromRegistrar(*reg, registrar));
+		//module.reset(createModuleFromRegistrar(*reg, registrar));
+		module.reset(registrar.createFromYAML(*reg));
 	}
 	else
 		module.reset();
 }
-
+/*
 template<typename T>
 template<typename R>
 typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar( const YAML::Node& module, const R& registrar)
@@ -821,7 +845,7 @@ typename R::TargetType* PointMatcher<T>::ICPChainBase::createModuleFromRegistrar
 	}
 	
 	return registrar.create(name, params);
-}
+}*/
 
 #endif // HAVE_YAML_CPP
 
