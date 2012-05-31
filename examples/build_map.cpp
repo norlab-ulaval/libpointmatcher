@@ -135,15 +135,7 @@ int main(int argc, char *argv[])
 
 	for(unsigned i=0; i < list.size(); i++)
 	{
-		if(list[i].readingExtension() == ".vtk")
-			newCloud = PM::loadVTK(list[i].readingFileName);
-		else if(list[i].readingExtension() == ".csv")
-			newCloud = PM::loadCSV(list[i].readingFileName);
-		else
-		{
-			cout << "Only VTK or CSV files are supported" << endl;
-			abort();
-		}
+		newCloud = PM::loadAnyFormat(list[i].readingFileName);
 
 		cout << "Point cloud loaded" << endl;
 	

@@ -344,6 +344,10 @@ struct PointMatcher
 	//Should it be here?
 	static DataPoints concatenateDataPoints(const DataPoints dp1, const DataPoints dp2);
 
+	// Generic load
+	
+	static DataPoints loadAnyFormat(const std::string& fileName);
+	
 	// CSV
 	
 	static DataPoints loadCSV(const std::string& fileName);

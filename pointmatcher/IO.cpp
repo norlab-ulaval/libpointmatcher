@@ -43,6 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/lexical_cast.hpp"
+#include "boost/filesystem.hpp"
+#include "boost/algorithm/string.hpp"
+
 
 using namespace std;
 
@@ -374,6 +377,25 @@ template
 PointMatcher<float>::CsvElements PointMatcher<float>::parseCsvWithHeader(const std::string& fileName);
 template
 PointMatcher<double>::CsvElements PointMatcher<double>::parseCsvWithHeader(const std::string& fileName);
+
+template<typename T>
+typename PointMatcher<T>::DataPoints PointMatcher<T>::loadAnyFormat(const std::string& fileName)
+{
+	const boost::filesystem::path path(fileName);
+	const string& ext(boost::filesystem::extension(path));
+	if (boost::iequals(ext, ".vtk"))
+		return loadVTK(fileName);
+	else if (boost::iequals(ext, ".csv"))
+		return loadCSV(fileName);
+	else
+		throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
+}
+
+template
+PointMatcher<float>::DataPoints PointMatcher<float>::loadAnyFormat(const std::string& fileName);
+template
+PointMatcher<double>::DataPoints PointMatcher<double>::loadAnyFormat(const std::string& fileName);
+
 
 //! @brief Load comma separated values (csv) file
 //! @param fileName a string containing the path and the file name

@@ -8,8 +8,8 @@ target_link_libraries(icp_simple pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Bo
 add_executable(align_sequence align_sequence.cpp)
 target_link_libraries(align_sequence pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})
 
-add_executable(convertCSVtoVTK convertCSVtoVTK.cpp)
-target_link_libraries(convertCSVtoVTK pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})
+add_executable(convert convert.cpp)
+target_link_libraries(convert pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})
 
 add_executable(list_modules list_modules.cpp)
 target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})

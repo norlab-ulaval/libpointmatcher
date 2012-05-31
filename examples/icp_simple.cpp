@@ -55,18 +55,8 @@ int main(int argc, char *argv[])
 	typedef PM::Parameters Parameters;
 	
 	// Load point clouds
-	PM::DataPoints ref;
-	PM::DataPoints data;
-	if(isCSV)
-	{
-		ref = PM::loadCSV(argv[1]);
-		data = PM::loadCSV(argv[2]);
-	}
-	else
-	{
-		ref = PM::loadVTK(argv[1]);
-		data= PM::loadVTK(argv[2]);
-	}
+	const PM::DataPoints ref(PM::loadAnyFormat(argv[1]));
+	const PM::DataPoints data(PM::loadAnyFormat(argv[2]));
 
 	// Create the default ICP algorithm
 	PM::ICP icp;
@@ -90,7 +80,6 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-
 void validateArgs(int argc, char *argv[], bool& isCSV )
 {
 	if (argc != 3)
@@ -103,32 +92,4 @@ void validateArgs(int argc, char *argv[], bool& isCSV )
 		cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
 		exit(1);
 	}
-	
-	// Validate extension
-	const boost::filesystem::path pathRef(argv[1]);
-	const boost::filesystem::path pathData(argv[2]);
-
-	string refExt = boost::filesystem::extension(pathRef);
-	string dataExt = boost::filesystem::extension(pathData);
-
-	if (!(refExt == ".vtk" || refExt == ".csv"))
-	{
-		cout << refExt << ", " << dataExt << endl;
-		cerr << "Reference file extension must be .vtk or .csv" << endl;
-		exit(2);
-	}
-	
-	if (!(dataExt == ".vtk" || dataExt == ".csv"))
-	{
-		cerr << "Reading file extension must be .vtk or .csv" << endl;
-		exit(3);
-	}
-
-	if (dataExt != refExt)
-	{
-		cerr << "File extension between reference and reading should be the same" << endl;
-		exit(4);
-	}
-
-	isCSV = (dataExt == ".csv");
 }

@@ -1,4 +1,6 @@
-- SamplingSurfaceNormalDataPointsFilter:
+SamplingSurfaceNormalDataPointsFilter:
 	binSize: 10
-- ObservationDirectionDataPointsFilter
-- OrientNormalsDataPointsFilter
+
+ObservationDirectionDataPointsFilter
+
+OrientNormalsDataPointsFilter

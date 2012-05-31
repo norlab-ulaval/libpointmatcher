@@ -36,27 +36,43 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pointmatcher/PointMatcher.h"
 #include <cassert>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace PointMatcherSupport;
 
+typedef PointMatcher<float> PM;
+
+void usage(char *argv[])
+{
+	cerr << "Usage " << argv[0] << " [CONFIG.yaml] INPUT.csv/.vtk OUTPUT.vtk\n";
+}
+
 int main(int argc, char *argv[])
 {
-	if (argc != 3)
+	if (argc < 3)
 	{
-		cerr << "Usage " << argv[0] << " INPUT.csv OUTPUT.vtk\n";
+		usage(argv);
 		return 1;
 	}
-
-	typedef PointMatcher<float> PM;
-	typedef PM::DataPoints DataPoints;
-
-	PM pm;
 	
+	PM pm;
 	setLogger(pm.LoggerRegistrar.create("FileLogger"));
-	DataPoints d = PM::loadCSV(argv[1]);
-		
-	PM::saveVTK(d, argv[2]);
+
+	PM::DataPoints d(PM::loadAnyFormat(argv[argc-2]));
+	
+	if (argc == 4)
+	{
+		ifstream ifs(argv[1]);
+		if (!ifs.good())
+		{
+			cerr << "Cannot open config file " << argv[1] << endl; usage(argv); return 2;
+		}
+		PM::DataPointsFilters f(ifs);
+		f.apply(d);
+	}
+	
+	PM::saveVTK(d, argv[argc-1]);
 	
 	return 0;
 }
