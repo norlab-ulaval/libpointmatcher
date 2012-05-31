@@ -37,51 +37,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 
-// TransformFeatures
+// RigidTransformation
 template<typename T>
-typename PointMatcher<T>::DataPoints TransformationsImpl<T>::TransformFeatures::compute(
+typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation::compute(
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
+	typedef typename PointMatcher<T>::Matrix Matrix;
+	
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 	
-	DataPoints transformedDataPoints = input;
-		
-	// Apply the transformation
-	transformedDataPoints.features = parameters * input.features;
-
-	return transformedDataPoints;
-}
-
-template struct TransformationsImpl<float>::TransformFeatures;
-template struct TransformationsImpl<double>::TransformFeatures;
-
-
-// TransformNormals
-template<typename T>
-typename PointMatcher<T>::DataPoints TransformationsImpl<T>::TransformNormals::compute(
-	const DataPoints& input,
-	const TransformationParameters& parameters) const
-{
-	typedef typename DataPoints::Descriptors Descriptors;
-	typedef typename PointMatcher<T>::Matrix Matrix;
+	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
 	
-	assert(parameters.rows() == parameters.cols());
+	// Apply the transformation to features
+	transformedCloud.features = parameters * input.features;
 	
-	DataPoints transformedDataPoints(input);
-	
-	if (!input.isDescriptorExist("normals"))
-		return transformedDataPoints;
-
+	// Apply the transformation to descriptors
 	const Matrix R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
-
-	const auto normals(input.getDescriptorViewByName("normals"));
-	transformedDataPoints.addDescriptor("normals", R*normals);
+	int row(0);
+	const int descCols(input.descriptors.cols());
+	for (size_t i = 0; i < input.descriptorLabels.size(); ++i)
+	{
+		const int span(input.descriptorLabels[i].span);
+		const std::string& name(input.descriptorLabels[i].text);
+		const auto inputDesc(input.descriptors.block(row, 0, span, descCols));
+		auto outputDesc(transformedCloud.descriptors.block(row, 0, span, descCols));
+		if (name == "normals" || name == "observationDirections")
+			outputDesc = R * inputDesc;
+		else
+			outputDesc = inputDesc;
+		row += span;
+	}
 	
-	return transformedDataPoints;
+	return transformedCloud;
 }
 
-template struct TransformationsImpl<float>::TransformNormals;
-template struct TransformationsImpl<double>::TransformNormals;
+template struct TransformationsImpl<float>::RigidTransformation;
+template struct TransformationsImpl<double>::RigidTransformation;
 

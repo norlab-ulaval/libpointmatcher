@@ -303,6 +303,7 @@ struct PointMatcher
 		{
 			typedef typename std::vector<Label>::const_iterator const_iterator; //!< alias
 			bool contains(const std::string& text) const;
+			size_t totalDim() const;
 		};
 		
 		//! An exception thrown when one tries to access features of wrong dimensions
@@ -317,6 +318,7 @@ struct PointMatcher
 		};
 		
 		DataPoints();
+		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount);
 		DataPoints(const Features& features, const Labels& featureLabels);
 		DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels);
 		

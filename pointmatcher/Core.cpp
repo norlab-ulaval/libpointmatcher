@@ -83,6 +83,16 @@ bool PointMatcher<T>::DataPoints::Labels::contains(const std::string& text) cons
 	return false;
 }
 
+//! Return the sum of the spans of each label
+template<typename T>
+size_t PointMatcher<T>::DataPoints::Labels::totalDim() const
+{
+	size_t dim(0);
+	for (const_iterator it(this->begin()); it != this->end(); ++it)
+		dim += it->span;
+	return dim;
+}
+
 //! Construct a label from a given name and number of data dimensions it spans
 template<typename T>
 PointMatcher<T>::DataPoints::Label::Label(const std::string& text, const size_t span):
@@ -94,6 +104,16 @@ PointMatcher<T>::DataPoints::Label::Label(const std::string& text, const size_t 
 template<typename T>
 PointMatcher<T>::DataPoints::DataPoints()
 {}
+
+//! Construct a point cloud from existing descriptions
+template<typename T>
+PointMatcher<T>::DataPoints::DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount):
+	featureLabels(featureLabels),
+	descriptorLabels(descriptorLabels)
+{
+	features.resize(featureLabels.totalDim(), pointCount);
+	descriptors.resize(descriptorLabels.totalDim(), pointCount);
+}
 
 //! Construct a point cloud from existing features without any descriptor
 template<typename T>
@@ -676,8 +696,7 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 {
 	this->cleanup();
 	
-	this->transformations.push_back(new typename TransformationsImpl<T>::TransformFeatures());
-	this->transformations.push_back(new typename TransformationsImpl<T>::TransformNormals());
+	this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
 	this->readingDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter());
 	this->keyframeDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter());
 	this->outlierFilters.push_back(new typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter());
@@ -706,8 +725,7 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
 	createModulesFromRegistrar("keyframeDataPointsFilters", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
 	//createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations);
-	this->transformations.push_back(new typename TransformationsImpl<T>::TransformFeatures());
-	this->transformations.push_back(new typename TransformationsImpl<T>::TransformNormals());
+	this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
 	createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher);
 	createModulesFromRegistrar("outlierFilters", doc, pm.REG(OutlierFilter), outlierFilters);
 	createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer);
@@ -1262,8 +1280,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 template<typename T>
 PointMatcher<T>::PointMatcher()
 {
-	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformFeatures, typename TransformationsImpl<T>::TransformFeatures)
-	ADD_TO_REGISTRAR_NO_PARAM(Transformation, TransformNormals, typename TransformationsImpl<T>::TransformNormals)
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, RigidTransformation, typename TransformationsImpl<T>::RigidTransformation)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter, typename DataPointsFiltersImpl<T>::IdentityDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxDistDataPointsFilter)

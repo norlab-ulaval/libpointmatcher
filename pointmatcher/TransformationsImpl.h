@@ -51,21 +51,11 @@ struct TransformationsImpl
 	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
 	typedef typename PointMatcher<T>::Transformation Transformation;
 	
-	struct TransformFeatures: public Transformation
+	struct RigidTransformation: public Transformation
 	{
 		inline static const std::string description()
 		{
-			return "Transform features.";
-		}
-		
-		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
-	};
-
-	struct TransformNormals: public Transformation
-	{
-		inline static const std::string description()
-		{
-			return "Rotate normals.";
+			return "Rigid transformation.";
 		}
 		
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
