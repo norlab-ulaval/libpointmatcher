@@ -1191,11 +1191,11 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ObservationDirect
 	for (int i = 0; i < input.features.cols(); i++)
 	{
 		// Check normal orientation
-		const Vector p(input.features.block(0, i, dim-1, 1));
+		const Vector p(input.features.block(0, i, dim, 1));
 		observationDirections.col(i) = center - p;
 	}
 	
-	return input;
+	return outputCloud;
 }
 
 template struct DataPointsFiltersImpl<float>::ObservationDirectionDataPointsFilter;

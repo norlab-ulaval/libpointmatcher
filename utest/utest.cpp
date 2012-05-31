@@ -174,6 +174,14 @@ public:
 	
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
+	
+	void addFilter(string name)
+	{
+		testedDataPointFilter = 
+			pm.DataPointsFilterRegistrar.create(name);
+		
+		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
+	}
 };
 
 TEST_F(DataFilterTest, MaxDistDataPointsFilter)
@@ -350,7 +358,7 @@ TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 	extraDataPointFilter = pm.DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter");
 	icp.readingDataPointsFilters.push_back(extraDataPointFilter);
-	
+	addFilter("ObservationDirectionDataPointsFilter");
 	params = PM::Parameters({{"towardCenter", toParam(false)}});
 	addFilter("OrientNormalsDataPointsFilter", params);
 	validate2dTransformation();	
