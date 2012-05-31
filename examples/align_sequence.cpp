@@ -100,15 +100,25 @@ int main(int argc, char *argv[])
 				cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 				
 				newCloud.features = tp.inverse()*newCloud.features;
-				
-				PM::DataPointsFilter* uniformSubsample;
+			
+				PM::DataPointsFilter* densityFilter;
+				densityFilter= pm.DataPointsFilterRegistrar.create(
+					"SurfaceNormalDataPointsFilter", PM::Parameters({
+						{"binSize", "10"},
+						{"epsilon", "5"}, 
+						{"keepNormals","0"},
+						{"keepDensities","1"}
+						}));
+
+				PM::DataPointsFilter* maxDensitySubsample;
 				PM::Parameters params;
-				params = PM::Parameters({{"aggressivity", toParam(0.35)}});
-				uniformSubsample = pm.DataPointsFilterRegistrar.create("UniformizeDensityDataPointsFilter", params);
+				params = PM::Parameters({{"maxDensity", toParam(30)}});
+				maxDensitySubsample = pm.DataPointsFilterRegistrar.create("MaxDensityDataPointsFilter", params);
 				
 				// Merge point clouds to map			
 				mapPointCloud.concatenate(newCloud);
-				mapPointCloud = uniformSubsample->filter(mapPointCloud);
+				mapPointCloud = densityFilter->filter(mapPointCloud);
+				mapPointCloud = maxDensitySubsample->filter(mapPointCloud);
 
 				// Controle the size of the point cloud
 				const double probToKeep = maxMapPointCount/(double)mapPointCloud.features.cols();
