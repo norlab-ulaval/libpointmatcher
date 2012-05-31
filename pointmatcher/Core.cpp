@@ -192,7 +192,8 @@ void PointMatcher<T>::DataPoints::allocateDescriptor(const std::string& name, co
 		const int pointCount(features.cols());
 		Descriptors tmpDescriptors(descriptors);
 		descriptors.resize(totalDim, pointCount);
-		descriptors.topRows(oldDescDim) = tmpDescriptors;
+		if (oldDescDim != 0)
+			descriptors.topRows(oldDescDim) = tmpDescriptors;
 		descriptorLabels.push_back(Label(name, dim));
 	}
 }

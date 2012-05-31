@@ -88,7 +88,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 	}
 	else
 	{
-		nbPointsOut = (input.features.row(dim).array().abs() < maxDist).count();
+		nbPointsOut = (input.features.row(dim).array() < maxDist).count();
 	}
 
 	DataPoints outputCloud(
@@ -118,7 +118,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 			}
 		}
 	}
-	else // Single axis distance
+	else // Single-axis distance
 	{
 		for (int i = 0; i < nbPointsIn; i++)
 		{
@@ -424,25 +424,22 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	
 	DataPoints output(input);
 	if (keepNormals)
-	{
 		output.allocateDescriptor("normals", dimNormals);
-		normals = output.getDescriptorViewByName("normals");
-	}
 	if (keepDensities)
-	{
 		output.allocateDescriptor("densities", dimDensities);
-		densities = output.getDescriptorViewByName("densities");
-	}
 	if (keepEigenValues)
-	{
 		output.allocateDescriptor("eigValues", dimEigValues);
-		eigenValues = output.getDescriptorViewByName("eigValues");
-	}
 	if (keepEigenVectors)
-	{
 		output.allocateDescriptor("eigVectors", dimEigVectors);
+	
+	if (keepNormals)
+		normals = output.getDescriptorViewByName("normals");
+	if (keepDensities)
+		densities = output.getDescriptorViewByName("densities");
+	if (keepEigenValues)
+		eigenValues = output.getDescriptorViewByName("eigValues");
+	if (keepEigenVectors)
 		eigenVectors = output.getDescriptorViewByName("eigVectors");
-	}
 	// TODO: implement keepMatchedIds
 // 	if (keepMatchedIds)
 // 	{

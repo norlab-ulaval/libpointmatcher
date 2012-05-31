@@ -281,28 +281,28 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 	validate3dTransformation();
 }
 
-
-TEST_F(DataFilterTest, UniformizeDensityDataPointsFilter)
-{
-	// Ratio has been selected to not affect the points too much
-	vector<double> ratio = vector<double>({0.1, 0.15});
-
-	for(unsigned i=0; i < ratio.size(); i++)
-	{
-		params = PM::Parameters({{"ratio", toParam(ratio[i])}, {"nbBin", "20"}});
-		icp.readingDataPointsFilters.clear();
-		addFilter("UniformizeDensityDataPointsFilter", params);
-		validate2dTransformation();	
-
-		const double nbInitPts = data2D.features.cols();
-		const double nbRemainingPts = icp.getPrefilteredReadingPtsCount();
-		// FIXME: 10% seems of seems a little bit high
-		EXPECT_NEAR(nbRemainingPts/nbInitPts, 1-ratio[i], 0.10);
-		
-		validate3dTransformation();
-		//TODO: add expectation on the reduction
-	}
-}
+// TODO; replace by MaxDensityDataPointsFilter
+// TEST_F(DataFilterTest, UniformizeDensityDataPointsFilter)
+// {
+// 	// Ratio has been selected to not affect the points too much
+// 	vector<double> ratio = vector<double>({0.1, 0.15});
+// 
+// 	for(unsigned i=0; i < ratio.size(); i++)
+// 	{
+// 		params = PM::Parameters({{"ratio", toParam(ratio[i])}, {"nbBin", "20"}});
+// 		icp.readingDataPointsFilters.clear();
+// 		addFilter("UniformizeDensityDataPointsFilter", params);
+// 		validate2dTransformation();	
+// 
+// 		const double nbInitPts = data2D.features.cols();
+// 		const double nbRemainingPts = icp.getPrefilteredReadingPtsCount();
+// 		// FIXME: 10% seems of seems a little bit high
+// 		EXPECT_NEAR(nbRemainingPts/nbInitPts, 1-ratio[i], 0.10);
+// 		
+// 		validate3dTransformation();
+// 		//TODO: add expectation on the reduction
+// 	}
+// }
 
 TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 {
