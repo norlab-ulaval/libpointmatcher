@@ -124,15 +124,13 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
 	{
 		stringstream errorMsg;
 		errorMsg << "Cannot concatenate DataPoints because the dimension of the features are not the same. Actual dimension: " << dimFeat << " New dimension: " << dp.features.rows(); 
-		throw runtime_error(errorMsg.str());
+		throw InvalidFeatures(errorMsg.str());
 	}
 	
 	typename DataPoints::Features combinedFeat(dimFeat, nbPointsTotal);
 	combinedFeat.leftCols(nbPoints1) = this->features;
 	combinedFeat.rightCols(nbPoints2) = dp.features;
-
-
-	DataPoints dpOut(combinedFeat, this->featureLabels);	
+	DataPoints dpOut(combinedFeat, this->featureLabels);
 	
 	for(unsigned i = 0; i < this->descriptorLabels.size(); i++)
 	{
@@ -143,7 +141,6 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
 			typename DataPoints::Descriptors mergedDesc(dimDesc, nbPointsTotal);
 			mergedDesc.leftCols(nbPoints1) = this->getDescriptorViewByName(name);
 			mergedDesc.rightCols(nbPoints2) = dp.getDescriptorViewByName(name);
-
 			dpOut.addDescriptor(name, mergedDesc);
 		}
 	}
@@ -163,7 +160,7 @@ void PointMatcher<T>::DataPoints::allocateDescriptor(const std::string& name, co
 		const int descDim(getDescriptorDimension(name));
 		if (descDim != int(dim))
 		{
-			throw runtime_error(
+			throw InvalidDescriptors(
 				(boost::format("The existing descriptor %1% has dimension %2%, different than requested dimension %3%") % name % descDim % dim).str()
 			);
 		}
@@ -208,14 +205,14 @@ void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, Descrip
 			{
 				stringstream errorMsg;
 				errorMsg << "The descriptor " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << "new: " << newPointCount;
-				throw runtime_error(errorMsg.str());
+				throw InvalidDescriptors(errorMsg.str());
 			}
 		}
 		else
 		{
 			stringstream errorMsg;
 			errorMsg << "The descriptor " << name << " already exists but could not be added because the dimension is not the same. Old dim: " << descDim << " new: " << newDescDim;
-			throw runtime_error(errorMsg.str());
+			throw InvalidDescriptors(errorMsg.str());
 		}
 	}
 	else // Add at the end if it is a new descriptor
@@ -234,7 +231,7 @@ void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, Descrip
 		{
 			stringstream errorMsg;
 			errorMsg << "The descriptor " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << " new: " << newPointCount;
-			throw runtime_error(errorMsg.str());
+			throw InvalidDescriptors(errorMsg.str());
 		}
 	}
 
@@ -271,7 +268,7 @@ typename PointMatcher<T>::DataPoints::ConstDescriptorView PointMatcher<T>::DataP
 		row += span;
 	}
 	
-	throw InvalidDescriptor("Descriptor " + name + " not found");
+	throw InvalidDescriptors("Descriptor " + name + " not found");
 }
 
 
@@ -289,7 +286,7 @@ typename PointMatcher<T>::DataPoints::DescriptorView PointMatcher<T>::DataPoints
 		row += span;
 	}
 	
-	throw InvalidDescriptor("Descriptor " + name + " not found");
+	throw InvalidDescriptors("Descriptor " + name + " not found");
 }
 
 //! Look if a descriptor with a given name exist
@@ -1144,7 +1141,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	else
 	{
 		if(inputCloudIn.features.rows() != keyFrameTransform.rows())
-			throw runtime_error((boost::format("Point cloud shouldn't change dimensions. Homogeneous dimension was %1% and is now %2%.") % keyFrameTransform.rows() % inputCloudIn.features.rows()).str());
+			throw runtime_error((boost::format("Point cloud should not change dimensions. Homogeneous dimension was %1% and is now %2%.") % keyFrameTransform.rows() % inputCloudIn.features.rows()).str());
 	}
 	
 	timer t; // Print how long take the algo
@@ -1280,6 +1277,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, FixStepSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, ShadowDataPointsFilter, typename DataPointsFiltersImpl<T>::ShadowDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SimpleSensorNoiseDataPointsFilter, typename DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, ObservationDirectionDataPointsFilter, typename DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)

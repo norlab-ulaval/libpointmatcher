@@ -310,7 +310,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPoi
 	// Force densities to be computed
 	if (!input.isDescriptorExist("densities"))
 	{
-		throw std::runtime_error("MaxDensityDataPointsFilter: Error, no densities found.");
+		throw InvalidDescriptors("MaxDensityDataPointsFilter: Error, no densities found in descriptors.");
 	}
 
 	DataPoints outputCloud = input;
@@ -407,7 +407,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	for(unsigned int i = 0; i < input.descriptorLabels.size(); i++)
 		insertDim += input.descriptorLabels[i].span;
 	if (insertDim != descDim)
-		throw std::runtime_error("SurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
+		throw InvalidDescriptors("SurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
 	
 	// Reserve memory for new descriptors
 	const int dimNormals(featDim-1);
@@ -603,7 +603,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 		for(unsigned int i = 0; i < input.descriptorLabels.size(); i++)
 			insertDim += input.descriptorLabels[i].span;
 		if (insertDim != descDim)
-			throw std::runtime_error("SamplingSurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
+			throw InvalidDescriptors("SamplingSurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
 	}
 	
 	// Reserve memory for new descriptors
@@ -872,23 +872,20 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input)
 {
 	if (!input.isDescriptorExist("normals"))
-		throw InvalidDescriptor("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors");
+		throw InvalidDescriptors("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors.");
+	if (!input.isDescriptorExist("observationDirections"))
+		throw InvalidDescriptors("OrientNormalsDataPointsFilter: Error, cannot find observation directions in descriptors.");
 	
 	DataPoints output(input);
 	auto normals(output.getDescriptorViewByName("normals"));
-
-	const int nbPoints = input.features.cols();
-	const int dim = input.features.rows();
-	const int nbNormals = input.descriptors.cols();
-	assert(nbPoints == nbNormals);
-
-	double scalar;
-	for (int i = 0; i < nbPoints; i++)
+	auto observationDirections(output.getDescriptorViewByName("observationDirections"));
+	assert(normals.rows() == observationDirections.rows());
+	for (int i = 0; i < input.features.cols(); i++)
 	{
 		// Check normal orientation
-		Vector vecP = -input.features.block(0, i, dim-1, 1);
+		Vector vecP = observationDirections.col(i);
 		Vector vecN = normals.col(i);
-		scalar = vecP.dot(vecN);
+		const double scalar = vecP.dot(vecN);
 
 		// Swap normal
 		if(towardCenter)
@@ -1076,7 +1073,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ShadowDataPointsF
 	// Check if normals are present
 	if (!input.isDescriptorExist("normals"))
 	{
-		throw InvalidDescriptor("ShadowDataPointsFilter, Error: cannot find normals in descriptors");
+		throw InvalidDescriptors("ShadowDataPointsFilter, Error: cannot find normals in descriptors");
 	}
 	
 	const int dim = input.features.rows();
@@ -1179,32 +1176,27 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ObservationDirect
 	const int dim(input.features.rows() - 1);
 	if (dim != 2 && dim != 3)
 	{
-		throw std::runtime_error(
+		throw InvalidFeatures(
 			(boost::format("ObservationDirectionDataPointsFilter: Error, works only in 2 or 3 dimensions, cloud has %1% dimensions.") % dim).str()
 		);
 	}
 	
-	// TODO
-	/*
-	for (int i = 0; i < nbPoints; i++)
+	Vector center(dim);
+	center[0] = centerX;
+	center[1] = centerY;
+	if (dim == 3)
+		center[2] = centerZ;
+	
+	DataPoints outputCloud(input);
+	outputCloud.allocateDescriptor("observationDirections", dim);
+	auto observationDirections(outputCloud.getDescriptorViewByName("normals"));
+	
+	for (int i = 0; i < input.features.cols(); i++)
 	{
 		// Check normal orientation
-		Vector vecP = -input.features.block(0, i, dim-1, 1);
-		Vector vecN = normals.col(i);
-		scalar = vecP.dot(vecN);
-
-		// Swap normal
-		if(towardCenter)
-		{
-			if (scalar < 0)
-				normals.col(i) = -vecN;
-		}
-		else
-		{
-			if (scalar > 0)
-				normals.col(i) = -vecN;
-		}
-	}*/
+		const Vector p(input.features.block(0, i, dim-1, 1));
+		observationDirections.col(i) = center - p;
+	}
 	
 	return input;
 }

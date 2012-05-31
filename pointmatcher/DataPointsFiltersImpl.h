@@ -54,7 +54,8 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
 	typedef typename PointMatcher<T>::DataPointsFilter DataPointsFilter;
 	typedef typename PointMatcher<T>::DataPoints::DescriptorView DescriptorView;
-	typedef typename PointMatcher<T>::DataPoints::InvalidDescriptor InvalidDescriptor;
+	typedef typename PointMatcher<T>::DataPoints::InvalidFeatures InvalidFeatures;
+	typedef typename PointMatcher<T>::DataPoints::InvalidDescriptors InvalidDescriptors;
 	
 	//! Identity, does nothing
 	struct IdentityDataPointsFilter: public DataPointsFilter
@@ -303,13 +304,13 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Normals. Reorient normals so that they all point in the same direction, with respect to the origin of the point cloud.";
+			return "Normals. Reorient normals so that they all point in the same direction, with respect to the observation points.";
 		}
 		
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the center of the point cloud).", "1", "0", "1", &P::Comp<bool>}
+				{ "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the observation points).", "1", "0", "1", &P::Comp<bool>}
 			});
 		}
 

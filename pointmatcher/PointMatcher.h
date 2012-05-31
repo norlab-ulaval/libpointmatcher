@@ -305,10 +305,15 @@ struct PointMatcher
 			bool contains(const std::string& text) const;
 		};
 		
-		//! An exception thrown when one tries to access an unexisting descriptor
-		struct InvalidDescriptor: std::runtime_error
+		//! An exception thrown when one tries to access features of wrong dimensions
+		struct InvalidFeatures: std::runtime_error
 		{
-			InvalidDescriptor(const std::string& reason):runtime_error(reason) {}
+			InvalidFeatures(const std::string& reason):runtime_error(reason) {}
+		};
+		//! An exception thrown when one tries to access an unexisting descriptor or one of the wrong dimensions
+		struct InvalidDescriptors: std::runtime_error
+		{
+			InvalidDescriptors(const std::string& reason):runtime_error(reason) {}
 		};
 		
 		DataPoints();
