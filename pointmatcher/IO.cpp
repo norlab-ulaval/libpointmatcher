@@ -582,7 +582,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(std::istream& is)
 	int nbPoints = xData.size();
 
 	// Transfer loaded points in specific structure (eigen matrix)
-	typename DataPoints::Features features(dim+1, nbPoints);
+	Matrix features(dim+1, nbPoints);
 	for(int i=0; i < nbPoints; i++)
 	{
 		features(0,i) = xData[i];
@@ -625,8 +625,6 @@ void PointMatcher<T>::saveCSV(const DataPoints& data, const std::string& fileNam
 template<typename T>
 void PointMatcher<T>::saveCSV(const DataPoints& data, std::ostream& os)
 {
-	typedef typename DataPoints::Descriptors Descriptors;
-	
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
 	
@@ -669,8 +667,6 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(const std::string&
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 {
-	typedef typename DataPoints::Features Features;
-	typedef typename DataPoints::Descriptors Descriptors;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 	
@@ -696,7 +692,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 		throw runtime_error(string("Wrong header for points"));
 	
 	// read points (features)
-	Features features(4, pointCount);
+	Matrix features(4, pointCount);
 	for (int p = 0; p < pointCount; ++p)
 	{
 		is >> features(0, p);
@@ -731,7 +727,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 	if (line == "COLOR_SCALARS lut 4")
 	{
 		// read color (descriptors)
-		Descriptors descriptors(4, pointCount);
+		Matrix descriptors(4, pointCount);
 		for (int p = 0; p < pointCount; ++p)
 		{
 			is >> descriptors(0, p);

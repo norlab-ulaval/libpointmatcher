@@ -113,14 +113,14 @@ PointMatcher<T>::DataPoints::DataPoints(const Labels& featureLabels, const Label
 
 //! Construct a point cloud from existing features without any descriptor
 template<typename T>
-PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels):
+PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels):
 	features(features),
 	featureLabels(featureLabels)
 {}
 
 //! Construct a point cloud from existing features and descriptors
 template<typename T>
-PointMatcher<T>::DataPoints::DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels):
+PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels):
 	features(features),
 	featureLabels(featureLabels),
 	descriptors(descriptors),
@@ -140,10 +140,10 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
 	{
 		stringstream errorMsg;
 		errorMsg << "Cannot concatenate DataPoints because the dimension of the features are not the same. Actual dimension: " << dimFeat << " New dimension: " << dp.features.rows(); 
-		throw InvalidFeatures(errorMsg.str());
+		throw InvalidField(errorMsg.str());
 	}
 	
-	typename DataPoints::Features combinedFeat(dimFeat, nbPointsTotal);
+	Matrix combinedFeat(dimFeat, nbPointsTotal);
 	combinedFeat.leftCols(nbPoints1) = this->features;
 	combinedFeat.rightCols(nbPoints2) = dp.features;
 	DataPoints dpOut(combinedFeat, this->featureLabels);
@@ -152,9 +152,9 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
 	{
 		const string name = this->descriptorLabels[i].text;
 		const int dimDesc = this->descriptorLabels[i].span;
-		if(dp.isDescriptorExist(name, dimDesc) == true)
+		if(dp.descriptorExists(name, dimDesc) == true)
 		{
-			typename DataPoints::Descriptors mergedDesc(dimDesc, nbPointsTotal);
+			Matrix mergedDesc(dimDesc, nbPointsTotal);
 			mergedDesc.leftCols(nbPoints1) = this->getDescriptorViewByName(name);
 			mergedDesc.rightCols(nbPoints2) = dp.getDescriptorViewByName(name);
 			dpOut.addDescriptor(name, mergedDesc);
@@ -167,205 +167,294 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
 	this->descriptorLabels = dpOut.descriptorLabels;
 }
 
+
+
+//! Makes sure a feature of a given name exists, if present, check its dimensions
+template<typename T>
+void PointMatcher<T>::DataPoints::allocateFeature(const std::string& name, const unsigned dim)
+{
+	allocateField(name, dim, featureLabels, features);
+}
+
+//! Add a feature by name, remove first if already exists
+template<typename T>
+void PointMatcher<T>::DataPoints::addFeature(const std::string& name, const Matrix& newFeature)
+{
+	addField(name, newFeature, featureLabels, features);
+}
+
+//! Get feature by name, return a matrix containing a copy of the requested feature
+template<typename T>
+typename PointMatcher<T>::Matrix PointMatcher<T>::DataPoints::getFeatureCopyByName(const std::string& name) const
+{
+	return Matrix(getFeatureViewByName(name));
+}
+
+//! Get a const view on a feature by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getFeatureViewByName(const std::string& name) const
+{
+	return getConstViewByName(name, featureLabels, features);
+}
+
+//! Look if a feature with a given name exist
+template<typename T>
+bool PointMatcher<T>::DataPoints::featureExists(const std::string& name) const
+{
+	return fieldExists(name, 0, featureLabels);
+}
+
+//! Look if a feature with a given name and dimension exist
+template<typename T>
+bool PointMatcher<T>::DataPoints::featureExists(const std::string& name, const unsigned dim) const
+{
+	return fieldExists(name, dim, featureLabels);
+}
+
+//! Return the dimension of a feature with a given name. Return 0 if the name is not found
+template<typename T>
+unsigned PointMatcher<T>::DataPoints::getFeatureDimension(const std::string& name) const
+{
+	return getFieldDimension(name, featureLabels);
+}
+
+//! Return the starting row of a feature with a given name. Return 0 if the name is not found
+template<typename T>
+unsigned PointMatcher<T>::DataPoints::getFeatureStartingRow(const std::string& name) const
+{
+	return getFieldStartingRow(name, featureLabels);
+}
+
+
+//! Get a view on a feature by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getFeatureViewByName(const std::string& name)
+{
+	return getViewByName(name, featureLabels, features);
+}
+
 //! Makes sure a descriptor of a given name exists, if present, check its dimensions
 template<typename T>
 void PointMatcher<T>::DataPoints::allocateDescriptor(const std::string& name, const unsigned dim)
 {
-	if (isDescriptorExist(name))
-	{
-		const int descDim(getDescriptorDimension(name));
-		if (descDim != int(dim))
-		{
-			throw InvalidDescriptors(
-				(boost::format("The existing descriptor %1% has dimension %2%, different than requested dimension %3%") % name % descDim % dim).str()
-			);
-		}
-	}
-	else
-	{
-		const int oldDescDim(descriptors.rows());
-		const int totalDim(oldDescDim + dim);
-		const int pointCount(features.cols());
-		Descriptors tmpDescriptors(descriptors);
-		descriptors.resize(totalDim, pointCount);
-		if (oldDescDim != 0)
-			descriptors.topRows(oldDescDim) = tmpDescriptors;
-		descriptorLabels.push_back(Label(name, dim));
-	}
+	allocateField(name, dim, descriptorLabels, descriptors);
 }
 
-//! Add a descriptor by name, remove if exists
+//! Add a descriptor by name, remove first if already exists
 template<typename T>
-void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, const Descriptors& newDescriptor)
+void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, const Matrix& newDescriptor)
 {
-	const int newDescDim = newDescriptor.rows();
-	const int newPointCount = newDescriptor.cols();
-	const int pointCount = features.cols();
-
-	if (newDescriptor.rows() == 0)
-		return;
-
-	// Replace if the descriptor exists
-	if (isDescriptorExist(name))
-	{
-		const int descDim = getDescriptorDimension(name);
-		
-		if(descDim == newDescDim)
-		{
-			// Ensure that the number of points in the point cloud and in the descriptor are the same
-			if(pointCount == newPointCount)
-			{
-				const int row = getDescriptorStartingRow(name);
-				descriptors.block(row, 0, descDim, pointCount) = newDescriptor;
-			}
-			else
-			{
-				stringstream errorMsg;
-				errorMsg << "The descriptor " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << "new: " << newPointCount;
-				throw InvalidDescriptors(errorMsg.str());
-			}
-		}
-		else
-		{
-			stringstream errorMsg;
-			errorMsg << "The descriptor " << name << " already exists but could not be added because the dimension is not the same. Old dim: " << descDim << " new: " << newDescDim;
-			throw InvalidDescriptors(errorMsg.str());
-		}
-	}
-	else // Add at the end if it is a new descriptor
-	{
-		if(pointCount == newPointCount)
-		{
-			const int oldDescDim(descriptors.rows());
-			const int totalDim = oldDescDim + newDescDim;
-			Descriptors tmpDescriptors(descriptors);
-			descriptors.resize(totalDim, pointCount);
-			if (oldDescDim > 0)
-				descriptors.topRows(oldDescDim) = tmpDescriptors;
-			descriptors.bottomRows(newDescDim) = newDescriptor;
-			descriptorLabels.push_back(Label(name, newDescDim));
-		}
-		else
-		{
-			stringstream errorMsg;
-			errorMsg << "The descriptor " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << " new: " << newPointCount;
-			throw InvalidDescriptors(errorMsg.str());
-		}
-	}
-
+	addField(name, newDescriptor, descriptorLabels, descriptors);
 }
 
 //! Get descriptor by name, return a matrix containing a copy of the requested descriptor
 template<typename T>
-typename PointMatcher<T>::DataPoints::Descriptors PointMatcher<T>::DataPoints::getDescriptorCopyByName(const std::string& name) const
+typename PointMatcher<T>::Matrix PointMatcher<T>::DataPoints::getDescriptorCopyByName(const std::string& name) const
 {
-	int row(0);
-	
-	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
-	{
-		const int span(descriptorLabels[i].span);
-		if (descriptorLabels[i].text == name)
-			return descriptors.block(row, 0, span, descriptors.cols());
-		row += span;
-	}
-
-	return Descriptors();
+	return Matrix(getDescriptorViewByName(name));
 }
 
 //! Get a const view on a descriptor by name, throw an exception if it does not exist
 template<typename T>
-typename PointMatcher<T>::DataPoints::ConstDescriptorView PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name) const
+typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name) const
 {
-	int row(0);
-	
-	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
-	{
-		const int span(descriptorLabels[i].span);
-		if (descriptorLabels[i].text == name)
-			return descriptors.block(row, 0, span, descriptors.cols());
-		row += span;
-	}
-	
-	throw InvalidDescriptors("Descriptor " + name + " not found");
+	return getConstViewByName(name, descriptorLabels, descriptors);
 }
 
 
 //! Get a view on a descriptor by name, throw an exception if it does not exist
 template<typename T>
-typename PointMatcher<T>::DataPoints::DescriptorView PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name)
+typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name)
 {
-	int row(0);
-	
-	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
-	{
-		const int span(descriptorLabels[i].span);
-		if (descriptorLabels[i].text == name)
-			return descriptors.block(row, 0, span, descriptors.cols());
-		row += span;
-	}
-	
-	throw InvalidDescriptors("Descriptor " + name + " not found");
+	return getViewByName(name, descriptorLabels, descriptors);
 }
 
 //! Look if a descriptor with a given name exist
 template<typename T>
-bool PointMatcher<T>::DataPoints::isDescriptorExist(const std::string& name) const
+bool PointMatcher<T>::DataPoints::descriptorExists(const std::string& name) const
 {
-	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
-	{
-		if (descriptorLabels[i].text == name)
-			return true;
-	}
-
-	return false;
+	return fieldExists(name, 0, descriptorLabels);
 }
 
 //! Look if a descriptor with a given name and dimension exist
 template<typename T>
-bool PointMatcher<T>::DataPoints::isDescriptorExist(const std::string& name, const unsigned dim) const
+bool PointMatcher<T>::DataPoints::descriptorExists(const std::string& name, const unsigned dim) const
 {
-	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	return fieldExists(name, dim, descriptorLabels);
+}
+
+//! Return the dimension of a descriptor with a given name. Return 0 if the name is not found
+template<typename T>
+unsigned PointMatcher<T>::DataPoints::getDescriptorDimension(const std::string& name) const
+{
+	return getFieldDimension(name, descriptorLabels);
+}
+
+//! Return the starting row of a descriptor with a given name. Return 0 if the name is not found
+template<typename T>
+unsigned PointMatcher<T>::DataPoints::getDescriptorStartingRow(const std::string& name) const
+{
+	return getFieldStartingRow(name, descriptorLabels);
+}
+
+
+//! Makes sure a field of a given name exists, if present, check its dimensions
+template<typename T>
+void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data)
+{
+	if (fieldExists(name, 0, labels))
 	{
-		if (descriptorLabels[i].text == name)
+		const unsigned descDim(getFieldDimension(name, labels));
+		if (descDim != dim)
 		{
-			if (descriptorLabels[i].span == dim)
+			throw InvalidField(
+				(boost::format("The existing field %1% has dimension %2%, different than requested dimension %3%") % name % descDim % dim).str()
+			);
+		}
+	}
+	else
+	{
+		const int oldDim(data.rows());
+		const int totalDim(oldDim + dim);
+		const int pointCount(features.cols());
+		Matrix tmpData(data);
+		data.resize(totalDim, pointCount);
+		if (oldDim != 0)
+			data.topRows(oldDim) = tmpData;
+		labels.push_back(Label(name, dim));
+	}
+}
+
+//! Add a descriptor or feature by name, remove first if already exists
+template<typename T>
+void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data)
+{
+	const int newFieldDim = newField.rows();
+	const int newPointCount = newField.cols();
+	const int pointCount = features.cols();
+
+	if (newField.rows() == 0)
+		return;
+
+	// Replace if the field exists
+	if (fieldExists(name, 0, labels))
+	{
+		const int fieldDim = getFieldDimension(name, labels);
+		
+		if(fieldDim == newFieldDim)
+		{
+			// Ensure that the number of points in the point cloud and in the field are the same
+			if(pointCount == newPointCount)
+			{
+				const int row = getFieldStartingRow(name, labels);
+				data.block(row, 0, fieldDim, pointCount) = newField;
+			}
+			else
+			{
+				stringstream errorMsg;
+				errorMsg << "The field " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << "new: " << newPointCount;
+				throw InvalidField(errorMsg.str());
+			}
+		}
+		else
+		{
+			stringstream errorMsg;
+			errorMsg << "The field " << name << " already exists but could not be added because the dimension is not the same. Old dim: " << fieldDim << " new: " << newFieldDim;
+			throw InvalidField(errorMsg.str());
+		}
+	}
+	else // Add at the end if it is a new field
+	{
+		if(pointCount == newPointCount)
+		{
+			const int oldFieldDim(data.rows());
+			const int totalDim = oldFieldDim + newFieldDim;
+			Matrix tmpFields(data);
+			data.resize(totalDim, pointCount);
+			if (oldFieldDim > 0)
+				data.topRows(oldFieldDim) = tmpFields;
+			data.bottomRows(newFieldDim) = newField;
+			labels.push_back(Label(name, newFieldDim));
+		}
+		else
+		{
+			stringstream errorMsg;
+			errorMsg << "The field " << name << " cannot be added because the number of points is not the same. Old point count: " << pointCount << " new: " << newPointCount;
+			throw InvalidField(errorMsg.str());
+		}
+	}
+}
+
+//! Get a const view on a matrix by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data) const
+{
+	unsigned row(0);
+	for(auto it(labels.begin()); it != labels.end(); ++it)
+	{
+		if (it->text == name)
+			return descriptors.block(row, 0, it->span, descriptors.cols());
+		row += it->span;
+	}
+	throw InvalidField("Field " + name + " not found");
+}
+
+//! Get a view on a matrix by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewByName(const std::string& name, const Labels& labels, Matrix& data)
+{
+	unsigned row(0);
+	for(auto it(labels.begin()); it != labels.end(); ++it)
+	{
+		if (it->text == name)
+			return descriptors.block(row, 0, it->span, descriptors.cols());
+		row += it->span;
+	}
+	throw InvalidField("Field " + name + " not found");
+}
+
+//! Look if a descriptor or a feature with a given name and dimension exist
+template<typename T>
+bool PointMatcher<T>::DataPoints::fieldExists(const std::string& name, const unsigned dim, const Labels& labels) const
+{
+	for(auto it(labels.begin()); it != labels.end(); ++it)
+	{
+		if (it->text == name)
+		{
+			if (dim != 0 && it->span == dim)
 				return true;
 			else
 				return false;
 		}
 	}
-
 	return false;
 }
 
-//! Return the dimension of a descriptor with a given name. Return 0 if the name is not found
-template<typename T>
-int PointMatcher<T>::DataPoints::getDescriptorDimension(const std::string& name) const
-{
-	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
-	{
-		if (descriptorLabels[i].text == name)
-			return descriptorLabels[i].span;
-	}
 
+//! Return the dimension of a feature or a descriptor with a given name. Return 0 if the name is not found
+template<typename T>
+unsigned PointMatcher<T>::DataPoints::getFieldDimension(const std::string& name, const Labels& labels) const
+{
+	for(auto it(labels.begin()); it != labels.end(); ++it)
+	{
+		if (it->text == name)
+			return it->span;
+	}
 	return 0;
 }
 
 
-//! Return the starting row of a descriptor with a given name. Return 0 if the name is not found
+//! Return the starting row of a feature or a descriptor with a given name. Return 0 if the name is not found
 template<typename T>
-int PointMatcher<T>::DataPoints::getDescriptorStartingRow(const std::string& name) const
+unsigned PointMatcher<T>::DataPoints::getFieldStartingRow(const std::string& name, const Labels& labels) const
 {
-	int row(0);
-	
-	for(unsigned int i = 0; i < descriptorLabels.size(); i++)
+	unsigned row(0);
+	for(auto it(labels.begin()); it != labels.end(); ++it)
 	{
-		const int span(descriptorLabels[i].span);
-		if(descriptorLabels[i].text == name)
+		if (it->text == name)
 			return row;
-		row += span;
+		row += it->span;
 	}
-
 	return 0;
 }
 

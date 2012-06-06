@@ -92,14 +92,14 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 	}
 
 	DataPoints outputCloud(
-		typename DataPoints::Features(input.features.rows(), nbPointsOut),
+		Matrix(input.features.rows(), nbPointsOut),
 		input.featureLabels
 	);
 	
 	// if there is descriptors, copy the labels
 	if (input.descriptors.cols() > 0)
 	{
-		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
+		outputCloud.descriptors = Matrix(input.descriptors.rows(), nbPointsOut);
 		outputCloud.descriptorLabels = input.descriptorLabels;
 	}
 	
@@ -169,14 +169,14 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 	}
 
 	DataPoints outputCloud(
-		typename DataPoints::Features(input.features.rows(), nbPointsOut),
+		Matrix(input.features.rows(), nbPointsOut),
 		input.featureLabels
 	);
 	
 	// if there is descriptors, copy the labels
 	if (input.descriptors.cols() > 0)
 	{
-		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
+		outputCloud.descriptors = Matrix(input.descriptors.rows(), nbPointsOut);
 		outputCloud.descriptorLabels = input.descriptorLabels;
 	}
 	
@@ -249,12 +249,12 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxQuantileOnAxis
 	
 	// build output values
 	DataPoints outputCloud(
-		typename DataPoints::Features(input.features.rows(), nbPointsOut),
+		Matrix(input.features.rows(), nbPointsOut),
 		input.featureLabels
 	);
 	if (input.descriptors.cols() > 0)
 	{
-		outputCloud.descriptors = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
+		outputCloud.descriptors = Matrix(input.descriptors.rows(), nbPointsOut);
 		outputCloud.descriptorLabels = input.descriptorLabels;
 	}
 	
@@ -308,18 +308,16 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::filter(const DataPoints& input)
 {
 	// Force densities to be computed
-	if (!input.isDescriptorExist("densities"))
+	if (!input.descriptorExists("densities"))
 	{
-		throw InvalidDescriptors("MaxDensityDataPointsFilter: Error, no densities found in descriptors.");
+		throw InvalidField("MaxDensityDataPointsFilter: Error, no densities found in descriptors.");
 	}
 
 	DataPoints outputCloud = input;
 	const int nbPointsIn = outputCloud.features.cols();
 
 	const auto densities(outputCloud.getDescriptorViewByName("densities"));
-
 	const T lastDensity = densities.maxCoeff();
-
 	const int nbSaturatedPts = (densities.cwise() == lastDensity).count();
 
 	// fill output values
@@ -391,8 +389,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input)
 {
-	typedef typename DataPoints::Features Features;
-	typedef typename DataPoints::Descriptors Descriptors;
+	typedef typename DataPoints::View View;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
@@ -407,7 +404,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	for(unsigned int i = 0; i < input.descriptorLabels.size(); i++)
 		insertDim += input.descriptorLabels[i].span;
 	if (insertDim != descDim)
-		throw InvalidDescriptors("SurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
+		throw InvalidField("SurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
 	
 	// Reserve memory for new descriptors
 	const int dimNormals(featDim-1);
@@ -416,11 +413,11 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	const int dimEigVectors((featDim-1)*(featDim-1));
 	//const int dimMatchedIds(knn); 
 
-	boost::optional<DescriptorView> normals;
-	boost::optional<DescriptorView> densities;
-	boost::optional<DescriptorView> eigenValues;
-	boost::optional<DescriptorView> eigenVectors;
-	boost::optional<DescriptorView> matchedValues;
+	boost::optional<View> normals;
+	boost::optional<View> densities;
+	boost::optional<View> eigenValues;
+	boost::optional<View> eigenVectors;
+	boost::optional<View> matchedValues;
 	
 	DataPoints output(input);
 	if (keepNormals)
@@ -582,7 +579,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::filter(
 	const DataPoints& input)
 {
-	typedef typename DataPoints::Features Features;
+	typedef Matrix Features;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 	
@@ -600,7 +597,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 		for(unsigned int i = 0; i < input.descriptorLabels.size(); i++)
 			insertDim += input.descriptorLabels[i].span;
 		if (insertDim != descDim)
-			throw InvalidDescriptors("SamplingSurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
+			throw InvalidField("SamplingSurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
 	}
 	
 	// Reserve memory for new descriptors
@@ -868,10 +865,10 @@ DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::OrientNormalsDataPoints
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::filter(const DataPoints& input)
 {
-	if (!input.isDescriptorExist("normals"))
-		throw InvalidDescriptors("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors.");
-	if (!input.isDescriptorExist("observationDirections"))
-		throw InvalidDescriptors("OrientNormalsDataPointsFilter: Error, cannot find observation directions in descriptors.");
+	if (!input.descriptorExists("normals"))
+		throw InvalidField("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors.");
+	if (!input.descriptorExists("observationDirections"))
+		throw InvalidField("OrientNormalsDataPointsFilter: Error, cannot find observation directions in descriptors.");
 	
 	DataPoints output(input);
 	auto normals(output.getDescriptorViewByName("normals"));
@@ -925,9 +922,8 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDat
 
 	//std::cout << "RandomSampling: size before: " << input.features.cols() << std::endl;
 
-	typename DataPoints::Features filteredFeat(input.features.rows(), nbPoints);
-
-
+	Matrix filteredFeat(input.features.rows(), nbPoints);
+	
 	int j(0);
 	for(int i = 0; i < filter.cols(); i++)
 	{
@@ -939,10 +935,10 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDat
 	}
 
 	// To handle no descriptors
-	typename DataPoints::Descriptors filteredDesc;
+	Matrix filteredDesc;
 	if(input.descriptors.cols() > 0)
 	{
-		filteredDesc = typename DataPoints::Descriptors(input.descriptors.rows(),nbPoints);
+		filteredDesc = Matrix(input.descriptors.rows(),nbPoints);
 		
 		int k(0);
 		for(int i = 0; i < filter.cols(); i++)
@@ -1001,7 +997,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDa
 	const int nbPointsIn = input.features.cols();
 	const int phase(rand() % iStep);
 	const int nbPointsOut = ((nbPointsIn - phase) + iStep - 1) / iStep;
-	typename DataPoints::Features filteredFeat(input.features.rows(), nbPointsOut);
+	Matrix filteredFeat(input.features.rows(), nbPointsOut);
 	
 	int j(0);
 	for (int i = 0; i < nbPointsIn-phase; i++)
@@ -1015,10 +1011,10 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDa
 	assert(j == nbPointsOut);
 
 	// To handle no descriptors
-	typename DataPoints::Descriptors filteredDesc;
+	Matrix filteredDesc;
 	if (input.descriptors.cols() > 0)
 	{
-		filteredDesc = typename DataPoints::Descriptors(input.descriptors.rows(), nbPointsOut);
+		filteredDesc = Matrix(input.descriptors.rows(), nbPointsOut);
 		
 		j = 0;
 		for (int i = 0; i < nbPointsIn-phase; i++)
@@ -1068,9 +1064,9 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ShadowDataPointsF
 	const DataPoints& input)
 {
 	// Check if normals are present
-	if (!input.isDescriptorExist("normals"))
+	if (!input.descriptorExists("normals"))
 	{
-		throw InvalidDescriptors("ShadowDataPointsFilter, Error: cannot find normals in descriptors");
+		throw InvalidField("ShadowDataPointsFilter, Error: cannot find normals in descriptors");
 	}
 	
 	const int dim = input.features.rows();
@@ -1173,7 +1169,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ObservationDirect
 	const int dim(input.features.rows() - 1);
 	if (dim != 2 && dim != 3)
 	{
-		throw InvalidFeatures(
+		throw InvalidField(
 			(boost::format("ObservationDirectionDataPointsFilter: Error, works only in 2 or 3 dimensions, cloud has %1% dimensions.") % dim).str()
 		);
 	}

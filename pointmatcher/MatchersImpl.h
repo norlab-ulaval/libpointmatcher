@@ -51,7 +51,6 @@ struct MatchersImpl
 	typedef typename NNS::SearchType NNSearchType;
 	
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
-	typedef typename PointMatcher<T>::DataPoints::Descriptors Descriptors;
 	typedef typename PointMatcher<T>::Matcher Matcher;
 	typedef typename PointMatcher<T>::Matches Matches;
 	

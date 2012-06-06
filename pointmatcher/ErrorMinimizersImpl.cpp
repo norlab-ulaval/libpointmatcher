@@ -67,7 +67,6 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const OutlierWeights& outlierWeights,
 	const Matches& matches)
 {
-	typedef typename DataPoints::Features Features;
 	typedef typename Matches::Ids Ids;
 	
 	assert(matches.ids.rows() > 0);
@@ -141,7 +140,6 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const Matches& matches)
 {
 	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
-	typedef typename DataPoints::Features Features;
 	typedef typename Matches::Ids Ids;
 	
 	assert(matches.ids.rows() > 0);

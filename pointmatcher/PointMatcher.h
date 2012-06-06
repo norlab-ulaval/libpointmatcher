@@ -275,14 +275,10 @@ struct PointMatcher
 	//! A point cloud
 	struct DataPoints
 	{
-		//! Feature points of size (dims+1) x ptcount
-		typedef Matrix Features;
-		//! Descriptor points of size descriptor_dims x ptcount
-		typedef Matrix Descriptors;
-		//! A view on a descriptor
-		typedef Eigen::Block<Descriptors> DescriptorView;
-		//! A view on a const descriptor
-		typedef const Eigen::Block<const Descriptors> ConstDescriptorView;
+		//! A view on a feature or descriptor
+		typedef Eigen::Block<Matrix> View;
+		//! A view on a const feature or const descriptor
+		typedef const Eigen::Block<const Matrix> ConstView;
 		
 		//! The name for a certain number of dim
 		struct Label
@@ -299,37 +295,52 @@ struct PointMatcher
 			size_t totalDim() const;
 		};
 		
-		//! An exception thrown when one tries to access features of wrong dimensions
-		struct InvalidFeatures: std::runtime_error
+		//! An exception thrown when one tries to access features or descriptors unexisting or of wrong dimensions
+		struct InvalidField: std::runtime_error
 		{
-			InvalidFeatures(const std::string& reason):runtime_error(reason) {}
-		};
-		//! An exception thrown when one tries to access an unexisting descriptor or one of the wrong dimensions
-		struct InvalidDescriptors: std::runtime_error
-		{
-			InvalidDescriptors(const std::string& reason):runtime_error(reason) {}
+			InvalidField(const std::string& reason):runtime_error(reason) {}
 		};
 		
 		DataPoints();
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount);
-		DataPoints(const Features& features, const Labels& featureLabels);
-		DataPoints(const Features& features, const Labels& featureLabels, const Descriptors& descriptors, const Labels& descriptorLabels);
+		DataPoints(const Matrix& features, const Labels& featureLabels);
+		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
 		
 		void concatenate(const DataPoints dp);
-		void allocateDescriptor(const std::string& name, const unsigned dim);
-		void addDescriptor(const std::string& name, const Descriptors& newDescriptor);
-		Descriptors getDescriptorCopyByName(const std::string& name) const;
-		ConstDescriptorView getDescriptorViewByName(const std::string& name) const;
-		DescriptorView getDescriptorViewByName(const std::string& name);
-		bool isDescriptorExist(const std::string& name) const;
-		bool isDescriptorExist(const std::string& name, const unsigned dim) const;
-		int getDescriptorDimension(const std::string& name) const;
-		int getDescriptorStartingRow(const std::string& name) const;
 		
-		Features features; //!< features of points in the cloud
+		void allocateFeature(const std::string& name, const unsigned dim);
+		void addFeature(const std::string& name, const Matrix& newFeature);
+		Matrix getFeatureCopyByName(const std::string& name) const;
+		ConstView getFeatureViewByName(const std::string& name) const;
+		View getFeatureViewByName(const std::string& name);
+		bool featureExists(const std::string& name) const;
+		bool featureExists(const std::string& name, const unsigned dim) const;
+		unsigned getFeatureDimension(const std::string& name) const;
+		unsigned getFeatureStartingRow(const std::string& name) const;
+		
+		void allocateDescriptor(const std::string& name, const unsigned dim);
+		void addDescriptor(const std::string& name, const Matrix& newDescriptor);
+		Matrix getDescriptorCopyByName(const std::string& name) const;
+		ConstView getDescriptorViewByName(const std::string& name) const;
+		View getDescriptorViewByName(const std::string& name);
+		bool descriptorExists(const std::string& name) const;
+		bool descriptorExists(const std::string& name, const unsigned dim) const;
+		unsigned getDescriptorDimension(const std::string& name) const;
+		unsigned getDescriptorStartingRow(const std::string& name) const;
+		
+		Matrix features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features
-		Descriptors descriptors; //!< descriptors of points in the cloud, might be empty
+		Matrix descriptors; //!< descriptors of points in the cloud, might be empty
 		Labels descriptorLabels; //!< labels of descriptors
+	
+	private:
+		void allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data);
+		void addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data);
+		ConstView getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data) const;
+		View getViewByName(const std::string& name, const Labels& labels, Matrix& data);
+		bool fieldExists(const std::string& name, const unsigned dim, const Labels& labels) const;
+		unsigned getFieldDimension(const std::string& name, const Labels& labels) const;
+		unsigned getFieldStartingRow(const std::string& name, const Labels& labels) const;
 	};
 	
 	// ---------------------------------

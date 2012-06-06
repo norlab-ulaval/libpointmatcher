@@ -132,8 +132,8 @@ InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string&
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& data, std::ostream& stream)
 {
-	const typename DataPoints::Features& features(data.features);
-	//const typename DataPoints::Descriptors& descriptors(data.descriptors);
+	const Matrix& features(data.features);
+	//const Matrix& descriptors(data.descriptors);
 	
 	stream << "# vtk DataFile Version 3.0\n";
 	stream << "File created by libpointmatcher\n";
@@ -172,8 +172,8 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& data, std::ostream& stream)
 {
-	//const typename DataPoints::Features& features(data.features);
-	const typename DataPoints::Descriptors& descriptors(data.descriptors.transpose());
+	//const Matrix& features(data.features);
+	const Matrix& descriptors(data.descriptors.transpose());
 	
 	assert(descriptors.cols() >= 15);
 
@@ -226,10 +226,10 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataLinks(
 	std::ostream& stream)
 {
 
-	const typename DataPoints::Features& refFeatures(ref.features);
+	const Matrix& refFeatures(ref.features);
 	const int refPtCount(refFeatures.cols());
 	//const int featDim(refFeatures.rows());
-	const typename DataPoints::Features& readingFeatures(reading.features);
+	const Matrix& readingFeatures(reading.features);
 	const int readingPtCount(readingFeatures.cols());
 	const int totalPtCount(refPtCount+readingPtCount);
 	
@@ -359,7 +359,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::ostream& stream, const std::string& attribute, const std::string& nameTag, const DataPoints& cloud, const int forcedDim)
 {
-	if (!cloud.isDescriptorExist(nameTag))
+	if (!cloud.descriptorExists(nameTag))
 		return;
 		
 	const auto desc(cloud.getDescriptorViewByName(nameTag));

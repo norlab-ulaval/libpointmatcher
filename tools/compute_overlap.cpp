@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
 	validateArgs(argc, argv);
 
 	typedef PointMatcher<float> PM;
+	typedef PM::Matrix Matrix;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DataPoints;
-	typedef PM::DataPoints::Descriptors Descriptors;
 	typedef PM::Matches Matches;
 
 	// Process arguments
@@ -182,13 +182,13 @@ int main(int argc, char *argv[])
 			reading = computeDensity->filter(reading);
 			reading = maxDensity->filter(reading);
 			//reading = cutInHalf->filter(reading);
-			const Descriptors inliersRead = Descriptors::Zero(1, reading.features.cols());
+			const Matrix inliersRead = Matrix::Zero(1, reading.features.cols());
 			reading.addDescriptor("inliers", inliersRead);
 
 			reference = subSample->filter(reference);
 			reference = computeDensity->filter(reference);
 			reference = maxDensity->filter(reference);
-			const Descriptors inliersRef = Descriptors::Zero(1, reference.features.cols());
+			const Matrix inliersRef = Matrix::Zero(1, reference.features.cols());
 			reference.addDescriptor("inliers", inliersRef);
 
 			//TODO: reverse self and target
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 				Matches selfMatches(knn, selfPtsCount);
 				selfMatches = matcherSelf->findClosests(self, DataPoints());
 
-				const Descriptors maxSearchDist = selfMatches.dists.colwise().maxCoeff().cwiseSqrt();
+				const Matrix maxSearchDist = selfMatches.dists.colwise().maxCoeff().cwiseSqrt();
 				self.addDescriptor("maxSearchDist", maxSearchDist);
 
 				Matches targetMatches(knnAll, targetPtsCount);

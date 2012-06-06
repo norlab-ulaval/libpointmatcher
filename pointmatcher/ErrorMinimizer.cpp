@@ -129,8 +129,6 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 		const Matches& matches, 
 		const OutlierWeights& outlierWeights)
 {
-	typedef typename DataPoints::Features Features;
-	typedef typename DataPoints::Descriptors Descriptors;
 	typedef typename Matches::Ids Ids;
 	typedef typename Matches::Dists Dists;
 	
@@ -148,11 +146,11 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 	if (pointsCount == 0)
 		throw ConvergenceError("ErrorMnimizer: no point to minimize");
 
-	Features keptFeat(dimFeat, pointsCount);
+	Matrix keptFeat(dimFeat, pointsCount);
 	
-	Descriptors keptDesc;
+	Matrix keptDesc;
 	if(dimReqDesc > 0)
-		keptDesc = Descriptors(dimReqDesc, pointsCount);
+		keptDesc = Matrix(dimReqDesc, pointsCount);
 
 	Matches keptMatches (Dists(1,pointsCount), Ids(1, pointsCount));
 	OutlierWeights keptWeights(1, pointsCount);
@@ -187,10 +185,10 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 	assert(dimFeat == sourcePts.features.rows());
 	const int dimSourDesc = sourcePts.descriptors.rows();
 	
-	Features associatedFeat(dimFeat, pointsCount);
-	Descriptors associatedDesc;
+	Matrix associatedFeat(dimFeat, pointsCount);
+	Matrix associatedDesc;
 	if(dimSourDesc > 0)
-		associatedDesc = Descriptors(dimSourDesc, pointsCount);
+		associatedDesc = Matrix(dimSourDesc, pointsCount);
 
 	// Fetch matched points
 	for (int i = 0; i < pointsCount; ++i)
