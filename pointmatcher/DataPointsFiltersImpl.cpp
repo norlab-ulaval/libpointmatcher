@@ -58,6 +58,41 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::IdentityDataPoint
 template struct DataPointsFiltersImpl<float>::IdentityDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::IdentityDataPointsFilter;
 
+// RemoveNaNDataPointsFilter
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter::filter(
+	const DataPoints& input)
+{
+	// compute the number of NaN
+	const unsigned pointCount(input.features.cols());
+	vector<bool> haveNaN(pointCount);
+	unsigned NaNCount(0);
+	for (int i = 0; i < input.features.cols(); ++i)
+	{
+		const auto colArray(input.features.col(i).array());
+		const bool hasNaN(!(colArray == colArray).all());
+		haveNaN[i] = hasNaN;
+		NaNCount += hasNaN ? 1 : 0;
+	}
+	
+	// copy the non-NaN values
+	DataPoints outputCloud(input.featureLabels, input.descriptorLabels, pointCount - NaNCount);
+	int j(0);
+	for (int i = 0; i < input.features.cols(); ++i)
+	{
+		if (!haveNaN[i])
+		{
+			outputCloud.features.col(j) = input.features.col(i);
+			outputCloud.descriptors.col(j) = input.descriptors.col(i);
+			++j;
+		}
+	}
+	return outputCloud;
+}
+
+template struct DataPointsFiltersImpl<float>::RemoveNaNDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::RemoveNaNDataPointsFilter;
+
 // MaxDistDataPointsFilter
 // Constructor
 template<typename T>

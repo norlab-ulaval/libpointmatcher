@@ -74,7 +74,19 @@ struct DataPointsFiltersImpl
 		
 		virtual DataPoints filter(const DataPoints& input);
 	};
-
+	
+	
+	//! Remove points having NaN as coordinate
+	struct RemoveNaNDataPointsFilter: public DataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			return "Remove points having NaN as coordinate.";
+		}
+		
+		virtual DataPoints filter(const DataPoints& input);
+	};
+	
 	//! Subsampling. Filter points beyond a maximum distance measured on a specific axis
 	struct MaxDistDataPointsFilter: public DataPointsFilter
 	{

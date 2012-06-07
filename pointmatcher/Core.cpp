@@ -1398,6 +1398,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR_NO_PARAM(Transformation, RigidTransformation, typename TransformationsImpl<T>::RigidTransformation)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter, typename DataPointsFiltersImpl<T>::IdentityDataPointsFilter)
+	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, RemoveNaNDataPointsFilter, typename DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxDistDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MinDistDataPointsFilter, typename DataPointsFiltersImpl<T>::MinDistDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, MaxQuantileOnAxisDataPointsFilter, typename DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter)
