@@ -421,7 +421,7 @@ bool PointMatcher<T>::DataPoints::fieldExists(const std::string& name, const uns
 	{
 		if (it->text == name)
 		{
-			if (dim != 0 && it->span == dim)
+			if (dim != 0 || it->span == dim)
 				return true;
 			else
 				return false;
