@@ -69,17 +69,15 @@ int main(int argc, char *argv[])
 	if (argc == 4)
 		debugMode = true;
 	
-	PM pm;
-
 	if(debugMode)
-		setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 
 	// Prepare transformation chain for maps
 	PM::Transformation* transformPoints;
-	transformPoints = pm.TransformationRegistrar.create("TransformFeatures");
+	transformPoints = PM::get().TransformationRegistrar.create("TransformFeatures");
 	
 	PM::Transformation* transformNormals;
-	transformNormals = pm.TransformationRegistrar.create("TransformNormals");
+	transformNormals = PM::get().TransformationRegistrar.create("TransformNormals");
 	
 	PM::Transformations transformations;
 	transformations.push_back(transformPoints);
@@ -154,25 +152,25 @@ int main(int argc, char *argv[])
 
 			// Preprare filters
 			PM::DataPointsFilter* subSample;
-			subSample= pm.DataPointsFilterRegistrar.create(
+			subSample= PM::get().DataPointsFilterRegistrar.create(
 				"RandomSamplingDataPointsFilter", PM::Parameters({
 					{"prob", "0.5"}
 					}));
 
 			PM::DataPointsFilter* maxDensity;
-			maxDensity = pm.DataPointsFilterRegistrar.create(
+			maxDensity = PM::get().DataPointsFilterRegistrar.create(
 				"MaxDensityDataPointsFilter"
 				);
 			
 			PM::DataPointsFilter* cutInHalf;
-			cutInHalf = pm.DataPointsFilterRegistrar.create(
+			cutInHalf = PM::get().DataPointsFilterRegistrar.create(
 				"MinDistDataPointsFilter", PM::Parameters({
 					{"dim", "1"},
 					{"minDist", "0"}
 				}));
 
 			PM::DataPointsFilter* computeDensity;
-			computeDensity = pm.DataPointsFilterRegistrar.create(
+			computeDensity = PM::get().DataPointsFilterRegistrar.create(
 				"SurfaceNormalDataPointsFilter", PM::Parameters({
 					{"knn", "20"},
 					{"keepDensities", "1"}
@@ -204,11 +202,11 @@ int main(int argc, char *argv[])
 				int knn = 20;
 				int knnAll = 50;
 				PM::Matcher* matcherSelf;
-				matcherSelf = pm.MatcherRegistrar.create(
+				matcherSelf = PM::get().MatcherRegistrar.create(
 					"KDTreeMatcher", PM::Parameters({{ "knn", toParam(knn) }}));
 
 				PM::Matcher* matcherTarget;
-				matcherTarget = pm.MatcherRegistrar.create(
+				matcherTarget = PM::get().MatcherRegistrar.create(
 					"KDTreeVarDistMatcher", PM::Parameters({
 						{ "knn", toParam(knnAll) },
 						{ "maxDistField", "maxSearchDist" }

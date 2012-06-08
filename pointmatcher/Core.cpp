@@ -1440,6 +1440,26 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(Logger, FileLogger, FileLogger)
 }
 
+// static instances plus wrapper function to get them from templatized static method in PointMatcher
+
+PointMatcher<float> _PointMatcherFloat;
+PointMatcher<double> _PointMatcherDouble;
+
+template<typename T>
+const PointMatcher<T>& _getPM();
+
+template<>
+const PointMatcher<float>& _getPM<float>() { return _PointMatcherFloat; }
+template<>
+const PointMatcher<double>& _getPM<double>() { return _PointMatcherDouble; }
+
+//! Return instances
+template<typename T>
+const PointMatcher<T>& PointMatcher<T>::get()
+{
+	return _getPM<T>();
+}
+
 template struct PointMatcher<float>;
 template struct PointMatcher<double>;
 

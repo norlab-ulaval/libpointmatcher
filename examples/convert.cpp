@@ -58,8 +58,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	PM pm;
-	setLogger(pm.LoggerRegistrar.create("FileLogger"));
+	setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 
 	PM::DataPoints d(PM::loadAnyFormat(argv[argc-2]));
 	

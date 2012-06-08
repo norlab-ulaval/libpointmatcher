@@ -149,17 +149,16 @@ void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, Cu
 
 void listModules()
 {
-	const PM pm;
 	CurrentBibliography bib;
 	
-	DUMP_REGISTRAR_CONTENT(pm, Transformation, bib)
-	DUMP_REGISTRAR_CONTENT(pm, DataPointsFilter, bib)
-	DUMP_REGISTRAR_CONTENT(pm, Matcher, bib)
-	DUMP_REGISTRAR_CONTENT(pm, OutlierFilter, bib)
-	DUMP_REGISTRAR_CONTENT(pm, ErrorMinimizer, bib)
-	DUMP_REGISTRAR_CONTENT(pm, TransformationChecker, bib)
-	DUMP_REGISTRAR_CONTENT(pm, Inspector, bib)
-	DUMP_REGISTRAR_CONTENT(pm, Logger, bib)
+	DUMP_REGISTRAR_CONTENT(PM::get(), Transformation, bib)
+	DUMP_REGISTRAR_CONTENT(PM::get(), DataPointsFilter, bib)
+	DUMP_REGISTRAR_CONTENT(PM::get(), Matcher, bib)
+	DUMP_REGISTRAR_CONTENT(PM::get(), OutlierFilter, bib)
+	DUMP_REGISTRAR_CONTENT(PM::get(), ErrorMinimizer, bib)
+	DUMP_REGISTRAR_CONTENT(PM::get(), TransformationChecker, bib)
+	DUMP_REGISTRAR_CONTENT(PM::get(), Inspector, bib)
+	DUMP_REGISTRAR_CONTENT(PM::get(), Logger, bib)
 	
 	cout << "* Bibliography *" << endl << endl;
 	bib.dump(cout);

@@ -62,7 +62,6 @@ private:
 
 	PM::FileInfoVector list;
 	std::fstream resultFile;
-	PM pm;
 };
 
 
@@ -83,7 +82,7 @@ EvaluateDataset::EvaluateDataset(const string& evalFileName, const string& dataP
 		  abort();
 	}
 	
-	//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+	//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 }
 
 void EvaluateDataset::testAll()

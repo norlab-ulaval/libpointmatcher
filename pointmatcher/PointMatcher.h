@@ -737,8 +737,13 @@ struct PointMatcher
 		void createKeyFrame(DataPoints& inputCloud);
 	};
 	
-	//! Constructor, fill registrars
+	// ---------------------------------
+	// Instance-related functions
+	// ---------------------------------
+	
 	PointMatcher();
+	
+	static const PointMatcher& get();
 }; // PointMatcher<T>
 
 #endif // __POINTMATCHER_CORE_H

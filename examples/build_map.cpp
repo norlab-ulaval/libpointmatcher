@@ -67,9 +67,7 @@ int main(int argc, char *argv[])
 	string outputFileName(argv[3]);
 	
 	
-	PM pm;
-	
-	setLogger(pm.LoggerRegistrar.create("FileLogger"));
+	setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 	
 	PM::DataPoints mapCloud;
 
@@ -79,28 +77,28 @@ int main(int argc, char *argv[])
 	// Define transformation chain
 	PM::Transformations transformations;
 	PM::Transformation* transformPoints;
-	transformPoints = pm.TransformationRegistrar.create("TransformFeatures");
+	transformPoints = PM::get().TransformationRegistrar.create("TransformFeatures");
 	PM::Transformation* transformNormals;
-	transformNormals = pm.TransformationRegistrar.create("TransformNormals");
+	transformNormals = PM::get().TransformationRegistrar.create("TransformNormals");
 	
 	transformations.push_back(transformPoints);
 	transformations.push_back(transformNormals);
 
 	// Define filters for later use
 	PM::DataPointsFilter* removeScanner;
-	removeScanner = pm.DataPointsFilterRegistrar.create(
+	removeScanner = PM::get().DataPointsFilterRegistrar.create(
 		"MinDistDataPointsFilter", PM::Parameters({
 			{"minDist", "1.0"}
 			}));
 	
 	PM::DataPointsFilter* randSubsample;
-	randSubsample = pm.DataPointsFilterRegistrar.create(
+	randSubsample = PM::get().DataPointsFilterRegistrar.create(
 		"RandomSamplingDataPointsFilter", PM::Parameters({
 			{"prob", toParam(0.65)}
 			}));
 
 	PM::DataPointsFilter* normalFilter;
-	normalFilter = pm.DataPointsFilterRegistrar.create(
+	normalFilter = PM::get().DataPointsFilterRegistrar.create(
 		"SurfaceNormalDataPointsFilter", PM::Parameters({
 			{"binSize", "10"},
 			{"epsilon", "5"}, 
@@ -109,7 +107,7 @@ int main(int argc, char *argv[])
 			}));
 
 	PM::DataPointsFilter* densityFilter;
-	densityFilter= pm.DataPointsFilterRegistrar.create(
+	densityFilter= PM::get().DataPointsFilterRegistrar.create(
 		"SurfaceNormalDataPointsFilter", PM::Parameters({
 			{"binSize", "10"},
 			{"epsilon", "5"}, 
@@ -118,19 +116,19 @@ int main(int argc, char *argv[])
 			}));
 
 	PM::DataPointsFilter* orientNormalFilter;
-	orientNormalFilter = pm.DataPointsFilterRegistrar.create(
+	orientNormalFilter = PM::get().DataPointsFilterRegistrar.create(
 		"OrientNormalsDataPointsFilter", PM::Parameters({
 			{"towardCenter", "1"}
 			}));
 
 	PM::DataPointsFilter* uniformSubsample;
-	uniformSubsample = pm.DataPointsFilterRegistrar.create(
+	uniformSubsample = PM::get().DataPointsFilterRegistrar.create(
 		"MaxDensityDataPointsFilter", PM::Parameters({
 			{"maxDensity", toParam(30)}
 			}));
 	
 	PM::DataPointsFilter* shadowFilter;
-	shadowFilter = pm.DataPointsFilterRegistrar.create(
+	shadowFilter = PM::get().DataPointsFilterRegistrar.create(
 		"ShadowDataPointsFilter");
 
 	for(unsigned i=0; i < list.size(); i++)
@@ -187,7 +185,7 @@ int main(int argc, char *argv[])
 				if(probToKeep < 1)
 				{
 					cout << "Randomly keep " << probToKeep*100 << "\% points" << endl; 
-					randSubsample = pm.DataPointsFilterRegistrar.create(
+					randSubsample = PM::get().DataPointsFilterRegistrar.create(
 						"RandomSamplingDataPointsFilter", PM::Parameters({
 							{"prob", toParam(probToKeep)}
 							}));

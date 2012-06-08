@@ -56,7 +56,6 @@ class IcpHelper: public testing::Test
 {
 public:
 	
-	PM pm;
 	PM::ICP icp;
 	
 	PM::Parameters params;
@@ -64,7 +63,7 @@ public:
 	virtual void dumpVTK()
 	{
 		// Make available a VTK inspector for manual inspection
-		icp.inspector.reset(pm.InspectorRegistrar.create(
+		icp.inspector.reset(PM::get().InspectorRegistrar.create(
 			"VTKFileInspector", 
 			PM::Parameters({{"baseFileName","./unitTest"}})
 			)
@@ -121,7 +120,7 @@ public:
 	{
 		icp.setDefault();
 		// Uncomment for consol outputs
-		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 	}
 
 	// Will be called for every tests
@@ -158,7 +157,7 @@ public:
 	{
 		icp.setDefault();
 		// Uncomment for consol outputs
-		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 		
 		// We'll test the filters on reading point cloud
 		icp.readingDataPointsFilters.clear();
@@ -170,7 +169,7 @@ public:
 	void addFilter(string name, PM::Parameters params)
 	{
 		testedDataPointFilter = 
-			pm.DataPointsFilterRegistrar.create(name, params);
+			PM::get().DataPointsFilterRegistrar.create(name, params);
 	
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
@@ -178,7 +177,7 @@ public:
 	void addFilter(string name)
 	{
 		testedDataPointFilter = 
-			pm.DataPointsFilterRegistrar.create(name);
+			PM::get().DataPointsFilterRegistrar.create(name);
 		
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
@@ -355,7 +354,7 @@ TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 {
 	// Used to create normal for reading point cloud
 	PM::DataPointsFilter* extraDataPointFilter;
-	extraDataPointFilter = pm.DataPointsFilterRegistrar.create(
+	extraDataPointFilter = PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter");
 	icp.readingDataPointsFilters.push_back(extraDataPointFilter);
 	addFilter("ObservationDirectionDataPointsFilter");
@@ -413,7 +412,7 @@ public:
 	{
 		icp.setDefault();
 		// Uncomment for consol outputs
-		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 	}
 
 	// Will be called for every tests
@@ -422,7 +421,7 @@ public:
 	void addFilter(string name, PM::Parameters params)
 	{
 		testedMatcher = 
-			pm.MatcherRegistrar.create(name, params);
+			PM::get().MatcherRegistrar.create(name, params);
 		icp.matcher.reset(testedMatcher);
 	}
 
@@ -471,7 +470,7 @@ public:
 	{
 		icp.setDefault();
 		// Uncomment for consol outputs
-		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 		
 		icp.outlierFilters.clear();
 	}
@@ -482,7 +481,7 @@ public:
 	void addFilter(string name, PM::Parameters params)
 	{
 		testedOutlierFilter = 
-			pm.OutlierFilterRegistrar.create(name, params);
+			PM::get().OutlierFilterRegistrar.create(name, params);
 		icp.outlierFilters.push_back(testedOutlierFilter);
 	}
 
@@ -513,7 +512,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter2D)
 	
 	params = PM::Parameters({{"maxDist", toParam(0.015)}});
 	extraOutlierFilter = 
-			pm.OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
+			PM::get().OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
 	icp.outlierFilters.push_back(extraOutlierFilter);	
 	
 	params = PM::Parameters({{"minDist", toParam(0.0002)}});
@@ -530,7 +529,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter3D)
 	
 	params = PM::Parameters({{"maxDist", toParam(0.1)}});
 	extraOutlierFilter = 
-			pm.OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
+			PM::get().OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
 	icp.outlierFilters.push_back(extraOutlierFilter);	
 	
 	params = PM::Parameters({{"minDist", toParam(0.0002)}});
@@ -584,7 +583,7 @@ public:
 	{
 		icp.setDefault();
 		// Uncomment for consol outputs
-		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 	}
 
 	// Will be called for every tests
@@ -592,7 +591,7 @@ public:
 
 	void addFilter(string name)
 	{
-		errorMin = pm.ErrorMinimizerRegistrar.create(name);
+		errorMin = PM::get().ErrorMinimizerRegistrar.create(name);
 		icp.errorMinimizer.reset(errorMin);
 	}
 };
@@ -627,7 +626,7 @@ public:
 	{
 		icp.setDefault();
 		// Uncomment for consol outputs
-		//setLogger(pm.LoggerRegistrar.create("FileLogger"));
+		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 		
 		icp.transformationCheckers.clear();
 	}
@@ -638,7 +637,7 @@ public:
 	void addFilter(string name, PM::Parameters params)
 	{
 		transformCheck = 
-			pm.TransformationCheckerRegistrar.create(name, params);
+			PM::get().TransformationCheckerRegistrar.create(name, params);
 		
 		icp.transformationCheckers.push_back(transformCheck);
 	}
@@ -676,7 +675,7 @@ TEST_F(TransformationCheckerTest, BoundTransformationChecker)
 		{"maxTranslationNorm", toParam(1.0)}
 	});
 	
-	extraTransformCheck = pm.TransformationCheckerRegistrar.create(
+	extraTransformCheck = PM::get().TransformationCheckerRegistrar.create(
 		"CounterTransformationChecker");
 	icp.transformationCheckers.push_back(extraTransformCheck);
 	

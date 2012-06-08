@@ -64,8 +64,6 @@ int main(int argc, char *argv[])
 
 	string outputFileName(argv[0]);
 	
-	PM pm;
-	
 	// Main algorithm definition
 	PM::ICP icp;
 
@@ -102,7 +100,7 @@ int main(int argc, char *argv[])
 				newCloud.features = tp.inverse()*newCloud.features;
 			
 				PM::DataPointsFilter* densityFilter;
-				densityFilter= pm.DataPointsFilterRegistrar.create(
+				densityFilter= PM::get().DataPointsFilterRegistrar.create(
 					"SurfaceNormalDataPointsFilter", PM::Parameters({
 						{"binSize", "10"},
 						{"epsilon", "5"}, 
@@ -113,7 +111,7 @@ int main(int argc, char *argv[])
 				PM::DataPointsFilter* maxDensitySubsample;
 				PM::Parameters params;
 				params = PM::Parameters({{"maxDensity", toParam(30)}});
-				maxDensitySubsample = pm.DataPointsFilterRegistrar.create("MaxDensityDataPointsFilter", params);
+				maxDensitySubsample = PM::get().DataPointsFilterRegistrar.create("MaxDensityDataPointsFilter", params);
 				
 				// Merge point clouds to map			
 				mapPointCloud.concatenate(newCloud);
@@ -126,7 +124,7 @@ int main(int argc, char *argv[])
 				{
 					PM::DataPointsFilter* randSubsample;
 					params = PM::Parameters({{"prob", toParam(probToKeep)}});
-					randSubsample = pm.DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
+					randSubsample = PM::get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
 					mapPointCloud = randSubsample->filter(mapPointCloud);
 				}
 			}
