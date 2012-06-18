@@ -393,7 +393,7 @@ typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::get
 	for(auto it(labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
-			return descriptors.block(row, 0, it->span, descriptors.cols());
+			return data.block(row, 0, it->span, data.cols());
 		row += it->span;
 	}
 	throw InvalidField("Field " + name + " not found");
@@ -407,7 +407,7 @@ typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewB
 	for(auto it(labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
-			return descriptors.block(row, 0, it->span, descriptors.cols());
+			return data.block(row, 0, it->span, data.cols());
 		row += it->span;
 	}
 	throw InvalidField("Field " + name + " not found");

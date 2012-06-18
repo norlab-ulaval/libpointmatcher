@@ -147,7 +147,6 @@ TEST_F(GenericTest, ICP_default)
 // Utility classes
 class DataFilterTest: public IcpHelper
 {
-
 public:
 
 	PM::DataPointsFilter* testedDataPointFilter;
@@ -156,7 +155,7 @@ public:
 	virtual void SetUp()
 	{
 		icp.setDefault();
-		// Uncomment for consol outputs
+		// Uncomment for console outputs
 		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 		
 		// We'll test the filters on reading point cloud
