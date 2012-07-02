@@ -599,7 +599,7 @@ template<typename T>
 DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurfaceNormalDataPointsFilter(const Parameters& params):
 	DataPointsFilter("SamplingSurfaceNormalDataPointsFilter", SamplingSurfaceNormalDataPointsFilter::availableParameters(), params),
 	ratio(Parametrizable::get<T>("ratio")),
-	binSize(Parametrizable::get<int>("binSize")),
+	knn(Parametrizable::get<int>("knn")),
 	samplingMethod(Parametrizable::get<int>("samplingMethod")),
 	averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
 	keepNormals(Parametrizable::get<bool>("keepNormals")),
@@ -722,7 +722,7 @@ template<typename T>
 void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
 {
 	const int count(last - first);
-	if (count <= int(binSize))
+	if (count <= int(knn))
 	{
 		// compute for this range
 		fuseRange(data, first, last);
@@ -945,6 +945,14 @@ DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPoin
 {
 }
 
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	DataPointsFilter(className, paramsDoc, params),
+	prob(Parametrizable::get<double>("prob"))
+{
+}
+
 // Sampling
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::randomSample(const DataPoints& input) const
@@ -993,7 +1001,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDat
 	return DataPoints(filteredFeat, input.featureLabels, filteredDesc, input.descriptorLabels);
 }
 
-// Pre filter
+// filter
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::filter(const DataPoints& input)
 {
@@ -1002,6 +1010,28 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDat
 
 template struct DataPointsFiltersImpl<float>::RandomSamplingDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::RandomSamplingDataPointsFilter;
+
+
+// MaxPointCountDataPointsFilter
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::MaxPointCountDataPointsFilter::MaxPointCountDataPointsFilter(const Parameters& params):
+	RandomSamplingDataPointsFilter("MaxPointCountDataPointsFilter", MaxPointCountDataPointsFilter::availableParameters(), params),
+	maxCount(Parametrizable::get<unsigned>("maxCount"))
+{
+}
+
+// filter
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxPointCountDataPointsFilter::filter(const DataPoints& input)
+{
+	if (unsigned(input.features.cols()) <= maxCount)
+		return input;
+	return RandomSamplingDataPointsFilter::filter(input);
+}
+
+template struct DataPointsFiltersImpl<float>::MaxPointCountDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::MaxPointCountDataPointsFilter;
 
 
 // FixStepSamplingDataPointsFilter

@@ -214,20 +214,20 @@ struct DataPointsFiltersImpl
 		static Vector serializeEigVec(const Matrix eigenVe);
 	};
 
-	//! Sampling surface normals. First decimate the space until there is at most binSize points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
+	//! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
 	//FIXME: the name of the normals field is "triangle_normals"
 	struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
-			return "Subsampling, Normals. This filter decomposes the point-cloud space in boxes, by recursively splitting the cloud through axis-aligned hyperplanes such as to maximize the evenness of the aspect ratio of the box. When the number of points in a box reaches a value binSize or lower, the filter computes the center of mass of these points and its normal by taking the eigenvector corresponding to the smallest eigenvalue of all points in the box.";
+			return "Subsampling, Normals. This filter decomposes the point-cloud space in boxes, by recursively splitting the cloud through axis-aligned hyperplanes such as to maximize the evenness of the aspect ratio of the box. When the number of points in a box reaches a value knn or lower, the filter computes the center of mass of these points and its normal by taking the eigenvector corresponding to the smallest eigenvalue of all points in the box.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
 				{ "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> },
-				{ "binSize", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> },
-				{ "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/binSize.", "0", "0", "1", &P::Comp<unsigned> },
+				{ "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> },
+				{ "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> },
 				{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
 				{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" },
 				{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" },
@@ -237,7 +237,7 @@ struct DataPointsFiltersImpl
 		}
 		
 		const T ratio;
-		const unsigned binSize;
+		const unsigned knn;
 		const unsigned samplingMethod; 
 		const bool averageExistingDescriptors;
 		const bool keepNormals;
@@ -350,8 +350,33 @@ struct DataPointsFiltersImpl
 		virtual ~RandomSamplingDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
 		
+	protected:
+		RandomSamplingDataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+		
 	private:
 		DataPoints randomSample(const DataPoints& input) const;
+	};
+	
+	//! Maximum number of points
+	struct MaxPointCountDataPointsFilter: public RandomSamplingDataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			return "Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above maxCount. Based on \\cite{Masuda1996Random}";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T> },
+				{ "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<unsigned> }
+			});
+		}
+		
+		const unsigned maxCount;
+		
+		MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
+		virtual ~MaxPointCountDataPointsFilter() {};
+		virtual DataPoints filter(const DataPoints& input);
 	};
 
 	//! Systematic sampling, with variation over time
