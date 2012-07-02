@@ -705,7 +705,14 @@ struct PointMatcher
 		ICPSequence();
 		~ICPSequence();
 		
-		TransformationParameters operator()(const DataPoints& inputCloudIn);
+		TransformationParameters operator()(
+			const DataPoints& cloudIn);
+		TransformationParameters operator()(
+			const DataPoints& cloudIn,
+			const TransformationParameters& initialTransformationParameters);
+		TransformationParameters compute(
+			const DataPoints& cloudIn,
+			const TransformationParameters& initialTransformationParameters);
 	
 		TransformationParameters getTransform() const;
 		TransformationParameters getDeltaTransform() const;
@@ -734,7 +741,7 @@ struct PointMatcher
 
 		TransformationParameters lastTransformInv; //!< inv of previous computed transform (using getTransform())
 		
-		void createKeyFrame(DataPoints& inputCloud);
+		bool createKeyFrame(DataPoints& inputCloud);
 	};
 	
 	// ---------------------------------

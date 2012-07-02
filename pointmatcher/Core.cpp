@@ -945,7 +945,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operato
 	const DataPoints& referenceIn)
 {
 	const int dim = readingIn.features.rows();
-	TransformationParameters identity = TransformationParameters::Identity(dim, dim);
+	const TransformationParameters identity = TransformationParameters::Identity(dim, dim);
 	return this->compute(readingIn, referenceIn, identity);
 }
 
@@ -1184,7 +1184,7 @@ void PointMatcher<T>::ICPSequence::loadAdditionalYAMLContent(YAML::Node& doc)
 
 //! Create a new key frame
 template<typename T>
-void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
+bool PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 {
 	timer t; // Print how long take the algo
 	t.restart();
@@ -1213,22 +1213,41 @@ void PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
 		inputCloud.features.topRows(dim-1).colwise() -= meanKeyframe.head(dim-1);
 	
 		keyFrameCloud = inputCloud;
-		T_refIn_dataIn = Matrix::Identity(dim, dim);
 		
 		this->matcher->init(keyFrameCloud);
 		
 		keyFrameCreated = true;
 	
 		this->inspector->addStat("KeyFrameDuration", t.elapsed());
+		return true;
 	}
 	else
+	{
 		LOG_WARNING_STREAM("Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)");
+		return false;
+	}
 }
 
-//! Apply ICP to cloud inputCloudIn, create a new keyframe if none is present or if the ratio of matching points is below ratioToSwitchKeyframe.
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
-	const DataPoints& inputCloudIn)
+	const DataPoints& cloudIn)
+{
+	const int dim = cloudIn.features.rows();
+	const TransformationParameters identity = TransformationParameters::Identity(dim, dim);
+	return this->compute(cloudIn, identity);
+}
+
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
+	const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew)
+{
+	return this->compute(cloudIn, T_dataInOld_dataInNew);
+}
+
+//! Apply ICP to cloud cloudIn, create a new keyframe if none is present or if the ratio of matching points is below ratioToSwitchKeyframe.
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::compute(
+	const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew)
 {
 	// Ensuring minimum definition of components
 	if (!this->matcher)
@@ -1241,9 +1260,9 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		throw runtime_error("You must setup a logger before running ICP");
 	
 	lastTransformInv = getTransform().inverse();
-	DataPoints inputCloud(inputCloudIn);
+	DataPoints inputCloud(cloudIn);
 	
-	const int dim = inputCloudIn.features.rows();
+	const int dim = cloudIn.features.rows();
 	
 	this->inspector->init();
 	
@@ -1252,7 +1271,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	if (!hasKeyFrame())
 	{
 		timer t;
-		const int ptCount = inputCloudIn.features.cols();
+		const int ptCount = cloudIn.features.cols();
 		
 		if(!(dim == 3 || dim == 4))
 			throw runtime_error("Point cloud should be 2D or 3D in homogeneous coordinates");
@@ -1262,7 +1281,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		// Initialize transformation matrices
 		keyFrameTransform = Matrix::Identity(dim, dim);
 		T_refIn_refMean = Matrix::Identity(dim, dim);
-		T_refIn_dataIn = Matrix::Identity(dim, dim);
+		T_refIn_dataIn = T_dataInOld_dataInNew;
 		lastTransformInv = Matrix::Identity(dim, dim);
 
 		this->createKeyFrame(inputCloud);
@@ -1273,8 +1292,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	}
 	else
 	{
-		if(inputCloudIn.features.rows() != keyFrameTransform.rows())
-			throw runtime_error((boost::format("Point cloud should not change dimensions. Homogeneous dimension was %1% and is now %2%.") % keyFrameTransform.rows() % inputCloudIn.features.rows()).str());
+		if(cloudIn.features.rows() != keyFrameTransform.rows())
+			throw runtime_error((boost::format("Point cloud should not change dimensions. Homogeneous dimension was %1% and is now %2%.") % keyFrameTransform.rows() % cloudIn.features.rows()).str());
 	}
 	
 	timer t; // Print how long take the algo
@@ -1293,7 +1312,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
 	TransformationParameters
-		T_refMean_dataIn = T_refIn_refMean.inverse() * T_refIn_dataIn;
+		T_refMean_dataIn = T_refIn_refMean.inverse() * T_refIn_dataIn * T_dataInOld_dataInNew;
 	this->transformations.apply(reading, T_refMean_dataIn);
 
 	//cout << "T_refMean_dataIn: " << endl << T_refMean_dataIn << endl;
@@ -1378,9 +1397,12 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	if (this->errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
 	{
 		// new keyframe
-		keyFrameTransform *= T_refIn_dataIn;
-		this->createKeyFrame(inputCloud);
-		this->inspector->addStat("KeyframingDuration", t.elapsed());
+		if (this->createKeyFrame(inputCloud))
+		{
+			keyFrameTransform *= T_refIn_dataIn;
+			T_refIn_dataIn = Matrix::Identity(dim, dim);
+			this->inspector->addStat("KeyframingDuration", t.elapsed());
+		}
 	}
 	
 	this->inspector->finish(iterationCount);
