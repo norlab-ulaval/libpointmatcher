@@ -704,7 +704,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 	featureLabels.push_back(Label("x", 1));
 	featureLabels.push_back(Label("y", 1));
 	featureLabels.push_back(Label("z", 1));
-	featureLabels.push_back(Label("w", 1));
+	featureLabels.push_back(Label("pad", 1));
 	
 	// read intermediate data (junk)
 	string s;
