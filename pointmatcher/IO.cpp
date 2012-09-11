@@ -571,9 +571,8 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(std::istream& is)
 				text += char('x' + i);
 				labels.push_back(Label(text, 1));
 			}
+			labels.push_back(Label("pad", 1));
 		}
-		
-		labels.push_back(Label("pad", 1));
 
 		firstLine = false;
 	}
@@ -597,7 +596,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(std::istream& is)
 			features(2,i) = 1;
 		}
 	}
-
+	
 	DataPoints dataPoints(features, labels);
 	//cout << "Loaded " << dataPoints.features.cols() << " points." << endl;
 	//cout << "Find " << dataPoints.features.rows() << " dimensions." << endl;
