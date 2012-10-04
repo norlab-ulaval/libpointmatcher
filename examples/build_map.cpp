@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	mapCloud = densityFilter->filter(mapCloud);
 	
 	cout << "Number of points: " << mapCloud.features.cols() << endl;
-	PM::saveVTK(mapCloud, outputFileName);
+	PM::saveAnyFormat(mapCloud, outputFileName);
 	cout << "OutputFileName: " << outputFileName << endl;
 
 	return 0;
@@ -218,7 +218,7 @@ void validateArgs(int argc, char *argv[])
 {
 	if (!(argc == 4))
 	{
-		cerr << "Error in command line, usage " << argv[0] << " listOfFiles.csv maxPoint outputFileName.vtk" << endl;
+		cerr << "Error in command line, usage " << argv[0] << " listOfFiles.csv maxPoint outputFileName.vtk/.csv" << endl;
 		abort();
 	}
 }

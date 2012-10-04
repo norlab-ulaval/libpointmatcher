@@ -610,6 +610,25 @@ PointMatcher<float>::DataPoints PointMatcher<float>::loadCSV(const std::string& 
 template
 PointMatcher<double>::DataPoints PointMatcher<double>::loadCSV(const std::string& fileName);
 
+
+template<typename T>
+void PointMatcher<T>::saveAnyFormat(const DataPoints& data, const std::string& fileName)
+{
+	const boost::filesystem::path path(fileName);
+	const string& ext(boost::filesystem::extension(path));
+	if (boost::iequals(ext, ".vtk"))
+		return saveVTK(data, fileName);
+	else if (boost::iequals(ext, ".csv"))
+		return saveCSV(data, fileName);
+	else
+		throw runtime_error("saveAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
+}
+
+template
+void PointMatcher<float>::saveAnyFormat(const DataPoints& data, const std::string& fileName);
+template
+void PointMatcher<double>::saveAnyFormat(const DataPoints& data, const std::string& fileName);
+
 //! Save point cloud to a file as CSV
 template<typename T>
 void PointMatcher<T>::saveCSV(const DataPoints& data, const std::string& fileName)
@@ -760,7 +779,6 @@ void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileNam
 	typedef typename InspectorsImpl<T>::VTKFileInspector VTKInspector;
 	VTKInspector vtkInspector(param);
 	vtkInspector.dumpDataPoints(data, fileName);
-	
 }
 
 

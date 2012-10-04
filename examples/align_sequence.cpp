@@ -46,8 +46,6 @@ using namespace std;
 using namespace PointMatcherSupport;
 
 void validateArgs(int argc, char *argv[]);
-void setupArgs(int argc, char *argv[], unsigned int& startId, unsigned int& endId, string& extension);
-vector<string> loadYamlFile(string listFileName);
 
 /**
   * Code example for ICP taking a sequence of point clouds relatively close 
@@ -160,23 +158,3 @@ void validateArgs(int argc, char *argv[])
 }
 
 
-void setupArgs(int argc, char *argv[], unsigned int& startId, unsigned int& endId, string& extension)
-{
-	if(argc >= 5)
-	{
-		startId = atoi(argv[3]);
-		endId = atoi(argv[4]);
-	}
-	else
-	{
-		startId = 0;
-		endId = 1000;
-	}
-
-	if(argc == 6)
-	{
-		const string command(argv[5]);
-		if(command == "-csv")
-			extension = "csv";
-	}
-}
