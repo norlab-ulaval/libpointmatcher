@@ -1192,6 +1192,13 @@ void PointMatcher<T>::ICPSequence::clearMap()
 	mapPointCloud = DataPoints();
 }
 
+//! Return the map
+template<typename T>
+const typename PointMatcher<T>::DataPoints& PointMatcher<T>::ICPSequence::getMap() const
+{
+	return mapPointCloud;
+}
+
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& cloudIn)
