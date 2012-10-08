@@ -642,7 +642,7 @@ struct PointMatcher
 	public:
 		DataPointsFilters readingDataPointsFilters; //!< filters for reading, applied once
 		DataPointsFilters readingStepDataPointsFilters; //!< filters for reading, applied at each step
-		DataPointsFilters keyframeDataPointsFilters; //!< filters for keyframe
+		DataPointsFilters referenceDataPointsFilters; //!< filters for reference
 		Transformations transformations; //!< transformations
 		std::shared_ptr<Matcher> matcher; //!< matcher
 		OutlierFilters outlierFilters; //!< outlier filters
@@ -656,11 +656,11 @@ struct PointMatcher
 		
 		void loadFromYaml(std::istream& in);
 		unsigned getPrefilteredReadingPtsCount() const;
-		unsigned getPrefilteredKeyframePtsCount() const;
+		unsigned getPrefilteredReferencePtsCount() const;
 		
 	protected:
 		unsigned prefilteredReadingPtsCount; //!< remaining number of points after prefiltering but before the iterative process
-		unsigned prefilteredKeyframePtsCount; //!< remaining number of points after prefiltering but before the iterative process
+		unsigned prefilteredReferencePtsCount; //!< remaining number of points after prefiltering but before the iterative process
 
 		ICPChainBase();
 		
@@ -696,16 +696,18 @@ struct PointMatcher
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
+	
+	protected:
+		TransformationParameters computeWithTransformedReference(
+			const DataPoints& readingIn, 
+			const DataPoints& reference, 
+			const TransformationParameters& T_refIn_refMean,
+			const TransformationParameters& initialTransformationParameters);
 	};
 	
-	//! ICP alogrithm, taking a sequence of clouds and using keyframing
-	struct ICPSequence: ICPChainBase
+	//! ICP alogrithm, taking a sequence of clouds and using a map
+	struct ICPSequence: public ICP
 	{
-		T ratioToSwitchKeyframe; //!< when the ratio of matching points is below this, create a new keyframe
-		
-		ICPSequence();
-		~ICPSequence();
-		
 		TransformationParameters operator()(
 			const DataPoints& cloudIn);
 		TransformationParameters operator()(
@@ -714,35 +716,14 @@ struct PointMatcher
 		TransformationParameters compute(
 			const DataPoints& cloudIn,
 			const TransformationParameters& initialTransformationParameters);
-	
-		TransformationParameters getTransform() const;
-		TransformationParameters getDeltaTransform() const;
-		bool keyFrameCreatedAtLastCall() const;
-		bool hasKeyFrame() const;
 		
-		void resetTracking(DataPoints& inputCloud);
-		
-		virtual void setDefault();
+		bool hasMap() const;
+		bool setMap(const DataPoints& map);
+		const DataPoints& getMap() const;
 		
 	protected:
-		#ifdef HAVE_YAML_CPP
-		virtual void loadAdditionalYAMLContent(YAML::Node& doc);
-		#endif // HAVE_YAML_CPP
-		
-	private:
-		bool keyFrameCreated; //!< true if the key frame was created at least once
-		DataPoints keyFrameCloud; //!< point cloud of the keyframe
-		TransformationParameters keyFrameTransform; //!< pose of keyframe
-		
-		TransformationParameters T_refIn_refMean; //!< offset for centered keyframe
-		//TransformationParameters keyFrameTransformOffset; //old T_refIn_refMean 
-		
-		TransformationParameters T_refIn_dataIn; //!< transform of last frame wrt keyframe (last call to operator())
-		//TransformationParameters curTransform; //old T_refMean_dataIn
-
-		TransformationParameters lastTransformInv; //!< inv of previous computed transform (using getTransform())
-		
-		bool createKeyFrame(DataPoints& inputCloud);
+		DataPoints mapPointCloud; //!< point cloud of the map, always in global frame (frame of first point cloud)
+		TransformationParameters T_refIn_refMean; //!< offset for centered map
 	};
 	
 	// ---------------------------------

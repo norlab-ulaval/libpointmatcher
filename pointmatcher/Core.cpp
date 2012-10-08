@@ -779,7 +779,7 @@ void PointMatcher<T>::Inspector::finish(const size_t iterationCount)
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
 	prefilteredReadingPtsCount(0),
-	prefilteredKeyframePtsCount(0)
+	prefilteredReferencePtsCount(0)
 {}
 
 //! virtual desctructor
@@ -795,7 +795,7 @@ void PointMatcher<T>::ICPChainBase::cleanup()
 	transformations.clear();
 	readingDataPointsFilters.clear();
 	readingStepDataPointsFilters.clear();
-	keyframeDataPointsFilters.clear();
+	referenceDataPointsFilters.clear();
 	matcher.reset();
 	outlierFilters.clear();
 	errorMinimizer.reset();
@@ -811,7 +811,7 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	
 	this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
 	this->readingDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter());
-	this->keyframeDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter());
+	this->referenceDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter());
 	this->outlierFilters.push_back(new typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter());
 	this->matcher.reset(new typename MatchersImpl<T>::KDTreeMatcher());
 	this->errorMinimizer.reset(new typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer());
@@ -836,7 +836,7 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	
 	createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
 	createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
-	createModulesFromRegistrar("keyframeDataPointsFilters", doc, pm.REG(DataPointsFilter), keyframeDataPointsFilters);
+	createModulesFromRegistrar("referenceDataPointsFilters", doc, pm.REG(DataPointsFilter), referenceDataPointsFilters);
 	//createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations);
 	this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
 	createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher);
@@ -863,11 +863,11 @@ unsigned PointMatcher<T>::ICPChainBase::getPrefilteredReadingPtsCount() const
 	return prefilteredReadingPtsCount;
 }
 
-//! Return the remaining number of points in the keyframe after prefiltering but before the iterative process
+//! Return the remaining number of points in the reference after prefiltering but before the iterative process
 template<typename T>
-unsigned PointMatcher<T>::ICPChainBase::getPrefilteredKeyframePtsCount() const
+unsigned PointMatcher<T>::ICPChainBase::getPrefilteredReferencePtsCount() const
 {
-	return prefilteredReadingPtsCount;
+	return prefilteredReferencePtsCount;
 }
 
 #ifdef HAVE_YAML_CPP
@@ -973,19 +973,17 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		throw runtime_error("You must setup an error minimizer before running ICP");
 	if (!this->inspector)
 		throw runtime_error("You must setup an inspector before running ICP");
-	if (!this->inspector)
-		throw runtime_error("You must setup a logger before running ICP");
 	
 	this->inspector->init();
 	
 	timer t; // Print how long take the algo
-	const int dim = referenceIn.features.rows();
+	const int dim(referenceIn.features.rows());
 	
 	// Apply reference filters
 	// reference is express in frame <refIn>
 	DataPoints reference(referenceIn);
-	this->keyframeDataPointsFilters.init();
-	this->keyframeDataPointsFilters.apply(reference);
+	this->referenceDataPointsFilters.init();
+	this->referenceDataPointsFilters.apply(reference);
 	
 	// Create intermediate frame at the center of mass of reference pts cloud
 	//  this help to solve for rotations
@@ -1001,7 +999,29 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	// Init matcher with reference points center on its mean
 	this->matcher->init(reference);
+	
+	// statistics on last step
+	this->inspector->addStat("ReferencePreprocessingDuration", t.elapsed());
+	this->inspector->addStat("ReferenceInPointCount", referenceIn.features.cols());
+	this->inspector->addStat("ReferencePointCount", reference.features.cols());
+	LOG_INFO_STREAM("PointMatcher::icp - reference pre-processing took " << t.elapsed() << " [s]");
+	this->prefilteredReferencePtsCount = reference.features.cols();
+	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << this->prefilteredReferencePtsCount);
+	
+	return computeWithTransformedReference(readingIn, reference, T_refIn_refMean, T_refIn_dataIn);
+	
+}
 
+//! Perferm ICP using an already-transformed reference and with an already-initialized matcher
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::computeWithTransformedReference(
+	const DataPoints& readingIn, 
+	const DataPoints& reference, 
+	const TransformationParameters& T_refIn_refMean,
+	const TransformationParameters& T_refIn_dataIn)
+{
+	timer t; // Print how long take the algo
+	
 	// Apply readings filters
 	// reading is express in frame <dataIn>
 	DataPoints reading(readingIn);
@@ -1020,6 +1040,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	// Since reading and reference are express in <refMean>
 	// the frame <refMean> is equivalent to the frame <iter(0)>
+	const int dim(reference.features.rows());
 	TransformationParameters T_iter = Matrix::Identity(dim, dim);
 	
 	bool iterate(true);
@@ -1027,19 +1048,16 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 
 	size_t iterationCount(0);
 	
-	this->inspector->addStat("PreprocessingDuration", t.elapsed());
-	this->inspector->addStat("PointCountReadingIn", readingIn.features.cols());
-	this->inspector->addStat("PointCountReading", reading.features.cols());
-	this->inspector->addStat("PointCountReferenceIn", referenceIn.features.cols());
-	this->inspector->addStat("PointCountReference", reference.features.cols());
-	
-	LOG_INFO_STREAM("PointMatcher::icp - preprocess took " << t.elapsed() << " [s]");
-	this->prefilteredKeyframePtsCount = reference.features.cols();
-	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << this->prefilteredKeyframePtsCount);
+	// statistics on last step
+	this->inspector->addStat("ReadingPreprocessingDuration", t.elapsed());
+	this->inspector->addStat("ReadingInPointCount", readingIn.features.cols());
+	this->inspector->addStat("ReadingPointCount", reading.features.cols());
+	LOG_INFO_STREAM("PointMatcher::icp - reading pre-processing took " << t.elapsed() << " [s]");
 	this->prefilteredReadingPtsCount = reading.features.cols();
 	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << this->prefilteredReadingPtsCount);
 	t.restart();
 	
+	// iterations
 	while (iterate)
 	{
 		DataPoints stepReading(reading);
@@ -1113,119 +1131,56 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
 }
 
-//! Construct a ICP sequence with ratioToSwitchKeyframe to 0.8
+//! Return whether the object currently holds a valid map
 template<typename T>
-PointMatcher<T>::ICPSequence::ICPSequence():
-	ratioToSwitchKeyframe(0.8),
-	keyFrameCreated(false)
+bool PointMatcher<T>::ICPSequence::hasMap() const
 {
+	return (mapPointCloud.features.cols() != 0);
 }
 
-//! destructor
+//! Set the map using inputCloud
 template<typename T>
-PointMatcher<T>::ICPSequence::~ICPSequence()
+bool PointMatcher<T>::ICPSequence::setMap(const DataPoints& inputCloud)
 {
-}
-
-//! Return the latest transform
-template<typename T>
-typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::getTransform() const
-{
-	return keyFrameTransform * T_refIn_dataIn;
-}
-
-//! Return the difference between the latest transform and the previous one
-template<typename T>
-typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::getDeltaTransform() const
-{
-	return lastTransformInv * getTransform();
-}
-
-//! Return whether a keyframe was create at last () call
-template<typename T>
-bool PointMatcher<T>::ICPSequence::keyFrameCreatedAtLastCall() const
-{
-	return keyFrameCreated;
-}
-
-//! Return whether the object currently holds a keyframe
-template<typename T>
-bool PointMatcher<T>::ICPSequence::hasKeyFrame() const
-{
-	return (keyFrameCloud.features.cols() != 0);
-}
-
-//! Drop current key frame, create a new one with inputCloud, reset transformations
-template<typename T>
-void PointMatcher<T>::ICPSequence::resetTracking(DataPoints& inputCloud)
-{
-	const int tDim(keyFrameTransform.rows());
-	createKeyFrame(inputCloud);
-	keyFrameTransform = Matrix::Identity(tDim, tDim);
-	lastTransformInv = Matrix::Identity(tDim, tDim);
-}
-
-//! Set default working values
-template<typename T>
-void PointMatcher<T>::ICPSequence::setDefault()
-{
-	ICPChainBase::setDefault();
-	ratioToSwitchKeyframe = 0.8;
-}
-
-#ifdef HAVE_YAML_CPP
-template<typename T>
-void PointMatcher<T>::ICPSequence::loadAdditionalYAMLContent(YAML::Node& doc)
-{
-	if (doc.FindValue("ratioToSwitchKeyframe"))
-		ratioToSwitchKeyframe = doc["ratioToSwitchKeyframe"].to<typeof(ratioToSwitchKeyframe)>();
-}
-#endif // HAVE_YAML_CPP
-
-//! Create a new key frame
-template<typename T>
-bool PointMatcher<T>::ICPSequence::createKeyFrame(DataPoints& inputCloud)
-{
+	// Ensuring minimum definition of components
+	if (!this->matcher)
+		throw runtime_error("You must setup a matcher before running ICP");
+	if (!this->inspector)
+		throw runtime_error("You must setup an inspector before running ICP");
+	
 	timer t; // Print how long take the algo
-	t.restart();
-	const int dim(keyFrameTransform.rows());
+	const int dim(inputCloud.features.rows());
 	const int ptCount(inputCloud.features.cols());
 	
 	// update keyframe
-	if (ptCount > 0)
+	if (ptCount == 0)
 	{
-		// Apply reference filters
-		// reference is express in frame <refIn>
-		this->keyframeDataPointsFilters.init();
-		this->keyframeDataPointsFilters.apply(inputCloud);
-		
-		this->inspector->addStat("PointCountKeyFrame", inputCloud.features.cols());
-
-		// Create intermediate frame at the center of mass of reference pts cloud
-		//  this help to solve for rotations
-		const int nbPtsKeyframe = inputCloud.features.cols();
-		const Vector meanKeyframe = inputCloud.features.rowwise().sum() / nbPtsKeyframe;
-		T_refIn_refMean.block(0,dim-1, dim-1, 1) = meanKeyframe.head(dim-1);
-		
-		// Reajust reference position (only translations): 
-		// from here reference is express in frame <refMean>
-		// Shortcut to do T_refIn_refMean.inverse() * reference
-		inputCloud.features.topRows(dim-1).colwise() -= meanKeyframe.head(dim-1);
-	
-		keyFrameCloud = inputCloud;
-		
-		this->matcher->init(keyFrameCloud);
-		
-		keyFrameCreated = true;
-	
-		this->inspector->addStat("KeyFrameDuration", t.elapsed());
-		return true;
-	}
-	else
-	{
-		LOG_WARNING_STREAM("Warning: ignoring attempt to create a keyframe from an empty cloud (" << ptCount << " points before filtering)");
+		LOG_WARNING_STREAM("Ignoring attempt to create a map from an empty cloud");
 		return false;
 	}
+	
+	this->inspector->addStat("MapPointCount", inputCloud.features.cols());
+	
+	// Set map
+	mapPointCloud = inputCloud;
+
+	// Create intermediate frame at the center of mass of reference pts cloud
+	//  this help to solve for rotations
+	const Vector meanMap = mapPointCloud.features.rowwise().sum() / ptCount;
+	T_refIn_refMean = Matrix::Identity(dim, dim);
+	T_refIn_refMean.block(0,dim-1, dim-1, 1) = meanMap.head(dim-1);
+	
+	// Reajust reference position (only translations): 
+	// from here reference is express in frame <refMean>
+	// Shortcut to do T_refIn_refMean.inverse() * reference
+	mapPointCloud.features.topRows(dim-1).colwise() -= meanMap.head(dim-1);
+	
+	this->matcher->init(mapPointCloud);
+	
+	this->inspector->addStat("SetMapDuration", t.elapsed());
+	LOG_INFO_STREAM("PointMatcher::icp - set map took " << t.elapsed() << " [s]");
+	
+	return true;
 }
 
 template<typename T>
@@ -1244,173 +1199,22 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	return this->compute(cloudIn, T_dataInOld_dataInNew);
 }
 
-//! Apply ICP to cloud cloudIn, create a new keyframe if none is present or if the ratio of matching points is below ratioToSwitchKeyframe.
+//! Apply ICP to cloud cloudIn
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::compute(
-	const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew)
+	const DataPoints& cloudIn, const TransformationParameters& T_refIn_dataIn)
 {
-	// Ensuring minimum definition of components
-	if (!this->matcher)
-		throw runtime_error("You must setup a matcher before running ICP");
-	if (!this->errorMinimizer)
-		throw runtime_error("You must setup an error minimizer before running ICP");
-	if (!this->inspector)
-		throw runtime_error("You must setup an inspector before running ICP");
-	if (!this->inspector)
-		throw runtime_error("You must setup a logger before running ICP");
-	
-	lastTransformInv = getTransform().inverse();
-	DataPoints inputCloud(cloudIn);
-	
-	const int dim = cloudIn.features.rows();
+	// initial keyframe
+	if (!hasMap())
+	{
+		const int dim(cloudIn.features.rows());
+		LOG_WARNING_STREAM("Ignoring attempt to perform ICP with an empty map");
+		return Matrix::Identity(dim, dim);
+	}
 	
 	this->inspector->init();
 	
-	// initial keyframe
-	keyFrameCreated = false;
-	if (!hasKeyFrame())
-	{
-		timer t;
-		const int ptCount = cloudIn.features.cols();
-		
-		if(!(dim == 3 || dim == 4))
-			throw runtime_error("Point cloud should be 2D or 3D in homogeneous coordinates");
-		if (ptCount == 0)
-			return Matrix::Identity(dim, dim);
-		
-		// Initialize transformation matrices
-		keyFrameTransform = Matrix::Identity(dim, dim);
-		T_refIn_refMean = Matrix::Identity(dim, dim);
-		T_refIn_dataIn = T_dataInOld_dataInNew;
-		lastTransformInv = Matrix::Identity(dim, dim);
-
-		this->createKeyFrame(inputCloud);
-		
-		this->inspector->addStat("KeyframingDuration", t.elapsed());
-		
-		return T_refIn_dataIn;
-	}
-	else
-	{
-		if(cloudIn.features.rows() != keyFrameTransform.rows())
-			throw runtime_error((boost::format("Point cloud should not change dimensions. Homogeneous dimension was %1% and is now %2%.") % keyFrameTransform.rows() % cloudIn.features.rows()).str());
-	}
-	
-	timer t; // Print how long take the algo
-	
-	// Apply readings filters
-	// reading is express in frame <dataIn>
-	DataPoints reading(inputCloud);
-	this->readingDataPointsFilters.init();
-	this->readingDataPointsFilters.apply(reading);
-	
-	this->inspector->addStat("PreprocessingDuration", t.elapsed());
-	this->inspector->addStat("PointCountIn", inputCloud.features.cols());
-	this->inspector->addStat("PointCountReading", reading.features.cols());
-	t.restart();
-	
-	// Reajust reading position: 
-	// from here reading is express in frame <refMean>
-	TransformationParameters
-		T_refMean_dataIn = T_refIn_refMean.inverse() * T_refIn_dataIn * T_dataInOld_dataInNew;
-	this->transformations.apply(reading, T_refMean_dataIn);
-
-	//cout << "T_refMean_dataIn: " << endl << T_refMean_dataIn << endl;
-	// Prepare reading filters used in the loop 
-	this->readingStepDataPointsFilters.init();
-	
-	// Since reading and reference are express in <refMean>
-	// the frame <refMean> is equivalent to the frame <iter(0)>
-	TransformationParameters T_iter = Matrix::Identity(dim, dim);
-	
-	bool iterate(true);
-	this->transformationCheckers.init(T_iter, iterate);
-	
-	size_t iterationCount(0);
-
-	while (iterate)
-	{
-		DataPoints stepReading(reading);
-		
-		//-----------------------------
-		// Apply step filter
-		this->readingStepDataPointsFilters.apply(stepReading);
-		
-		//-----------------------------
-		// Transform Readings
-		this->transformations.apply(stepReading, T_iter);
-		
-		//-----------------------------
-		// Match to closest point in Reference
-		const Matches matches(
-			this->matcher->findClosests(stepReading, keyFrameCloud)
-		);
-		
-		//-----------------------------
-		// Detect outliers
-		//cout << matches.ids.leftCols(10) << endl;
-		//cout << matches.dists.leftCols(10) << endl;
-		const OutlierWeights outlierWeights(
-			this->outlierFilters.compute(stepReading, keyFrameCloud, matches)
-		);
-		
-
-		assert(outlierWeights.rows() == matches.ids.rows());
-		assert(outlierWeights.cols() == matches.ids.cols());
-		
-		//-----------------------------
-		// Dump
-		this->inspector->dumpIteration(
-			iterationCount, T_iter, keyFrameCloud, stepReading, matches, outlierWeights, this->transformationCheckers
-		);
-		
-		//-----------------------------
-		// Error minimization
-		// equivalent to: 
-		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
-		T_iter = this->errorMinimizer->compute(
-			stepReading, keyFrameCloud, outlierWeights, matches) * T_iter;
-		
-		this->transformationCheckers.check(T_iter, iterate);
-		
-		//cout << "T_iter: " << endl << T_iter << endl;
-
-		++iterationCount;
-	}
-	
-	this->inspector->addStat("IterationsCount", iterationCount);
-	this->inspector->addStat("PointCountTouched", this->matcher->getVisitCount());
-	this->matcher->resetVisitCount();
-	this->inspector->addStat("OverlapRatio", this->errorMinimizer->getWeightedPointUsedRatio());
-	this->inspector->addStat("ConvergenceDuration", t.elapsed());
-	t.restart();
-	
-	// Move transformation back to original coordinate (without center of mass)
-	// T_iter is equivalent to: T_iter(i+1)_iter(0)
-	// the frame <iter(0)> equals <refMean>
-	// so we have: 
-	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_refMean_dataIn
-	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_iter(0)_dataIn
-	// T_refIn_refMean remove the temperary frame added during initialization
-	T_refIn_dataIn = T_refIn_refMean * T_iter * T_refMean_dataIn;
-	
-	if (this->errorMinimizer->getWeightedPointUsedRatio() < ratioToSwitchKeyframe)
-	{
-		// new keyframe
-		if (this->createKeyFrame(inputCloud))
-		{
-			keyFrameTransform *= T_refIn_dataIn;
-			T_refIn_dataIn = Matrix::Identity(dim, dim);
-			this->inspector->addStat("KeyframingDuration", t.elapsed());
-		}
-	}
-	
-	this->inspector->finish(iterationCount);
-	
-	//cout << "keyFrameTransform: " << endl << keyFrameTransform << endl;
-	//cout << "T_refIn_dataIn: " << endl << T_refIn_dataIn << endl;
-	// Return transform in world space
-	return keyFrameTransform * T_refIn_dataIn;
+	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn);
 }
 
 //! Constructor, populates the registrars
