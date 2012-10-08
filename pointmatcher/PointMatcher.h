@@ -720,7 +720,8 @@ struct PointMatcher
 		bool hasMap() const;
 		bool setMap(const DataPoints& map);
 		void clearMap();
-		const DataPoints& getMap() const;
+		const DataPoints& getInternalMap() const;
+		const DataPoints getMap() const;
 		
 	protected:
 		DataPoints mapPointCloud; //!< point cloud of the map, always in global frame (frame of first point cloud)
