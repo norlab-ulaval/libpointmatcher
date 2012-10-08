@@ -719,6 +719,7 @@ struct PointMatcher
 		
 		bool hasMap() const;
 		bool setMap(const DataPoints& map);
+		void clearMap();
 		const DataPoints& getMap() const;
 		
 	protected:

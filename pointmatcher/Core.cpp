@@ -1183,6 +1183,15 @@ bool PointMatcher<T>::ICPSequence::setMap(const DataPoints& inputCloud)
 	return true;
 }
 
+//! Clear the map (reset to same state as after the object is created)
+template<typename T>
+void PointMatcher<T>::ICPSequence::clearMap()
+{
+	const int dim(mapPointCloud.features.rows());
+	T_refIn_refMean = Matrix::Identity(dim, dim);
+	mapPointCloud = DataPoints();
+}
+
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& cloudIn)
