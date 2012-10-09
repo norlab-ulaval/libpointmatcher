@@ -599,6 +599,9 @@ void PointMatcher<T>::DataPointsFilters::init()
 template<typename T>
 void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 {
+	if (this->empty())
+		return;
+	
 	DataPoints filteredCloud;
 	const int nbPointsBeforeFilters(cloud.features.cols());
 	LOG_INFO_STREAM("Applying " << this->size() << " filters - " << nbPointsBeforeFilters << " points in");
@@ -615,6 +618,9 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 		const int nbPointsOut(cloud.features.cols());
 		LOG_INFO_STREAM("* " << (*it)->className << " - " << nbPointsOut << " points out (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "\%)");
 	}
+	
+	const int nbPointsAfterFilters(cloud.features.cols());
+	LOG_INFO_STREAM("Applied " << this->size() << " filters - " << nbPointsAfterFilters << " points out (-" << (100 - double(nbPointsAfterFilters*100.)/nbPointsBeforeFilters) << "\%)");
 }
 
 // Matcher
@@ -1182,7 +1188,6 @@ bool PointMatcher<T>::ICPSequence::setMap(const DataPoints& inputCloud)
 	this->matcher->init(mapPointCloud);
 	
 	this->inspector->addStat("SetMapDuration", t.elapsed());
-	LOG_INFO_STREAM("PointMatcher::icp - set map took " << t.elapsed() << " [s]");
 	
 	return true;
 }
