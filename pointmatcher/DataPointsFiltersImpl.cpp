@@ -664,7 +664,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	const int ptsOut = buildData.outputInsertionPoint;
 
 	if(buildData.unfitPointsCount != 0)
-		LOG_INFO_STREAM("SamplingSurfaceNormalDataPointsFilter - Could not compute normal for " << buildData.unfitPointsCount << " pts.");
+		LOG_INFO_STREAM("  SamplingSurfaceNormalDataPointsFilter - Could not compute normal for " << buildData.unfitPointsCount << " pts.");
 	
 	// Build the filtered point cloud
 	DataPoints output;
@@ -1034,7 +1034,7 @@ DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter::FixStepSamplingDataPo
 	stepMult(Parametrizable::get<double>("stepMult")),
 	step(startStep)
 {
-	LOG_INFO_STREAM( "Using FixStepSamplingDataPointsFilter with startStep=" << startStep << ", endStep=" << endStep << ", stepMult=" << stepMult); 
+	LOG_INFO_STREAM("Using FixStepSamplingDataPointsFilter with startStep=" << startStep << ", endStep=" << endStep << ", stepMult=" << stepMult); 
 }
 
 

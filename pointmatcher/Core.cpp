@@ -600,6 +600,8 @@ template<typename T>
 void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 {
 	DataPoints filteredCloud;
+	const int nbPointsBeforeFilters(cloud.features.cols());
+	LOG_INFO_STREAM("Applying " << this->size() << " filters - " << nbPointsBeforeFilters << " points in");
 
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
 	{
@@ -611,7 +613,7 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 		swapDataPoints<T>(cloud, filteredCloud);
 		
 		const int nbPointsOut(cloud.features.cols());
-		LOG_INFO_STREAM((*it)->className << " - pts in: " << nbPointsIn << ", pts out: " << nbPointsOut << " (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "\%)");
+		LOG_INFO_STREAM("* " << (*it)->className << " - " << nbPointsOut << " points out (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "\%)");
 	}
 }
 
