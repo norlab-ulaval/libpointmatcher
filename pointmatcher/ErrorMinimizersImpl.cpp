@@ -107,14 +107,13 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
 	}
 
-	const auto noises(this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
-
-	if(noises.cols() == 0)
+	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise"))
 	{
-		LOG_INFO_STREAM("PointToPointErrorMinimizer - warning, no sensor noise found. Using best estimat given outlier rejection instead.");
+		LOG_INFO_STREAM("PointToPointErrorMinimizer - warning, no sensor noise found. Using best estimate given outlier rejection instead.");
 		return this->weightedPointUsedRatio;
 	}
 
+	const auto noises(this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
 	int count = 0;
 	for(int i=0; i < nbPoints; i++)
 	{
@@ -234,16 +233,16 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 	{
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
 	}
-
-	const auto noises(this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
-	const auto normals(this->lastErrorElements.reading.getDescriptorViewByName("normals"));
-
-	if(noises.cols() == 0 || normals.cols() == 0)
+	
+	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise") ||
+		!this->lastErrorElements.reading.descriptorExists("normals"))
 	{
 		LOG_INFO_STREAM("PointToPointErrorMinimizer - warning, no sensor noise or normals found. Using best estimate given outlier rejection instead.");
 		return this->weightedPointUsedRatio;
 	}
 
+	const auto noises(this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
+	const auto normals(this->lastErrorElements.reading.getDescriptorViewByName("normals"));
 	int count = 0;
 	for(int i=0; i < nbPoints; i++)
 	{
