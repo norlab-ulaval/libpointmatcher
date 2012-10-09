@@ -1016,7 +1016,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	this->inspector->addStat("ReferencePointCount", reference.features.cols());
 	LOG_INFO_STREAM("PointMatcher::icp - reference pre-processing took " << t.elapsed() << " [s]");
 	this->prefilteredReferencePtsCount = reference.features.cols();
-	LOG_INFO_STREAM("PointMatcher::icp - nb points in reference: " << nbPtsReference << " -> " << this->prefilteredReferencePtsCount);
 	
 	return computeWithTransformedReference(readingIn, reference, T_refIn_refMean, T_refIn_dataIn);
 	
@@ -1064,7 +1063,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	this->inspector->addStat("ReadingPointCount", reading.features.cols());
 	LOG_INFO_STREAM("PointMatcher::icp - reading pre-processing took " << t.elapsed() << " [s]");
 	this->prefilteredReadingPtsCount = reading.features.cols();
-	LOG_INFO_STREAM( "PointMatcher::icp - nb points in reading: " << nbPtsReading << " -> " << this->prefilteredReadingPtsCount);
 	t.restart();
 	
 	// iterations
