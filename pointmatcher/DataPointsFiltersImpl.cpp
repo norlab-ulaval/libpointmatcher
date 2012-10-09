@@ -245,8 +245,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 	}
 	assert(j == nbPointsOut);
 	
-	LOG_INFO_STREAM("MinDistDataPointsFilter- pts in: " << nbPointsIn << " pts out: " << j << " (-" << 100-(j/double(nbPointsIn))*100 << "\%)");
-	
 	return outputCloud;
 }
 
@@ -393,8 +391,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPoi
 	if (outputCloud.descriptors.cols() > 0)
 			outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
 
-	LOG_INFO_STREAM("MaxDensityDataPointsFilter - pts in: " << nbPointsIn << " pts out: " << j << " (-" << 100 - (j/double(nbPointsIn)*100) << "\%)");
-	
 	return outputCloud;
 }
 
@@ -667,10 +663,8 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	
 	const int ptsOut = buildData.outputInsertionPoint;
 
-	LOG_INFO_STREAM("SamplingSurfaceNormalDataPointsFilter - pts in: " << pointsCount << " pts out: " << ptsOut << " (-" << 100-(ptsOut/double(pointsCount))*100 << "\%)");
-	
 	if(buildData.unfitPointsCount != 0)
-		LOG_INFO_STREAM("SamplingSurfaceNormalDataPointsFilter - Coudn't compute normal for " << buildData.unfitPointsCount << " pts.");
+		LOG_INFO_STREAM("SamplingSurfaceNormalDataPointsFilter - Could not compute normal for " << buildData.unfitPointsCount << " pts.");
 	
 	// Build the filtered point cloud
 	DataPoints output;
@@ -994,10 +988,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDat
 		}
 	}
 	
-	const int nbPointsIn = input.features.cols();
-	const int nbPointsOut = filteredFeat.cols();
-	LOG_INFO_STREAM("RandomSamplingDataPointsFilter - pts in: " << nbPointsIn << " pts out: " << nbPointsOut << " (-" << 100 - (nbPointsOut/double(nbPointsIn)*100) << "\%)");
-
 	return DataPoints(filteredFeat, input.featureLabels, filteredDesc, input.descriptorLabels);
 }
 
@@ -1159,9 +1149,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ShadowDataPointsF
 	outputCloud.features.conservativeResize(Eigen::NoChange, j);
 	outputCloud.descriptors.conservativeResize(Eigen::NoChange, j);
 
-	const int nbPointsIn = input.features.cols();
-	const int nbPointsOut = outputCloud.features.cols();
-	LOG_INFO_STREAM("ShadowDataPointsFilter - pts in: " << nbPointsIn << " pts out: " << nbPointsOut << " (-" << 100 - (nbPointsOut/double(nbPointsIn)*100) << "\%)");
 	return outputCloud;
 }
 

@@ -603,13 +603,15 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
 	{
-		const int pointsCount(cloud.features.cols());
-		if (pointsCount == 0)
+		const int nbPointsIn(cloud.features.cols());
+		if (nbPointsIn == 0)
 			throw ConvergenceError("no point to filter");
 		
 		filteredCloud = (*it)->filter(cloud);
 		swapDataPoints<T>(cloud, filteredCloud);
-		LOG_INFO_STREAM("in: " << pointsCount << " pts -> out: " << cloud.features.cols());
+		
+		const int nbPointsOut(cloud.features.cols());
+		LOG_INFO_STREAM((*it)->className << " - pts in: " << nbPointsIn << ", pts out: " << nbPointsOut << " (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "\%)");
 	}
 }
 
