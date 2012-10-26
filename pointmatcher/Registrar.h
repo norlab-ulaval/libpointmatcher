@@ -50,14 +50,18 @@ namespace PointMatcherSupport
 	struct Registrar
 	{
 	public:
-		typedef Interface TargetType;
+		typedef Interface TargetType; //!< alias to recover the template parameter
 		
 		//! The interface for class descriptors
 		struct ClassDescriptor
 		{
+			//! Virtual destructor, do nothing
 			virtual ~ClassDescriptor() {}
+			//! Create an instance of Interface using params
 			virtual Interface* createInstance(const Parametrizable::Parameters& params) const = 0;
+			//! Return the description of this class
 			virtual const std::string description() const = 0;
+			//! Return the available parameters for this class
 			virtual const Parametrizable::ParametersDoc availableParameters() const = 0;
 		};
 		
@@ -98,8 +102,8 @@ namespace PointMatcherSupport
 		};
 		
 	protected:
-		typedef std::map<std::string, ClassDescriptor*> DescriptorMap;
-		DescriptorMap classes;
+		typedef std::map<std::string, ClassDescriptor*> DescriptorMap; //!< descriptors for sub-classes of Interface, indexed by their names
+		DescriptorMap classes; //!< known classes that can be constructed
 		
 	public:
 		//! Destructor, remove all classes descriptors 

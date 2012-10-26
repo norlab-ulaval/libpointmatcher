@@ -47,6 +47,58 @@ PointMatcher<T>::TransformationChecker::TransformationChecker(const std::string&
 	Parametrizable(className,paramsDoc,params)
 {}
 
+//! Return the value of limits
+template<typename T>
+const typename PointMatcher<T>::Vector& PointMatcher<T>::TransformationChecker::getLimits() const
+{
+	return limits;
+}
+
+//! Return the collected values
+template<typename T>
+const typename PointMatcher<T>::Vector& PointMatcher<T>::TransformationChecker::getValues() const
+{
+	return values;
+}
+
+//! Return the name of each limit
+template<typename T>
+const typename PointMatcher<T>::TransformationChecker::StringVector& PointMatcher<T>::TransformationChecker::getLimitNames() const
+{
+	return limitNames;
+}
+
+//! Return the name of each value
+template<typename T>
+const typename PointMatcher<T>::TransformationChecker::StringVector& PointMatcher<T>::TransformationChecker::getValueNames() const
+{
+	return valueNames;
+}
+
+//! Extract the Euler angles from a rigid-transformation matrix 
+template<typename T>
+typename PointMatcher<T>::Vector PointMatcher<T>::TransformationChecker::matrixToAngles(const TransformationParameters& parameters)
+{
+	Vector angles;
+	if(parameters.rows() == 4)
+	{
+		angles = Vector::Zero(3);
+
+		angles(0) = atan2(parameters(2,0), parameters(2,1));
+		angles(1) = acos(parameters(2,2));
+		angles(2) = -atan2(parameters(0,2), parameters(1,2));
+	}
+	else
+	{
+		angles = Vector::Zero(1);
+
+		angles(0) = acos(parameters(0,0));
+	}
+
+	return angles;
+}
+
+
 //! Init all transformation checkers, set iterate to false if iteration should stop
 template<typename T>
 void PointMatcher<T>::TransformationCheckers::init(const TransformationParameters& parameters, bool& iterate)

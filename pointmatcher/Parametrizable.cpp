@@ -40,6 +40,12 @@ namespace PointMatcherSupport
 {
 	using namespace std;
 	
+	//! Construct an invalid-parameter exception
+	Parametrizable::InvalidParameter::InvalidParameter(const std::string& reason):
+		runtime_error(reason)
+	{}
+	
+	//! Dump the documentation of this parameter to a stream
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParameterDoc& p)
 	{
 		o << p.name << " (default: " << p.defaultValue << ") - " << p.doc;
@@ -50,6 +56,7 @@ namespace PointMatcherSupport
 		return o;
 	}
 	
+	//! Dump the documentation of these parameters to a stream
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParametersDoc& p)
 	{
 		for (auto it = p.cbegin(); it != p.cend(); ++it)
@@ -57,18 +64,18 @@ namespace PointMatcherSupport
 		return o;
 	}
 
+	//! Return always false
 	bool FalseLexicalComparison(std::string, std::string)
 	{
 		return false;
 	}
 	
-	template<typename S>
+	/*template<typename S>
 	bool ScalarLexicalComparison(std::string a, std::string b)
 	{
 		return boost::lexical_cast<S>(a) < boost::lexical_cast<S>(b);
 	}
 	
-	/*
 	Uncomment once most people have gcc >= 4.5
 	Shame on bug  9050 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=9050)
 	template<typename S>
@@ -92,6 +99,7 @@ namespace PointMatcherSupport
 	{}
 	*/
 	
+	//! Construct a parameter documentation with bounds
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue, const std::string& minValue, const std::string& maxValue, LexicalComparison comp):
 		name(name),
 		doc(doc),
@@ -101,6 +109,7 @@ namespace PointMatcherSupport
 		comp(comp)
 	{}
 	
+	//! Construct a parameter documentation without bounds
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue):
 		name(name),
 		doc(doc),
@@ -108,6 +117,15 @@ namespace PointMatcherSupport
 		minValue(""), 
 		maxValue(""),
 		comp(FalseLexicalComparison)
+	{}
+	
+	//! Construct a documentation of parameters from a static description in the source
+	Parametrizable::ParametersDoc::ParametersDoc(std::initializer_list<ParameterDoc> list):
+		std::vector<ParameterDoc>(list)
+	{}
+	
+	//! Construct an empty documentation of parameters
+	Parametrizable::ParametersDoc::ParametersDoc()
 	{}
 	
 	/*
@@ -138,6 +156,12 @@ namespace PointMatcherSupport
 
 	*/
 	
+	//! Construct an unknown class without parameters
+	Parametrizable::Parametrizable():
+		className("unknown")
+	{}
+	
+	//! Construct a known with documented parameters
 	Parametrizable::Parametrizable(
 		const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 		className(className),
@@ -161,7 +185,12 @@ namespace PointMatcherSupport
 				parameters[paramName] = it->defaultValue;
 		}
 	}
+	
+	//! Virtual destructor, do nothing
+	Parametrizable::~Parametrizable()
+	{}
 
+	//! Get the value of a parameter, as a string
 	std::string Parametrizable::getParamValueString(const std::string& paramName) const
 	{
 		Parameters::const_iterator paramIt(parameters.find(paramName));

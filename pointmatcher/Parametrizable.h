@@ -89,12 +89,13 @@ namespace PointMatcherSupport
 		//! An exception thrown when one tries to fetch the value of an unexisting parameter
 		struct InvalidParameter: std::runtime_error
 		{
-			InvalidParameter(const std::string& reason):runtime_error(reason) {}
+			InvalidParameter(const std::string& reason);
 		};
 		
-		//! Return whether a is smaller than b
+		//! A function that returns whether a is smaller than b
 		typedef bool(*LexicalComparison)(std::string a, std::string b);
 		
+		//! Return whether a < b, lexically casted to S
 		template<typename S>
 		static bool Comp(std::string a, std::string b)
 		{
@@ -104,12 +105,12 @@ namespace PointMatcherSupport
 		//! The documentation of a parameter
 		struct ParameterDoc
 		{
-			std::string name;
-			std::string doc;
-			std::string defaultValue;
-			std::string minValue;
-			std::string maxValue;
-			LexicalComparison comp;
+			std::string name; //!< name
+			std::string doc; //!< short documentation
+			std::string defaultValue; //!< default value
+			std::string minValue; //!< if bounds are checked, minimum value
+			std::string maxValue; //!< if bounds are checked, maxmimu value
+			LexicalComparison comp; //!< pointer to comparison function
 			
 			/*
 			This code is beautiful, this code is correct, this code does not work ;-(
@@ -131,8 +132,9 @@ namespace PointMatcherSupport
 		//! The documentation of all parameters
 		struct ParametersDoc : public std::vector<ParameterDoc>
 		{
-			ParametersDoc(std::initializer_list<ParameterDoc> list):std::vector<ParameterDoc>(list){}
-			ParametersDoc() {}
+			ParametersDoc(std::initializer_list<ParameterDoc> list);
+			ParametersDoc();
+			
 			friend std::ostream& operator<< (std::ostream& o, const ParametersDoc& p);
 		};
 		
@@ -145,22 +147,24 @@ namespace PointMatcherSupport
 			Parameter(){}
 		};
 		*/
-		typedef std::string Parameter;
-		typedef std::map<std::string, Parameter> Parameters;
+		typedef std::string Parameter; //!< alias
+		typedef std::map<std::string, Parameter> Parameters; //!< Parameters are stored as a map of string->string
 		
-		const std::string className;
-		const ParametersDoc parametersDoc;
-		Parameters parameters;
+		const std::string className; //!< name of the class
+		const ParametersDoc parametersDoc; //!< documentation of parameters
+		Parameters parameters; //!< parameters with their values encoded in string
 		
-		Parametrizable():className("unknown") {}
+		Parametrizable();
 		Parametrizable(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
-		virtual ~Parametrizable(){}
+		virtual ~Parametrizable();
 		
 		std::string getParamValueString(const std::string& paramName) const;
 		
+		//! Return the value of paramName, lexically-casted to S
 		template<typename S>
 		S get(const std::string& paramName) const { return lexical_cast<S>(getParamValueString(paramName)); }
 		
+		//! Dump the documentation of this object to a stream
 		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p) { o << p.parametersDoc; return o; }
 	};
 } // namespace PointMatcherSupport

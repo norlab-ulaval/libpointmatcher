@@ -199,18 +199,18 @@ namespace PointMatcherSupport
 	//! The logger interface, used to output warnings and informations
 	struct Logger: public Parametrizable
 	{
-		Logger() {}
-		Logger(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
+		Logger();
+		Logger(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		
-		virtual ~Logger() {}
-		virtual bool hasInfoChannel() const { return false; };
-		virtual void beginInfoEntry(const char *file, unsigned line, const char *func) {}
-		virtual std::ostream* infoStream() { return 0; }
-		virtual void finishInfoEntry(const char *file, unsigned line, const char *func) {}
-		virtual bool hasWarningChannel() const { return false; }
-		virtual void beginWarningEntry(const char *file, unsigned line, const char *func) {}
-		virtual std::ostream* warningStream() { return 0; }
-		virtual void finishWarningEntry(const char *file, unsigned line, const char *func) {}
+		virtual ~Logger();
+		virtual bool hasInfoChannel() const;
+		virtual void beginInfoEntry(const char *file, unsigned line, const char *func);
+		virtual std::ostream* infoStream();
+		virtual void finishInfoEntry(const char *file, unsigned line, const char *func);
+		virtual bool hasWarningChannel() const;
+		virtual void beginWarningEntry(const char *file, unsigned line, const char *func);
+		virtual std::ostream* warningStream();
+		virtual void finishWarningEntry(const char *file, unsigned line, const char *func);
 	};
 	
 	void setLogger(Logger* newLogger);
@@ -572,11 +572,12 @@ struct PointMatcher
 	struct TransformationChecker: public Parametrizable
 	{
 	protected:
-		typedef std::vector<std::string> StringVector;
-		Vector limits;
-		Vector values;
-		StringVector limitNames;
-		StringVector valueNames;
+		typedef std::vector<std::string> StringVector; //!< a vector of string
+		Vector limits; //!< values of limits
+		// FIXME: values is a very bad name
+		Vector values; //!< collected values
+		StringVector limitNames; //!< names of limits
+		StringVector valueNames; //!< names of values
 
 	public:
 		TransformationChecker();
@@ -587,10 +588,10 @@ struct PointMatcher
 		//! Set iterate to false if iteration should stop
 		virtual void check(const TransformationParameters& parameters, bool& iterate) = 0;
 		
-		const Vector& getLimits() const { return limits; }
-		const Vector& getValues() const { return values; }
-		const StringVector& getLimitNames() const { return limitNames; }
-		const StringVector& getValueNames() const { return valueNames; }
+		const Vector& getLimits() const;
+		const Vector& getValues() const;
+		const StringVector& getLimitNames() const;
+		const StringVector& getValueNames() const;
 		
 	protected:
 		static Vector matrixToAngles(const TransformationParameters& parameters);

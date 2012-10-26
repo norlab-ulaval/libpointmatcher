@@ -40,28 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
-template<typename T>
-typename PointMatcher<T>::Vector PointMatcher<T>::TransformationChecker::matrixToAngles(const TransformationParameters& parameters)
-{
-	Vector angles;
-	if(parameters.rows() == 4)
-	{
-		angles = Vector::Zero(3);
-
-		angles(0) = atan2(parameters(2,0), parameters(2,1));
-		angles(1) = acos(parameters(2,2));
-		angles(2) = -atan2(parameters(0,2), parameters(1,2));
-	}
-	else
-	{
-		angles = Vector::Zero(1);
-
-		angles(0) = acos(parameters(0,0));
-	}
-
-	return angles;
-}
-
 //--------------------------------------
 // max iteration counter
 template<typename T>

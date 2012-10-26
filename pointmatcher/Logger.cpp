@@ -38,8 +38,61 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace PointMatcherSupport
 {
-	boost::mutex loggerMutex;
-	std::shared_ptr<Logger> logger;
+	boost::mutex loggerMutex; //!< mutex to protect access to logging 
+	std::shared_ptr<Logger> logger; //!< the current logger
+	
+	//! Construct without parameter
+	Logger::Logger()
+	{}
+	
+	//! Construct with parameters
+	Logger::Logger(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+		Parametrizable(className,paramsDoc,params) 
+	{}
+	
+	//! Virtual destructor, do nothing
+	Logger::~Logger()
+	{}
+	
+	//! Return whether this logger provides the info channel
+	bool Logger::hasInfoChannel() const
+	{
+		return false;
+	};
+	
+	//! Start a new entry into the info channel
+	void Logger::beginInfoEntry(const char *file, unsigned line, const char *func)
+	{}
+	
+	//! Return the info stream, 0 if hasInfoChannel is false
+	std::ostream* Logger::infoStream()
+	{
+		return 0;
+	}
+	
+	//! Finish the entry into the info channel
+	void Logger::finishInfoEntry(const char *file, unsigned line, const char *func)
+	{}
+	
+	//! Return whether this logger provides the warning channel
+	bool Logger::hasWarningChannel() const
+	{
+		return false;
+	}
+	
+	//! Start a new entry into the warning channel
+	void Logger::beginWarningEntry(const char *file, unsigned line, const char *func)
+	{}
+	
+	//! Return the warning stream, 0 if hasWarningChannel is false
+	std::ostream* Logger::warningStream()
+	{
+		return 0;
+	}
+	
+	//! Finish the entry into the warning channel
+	void Logger::finishWarningEntry(const char *file, unsigned line, const char *func)
+	{}
 	
 	//! Set a new logger, protected by a mutex
 	void setLogger(Logger* newLogger)
