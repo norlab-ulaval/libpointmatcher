@@ -63,7 +63,6 @@ PointMatcher<T>::FileInfo::FileInfo(const std::string& readingFileName, const st
 template struct PointMatcher<float>::FileInfo;
 template struct PointMatcher<double>::FileInfo;
 
-// FIXME: this documentation is inconsistent with the parameters
 //! Load a vector of FileInfo from a CSV file.
 /**
 	@param fileName name of the CSV file
