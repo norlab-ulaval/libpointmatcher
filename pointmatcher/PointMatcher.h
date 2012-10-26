@@ -299,6 +299,7 @@ struct PointMatcher
 		//! An exception thrown when one tries to access features or descriptors unexisting or of wrong dimensions
 		struct InvalidField: std::runtime_error
 		{
+			//! Construct the exception with an error message
 			InvalidField(const std::string& reason):runtime_error(reason) {}
 		};
 		
@@ -347,14 +348,13 @@ struct PointMatcher
 	// ---------------------------------
 	// IO functions
 	// ---------------------------------
+	
+	//! Data from a CSV file
 	typedef std::map<std::string, std::vector<std::string>> CsvElements;
 
 	static void validateFile(const std::string& fileName);
 	static std::vector<std::string> csvLineToVector(const char* line);
 	static CsvElements parseCsvWithHeader(const std::string& fileName);
-
-	//Should it be here?
-	static DataPoints concatenateDataPoints(const DataPoints dp1, const DataPoints dp2);
 
 	// Generic load and save
 	
@@ -376,20 +376,18 @@ struct PointMatcher
 
 	static void saveVTK(const DataPoints& data, const std::string& fileName);
 	
+	// TODO: The FileInfo and FileInfoVector structs should go somewhere else than this main file
 	//! Information required to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo 
 	{
-		std::string readingFileName;
-		std::string referenceFileName;
-		std::string configFileName;
-		TransformationParameters initialTransformation;
-		TransformationParameters groundTruthTransformation;
-		Eigen::Matrix<T, 3, 1> gravity;
+		std::string readingFileName; //!< file name of the reading point cloud
+		std::string referenceFileName; //!< file name of the reference point cloud
+		std::string configFileName; //!< file name of the yaml configuration
+		TransformationParameters initialTransformation; //!< matrix of initial estimate transform
+		TransformationParameters groundTruthTransformation; //!< matrix of the ground-truth transform
+		Eigen::Matrix<T, 3, 1> gravity; //!< gravity vector
 
 		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& grativity=Eigen::Matrix<T,3,1>::Zero());
-		
-		std::string readingExtension() const;
-		std::string referenceExtension() const;
 	};
 
 	//! A vector of file info, to be used in batch

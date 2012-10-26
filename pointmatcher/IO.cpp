@@ -49,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+//! Constructor, leave fields blank if unused
 template<typename T>
 PointMatcher<T>::FileInfo::FileInfo(const std::string& readingFileName, const std::string& referenceFileName, const std::string& configFileName, const TransformationParameters& initialTransformation, const TransformationParameters& groundTruthTransformation, const Vector& grativity):
 	readingFileName(readingFileName),
@@ -59,30 +60,10 @@ PointMatcher<T>::FileInfo::FileInfo(const std::string& readingFileName, const st
 	gravity(gravity)
 {}
 
-template<typename T>
-std::string PointMatcher<T>::FileInfo::readingExtension() const
-{
-	#if BOOST_FILESYSTEM_VERSION >= 3
-	return boost::filesystem::path(readingFileName).extension().string();
-	#else
-	return boost::filesystem::path(readingFileName).extension();
-	#endif
-}
-
-template<typename T>
-std::string PointMatcher<T>::FileInfo::referenceExtension() const
-{
-	#if BOOST_FILESYSTEM_VERSION >= 3
-	return boost::filesystem::path(referenceFileName).extension().string();
-	#else
-	return boost::filesystem::path(referenceFileName).extension();
-	#endif
-}
-
 template struct PointMatcher<float>::FileInfo;
 template struct PointMatcher<double>::FileInfo;
 
-
+// FIXME: this documentation is inconsistent with the parameters
 //! Load a vector of FileInfo from a CSV file.
 /**
 	@param fileName name of the CSV file
@@ -195,6 +176,7 @@ PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName, std
 	*/
 }
 
+//! Join parentPath and fileName and return the result as a global path
 template<typename T>
 std::string PointMatcher<T>::FileInfoVector::localToGlobalFileName(const std::string& parentPath, const std::string& fileName)
 {
@@ -251,7 +233,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::FileInfoVect
 template struct PointMatcher<float>::FileInfoVector;
 template struct PointMatcher<double>::FileInfoVector;
 
-
+//! Throw a runtime_error exception if fileName cannot be opened
 template<typename T>
 void PointMatcher<T>::validateFile(const std::string& fileName)
 {
@@ -264,7 +246,6 @@ void PointMatcher<T>::validateFile(const std::string& fileName)
 	#else
 		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
 	#endif
-
 }
 
 template
@@ -272,6 +253,7 @@ void PointMatcher<float>::validateFile(const std::string& fileName);
 template
 void PointMatcher<double>::validateFile(const std::string& fileName);
 
+//! Tokenize a string, excepted if it begins with a '%' (a comment in CSV)
 template<typename T>
 std::vector<string> PointMatcher<T>::csvLineToVector(const char* line)
 {
@@ -299,14 +281,13 @@ std::vector<string> PointMatcher<float>::csvLineToVector(const char* line);
 template
 std::vector<string> PointMatcher<double>::csvLineToVector(const char* line);
 
-
+//! Open and parse a CSV file, return the data
 template<typename T>
 typename PointMatcher<T>::CsvElements PointMatcher<T>::parseCsvWithHeader(const std::string& fileName)
 {
-	ifstream is(fileName.c_str());
-	
 	validateFile(fileName);
-
+	
+	ifstream is(fileName.c_str());
 
 	unsigned elementCount=0;
 	std::map<string, unsigned> keywordCols;
@@ -378,6 +359,7 @@ PointMatcher<float>::CsvElements PointMatcher<float>::parseCsvWithHeader(const s
 template
 PointMatcher<double>::CsvElements PointMatcher<double>::parseCsvWithHeader(const std::string& fileName);
 
+//! Load a point cloud from a file, determine format from extension
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::loadAnyFormat(const std::string& fileName)
 {
@@ -610,7 +592,7 @@ PointMatcher<float>::DataPoints PointMatcher<float>::loadCSV(const std::string& 
 template
 PointMatcher<double>::DataPoints PointMatcher<double>::loadCSV(const std::string& fileName);
 
-
+//! Save a point cloud to a file, determine format from extension
 template<typename T>
 void PointMatcher<T>::saveAnyFormat(const DataPoints& data, const std::string& fileName)
 {

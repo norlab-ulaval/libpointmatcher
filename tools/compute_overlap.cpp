@@ -116,21 +116,8 @@ int main(int argc, char *argv[])
 		for(unsigned j = startingJ; j < listSizeJ; j++)
 		{
 			// Load point clouds
-			if(list[i].readingExtension() == ".vtk")
-			{
-				reading = PM::loadVTK(list[i].readingFileName);
-				reference = PM::loadVTK(list[j].readingFileName);
-			}
-			else if(list[i].readingExtension() == ".csv")
-			{
-				reading = PM::loadCSV(list[i].readingFileName);
-				reference = PM::loadCSV(list[j].readingFileName);
-			}
-			else
-			{
-				cout << "Only VTK or CSV files are supported" << endl;
-				abort();
-			}
+			reading = PM::loadAnyFormat(list[i].readingFileName);
+			reference = PM::loadAnyFormat(list[j].readingFileName);
 
 			cout << "Point cloud loaded" << endl;
 
@@ -162,12 +149,12 @@ int main(int argc, char *argv[])
 				"MaxDensityDataPointsFilter"
 				);
 			
-			PM::DataPointsFilter* cutInHalf;
+			/*PM::DataPointsFilter* cutInHalf;
 			cutInHalf = PM::get().DataPointsFilterRegistrar.create(
 				"MinDistDataPointsFilter", PM::Parameters({
 					{"dim", "1"},
 					{"minDist", "0"}
-				}));
+				}));*/
 
 			PM::DataPointsFilter* computeDensity;
 			computeDensity = PM::get().DataPointsFilterRegistrar.create(
