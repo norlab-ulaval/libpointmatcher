@@ -2,7 +2,7 @@
 // vim: ts=4:sw=4:noexpandtab
 /*
 
-Copyright (c) 2010--2011,
+Copyright (c) 2010--2012,
 François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
 You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
