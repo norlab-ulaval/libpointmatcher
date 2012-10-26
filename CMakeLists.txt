@@ -115,13 +115,23 @@ add_definitions(-Wall)
 
 # Pointmatcher lib and install
 set(POINTMATCHER_SRC
+	pointmatcher/Logger.cpp
+	pointmatcher/DataPoints.cpp
+	pointmatcher/Matches.cpp
+	pointmatcher/ICP.cpp
+	pointmatcher/Registry.cpp
+	pointmatcher/DataPointsFilter.cpp
+	pointmatcher/Matcher.cpp
+	pointmatcher/OutlierFilter.cpp
+	pointmatcher/ErrorMinimizer.cpp
+	pointmatcher/Transformation.cpp
+	pointmatcher/TransformationChecker.cpp
+	pointmatcher/Inspector.cpp
+	pointmatcher/IO.cpp
+	pointmatcher/Bibliography.cpp
 	pointmatcher/Timer.cpp
 	pointmatcher/Histogram.cpp
 	pointmatcher/Parametrizable.cpp
-	pointmatcher/Core.cpp
-	pointmatcher/ErrorMinimizer.cpp
-	pointmatcher/IO.cpp
-	pointmatcher/Bibliography.cpp
 	pointmatcher/LoggerImpl.cpp
 	pointmatcher/DataPointsFiltersImpl.cpp
 	pointmatcher/MatchersImpl.cpp

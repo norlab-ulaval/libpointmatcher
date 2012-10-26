@@ -345,6 +345,8 @@ struct PointMatcher
 		unsigned getFieldStartingRow(const std::string& name, const Labels& labels) const;
 	};
 	
+	static void swapDataPoints(DataPoints& a, DataPoints& b);
+	
 	// ---------------------------------
 	// IO functions
 	// ---------------------------------
