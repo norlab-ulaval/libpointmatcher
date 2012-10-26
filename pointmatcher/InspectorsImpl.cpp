@@ -301,7 +301,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpMeshNodes(const DataPoints& fi
 
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
-	const size_t iterationCount,
+	const size_t iterationNumber,
 	const TransformationParameters& parameters,
 	const DataPoints& filteredReference,
 	const DataPoints& reading,
@@ -309,22 +309,22 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 	const OutlierWeights& outlierWeights, 
 	const TransformationCheckers& transCheck)
 {
-	ostream* streamLinks(openStream("link", iterationCount));
+	ostream* streamLinks(openStream("link", iterationNumber));
 	dumpDataLinks(filteredReference, reading, matches, outlierWeights, *streamLinks);
 	closeStream(streamLinks);
 
-	ostream* streamRead(openStream("reading", iterationCount));
+	ostream* streamRead(openStream("reading", iterationNumber));
 	dumpDataPoints(reading, *streamRead);
 	closeStream(streamRead);
 	
-	ostream* streamRef(openStream("reference", iterationCount));
+	ostream* streamRef(openStream("reference", iterationNumber));
 	dumpDataPoints(filteredReference, *streamRef);
 	closeStream(streamRef);
 	
 	// streamIter must be define by children
 	assert(streamIter);
 
-	if(iterationCount == 0)
+	if(iterationNumber == 0)
 	{
 		//Build header
 		for(unsigned int j = 0; j < transCheck.size(); j++)
@@ -578,10 +578,10 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 }
 
 template<typename T>
-std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string& role, const size_t iterationCount)
+std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string& role, const size_t iterationNumber)
 {
 	ostringstream oss;
-	oss << baseFileName << "-" << role << "-" << iterationCount << ".vtk";
+	oss << baseFileName << "-" << role << "-" << iterationNumber << ".vtk";
 	ofstream* file = new ofstream(oss.str().c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if repository exist.");

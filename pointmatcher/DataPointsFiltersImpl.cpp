@@ -483,7 +483,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	matcher.init(input);
 
 	Matches matches(typename Matches::Dists(knn, pointsCount), typename Matches::Ids(knn, pointsCount));
-	matches = matcher.findClosests(input, DataPoints());
+	matches = matcher.findClosests(input);
 	
 	// Search for surrounding points and compute descriptors
 	int degenerateCount(0);

@@ -47,7 +47,6 @@ This out-of-source build is a nice feature of [CMake] under Unixes.
 If [Eigen], [libnabo] or [yaml-cpp] are not installed system-wide, you might have to tell [CMake] where to find them.
 You can do this with a command-line tool, `ccmake`, or with a graphical tool, `cmake-gui`.
 Please read the [CMake documentation] for more information.
-Note that if you have [ROS] (Diamondback) installed, Eigen 3 should be availabe in the path `/opt/ros/diamondback/stacks/geometry/eigen/include`.
 
 Test
 ====
@@ -67,13 +66,13 @@ You can list the available modules with:
 
 	examples/pmicp -l
 
-If you have compiled libpointmatcher with [yaml-cpp] enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the `pmicp` command using the `--config` switch. An example file is available in `data/examples/default.yaml`.
+If you have compiled libpointmatcher with [yaml-cpp] enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the `pmicp` command using the `--config` switch. An example file is available in `examples/data/default.yaml`.
 
 
 Developing
 ==========
 
-If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and icp (in `example/icp_simple.cpp` and `example/icp.cpp`). You can see how loading/saving of data files work by looking at convertCSVtoVTK (`example/convertCSVtoVTK.cpp`). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (`example/align_sequence.cpp`).
+If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and pmicp (in `example/icp_simple.cpp` and `example/icp.cpp`). You can see how loading/saving of data files work by looking at convert (`example/convert.cpp`). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (`example/align_sequence.cpp`).
 
 
 Bug reporting

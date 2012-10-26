@@ -62,7 +62,7 @@ struct MatchersImpl
 		}
 		
 		virtual void init(const DataPoints& filteredReference);
-		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
+		virtual Matches findClosests(const DataPoints& filteredReading);
 	};
 
 	struct KDTreeMatcher: public Matcher
@@ -93,7 +93,7 @@ struct MatchersImpl
 		KDTreeMatcher(const Parameters& params = Parameters());
 		virtual ~KDTreeMatcher();
 		virtual void init(const DataPoints& filteredReference);
-		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
+		virtual Matches findClosests(const DataPoints& filteredReading);
 	};
 
 	struct KDTreeVarDistMatcher: public Matcher
@@ -124,7 +124,7 @@ struct MatchersImpl
 		KDTreeVarDistMatcher(const Parameters& params = Parameters());
 		virtual ~KDTreeVarDistMatcher();
 		virtual void init(const DataPoints& filteredReference);
-		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference);
+		virtual Matches findClosests(const DataPoints& filteredReading);
 	};
 
 }; // MatchersImpl

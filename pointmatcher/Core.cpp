@@ -714,8 +714,21 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters::comput
 
 // ErrorMinimizer, see ErrorMinimizers.cpp
 
+
 // TranformationCheckers
 
+//! Construct without parameter
+template<typename T>
+PointMatcher<T>::TransformationChecker::TransformationChecker()
+{} 
+
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::TransformationChecker::TransformationChecker(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params)
+{}
+
+//! Init all transformation checkers, set iterate to false if iteration should stop
 template<typename T>
 void PointMatcher<T>::TransformationCheckers::init(const TransformationParameters& parameters, bool& iterate)
 {
@@ -723,6 +736,7 @@ void PointMatcher<T>::TransformationCheckers::init(const TransformationParameter
 		(*it)->init(parameters, iterate);
 }
 
+//! Check using all transformation checkers, set iterate to false if iteration should stop
 template<typename T>
 void PointMatcher<T>::TransformationCheckers::check(const TransformationParameters& parameters, bool& iterate)
 {
@@ -771,14 +785,13 @@ void PointMatcher<T>::Inspector::dumpStatsHeader(std::ostream& stream)
 {}
 
 // data statistics 
+
+//! Dump the state of a given iteration
 template<typename T>
-void PointMatcher<T>::Inspector::dumpFilteredReference(const DataPoints& filteredReference)
+void PointMatcher<T>::Inspector::dumpIteration(const size_t iterationNumber, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers)
 {}
 
-template<typename T>
-void PointMatcher<T>::Inspector::dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers)
-{}
-
+//! Tell the inspector the ICP operation is completed
 template<typename T>
 void PointMatcher<T>::Inspector::finish(const size_t iterationCount)
 {}
@@ -1035,7 +1048,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// Apply readings filters
 	// reading is express in frame <dataIn>
 	DataPoints reading(readingIn);
-	const int nbPtsReading = reading.features.cols();
+	//const int nbPtsReading = reading.features.cols();
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
 	
@@ -1082,7 +1095,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		//-----------------------------
 		// Match to closest point in Reference
 		const Matches matches(
-			this->matcher->findClosests(stepReading, reference)
+			this->matcher->findClosests(stepReading)
 		);
 		
 		//-----------------------------
@@ -1218,6 +1231,7 @@ const typename PointMatcher<T>::DataPoints& PointMatcher<T>::ICPSequence::getInt
 	return mapPointCloud;
 }
 
+//! Apply ICP to cloud cloudIn, with identity as initial guess
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& cloudIn)
@@ -1227,6 +1241,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	return this->compute(cloudIn, identity);
 }
 
+//! Apply ICP to cloud cloudIn, with initial guess
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew)
@@ -1234,7 +1249,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	return this->compute(cloudIn, T_dataInOld_dataInNew);
 }
 
-//! Apply ICP to cloud cloudIn
+//! Apply ICP to cloud cloudIn, with initial guess
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::compute(
 	const DataPoints& cloudIn, const TransformationParameters& T_refIn_dataIn)

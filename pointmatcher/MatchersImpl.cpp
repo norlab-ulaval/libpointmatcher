@@ -46,8 +46,7 @@ void MatchersImpl<T>::NullMatcher::init(
 
 template<typename T>
 typename PointMatcher<T>::Matches MatchersImpl<T>::NullMatcher::findClosests(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference)
+	const DataPoints& filteredReading)
 {
 	return Matches();
 }
@@ -85,8 +84,7 @@ void MatchersImpl<T>::KDTreeMatcher::init(
 
 template<typename T>
 typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeMatcher::findClosests(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference)
+	const DataPoints& filteredReading)
 {
 	
 	const int pointsCount(filteredReading.features.cols());
@@ -131,8 +129,7 @@ void MatchersImpl<T>::KDTreeVarDistMatcher::init(
 
 template<typename T>
 typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeVarDistMatcher::findClosests(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference)
+	const DataPoints& filteredReading)
 {
 	
 	const int pointsCount(filteredReading.features.cols());

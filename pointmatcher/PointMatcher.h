@@ -91,15 +91,15 @@ You can list the available modules with:
 pmicp -l
 \endcode
 
-If you have compiled libpointmatcher with \ref yaml-cpp enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the \c pmicp command using the \c --config switch. An example file is available in \c data/examples/default.yaml.
+If you have compiled libpointmatcher with \ref yaml-cpp enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the \c pmicp command using the \c --config switch. An example file is available in \c examples/data/default.yaml.
 
 \section DevelopingUsing Developing using libpointmatcher
 
-If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and icp (in \c example/icp_simple.cpp and \c example/icp.cpp). You can see how loading/saving of data files work by looking at convertCSVtoVTK (\c example/convertCSVtoVTK.cpp). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (\c example/align_sequence.cpp).
+If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and pmicp (in \c example/icp_simple.cpp and \c example/icp.cpp). You can see how loading/saving of data files work by looking at convert (\c example/convert.cpp). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (\c example/align_sequence.cpp).
 
 \section DevelopingSelf Extending libpointmatcher
 
-You can also extend libpointmatcher relatively easily, by adding new modules. The file PointMatcher.h is the most important file, it defines the interfaces for all module types, as well as the ICP algorithms. Each interface is an inner class of the PointMatcher class, which is templatized on the scalar type. Instanciation is forced in \c Core.cpp for float and double scalar types. There are different types of modules corresponding to the different bricks of the ICP algorithm. The modules themselves are defined in their own files, for instance data-point filters live in the \c DataPointFilters.h/\c .cpp files. You can read a description of the ICP chain architecture in our \ref icppaper "IROS paper". Then, start from the documentation of PointMatcher to see the different interfaces, and then read the source code of the existing modules for the interface you are interested in, to get an idea of what you have to implement.
+You can also extend libpointmatcher relatively easily, by adding new modules. The file PointMatcher.h is the most important file, it defines the interfaces for all module types, as well as the ICP algorithms. Each interface is an inner class of the PointMatcher class, which is templatized on the scalar type. Instanciation is forced in \c Core.cpp for float and double scalar types. There are different types of modules corresponding to the different bricks of the ICP algorithm. The modules themselves are defined in their own files, for instance data-point filters live in the \c DataPointFiltersImpl.h/\c .cpp files. You can read a description of the ICP chain architecture in our \ref icppaper "IROS paper". Then, start from the documentation of PointMatcher to see the different interfaces, and then read the source code of the existing modules for the interface you are interested in, to get an idea of what you have to implement.
 
 All modules have a common way to get parameters at initialization, and feature a self-documentation mechanism. This allows to configure the ICP chain from external descriptions such as \ref yaml-cpp "yaml files".
 
@@ -107,27 +107,27 @@ All modules have a common way to get parameters at initialization, and feature a
 
 You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "DataPointsFilter": \c DataPointsFiltersImpl.h, \c DataPointsFiltersImpl.cpp and \c Core.cpp. The easiest way is to start by copying and renaming \c IdentityDataPointsFilter, and then to modify it.
 
-- In \c DataPointsFiltersImpl.h, copy the declaration of the struct \c IdentityDataPointsFilter at the end of the file,
-- Rename the pasted structure with the new filter name,
-- Fill the \c description() function with a short explanation of the filter's action,
+- In \c DataPointsFiltersImpl.h, copy the declaration of the struct \c IdentityDataPointsFilter at the end of the file.
+- Rename the pasted structure with the new filter name.
+- Fill the \c description() function with a short explanation of the filter's action.
 - If you need parameters for the filter:
-	- Uncomment the \c availableParameters() function and filled the description, default, min, max values as string,
-	- The types of the parameters are used to properly cast the string value and can be:  \c &P::Comp<T>, \c &P::Comp<int>, \c &P::Comp<unsigned>, etc. See \c DataPointsFiltersImpl.h for examples,
+	- Uncomment the \c availableParameters() function and fill the description, default, min, max values as string.
+	- The types of the parameters are used to properly cast the string value and can be:  \c &P::Comp<T>, \c &P::Comp<int>, \c &P::Comp<unsigned>, etc. See \c DataPointsFiltersImpl.h for examples.
 	- Uncomment and rename the constructor.
 
 - In \c DataPointsFiltersImpl.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the predeclaration (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct 
-\c DataPointsFiltersImpl<double>::YourFilter;),
-- Add the constructor if needed,
+\c DataPointsFiltersImpl<double>::YourFilter;).
+- Add the constructor if needed.
 - At this stage, you should let the implementation of the filter function to hold only the statement that returns the input.
 
-- In \c Core.cpp, search for \c "ADD_TO_REGISTRAR(DataPointsFilter,",
+- In \c Core.cpp, search for \c "ADD_TO_REGISTRAR(DataPointsFilter,".
 - You should see all available \c dataPointfilter there. At the end of that block, add your filter.
 
 - Compile.
 
 - Test if your new module is available with the \c pmicp \c -l command, which lists the documentation of all modules. You should be able to find yours in the output.
 
-- Go back to \c DataPointFilter.cpp and code the \c filter() function.
+- Go back to \c DataPointsFiltersImpl.cpp and code the \c filter() function.
 
 \subsection CodingStyle Coding Style
 
@@ -137,6 +137,7 @@ One shall:
 - use \ref CamelCase "camel case" with classes beginning with Capitals and members with a small letter.
 
 For documentation, one shall document classes and data members inside the header file and methods at the implementation location.
+One exception is purely-virtual methods, which must be documented in the header file.
 
 \section BugReporting Bug reporting
 
@@ -298,6 +299,7 @@ struct PointMatcher
 		//! An exception thrown when one tries to access features or descriptors unexisting or of wrong dimensions
 		struct InvalidField: std::runtime_error
 		{
+			//! Construct the exception with an error message
 			InvalidField(const std::string& reason):runtime_error(reason) {}
 		};
 		
@@ -346,14 +348,13 @@ struct PointMatcher
 	// ---------------------------------
 	// IO functions
 	// ---------------------------------
+	
+	//! Data from a CSV file
 	typedef std::map<std::string, std::vector<std::string>> CsvElements;
 
 	static void validateFile(const std::string& fileName);
 	static std::vector<std::string> csvLineToVector(const char* line);
 	static CsvElements parseCsvWithHeader(const std::string& fileName);
-
-	//Should it be here?
-	static DataPoints concatenateDataPoints(const DataPoints dp1, const DataPoints dp2);
 
 	// Generic load and save
 	
@@ -375,20 +376,18 @@ struct PointMatcher
 
 	static void saveVTK(const DataPoints& data, const std::string& fileName);
 	
+	// TODO: The FileInfo and FileInfoVector structs should go somewhere else than this main file
 	//! Information required to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo 
 	{
-		std::string readingFileName;
-		std::string referenceFileName;
-		std::string configFileName;
-		TransformationParameters initialTransformation;
-		TransformationParameters groundTruthTransformation;
-		Eigen::Matrix<T, 3, 1> gravity;
+		std::string readingFileName; //!< file name of the reading point cloud
+		std::string referenceFileName; //!< file name of the reference point cloud
+		std::string configFileName; //!< file name of the yaml configuration
+		TransformationParameters initialTransformation; //!< matrix of initial estimate transform
+		TransformationParameters groundTruthTransformation; //!< matrix of the ground-truth transform
+		Eigen::Matrix<T, 3, 1> gravity; //!< gravity vector
 
 		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& grativity=Eigen::Matrix<T,3,1>::Zero());
-		
-		std::string readingExtension() const;
-		std::string referenceExtension() const;
 	};
 
 	//! A vector of file info, to be used in batch
@@ -491,8 +490,10 @@ struct PointMatcher
 		void resetVisitCount();
 		unsigned long getVisitCount() const;
 		
+		//! Init this matcher to find nearest neighbor in filteredReference
 		virtual void init(const DataPoints& filteredReference) = 0;
-		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference) = 0;
+		//! Find the closest neighbors of filteredReading in filteredReference passed to init()
+		virtual Matches findClosests(const DataPoints& filteredReading) = 0;
 	};
 	
 	DEF_REGISTRAR(Matcher)
@@ -577,9 +578,11 @@ struct PointMatcher
 
 	public:
 		TransformationChecker();
-		TransformationChecker(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
+		TransformationChecker(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~TransformationChecker() {}
+		//! Init, set iterate to false if iteration should stop
 		virtual void init(const TransformationParameters& parameters, bool& iterate) = 0;
+		//! Set iterate to false if iteration should stop
 		virtual void check(const TransformationParameters& parameters, bool& iterate) = 0;
 		
 		const Vector& getLimits() const { return limits; }
@@ -621,8 +624,7 @@ struct PointMatcher
 		virtual void dumpStatsHeader(std::ostream& stream);
 		
 		// data statistics 
-		virtual void dumpFilteredReference(const DataPoints& filteredReference);
-		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers);
+		virtual void dumpIteration(const size_t iterationNumber, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers);
 		virtual void finish(const size_t iterationCount);
 	};
 	

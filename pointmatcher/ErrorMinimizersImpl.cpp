@@ -237,7 +237,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise") ||
 		!this->lastErrorElements.reading.descriptorExists("normals"))
 	{
-		LOG_INFO_STREAM("PointToPointErrorMinimizer - warning, no sensor noise or normals found. Using best estimate given outlier rejection instead.");
+		LOG_INFO_STREAM("PointToPlaneErrorMinimizer - warning, no sensor noise or normals found. Using best estimate given outlier rejection instead.");
 		return this->weightedPointUsedRatio;
 	}
 
