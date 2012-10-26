@@ -203,13 +203,13 @@ int main(int argc, char *argv[])
 				matcherTarget->init(target);
 
 				Matches selfMatches(knn, selfPtsCount);
-				selfMatches = matcherSelf->findClosests(self, DataPoints());
+				selfMatches = matcherSelf->findClosests(self);
 
 				const Matrix maxSearchDist = selfMatches.dists.colwise().maxCoeff().cwiseSqrt();
 				self.addDescriptor("maxSearchDist", maxSearchDist);
 
 				Matches targetMatches(knnAll, targetPtsCount);
-				targetMatches = matcherTarget->findClosests(self, DataPoints());
+				targetMatches = matcherTarget->findClosests(self);
 
 				auto inlierSelf(self.getDescriptorViewByName("inliers"));
 				auto inlierTarget(target.getDescriptorViewByName("inliers"));
