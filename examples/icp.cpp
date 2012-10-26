@@ -91,12 +91,12 @@ int main(int argc, const char *argv[])
 		}
 		icp.loadFromYaml(ifs);
 	}
-	//FP: tmp
 	PM::TransformationParameters Tinit = PM::TransformationParameters::Identity(4,4);
-	Tinit << 0, 1, 0, -0.0,
-			 -1, 0, 0, 0,
-			 0, 0, 1, 0,
-			 0, 0, 0, 1;
+	
+	//Tinit << 0, 1, 0, -0.0,
+	//		 -1, 0, 0, 0,
+	//		 0, 0, 1, 0,
+	//		 0, 0, 0, 1;
 	// rot around x-axis
 	//Tinit << 1, 0, 0, 0,
 	//		 0, 0.940, 0.342, 0,

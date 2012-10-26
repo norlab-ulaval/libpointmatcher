@@ -887,9 +887,10 @@ template<typename R>
 void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules)
 {
 	const YAML::Node *reg = doc.FindValue(regName);
+
 	if (reg)
 	{
-		cout << regName << endl;
+		//cout << "Found! " << regName << endl;
 		for(YAML::Iterator moduleIt = reg->begin(); moduleIt != reg->end(); ++moduleIt)
 		{
 			const YAML::Node& module(*moduleIt);
@@ -906,7 +907,7 @@ void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string&
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
 	{
-		cout << regName << endl;
+		//cout << regName << endl;
 		//module.reset(createModuleFromRegistrar(*reg, registrar));
 		module.reset(registrar.createFromYAML(*reg));
 	}

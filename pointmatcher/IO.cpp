@@ -86,7 +86,8 @@ template struct PointMatcher<double>::FileInfo;
 //! Load a vector of FileInfo from a CSV file.
 /**
 	@param fileName name of the CSV file
-	@param parentPath path relative to which to resolve the reference to relative paths in the CSV, use the path of the CSV file if empty.
+	@param dataPath path relative to which the point cloud CSV or VTK will be resolved.
+	@param configPath path relative to which the yaml configuration files will be resolved
 	
 	The first line of the CSV file must contain a header. The supported tags are:
 	- reading: file name of the reading point cloud
@@ -706,7 +707,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 	int pointCount;
 	string pad0;
 	is >> type >> pointCount >> pad0;
-	if (type != "POINTS" || pad0 != "float")
+	if (type != "POINTS" || !(pad0 == "float" || pad0 == "double"))
 		throw runtime_error(string("Wrong header for points"));
 	
 	// read points (features)
