@@ -490,8 +490,10 @@ struct PointMatcher
 		void resetVisitCount();
 		unsigned long getVisitCount() const;
 		
+		//! Init this matcher to find nearest neighbor in filteredReference
 		virtual void init(const DataPoints& filteredReference) = 0;
-		virtual Matches findClosests(const DataPoints& filteredReading, const DataPoints& filteredReference) = 0;
+		//! Find the closest neighbors of filteredReading in filteredReference passed to init()
+		virtual Matches findClosests(const DataPoints& filteredReading) = 0;
 	};
 	
 	DEF_REGISTRAR(Matcher)
@@ -576,9 +578,11 @@ struct PointMatcher
 
 	public:
 		TransformationChecker();
-		TransformationChecker(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):Parametrizable(className,paramsDoc,params) {}
+		TransformationChecker(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~TransformationChecker() {}
+		//! Init, set iterate to false if iteration should stop
 		virtual void init(const TransformationParameters& parameters, bool& iterate) = 0;
+		//! Set iterate to false if iteration should stop
 		virtual void check(const TransformationParameters& parameters, bool& iterate) = 0;
 		
 		const Vector& getLimits() const { return limits; }
@@ -620,8 +624,7 @@ struct PointMatcher
 		virtual void dumpStatsHeader(std::ostream& stream);
 		
 		// data statistics 
-		virtual void dumpFilteredReference(const DataPoints& filteredReference);
-		virtual void dumpIteration(const size_t iterationCount, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers);
+		virtual void dumpIteration(const size_t iterationNumber, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers);
 		virtual void finish(const size_t iterationCount);
 	};
 	
