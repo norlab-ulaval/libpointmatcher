@@ -16,3 +16,6 @@ target_link_libraries(list_modules pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${
 
 add_executable(build_map build_map.cpp)
 target_link_libraries(build_map pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})
+
+add_executable(eval_solution eval_solution.cpp)
+target_link_libraries(eval_solution pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})

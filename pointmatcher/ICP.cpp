@@ -153,7 +153,7 @@ void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
 	{
-		cout << regName << endl;
+		//cout << regName << endl;
 		for(YAML::Iterator moduleIt = reg->begin(); moduleIt != reg->end(); ++moduleIt)
 		{
 			const YAML::Node& module(*moduleIt);
@@ -169,8 +169,7 @@ void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string&
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
 	{
-		cout << regName << endl;
-		// FIXME: use logger
+		//cout << regName << endl;
 		module.reset(registrar.createFromYAML(*reg));
 	}
 	else
