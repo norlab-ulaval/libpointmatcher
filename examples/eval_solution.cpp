@@ -41,16 +41,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <thread>
 #include <mutex>
+#include <time.h>
 
 #include <ncurses.h>
 
-#include <boost/program_options.hpp>
+#include "boost/program_options.hpp"
 #include "boost/filesystem.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/posix_time/posix_time_io.hpp"
 
 using namespace std;
 using namespace PointMatcherSupport;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
+namespace pt = boost::posix_time;
 
 typedef PointMatcher<float> PM;
 typedef PM::TransformationParameters TP;
@@ -106,9 +110,11 @@ struct Config
 class EvaluationModule
 {
 public:
-	const int coreId;
-	EvaluationModule(const int coreId);
-	void evaluateSolution(const string &yaml_config, const int &coreId, PM::FileInfoVector::const_iterator it_eval, PM::FileInfoVector::const_iterator it_end);
+	EvaluationModule();
+	int coreId;
+	string tmp_file_name;
+	double result_time;
+	void evaluateSolution(const string &tmp_file_name, const string &yaml_config, const int &coreId, PM::FileInfoVector::const_iterator it_eval, PM::FileInfoVector::const_iterator it_end);
 	
 };
 
@@ -120,10 +126,12 @@ void saveConfig(Config& config);
 void loadConfig(Config& config);
 void downloadDataSets(Config& config, po::variables_map &vm);
 void validateFileInfo(const PM::FileInfo &fileInfo);
-void displayLoadingBar(const int &coreId, const int &i, const int &total, const double sec, const double total_time);
+void displayLoadingBar(const int &coreId, const int &i, const int &total, const int &nbFailures, const double sec, const double total_time);
 
 int main(int argc, char *argv[])
 {
+	srand ( time(NULL) );
+
 	// Option parsing
 	po::options_description desc = setupOptions(argv[0]);
 	po::positional_options_description p;
@@ -215,22 +223,27 @@ int main(int argc, char *argv[])
 			
 			// List of thread
 			std::thread a_threads[maxNbCore];
+			std::vector<EvaluationModule> v_evalModules;
 			
 			const int nbPerThread = eval_list.size()/nbCore;
 			PM::FileInfoVector::const_iterator it_start = eval_list.begin();
 			for (int j=0; j<nbCore; ++j)
 			{
-				EvaluationModule evalCore(j);
+				v_evalModules.push_back(EvaluationModule());
+				v_evalModules[j].coreId = j;
+				stringstream name;
+				name << ".tmp_core" << j << "_" << rand() << ".csv";
+				v_evalModules[j].tmp_file_name = name.str();
 				// Start evaluation for every line
 				if(j == nbCore-1)
 				{
 					// last core receive the reste
-					a_threads[j] = std::thread(&EvaluationModule::evaluateSolution, &evalCore, yaml_config, j, it_start, eval_list.end());
+					a_threads[j] = std::thread(&EvaluationModule::evaluateSolution, &v_evalModules[j], name.str(), yaml_config, j, it_start, eval_list.end());
 					//evalCore.evaluateSolution(yaml_config, j, it_start, eval_list.end());
 				}
 				else
 				{
-					a_threads[j] = std::thread(&EvaluationModule::evaluateSolution, &evalCore, yaml_config, j, it_start, it_start + nbPerThread);
+					a_threads[j] = std::thread(&EvaluationModule::evaluateSolution, &v_evalModules[j], name.str(), yaml_config, j, it_start, it_start + nbPerThread);
 					//evalCore.evaluateSolution(yaml_config, j, it_start, it_start + nbPerThread);
 					it_start += nbPerThread;
 				}
@@ -240,9 +253,51 @@ int main(int argc, char *argv[])
 			// Wait for the results
 			for (int k=0; k<nbCore; ++k)
 			{
-				a_threads[k].join();
+				if(a_threads[k].joinable())
+					a_threads[k].join();
 			}
 
+			// Write the results to a file
+			stringstream ss_path_time;
+			pt::time_facet *facet = new pt::time_facet("%d-%b-%Y-%H_%M_%S");
+			ss_path_time.imbue(locale(ss_path_time.getloc(), facet));
+
+			ss_path_time << config.path_result << it->second.name << "_";
+			ss_path_time << pt::second_clock::local_time() << ".csv";
+			
+			move(nbCore+3,0);
+			clrtoeol();
+			mvprintw(nbCore+3, 0, "Last result written to: %s", ss_path_time.str().c_str());
+			std::ofstream fout(ss_path_time.str());
+
+			// dump header
+			fout << "time";
+			for(int r=0; r<4;++r)
+				for(int c=0; c<4;++c)
+					fout << ", T" << r << c;
+			
+			fout << "\n";
+			
+			// dump results
+			// for all threads
+			for(unsigned i=0; i<v_evalModules.size(); ++i)
+			{
+				const string tmp_file_name = v_evalModules[i].tmp_file_name;
+				ifstream tmp_file(tmp_file_name);
+				if(tmp_file.is_open())
+				{
+					fout << tmp_file.rdbuf();
+					tmp_file.close();
+					fs::remove(fs::path(tmp_file_name));
+				}
+				else
+				{
+					endwin();/* End curses mode		  */
+					cerr << "Cannot find tmp file named "<< tmp_file_name << endl;
+				}
+			}
+
+			fout.close();
 		}
 	}
 	endwin();			/* End curses mode		  */
@@ -438,19 +493,22 @@ void validateFileInfo(const PM::FileInfo &fileInfo)
 }
 
 mutex m_display;
-void displayLoadingBar(const int &coreId, const int &i, const int &total, const double sec, const double total_time)
+void displayLoadingBar(const int &coreId, const int &i, const int &total, const int &nbFailures, const double sec, const double total_time)
 {
 	const double average_time = total_time/double(i+1);
-	const int eta = average_time*double(total-i);
-	const int m = eta/60;
-	const int h = m/60;
+	int time = average_time*double(total-i);
+	const int h=time/3600;
+	time=time%3600;
+	const int m=time/60;
+	time=time%60;
+	const int s=time;
 
 
 	m_display.lock();
 	//ncurse output
 	move(coreId+1,0);
 	clrtoeol();
-	mvprintw(coreId+1, 10, " Core %2d: %5d/%5d   last dur: %.3f sec, avr: %.3f sec, eta: %3dh%02dm%02d",coreId,i+1, total, sec, average_time, h, m, eta % 60);
+	mvprintw(coreId+1, 10, " Core %2d: %5d/%5d  failed: %2d last dur: %2.3f sec, avr: %2.3f sec, eta: %3dh%02dm%02d",coreId,i+1, total, nbFailures, sec, average_time, h, m, s);
 	refresh();			/* Print it on to the real screen */
 	m_display.unlock();
 
@@ -464,11 +522,12 @@ void displayLoadingBar(const int &coreId, const int &i, const int &total, const 
 // ----------------------------------------------------
 // EvaluationModule
 // ----------------------------------------------------
-EvaluationModule::EvaluationModule(const int coreId):
-	coreId(coreId)
-{}
+EvaluationModule::EvaluationModule():
+	coreId(0)
+{
+}
 
-void EvaluationModule::evaluateSolution(const string &yaml_config, const int &coreId, PM::FileInfoVector::const_iterator it_eval, PM::FileInfoVector::const_iterator it_end)
+void EvaluationModule::evaluateSolution(const string &tmp_file_name, const string &yaml_config, const int &coreId, PM::FileInfoVector::const_iterator it_eval, PM::FileInfoVector::const_iterator it_end)
 {
 	PM::DataPoints refCloud, readCloud;
 	string last_read_name = "";
@@ -476,6 +535,9 @@ void EvaluationModule::evaluateSolution(const string &yaml_config, const int &co
 	const int count = std::distance(it_eval, it_end);
 	int current_line = 0;
 	timer t_eval_list;
+
+	std::ofstream fout(tmp_file_name);
+
 	for( ; it_eval < it_end; ++it_eval)
 	{
 		timer t_singleTest;
@@ -485,14 +547,12 @@ void EvaluationModule::evaluateSolution(const string &yaml_config, const int &co
 		{
 			readCloud = PM::loadCSV(it_eval->readingFileName);
 			last_read_name = it_eval->readingFileName;
-			//cout << "Reading cloud " << eval_list[i].readingFileName << " loaded" << endl;
 		}
 
 		if(last_ref_name != it_eval->referenceFileName)
 		{
 			refCloud = PM::loadCSV(it_eval->referenceFileName);
 			last_ref_name = it_eval->referenceFileName;
-			//cout << "Reference cloud " << eval_list[i].referenceFileName << " loaded" << endl;
 		}
 
 		// Build ICP based on config file
@@ -502,7 +562,34 @@ void EvaluationModule::evaluateSolution(const string &yaml_config, const int &co
 
 		const TP Tinit = it_eval->initialTransformation;
 
-		displayLoadingBar(coreId, current_line, count, t_singleTest.elapsed(), t_eval_list.elapsed());
+		timer t_icp;
+
+		int nbFailures = 0;
+		TP Tresult = TP::Identity(4,4);
+		// Apply ICP
+		try
+		{
+			Tresult = icp(readCloud, refCloud, Tinit);
+		}
+		catch (PM::ConvergenceError error)
+		{
+			nbFailures ++;
+		}
+		//sleep(1);
+		//result_T.push_back(Tinit);
+		//result_time.push_back(t_icp.elapsed());
+		fout << t_icp.elapsed();
+
+		for(int r=0; r<4;++r)
+			for(int c=0; c<4;++c)
+				fout << ", " << Tinit(r,c);
+		
+		fout << "\n";
+
+		// Output eta to console
+		displayLoadingBar(coreId, current_line, count, nbFailures, t_singleTest.elapsed(), t_eval_list.elapsed());
 		current_line ++;
 	}
+
+	fout.close();
 }
