@@ -423,7 +423,7 @@ struct PointMatcher
 		T getDistsQuantile(const T quantile) const;
 	};
 
-	//! Weights resulting of the application of OutlierFilter or DescriptorOutlierFilter; a dense matrix over ScalarType
+	//! Weights resulting from the application of OutlierFilter or DescriptorOutlierFilter; a dense matrix over ScalarType
 	typedef Matrix OutlierWeights;
 	
 	// ---------------------------------
@@ -515,7 +515,7 @@ struct PointMatcher
 	};
 	
 	
-	//! A chain of outlier filters of type F
+	//! A chain of outlier filters
 	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<OutlierFilter>
 	{
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
@@ -531,7 +531,7 @@ struct PointMatcher
 	//! An error minimizer will compute a transformation matrix such as to minimize the error between the reading and the reference. 
 	struct ErrorMinimizer: public Parametrizable
 	{
-		//! A structure holding data ready for minimization. The data are "normalized", for instance there are no point with 0 weight, etc.
+		//! A structure holding data ready for minimization. The data are "normalized", for instance there are no points with 0 weight, etc.
 		struct ErrorElements
 		{
 			DataPoints reading; //!< reading point cloud
@@ -559,9 +559,9 @@ struct PointMatcher
 		ErrorElements getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
 		
 	protected:
-		T pointUsedRatio; //!< the ratio of how many points where used for error minimization
-		T weightedPointUsedRatio; //!< the ratio of how many points where used (with weight) for error minimization
-		ErrorElements lastErrorElements; //!< Memory of the last error computed
+		T pointUsedRatio; //!< the ratio of how many points were used for error minimization
+		T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+		ErrorElements lastErrorElements; //!< memory of the last computed error
 	};
 	
 	DEF_REGISTRAR(ErrorMinimizer)
@@ -572,7 +572,7 @@ struct PointMatcher
 	struct TransformationChecker: public Parametrizable
 	{
 	protected:
-		typedef std::vector<std::string> StringVector; //!< a vector of string
+		typedef std::vector<std::string> StringVector; //!< a vector of strings
 		Vector limits; //!< values of limits
 		// FIXME: values is a very bad name
 		Vector values; //!< collected values

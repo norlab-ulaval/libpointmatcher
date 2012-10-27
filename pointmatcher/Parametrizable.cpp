@@ -161,7 +161,7 @@ namespace PointMatcherSupport
 		className("unknown")
 	{}
 	
-	//! Construct a known with documented parameters
+	//! Construct with documented parameters
 	Parametrizable::Parametrizable(
 		const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 		className(className),

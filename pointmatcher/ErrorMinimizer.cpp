@@ -62,21 +62,21 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& 
 	// May have no descriptors... size 0
 }
 
-//! Return the ratio of how many points where used for error minimization
+//! Return the ratio of how many points were used for error minimization
 template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getPointUsedRatio() const
 {
 	return pointUsedRatio;
 }
 
-//! Return the ratio of how many points where used (with weight) for error minimization
+//! Return the ratio of how many points were used (with weight) for error minimization
 template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getWeightedPointUsedRatio() const
 {
 	return weightedPointUsedRatio;
 }
 
-//! If not redefined by child class, return the ratio of how many points where used (with weight) for error minimization
+//! If not redefined by child class, return the ratio of how many points were used (with weight) for error minimization
 template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getOverlap() const
 {

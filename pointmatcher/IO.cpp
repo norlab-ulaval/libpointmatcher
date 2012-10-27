@@ -66,7 +66,7 @@ template struct PointMatcher<double>::FileInfo;
 //! Load a vector of FileInfo from a CSV file.
 /**
 	@param fileName name of the CSV file
-	@param dataPath path relative to which the point cloud CSV or VTK will be resolved.
+	@param dataPath path relative to which the point cloud CSV or VTK will be resolved
 	@param configPath path relative to which the yaml configuration files will be resolved
 	
 	The first line of the CSV file must contain a header. The supported tags are:
@@ -382,10 +382,10 @@ PointMatcher<double>::DataPoints PointMatcher<double>::loadAnyFormat(const std::
 //! @brief Load comma separated values (csv) file
 //! @param fileName a string containing the path and the file name
 //! 
-//! This loader has 3 behaviors since there is not official standard for
+//! This loader has 3 behaviors since there is no official standard for
 //! csv files. A 2D or 3D point cloud will be created automatically if:
-//!   - there is an header with columns named x, y and optionnaly z
-//!   - there is only 2 or 3 columns in the file
+//!   - there is a header with columns named x, y and optionnaly z
+//!   - there are only 2 or 3 columns in the file
 //!
 //! Otherwise, the user is asked to enter column id manually which might 
 //! block automatic processing.

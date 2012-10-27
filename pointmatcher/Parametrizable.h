@@ -148,7 +148,7 @@ namespace PointMatcherSupport
 		};
 		*/
 		typedef std::string Parameter; //!< alias
-		typedef std::map<std::string, Parameter> Parameters; //!< Parameters are stored as a map of string->string
+		typedef std::map<std::string, Parameter> Parameters; //!< Parameters stored as a map of string->string
 		
 		const std::string className; //!< name of the class
 		const ParametersDoc parametersDoc; //!< documentation of parameters

@@ -64,7 +64,7 @@ namespace PointMatcherSupport
 	void Logger::beginInfoEntry(const char *file, unsigned line, const char *func)
 	{}
 	
-	//! Return the info stream, 0 if hasInfoChannel is false
+	//! Return the info stream, 0 if hasInfoChannel() returns false
 	std::ostream* Logger::infoStream()
 	{
 		return 0;
@@ -84,7 +84,7 @@ namespace PointMatcherSupport
 	void Logger::beginWarningEntry(const char *file, unsigned line, const char *func)
 	{}
 	
-	//! Return the warning stream, 0 if hasWarningChannel is false
+	//! Return the warning stream, 0 if hasWarningChannel() returns false
 	std::ostream* Logger::warningStream()
 	{
 		return 0;
