@@ -39,6 +39,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <thread>
+#include <mutex>
+
+#include <ncurses.h>
 
 #include <boost/program_options.hpp>
 #include "boost/filesystem.hpp"
@@ -99,6 +103,15 @@ struct Config
 
 };
 
+class EvaluationModule
+{
+public:
+	const int coreId;
+	EvaluationModule(const int coreId);
+	void evaluateSolution(const string &yaml_config, const int &coreId, PM::FileInfoVector::const_iterator it_eval, PM::FileInfoVector::const_iterator it_end);
+	
+};
+
 po::options_description setupOptions(const string & name);
 string outputStatus(map<string, DataSetInfo> dataSetStatus);
 string enterValidPath(string message);
@@ -107,7 +120,7 @@ void saveConfig(Config& config);
 void loadConfig(Config& config);
 void downloadDataSets(Config& config, po::variables_map &vm);
 void validateFileInfo(const PM::FileInfo &fileInfo);
-void displayLoadingBar(const int &i, const int &total, const double sec);
+void displayLoadingBar(const int &coreId, const int &i, const int &total, const double sec, const double total_time);
 
 int main(int argc, char *argv[])
 {
@@ -163,8 +176,9 @@ int main(int argc, char *argv[])
 	}
 
 
-	PM::DataPoints refCloud, readCloud;
 	const string yaml_config = vm["icp-config"].as<string>();
+
+	initscr(); // ncurse screen
 
 	// Starting evaluation
 	for(auto it=config.dataSetStatus.begin(); it != config.dataSetStatus.end(); ++it)
@@ -173,6 +187,7 @@ int main(int argc, char *argv[])
 		{
 			if(it->second.downloaded == false)
 			{
+				endwin();			/* End curses mode		  */
 				cerr << ">> Please download data set first." << endl
 				     << ">> You can use the option --download -A to download them all." << endl;
 					 return 1;
@@ -185,44 +200,52 @@ int main(int argc, char *argv[])
 
 			// Ensure that all required columns are there
 			validateFileInfo(eval_list[0]);
-
-			cout << endl << "<<< Evaluating " << it->second.name << " >>>" << endl;
-			string last_read_name = "";
-			string last_ref_name = "";
-			// Start evaluation for every line
-			for(unsigned i=0; i < eval_list.size(); i++)
+			move(0,0);
+			clrtoeol();
+			mvprintw(0, 0, " <<< Evaluating %s >>>", it->second.name.c_str());
+			//cout << endl << "<<< Evaluating " << it->second.name << " >>>" << endl;
+		
+			// Spawn threads
+			const int maxNbCore = 16;
+			int nbCore = 1;
+			if(vm["threads"].as<int>() > 1 || vm["threads"].as<int>() < maxNbCore)
 			{
-				timer t_all;
-
-				// Load point clouds
-				if(last_read_name != eval_list[i].readingFileName)
+				nbCore = vm["threads"].as<int>();
+			}
+			
+			// List of thread
+			std::thread a_threads[maxNbCore];
+			
+			const int nbPerThread = eval_list.size()/nbCore;
+			PM::FileInfoVector::const_iterator it_start = eval_list.begin();
+			for (int j=0; j<nbCore; ++j)
+			{
+				EvaluationModule evalCore(j);
+				// Start evaluation for every line
+				if(j == nbCore-1)
 				{
-					readCloud = PM::loadCSV(eval_list[i].readingFileName);
-					last_read_name = eval_list[i].readingFileName;
-					//cout << "Reading cloud " << eval_list[i].readingFileName << " loaded" << endl;
+					// last core receive the reste
+					a_threads[j] = std::thread(&EvaluationModule::evaluateSolution, &evalCore, yaml_config, j, it_start, eval_list.end());
+					//evalCore.evaluateSolution(yaml_config, j, it_start, eval_list.end());
 				}
-
-				if(last_ref_name != eval_list[i].referenceFileName)
+				else
 				{
-					refCloud = PM::loadCSV(eval_list[i].referenceFileName);
-					last_ref_name = eval_list[i].referenceFileName;
-					//cout << "Reference cloud " << eval_list[i].referenceFileName << " loaded" << endl;
+					a_threads[j] = std::thread(&EvaluationModule::evaluateSolution, &evalCore, yaml_config, j, it_start, it_start + nbPerThread);
+					//evalCore.evaluateSolution(yaml_config, j, it_start, it_start + nbPerThread);
+					it_start += nbPerThread;
 				}
-
-				// Build ICP based on config file
-				PM::ICP icp;
-				ifstream ifs(yaml_config);
-				icp.loadFromYaml(ifs);
-
-				const TP Tinit = eval_list[i].initialTransformation;
-
-				displayLoadingBar(i, eval_list.size(), t_all.elapsed());
+				cout << endl;
 			}
 
-			cout << endl;
+			// Wait for the results
+			for (int k=0; k<nbCore; ++k)
+			{
+				a_threads[k].join();
+			}
 
 		}
 	}
+	endwin();			/* End curses mode		  */
 	
 	return 0;
 }
@@ -237,13 +260,14 @@ po::options_description setupOptions(const string & name)
 		("config,C", "Interactive configuration")
 		("download,D", "Download selected data sets from the web")
 		("evaluate,E", "Evaluate a solution over selected data sets")
-		("all,A", "Apply action for all data sets")
+		("threads,j", po::value<int>()->default_value(1), "Number of threads to use. Max 16.")
 		("apartment,a", "Apply action only on the data set Apartment")
 		("eth,e", "Apply action only on the data set ETH Hauptgebaude")
 		("plain,p", "Apply action only on the data set Mountain Plain")
 		("stairs,s", "Apply action only on the data set Stairs")
 		("gazebo,g", "Apply action only on the data set Gazebo Winter")
 		("wood,w", "Apply action only on the data set Wood Summer")
+		("all,A", "Apply action for all data sets")
 		;
 
 	return desc;
@@ -413,15 +437,72 @@ void validateFileInfo(const PM::FileInfo &fileInfo)
 	
 }
 
-double total_time = 0;
-void displayLoadingBar(const int &i, const int &total, const double sec)
+mutex m_display;
+void displayLoadingBar(const int &coreId, const int &i, const int &total, const double sec, const double total_time)
 {
-	total_time += sec;
 	const double average_time = total_time/double(i+1);
 	const int eta = average_time*double(total-i);
 	const int m = eta/60;
 	const int h = m/60;
 
-	cout << "\r   " << i << "/" << total << "     last dur: " <<  sec << " sec, avr: " << average_time << " sec, eta: " << h << "h" << m % 60 << "m" << eta % 60 << "s             "; 	
-	cout.flush();
+
+	m_display.lock();
+	//ncurse output
+	move(coreId+1,0);
+	clrtoeol();
+	mvprintw(coreId+1, 10, " Core %2d: %5d/%5d   last dur: %.3f sec, avr: %.3f sec, eta: %3dh%02dm%02d",coreId,i+1, total, sec, average_time, h, m, eta % 60);
+	refresh();			/* Print it on to the real screen */
+	m_display.unlock();
+
+	//cout << "\r  Core " << coreId << ": " << i+1 << "/" << total << "     last dur: " <<  sec << " sec, avr: " << average_time << " sec, eta: " << h << "h" << m % 60 << "m" << eta % 60 << "s             "; 	
+}
+
+
+
+
+
+// ----------------------------------------------------
+// EvaluationModule
+// ----------------------------------------------------
+EvaluationModule::EvaluationModule(const int coreId):
+	coreId(coreId)
+{}
+
+void EvaluationModule::evaluateSolution(const string &yaml_config, const int &coreId, PM::FileInfoVector::const_iterator it_eval, PM::FileInfoVector::const_iterator it_end)
+{
+	PM::DataPoints refCloud, readCloud;
+	string last_read_name = "";
+	string last_ref_name = "";
+	const int count = std::distance(it_eval, it_end);
+	int current_line = 0;
+	timer t_eval_list;
+	for( ; it_eval < it_end; ++it_eval)
+	{
+		timer t_singleTest;
+
+		// Load point clouds
+		if(last_read_name != it_eval->readingFileName)
+		{
+			readCloud = PM::loadCSV(it_eval->readingFileName);
+			last_read_name = it_eval->readingFileName;
+			//cout << "Reading cloud " << eval_list[i].readingFileName << " loaded" << endl;
+		}
+
+		if(last_ref_name != it_eval->referenceFileName)
+		{
+			refCloud = PM::loadCSV(it_eval->referenceFileName);
+			last_ref_name = it_eval->referenceFileName;
+			//cout << "Reference cloud " << eval_list[i].referenceFileName << " loaded" << endl;
+		}
+
+		// Build ICP based on config file
+		PM::ICP icp;
+		ifstream ifs(yaml_config);
+		icp.loadFromYaml(ifs);
+
+		const TP Tinit = it_eval->initialTransformation;
+
+		displayLoadingBar(coreId, current_line, count, t_singleTest.elapsed(), t_eval_list.elapsed());
+		current_line ++;
+	}
 }
