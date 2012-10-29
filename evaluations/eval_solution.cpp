@@ -208,6 +208,14 @@ int main(int argc, char *argv[])
 			const string protocol_name = config.path_download + "protocols/" + it->second.name + "_protocol.csv";
 			const string data_directory = config.path_download + it->second.name + "/";
 			
+			if(!fs::exists(fs::path(protocol_name)))
+			{
+				endwin();			/* End curses mode		  */
+				cerr << ">> Missing protocol file: " << protocol_name << endl
+				     << ">> You can use the option --download to download it back." << endl;
+					 return 1;
+			}
+
 			const PM::FileInfoVector eval_list(protocol_name, data_directory, "");
 
 			// Ensure that all required columns are there
@@ -604,7 +612,7 @@ void EvaluationModule::evaluateSolution(const string &tmp_file_name, const strin
 
 		for(int r=0; r<4;++r)
 			for(int c=0; c<4;++c)
-				fout << ", " << Tinit(r,c);
+				fout << ", " << Tresult(r,c);
 		
 		fout << "\n";
 
