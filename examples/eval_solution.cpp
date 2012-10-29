@@ -77,6 +77,8 @@ struct Config
 	string path_config;
 	string path_download;
 	string path_result;
+	string path_server_validation;
+	string path_server_protocols;
 	map<string, DataSetInfo> dataSetStatus;
 	
 	Config()
@@ -84,6 +86,8 @@ struct Config
 		path_config = string(getenv("HOME")) + "/.lpm/eval_solution.conf";
 		path_download = string(getenv("HOME")) + "/.lpm/download/";
 		path_result = "./";
+		path_server_validation = "robotics.ethz.ch/~asl-datasets/evaluations/validation";
+		path_server_protocols = "robotics.ethz.ch/~asl-datasets/evaluations/protocols";
 		DataSetInfo info;
 		info = DataSetInfo("apartment", false);
 		info.path = "robotics.ethz.ch/~asl-datasets/apartment_03-Dec-2011-18_13_33/csv_local/local_frame.zip";
@@ -444,21 +448,41 @@ void loadConfig(Config& config)
 
 void downloadDataSets(Config& config, po::variables_map &vm)
 {
+	// Ensure that validation and protocol folders are there
+	fs::path extra_path(config.path_download+"/validation/");
+	if(!fs::is_directory(extra_path))
+		fs::create_directories(extra_path);
+	extra_path = fs::path(config.path_download+"/protocols/");
+	if(!fs::is_directory(extra_path))
+		fs::create_directories(extra_path);
+
 	for(auto it=config.dataSetStatus.begin(); it != config.dataSetStatus.end(); ++it)
 	{
 		if(vm.count("all") || vm.count(it->second.name))
 		{
-			cout << "Downloading " << it->second.name << "..." << endl;
+			cout << ">> Fetching files for: " << it->second.name << "..." << endl << endl;
 			fs::path d_path(config.path_download+it->second.name);
 			if(!fs::is_directory(d_path))
-			{
-				cout << d_path.string() << endl;
 				fs::create_directories(d_path);
-			}
-			string cmd = "wget -P " + d_path.string() + " " + it->second.path;
+
+			string cmd;
 			int sysRes;
+			// Dowload validation
+			cout << ">> Downloading validation file ..." << endl;
+			cmd = "wget -P " + config.path_download + "/validation/ " + config.path_server_validation + "/" + it->second.name + "_validation.csv";
+			sysRes = system(cmd.c_str());
+
+			// Dowload protocol
+			cout << ">> Downloading protocol file ..." << endl;
+			cmd = "wget -P " + config.path_download + "/protocols/ " + config.path_server_protocols + "/" + it->second.name + "_protocol.csv";
+			sysRes = system(cmd.c_str());
+
+			// Download data set
+			cout << ">> Downloading data set files ..." << endl;
+			cmd = "wget -P " + d_path.string() + " " + it->second.path;
 			sysRes = system(cmd.c_str());
 			
+			cout << ">> Unzipping dataset..." << endl;
 			cmd = "unzip -q " + d_path.string() + "/local_frame.zip -d " + d_path.string() + "/";
 			sysRes = system(cmd.c_str());
 			
@@ -575,9 +599,7 @@ void EvaluationModule::evaluateSolution(const string &tmp_file_name, const strin
 		{
 			nbFailures ++;
 		}
-		//sleep(1);
-		//result_T.push_back(Tinit);
-		//result_time.push_back(t_icp.elapsed());
+
 		fout << t_icp.elapsed();
 
 		for(int r=0; r<4;++r)
