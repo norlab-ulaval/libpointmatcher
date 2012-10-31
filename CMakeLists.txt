@@ -63,14 +63,6 @@ find_library(NABO_LIBRARY NAMES libnabo.a nabo PATHS
 	/usr/lib
 )
 
-# gtest
-find_path(GTEST_INCLUDE_DIR gtest/gtest.h
-    /usr/include
-)
-find_library(GTEST_LIBRARY gtest
-    /usr/lib/
-)
-
 # optionally, look for OpenCL library
 set(USE_OPEN_CL "false" CACHE BOOL "Set to ON to look for OpenCL, if your libnabo was compiled with CL support")
 if (USE_OPEN_CL)
