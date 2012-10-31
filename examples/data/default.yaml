@@ -1,5 +1,3 @@
-ratioToSwitchKeyframe: 0.8
-
 transformations:
   - TransformFeatures
 
@@ -36,6 +34,6 @@ inspector:
   VTKFileInspector
 
 logger:
-  FileLogger
+	NullLogger
+#  FileLogger
 
-outlierMixingWeight: 1
