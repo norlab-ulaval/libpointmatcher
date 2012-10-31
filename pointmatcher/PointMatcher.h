@@ -57,6 +57,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parametrizable.h"
 #include "Registrar.h"
 
+#if NABO_VERSION_INT < 10001
+	#error "You need libnabo version 1.0.1 or greater"
+#endif
+
 /*! 
 	\file PointMatcher.h
 	\brief public interface
@@ -183,7 +187,7 @@ libpointmatcher is released under a permissive BSD license.
 //! version of the Pointmatcher library as string
 #define POINTMATCHER_VERSION "0.9.0"
 //! version of the Pointmatcher library as an int
-#define POINTMATCHER_VERSION_INT "900"
+#define POINTMATCHER_VERSION_INT 900
 
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
