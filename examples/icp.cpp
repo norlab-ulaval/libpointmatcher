@@ -91,31 +91,9 @@ int main(int argc, const char *argv[])
 		}
 		icp.loadFromYaml(ifs);
 	}
-	PM::TransformationParameters Tinit = PM::TransformationParameters::Identity(4,4);
-	
-	//Tinit << 0, 1, 0, -0.0,
-	//		 -1, 0, 0, 0,
-	//		 0, 0, 1, 0,
-	//		 0, 0, 0, 1;
-	// rot around x-axis
-	//Tinit << 1, 0, 0, 0,
-	//		 0, 0.940, 0.342, 0,
-	//		 0, -0.342, 0.940, 0,
-	//		 0, 0, 0, 1;
-	// rot around y-axis
-	//Tinit << 0.940, 0, 0.342, 0,
-	//		 0, 1, 0, 0,
-	//		 -0.342, 0, 0.940, 0,
-	//		 0, 0, 0, 1;
-	// rot around z-axis
-	//Tinit << 0.940, -0.342, 0, 0,
-	//		 0.342, 0.940, 0, 0,
-	//		 0, 0, 1, 0,
-	//		 0, 0, 0, 1;
-	
-	cout << Tinit << endl;
+
 	// Compute the transformation to express data in ref
-	PM::TransformationParameters T = icp(data, ref, Tinit);
+	PM::TransformationParameters T = icp(data, ref);
 	cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 
 	// Transform data to express it in ref
