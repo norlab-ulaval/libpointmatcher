@@ -53,7 +53,7 @@ Test
 
 In 2D:
 
-	examples/pmicp ${SRC_DIR}/examples/data/2D_oneBox.csv ${SRC_DIR}/examples/data/data/2D_twoBoxes.csv
+	examples/pmicp ${SRC_DIR}/examples/data/2D_oneBox.csv ${SRC_DIR}/examples/data/2D_twoBoxes.csv
 
 In 3D:
 
