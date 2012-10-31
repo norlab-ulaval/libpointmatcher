@@ -183,12 +183,19 @@ int main(int argc, char *argv[])
 
 	if (vm.count("icp-config") == false)
 	{
-		cerr << "You must enter a YAMl file to evaluate it." << endl;
+		cerr << "You must provide a YAMl file to evaluate it." << endl;
 		return 1;
 	}
-
-
+	
 	const string yaml_config = vm["icp-config"].as<string>();
+	{
+		ifstream cfgIfs(yaml_config);
+		if (!cfgIfs.good())
+		{
+			cerr << "Cannot open YAML file name: it must exist and be readable." << endl;
+			return 2;
+		}
+	}
 
 	initscr(); // ncurse screen
 
@@ -281,6 +288,11 @@ int main(int argc, char *argv[])
 			clrtoeol();
 			mvprintw(nbCore+3, 0, "Last result written to: %s", ss_path_time.str().c_str());
 			std::ofstream fout(ss_path_time.str());
+			if (!fout.good())
+			{
+				cerr << "Warning, cannot open result file " << ss_path_time << ", results were not saved" << endl;
+				continue;
+			}
 
 			// dump header
 			fout << "time";
@@ -431,6 +443,11 @@ void saveConfig(Config& config)
 		emitter << YAML::EndMap;
 
 		std::ofstream fout(config.path_config);
+		if (!fout.good())
+		{
+			cerr << "Warning, cannot open config file " << config.path_config << ", content was not saved" << endl;
+			return;
+		}
 		fout << emitter.c_str();
 		fout.close();
 }
@@ -438,6 +455,11 @@ void saveConfig(Config& config)
 void loadConfig(Config& config)
 {
 	ifstream f_config(config.path_config);
+	if (!f_config.good())
+	{
+		cerr << "Warning, cannot open config file " << config.path_config << ", content was not loaded" << endl;
+		return;
+	}
 	YAML::Parser parser(f_config);
 
 	YAML::Node doc;
@@ -475,27 +497,34 @@ void downloadDataSets(Config& config, po::variables_map &vm)
 
 			string cmd;
 			int sysRes;
+			#define CHECK_RES if (sysRes != 0) { cerr << "Warning, system command \"" << cmd << "\" failed with result code " << sysRes << endl; }
+			
 			// Dowload validation
 			cout << ">> Downloading validation file ..." << endl;
 			cmd = "wget -P " + config.path_download + "/validation/ " + config.path_server_validation + "/" + it->second.name + "_validation.csv";
 			sysRes = system(cmd.c_str());
+			CHECK_RES
 
 			// Dowload protocol
 			cout << ">> Downloading protocol file ..." << endl;
 			cmd = "wget -P " + config.path_download + "/protocols/ " + config.path_server_protocols + "/" + it->second.name + "_protocol.csv";
 			sysRes = system(cmd.c_str());
+			CHECK_RES
 
 			// Download data set
 			cout << ">> Downloading data set files ..." << endl;
 			cmd = "wget -P " + d_path.string() + " " + it->second.path;
 			sysRes = system(cmd.c_str());
+			CHECK_RES
 			
 			cout << ">> Unzipping dataset..." << endl;
 			cmd = "unzip -q " + d_path.string() + "/local_frame.zip -d " + d_path.string() + "/";
 			sysRes = system(cmd.c_str());
+			CHECK_RES
 			
 			cmd = "rm " + d_path.string() + "/local_frame.zip";
 			sysRes = system(cmd.c_str());
+			CHECK_RES
 
 			it->second.downloaded = true;
 		}
@@ -569,6 +598,11 @@ void EvaluationModule::evaluateSolution(const string &tmp_file_name, const strin
 	timer t_eval_list;
 
 	std::ofstream fout(tmp_file_name);
+	if (!fout.good())
+	{
+		cerr << "Warning, cannot open temporary result file " << tmp_file_name << ", evaluation was skipped" << endl;
+		return;
+	}
 
 	for( ; it_eval < it_end; ++it_eval)
 	{
