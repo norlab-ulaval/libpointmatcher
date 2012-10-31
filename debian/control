@@ -1,7 +1,7 @@
 Source: libpointmatcher
 Priority: extra
 Maintainer: Stéphane Magnenat <stephane@nospam.magnenat.net>
-Build-Depends: debhelper (>= 7.0.50~), cmake, doxygen, cdbs, libboost-dev, libboost-thread-dev, libboost-system-dev, libboost-filesystem-dev, libeigen3-dev, libnabo-dev (>= 1.0.1~), yaml-cpp0.2.6-dev
+Build-Depends: debhelper (>= 7.0.50~), cmake, doxygen, cdbs, libboost-dev, libboost-thread-dev, libboost-system-dev, libboost-filesystem-dev, libeigen3-dev, libnabo-dev (>= 1.0.1~), yaml-cpp0.2.6-dev, libncurses5-dev
 Standards-Version: 3.9.1
 Section: libs
 Homepage: https://github.com/ethz-asl/libpointmatcher
@@ -11,7 +11,7 @@ Vcs-Browser: https://github.com/ethz-asl/libpointmatcher
 Package: libpointmatcher-dev
 Section: libdevel
 Architecture: any
-Depends: libpointmatcher1 (= ${binary:Version}), libnabo-dev (>= 1.0.1~), libboost-dev, libboost-thread-dev, libboost-system-dev, libboost-filesystem-dev, libeigen3-dev, yaml-cpp0.2.6-dev
+Depends: libpointmatcher1 (= ${binary:Version}), libnabo-dev (>= 1.0.1~), libboost-dev, libboost-thread-dev, libboost-system-dev, libboost-filesystem-dev, libeigen3-dev, yaml-cpp0.2.6-dev, libncurses5-dev
 Suggests: libpointmatcher-doc
 Description: A modular ICP library, development headers.
  libpointmatcher is a modular ICP library, useful for robotics and
