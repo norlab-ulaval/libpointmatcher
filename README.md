@@ -3,7 +3,7 @@ libpointmatcher is a modular ICP library, useful for robotics and computer visio
 libpointmatcher depends on:
 
  * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
- * [libnabo], a fast K Nearest Neighbour library for low-dimensional spaces.
+ * [libnabo] version 1.0.1, a fast K Nearest Neighbour library for low-dimensional spaces.
  * [yaml-cpp], a YAML 1.2 parser and emitter (optional)
 
 libpointmatcher is being developed by François Pomerleau and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
