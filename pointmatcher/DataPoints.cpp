@@ -289,10 +289,7 @@ void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const u
 		const int oldDim(data.rows());
 		const int totalDim(oldDim + dim);
 		const int pointCount(features.cols());
-		Matrix tmpData(data);
-		data.resize(totalDim, pointCount);
-		if (oldDim != 0)
-			data.topRows(oldDim) = tmpData;
+		data.conservativeResize(totalDim, pointCount);
 		labels.push_back(Label(name, dim));
 	}
 }
@@ -341,10 +338,7 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 		{
 			const int oldFieldDim(data.rows());
 			const int totalDim = oldFieldDim + newFieldDim;
-			Matrix tmpFields(data);
-			data.resize(totalDim, pointCount);
-			if (oldFieldDim > 0)
-				data.topRows(oldFieldDim) = tmpFields;
+			data.conservativeResize(totalDim, pointCount);
 			data.bottomRows(newFieldDim) = newField;
 			labels.push_back(Label(name, newFieldDim));
 		}
