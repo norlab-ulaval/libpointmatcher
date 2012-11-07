@@ -774,7 +774,10 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	const T boxDim(box.maxCoeff());
 	// drop box if it is too large
 	if (boxDim > maxBoxDim)
+	{
+		unfitPointsCount += colCount;
 		return;
+	}
 	const Vector mean = d.rowwise().sum() / T(colCount);
 	const Matrix NN = (d.colwise() - mean);
 	
