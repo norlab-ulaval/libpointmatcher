@@ -228,6 +228,7 @@ struct DataPointsFiltersImpl
 				{ "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> },
 				{ "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> },
 				{ "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> },
+				{ "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" },
 				{ "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
 				{ "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" },
 				{ "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" },
@@ -239,6 +240,7 @@ struct DataPointsFiltersImpl
 		const T ratio;
 		const unsigned knn;
 		const unsigned samplingMethod; 
+		const T maxBoxDim;
 		const bool averageExistingDescriptors;
 		const bool keepNormals;
 		const bool keepDensities;

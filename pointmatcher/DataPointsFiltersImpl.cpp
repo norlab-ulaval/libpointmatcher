@@ -597,6 +597,7 @@ DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::SamplingSurface
 	ratio(Parametrizable::get<T>("ratio")),
 	knn(Parametrizable::get<int>("knn")),
 	samplingMethod(Parametrizable::get<int>("samplingMethod")),
+	maxBoxDim(Parametrizable::get<T>("maxBoxDim")),
 	averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
 	keepNormals(Parametrizable::get<bool>("keepNormals")),
 	keepDensities(Parametrizable::get<bool>("keepDensities")),
@@ -769,9 +770,13 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	Matrix d(featDim-1, colCount);
 	for (int i = 0; i < colCount; ++i)
 		d.col(i) = data.inputFeatures.block(0,data.indices[first+i],featDim-1, 1);
+	const Vector box = d.rowwise().maxCoeff() - d.rowwise().minCoeff();
+	const T boxDim(box.maxCoeff());
+	// drop box if it is too large
+	if (boxDim > maxBoxDim)
+		return;
 	const Vector mean = d.rowwise().sum() / T(colCount);
 	const Matrix NN = (d.colwise() - mean);
-	
 	
 	// compute covariance
 	const Matrix C(NN * NN.transpose());
@@ -824,7 +829,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 						data.inputDescriptors.col(data.indices[first+i]);
 				}
 
-				// Build new descriptor in paralelle to be merge at the end
+				// Build new descriptors in parallel to be merged at the end
 				if(keepNormals)
 					data.normals.col(data.outputInsertionPoint) = normal;
 				if(keepDensities)
