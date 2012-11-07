@@ -108,7 +108,7 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 	{
 		const int nbPointsIn(cloud.features.cols());
 		if (nbPointsIn == 0)
-			throw ConvergenceError("no point to filter");
+			throw ConvergenceError("no points to filter");
 		
 		filteredCloud = (*it)->filter(cloud);
 		swapDataPoints(cloud, filteredCloud);

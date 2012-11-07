@@ -793,23 +793,6 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 		}
 	}
 
-	// average the existing descriptors
-	Vector mergedDesc;
-	if(data.inputDescriptors.cols() != 0)
-	{
-		mergedDesc.resize(data.inputDescriptors.rows());
-
-		if (averageExistingDescriptors)
-		{
-			for (int i = 0; i < colCount; ++i)
-				mergedDesc += data.inputDescriptors.col(data.indices[first+i]);
-			
-			mergedDesc = mergedDesc / T(colCount);
-		}
-		else // just take the first one
-			mergedDesc = data.inputDescriptors.col(data.indices[first]);
-	}
-
 	Vector normal;
 	if(keepNormals)
 		normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
@@ -861,7 +844,22 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 		data.outputFeatures(featDim-1, data.outputInsertionPoint) = 1;
 		
 		if(data.inputDescriptors.rows() != 0)
+		{
+			// average the existing descriptors
+			Vector mergedDesc(Vector::Zero(data.inputDescriptors.rows()));
+			if (data.inputDescriptors.cols() != 0)
+			{
+				if (averageExistingDescriptors)
+				{
+					for (int i = 0; i < colCount; ++i)
+						mergedDesc += data.inputDescriptors.col(data.indices[first+i]);
+					mergedDesc /= T(colCount);
+				}
+				else // just take the first one
+					mergedDesc = data.inputDescriptors.col(data.indices[first]);
+			}
 			data.outputDescriptors.col(data.outputInsertionPoint) = mergedDesc;
+		}
 		
 		// Build new descriptor in paralelle to be merge at the end
 		if(keepNormals)
