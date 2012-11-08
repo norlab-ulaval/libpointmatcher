@@ -257,24 +257,25 @@ struct DataPointsFiltersImpl
 		struct BuildData
 		{
 			typedef std::vector<int> Indices;
+			typedef typename DataPoints::View View;
 			
 			Indices indices;
 			const Matrix& inputFeatures;
 			const Matrix& inputDescriptors;
-			Matrix outputFeatures;
-			Matrix outputDescriptors;
-			Matrix normals;
-			Matrix densities;
-			Matrix eigValues;
-			Matrix eigVectors;
+			Matrix& outputFeatures;
+			View& outputExistingDescriptors;
+			boost::optional<View> normals;
+			boost::optional<View> densities;
+			boost::optional<View> eigenValues;
+			boost::optional<View> eigenVectors;
 			int outputInsertionPoint;
 			int unfitPointsCount;
 			
-			BuildData(const Matrix& inputFeatures, const Matrix& inputDescriptors):
+			BuildData(const Matrix& inputFeatures, const Matrix& inputDescriptors, Matrix &outputFeatures, View& outputExistingDescriptors):
 				inputFeatures(inputFeatures),
 				inputDescriptors(inputDescriptors),
-				outputFeatures(inputFeatures.rows(), inputFeatures.cols()),
-				outputDescriptors(inputDescriptors.rows(), inputDescriptors.cols()),
+				outputFeatures(outputFeatures),
+				outputExistingDescriptors(outputExistingDescriptors),
 				outputInsertionPoint(0),
 				unfitPointsCount(0)
 			{
@@ -282,14 +283,6 @@ struct DataPointsFiltersImpl
 				indices.reserve(pointsCount);
 				for (int i = 0; i < pointsCount; ++i)
 					indices.push_back(i);
-			}
-
-			Matrix getResizedMatrix(const Matrix input) const
-			{
-				if(input.rows() != 0)
-					return input.leftCols(outputInsertionPoint);
-				else
-					return input;
 			}
 		};
 		

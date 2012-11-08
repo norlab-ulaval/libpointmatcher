@@ -148,6 +148,13 @@ void PointMatcher<T>::DataPoints::allocateFeature(const std::string& name, const
 	allocateField(name, dim, featureLabels, features);
 }
 
+//! Make sure a vector of features of given names exist
+template<typename T>
+void PointMatcher<T>::DataPoints::allocateFeatures(const Labels& newLabels)
+{
+	allocateFields(newLabels, featureLabels, features);
+}
+
 //! Add a feature by name, remove first if already exists
 template<typename T>
 void PointMatcher<T>::DataPoints::addFeature(const std::string& name, const Matrix& newFeature)
@@ -212,6 +219,13 @@ void PointMatcher<T>::DataPoints::allocateDescriptor(const std::string& name, co
 	allocateField(name, dim, descriptorLabels, descriptors);
 }
 
+//! Make sure a vector of descriptors of given names exist
+template<typename T>
+void PointMatcher<T>::DataPoints::allocateDescriptors(const Labels& newLabels)
+{
+	allocateFields(newLabels, descriptorLabels, descriptors);
+}
+
 //! Add a descriptor by name, remove first if already exists
 template<typename T>
 void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, const Matrix& newDescriptor)
@@ -270,9 +284,9 @@ unsigned PointMatcher<T>::DataPoints::getDescriptorStartingRow(const std::string
 }
 
 
-//! Makes sure a field of a given name exists, if present, check its dimensions
+//! Make sure a field of a given name exists, if present, check its dimensions
 template<typename T>
-void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data)
+void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data) const
 {
 	if (fieldExists(name, 0, labels))
 	{
@@ -294,9 +308,50 @@ void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const u
 	}
 }
 
+//! Make sure a vector of fields of given names exist
+template<typename T>
+void PointMatcher<T>::DataPoints::allocateFields(const Labels& newLabels, Labels& labels, Matrix& data) const
+{
+	typedef vector<bool> BoolVector;
+	BoolVector present(newLabels.size(), false);
+	
+	// for fields that exist, take note and check dimension
+	size_t additionalDim(0);
+	for (size_t i = 0; i < newLabels.size(); ++i)
+	{
+		const string& newName(newLabels[i].text);
+		const size_t newSpan(newLabels[i].span);
+		for(auto it(labels.begin()); it != labels.end(); ++it)
+		{
+			if (it->text == newName)
+			{
+				if (it->span != newSpan)
+					throw InvalidField(
+						(boost::format("The existing field %1% has dimension %2%, different than requested dimension %3%") % newName % it->span % newSpan).str()
+					);
+				present[i] = true;
+				break;
+			}
+		}
+		if (!present[i])
+			additionalDim += newSpan;
+	}
+	
+	// for new fields allocate
+	const int oldDim(data.rows());
+	const int totalDim(oldDim + additionalDim);
+	const int pointCount(features.cols());
+	data.conservativeResize(totalDim, pointCount);
+	for (size_t i = 0; i < newLabels.size(); ++i)
+	{
+		if (!present[i])
+			labels.push_back(newLabels[i]);
+	}
+}
+
 //! Add a descriptor or feature by name, remove first if already exists
 template<typename T>
-void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data)
+void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data) const
 {
 	const int newFieldDim = newField.rows();
 	const int newPointCount = newField.cols();
@@ -367,7 +422,7 @@ typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::get
 
 //! Get a view on a matrix by name, throw an exception if it does not exist
 template<typename T>
-typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewByName(const std::string& name, const Labels& labels, Matrix& data)
+typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewByName(const std::string& name, const Labels& labels, Matrix& data) const
 {
 	unsigned row(0);
 	for(auto it(labels.begin()); it != labels.end(); ++it)

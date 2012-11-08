@@ -380,16 +380,16 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPoi
 		else
 		{
 			outputCloud.features.col(j) = outputCloud.features.col(i);
-				if (outputCloud.descriptors.cols() > 0)
-					outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
-				j++;
+			if (outputCloud.descriptors.cols() > 0)
+				outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
+			j++;
 		}
 	}
 
 	// Reduce the point cloud size
 	outputCloud.features.conservativeResize(Eigen::NoChange, j);
 	if (outputCloud.descriptors.cols() > 0)
-			outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
+		outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
 
 	return outputCloud;
 }
@@ -451,14 +451,16 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 	boost::optional<View> matchedValues;
 	
 	DataPoints output(input);
+	Labels outputLabels;
 	if (keepNormals)
-		output.allocateDescriptor("normals", dimNormals);
+		outputLabels.push_back(Label("normals", dimNormals));
 	if (keepDensities)
-		output.allocateDescriptor("densities", dimDensities);
+		outputLabels.push_back(Label("densities", dimDensities));
 	if (keepEigenValues)
-		output.allocateDescriptor("eigValues", dimEigValues);
+		outputLabels.push_back(Label("eigValues", dimEigValues));
 	if (keepEigenVectors)
-		output.allocateDescriptor("eigVectors", dimEigVectors);
+		outputLabels.push_back(Label("eigVectors", dimEigVectors));
+	output.allocateDescriptors(outputLabels);
 	
 	if (keepNormals)
 		normals = output.getDescriptorViewByName("normals");
@@ -612,6 +614,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	const DataPoints& input)
 {
 	typedef Matrix Features;
+	typedef typename DataPoints::View View;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 	
@@ -619,12 +622,10 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	const int featDim(input.features.rows());
 	const int descDim(input.descriptors.rows());
 	
-	//if (pointsCount == 0)
-	//	throw ConvergenceError("no point to filter");
-	
 	int insertDim(0);
 	if (averageExistingDescriptors)
 	{
+		// TODO: this should be in the form of an assert
 		// Validate descriptors and labels
 		for(unsigned int i = 0; i < input.descriptorLabels.size(); i++)
 			insertDim += input.descriptorLabels[i].span;
@@ -632,26 +633,38 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 			throw InvalidField("SamplingSurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
 	}
 	
-	// Reserve memory for new descriptors
+	// Compute space requirement for new descriptors
 	const int dimNormals(featDim-1);
 	const int dimDensities(1);
 	const int dimEigValues(featDim-1);
 	const int dimEigVectors((featDim-1)*(featDim-1));
 	
-	// we keep build data on stack for reentrant behaviour
-	BuildData buildData(input.features, input.descriptors);
-
+	// Build output cloud and allocate space for new descriptors
+	DataPoints output(input.featureLabels, input.descriptorLabels, input.features.cols());
+	Labels outputLabels;
 	if (keepNormals)
-		buildData.normals.resize(dimNormals, pointsCount);
-
+		outputLabels.push_back(Label("normals", dimNormals));
 	if (keepDensities)
-		buildData.densities.resize(dimDensities, pointsCount);
-
+		outputLabels.push_back(Label("densities", dimDensities));
 	if (keepEigenValues)
-		buildData.eigValues.resize(dimEigValues, pointsCount);
-
+		outputLabels.push_back(Label("eigValues", dimEigValues));
 	if (keepEigenVectors)
-		buildData.eigVectors.resize(dimEigVectors, pointsCount);
+		outputLabels.push_back(Label("eigVectors", dimEigVectors));
+	output.allocateDescriptors(outputLabels);
+	
+	// we keep build data on stack for reentrant behaviour
+	View outputExistingDescriptors(output.descriptors.block(0,0,input.descriptors.rows(),output.descriptors.cols()));
+	BuildData buildData(input.features, input.descriptors, output.features, outputExistingDescriptors);
+
+	// get views
+	if (keepNormals)
+		buildData.normals = output.getDescriptorViewByName("normals");
+	if (keepDensities)
+		buildData.densities = output.getDescriptorViewByName("densities");
+	if (keepEigenValues)
+		buildData.eigenValues = output.getDescriptorViewByName("eigValues");
+	if (keepEigenVectors)
+		buildData.eigenVectors = output.getDescriptorViewByName("eigVectors");
 
 	// build the new point cloud
 	buildNew(
@@ -662,35 +675,14 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 		input.features.rowwise().maxCoeff()
 	);
 	
+	// resize point cloud to trimmed unused space
 	const int ptsOut = buildData.outputInsertionPoint;
+	output.features.conservativeResize(Eigen::NoChange, ptsOut);
+	output.descriptors.conservativeResize(Eigen::NoChange, ptsOut);
 
+	// warning if some points were dropped
 	if(buildData.unfitPointsCount != 0)
 		LOG_INFO_STREAM("  SamplingSurfaceNormalDataPointsFilter - Could not compute normal for " << buildData.unfitPointsCount << " pts.");
-	
-	// Build the filtered point cloud
-	DataPoints output;
-	if(buildData.outputDescriptors.cols() == 0)
-	{
-		output = DataPoints(
-			buildData.outputFeatures.leftCols(ptsOut),
-			input.featureLabels
-		);
-	}
-	else
-	{
-		output = DataPoints(
-			buildData.outputFeatures.leftCols(ptsOut),
-			input.featureLabels,
-			buildData.outputDescriptors.leftCols(ptsOut),
-			input.descriptorLabels
-		);
-	}
-
-	// Add or replace new descriptors
-	output.addDescriptor("normals", buildData.getResizedMatrix(buildData.normals));
-	output.addDescriptor("densities", buildData.getResizedMatrix(buildData.densities));
-	output.addDescriptor("eigValues", buildData.getResizedMatrix(buildData.eigValues));
-	output.addDescriptor("eigVectors", buildData.getResizedMatrix(buildData.eigVectors));
 	
 	// return the new point cloud
 	return output;
@@ -815,6 +807,10 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	if(keepEigenVectors)
 		serialEigVector = SurfaceNormalDataPointsFilter::serializeEigVec(eigenVe);
 	
+	// some safety check
+	if(data.inputDescriptors.rows() != 0)
+		assert(data.inputDescriptors.cols() != 0);
+	
 	// Filter points randomly
 	if(samplingMethod == 0)
 	{
@@ -826,21 +822,22 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 				// Keep points with their descriptors
 				data.outputFeatures.col(data.outputInsertionPoint) = 
 					data.inputFeatures.col(data.indices[first+i]);
-				if(data.outputDescriptors.cols() != 0)
+				
+				if(data.inputDescriptors.rows() != 0)
 				{
-					data.outputDescriptors.col(data.outputInsertionPoint) = 
+					data.outputExistingDescriptors.col(data.outputInsertionPoint) = 
 						data.inputDescriptors.col(data.indices[first+i]);
 				}
 
 				// Build new descriptors in parallel to be merged at the end
 				if(keepNormals)
-					data.normals.col(data.outputInsertionPoint) = normal;
+					data.normals->col(data.outputInsertionPoint) = normal;
 				if(keepDensities)
-					data.densities(data.outputInsertionPoint) = densitie;
+					(*data.densities)(0,data.outputInsertionPoint) = densitie;
 				if(keepEigenValues)
-					data.eigValues.col(data.outputInsertionPoint) = eigenVa;
+					data.eigenValues->col(data.outputInsertionPoint) = eigenVa;
 				if(keepEigenVectors)
-					data.eigVectors.col(data.outputInsertionPoint) = serialEigVector;
+					data.eigenVectors->col(data.outputInsertionPoint) = serialEigVector;
 
 				++data.outputInsertionPoint;
 			}
@@ -854,30 +851,28 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 		if(data.inputDescriptors.rows() != 0)
 		{
 			// average the existing descriptors
-			Vector mergedDesc(Vector::Zero(data.inputDescriptors.rows()));
-			if (data.inputDescriptors.cols() != 0)
+			if (averageExistingDescriptors)
 			{
-				if (averageExistingDescriptors)
-				{
-					for (int i = 0; i < colCount; ++i)
-						mergedDesc += data.inputDescriptors.col(data.indices[first+i]);
-					mergedDesc /= T(colCount);
-				}
-				else // just take the first one
-					mergedDesc = data.inputDescriptors.col(data.indices[first]);
+				Vector mergedDesc(Vector::Zero(data.inputDescriptors.rows()));
+				for (int i = 0; i < colCount; ++i)
+					mergedDesc += data.inputDescriptors.col(data.indices[first+i]);
+				mergedDesc /= T(colCount);
+				data.outputExistingDescriptors.col(data.outputInsertionPoint) = mergedDesc;
 			}
-			data.outputDescriptors.col(data.outputInsertionPoint) = mergedDesc;
+			else // just take the first one
+				data.outputExistingDescriptors.col(data.outputInsertionPoint) = 
+					data.inputDescriptors.col(data.indices[first]);
 		}
 		
 		// Build new descriptor in paralelle to be merge at the end
 		if(keepNormals)
-			data.normals.col(data.outputInsertionPoint) = normal;
+			data.normals->col(data.outputInsertionPoint) = normal;
 		if(keepDensities)
-			data.densities(data.outputInsertionPoint) = densitie;
+			(*data.densities)(0,data.outputInsertionPoint) = densitie;
 		if(keepEigenValues)
-			data.eigValues.col(data.outputInsertionPoint) = eigenVa;
+			data.eigenValues->col(data.outputInsertionPoint) = eigenVa;
 		if(keepEigenVectors)
-			data.eigVectors.col(data.outputInsertionPoint) = serialEigVector;
+			data.eigenVectors->col(data.outputInsertionPoint) = serialEigVector;
 		
 		++data.outputInsertionPoint;
 	}

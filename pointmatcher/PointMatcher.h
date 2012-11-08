@@ -315,6 +315,7 @@ struct PointMatcher
 		void concatenate(const DataPoints dp);
 		
 		void allocateFeature(const std::string& name, const unsigned dim);
+		void allocateFeatures(const Labels& newLabels);
 		void addFeature(const std::string& name, const Matrix& newFeature);
 		Matrix getFeatureCopyByName(const std::string& name) const;
 		ConstView getFeatureViewByName(const std::string& name) const;
@@ -325,6 +326,7 @@ struct PointMatcher
 		unsigned getFeatureStartingRow(const std::string& name) const;
 		
 		void allocateDescriptor(const std::string& name, const unsigned dim);
+		void allocateDescriptors(const Labels& newLabels);
 		void addDescriptor(const std::string& name, const Matrix& newDescriptor);
 		Matrix getDescriptorCopyByName(const std::string& name) const;
 		ConstView getDescriptorViewByName(const std::string& name) const;
@@ -340,10 +342,11 @@ struct PointMatcher
 		Labels descriptorLabels; //!< labels of descriptors
 	
 	private:
-		void allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data);
-		void addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data);
+		void allocateFields(const Labels& newLabels, Labels& labels, Matrix& data) const;
+		void allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data) const;
+		void addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data) const;
 		ConstView getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data) const;
-		View getViewByName(const std::string& name, const Labels& labels, Matrix& data);
+		View getViewByName(const std::string& name, const Labels& labels, Matrix& data) const;
 		bool fieldExists(const std::string& name, const unsigned dim, const Labels& labels) const;
 		unsigned getFieldDimension(const std::string& name, const Labels& labels) const;
 		unsigned getFieldStartingRow(const std::string& name, const Labels& labels) const;
