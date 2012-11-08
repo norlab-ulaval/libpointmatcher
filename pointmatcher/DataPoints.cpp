@@ -39,6 +39,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
+//! Construct a label from a given name and number of data dimensions it spans
+template<typename T>
+PointMatcher<T>::DataPoints::Label::Label(const std::string& text, const size_t span):
+	text(text),
+	span(span)
+{}
+
+//! Return whether two labels are equals
+template<typename T>
+bool PointMatcher<T>::DataPoints::Label::operator ==(const Label& that) const
+{
+	return (this->text == that.text) && (this->span == that.span);
+}
+
+//! Construct empty Labels
+template<typename T>
+PointMatcher<T>::DataPoints::Labels::Labels()
+{}
+
+//! Construct Labels with a single Label in it
+template<typename T>
+PointMatcher<T>::DataPoints::Labels::Labels(const Label& label):
+	std::vector<Label>(1, label)
+{}
+
 //! Return whether there is a label named text
 template<typename T>
 bool PointMatcher<T>::DataPoints::Labels::contains(const std::string& text) const
@@ -59,20 +84,6 @@ size_t PointMatcher<T>::DataPoints::Labels::totalDim() const
 	for (const_iterator it(this->begin()); it != this->end(); ++it)
 		dim += it->span;
 	return dim;
-}
-
-//! Construct a label from a given name and number of data dimensions it spans
-template<typename T>
-PointMatcher<T>::DataPoints::Label::Label(const std::string& text, const size_t span):
-	text(text),
-	span(span)
-{}
-
-//! Returns whether two labels are equals
-template<typename T>
-bool PointMatcher<T>::DataPoints::Label::operator ==(const Label& that) const
-{
-	return (this->text == that.text) && (this->span == that.span);
 }
 
 //! Construct an empty point cloud
@@ -106,6 +117,17 @@ PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& fe
 	descriptorLabels(descriptorLabels)
 {}
 
+//! Return whether two point-clouds are identical (same data and same labels)
+template<typename T>
+bool PointMatcher<T>::DataPoints::operator ==(const DataPoints& that) const
+{
+	return
+		(features == that.features) &&
+		(featureLabels == that.featureLabels) &&
+		(descriptors == that.descriptors) &&
+		(featureLabels == that.featureLabels);
+}
+
 //! Add an other point cloud after the current one
 template<typename T>
 void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
@@ -129,9 +151,12 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 	// concatenate descriptors
 	if (this->descriptorLabels == dp.descriptorLabels)
 	{
-		// same descriptors, fast merge
-		this->descriptors.conservativeResize(Eigen::NoChange, nbPointsTotal);
-		this->descriptors.rightCols(nbPoints2) = dp.descriptors;
+		if (this->descriptorLabels.size() > 0)
+		{
+			// same descriptors, fast merge
+			this->descriptors.conservativeResize(Eigen::NoChange, nbPointsTotal);
+			this->descriptors.rightCols(nbPoints2) = dp.descriptors;
+		}
 	}
 	else
 	{
@@ -141,30 +166,49 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 		Labels newDescLabels;
 		for(auto it(this->descriptorLabels.begin()); it != this->descriptorLabels.end(); ++it)
 		{
-			if(dp.descriptorExists(it->text, it->span))
-				newDescLabels.push_back(*it);
+			for(auto jt(dp.descriptorLabels.begin()); jt != dp.descriptorLabels.end(); ++jt)
+			{
+				if (it->text == jt->text)
+				{
+					if (it->span != jt->span)
+						throw InvalidField(
+						(boost::format("The field %1% has dimension %2% in this, different than dimension %3% in that") % it->text % it->span % jt->span).str()
+					);
+					newDescLabels.push_back(*it);
+					break;
+				}
+			}
 		}
 		
 		// allocate new descriptors
-		Matrix newDescriptors;
-		Labels filledLabels;
-		this->allocateFields(newDescLabels, filledLabels, newDescriptors);
-		assert(newDescLabels == filledLabels);
-		
-		// fill
-		unsigned row(0);
-		for(auto it(newDescLabels.begin()); it != newDescLabels.end(); ++it)
+		if (newDescLabels.size() > 0)
 		{
-			View view(newDescriptors.block(row, 0, it->span, newDescriptors.cols()));
-			view.leftCols(nbPoints1) = this->getDescriptorViewByName(it->text);
-			view.rightCols(nbPoints2) = dp.getDescriptorViewByName(it->text);
-			row += it->span;
+			Matrix newDescriptors;
+			Labels filledLabels;
+			this->allocateFields(newDescLabels, filledLabels, newDescriptors);
+			assert(newDescLabels == filledLabels);
+			
+			// fill
+			unsigned row(0);
+			for(auto it(newDescLabels.begin()); it != newDescLabels.end(); ++it)
+			{
+				View view(newDescriptors.block(row, 0, it->span, newDescriptors.cols()));
+				view.leftCols(nbPoints1) = this->getDescriptorViewByName(it->text);
+				view.rightCols(nbPoints2) = dp.getDescriptorViewByName(it->text);
+				row += it->span;
+			}
+			
+			// swap descriptors
+			this->descriptors.swap(newDescriptors);
+			this->descriptorLabels = newDescLabels;
 		}
-		
-		// swap descriptors
-		this->descriptors.swap(newDescriptors);
-		this->descriptorLabels = newDescLabels;
+		else
+		{
+			this->descriptors = Matrix();
+			this->descriptorLabels = Labels();
+		}
 	}
+	assertDescriptorConsistency();
 }
 
 //! Makes sure a feature of a given name exists, if present, check its dimensions
@@ -309,6 +353,36 @@ unsigned PointMatcher<T>::DataPoints::getDescriptorStartingRow(const std::string
 	return getFieldStartingRow(name, descriptorLabels);
 }
 
+//! Assert if descriptors are not consistent with features
+template<typename T>
+void PointMatcher<T>::DataPoints::assertDescriptorConsistency() const
+{
+	if (descriptors.rows() == 0)
+	{
+		if (descriptors.cols() != 0)
+			throw std::runtime_error(
+				(boost::format("Point cloud has degenerate descriptor dimensions of 0x%1%") % descriptors.cols()).str()
+			);
+		if (descriptorLabels.size() > 0)
+			throw std::runtime_error(
+				(boost::format("Point cloud has no descriptor data but %1% descriptor labels") % descriptorLabels.size()).str()
+			);
+	}
+	else
+	{
+		if (descriptors.cols() != features.cols())
+			throw std::runtime_error(
+				(boost::format("Point cloud has %1% points in features but %2% points in descriptors") % features.cols() % descriptors.cols()).str()
+			);
+		int descDim(0);
+		for (auto it(descriptorLabels.begin()); it != descriptorLabels.end(); ++it)
+			descDim += it->span;
+		if (descriptors.rows() != descDim)
+			throw std::runtime_error(
+				(boost::format("Descriptor labels return %1% total dimensions but there are %2% in the descriptors matrix") % descDim % descriptors.rows()).str()
+			);
+	}
+}
 
 //! Make sure a field of a given name exists, if present, check its dimensions
 template<typename T>

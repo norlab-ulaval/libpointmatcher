@@ -297,6 +297,8 @@ struct PointMatcher
 		struct Labels: std::vector<Label>
 		{
 			typedef typename std::vector<Label>::const_iterator const_iterator; //!< alias
+			Labels();
+			Labels(const Label& label);
 			bool contains(const std::string& text) const;
 			size_t totalDim() const;
 		};
@@ -312,6 +314,7 @@ struct PointMatcher
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount);
 		DataPoints(const Matrix& features, const Labels& featureLabels);
 		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
+		bool operator ==(const DataPoints& that) const;
 		
 		void concatenate(const DataPoints& dp);
 		
@@ -336,6 +339,7 @@ struct PointMatcher
 		bool descriptorExists(const std::string& name, const unsigned dim) const;
 		unsigned getDescriptorDimension(const std::string& name) const;
 		unsigned getDescriptorStartingRow(const std::string& name) const;
+		void assertDescriptorConsistency() const;
 		
 		Matrix features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features

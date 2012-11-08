@@ -51,6 +51,182 @@ PM::DataPoints data3D;
 PM::TransformationParameters validT2d;
 PM::TransformationParameters validT3d;
 
+//---------------------------
+// Point-cloud structures
+//---------------------------
+
+TEST(PointCloudTest, CopyConstructor2D)
+{
+	const PM::DataPoints ref2DCopy(ref2D);
+	EXPECT_TRUE(ref2DCopy.features == ref2D.features);
+	EXPECT_TRUE(ref2DCopy.featureLabels == ref2D.featureLabels);
+	EXPECT_TRUE(ref2DCopy.descriptors == ref2D.descriptors);
+	EXPECT_TRUE(ref2DCopy.descriptorLabels == ref2D.descriptorLabels);
+	EXPECT_TRUE(ref2DCopy == ref2D);
+}
+
+TEST(PointCloudTest, CopyConstructor3D)
+{
+	const PM::DataPoints ref3DCopy(ref3D);
+	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
+	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
+	EXPECT_TRUE(ref3DCopy.descriptors == ref3D.descriptors);
+	EXPECT_TRUE(ref3DCopy.descriptorLabels == ref3D.descriptorLabels);
+	EXPECT_TRUE(ref3DCopy == ref3D);
+}
+
+TEST(PointCloudTest, FeatureConstructor2D)
+{
+	const PM::DataPoints ref2DCopy(ref2D.features, ref2D.featureLabels);
+	EXPECT_TRUE(ref2DCopy.features == ref2D.features);
+	EXPECT_TRUE(ref2DCopy.featureLabels == ref2D.featureLabels);
+	EXPECT_TRUE(ref2DCopy == ref2D);
+	EXPECT_TRUE(ref2DCopy.descriptors.rows() == 0);
+	EXPECT_TRUE(ref2DCopy.descriptors.cols() == 0);
+}
+
+TEST(PointCloudTest, FeatureConstructor3D)
+{
+	const PM::DataPoints ref3DCopy(ref3D.features, ref3D.featureLabels);
+	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
+	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
+	EXPECT_TRUE(ref3DCopy == ref3D);
+	EXPECT_TRUE(ref3DCopy.descriptors.rows() == 0);
+	EXPECT_TRUE(ref3DCopy.descriptors.cols() == 0);
+}
+
+TEST(PointCloudTest, ConcatenateFeatures2D)
+{
+	const int leftPoints(ref2D.features.cols() / 2);
+	const int rightPoints(ref2D.features.cols() - leftPoints);
+	PM::DataPoints lefts(
+		ref2D.features.leftCols(leftPoints),
+		ref2D.featureLabels
+	);
+	PM::DataPoints rights(
+		ref2D.features.rightCols(rightPoints),
+		ref2D.featureLabels
+	);
+	lefts.concatenate(rights);
+	EXPECT_TRUE(lefts == ref2D);
+}
+
+TEST(PointCloudTest, ConcatenateFeatures3D)
+{
+	const int leftPoints(ref3D.features.cols() / 2);
+	const int rightPoints(ref3D.features.cols() - leftPoints);
+	PM::DataPoints lefts(
+		ref3D.features.leftCols(leftPoints),
+		ref3D.featureLabels
+	);
+	PM::DataPoints rights(
+		ref3D.features.rightCols(rightPoints),
+		ref3D.featureLabels
+	);
+	lefts.concatenate(rights);
+	EXPECT_TRUE(lefts == ref3D);
+}
+
+TEST(PointCloudTest, ConcatenateDescSame)
+{
+	typedef PM::DataPoints::Label Label;
+	typedef PM::DataPoints::Labels Labels;
+	
+	const int leftPoints(ref2D.features.cols() / 2);
+	const int rightPoints(ref2D.features.cols() - leftPoints);
+	PM::DataPoints lefts(
+		ref2D.features.leftCols(leftPoints),
+		ref2D.featureLabels,
+		PM::Matrix::Random(5, leftPoints),
+		Labels(Label("Desc5D", 5))
+	);
+	PM::DataPoints rights(
+		ref2D.features.rightCols(rightPoints),
+		ref2D.featureLabels,
+		PM::Matrix::Random(5, rightPoints),
+		Labels(Label("Desc5D", 5))
+	);
+	lefts.concatenate(rights);
+	EXPECT_TRUE(lefts.descriptors.rows() == 5);
+	EXPECT_TRUE(lefts.descriptors.cols() == lefts.features.cols());
+}
+
+TEST(PointCloudTest, ConcatenateDescSame2)
+{
+	typedef PM::DataPoints::Label Label;
+	typedef PM::DataPoints::Labels Labels;
+	
+	PM::DataPoints ref3DCopy(ref3D.features, ref3D.featureLabels);
+	ref3DCopy.descriptorLabels.push_back(Label("Desc5D", 5));
+	ref3DCopy.descriptors = PM::Matrix::Random(5, ref3DCopy.features.cols());
+	
+	const int leftPoints(ref3DCopy.features.cols() / 2);
+	const int rightPoints(ref3DCopy.features.cols() - leftPoints);
+	PM::DataPoints lefts(
+		ref3DCopy.features.leftCols(leftPoints),
+		ref3DCopy.featureLabels,
+		ref3DCopy.descriptors.leftCols(leftPoints),
+		ref3DCopy.descriptorLabels
+	);
+	PM::DataPoints rights(
+		ref3DCopy.features.rightCols(rightPoints),
+		ref3DCopy.featureLabels,
+		ref3DCopy.descriptors.rightCols(rightPoints),
+		ref3DCopy.descriptorLabels
+	);
+	lefts.concatenate(rights);
+	EXPECT_TRUE(lefts == ref3DCopy);
+}
+
+TEST(PointCloudTest, ConcatenateDescDiffName)
+{
+	typedef PM::DataPoints::Label Label;
+	typedef PM::DataPoints::Labels Labels;
+	
+	const int leftPoints(ref2D.features.cols() / 2);
+	const int rightPoints(ref2D.features.cols() - leftPoints);
+	PM::DataPoints lefts(
+		ref2D.features.leftCols(leftPoints),
+		ref2D.featureLabels,
+		PM::Matrix::Random(5, leftPoints),
+		Labels(Label("MyDesc5D", 5))
+	);
+	PM::DataPoints rights(
+		ref2D.features.rightCols(rightPoints),
+		ref2D.featureLabels,
+		PM::Matrix::Random(5, rightPoints),
+		Labels(Label("YourDesc5D", 5))
+	);
+	lefts.concatenate(rights);
+	EXPECT_TRUE(lefts.descriptors.rows() == 0);
+	EXPECT_TRUE(lefts.descriptors.cols() == 0);
+}
+
+TEST(PointCloudTest, ConcatenateDescDiffSize)
+{
+	typedef PM::DataPoints::Label Label;
+	typedef PM::DataPoints::Labels Labels;
+	
+	const int leftPoints(ref2D.features.cols() / 2);
+	const int rightPoints(ref2D.features.cols() - leftPoints);
+	PM::DataPoints lefts(
+		ref2D.features.leftCols(leftPoints),
+		ref2D.featureLabels,
+		PM::Matrix::Random(3, leftPoints),
+		Labels(Label("DescND", 3))
+	);
+	PM::DataPoints rights(
+		ref2D.features.rightCols(rightPoints),
+		ref2D.featureLabels,
+		PM::Matrix::Random(5, rightPoints),
+		Labels(Label("DescND", 5))
+	);
+	EXPECT_THROW(lefts.concatenate(rights), PM::DataPoints::InvalidField);
+}
+
+//---------------------------
+// Base for ICP tests
+//---------------------------
 
 class IcpHelper: public testing::Test
 {
@@ -283,7 +459,7 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 	params["dim"] = "2";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
-	EXPECT_ANY_THROW(validate2dTransformation());	
+	EXPECT_ANY_THROW(validate2dTransformation());
 	validate3dTransformation();
 }
 
