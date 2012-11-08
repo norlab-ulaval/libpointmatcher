@@ -508,7 +508,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 		// Ensure that the matrix is suited for eigenvalues calculation
 		if(keepNormals || keepEigenValues || keepEigenVectors)
 		{
-			if(C.fullPivHouseholderQr().rank() == featDim-1)
+			if(C.fullPivHouseholderQr().rank()+1 >= featDim-1)
 			{
 				const Eigen::EigenSolver<Matrix> solver(C);
 				eigenVa = solver.eigenvalues().real();
@@ -780,7 +780,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	// Ensure that the matrix is suited for eigenvalues calculation
 	if(keepNormals || keepEigenValues || keepEigenVectors)
 	{
-		if(C.fullPivHouseholderQr().rank() == featDim-1)
+		if(C.fullPivHouseholderQr().rank()+1 >= featDim-1)
 		{
 			const Eigen::EigenSolver<Matrix> solver(C);
 			eigenVa = solver.eigenvalues().real();
