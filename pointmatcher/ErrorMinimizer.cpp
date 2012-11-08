@@ -123,7 +123,7 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(c
 //! Helper function outputting pair of points from the reference and 
 //! the reading based on the matching matrix
 template<typename T>
-typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMinimizer::getMatchedPoints(
+typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorMinimizer::getMatchedPoints(
 		const DataPoints& requestedPts,
 		const DataPoints& sourcePts,
 		const Matches& matches, 
@@ -200,17 +200,20 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 			associatedDesc.col(i) = sourcePts.descriptors.block(0, refIndex, dimSourDesc, 1);
 	}
 
-	DataPoints keptPts;
-	keptPts.features = keptFeat;
-	keptPts.descriptors = keptDesc;
-	keptPts.descriptorLabels = requestedPts.descriptorLabels;
-
-	DataPoints associatedPts;
-	associatedPts.features = associatedFeat;
-	associatedPts.descriptors = associatedDesc;
-	associatedPts.descriptorLabels = sourcePts.descriptorLabels;
-
-	this->lastErrorElements = ErrorElements(keptPts, associatedPts, keptWeights, keptMatches);
+	lastErrorElements.reading = DataPoints(
+		keptFeat, 
+		requestedPts.featureLabels,
+		keptDesc,
+		requestedPts.descriptorLabels
+	);
+	lastErrorElements.reference = DataPoints(
+		associatedFeat,
+		sourcePts.featureLabels,
+		associatedDesc,
+		sourcePts.descriptorLabels
+	);
+	lastErrorElements.weights = keptWeights;
+	lastErrorElements.matches = keptMatches;
 	return lastErrorElements;
 }
 

@@ -74,20 +74,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MaxDistOutlierFi
 	const DataPoints& filteredReference,
 	const Matches& input)
 {
-	// select weight from median
-	OutlierWeights w(input.dists.rows(), input.dists.cols());
-	for (int x = 0; x < w.cols(); ++x)
-	{
-		for (int y = 0; y < w.rows(); ++y)
-		{
-			if (input.dists(y, x) > maxDist)
-				w(y, x) = 0;
-			else
-				w(y, x) = 1;
-		}
-	}
-	
-	return w;
+	return OutlierWeights((input.dists.array() <= maxDist).template cast<T>());
 }
 
 template struct OutlierFiltersImpl<float>::MaxDistOutlierFilter;
@@ -107,20 +94,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MinDistOutlierFi
 	const DataPoints& filteredReference,
 	const Matches& input)
 {
-	
-	OutlierWeights w(input.dists.rows(), input.dists.cols());
-	for (int x = 0; x < w.cols(); ++x)
-	{
-		for (int y = 0; y < w.rows(); ++y)
-		{
-			if (input.dists(y, x) < minDist)
-				w(y, x) = 0;
-			else
-				w(y, x) = 1;
-		}
-	}
-	
-	return w;
+	return OutlierWeights((input.dists.array() >= minDist).template cast<T>());
 }
 
 template struct OutlierFiltersImpl<float>::MinDistOutlierFilter;
@@ -143,23 +117,8 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MedianDistOutlie
 	const Matches& input)
 {
 	const T median = input.getDistsQuantile(0.5);
-	
-	// select weight from median
-	OutlierWeights w(input.dists.rows(), input.dists.cols());
-	for (int x = 0; x < w.cols(); ++x)
-	{
-		for (int y = 0; y < w.rows(); ++y)
-		{
-			if (input.dists(y, x) > factor * median)
-				w(y, x) = 0;
-			else
-				w(y, x) = 1;
-			//if (w(y, x) == 0)
-			//	cout << "rejeting long dist " <<  input.dists(y, x) << " on median " << median << endl;
-		}
-	}
-	
-	return w;
+	const T limit = factor * median;
+	return OutlierWeights((input.dists.array() <= limit).template cast<T>());
 }
 
 template struct OutlierFiltersImpl<float>::MedianDistOutlierFilter;
@@ -181,29 +140,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::TrimmedDistOutli
 	const Matches& input)
 {
 	const T limit = input.getDistsQuantile(ratio);
-	
-	// select weight from median
-	OutlierWeights w(input.dists.rows(), input.dists.cols());
-	int j=0;
-	int k=0;
-	for (int x = 0; x < w.cols(); ++x)
-	{
-		for (int y = 0; y < w.rows(); ++y)
-		{
-			if (input.dists(y, x) > limit)
-			{
-				w(y, x) = 0;
-				j++;
-			}
-			else
-			{
-				w(y, x) = 1;
-				k++;
-			}
-		}
-	}
-	
-	return w;
+	return OutlierWeights((input.dists.array() <= limit).template cast<T>());
 }
 
 template struct OutlierFiltersImpl<float>::TrimmedDistOutlierFilter;
@@ -233,21 +170,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::VarTrimmedDistOu
 	LOG_INFO_STREAM("Optimized ratio: " << tunedRatio);
 
 	const T limit = input.getDistsQuantile(tunedRatio);
-	
-	// select weight from median
-	typename PointMatcher<T>::OutlierWeights w(input.dists.rows(), input.dists.cols());
-	for (int x = 0; x < w.cols(); ++x)
-	{
-		for (int y = 0; y < w.rows(); ++y)
-		{
-			if (input.dists(y, x) > limit)
-				w(y, x) = 0;
-			else
-				w(y, x) = 1;
-		}
-	}
-
-	return w;
+	return OutlierWeights((input.dists.array() <= limit).template cast<T>());
 }
 
 template<typename T>

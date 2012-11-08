@@ -71,7 +71,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	assert(matches.ids.rows() > 0);
 
-	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
@@ -146,7 +146,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// if 2D, use homogenious coordinates [x, y] 
 	// if 3D, use [x, y, z]
 
-	const typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	const typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
 	
 	const auto normalRef(mPts.reference.getDescriptorViewByName("normals"));
 

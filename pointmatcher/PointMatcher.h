@@ -218,6 +218,11 @@ namespace PointMatcherSupport
 	};
 	
 	void setLogger(Logger* newLogger);
+	
+	void validateFile(const std::string& fileName);
+	
+	//! Data from a CSV file
+	typedef std::map<std::string, std::vector<std::string>> CsvElements;
 }
 
 //! Functions and classes that are dependant on scalar type are defined in this templatized class
@@ -362,13 +367,6 @@ struct PointMatcher
 	// ---------------------------------
 	// IO functions
 	// ---------------------------------
-	
-	//! Data from a CSV file
-	typedef std::map<std::string, std::vector<std::string>> CsvElements;
-
-	static void validateFile(const std::string& fileName);
-	static std::vector<std::string> csvLineToVector(const char* line);
-	static CsvElements parseCsvWithHeader(const std::string& fileName);
 
 	// Generic load and save
 	
@@ -411,8 +409,8 @@ struct PointMatcher
 	
 	protected:
 		std::string localToGlobalFileName(const std::string& path, const std::string& fileName);
-		bool findTransform(const CsvElements& data, const std::string& prefix, unsigned dim);
-		TransformationParameters getTransform(const CsvElements& data, const std::string& prefix, unsigned dim, unsigned line);
+		bool findTransform(const PointMatcherSupport::CsvElements& data, const std::string& prefix, unsigned dim);
+		TransformationParameters getTransform(const PointMatcherSupport::CsvElements& data, const std::string& prefix, unsigned dim, unsigned line);
 	};
 
 	// ---------------------------------
@@ -568,7 +566,7 @@ struct PointMatcher
 	protected:
 		// helper functions
 		static Matrix crossProduct(const Matrix& A, const Matrix& B);
-		ErrorElements getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
+		ErrorElements& getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
 		
 	protected:
 		T pointUsedRatio; //!< the ratio of how many points were used for error minimization

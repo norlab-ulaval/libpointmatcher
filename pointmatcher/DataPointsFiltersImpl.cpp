@@ -139,7 +139,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 	}
 	
 	int j = 0;
-	if(dim == -1) // Euclidian distance
+	if(dim == -1) // Euclidean distance
 	{
 		for (int i = 0; i < nbPointsIn; i++)
 		{
@@ -216,7 +216,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 	}
 	
 	int j = 0;
-	if(dim == -1) // Euclidian distance
+	if(dim == -1) // Euclidean distance
 	{
 		const T absMinDist = anyabs(minDist);
 		for (int i = 0; i < nbPointsIn; i++)
@@ -361,15 +361,15 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPoi
 		if (density > maxDensity)
 		{
 			const float r = (float)std::rand()/(float)RAND_MAX;
-			float accepRatio = maxDensity/density;
+			float acceptRatio = maxDensity/density;
 			
 			// Handle saturation value of density
 			if (density == lastDensity)
 			{
-				accepRatio = accepRatio * (1-nbSaturatedPts/nbPointsIn);	
+				acceptRatio = acceptRatio * (1-nbSaturatedPts/nbPointsIn);	
 			}
 
-			if (r < accepRatio)
+			if (r < acceptRatio)
 			{
 				outputCloud.features.col(j) = outputCloud.features.col(i);
 				if (outputCloud.descriptors.cols() > 0)

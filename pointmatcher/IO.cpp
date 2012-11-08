@@ -48,6 +48,103 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 using namespace std;
+using namespace PointMatcherSupport;
+
+
+// Tokenize a string, excepted if it begins with a '%' (a comment in CSV)
+static std::vector<string> csvLineToVector(const char* line)
+{
+	std::vector<string> parsedLine;
+	char delimiters[] = " \t,;";
+	char *token;
+	char tmpLine[1024];
+	char *brkt;
+	strcpy(tmpLine, line);
+	token = strtok_r(tmpLine, delimiters, &brkt);
+	if(line[0] != '%') // Jump line if it's commented
+	{
+		while (token)
+		{
+			parsedLine.push_back(string(token));
+			token = strtok_r(NULL, delimiters, &brkt);
+		}
+	}
+
+	return parsedLine;
+}
+
+// Open and parse a CSV file, return the data
+CsvElements parseCsvWithHeader(const std::string& fileName)
+{
+	validateFile(fileName);
+	
+	ifstream is(fileName.c_str());
+
+	unsigned elementCount=0;
+	std::map<string, unsigned> keywordCols;
+	CsvElements data;
+
+	bool firstLine(true);
+	unsigned lineCount=0;
+	while (!is.eof())
+	{
+		char line[1024];
+		is.getline(line, sizeof(line));
+		line[sizeof(line)-1] = 0;
+
+		if(firstLine)
+		{
+			std::vector<string> header = csvLineToVector(line);
+				
+			elementCount = header.size();
+			for(unsigned int i = 0; i < elementCount; i++)
+			{
+				keywordCols[header[i]] = i;
+			}
+
+			firstLine = false;
+		}
+		else // load the rest of the file
+		{
+			std::vector<string> parsedLine = csvLineToVector(line);
+			if(parsedLine.size() != elementCount && parsedLine.size() !=0)
+			{
+				stringstream errorMsg;
+				errorMsg << "Error at line " << lineCount+1 << ": expecting " << elementCount << " columns but read " << parsedLine.size() << " elements.";
+				throw runtime_error(errorMsg.str());	
+			}
+
+			for(unsigned int i = 0; i < parsedLine.size(); i++)
+			{
+				for(auto it=keywordCols.begin(); it!=keywordCols.end(); it++)
+				{
+					if(i == (*it).second)
+					{
+						data[(*it).first].push_back(parsedLine[i]);	
+					}
+				}
+			}
+		}
+
+		lineCount++;
+	}
+	
+	// Use for debug
+	
+	//for(auto it=data.begin(); it!=data.end(); it++)
+	//{
+	//	cout << "--------------------------" << endl;
+	//	cout << "Header: |" << (*it).first << "|" << endl;
+	//	//for(unsigned i=0; i<(*it).second.size(); i++)
+	//	//{
+	//	//	cout << (*it).second[i] << endl;
+	//	//}
+	//}
+	
+
+	return data;
+}
+
 
 //! Constructor, leave fields blank if unused
 template<typename T>
@@ -234,8 +331,7 @@ template struct PointMatcher<float>::FileInfoVector;
 template struct PointMatcher<double>::FileInfoVector;
 
 //! Throw a runtime_error exception if fileName cannot be opened
-template<typename T>
-void PointMatcher<T>::validateFile(const std::string& fileName)
+void PointMatcherSupport::validateFile(const std::string& fileName)
 {
 	boost::filesystem::path fullPath(fileName);
 
@@ -248,116 +344,6 @@ void PointMatcher<T>::validateFile(const std::string& fileName)
 	#endif
 }
 
-template
-void PointMatcher<float>::validateFile(const std::string& fileName);
-template
-void PointMatcher<double>::validateFile(const std::string& fileName);
-
-//! Tokenize a string, excepted if it begins with a '%' (a comment in CSV)
-template<typename T>
-std::vector<string> PointMatcher<T>::csvLineToVector(const char* line)
-{
-	std::vector<string> parsedLine;
-	char delimiters[] = " \t,;";
-	char *token;
-	char tmpLine[1024];
-	char *brkt;
-	strcpy(tmpLine, line);
-	token = strtok_r(tmpLine, delimiters, &brkt);
-	if(line[0] != '%') // Jump line if it's commented
-	{
-		while (token)
-		{
-			parsedLine.push_back(string(token));
-			token = strtok_r(NULL, delimiters, &brkt);
-		}
-	}
-
-	return parsedLine;
-}
-
-template
-std::vector<string> PointMatcher<float>::csvLineToVector(const char* line);
-template
-std::vector<string> PointMatcher<double>::csvLineToVector(const char* line);
-
-//! Open and parse a CSV file, return the data
-template<typename T>
-typename PointMatcher<T>::CsvElements PointMatcher<T>::parseCsvWithHeader(const std::string& fileName)
-{
-	validateFile(fileName);
-	
-	ifstream is(fileName.c_str());
-
-	unsigned elementCount=0;
-	std::map<string, unsigned> keywordCols;
-	CsvElements data;
-
-	bool firstLine(true);
-	unsigned lineCount=0;
-	while (!is.eof())
-	{
-		char line[1024];
-		is.getline(line, sizeof(line));
-		line[sizeof(line)-1] = 0;
-
-		if(firstLine)
-		{
-			std::vector<string> header = csvLineToVector(line);	
-				
-			elementCount = header.size();
-			for(unsigned int i = 0; i < elementCount; i++)
-			{
-				keywordCols[header[i]] = i;
-			}
-
-			firstLine = false;
-		}
-		else // load the rest of the file
-		{
-			std::vector<string> parsedLine = csvLineToVector(line);
-			if(parsedLine.size() != elementCount && parsedLine.size() !=0)
-			{
-				stringstream errorMsg;
-				errorMsg << "Error at line " << lineCount+1 << ": expecting " << elementCount << " columns but read " << parsedLine.size() << " elements.";
-				throw runtime_error(errorMsg.str());	
-			}
-
-			for(unsigned int i = 0; i < parsedLine.size(); i++)
-			{
-				for(auto it=keywordCols.begin(); it!=keywordCols.end(); it++)
-				{
-					if(i == (*it).second)
-					{
-						data[(*it).first].push_back(parsedLine[i]);	
-					}
-				}
-			}
-		}
-
-		lineCount++;
-	}
-	
-	// Use for debug
-	
-	//for(auto it=data.begin(); it!=data.end(); it++)
-	//{
-	//	cout << "--------------------------" << endl;
-	//	cout << "Header: |" << (*it).first << "|" << endl;
-	//	//for(unsigned i=0; i<(*it).second.size(); i++)
-	//	//{
-	//	//	cout << (*it).second[i] << endl;
-	//	//}
-	//}
-	
-
-	return data;
-}
-
-template
-PointMatcher<float>::CsvElements PointMatcher<float>::parseCsvWithHeader(const std::string& fileName);
-template
-PointMatcher<double>::CsvElements PointMatcher<double>::parseCsvWithHeader(const std::string& fileName);
 
 //! Load a point cloud from a file, determine format from extension
 template<typename T>

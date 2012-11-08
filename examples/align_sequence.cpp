@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
 	// load YAML config
 	ifstream ifs(argv[1]);
-	PM::validateFile(argv[1]);
+	validateFile(argv[1]);
 	icp.loadFromYaml(ifs);
 
 	PM::FileInfoVector list(argv[2]);
