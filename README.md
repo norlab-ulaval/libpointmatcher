@@ -4,7 +4,9 @@ libpointmatcher depends on:
 
  * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
  * [libnabo] version 1.0.1, a fast K Nearest Neighbour library for low-dimensional spaces.
+ * [Doxygen], a documentation-generation tool
  * [yaml-cpp], a YAML 1.2 parser and emitter (optional)
+ 
 
 libpointmatcher is being developed by François Pomerleau and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
@@ -48,6 +50,8 @@ If [Eigen], [libnabo] or [yaml-cpp] are not installed system-wide, you might hav
 You can do this with a command-line tool, `ccmake`, or with a graphical tool, `cmake-gui`.
 Please read the [CMake documentation] for more information.
 
+Building libpointmatcher also builds its documentation, available in the `doc/html` folder in the build directory.
+
 Test
 ====
 
@@ -73,7 +77,7 @@ Developing
 ==========
 
 If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and pmicp (in `example/icp_simple.cpp` and `example/icp.cpp`). You can see how loading/saving of data files work by looking at convert (`example/convert.cpp`). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (`example/align_sequence.cpp`).
-
+Please read the generated documentation in the `doc/html` folder in the build directory.
 
 Bug reporting
 =============
@@ -110,3 +114,4 @@ libpointmatcher is released under a permissive BSD license.
 [ROS]: http://www.ros.org/
 [Paraview]: http://www.paraview.org/
 [yaml-cpp]: http://code.google.com/p/yaml-cpp/
+[Doxygen]: http://www.stack.nl/~dimitri/doxygen/

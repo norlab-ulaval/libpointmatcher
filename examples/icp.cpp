@@ -55,8 +55,8 @@ void usage(const char *argv[]);
   * Code example for ICP taking 2 points clouds (2D or 3D) relatively close 
   * and computing the transformation between them.
   *
-  * This code is more complet than icp_simple. It can load parameter files and 
-  * have more options.
+  * This code is more complete than icp_simple. It can load parameter files and 
+  * has more options.
   */
 int main(int argc, const char *argv[])
 {
@@ -109,6 +109,7 @@ int main(int argc, const char *argv[])
 	return 0;
 }
 
+// The following code allows to dump all existing modules
 template<typename R>
 void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, CurrentBibliography& bib)
 {
@@ -142,6 +143,7 @@ void listModules()
 	bib.dump(cout);
 }
 
+// Make sure that the command arguments make sense
 int validateArgs(const int argc, const char *argv[], bool& isCSV, string& configFile, string& outputBaseFile)
 {
 	if (argc == 1)
@@ -185,6 +187,7 @@ int validateArgs(const int argc, const char *argv[], bool& isCSV, string& config
 	return 0;
 }
 
+// Dump command-line help
 void usage(const char *argv[])
 {
 	cerr << endl << endl;

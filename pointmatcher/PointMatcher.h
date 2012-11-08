@@ -103,13 +103,13 @@ If you wish to develop using libpointmatcher, you can start by looking at the so
 
 \section DevelopingSelf Extending libpointmatcher
 
-You can also extend libpointmatcher relatively easily, by adding new modules. The file PointMatcher.h is the most important file, it defines the interfaces for all module types, as well as the ICP algorithms. Each interface is an inner class of the PointMatcher class, which is templatized on the scalar type. Instanciation is forced in \c Core.cpp for float and double scalar types. There are different types of modules corresponding to the different bricks of the ICP algorithm. The modules themselves are defined in their own files, for instance data-point filters live in the \c DataPointFiltersImpl.h/\c .cpp files. You can read a description of the ICP chain architecture in our \ref icppaper "IROS paper". Then, start from the documentation of PointMatcher to see the different interfaces, and then read the source code of the existing modules for the interface you are interested in, to get an idea of what you have to implement.
+You can also extend libpointmatcher relatively easily, by adding new modules. The file PointMatcher.h is the most important file, it defines the interfaces for all module types, as well as the ICP algorithms. Each interface is an inner class of the PointMatcher class, which is templatized on the scalar type. Instanciation is forced in \c Registry.cpp for float and double scalar types. There are different types of modules corresponding to the different bricks of the ICP algorithm. The modules themselves are defined in their own files, for instance data-point filters live in the \c DataPointFiltersImpl.h/\c .cpp files. You can read a description of the ICP chain architecture in our \ref icppaper "IROS paper". Then, start from the documentation of PointMatcher to see the different interfaces, and then read the source code of the existing modules for the interface you are interested in, to get an idea of what you have to implement.
 
 All modules have a common way to get parameters at initialization, and feature a self-documentation mechanism. This allows to configure the ICP chain from external descriptions such as \ref yaml-cpp "yaml files".
 
 \subsection CreatingNewDataPointFilter Example: creating a new module of type DataPointsFilter
 
-You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "DataPointsFilter": \c DataPointsFiltersImpl.h, \c DataPointsFiltersImpl.cpp and \c Core.cpp. The easiest way is to start by copying and renaming \c IdentityDataPointsFilter, and then to modify it.
+You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "DataPointsFilter": \c DataPointsFiltersImpl.h, \c DataPointsFiltersImpl.cpp and \c Registry.cpp. The easiest way is to start by copying and renaming \c IdentityDataPointsFilter, and then to modify it.
 
 - In \c DataPointsFiltersImpl.h, copy the declaration of the struct \c IdentityDataPointsFilter at the end of the file.
 - Rename the pasted structure with the new filter name.
@@ -119,13 +119,13 @@ You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "Dat
 	- The types of the parameters are used to properly cast the string value and can be:  \c &P::Comp<T>, \c &P::Comp<int>, \c &P::Comp<unsigned>, etc. See \c DataPointsFiltersImpl.h for examples.
 	- Uncomment and rename the constructor.
 
-- In \c DataPointsFiltersImpl.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the predeclaration (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct 
+- In \c DataPointsFiltersImpl.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the explicit instantiation (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct 
 \c DataPointsFiltersImpl<double>::YourFilter;).
 - Add the constructor if needed.
 - At this stage, you should let the implementation of the filter function to hold only the statement that returns the input.
 
-- In \c Core.cpp, search for \c "ADD_TO_REGISTRAR(DataPointsFilter,".
-- You should see all available \c dataPointfilter there. At the end of that block, add your filter.
+- In \c Registry.cpp, search for \c "ADD_TO_REGISTRAR(DataPointsFilter,".
+- You should see all available \c DataPointsFilter there. At the end of that block, add your filter.
 
 - Compile.
 
