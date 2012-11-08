@@ -516,7 +516,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 			}
 			else
 			{
-				//TODO: solve without noise..
 				//std::cout << "WARNING: Matrix C needed for eigen decomposition is degenerated. Expected cause: no noise in data" << std::endl;
 				++degenerateCount;
 			}

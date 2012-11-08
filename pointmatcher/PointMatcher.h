@@ -388,7 +388,7 @@ struct PointMatcher
 
 	static void saveVTK(const DataPoints& data, const std::string& fileName);
 	
-	// TODO: The FileInfo and FileInfoVector structs should go somewhere else than this main file
+	// FIXME: The FileInfo and FileInfoVector structs should go somewhere else than this main file
 	//! Information required to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo 
 	{
