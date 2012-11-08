@@ -312,7 +312,7 @@ struct PointMatcher
 		DataPoints(const Matrix& features, const Labels& featureLabels);
 		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
 		
-		void concatenate(const DataPoints dp);
+		void concatenate(const DataPoints& dp);
 		
 		void allocateFeature(const std::string& name, const unsigned dim);
 		void allocateFeatures(const Labels& newLabels);

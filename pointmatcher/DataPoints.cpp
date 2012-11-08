@@ -101,7 +101,7 @@ PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& fe
 
 //! Add an other point cloud after the current one
 template<typename T>
-void PointMatcher<T>::DataPoints::concatenate(const DataPoints dp)
+void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 {
 	const int nbPoints1 = this->features.cols();
 	const int nbPoints2 = dp.features.cols();
