@@ -291,6 +291,7 @@ struct PointMatcher
 			std::string text; //!< name of the label
 			size_t span; //!< number of data dimensions the label spans
 			Label(const std::string& text = "", const size_t span = 0);
+			bool operator ==(const Label& that) const;
 		};
 		//! A vector of Label
 		struct Labels: std::vector<Label>

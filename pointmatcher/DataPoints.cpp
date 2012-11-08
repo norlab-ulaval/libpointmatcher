@@ -68,6 +68,13 @@ PointMatcher<T>::DataPoints::Label::Label(const std::string& text, const size_t 
 	span(span)
 {}
 
+//! Returns whether two labels are equals
+template<typename T>
+bool PointMatcher<T>::DataPoints::Label::operator ==(const Label& that) const
+{
+	return (this->text == that.text) && (this->span == that.span);
+}
+
 //! Construct an empty point cloud
 template<typename T>
 PointMatcher<T>::DataPoints::DataPoints()
@@ -115,31 +122,50 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 		throw InvalidField(errorMsg.str());
 	}
 	
-	Matrix combinedFeat(dimFeat, nbPointsTotal);
-	combinedFeat.leftCols(nbPoints1) = this->features;
-	combinedFeat.rightCols(nbPoints2) = dp.features;
-	DataPoints dpOut(combinedFeat, this->featureLabels);
+	// concatenate features
+	this->features.conservativeResize(Eigen::NoChange, nbPointsTotal);
+	this->features.rightCols(nbPoints2) = dp.features;
 	
-	for(unsigned i = 0; i < this->descriptorLabels.size(); i++)
+	// concatenate descriptors
+	if (this->descriptorLabels == dp.descriptorLabels)
 	{
-		const string name = this->descriptorLabels[i].text;
-		const int dimDesc = this->descriptorLabels[i].span;
-		if(dp.descriptorExists(name, dimDesc) == true)
-		{
-			Matrix mergedDesc(dimDesc, nbPointsTotal);
-			mergedDesc.leftCols(nbPoints1) = this->getDescriptorViewByName(name);
-			mergedDesc.rightCols(nbPoints2) = dp.getDescriptorViewByName(name);
-			dpOut.addDescriptor(name, mergedDesc);
-		}
+		// same descriptors, fast merge
+		this->descriptors.conservativeResize(Eigen::NoChange, nbPointsTotal);
+		this->descriptors.rightCols(nbPoints2) = dp.descriptors;
 	}
-
-	this->features.swap(dpOut.features);
-	this->featureLabels = dpOut.featureLabels;
-	this->descriptors.swap(dpOut.descriptors);
-	this->descriptorLabels = dpOut.descriptorLabels;
+	else
+	{
+		// different descriptors, slow merge
+		
+		// collect labels to be kept
+		Labels newDescLabels;
+		for(auto it(this->descriptorLabels.begin()); it != this->descriptorLabels.end(); ++it)
+		{
+			if(dp.descriptorExists(it->text, it->span))
+				newDescLabels.push_back(*it);
+		}
+		
+		// allocate new descriptors
+		Matrix newDescriptors;
+		Labels filledLabels;
+		this->allocateFields(newDescLabels, filledLabels, newDescriptors);
+		assert(newDescLabels == filledLabels);
+		
+		// fill
+		unsigned row(0);
+		for(auto it(newDescLabels.begin()); it != newDescLabels.end(); ++it)
+		{
+			View view(newDescriptors.block(row, 0, it->span, newDescriptors.cols()));
+			view.leftCols(nbPoints1) = this->getDescriptorViewByName(it->text);
+			view.rightCols(nbPoints2) = dp.getDescriptorViewByName(it->text);
+			row += it->span;
+		}
+		
+		// swap descriptors
+		this->descriptors.swap(newDescriptors);
+		this->descriptorLabels = newDescLabels;
+	}
 }
-
-
 
 //! Makes sure a feature of a given name exists, if present, check its dimensions
 template<typename T>
