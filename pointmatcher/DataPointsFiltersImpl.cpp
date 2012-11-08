@@ -902,13 +902,13 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsData
 	
 	DataPoints output(input);
 	auto normals(output.getDescriptorViewByName("normals"));
-	auto observationDirections(output.getDescriptorViewByName("observationDirections"));
+	const auto observationDirections(output.getDescriptorViewByName("observationDirections"));
 	assert(normals.rows() == observationDirections.rows());
 	for (int i = 0; i < input.features.cols(); i++)
 	{
 		// Check normal orientation
-		Vector vecP = observationDirections.col(i);
-		Vector vecN = normals.col(i);
+		const Vector vecP = observationDirections.col(i);
+		const Vector vecN = normals.col(i);
 		const double scalar = vecP.dot(vecN);
 
 		// Swap normal
