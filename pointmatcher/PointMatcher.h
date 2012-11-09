@@ -66,123 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	\brief public interface
 */
 
-/*!
-\mainpage libpointmatcher
-
-from http://github.com/ethz-asl/libpointmatcher by François Pomerleau and Stéphane Magnenat (http://stephane.magnenat.net), ASL-ETHZ, Switzerland (http://www.asl.ethz.ch)
-
-libpointmatcher is a modular ICP library, useful for robotics and computer vision. This help assumes that libpointmatcher is already installed, if not, please read the \c README.md file at the top-level of the source tree.
-
-\section Test
-
-To test, you can use the \c pmicp command provided in the \c example directory, or installed system-wide with the \c -bin deb package.
-
-In 2D:
-\code
-pmicp ${SRC_DIR}/examples/data/2D_oneBox.csv ${SRC_DIR}/examples/data/data/2D_twoBoxes.csv
-\endcode
-In 3D:
-\code
-pmicp ${SRC_DIR}/examples/data/car_cloud401.csv ${SRC_DIR}/examples/data/car_cloud400.csv
-\endcode
-Use \ref Paraview to view the results. On \ref Ubuntu, you can install Paraview with:
-\code
-sudo apt-get install paraview
-\endcode
-
-You can list the available modules with:
-\code
-pmicp -l
-\endcode
-
-If you have compiled libpointmatcher with \ref yaml-cpp enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the \c pmicp command using the \c --config switch. An example file is available in \c examples/data/default.yaml.
-
-\section DevelopingUsing Developing using libpointmatcher
-
-If you wish to develop using libpointmatcher, you can start by looking at the sources of icp_simple and pmicp (in \c example/icp_simple.cpp and \c example/icp.cpp). You can see how loading/saving of data files work by looking at convert (\c example/convert.cpp). If you want to see how libpointmatcher can align a sequence of clouds, you can have a look at align_sequence (\c example/align_sequence.cpp).
-
-\section DevelopingSelf Extending libpointmatcher
-
-You can also extend libpointmatcher relatively easily, by adding new modules. The file PointMatcher.h is the most important file, it defines the interfaces for all module types, as well as the ICP algorithms. Each interface is an inner class of the PointMatcher class, which is templatized on the scalar type. Instanciation is forced in \c Registry.cpp for float and double scalar types. There are different types of modules corresponding to the different bricks of the ICP algorithm. The modules themselves are defined in their own files, for instance data-point filters live in the \c DataPointFiltersImpl.h/\c .cpp files. You can read a description of the ICP chain architecture in our \ref icppaper "IROS paper". Then, start from the documentation of PointMatcher to see the different interfaces, and then read the source code of the existing modules for the interface you are interested in, to get an idea of what you have to implement.
-
-All modules have a common way to get parameters at initialization, and feature a self-documentation mechanism. This allows to configure the ICP chain from external descriptions such as \ref yaml-cpp "yaml files".
-
-\subsection CreatingNewDataPointFilter Example: creating a new module of type DataPointsFilter
-
-You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "DataPointsFilter": \c DataPointsFiltersImpl.h, \c DataPointsFiltersImpl.cpp and \c Registry.cpp. The easiest way is to start by copying and renaming \c IdentityDataPointsFilter, and then to modify it.
-
-- In \c DataPointsFiltersImpl.h, copy the declaration of the struct \c IdentityDataPointsFilter at the end of the file.
-- Rename the pasted structure with the new filter name.
-- Fill the \c description() function with a short explanation of the filter's action.
-- If you need parameters for the filter:
-	- Uncomment the \c availableParameters() function and fill the description, default, min, max values as string.
-	- The types of the parameters are used to properly cast the string value and can be:  \c &P::Comp<T>, \c &P::Comp<int>, \c &P::Comp<unsigned>, etc. See \c DataPointsFiltersImpl.h for examples.
-	- Uncomment and rename the constructor.
-
-- In \c DataPointsFiltersImpl.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the explicit instantiation (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct 
-\c DataPointsFiltersImpl<double>::YourFilter;).
-- Add the constructor if needed.
-- At this stage, you should let the implementation of the filter function to hold only the statement that returns the input.
-
-- In \c Registry.cpp, search for \c "ADD_TO_REGISTRAR(DataPointsFilter,".
-- You should see all available \c DataPointsFilter there. At the end of that block, add your filter.
-
-- Compile.
-
-- Test if your new module is available with the \c pmicp \c -l command, which lists the documentation of all modules. You should be able to find yours in the output.
-
-- Go back to \c DataPointsFiltersImpl.cpp and code the \c filter() function.
-
-\subsection CodingStyle Coding Style
-
-One shall:
-- indent with tabs,
-- put {} on single lines (\ref Allman_style "Allman coding style"),
-- use \ref CamelCase "camel case" with classes beginning with Capitals and members with a small letter.
-
-For documentation, one shall document classes and data members inside the header file and methods at the implementation location.
-One exception is purely-virtual methods, which must be documented in the header file.
-
-\section BugReporting Bug reporting
-
-Please use <a href="http://github.com/ethz-asl/libpointmatcher/issues">github's issue tracker</a> to report bugs.
-
-\section Citing
-
-If you use libpointmatcher in an academic context, please cite the following publication:
-\code
-@INPROCEEDINGS{pomerleau11tracking,
-	author = {François Pomerleau and Stéphane Magnenat and Francis Colas and Ming Liu and Roland Siegwart},
-	title = {Tracking a Depth Camera: Parameter Exploration for Fast ICP},
-	booktitle = {Proc. of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-	publisher = {IEEE Press},
-	pages = {3824--3829},
-	year = {2011}
-}
-\endcode
-
-\section License
-
-libpointmatcher is released under a permissive BSD license.
-
-\section References
-
-- \anchor icppaper IROS paper: http://publications.asl.ethz.ch/files/pomerleau11tracking.pdf
-- \anchor Eigen Eigen: http://eigen.tuxfamily.org
-- \anchor libnabo libnabo: http://github.com/ethz-asl/libnabo
-- \anchor yaml-cpp yaml-cpp: http://code.google.com/p/yaml-cpp/
-- \anchor CMake CMake: http://www.cmake.org
-- \anchor Boost Boost: http://www.boost.org
-- \anchor Ubuntu Ubuntu: http://www.ubuntu.com
-- \anchor CMake CMake: http://www.cmake.org
-- \anchor CMakeDoc CMake documentation: http://www.cmake.org/cmake/help/cmake2.6docs.html
-- \anchor git git: http://git-scm.com
-- \anchor ROS ROS: http://www.ros.org/
-- \anchor Paraview Paraview: http://www.paraview.org/
-- \anchor Allman_style Allman coding style: http://en.wikipedia.org/wiki/Indent_style#Allman_style
-- \anchor CamelCase Camel case style: http://en.wikipedia.org/wiki/CamelCase
-
-*/
 
 //! version of the Pointmatcher library as string
 #define POINTMATCHER_VERSION "1.0.0"
@@ -268,7 +151,10 @@ struct PointMatcher
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	
-	//! The parameters of a transformation; a dense matrix over ScalarType
+	//! A matrix holding the parameters a transformation.
+	/**
+		The transformation lies in the special Euclidean group of dimension \f$n\f$, \f$SE(n)\f$, implemented as a dense matrix of size \f$n+1 \times n+1\f$ over ScalarType.
+	*/
 	typedef Matrix TransformationParameters;
 	
 	// alias for scope reasons
@@ -283,6 +169,17 @@ struct PointMatcher
 	// ---------------------------------
 	
 	//! A point cloud
+	/**
+		For every point, it has features and, optionally, descriptors.
+		Features are typically the coordinates of the point in the space.
+		Descriptors contain information attached to the point, such as its color, its normal vector, etc.
+		In both features and descriptors, every point can have multiple channels.
+		Every channel has a dimension and a name.
+		For instance, a typical 3D cloud might have the channels \c x, \c y, \c z, \c w of dimension 1 as features (using homogeneous coordinates), and the channel \c normal of size 3 as descriptor.
+		There are no sub-channels, such as \c normal.x, for the sake of simplicity.
+		Moreover, the position of the points is in homogeneous coordinates because they need both translation and rotation, while the normals need only rotation.
+		All channels contain scalar values of type ScalarType.
+	*/
 	struct DataPoints
 	{
 		//! A view on a feature or descriptor
@@ -371,7 +268,11 @@ struct PointMatcher
 	// intermediate types
 	// ---------------------------------
 	
-	//! Result of Matcher::findClosests
+	//! Result of the data-association step (Matcher::findClosests), before outlier rejection.
+	/**
+		This class holds a list of associated reference identifiers, along with the corresponding \e squared distance, for all points in the reading.
+		A single point in the reading can have one or multiple matches.
+	*/
 	struct Matches
 	{
 		typedef Matrix Dists; //!< Squared distances to closest points, dense matrix of ScalarType
@@ -387,21 +288,24 @@ struct PointMatcher
 		T getDistsQuantile(const T quantile) const;
 	};
 
-	//! Weights resulting from the application of OutlierFilter or DescriptorOutlierFilter; a dense matrix over ScalarType
+	//! Weights of the associations between the points in Matches and the points in the reference.
+	/**
+		A weight of 0 means no association, while a weight of 1 means a complete trust in association.
+	*/
 	typedef Matrix OutlierWeights;
 	
 	// ---------------------------------
 	// types of processing bricks
 	// ---------------------------------
 	
-	//! A function that transforms points and their descriptor given parameters
+	//! A function that transforms points and their descriptors given a transformation matrix
 	struct Transformation: public Parametrizable
 	{
 		Transformation();
 		Transformation(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~Transformation();
 		
-		//! Transform input using parameters
+		//! Transform input using the transformation matrix
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0; 
 	};
 	
@@ -418,6 +322,9 @@ struct PointMatcher
 	// ---------------------------------
 	
 	//! A data filter takes a point cloud as input, transforms it, and produces another point cloud as output.
+	/**
+		The filter might add information, for instance surface normals, or might change the number of points, for instance by randomly removing some of them.
+	*/
 	struct DataPointsFilter: public Parametrizable
 	{
 		DataPointsFilter();
@@ -444,7 +351,10 @@ struct PointMatcher
 	
 	// ---------------------------------
 	
-	//! A matcher links points in the reading to points in the reference
+	//! A matcher links points in the reading to points in the reference.
+	/**
+		This typically uses a space-partitioning structure such as a kd-tree for performance optimization.
+	*/
 	struct Matcher: public Parametrizable
 	{
 		unsigned long visitCounter; //!< number of points visited
@@ -466,7 +376,11 @@ struct PointMatcher
 	
 	// ---------------------------------
 	
-	//! An outlier filter removes links between points in reading and their matched points in reference, depending on some criteria. Points with no link will be ignored in the subsequent minimization step.
+	//! An outlier filter removes or weights links between points in reading and their matched points in reference, depending on some criteria.
+	/**
+		Criteria can be a fixed maximum authorized distance, a factor of the median distance, etc. 
+		Points with zero weights are ignored in the subsequent minimization step.
+	*/
 	struct OutlierFilter: public Parametrizable
 	{
 		OutlierFilter();
@@ -479,7 +393,7 @@ struct PointMatcher
 	};
 	
 	
-	//! A chain of outlier filters
+	//! A chain of OutlierFilter
 	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<OutlierFilter>
 	{
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
@@ -493,6 +407,9 @@ struct PointMatcher
 	// ---------------------------------
 	
 	//! An error minimizer will compute a transformation matrix such as to minimize the error between the reading and the reference. 
+	/**
+		Typical error minimized are point-to-point and point-to-plane.
+	*/
 	struct ErrorMinimizer: public Parametrizable
 	{
 		//! A structure holding data ready for minimization. The data are "normalized", for instance there are no points with 0 weight, etc.
@@ -513,7 +430,7 @@ struct PointMatcher
 		T getWeightedPointUsedRatio() const;
 		virtual T getOverlap() const;
 		
-		//! Find the parameters that minimize the error
+		//! Find the transformation that minimizes the error
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
 		
 		
@@ -533,6 +450,10 @@ struct PointMatcher
 	// ---------------------------------
 	
 	//! A transformation checker can stop the iteration depending on some conditions.
+	/**
+		For example, a condition can be the number of times the loop was executed, or it can be related to the matching error.
+		Because the modules can be chained, we defined that the relation between modules must agree through an OR-condition, while all AND-conditions are defined within a single module.
+	*/
 	struct TransformationChecker: public Parametrizable
 	{
 	protected:
