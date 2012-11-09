@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 typedef PointMatcher<float> PM;
+typedef PM::DataPoints DP;
 typedef PM::Parameters Parameters;
 typedef PointMatcherSupport::CurrentBibliography CurrentBibliography;
 
@@ -70,8 +71,8 @@ int main(int argc, const char *argv[])
 	const char *dataFile(argv[argc-1]);
 	
 	// Load point clouds
-	const PM::DataPoints ref(PM::loadAnyFormat(refFile));
-	const PM::DataPoints data(PM::loadAnyFormat(dataFile));
+	const DP ref(DP::load(refFile));
+	const DP data(DP::load(dataFile));
 
 	// Create the default ICP algorithm
 	PM::ICP icp;
@@ -97,13 +98,13 @@ int main(int argc, const char *argv[])
 	cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 
 	// Transform data to express it in ref
-	PM::DataPoints data_out(data);
+	DP data_out(data);
 	icp.transformations.apply(data_out, T);
 	
 	// Safe files to see the results
-	PM::saveVTK(ref, outputBaseFile + "_ref.vtk");
-	PM::saveVTK(data, outputBaseFile + "_data_in.vtk");
-	PM::saveVTK(data_out, outputBaseFile + "_data_out.vtk");
+	ref.save(outputBaseFile + "_ref.vtk");
+	data.save(outputBaseFile + "_data_in.vtk");
+	data_out.save(outputBaseFile + "_data_out.vtk");
 	cout << "Final transformation:" << endl << T << endl;
 
 	return 0;

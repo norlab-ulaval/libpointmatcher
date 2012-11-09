@@ -42,6 +42,7 @@ using namespace std;
 using namespace PointMatcherSupport;
 
 typedef PointMatcher<float> PM;
+typedef PM::DataPoints DP;
 
 void usage(char *argv[])
 {
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
 	
 	setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 
-	PM::DataPoints d(PM::loadAnyFormat(argv[argc-2]));
+	DP d(DP::load(argv[argc-2]));
 	
 	if (argc == 4)
 	{
@@ -75,7 +76,7 @@ int main(int argc, char *argv[])
 		f.apply(d);
 	}
 	
-	PM::saveAnyFormat(d, argv[argc-1]);
+	d.save(argv[argc-1]);
 	
 	return 0;
 }

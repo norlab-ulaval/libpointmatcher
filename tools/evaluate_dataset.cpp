@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
+#include "pointmatcher/IO.h"
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -50,17 +51,18 @@ class EvaluateDataset
 {
 public:
 	typedef PointMatcher<float> PM;
+	typedef PointMatcherIO<float> PMIO;
 	typedef PM::TransformationParameters TP;
-	typedef PM::DataPoints DataPoints;
+	typedef PM::DataPoints DP;
 	
 	EvaluateDataset(const string& dataPath, const string& configPath, const string& evalFileName);
 	~EvaluateDataset();
 
 	void testAll();
 private:
-	void validateFileInfo(PM::FileInfo fileInfo);
+	void validateFileInfo(PMIO::FileInfo fileInfo);
 
-	PM::FileInfoVector list;
+	PMIO::FileInfoVector list;
 	std::fstream resultFile;
 };
 
@@ -87,8 +89,7 @@ EvaluateDataset::EvaluateDataset(const string& evalFileName, const string& dataP
 
 void EvaluateDataset::testAll()
 {
-	
-	PM::DataPoints refCloud, readCloud;
+	DP refCloud, readCloud;
 
 	// Ensure that all required columns are there
 	validateFileInfo(list[0]);
@@ -97,10 +98,9 @@ void EvaluateDataset::testAll()
 	for(unsigned i=0; i < list.size(); i++)
 	{
 		// Load point clouds
-		//TODO: handle vtk
-		readCloud = PM::loadCSV(list[i].readingFileName);
+		readCloud = DP::load(list[i].readingFileName);
 		cout << "Reading cloud " << list[i].readingFileName << " loaded" << endl;
-		refCloud = PM::loadCSV(list[i].referenceFileName);
+		refCloud = DP::load(list[i].referenceFileName);
 		cout << "Reference cloud " << list[i].referenceFileName << " loaded" << endl;
 	
 		// Build ICP based on config file
@@ -161,7 +161,7 @@ void EvaluateDataset::testAll()
 	}
 }
 
-void EvaluateDataset::validateFileInfo(PM::FileInfo fileInfo)
+void EvaluateDataset::validateFileInfo(PMIO::FileInfo fileInfo)
 {
 	if(fileInfo.initialTransformation.rows() == 0)
 	{

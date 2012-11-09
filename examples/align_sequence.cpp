@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
+#include "pointmatcher/IO.h"
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -56,8 +57,10 @@ int main(int argc, char *argv[])
 	validateArgs(argc, argv);
 
 	typedef PointMatcher<float> PM;
+	typedef PointMatcherIO<float> PMIO;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DP;
+	
 	const int maxMapPointCount = 200000;
 
 	string outputFileName(argv[0]);
@@ -70,7 +73,7 @@ int main(int argc, char *argv[])
 	validateFile(argv[1]);
 	icp.loadFromYaml(ifs);
 
-	PM::FileInfoVector list(argv[2]);
+	PMIO::FileInfoVector list(argv[2]);
 
 	PM::DataPoints mapPointCloud, newCloud;
 	TP tp;
@@ -78,7 +81,7 @@ int main(int argc, char *argv[])
 	for(unsigned i=0; i < list.size(); i++)
 	{
 		cout << "---------------------\nLoading: " << list[i].readingFileName << endl; 
-		newCloud = PM::loadAnyFormat(list[i].readingFileName);
+		newCloud = DP::load(list[i].readingFileName);
 		
 		if(mapPointCloud.features.rows() == 0)
 		{
@@ -138,7 +141,7 @@ int main(int argc, char *argv[])
 			outputFileNameIter << outputFileName << "_" << i;
 			
 			cout << "outputFileName: " << outputFileNameIter.str() << endl;
-			PM::saveVTK(mapPointCloud, outputFileNameIter.str());
+			mapPointCloud.save(outputFileNameIter.str());
 		}
 	}
 

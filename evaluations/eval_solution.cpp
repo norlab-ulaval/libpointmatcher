@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
+#include "pointmatcher/IO.h"
 #include "pointmatcher/Timer.h"
 #include <cassert>
 #include <iostream>
@@ -57,6 +58,7 @@ namespace fs = boost::filesystem;
 namespace pt = boost::posix_time;
 
 typedef PointMatcher<float> PM;
+typedef PointMatcherIO<float> PMIO;
 typedef PM::TransformationParameters TP;
 
 struct DataSetInfo
@@ -118,7 +120,7 @@ public:
 	int coreId;
 	string tmp_file_name;
 	double result_time;
-	void evaluateSolution(const string &tmp_file_name, const string &yaml_config, const int &coreId, PM::FileInfoVector::const_iterator it_eval, PM::FileInfoVector::const_iterator it_end);
+	void evaluateSolution(const string &tmp_file_name, const string &yaml_config, const int &coreId, PMIO::FileInfoVector::const_iterator it_eval, PMIO::FileInfoVector::const_iterator it_end);
 	
 };
 
@@ -129,7 +131,7 @@ void setConfig(Config& config);
 void saveConfig(Config& config);
 void loadConfig(Config& config);
 void downloadDataSets(Config& config, po::variables_map &vm);
-void validateFileInfo(const PM::FileInfo &fileInfo);
+void validateFileInfo(const PMIO::FileInfo &fileInfo);
 void displayLoadingBar(const int &coreId, const int &i, const int &total, const int &nbFailures, const double sec, const double total_time);
 
 int main(int argc, char *argv[])
@@ -223,7 +225,7 @@ int main(int argc, char *argv[])
 					 return 1;
 			}
 
-			const PM::FileInfoVector eval_list(protocol_name, data_directory, "");
+			const PMIO::FileInfoVector eval_list(protocol_name, data_directory, "");
 
 			// Ensure that all required columns are there
 			validateFileInfo(eval_list[0]);
@@ -245,7 +247,7 @@ int main(int argc, char *argv[])
 			std::vector<EvaluationModule> v_evalModules;
 			
 			const int nbPerThread = eval_list.size()/nbCore;
-			PM::FileInfoVector::const_iterator it_start = eval_list.begin();
+			PMIO::FileInfoVector::const_iterator it_start = eval_list.begin();
 			for (int j=0; j<nbCore; ++j)
 			{
 				v_evalModules.push_back(EvaluationModule());
@@ -531,7 +533,7 @@ void downloadDataSets(Config& config, po::variables_map &vm)
 	}
 }
 
-void validateFileInfo(const PM::FileInfo &fileInfo)
+void validateFileInfo(const PMIO::FileInfo &fileInfo)
 {
 	if(fileInfo.initialTransformation.rows() == 0)
 	{
@@ -588,7 +590,7 @@ EvaluationModule::EvaluationModule():
 {
 }
 
-void EvaluationModule::evaluateSolution(const string &tmp_file_name, const string &yaml_config, const int &coreId, PM::FileInfoVector::const_iterator it_eval, PM::FileInfoVector::const_iterator it_end)
+void EvaluationModule::evaluateSolution(const string &tmp_file_name, const string &yaml_config, const int &coreId, PMIO::FileInfoVector::const_iterator it_eval, PMIO::FileInfoVector::const_iterator it_end)
 {
 	PM::DataPoints refCloud, readCloud;
 	string last_read_name = "";
@@ -611,13 +613,13 @@ void EvaluationModule::evaluateSolution(const string &tmp_file_name, const strin
 		// Load point clouds
 		if(last_read_name != it_eval->readingFileName)
 		{
-			readCloud = PM::loadCSV(it_eval->readingFileName);
+			readCloud = PM::DataPoints::load(it_eval->readingFileName);
 			last_read_name = it_eval->readingFileName;
 		}
 
 		if(last_ref_name != it_eval->referenceFileName)
 		{
-			refCloud = PM::loadCSV(it_eval->referenceFileName);
+			refCloud = PM::DataPoints::load(it_eval->referenceFileName);
 			last_ref_name = it_eval->referenceFileName;
 		}
 

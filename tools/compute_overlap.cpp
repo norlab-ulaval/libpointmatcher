@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
+#include "pointmatcher/IO.h"
 #include <cassert>
 #include <iostream>
 #include <iomanip>
@@ -58,13 +59,14 @@ int main(int argc, char *argv[])
 	validateArgs(argc, argv);
 
 	typedef PointMatcher<float> PM;
+	typedef PointMatcherIO<float> PMIO;
 	typedef PM::Matrix Matrix;
 	typedef PM::TransformationParameters TP;
-	typedef PM::DataPoints DataPoints;
+	typedef PM::DataPoints DP;
 	typedef PM::Matches Matches;
 
 	// Process arguments
-	PM::FileInfoVector list(argv[1]);
+	PMIO::FileInfoVector list(argv[1]);
 	bool debugMode = false;
 	if (argc == 4)
 		debugMode = true;
@@ -83,9 +85,9 @@ int main(int argc, char *argv[])
 	transformations.push_back(transformPoints);
 	transformations.push_back(transformNormals);
 
-	PM::DataPoints reading, reference;
+	DP reading, reference;
 	TP Tread = TP::Identity(4,4);
-	PM::DataPoints mapCloud;
+	DP mapCloud;
 	TP Tref = TP::Identity(4,4);
 
 	//TODO: loop through all point clouds
@@ -116,8 +118,8 @@ int main(int argc, char *argv[])
 		for(unsigned j = startingJ; j < listSizeJ; j++)
 		{
 			// Load point clouds
-			reading = PM::loadAnyFormat(list[i].readingFileName);
-			reference = PM::loadAnyFormat(list[j].readingFileName);
+			reading = DP::load(list[i].readingFileName);
+			reference = DP::load(list[j].readingFileName);
 
 			cout << "Point cloud loaded" << endl;
 
@@ -177,8 +179,8 @@ int main(int argc, char *argv[])
 			reference.addDescriptor("inliers", inliersRef);
 
 			//TODO: reverse self and target
-			PM::DataPoints self = reading;
-			PM::DataPoints target = reference;
+			DP self = reading;
+			DP target = reference;
 
 			for(int l = 0; l < 2; l++)
 			{
@@ -226,10 +228,7 @@ int main(int argc, char *argv[])
 				}
 				
 				// Swap point clouds
-				DataPoints tmp = self;
-				self = target;
-				target = tmp;
-
+				PM::swapDataPoints(self, target);
 			}
 			
 			const auto finalInlierSelf(self.getDescriptorViewByName("inliers"));
@@ -242,8 +241,8 @@ int main(int argc, char *argv[])
 			
 			if(debugMode)
 			{
-				PM::saveVTK(self, "scan_i.vtk");
-				PM::saveVTK(target, "scan_j.vtk");
+				self.save("scan_i.vtk");
+				target.save("scan_j.vtk");
 			}
 			else
 			{

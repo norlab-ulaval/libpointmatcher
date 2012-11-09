@@ -548,7 +548,7 @@ void InspectorsImpl<T>::VTKFileInspector::init()
 
 	this->streamIter = new ofstream(oss.str().c_str());
 	if (this->streamIter->fail())
-		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if repository exist.");
+		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	
 }
 
@@ -573,7 +573,7 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 
 	ofstream* file = new ofstream(oss.str().c_str());
 	if (file->fail())
-		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if repository exist.");
+		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	return file;
 }
 
@@ -584,7 +584,7 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 	oss << baseFileName << "-" << role << "-" << iterationNumber << ".vtk";
 	ofstream* file = new ofstream(oss.str().c_str());
 	if (file->fail())
-		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if repository exist.");
+		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	return file;
 }
 

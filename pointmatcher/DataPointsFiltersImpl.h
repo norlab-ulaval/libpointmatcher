@@ -215,7 +215,6 @@ struct DataPointsFiltersImpl
 	};
 
 	//! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
-	//FIXME: the name of the normals field is "triangle_normals"
 	struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()

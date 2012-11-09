@@ -185,9 +185,9 @@ libpointmatcher is released under a permissive BSD license.
 */
 
 //! version of the Pointmatcher library as string
-#define POINTMATCHER_VERSION "0.9.0"
+#define POINTMATCHER_VERSION "1.0.0"
 //! version of the Pointmatcher library as an int
-#define POINTMATCHER_VERSION_INT 900
+#define POINTMATCHER_VERSION_INT 10000
 
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
@@ -321,6 +321,9 @@ struct PointMatcher
 		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
 		bool operator ==(const DataPoints& that) const;
 		
+		void save(const std::string& fileName) const;
+		static DataPoints load(const std::string& fileName);
+		
 		void concatenate(const DataPoints& dp);
 		
 		void allocateFeature(const std::string& name, const unsigned dim);
@@ -363,55 +366,6 @@ struct PointMatcher
 	};
 	
 	static void swapDataPoints(DataPoints& a, DataPoints& b);
-	
-	// ---------------------------------
-	// IO functions
-	// ---------------------------------
-
-	// Generic load and save
-	
-	static DataPoints loadAnyFormat(const std::string& fileName);
-	static void saveAnyFormat(const DataPoints& data, const std::string& fileName);
-	
-	// CSV
-	
-	static DataPoints loadCSV(const std::string& fileName);
-	static DataPoints loadCSV(std::istream& is);
-
-	static void saveCSV(const DataPoints& data, const std::string& fileName);
-	static void saveCSV(const DataPoints& data, std::ostream& os);
-
-	// VTK
-	
-	static DataPoints loadVTK(const std::string& fileName);
-	static DataPoints loadVTK(std::istream& is);
-
-	static void saveVTK(const DataPoints& data, const std::string& fileName);
-	
-	// FIXME: The FileInfo and FileInfoVector structs should go somewhere else than this main file
-	//! Information required to exploit a reading from a file using this library. Fields might be left blank if unused.
-	struct FileInfo 
-	{
-		std::string readingFileName; //!< file name of the reading point cloud
-		std::string referenceFileName; //!< file name of the reference point cloud
-		std::string configFileName; //!< file name of the yaml configuration
-		TransformationParameters initialTransformation; //!< matrix of initial estimate transform
-		TransformationParameters groundTruthTransformation; //!< matrix of the ground-truth transform
-		Eigen::Matrix<T, 3, 1> gravity; //!< gravity vector
-
-		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& grativity=Eigen::Matrix<T,3,1>::Zero());
-	};
-
-	//! A vector of file info, to be used in batch
-	struct FileInfoVector: public std::vector<FileInfo>
-	{
-		FileInfoVector(const std::string& fileName, std::string dataPath = "", std::string configPath = "");
-	
-	protected:
-		std::string localToGlobalFileName(const std::string& path, const std::string& fileName);
-		bool findTransform(const PointMatcherSupport::CsvElements& data, const std::string& prefix, unsigned dim);
-		TransformationParameters getTransform(const PointMatcherSupport::CsvElements& data, const std::string& prefix, unsigned dim, unsigned line);
-	};
 
 	// ---------------------------------
 	// intermediate types

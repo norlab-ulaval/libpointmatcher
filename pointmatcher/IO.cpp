@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "PointMatcher.h"
+#include "IO.h"
 #include "InspectorsImpl.h"
 
 #include <iostream>
@@ -148,7 +148,7 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 
 //! Constructor, leave fields blank if unused
 template<typename T>
-PointMatcher<T>::FileInfo::FileInfo(const std::string& readingFileName, const std::string& referenceFileName, const std::string& configFileName, const TransformationParameters& initialTransformation, const TransformationParameters& groundTruthTransformation, const Vector& grativity):
+PointMatcherIO<T>::FileInfo::FileInfo(const std::string& readingFileName, const std::string& referenceFileName, const std::string& configFileName, const TransformationParameters& initialTransformation, const TransformationParameters& groundTruthTransformation, const Vector& grativity):
 	readingFileName(readingFileName),
 	referenceFileName(referenceFileName),
 	configFileName(configFileName),
@@ -157,8 +157,8 @@ PointMatcher<T>::FileInfo::FileInfo(const std::string& readingFileName, const st
 	gravity(gravity)
 {}
 
-template struct PointMatcher<float>::FileInfo;
-template struct PointMatcher<double>::FileInfo;
+template struct PointMatcherIO<float>::FileInfo;
+template struct PointMatcherIO<double>::FileInfo;
 
 //! Load a vector of FileInfo from a CSV file.
 /**
@@ -175,7 +175,7 @@ template struct PointMatcher<double>::FileInfo;
 	Note that the header must at least contain "reading".
 */
 template<typename T>
-PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName, std::string dataPath, std::string configPath)
+PointMatcherIO<T>::FileInfoVector::FileInfoVector(const std::string& fileName, std::string dataPath, std::string configPath)
 {
 	if (dataPath.empty())
 	{
@@ -275,7 +275,7 @@ PointMatcher<T>::FileInfoVector::FileInfoVector(const std::string& fileName, std
 
 //! Join parentPath and fileName and return the result as a global path
 template<typename T>
-std::string PointMatcher<T>::FileInfoVector::localToGlobalFileName(const std::string& parentPath, const std::string& fileName)
+std::string PointMatcherIO<T>::FileInfoVector::localToGlobalFileName(const std::string& parentPath, const std::string& fileName)
 {
 	std::string globalFileName(fileName);
 	if (!boost::filesystem::exists(globalFileName))
@@ -293,7 +293,7 @@ std::string PointMatcher<T>::FileInfoVector::localToGlobalFileName(const std::st
 
 //! Return whether there is a valid transformation named prefix in data
 template<typename T>
-bool PointMatcher<T>::FileInfoVector::findTransform(const CsvElements& data, const std::string& prefix, unsigned dim)
+bool PointMatcherIO<T>::FileInfoVector::findTransform(const CsvElements& data, const std::string& prefix, unsigned dim)
 {
 	bool found(true);
 	for(unsigned i=0; i<dim+1; i++)
@@ -310,7 +310,7 @@ bool PointMatcher<T>::FileInfoVector::findTransform(const CsvElements& data, con
 
 //! Return the transformation named prefix from data
 template<typename T>
-typename PointMatcher<T>::TransformationParameters PointMatcher<T>::FileInfoVector::getTransform(const CsvElements& data, const std::string& prefix, unsigned dim, unsigned line)
+typename PointMatcherIO<T>::TransformationParameters PointMatcherIO<T>::FileInfoVector::getTransform(const CsvElements& data, const std::string& prefix, unsigned dim, unsigned line)
 {
 	TransformationParameters transformation(TransformationParameters::Identity(dim+1, dim+1));
 	for(unsigned i=0; i<dim+1; i++)
@@ -327,8 +327,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::FileInfoVect
 	return transformation;
 }
 
-template struct PointMatcher<float>::FileInfoVector;
-template struct PointMatcher<double>::FileInfoVector;
+template struct PointMatcherIO<float>::FileInfoVector;
+template struct PointMatcherIO<double>::FileInfoVector;
 
 //! Throw a runtime_error exception if fileName cannot be opened
 void PointMatcherSupport::validateFile(const std::string& fileName)
@@ -347,22 +347,17 @@ void PointMatcherSupport::validateFile(const std::string& fileName)
 
 //! Load a point cloud from a file, determine format from extension
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::loadAnyFormat(const std::string& fileName)
+typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::load(const std::string& fileName)
 {
 	const boost::filesystem::path path(fileName);
 	const string& ext(boost::filesystem::extension(path));
 	if (boost::iequals(ext, ".vtk"))
-		return loadVTK(fileName);
+		return PointMatcherIO<T>::loadVTK(fileName);
 	else if (boost::iequals(ext, ".csv"))
-		return loadCSV(fileName);
+		return PointMatcherIO<T>::loadCSV(fileName);
 	else
 		throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
 }
-
-template
-PointMatcher<float>::DataPoints PointMatcher<float>::loadAnyFormat(const std::string& fileName);
-template
-PointMatcher<double>::DataPoints PointMatcher<double>::loadAnyFormat(const std::string& fileName);
 
 
 //! @brief Load comma separated values (csv) file
@@ -378,7 +373,7 @@ PointMatcher<double>::DataPoints PointMatcher<double>::loadAnyFormat(const std::
 //!
 //! @todo Add support to load descriptors (ex. color, ids, etc.)
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(const std::string& fileName)
+typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(const std::string& fileName)
 {
 	ifstream ifs(fileName.c_str());
 	
@@ -390,7 +385,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(const std::string&
 //! @brief Load comma separated values (csv) file
 //! @see loadCSV()
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(std::istream& is)
+typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is)
 {
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
@@ -574,32 +569,27 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadCSV(std::istream& is)
 }
 
 template
-PointMatcher<float>::DataPoints PointMatcher<float>::loadCSV(const std::string& fileName);
+PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadCSV(const std::string& fileName);
 template
-PointMatcher<double>::DataPoints PointMatcher<double>::loadCSV(const std::string& fileName);
+PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadCSV(const std::string& fileName);
 
 //! Save a point cloud to a file, determine format from extension
 template<typename T>
-void PointMatcher<T>::saveAnyFormat(const DataPoints& data, const std::string& fileName)
+void PointMatcher<T>::DataPoints::save(const std::string& fileName) const
 {
 	const boost::filesystem::path path(fileName);
 	const string& ext(boost::filesystem::extension(path));
 	if (boost::iequals(ext, ".vtk"))
-		return saveVTK(data, fileName);
+		return PointMatcherIO<T>::saveVTK(*this, fileName);
 	else if (boost::iequals(ext, ".csv"))
-		return saveCSV(data, fileName);
+		return PointMatcherIO<T>::saveCSV(*this, fileName);
 	else
 		throw runtime_error("saveAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
 }
 
-template
-void PointMatcher<float>::saveAnyFormat(const DataPoints& data, const std::string& fileName);
-template
-void PointMatcher<double>::saveAnyFormat(const DataPoints& data, const std::string& fileName);
-
 //! Save point cloud to a file as CSV
 template<typename T>
-void PointMatcher<T>::saveCSV(const DataPoints& data, const std::string& fileName)
+void PointMatcherIO<T>::saveCSV(const DataPoints& data, const std::string& fileName)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
@@ -609,7 +599,7 @@ void PointMatcher<T>::saveCSV(const DataPoints& data, const std::string& fileNam
 
 //! Save point cloud to a stream as CSV
 template<typename T>
-void PointMatcher<T>::saveCSV(const DataPoints& data, std::ostream& os)
+void PointMatcherIO<T>::saveCSV(const DataPoints& data, std::ostream& os)
 {
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
@@ -635,13 +625,13 @@ void PointMatcher<T>::saveCSV(const DataPoints& data, std::ostream& os)
 }
 
 template
-void PointMatcher<float>::saveCSV(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::saveCSV(const DataPoints& data, const std::string& fileName);
 template
-void PointMatcher<double>::saveCSV(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<double>::saveCSV(const DataPoints& data, const std::string& fileName);
 
 //! Load point cloud from a file as VTK
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(const std::string& fileName)
+typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(const std::string& fileName)
 {
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
@@ -651,7 +641,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(const std::string&
 
 //! Load point cloud from a stream as VTK
 template<typename T>
-typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
+typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is)
 {
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
@@ -730,20 +720,19 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::loadVTK(std::istream& is)
 		loadedPoints = DataPoints(features, featureLabels);
 	}
 	
-	
 	return loadedPoints;
 }
 
 template
-PointMatcher<float>::DataPoints PointMatcher<float>::loadVTK(const std::string& fileName);
+PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadVTK(const std::string& fileName);
 template
-PointMatcher<double>::DataPoints PointMatcher<double>::loadVTK(const std::string& fileName);
+PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadVTK(const std::string& fileName);
 
 //! Save point cloud to a file as VTK
 template<typename T>
-void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileName)
+void PointMatcherIO<T>::saveVTK(const DataPoints& data, const std::string& fileName)
 {
-	Parameters param({{"baseFileName", ""}});
+	Parametrizable::Parameters param({{"baseFileName", ""}});
 	typedef typename InspectorsImpl<T>::VTKFileInspector VTKInspector;
 	VTKInspector vtkInspector(param);
 	vtkInspector.dumpDataPoints(data, fileName);
@@ -751,7 +740,10 @@ void PointMatcher<T>::saveVTK(const DataPoints& data, const std::string& fileNam
 
 
 template
-void PointMatcher<float>::saveVTK(const PointMatcher<float>::DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName);
 template
-void PointMatcher<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+
+template struct PointMatcher<float>;
+template struct PointMatcher<double>;
 

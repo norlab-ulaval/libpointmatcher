@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
+#include "pointmatcher/IO.h"
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -58,11 +59,12 @@ int main(int argc, char *argv[])
 	validateArgs(argc, argv);
 
 	typedef PointMatcher<float> PM;
+	typedef PointMatcherIO<float> PMIO;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DP;
 
 	// Process arguments
-	PM::FileInfoVector list(argv[1]);
+	PMIO::FileInfoVector list(argv[1]);
 	const unsigned totalPointCount = boost::lexical_cast<unsigned>(argv[2]);	
 	string outputFileName(argv[3]);
 	
@@ -133,7 +135,7 @@ int main(int argc, char *argv[])
 
 	for(unsigned i=0; i < list.size(); i++)
 	{
-		newCloud = PM::loadAnyFormat(list[i].readingFileName);
+		newCloud = DP::load(list[i].readingFileName);
 
 		cout << "Point cloud loaded" << endl;
 	
@@ -170,8 +172,6 @@ int main(int argc, char *argv[])
 		{
 			mapCloud.concatenate(newCloud);
 			
-			
-
 			// Control point cloud size
 			double probToKeep = totalPointCount/(double)mapCloud.features.cols();
 			if(probToKeep < 1)
@@ -195,10 +195,10 @@ int main(int argc, char *argv[])
 		}
 
 		stringstream outputFileNameIter;
-		outputFileNameIter << boost::filesystem::path(outputFileName).stem() << "_" << i;
+		outputFileNameIter << boost::filesystem::path(outputFileName).stem() << "_" << i << ".vtk";
 		
 		cout << "Number of points: " << mapCloud.features.cols() << endl;
-		PM::saveVTK(mapCloud, outputFileNameIter.str());
+		mapCloud.save(outputFileNameIter.str());
 		cout << "OutputFileName: " << outputFileNameIter.str() << endl;
 	}
 	
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	mapCloud = densityFilter->filter(mapCloud);
 	
 	cout << "Number of points: " << mapCloud.features.cols() << endl;
-	PM::saveAnyFormat(mapCloud, outputFileName);
+	mapCloud.save(outputFileName);
 	cout << "OutputFileName: " << outputFileName << endl;
 
 	return 0;

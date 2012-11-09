@@ -40,7 +40,7 @@ using namespace std;
 using namespace PointMatcherSupport;
 
 typedef PointMatcherSupport::Parametrizable::ParametersDoc ParametersDoc;
-typedef PointMatcher<double> PM;
+typedef PointMatcher<float> PM;
 
 void printBibliographyHeader(const CurrentBibliography::Mode mode)
 {

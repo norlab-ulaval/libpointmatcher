@@ -42,12 +42,14 @@ using namespace PointMatcherSupport;
 
 // TODO: avoid global by using testing::Environment
 typedef PointMatcher<float> PM;
+typedef PM::DataPoints DP;
+
 std::string dataPath;
 
-PM::DataPoints ref2D;
-PM::DataPoints data2D;
-PM::DataPoints ref3D;
-PM::DataPoints data3D;
+DP ref2D;
+DP data2D;
+DP ref3D;
+DP data3D;
 PM::TransformationParameters validT2d;
 PM::TransformationParameters validT3d;
 
@@ -57,7 +59,7 @@ PM::TransformationParameters validT3d;
 
 TEST(PointCloudTest, CopyConstructor2D)
 {
-	const PM::DataPoints ref2DCopy(ref2D);
+	const DP ref2DCopy(ref2D);
 	EXPECT_TRUE(ref2DCopy.features == ref2D.features);
 	EXPECT_TRUE(ref2DCopy.featureLabels == ref2D.featureLabels);
 	EXPECT_TRUE(ref2DCopy.descriptors == ref2D.descriptors);
@@ -67,7 +69,7 @@ TEST(PointCloudTest, CopyConstructor2D)
 
 TEST(PointCloudTest, CopyConstructor3D)
 {
-	const PM::DataPoints ref3DCopy(ref3D);
+	const DP ref3DCopy(ref3D);
 	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
 	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
 	EXPECT_TRUE(ref3DCopy.descriptors == ref3D.descriptors);
@@ -77,7 +79,7 @@ TEST(PointCloudTest, CopyConstructor3D)
 
 TEST(PointCloudTest, FeatureConstructor2D)
 {
-	const PM::DataPoints ref2DCopy(ref2D.features, ref2D.featureLabels);
+	const DP ref2DCopy(ref2D.features, ref2D.featureLabels);
 	EXPECT_TRUE(ref2DCopy.features == ref2D.features);
 	EXPECT_TRUE(ref2DCopy.featureLabels == ref2D.featureLabels);
 	EXPECT_TRUE(ref2DCopy == ref2D);
@@ -87,7 +89,7 @@ TEST(PointCloudTest, FeatureConstructor2D)
 
 TEST(PointCloudTest, FeatureConstructor3D)
 {
-	const PM::DataPoints ref3DCopy(ref3D.features, ref3D.featureLabels);
+	const DP ref3DCopy(ref3D.features, ref3D.featureLabels);
 	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
 	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
 	EXPECT_TRUE(ref3DCopy == ref3D);
@@ -99,11 +101,11 @@ TEST(PointCloudTest, ConcatenateFeatures2D)
 {
 	const int leftPoints(ref2D.features.cols() / 2);
 	const int rightPoints(ref2D.features.cols() - leftPoints);
-	PM::DataPoints lefts(
+	DP lefts(
 		ref2D.features.leftCols(leftPoints),
 		ref2D.featureLabels
 	);
-	PM::DataPoints rights(
+	DP rights(
 		ref2D.features.rightCols(rightPoints),
 		ref2D.featureLabels
 	);
@@ -115,11 +117,11 @@ TEST(PointCloudTest, ConcatenateFeatures3D)
 {
 	const int leftPoints(ref3D.features.cols() / 2);
 	const int rightPoints(ref3D.features.cols() - leftPoints);
-	PM::DataPoints lefts(
+	DP lefts(
 		ref3D.features.leftCols(leftPoints),
 		ref3D.featureLabels
 	);
-	PM::DataPoints rights(
+	DP rights(
 		ref3D.features.rightCols(rightPoints),
 		ref3D.featureLabels
 	);
@@ -129,18 +131,18 @@ TEST(PointCloudTest, ConcatenateFeatures3D)
 
 TEST(PointCloudTest, ConcatenateDescSame)
 {
-	typedef PM::DataPoints::Label Label;
-	typedef PM::DataPoints::Labels Labels;
+	typedef DP::Label Label;
+	typedef DP::Labels Labels;
 	
 	const int leftPoints(ref2D.features.cols() / 2);
 	const int rightPoints(ref2D.features.cols() - leftPoints);
-	PM::DataPoints lefts(
+	DP lefts(
 		ref2D.features.leftCols(leftPoints),
 		ref2D.featureLabels,
 		PM::Matrix::Random(5, leftPoints),
 		Labels(Label("Desc5D", 5))
 	);
-	PM::DataPoints rights(
+	DP rights(
 		ref2D.features.rightCols(rightPoints),
 		ref2D.featureLabels,
 		PM::Matrix::Random(5, rightPoints),
@@ -153,22 +155,22 @@ TEST(PointCloudTest, ConcatenateDescSame)
 
 TEST(PointCloudTest, ConcatenateDescSame2)
 {
-	typedef PM::DataPoints::Label Label;
-	typedef PM::DataPoints::Labels Labels;
+	typedef DP::Label Label;
+	typedef DP::Labels Labels;
 	
-	PM::DataPoints ref3DCopy(ref3D.features, ref3D.featureLabels);
+	DP ref3DCopy(ref3D.features, ref3D.featureLabels);
 	ref3DCopy.descriptorLabels.push_back(Label("Desc5D", 5));
 	ref3DCopy.descriptors = PM::Matrix::Random(5, ref3DCopy.features.cols());
 	
 	const int leftPoints(ref3DCopy.features.cols() / 2);
 	const int rightPoints(ref3DCopy.features.cols() - leftPoints);
-	PM::DataPoints lefts(
+	DP lefts(
 		ref3DCopy.features.leftCols(leftPoints),
 		ref3DCopy.featureLabels,
 		ref3DCopy.descriptors.leftCols(leftPoints),
 		ref3DCopy.descriptorLabels
 	);
-	PM::DataPoints rights(
+	DP rights(
 		ref3DCopy.features.rightCols(rightPoints),
 		ref3DCopy.featureLabels,
 		ref3DCopy.descriptors.rightCols(rightPoints),
@@ -180,18 +182,18 @@ TEST(PointCloudTest, ConcatenateDescSame2)
 
 TEST(PointCloudTest, ConcatenateDescDiffName)
 {
-	typedef PM::DataPoints::Label Label;
-	typedef PM::DataPoints::Labels Labels;
+	typedef DP::Label Label;
+	typedef DP::Labels Labels;
 	
 	const int leftPoints(ref2D.features.cols() / 2);
 	const int rightPoints(ref2D.features.cols() - leftPoints);
-	PM::DataPoints lefts(
+	DP lefts(
 		ref2D.features.leftCols(leftPoints),
 		ref2D.featureLabels,
 		PM::Matrix::Random(5, leftPoints),
 		Labels(Label("MyDesc5D", 5))
 	);
-	PM::DataPoints rights(
+	DP rights(
 		ref2D.features.rightCols(rightPoints),
 		ref2D.featureLabels,
 		PM::Matrix::Random(5, rightPoints),
@@ -204,24 +206,24 @@ TEST(PointCloudTest, ConcatenateDescDiffName)
 
 TEST(PointCloudTest, ConcatenateDescDiffSize)
 {
-	typedef PM::DataPoints::Label Label;
-	typedef PM::DataPoints::Labels Labels;
+	typedef DP::Label Label;
+	typedef DP::Labels Labels;
 	
 	const int leftPoints(ref2D.features.cols() / 2);
 	const int rightPoints(ref2D.features.cols() - leftPoints);
-	PM::DataPoints lefts(
+	DP lefts(
 		ref2D.features.leftCols(leftPoints),
 		ref2D.featureLabels,
 		PM::Matrix::Random(3, leftPoints),
 		Labels(Label("DescND", 3))
 	);
-	PM::DataPoints rights(
+	DP rights(
 		ref2D.features.rightCols(rightPoints),
 		ref2D.featureLabels,
 		PM::Matrix::Random(5, rightPoints),
 		Labels(Label("DescND", 5))
 	);
-	EXPECT_THROW(lefts.concatenate(rights), PM::DataPoints::InvalidField);
+	EXPECT_THROW(lefts.concatenate(rights), DP::InvalidField);
 }
 
 //---------------------------
@@ -374,7 +376,7 @@ TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 	
 	// Filter on z axis (not existing)
@@ -388,7 +390,7 @@ TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 	params["dim"] = "-1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 	
 	// Parameter outside valid range
@@ -408,14 +410,14 @@ TEST_F(DataFilterTest, MinDistDataPointsFilter)
 	params["dim"] = "0";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 	
 	// Filter on y axis
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 	
 	//TODO: move that to specific 2D test
@@ -430,7 +432,7 @@ TEST_F(DataFilterTest, MinDistDataPointsFilter)
 	params["dim"] = "-1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 		
 }
@@ -445,14 +447,14 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 	params["dim"] = "0";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 	
 	// Filter on y axis
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 	
 	// Filter on z axis (not existing)
@@ -520,7 +522,7 @@ TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 		});
 	
 	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 
 }
@@ -535,9 +537,8 @@ TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 	addFilter("ObservationDirectionDataPointsFilter");
 	params = PM::Parameters({{"towardCenter", toParam(false)}});
 	addFilter("OrientNormalsDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
-
 }
 
 
@@ -550,7 +551,7 @@ TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 		params = PM::Parameters({{"prob", toParam(prob[i])}});
 		icp.readingDataPointsFilters.clear();
 		addFilter("RandomSamplingDataPointsFilter", params);
-		validate2dTransformation();	
+		validate2dTransformation();
 		validate3dTransformation();
 	}
 }
@@ -565,7 +566,7 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 		params = PM::Parameters({{"startStep", toParam(steps[i])}});
 		icp.readingDataPointsFilters.clear();
 		addFilter("FixStepSamplingDataPointsFilter", params);
-		validate2dTransformation();	
+		validate2dTransformation();
 		validate3dTransformation();
 	}
 }
@@ -688,7 +689,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter2D)
 	params = PM::Parameters({{"maxDist", toParam(0.015)}});
 	extraOutlierFilter = 
 			PM::get().OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
-	icp.outlierFilters.push_back(extraOutlierFilter);	
+	icp.outlierFilters.push_back(extraOutlierFilter);
 	
 	params = PM::Parameters({{"minDist", toParam(0.0002)}});
 	addFilter("MinDistOutlierFilter", params);
@@ -705,7 +706,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter3D)
 	params = PM::Parameters({{"maxDist", toParam(0.1)}});
 	extraOutlierFilter = 
 			PM::get().OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
-	icp.outlierFilters.push_back(extraOutlierFilter);	
+	icp.outlierFilters.push_back(extraOutlierFilter);
 	
 	params = PM::Parameters({{"minDist", toParam(0.0002)}});
 	addFilter("MinDistOutlierFilter", params);
@@ -866,8 +867,8 @@ int main(int argc, char **argv)
 	dataPath = "";
 	for(int i=1; i < argc; i++)
 	{
-		if(strcmp(argv[i], "--path") == 0 && i+1 < argc)
-				dataPath = argv[i+1];
+		if (strcmp(argv[i], "--path") == 0 && i+1 < argc)
+			dataPath = argv[i+1];
 	}
 
 	if(dataPath == "")
@@ -877,11 +878,10 @@ int main(int argc, char **argv)
 	}
 
 	// Load point cloud for all test
-	ref2D =  PM::loadCSV(dataPath + "2D_oneBox.csv");
-	data2D = PM::loadCSV(dataPath + "2D_twoBoxes.csv");
-	ref3D =  PM::loadCSV(dataPath + "car_cloud400.csv");
-	data3D = PM::loadCSV(dataPath + "car_cloud401.csv");
-	
+	ref2D =  DP::load(dataPath + "2D_oneBox.csv");
+	data2D = DP::load(dataPath + "2D_twoBoxes.csv");
+	ref3D =  DP::load(dataPath + "car_cloud400.csv");
+	data3D = DP::load(dataPath + "car_cloud401.csv");
 
 	// Result of data express in ref (from visual inspection)
 	validT2d = PM::TransformationParameters(3,3);

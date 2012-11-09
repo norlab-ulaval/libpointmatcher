@@ -52,11 +52,12 @@ int main(int argc, char *argv[])
 	validateArgs(argc, argv, isCSV);
 	
 	typedef PointMatcher<float> PM;
+	typedef PM::DataPoints DP;
 	typedef PM::Parameters Parameters;
 	
 	// Load point clouds
-	const PM::DataPoints ref(PM::loadAnyFormat(argv[1]));
-	const PM::DataPoints data(PM::loadAnyFormat(argv[2]));
+	const DP ref(DP::load(argv[1]));
+	const DP data(DP::load(argv[2]));
 
 	// Create the default ICP algorithm
 	PM::ICP icp;
@@ -68,13 +69,13 @@ int main(int argc, char *argv[])
 	PM::TransformationParameters T = icp(data, ref);
 
 	// Transform data to express it in ref
-	PM::DataPoints data_out(data);
+	DP data_out(data);
 	icp.transformations.apply(data_out, T);
 	
 	// Safe files to see the results
-	PM::saveVTK(ref, "test_ref.vtk");
-	PM::saveVTK(data, "test_data_in.vtk");
-	PM::saveVTK(data_out, "test_data_out.vtk");
+	ref.save("test_ref.vtk");
+	data.save("test_data_in.vtk");
+	data_out.save("test_data_out.vtk");
 	cout << "Final transformation:" << endl << T << endl;
 
 	return 0;
