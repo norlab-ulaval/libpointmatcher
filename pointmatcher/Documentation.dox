@@ -66,7 +66,7 @@ If you have compiled libpointmatcher with \ref yaml-cpp enabled, you can configu
 
 \section Understanding Understanding libpointmatcher
 
-\subsection UnderstandingICP ICP - Iterative Closest Point Algorithm
+\subsection UnderstandingICP ICP - Iterative Closest Point algorithm
 
 This library implements a modular ICP chain.
 ICP is an iterative algorithm performing several sequential processing steps, both inside and outside its main loop.
@@ -80,7 +80,7 @@ The ICP algorithm tries to align the reading onto the reference.
 To do so, it first applies filtering (PointMatcher::DataPointsFilters) to the point clouds, and then it iterates through a sequence of processing blocks.
 For each iteration, it associates points in reading to points in reference (PointMatcher::Matcher), rejects outliers (PointMatcher::OutlierFilters) and finds a transformation (PointMatcher::TransformationParameters) of reading that minimizes the alignment error (PointMatcher::ErrorMinimizer).
 
-\subsection UnderstandingArchitecture Software Architecture
+\subsection UnderstandingArchitecture Software architecture
 
 All modules are children of parent classes defined within the PointMatcher class.
 This class is templatized on the scalar type for the point coordinates, typically \c float or \c double.
