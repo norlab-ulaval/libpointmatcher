@@ -329,11 +329,11 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 		//Build header
 		for(unsigned int j = 0; j < transCheck.size(); j++)
 		{
-			for(unsigned int i=0; i < transCheck[j]->getValueNames().size(); i++)
+			for(unsigned int i=0; i < transCheck[j]->getConditionVariableNames().size(); i++)
 			{
 				if (!(j == 0 && i == 0))
 					*streamIter << ", ";
-				*streamIter << transCheck[j]->getValueNames()[i] << ", "; 
+				*streamIter << transCheck[j]->getConditionVariableNames()[i] << ", "; 
 				*streamIter << transCheck[j]->getLimitNames()[i]; 
 			}
 		}
@@ -343,12 +343,12 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 
 	for(unsigned int j = 0; j < transCheck.size(); j++)
 	{
-		for(unsigned int i=0; i < transCheck[j]->getValueNames().size(); i++)
+		for(unsigned int i=0; i < transCheck[j]->getConditionVariables().size(); i++)
 		{
 		
 			if (!(j == 0 && i == 0))
 				*streamIter << ", ";
-			*streamIter << transCheck[j]->getValues()(i) << ", ";
+			*streamIter << transCheck[j]->getConditionVariables()(i) << ", ";
 			*streamIter << transCheck[j]->getLimits()(i); 
 		}
 	}

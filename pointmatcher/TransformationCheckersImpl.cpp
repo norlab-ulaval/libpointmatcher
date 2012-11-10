@@ -50,25 +50,25 @@ TransformationCheckersImpl<T>::CounterTransformationChecker::CounterTransformati
 	this->limits.setZero(1);
 	this->limits(0) = maxIterationCount;
 
-	this->valueNames.push_back("Iteration");
+	this->conditionVariableNames.push_back("Iteration");
 	this->limitNames.push_back("Max iteration");
 }
 
 template<typename T>
 void TransformationCheckersImpl<T>::CounterTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
-	this->values.setZero(1);
+	this->conditionVariables.setZero(1);
 }
 
 template<typename T>
 void TransformationCheckersImpl<T>::CounterTransformationChecker::check(const TransformationParameters& parameters, bool& iterate)
 {
-	this->values(0)++;
+	this->conditionVariables(0)++;
 	
-	//std::cout << "Iter: " << this->values(0) << " / " << this->limits(0) << std::endl;
+	//std::cout << "Iter: " << this->conditionVariables(0) << " / " << this->limits(0) << std::endl;
 	//cerr << parameters << endl;
 	
-	if (this->values(0) >= this->limits(0))
+	if (this->conditionVariables(0) >= this->limits(0))
 		iterate = false;
 }
 
@@ -89,8 +89,8 @@ TransformationCheckersImpl<T>::DifferentialTransformationChecker::DifferentialTr
 	this->limits(0) = minDiffRotErr;
 	this->limits(1) = minDiffTransErr;
 	
-	this->valueNames.push_back("Mean abs differential trans err");
-	this->valueNames.push_back("Mean abs differential rot err");
+	this->conditionVariableNames.push_back("Mean abs differential trans err");
+	this->conditionVariableNames.push_back("Mean abs differential rot err");
 	this->limitNames.push_back("Min differential translation err");
 	this->limitNames.push_back("Min differential rotation err");
 
@@ -99,7 +99,7 @@ TransformationCheckersImpl<T>::DifferentialTransformationChecker::DifferentialTr
 template<typename T>
 void TransformationCheckersImpl<T>::DifferentialTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
-	this->values.setZero(4);
+	this->conditionVariables.setZero(4);
 	
 	rotations.clear();
 	translations.clear();
@@ -127,28 +127,28 @@ void TransformationCheckersImpl<T>::DifferentialTransformationChecker::check(con
 	rotations.push_back(Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3))));
 	translations.push_back(parameters.topRightCorner(parameters.rows()-1,1));
 	
-	this->values.setZero(4);
+	this->conditionVariables.setZero(4);
 	if(rotations.size() > smoothLength)
 	{
 		for(size_t i = rotations.size()-1; i >= rotations.size()-smoothLength; i--)
 		{
 			//Compute the mean derivative
-			this->values(0) += anyabs(rotations[i].angularDistance(rotations[i-1]));
-			this->values(1) += anyabs((translations[i] - translations[i-1]).norm());
+			this->conditionVariables(0) += anyabs(rotations[i].angularDistance(rotations[i-1]));
+			this->conditionVariables(1) += anyabs((translations[i] - translations[i-1]).norm());
 		}
 
-		this->values /= smoothLength;
+		this->conditionVariables /= smoothLength;
 
-		if(this->values(0) < this->limits(0) && this->values(1) < this->limits(1))
+		if(this->conditionVariables(0) < this->limits(0) && this->conditionVariables(1) < this->limits(1))
 			iterate = false;
 	}
 	
-	//std::cout << "Abs Rotation: " << this->values(0) << " / " << this->limits(0) << std::endl;
-	//std::cout << "Abs Translation: " << this->values(1) << " / " << this->limits(1) << std::endl;
+	//std::cout << "Abs Rotation: " << this->conditionVariables(0) << " / " << this->limits(0) << std::endl;
+	//std::cout << "Abs Translation: " << this->conditionVariables(1) << " / " << this->limits(1) << std::endl;
 	
-	if (std::isnan(this->values(0)))
+	if (std::isnan(this->conditionVariables(0)))
 		throw ConvergenceError("abs rotation norm not a number");
-	if (std::isnan(this->values(1)))
+	if (std::isnan(this->conditionVariables(1)))
 		throw ConvergenceError("abs translation norm not a number");
 }
 
@@ -170,14 +170,14 @@ TransformationCheckersImpl<T>::BoundTransformationChecker::BoundTransformationCh
 
 	this->limitNames.push_back("Max rotation angle");
 	this->limitNames.push_back("Max translation norm");
-	this->valueNames.push_back("Rotation angle");
-	this->valueNames.push_back("Translation norm");
+	this->conditionVariableNames.push_back("Rotation angle");
+	this->conditionVariableNames.push_back("Translation norm");
 }
 
 template<typename T>
 void TransformationCheckersImpl<T>::BoundTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
-	this->values.setZero(2);
+	this->conditionVariables.setZero(2);
 	if (parameters.rows() == 4)
 		initialRotation3D = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
 	else if (parameters.rows() == 3)
@@ -196,23 +196,23 @@ void TransformationCheckersImpl<T>::BoundTransformationChecker::check(const Tran
 	if (parameters.rows() == 4)
 	{
 		const Quaternion currentRotation = Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3)));
-		this->values(0) = currentRotation.angularDistance(initialRotation3D);
+		this->conditionVariables(0) = currentRotation.angularDistance(initialRotation3D);
 	}
 	else if (parameters.rows() == 3)
 	{
 		const T currentRotation(acos(parameters(0,0)));
-		this->values(0) = normalizeAngle(currentRotation - initialRotation2D);
+		this->conditionVariables(0) = normalizeAngle(currentRotation - initialRotation2D);
 	}
 	else
 		assert(false);
 	const Vector currentTranslation = parameters.topRightCorner(parameters.rows()-1,1);
-	this->values(1) = (currentTranslation - initialTranslation).norm();
-	if (this->values(0) > this->limits(0) || this->values(1) > this->limits(1))
+	this->conditionVariables(1) = (currentTranslation - initialTranslation).norm();
+	if (this->conditionVariables(0) > this->limits(0) || this->conditionVariables(1) > this->limits(1))
 	{
 		ostringstream oss;
 		oss << "limit out of bounds: ";
-		oss << "rot: " << this->values(0) << "/" << this->limits(0) << " ";
-		oss << "tr: " << this->values(1) << "/" << this->limits(1);
+		oss << "rot: " << this->conditionVariables(0) << "/" << this->limits(0) << " ";
+		oss << "tr: " << this->conditionVariables(1) << "/" << this->limits(1);
 		throw ConvergenceError(oss.str());
 	}
 }

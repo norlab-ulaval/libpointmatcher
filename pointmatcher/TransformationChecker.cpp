@@ -47,32 +47,32 @@ PointMatcher<T>::TransformationChecker::TransformationChecker(const std::string&
 	Parametrizable(className,paramsDoc,params)
 {}
 
-//! Return the value of limits
+//! Return the value of limits involved in conditions to stop ICP loop
 template<typename T>
 const typename PointMatcher<T>::Vector& PointMatcher<T>::TransformationChecker::getLimits() const
 {
 	return limits;
 }
 
-//! Return the collected values
+//! Return the values of variables involved in conditions to stop ICP loop
 template<typename T>
-const typename PointMatcher<T>::Vector& PointMatcher<T>::TransformationChecker::getValues() const
+const typename PointMatcher<T>::Vector& PointMatcher<T>::TransformationChecker::getConditionVariables() const
 {
-	return values;
+	return conditionVariables;
 }
 
-//! Return the name of each limit
+//! Return the names of limits involved in conditions to stop ICP loop
 template<typename T>
 const typename PointMatcher<T>::TransformationChecker::StringVector& PointMatcher<T>::TransformationChecker::getLimitNames() const
 {
 	return limitNames;
 }
 
-//! Return the name of each value
+//! Return the names of variables involved in conditions to stop ICP loop
 template<typename T>
-const typename PointMatcher<T>::TransformationChecker::StringVector& PointMatcher<T>::TransformationChecker::getValueNames() const
+const typename PointMatcher<T>::TransformationChecker::StringVector& PointMatcher<T>::TransformationChecker::getConditionVariableNames() const
 {
-	return valueNames;
+	return conditionVariableNames;
 }
 
 //! Extract the Euler angles from a rigid-transformation matrix 

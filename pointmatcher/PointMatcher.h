@@ -458,11 +458,10 @@ struct PointMatcher
 	{
 	protected:
 		typedef std::vector<std::string> StringVector; //!< a vector of strings
-		Vector limits; //!< values of limits
-		// FIXME: values is a very bad name
-		Vector values; //!< collected values
-		StringVector limitNames; //!< names of limits
-		StringVector valueNames; //!< names of values
+		Vector limits; //!< values of limits involved in conditions to stop ICP loop
+		Vector conditionVariables; //!< values of variables involved in conditions to stop ICP loop
+		StringVector limitNames; //!< names of limits involved in conditions to stop ICP loop
+		StringVector conditionVariableNames; //!< names of variables involved in conditions to stop ICP loop
 
 	public:
 		TransformationChecker();
@@ -474,9 +473,9 @@ struct PointMatcher
 		virtual void check(const TransformationParameters& parameters, bool& iterate) = 0;
 		
 		const Vector& getLimits() const;
-		const Vector& getValues() const;
+		const Vector& getConditionVariables() const;
 		const StringVector& getLimitNames() const;
-		const StringVector& getValueNames() const;
+		const StringVector& getConditionVariableNames() const;
 		
 	protected:
 		static Vector matrixToAngles(const TransformationParameters& parameters);
