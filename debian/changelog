@@ -1,5 +1,6 @@
-libpointmatcher (0.9.0) natty; urgency=low
+libpointmatcher (1.0.0) precise; urgency=low
 
-  * Initial release.
+  * new upstream release
 
- -- Stéphane Magnenat <stephane@nospam.magnenat.net>  Fri, 21 Oct 2011 15:01:15 +0200
+ -- Stéphane Magnenat <stephane@nospam.magnenat.net>  Mon, 12 Nov 2012 09:54:00 -0800
+
