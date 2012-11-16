@@ -246,6 +246,27 @@ typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::get
 	return getConstViewByName(name, featureLabels, features);
 }
 
+//! Get a view on a feature by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getFeatureViewByName(const std::string& name)
+{
+	return getViewByName(name, featureLabels, features);
+}
+
+//! Get a const view on a feature row by name and number, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getFeatureRowViewByName(const std::string& name, const unsigned row) const
+{
+	return getConstViewByName(name, featureLabels, features, int(row));
+}
+
+//! Get a view on a feature by row name and number, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getFeatureRowViewByName(const std::string& name, const unsigned row)
+{
+	return getViewByName(name, featureLabels, features, int(row));
+}
+
 //! Look if a feature with a given name exist
 template<typename T>
 bool PointMatcher<T>::DataPoints::featureExists(const std::string& name) const
@@ -272,14 +293,6 @@ template<typename T>
 unsigned PointMatcher<T>::DataPoints::getFeatureStartingRow(const std::string& name) const
 {
 	return getFieldStartingRow(name, featureLabels);
-}
-
-
-//! Get a view on a feature by name, throw an exception if it does not exist
-template<typename T>
-typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getFeatureViewByName(const std::string& name)
-{
-	return getViewByName(name, featureLabels, features);
 }
 
 //! Makes sure a descriptor of a given name exists, if present, check its dimensions
@@ -317,12 +330,25 @@ typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::get
 	return getConstViewByName(name, descriptorLabels, descriptors);
 }
 
-
 //! Get a view on a descriptor by name, throw an exception if it does not exist
 template<typename T>
 typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name)
 {
 	return getViewByName(name, descriptorLabels, descriptors);
+}
+
+//! Get a const view on a descriptor row by name and number, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getDescriptorRowViewByName(const std::string& name, const unsigned row) const
+{
+	return getConstViewByName(name, descriptorLabels, descriptors, int(row));
+}
+
+//! Get a view on a descriptor by row name and number, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getDescriptorRowViewByName(const std::string& name, const unsigned row)
+{
+	return getViewByName(name, descriptorLabels, descriptors, int(row));
 }
 
 //! Look if a descriptor with a given name exist
@@ -506,29 +532,53 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 	}
 }
 
-//! Get a const view on a matrix by name, throw an exception if it does not exist
+//! Get a const view on a matrix by name, throw an exception if it does not exist.
+//! If viewRow is given, only return this row, otherwise return the full view
 template<typename T>
-typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data) const
+typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data, const int viewRow) const
 {
 	unsigned row(0);
 	for(auto it(labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
-			return data.block(row, 0, it->span, data.cols());
+		{
+			if (viewRow >= 0)
+			{
+				if (viewRow >= int(it->span))
+					throw InvalidField(
+						(boost::format("Requesting row %1% of field %2% that only has %3% rows") % viewRow % name % it->span).str()
+					);
+				return data.block(row + viewRow, 0, 1, data.cols());
+			}
+			else
+				return data.block(row, 0, it->span, data.cols());
+		}
 		row += it->span;
 	}
 	throw InvalidField("Field " + name + " not found");
 }
 
 //! Get a view on a matrix by name, throw an exception if it does not exist
+//! If viewRow is given, only return this row, otherwise return the full view
 template<typename T>
-typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewByName(const std::string& name, const Labels& labels, Matrix& data) const
+typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewByName(const std::string& name, const Labels& labels, Matrix& data, const int viewRow) const
 {
 	unsigned row(0);
 	for(auto it(labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
-			return data.block(row, 0, it->span, data.cols());
+		{
+			if (viewRow >= 0)
+			{
+				if (viewRow >= int(it->span))
+					throw InvalidField(
+						(boost::format("Requesting row %1% of field %2% that only has %3% rows") % viewRow % name % it->span).str()
+					);
+				return data.block(row + viewRow, 0, 1, data.cols());
+			}
+			else
+				return data.block(row, 0, it->span, data.cols());
+		}
 		row += it->span;
 	}
 	throw InvalidField("Field " + name + " not found");

@@ -68,9 +68,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //! version of the Pointmatcher library as string
-#define POINTMATCHER_VERSION "1.0.0"
+#define POINTMATCHER_VERSION "1.0.1"
 //! version of the Pointmatcher library as an int
-#define POINTMATCHER_VERSION_INT 10000
+#define POINTMATCHER_VERSION_INT 10001
 
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
@@ -229,6 +229,8 @@ struct PointMatcher
 		Matrix getFeatureCopyByName(const std::string& name) const;
 		ConstView getFeatureViewByName(const std::string& name) const;
 		View getFeatureViewByName(const std::string& name);
+		ConstView getFeatureRowViewByName(const std::string& name, const unsigned row) const;
+		View getFeatureRowViewByName(const std::string& name, const unsigned row);
 		bool featureExists(const std::string& name) const;
 		bool featureExists(const std::string& name, const unsigned dim) const;
 		unsigned getFeatureDimension(const std::string& name) const;
@@ -240,6 +242,8 @@ struct PointMatcher
 		Matrix getDescriptorCopyByName(const std::string& name) const;
 		ConstView getDescriptorViewByName(const std::string& name) const;
 		View getDescriptorViewByName(const std::string& name);
+		ConstView getDescriptorRowViewByName(const std::string& name, const unsigned row) const;
+		View getDescriptorRowViewByName(const std::string& name, const unsigned row);
 		bool descriptorExists(const std::string& name) const;
 		bool descriptorExists(const std::string& name, const unsigned dim) const;
 		unsigned getDescriptorDimension(const std::string& name) const;
@@ -255,8 +259,8 @@ struct PointMatcher
 		void allocateFields(const Labels& newLabels, Labels& labels, Matrix& data) const;
 		void allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data) const;
 		void addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data) const;
-		ConstView getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data) const;
-		View getViewByName(const std::string& name, const Labels& labels, Matrix& data) const;
+		ConstView getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data, const int viewRow = -1) const;
+		View getViewByName(const std::string& name, const Labels& labels, Matrix& data, const int viewRow = -1) const;
 		bool fieldExists(const std::string& name, const unsigned dim, const Labels& labels) const;
 		unsigned getFieldDimension(const std::string& name, const Labels& labels) const;
 		unsigned getFieldStartingRow(const std::string& name, const Labels& labels) const;
