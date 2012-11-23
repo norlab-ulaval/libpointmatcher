@@ -153,6 +153,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	for (int i = 0; i < features.cols(); ++i)
 		stream << "1 " << i << "\n";
 	
+
 	stream << "POINT_DATA " << features.cols() << "\n";
 	buildScalarStream(stream, "densities", data);
 	buildScalarStream(stream, "obstacles", data);
@@ -341,6 +342,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 		*streamIter << "\n";
 	}
 
+	
 	for(unsigned int j = 0; j < transCheck.size(); j++)
 	{
 		for(unsigned int i=0; i < transCheck[j]->getConditionVariables().size(); i++)
@@ -348,8 +350,9 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 		
 			if (!(j == 0 && i == 0))
 				*streamIter << ", ";
-			*streamIter << transCheck[j]->getConditionVariables()(i) << ", ";
-			*streamIter << transCheck[j]->getLimits()(i); 
+
+			*streamIter << transCheck[j]->getConditionVariables()[i] << ", ";
+			*streamIter << transCheck[j]->getLimits()[i]; 
 		}
 	}
 

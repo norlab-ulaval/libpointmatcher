@@ -132,6 +132,39 @@ struct DataPointsFiltersImpl
 		MinDistDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
 	};
+	
+	//! Subsampling. Remove point laying in a bounding box
+	struct BoundingBoxDataPointsFilter: public DataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			return "Subsampling. Remove points laying in a bounding box which is axis aligned.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return ParametersDoc({
+				{ "xMin", "minimum value on x-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T> },
+				{ "xMax", "maximum value on x-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T> },
+				{ "yMin", "minimum value on y-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T> },
+				{ "yMax", "maximum value on y-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T> },
+				{ "zMin", "minimum value on z-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T> },
+				{ "zMax", "maximum value on z-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T> },
+				{ "removeInside", "If set to true(1), remove point inside the bounding box. Else(0), remove points outside the bounding box", "1", "0", "1", P::Comp<bool> }
+			});
+		}
+
+		const T xMin;
+		const T xMax;
+		const T yMin;
+		const T yMax;
+		const T zMin;
+		const T zMax;
+		const bool removeInside;
+		
+		//! Constructor, uses parameter interface
+		BoundingBoxDataPointsFilter(const Parameters& params = Parameters());
+		virtual DataPoints filter(const DataPoints& input);
+	};
 
 	//! Subsampling. Filter points beyond a maximum quantile measured on a specific axis
 	struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter

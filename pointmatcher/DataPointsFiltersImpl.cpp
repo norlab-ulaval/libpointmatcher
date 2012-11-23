@@ -251,6 +251,76 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 template struct DataPointsFiltersImpl<float>::MinDistDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::MinDistDataPointsFilter;
 
+// BoundingBoxDataPointsFilter
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::BoundingBoxDataPointsFilter::BoundingBoxDataPointsFilter(const Parameters& params):
+	DataPointsFilter("BoundingBoxDataPointsFilter", BoundingBoxDataPointsFilter::availableParameters(), params),
+	xMin(Parametrizable::get<T>("xMin")),
+	xMax(Parametrizable::get<T>("xMax")),
+	yMin(Parametrizable::get<T>("yMin")),
+	yMax(Parametrizable::get<T>("yMax")),
+	zMin(Parametrizable::get<T>("zMin")),
+	zMax(Parametrizable::get<T>("zMax")),
+	removeInside(Parametrizable::get<bool>("removeInside"))
+{
+}
+
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::BoundingBoxDataPointsFilter::filter(const DataPoints& input)
+{
+	const int nbPointsIn = input.features.cols();
+	const int nbRows = input.features.rows();
+
+
+	DataPoints output(
+		Matrix(input.features.rows(), nbPointsIn),
+		input.featureLabels
+	);
+	
+	// if there is descriptors, copy the labels
+	if (input.descriptors.cols() > 0)
+	{
+		output.descriptors = Matrix(input.descriptors.rows(), nbPointsIn);
+		output.descriptorLabels = input.descriptorLabels;
+	}
+
+	int j = 0;
+	for (int i = 0; i < nbPointsIn; i++)
+	{
+		bool keepPt = false;
+		Vector point = input.features.col(i);
+		
+		const bool x_in = (point(0) > xMin && point(0) < xMax);
+		const bool y_in = (point(1) > yMin && point(1) < yMax);
+		const bool z_in = (point(2) > zMin && point(2) < zMax) || nbRows == 3;
+		const bool in_box = x_in && y_in && z_in;
+
+		if(removeInside)
+			keepPt = !in_box;
+		else
+			keepPt = in_box;
+
+		if(keepPt)
+		{
+			output.features.col(j) = input.features.col(i);
+			if (output.descriptors.cols() > 0)
+				output.descriptors.col(j) = input.descriptors.col(i);
+			j++;
+		}
+	}
+	
+
+	output.features.conservativeResize(Eigen::NoChange, j);
+	if (input.descriptors.cols() > 0)
+		output.descriptors.conservativeResize(Eigen::NoChange, j);
+
+	return output;
+}
+
+template struct DataPointsFiltersImpl<float>::BoundingBoxDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::BoundingBoxDataPointsFilter;
+
 // MaxQuantileOnAxisDataPointsFilter
 // Constructor
 template<typename T>
