@@ -99,7 +99,7 @@ TransformationCheckersImpl<T>::DifferentialTransformationChecker::DifferentialTr
 template<typename T>
 void TransformationCheckersImpl<T>::DifferentialTransformationChecker::init(const TransformationParameters& parameters, bool& iterate)
 {
-	this->conditionVariables.setZero(4);
+	this->conditionVariables.setZero(2);
 	
 	rotations.clear();
 	translations.clear();
@@ -127,7 +127,7 @@ void TransformationCheckersImpl<T>::DifferentialTransformationChecker::check(con
 	rotations.push_back(Quaternion(Eigen::Matrix<T,3,3>(parameters.topLeftCorner(3,3))));
 	translations.push_back(parameters.topRightCorner(parameters.rows()-1,1));
 	
-	this->conditionVariables.setZero(4);
+	this->conditionVariables.setZero(2);
 	if(rotations.size() > smoothLength)
 	{
 		for(size_t i = rotations.size()-1; i >= rotations.size()-smoothLength; i--)

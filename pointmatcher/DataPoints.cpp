@@ -98,7 +98,8 @@ PointMatcher<T>::DataPoints::DataPoints(const Labels& featureLabels, const Label
 	descriptorLabels(descriptorLabels)
 {
 	features.resize(featureLabels.totalDim(), pointCount);
-	descriptors.resize(descriptorLabels.totalDim(), pointCount);
+	if(descriptorLabels.totalDim())
+		descriptors.resize(descriptorLabels.totalDim(), pointCount);
 }
 
 //! Construct a point cloud from existing features without any descriptor
@@ -387,7 +388,7 @@ void PointMatcher<T>::DataPoints::assertDescriptorConsistency() const
 	{
 		if (descriptors.cols() != 0)
 			throw std::runtime_error(
-				(boost::format("Point cloud has degenerate descriptor dimensions of 0x%1%") % descriptors.cols()).str()
+				(boost::format("Point cloud has degenerate descriptor dimensions of rows=0, cols=%1%") % descriptors.cols()).str()
 			);
 		if (descriptorLabels.size() > 0)
 			throw std::runtime_error(

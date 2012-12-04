@@ -63,31 +63,53 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter::filter(
 	const DataPoints& input)
 {
-	// compute the number of NaN
-	const unsigned pointCount(input.features.cols());
-	vector<bool> haveNaN(pointCount);
-	unsigned NaNCount(0);
-	for (int i = 0; i < input.features.cols(); ++i)
+
+	const int nbPointsIn = input.features.cols();
+	const int nbRows = input.features.rows();
+
+	DataPoints output(
+		Matrix(input.features.rows(), nbPointsIn),
+		input.featureLabels
+	);
+
+	// if there is descriptors, copy the labels
+	if (input.descriptors.cols() > 0)
 	{
-		const auto colArray(input.features.col(i).array());
-		const bool hasNaN(!(colArray == colArray).all());
-		haveNaN[i] = hasNaN;
-		NaNCount += hasNaN ? 1 : 0;
+		output.descriptors = Matrix(input.descriptors.rows(), nbPointsIn);
+		output.descriptorLabels = input.descriptorLabels;
 	}
+
+	// compute the number of NaN
+	//const unsigned pointCount(input.features.cols());
+	vector<bool> haveNaN(nbPointsIn);
+	//unsigned NaNCount(0);
+	//for (int i = 0; i < input.features.cols(); ++i)
+	//{
+	//	const auto colArray(input.features.col(i).array());
+	//	const bool hasNaN(!(colArray == colArray).all());
+	//	haveNaN[i] = hasNaN;
+	//	NaNCount += hasNaN ? 1 : 0;
+	//}
 	
 	// copy the non-NaN values
-	DataPoints outputCloud(input.featureLabels, input.descriptorLabels, pointCount - NaNCount);
+	//DataPoints outputCloud(input.featureLabels, input.descriptorLabels, pointCount - NaNCount);
 	int j(0);
 	for (int i = 0; i < input.features.cols(); ++i)
 	{
 		if (!haveNaN[i])
 		{
-			outputCloud.features.col(j) = input.features.col(i);
-			outputCloud.descriptors.col(j) = input.descriptors.col(i);
+			output.features.col(j) = input.features.col(i);
+			if (output.descriptors.cols() > 0)
+				output.descriptors.col(j) = input.descriptors.col(i);
 			++j;
 		}
 	}
-	return outputCloud;
+
+	output.features.conservativeResize(Eigen::NoChange, j);
+	if (input.descriptors.cols() > 0)
+		output.descriptors.conservativeResize(Eigen::NoChange, j);
+
+	return output;
 }
 
 template struct DataPointsFiltersImpl<float>::RemoveNaNDataPointsFilter;

@@ -160,6 +160,12 @@ PointMatcherIO<T>::FileInfo::FileInfo(const std::string& readingFileName, const 
 template struct PointMatcherIO<float>::FileInfo;
 template struct PointMatcherIO<double>::FileInfo;
 
+// Empty constructor
+template<typename T>
+PointMatcherIO<T>::FileInfoVector::FileInfoVector()
+{
+}
+
 //! Load a vector of FileInfo from a CSV file.
 /**
 	@param fileName name of the CSV file

@@ -79,6 +79,7 @@ struct PointMatcherIO
 	//! A vector of file info, to be used in batch processing
 	struct FileInfoVector: public std::vector<FileInfo>
 	{
+		FileInfoVector();
 		FileInfoVector(const std::string& fileName, std::string dataPath = "", std::string configPath = "");
 	
 	protected:
