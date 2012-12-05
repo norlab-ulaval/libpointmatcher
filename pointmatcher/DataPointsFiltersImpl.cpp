@@ -63,38 +63,36 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter::filter(
 	const DataPoints& input)
 {
-
 	const int nbPointsIn = input.features.cols();
-	const int nbRows = input.features.rows();
-
+	//const int nbRows = input.features.rows();
+	
+	// compute the number of NaN
+	vector<bool> haveNaN(nbPointsIn);
+	unsigned NaNCount(0);
+	for (int i = 0; i < nbPointsIn; ++i)
+	{
+		const auto colArray(input.features.col(i).array());
+		const bool hasNaN(!(colArray == colArray).all());
+		haveNaN[i] = hasNaN;
+		NaNCount += hasNaN ? 1 : 0;
+	}
+	const int nbPointsOut = nbPointsIn - NaNCount;
+	
+	// create output cloud
 	DataPoints output(
-		Matrix(input.features.rows(), nbPointsIn),
+		Matrix(input.features.rows(), nbPointsOut),
 		input.featureLabels
 	);
-
 	// if there is descriptors, copy the labels
 	if (input.descriptors.cols() > 0)
 	{
-		output.descriptors = Matrix(input.descriptors.rows(), nbPointsIn);
+		output.descriptors = Matrix(input.descriptors.rows(), nbPointsOut);
 		output.descriptorLabels = input.descriptorLabels;
 	}
 
-	// compute the number of NaN
-	//const unsigned pointCount(input.features.cols());
-	vector<bool> haveNaN(nbPointsIn);
-	//unsigned NaNCount(0);
-	//for (int i = 0; i < input.features.cols(); ++i)
-	//{
-	//	const auto colArray(input.features.col(i).array());
-	//	const bool hasNaN(!(colArray == colArray).all());
-	//	haveNaN[i] = hasNaN;
-	//	NaNCount += hasNaN ? 1 : 0;
-	//}
-	
 	// copy the non-NaN values
-	//DataPoints outputCloud(input.featureLabels, input.descriptorLabels, pointCount - NaNCount);
 	int j(0);
-	for (int i = 0; i < input.features.cols(); ++i)
+	for (int i = 0; i < nbPointsIn; ++i)
 	{
 		if (!haveNaN[i])
 		{
@@ -104,10 +102,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RemoveNaNDataPoin
 			++j;
 		}
 	}
-
-	output.features.conservativeResize(Eigen::NoChange, j);
-	if (input.descriptors.cols() > 0)
-		output.descriptors.conservativeResize(Eigen::NoChange, j);
+	assert(j == nbPointsOut);
 
 	return output;
 }

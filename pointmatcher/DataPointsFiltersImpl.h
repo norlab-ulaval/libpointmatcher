@@ -149,7 +149,7 @@ struct DataPointsFiltersImpl
 				{ "yMax", "maximum value on y-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T> },
 				{ "zMin", "minimum value on z-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T> },
 				{ "zMax", "maximum value on z-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T> },
-				{ "removeInside", "If set to true(1), remove point inside the bounding box. Else(0), remove points outside the bounding box", "1", "0", "1", P::Comp<bool> }
+				{ "removeInside", "If set to true (1), remove points inside the bounding box; else (0), remove points outside the bounding box", "1", "0", "1", P::Comp<bool> }
 			});
 		}
 

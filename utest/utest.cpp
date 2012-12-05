@@ -326,9 +326,6 @@ TEST_F(GenericTest, ICP_default)
 class DataFilterTest: public IcpHelper
 {
 public:
-
-	PM::DataPointsFilter* testedDataPointFilter;
-
 	// Will be called for every tests
 	virtual void SetUp()
 	{
@@ -345,7 +342,7 @@ public:
 
 	void addFilter(string name, PM::Parameters params)
 	{
-		testedDataPointFilter = 
+		PM::DataPointsFilter* testedDataPointFilter = 
 			PM::get().DataPointsFilterRegistrar.create(name, params);
 	
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
@@ -353,12 +350,35 @@ public:
 	
 	void addFilter(string name)
 	{
-		testedDataPointFilter = 
+		PM::DataPointsFilter* testedDataPointFilter = 
 			PM::get().DataPointsFilterRegistrar.create(name);
 		
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
 };
+
+
+TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
+{
+	// build test cloud
+	DP ref2DCopy(ref2D);
+	int goodCount(0);
+	const float nan(std::numeric_limits<float>::quiet_NaN());
+	for (int i(0); i < ref2DCopy.features.cols(); ++i)
+	{
+		if (rand() % 3 == 0)
+		{
+			ref2DCopy.features(rand() % ref2DCopy.features.rows(), i) = nan;
+		}
+		else
+			++goodCount;
+	}
+	
+	// apply and checked
+	addFilter("RemoveNaNDataPointsFilter");
+	icp.readingDataPointsFilters.apply(ref2DCopy);
+	EXPECT_TRUE(ref2DCopy.features.cols() == goodCount);
+}
 
 TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 {
@@ -399,7 +419,6 @@ TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 	EXPECT_ANY_THROW(addFilter("MaxDistDataPointsFilter", params));
 	
 }
-
 
 TEST_F(DataFilterTest, MinDistDataPointsFilter)
 {
