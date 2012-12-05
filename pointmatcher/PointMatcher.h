@@ -186,6 +186,8 @@ struct PointMatcher
 		typedef Eigen::Block<Matrix> View;
 		//! A view on a const feature or const descriptor
 		typedef const Eigen::Block<const Matrix> ConstView;
+		//! An index to a row or a column
+		typedef typename Matrix::Index Index;
 		
 		//! The name for a certain number of dim
 		struct Label
@@ -222,6 +224,10 @@ struct PointMatcher
 		static DataPoints load(const std::string& fileName);
 		
 		void concatenate(const DataPoints& dp);
+		void conservativeResize(Index pointCount);
+		DataPoints createSimilarEmpty() const;
+		DataPoints createSimilarEmpty(Index pointCount) const;
+		void setColFrom(Index thisCol, const DataPoints& that, Index thatCol);
 		
 		void allocateFeature(const std::string& name, const unsigned dim);
 		void allocateFeatures(const Labels& newLabels);

@@ -58,57 +58,36 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::IdentityDataPoint
 template struct DataPointsFiltersImpl<float>::IdentityDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::IdentityDataPointsFilter;
 
+
 // RemoveNaNDataPointsFilter
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter::filter(
 	const DataPoints& input)
 {
 	const int nbPointsIn = input.features.cols();
-	//const int nbRows = input.features.rows();
 	
-	// compute the number of NaN
-	vector<bool> haveNaN(nbPointsIn);
-	unsigned NaNCount(0);
+	DataPoints output(input.createSimilarEmpty());
+	
+	int j = 0;
 	for (int i = 0; i < nbPointsIn; ++i)
 	{
 		const auto colArray(input.features.col(i).array());
 		const bool hasNaN(!(colArray == colArray).all());
-		haveNaN[i] = hasNaN;
-		NaNCount += hasNaN ? 1 : 0;
-	}
-	const int nbPointsOut = nbPointsIn - NaNCount;
-	
-	// create output cloud
-	DataPoints output(
-		Matrix(input.features.rows(), nbPointsOut),
-		input.featureLabels
-	);
-	// if there is descriptors, copy the labels
-	if (input.descriptors.cols() > 0)
-	{
-		output.descriptors = Matrix(input.descriptors.rows(), nbPointsOut);
-		output.descriptorLabels = input.descriptorLabels;
-	}
-
-	// copy the non-NaN values
-	int j(0);
-	for (int i = 0; i < nbPointsIn; ++i)
-	{
-		if (!haveNaN[i])
+		if (!hasNaN)
 		{
-			output.features.col(j) = input.features.col(i);
-			if (output.descriptors.cols() > 0)
-				output.descriptors.col(j) = input.descriptors.col(i);
-			++j;
+			output.setColFrom(j, input, i);
+			j++;
 		}
 	}
-	assert(j == nbPointsOut);
+	
+	output.conservativeResize(j);
 
 	return output;
 }
 
 template struct DataPointsFiltersImpl<float>::RemoveNaNDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::RemoveNaNDataPointsFilter;
+
 
 // MaxDistDataPointsFilter
 // Constructor
@@ -129,31 +108,10 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 			(boost::format("MaxDistDataPointsFilter: Error, filtering on dimension number %1%, larger than authorized axis id %2%") % dim % (input.features.rows() - 2)).str());
 	}
 
-	//TODO: should we do that in 2 passes or use conservativeResize?
 	const int nbPointsIn = input.features.cols();
 	const int nbRows = input.features.rows();
-	int nbPointsOut = 0;
-	if (dim == -1)
-	{
-		const T absMaxDist = anyabs(maxDist);
-		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() < absMaxDist).count();
-	}
-	else
-	{
-		nbPointsOut = (input.features.row(dim).array() < maxDist).count();
-	}
-
-	DataPoints outputCloud(
-		Matrix(input.features.rows(), nbPointsOut),
-		input.featureLabels
-	);
 	
-	// if there is descriptors, copy the labels
-	if (input.descriptors.cols() > 0)
-	{
-		outputCloud.descriptors = Matrix(input.descriptors.rows(), nbPointsOut);
-		outputCloud.descriptorLabels = input.descriptorLabels;
-	}
+	DataPoints output(input.createSimilarEmpty());
 	
 	int j = 0;
 	if(dim == -1) // Euclidean distance
@@ -163,9 +121,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 			const T absMaxDist = anyabs(maxDist);
 			if (input.features.col(i).head(nbRows-1).norm() < absMaxDist)
 			{
-				outputCloud.features.col(j) = input.features.col(i);
-				if (outputCloud.descriptors.cols() > 0)
-					outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				output.setColFrom(j, input, i);
 				j++;
 			}
 		}
@@ -176,20 +132,20 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDistDataPoints
 		{
 			if ((input.features(dim, i)) < maxDist)
 			{
-				outputCloud.features.col(j) = input.features.col(i);
-				if (outputCloud.descriptors.cols() > 0)
-					outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				output.setColFrom(j, input, i);
 				j++;
 			}
 		}
 	}
 	
-	assert(j == nbPointsOut);
-	return outputCloud;
+	output.conservativeResize(j);
+	
+	return output;
 }
 
 template struct DataPointsFiltersImpl<float>::MaxDistDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::MaxDistDataPointsFilter;
+
 
 // MinDistDataPointsFilter
 // Constructor
@@ -209,28 +165,8 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 	
 	const int nbPointsIn = input.features.cols();
 	const int nbRows = input.features.rows();
-	int nbPointsOut = 0;
-	if (dim == -1)
-	{
-		const T absMinDist = anyabs(minDist);
-		nbPointsOut = (input.features.topRows(nbRows-1).colwise().norm().array() > absMinDist).count();
-	}
-	else
-	{
-		nbPointsOut = (input.features.row(dim).array() > minDist).count();
-	}
-
-	DataPoints outputCloud(
-		Matrix(input.features.rows(), nbPointsOut),
-		input.featureLabels
-	);
 	
-	// if there is descriptors, copy the labels
-	if (input.descriptors.cols() > 0)
-	{
-		outputCloud.descriptors = Matrix(input.descriptors.rows(), nbPointsOut);
-		outputCloud.descriptorLabels = input.descriptorLabels;
-	}
+	DataPoints output(input.createSimilarEmpty());
 	
 	int j = 0;
 	if(dim == -1) // Euclidean distance
@@ -240,9 +176,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 		{
 			if (input.features.col(i).head(nbRows-1).norm() > absMinDist)
 			{
-				outputCloud.features.col(j) = input.features.col(i);
-				if (outputCloud.descriptors.cols() > 0)
-					outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				output.setColFrom(j, input, i);
 				j++;
 			}
 		}
@@ -253,20 +187,20 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MinDistDataPoints
 		{
 			if ((input.features(dim, i)) > minDist)
 			{
-				outputCloud.features.col(j) = input.features.col(i);
-				if (outputCloud.descriptors.cols() > 0)
-					outputCloud.descriptors.col(j) = input.descriptors.col(i);
+				output.setColFrom(j, input, i);
 				j++;
 			}
 		}
 	}
-	assert(j == nbPointsOut);
 	
-	return outputCloud;
+	output.conservativeResize(j);
+	
+	return output;
 }
 
 template struct DataPointsFiltersImpl<float>::MinDistDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::MinDistDataPointsFilter;
+
 
 // BoundingBoxDataPointsFilter
 // Constructor
@@ -289,25 +223,15 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::BoundingBoxDataPo
 	const int nbPointsIn = input.features.cols();
 	const int nbRows = input.features.rows();
 
-
-	DataPoints output(
-		Matrix(input.features.rows(), nbPointsIn),
-		input.featureLabels
-	);
-	
-	// if there is descriptors, copy the labels
-	if (input.descriptors.cols() > 0)
-	{
-		output.descriptors = Matrix(input.descriptors.rows(), nbPointsIn);
-		output.descriptorLabels = input.descriptorLabels;
-	}
+	DataPoints output(input.createSimilarEmpty());
 
 	int j = 0;
 	for (int i = 0; i < nbPointsIn; i++)
 	{
 		bool keepPt = false;
-		Vector point = input.features.col(i);
+		const Vector point = input.features.col(i);
 		
+		// FIXME: improve performance by using Eigen array operations
 		const bool x_in = (point(0) > xMin && point(0) < xMax);
 		const bool y_in = (point(1) > yMin && point(1) < yMax);
 		const bool z_in = (point(2) > zMin && point(2) < zMax) || nbRows == 3;
@@ -320,23 +244,19 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::BoundingBoxDataPo
 
 		if(keepPt)
 		{
-			output.features.col(j) = input.features.col(i);
-			if (output.descriptors.cols() > 0)
-				output.descriptors.col(j) = input.descriptors.col(i);
+			output.setColFrom(j, input, i);
 			j++;
 		}
 	}
 	
-
-	output.features.conservativeResize(Eigen::NoChange, j);
-	if (input.descriptors.cols() > 0)
-		output.descriptors.conservativeResize(Eigen::NoChange, j);
-
+	output.conservativeResize(j);
+	
 	return output;
 }
 
 template struct DataPointsFiltersImpl<float>::BoundingBoxDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::BoundingBoxDataPointsFilter;
+
 
 // MaxQuantileOnAxisDataPointsFilter
 // Constructor
@@ -368,15 +288,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxQuantileOnAxis
 	const T limit = values[nbPointsOut];
 	
 	// build output values
-	DataPoints outputCloud(
-		Matrix(input.features.rows(), nbPointsOut),
-		input.featureLabels
-	);
-	if (input.descriptors.cols() > 0)
-	{
-		outputCloud.descriptors = Matrix(input.descriptors.rows(), nbPointsOut);
-		outputCloud.descriptorLabels = input.descriptorLabels;
-	}
+	DataPoints output(input.createSimilarEmpty(nbPointsOut));
 	
 	// fill output values
 	int j = 0;
@@ -384,31 +296,16 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxQuantileOnAxis
 	{
 		if (input.features(dim, i) < limit)
 		{
-			outputCloud.features.col(j) = input.features.col(i);
-			if (outputCloud.descriptors.cols() > 0)
-				outputCloud.descriptors.col(j) = input.descriptors.col(i);
+			output.setColFrom(j, input, i);
 			j++;
 		}
 	}
 	assert(j <= nbPointsOut);
 	
 	if (j < nbPointsOut)
-	{
-		if (outputCloud.descriptors.cols() > 0)
-			return DataPoints(
-				outputCloud.features.corner(Eigen::TopLeft,outputCloud.features.rows(),j),
-				outputCloud.featureLabels,
-				outputCloud.descriptors.corner(Eigen::TopLeft,outputCloud.descriptors.rows(),j),
-				outputCloud.descriptorLabels
-			);
-		else
-			return DataPoints(
-				outputCloud.features.corner(Eigen::TopLeft,outputCloud.features.rows(),j),
-				outputCloud.featureLabels
-			);
-	}
+		output.conservativeResize(j);
 	
-	return outputCloud;
+	return output;
 }
 
 template struct DataPointsFiltersImpl<float>::MaxQuantileOnAxisDataPointsFilter;
@@ -433,10 +330,10 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPoi
 		throw InvalidField("MaxDensityDataPointsFilter: Error, no densities found in descriptors.");
 	}
 
-	DataPoints outputCloud = input;
-	const int nbPointsIn = outputCloud.features.cols();
-
-	const auto densities(outputCloud.getDescriptorViewByName("densities"));
+	DataPoints output(input.createSimilarEmpty());
+	
+	const int nbPointsIn = output.features.cols();
+	const auto densities(output.getDescriptorViewByName("densities"));
 	const T lastDensity = densities.maxCoeff();
 	const int nbSaturatedPts = (densities.cwise() == lastDensity).count();
 
@@ -458,27 +355,20 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPoi
 
 			if (r < acceptRatio)
 			{
-				outputCloud.features.col(j) = outputCloud.features.col(i);
-				if (outputCloud.descriptors.cols() > 0)
-					outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
+				output.setColFrom(j, input, i);
 				j++;
 			}
 		}
 		else
 		{
-			outputCloud.features.col(j) = outputCloud.features.col(i);
-			if (outputCloud.descriptors.cols() > 0)
-				outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
+			output.setColFrom(j, input, i);
 			j++;
 		}
 	}
 
-	// Reduce the point cloud size
-	outputCloud.features.conservativeResize(Eigen::NoChange, j);
-	if (outputCloud.descriptors.cols() > 0)
-		outputCloud.descriptors.conservativeResize(Eigen::NoChange,j);
+	output.conservativeResize(j);
 
-	return outputCloud;
+	return output;
 }
 
 template struct DataPointsFiltersImpl<float>::MaxDensityDataPointsFilter;
@@ -500,7 +390,6 @@ DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::SurfaceNormalDataPoints
 	keepMatchedIds(Parametrizable::get<bool>("keepMatchedIds"))
 {
 }
-
 
 // Compute
 template<typename T>
@@ -774,7 +663,6 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SamplingSurfaceNo
 	return output;
 }
 
-
 template<typename T>
 size_t argMax(const typename PointMatcher<T>::Vector& v)
 {
@@ -967,6 +855,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 template struct DataPointsFiltersImpl<float>::SamplingSurfaceNormalDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SamplingSurfaceNormalDataPointsFilter;
 
+
 // OrientNormalsDataPointsFilter
 // Constructor
 template<typename T>
@@ -1038,44 +927,24 @@ DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::RandomSamplingDataPoin
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::randomSample(const DataPoints& input) const
 {
-	Eigen::Matrix<double, 1, Eigen::Dynamic> filter;
-	filter.setRandom(input.features.cols());
-	filter = (filter.cwise() + 1)/2;
-
-	const int nbPoints = (filter.cwise() < prob).count();
-
-	//std::cout << "RandomSampling: size before: " << input.features.cols() << std::endl;
-
-	Matrix filteredFeat(input.features.rows(), nbPoints);
+	const int nbPointsIn = input.features.cols();
 	
-	int j(0);
-	for(int i = 0; i < filter.cols(); i++)
+	DataPoints output(input.createSimilarEmpty());
+	
+	int j = 0;
+	for (int i = 0; i < nbPointsIn; i++)
 	{
-		if(filter(i) < prob)
+		const float r = (float)std::rand()/(float)RAND_MAX;
+		if (r < prob)
 		{
-			filteredFeat.col(j) = input.features.col(i);
+			output.setColFrom(j, input, i);
 			j++;
 		}
 	}
-
-	// To handle no descriptors
-	Matrix filteredDesc;
-	if(input.descriptors.cols() > 0)
-	{
-		filteredDesc = Matrix(input.descriptors.rows(),nbPoints);
-		
-		int k(0);
-		for(int i = 0; i < filter.cols(); i++)
-		{
-			if(filter(i) < prob)
-			{
-				filteredDesc.col(k) = input.descriptors.col(i);
-				k++;
-			}
-		}
-	}
 	
-	return DataPoints(filteredFeat, input.featureLabels, filteredDesc, input.descriptorLabels);
+	output.conservativeResize(j);
+	
+	return output;
 }
 
 // filter
@@ -1138,37 +1007,17 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDa
 	const int iStep(step);
 	const int nbPointsIn = input.features.cols();
 	const int phase(rand() % iStep);
-	const int nbPointsOut = ((nbPointsIn - phase) + iStep - 1) / iStep;
-	Matrix filteredFeat(input.features.rows(), nbPointsOut);
 	
-	int j(0);
-	for (int i = 0; i < nbPointsIn-phase; i++)
+	DataPoints output(input.createSimilarEmpty());
+	
+	int j = 0;
+	for (int i = phase; i < nbPointsIn; i += iStep)
 	{
-		if ((i % iStep) == 0)
-		{
-			filteredFeat.col(j) = input.features.col(i+phase);
-			j++;
-		}
+		output.setColFrom(j, input, i);
+		j++;
 	}
-	assert(j == nbPointsOut);
-
-	// To handle no descriptors
-	Matrix filteredDesc;
-	if (input.descriptors.cols() > 0)
-	{
-		filteredDesc = Matrix(input.descriptors.rows(), nbPointsOut);
-		
-		j = 0;
-		for (int i = 0; i < nbPointsIn-phase; i++)
-		{
-			if ((i % iStep) == 0)
-			{
-				filteredDesc.col(j) = input.descriptors.col(i+phase);
-				j++;
-			}
-		}
-		assert(j == nbPointsOut);
-	}
+	
+	output.conservativeResize(j);
 	
 	const double deltaStep(startStep * stepMult - startStep);
 	step *= stepMult;
@@ -1177,7 +1026,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDa
 	if (deltaStep > 0 && step > endStep)
 		step = endStep;
 	
-	return DataPoints(filteredFeat, input.featureLabels, filteredDesc, input.descriptorLabels);
+	return output;
 }
 
 // Pre filter
@@ -1189,6 +1038,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::FixStepSamplingDa
 
 template struct DataPointsFiltersImpl<float>::FixStepSamplingDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::FixStepSamplingDataPointsFilter;
+
 
 // ShadowDataPointsFilter
 // Constructor
@@ -1212,31 +1062,30 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ShadowDataPointsF
 	}
 	
 	const int dim = input.features.rows();
-	DataPoints outputCloud(input);
+	DataPoints output(input.createSimilarEmpty());
 	
-	const auto normals(outputCloud.getDescriptorViewByName("normals"));
+	const auto normals(input.getDescriptorViewByName("normals"));
 	int j = 0;
 
-	for(int i=0; i < outputCloud.features.cols(); i++)
+	for(int i=0; i < input.features.cols(); i++)
 	{
 		const Vector normal = normals.col(i).normalized();
-		const Vector point = outputCloud.features.block(0, i, dim-1, 1).normalized();
+		const Vector point = input.features.block(0, i, dim-1, 1).normalized();
 		
 		const T value = anyabs(normal.dot(point));
 
 		if(value > eps) // test to keep the points
 		{
-			outputCloud.features.col(j) = outputCloud.features.col(i);
-			outputCloud.descriptors.col(j) = outputCloud.descriptors.col(i);
+			output.features.col(j) = input.features.col(i);
+			output.descriptors.col(j) = input.descriptors.col(i);
 			
 			j++;
 		}
 	}
+	
+	output.conservativeResize(j);
 
-	outputCloud.features.conservativeResize(Eigen::NoChange, j);
-	outputCloud.descriptors.conservativeResize(Eigen::NoChange, j);
-
-	return outputCloud;
+	return output;
 }
 
 template struct DataPointsFiltersImpl<float>::ShadowDataPointsFilter;
@@ -1290,9 +1139,9 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SimpleSensorNoise
 template struct DataPointsFiltersImpl<float>::SimpleSensorNoiseDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SimpleSensorNoiseDataPointsFilter;
 
+
 // ObservationDirectionDataPointsFilter
 // Constructor
-
 template<typename T>
 DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter::ObservationDirectionDataPointsFilter(const Parameters& params):
 	DataPointsFilter("ObservationDirectionDataPointsFilter", ObservationDirectionDataPointsFilter::availableParameters(), params),

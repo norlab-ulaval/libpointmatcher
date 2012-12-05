@@ -212,6 +212,68 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 	assertDescriptorConsistency();
 }
 
+//! Resize the cloud to pointCount points, conserving existing ones
+template<typename T>
+void PointMatcher<T>::DataPoints::conservativeResize(Index pointCount)
+{
+	features.conservativeResize(Eigen::NoChange, pointCount);
+	if (descriptors.cols() > 0)
+		descriptors.conservativeResize(Eigen::NoChange, pointCount);
+}
+
+//! Create an empty DataPoints of similar dimensions and labels, both for features and descriptors
+template<typename T>
+typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarEmpty() const
+{
+	const int nbPoints(features.cols());
+	DataPoints output(
+		Matrix(features.rows(), nbPoints),
+		featureLabels
+	);
+	if (descriptors.cols() > 0)
+	{
+		assert(descriptors.cols() == nbPoints);
+		output.descriptors = Matrix(descriptors.rows(), nbPoints);
+		output.descriptorLabels = descriptorLabels;
+	}
+	else
+	{
+		assert(descriptors.rows() == 0);
+	}
+	return output;
+}
+
+//! Create an empty DataPoints with pointCount points of similar dimensions and labels, both for features and descriptors
+template<typename T>
+typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarEmpty(Index pointCount) const
+{
+	DataPoints output(
+		Matrix(features.rows(), pointCount),
+		featureLabels
+	);
+	if (descriptors.cols() > 0)
+	{
+		assert(descriptors.cols() == pointCount);
+		output.descriptors = Matrix(descriptors.rows(), pointCount);
+		output.descriptorLabels = descriptorLabels;
+	}
+	else
+	{
+		assert(descriptors.rows() == 0);
+	}
+	return output;
+}
+
+//! Set column thisCol equal to column thatCol of that, copy features and descriptors if any. Assumes sizes are similar
+template<typename T>
+void PointMatcher<T>::DataPoints::setColFrom(Index thisCol, const DataPoints& that, Index thatCol)
+{
+	features.col(thisCol) = that.features.col(thatCol);
+	if (descriptors.cols() > 0)
+		descriptors.col(thisCol) = that.descriptors.col(thatCol);
+}
+
+
 //! Makes sure a feature of a given name exists, if present, check its dimensions
 template<typename T>
 void PointMatcher<T>::DataPoints::allocateFeature(const std::string& name, const unsigned dim)
