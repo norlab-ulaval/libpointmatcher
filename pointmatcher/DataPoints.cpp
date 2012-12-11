@@ -46,6 +46,12 @@ PointMatcher<T>::DataPoints::Label::Label(const std::string& text, const size_t 
 	span(span)
 {}
 
+//! Construct the exception with an error message
+template<typename T>
+PointMatcher<T>::DataPoints::InvalidField::InvalidField(const std::string& reason):
+	runtime_error(reason)
+{}
+
 //! Return whether two labels are equals
 template<typename T>
 bool PointMatcher<T>::DataPoints::Label::operator ==(const Label& that) const

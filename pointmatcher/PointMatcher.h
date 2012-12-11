@@ -128,8 +128,7 @@ struct PointMatcher
 	//! Point matcher did not converge
 	struct ConvergenceError: std::runtime_error
 	{
-		//! Construct the exception with an error message
-		ConvergenceError(const std::string& reason):runtime_error(reason) {}
+		ConvergenceError(const std::string& reason);
 	};
 	
 	// ---------------------------------
@@ -210,8 +209,7 @@ struct PointMatcher
 		//! An exception thrown when one tries to access features or descriptors unexisting or of wrong dimensions
 		struct InvalidField: std::runtime_error
 		{
-			//! Construct the exception with an error message
-			InvalidField(const std::string& reason):runtime_error(reason) {}
+			InvalidField(const std::string& reason);
 		};
 		
 		DataPoints();
@@ -476,7 +474,7 @@ struct PointMatcher
 	public:
 		TransformationChecker();
 		TransformationChecker(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
-		virtual ~TransformationChecker() {}
+		virtual ~TransformationChecker();
 		//! Init, set iterate to false if iteration should stop
 		virtual void init(const TransformationParameters& parameters, bool& iterate) = 0;
 		//! Set iterate to false if iteration should stop
@@ -566,7 +564,7 @@ struct PointMatcher
 		void cleanup();
 		
 		#ifdef HAVE_YAML_CPP
-		virtual void loadAdditionalYAMLContent(YAML::Node& doc) {}
+		virtual void loadAdditionalYAMLContent(YAML::Node& doc);
 		
 		template<typename R>
 		void createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);

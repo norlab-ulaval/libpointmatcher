@@ -77,6 +77,12 @@ void PointMatcher<T>::ICPChainBase::cleanup()
 	inspector.reset();
 }
 
+//! Hook to load addition subclass-specific content from the YAML file
+template<typename T>
+void PointMatcher<T>::ICPChainBase::loadAdditionalYAMLContent(YAML::Node& doc)
+{
+}
+
 //! Construct an ICP algorithm that works in most of the cases
 template<typename T>
 void PointMatcher<T>::ICPChainBase::setDefault()

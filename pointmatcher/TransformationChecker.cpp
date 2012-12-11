@@ -36,6 +36,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 #include "PointMatcherPrivate.h"
 
+//! Construct the exception with an error message
+template<typename T>
+PointMatcher<T>::ConvergenceError::ConvergenceError(const std::string& reason):
+	runtime_error(reason)
+{} 
+
+
 //! Construct without parameter
 template<typename T>
 PointMatcher<T>::TransformationChecker::TransformationChecker()
@@ -46,6 +53,11 @@ template<typename T>
 PointMatcher<T>::TransformationChecker::TransformationChecker(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 	Parametrizable(className,paramsDoc,params)
 {}
+
+//! Destructor
+template<typename T>
+PointMatcher<T>::TransformationChecker::~TransformationChecker()
+{} 
 
 //! Return the value of limits involved in conditions to stop ICP loop
 template<typename T>
