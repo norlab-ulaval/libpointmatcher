@@ -36,13 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 #include "PointMatcherPrivate.h"
 
-//! Construct the exception with an error message
-template<typename T>
-PointMatcher<T>::ConvergenceError::ConvergenceError(const std::string& reason):
-	runtime_error(reason)
-{} 
-
-
 //! Construct without parameter
 template<typename T>
 PointMatcher<T>::TransformationChecker::TransformationChecker()
@@ -110,6 +103,9 @@ typename PointMatcher<T>::Vector PointMatcher<T>::TransformationChecker::matrixT
 	return angles;
 }
 
+template struct PointMatcher<float>::TransformationChecker;
+template struct PointMatcher<double>::TransformationChecker;
+
 
 //! Init all transformation checkers, set iterate to false if iteration should stop
 template<typename T>
@@ -127,5 +123,5 @@ void PointMatcher<T>::TransformationCheckers::check(const TransformationParamete
 		(*it)->check(parameters, iterate);
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template struct PointMatcher<float>::TransformationCheckers;
+template struct PointMatcher<double>::TransformationCheckers;

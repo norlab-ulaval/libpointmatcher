@@ -75,5 +75,5 @@ T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 	return values[values.size() * quantile];
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template struct PointMatcher<float>::Matches;
+template struct PointMatcher<double>::Matches;

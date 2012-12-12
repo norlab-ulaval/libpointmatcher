@@ -108,6 +108,7 @@ add_definitions(-Wall)
 # Pointmatcher lib and install
 set(POINTMATCHER_SRC
 	pointmatcher/Logger.cpp
+	pointmatcher/Exceptions.cpp
 	pointmatcher/DataPoints.cpp
 	pointmatcher/Matches.cpp
 	pointmatcher/ICP.cpp

@@ -55,6 +55,10 @@ template<typename T>
 PointMatcher<T>::OutlierFilter::~OutlierFilter()
 {}
 
+template struct PointMatcher<float>::OutlierFilter;
+template struct PointMatcher<double>::OutlierFilter;
+
+
 //! Apply outlier-detection chain
 template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters::compute(
@@ -92,5 +96,5 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters::comput
 	}
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template struct PointMatcher<float>::OutlierFilters;
+template struct PointMatcher<double>::OutlierFilters;

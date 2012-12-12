@@ -40,11 +40,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <stdexcept>
 #include <ctype.h>
+#include "boost/algorithm/string.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/filesystem.hpp"
-#include "boost/algorithm/string.hpp"
 
 
 using namespace std;
@@ -365,6 +365,11 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::load(const std
 		throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
 }
 
+template
+PointMatcher<float>::DataPoints PointMatcher<float>::DataPoints::load(const std::string& fileName);
+template
+PointMatcher<double>::DataPoints PointMatcher<double>::DataPoints::load(const std::string& fileName);
+
 
 //! @brief Load comma separated values (csv) file
 //! @param fileName a string containing the path and the file name
@@ -575,9 +580,9 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 }
 
 template
-PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadCSV(const std::string& fileName);
+PointMatcher<float>::DataPoints PointMatcherIO<float>::loadCSV(const std::string& fileName);
 template
-PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadCSV(const std::string& fileName);
+PointMatcher<double>::DataPoints PointMatcherIO<double>::loadCSV(const std::string& fileName);
 
 //! Save a point cloud to a file, determine format from extension
 template<typename T>
@@ -592,6 +597,11 @@ void PointMatcher<T>::DataPoints::save(const std::string& fileName) const
 	else
 		throw runtime_error("saveAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
 }
+
+template
+void PointMatcher<float>::DataPoints::save(const std::string& fileName) const;
+template
+void PointMatcher<double>::DataPoints::save(const std::string& fileName) const;
 
 //! Save point cloud to a file as CSV
 template<typename T>
@@ -749,7 +759,3 @@ template
 void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName);
 template
 void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
-
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
-

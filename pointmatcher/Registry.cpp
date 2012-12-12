@@ -123,6 +123,6 @@ const PointMatcher<T>& PointMatcher<T>::get()
 	return _getPM<T>();
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template const PointMatcher<float>& PointMatcher<float>::get();
+template const PointMatcher<double>& PointMatcher<double>::get();
 

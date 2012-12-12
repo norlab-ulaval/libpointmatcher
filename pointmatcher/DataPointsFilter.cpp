@@ -57,6 +57,10 @@ template<typename T>
 void PointMatcher<T>::DataPointsFilter::init()
 {}
 
+template struct PointMatcher<float>::DataPointsFilter;
+template struct PointMatcher<double>::DataPointsFilter;
+
+
 //! Construct an empty chain
 template<typename T>
 PointMatcher<T>::DataPointsFilters::DataPointsFilters()
@@ -123,5 +127,5 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 	LOG_INFO_STREAM("Applied " << this->size() << " filters - " << nbPointsAfterFilters << " points out (-" << (100 - double(nbPointsAfterFilters*100.)/nbPointsBeforeFilters) << "\%)");
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template struct PointMatcher<float>::DataPointsFilters;
+template struct PointMatcher<double>::DataPointsFilters;

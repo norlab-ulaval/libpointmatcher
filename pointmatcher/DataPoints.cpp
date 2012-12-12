@@ -698,6 +698,10 @@ unsigned PointMatcher<T>::DataPoints::getFieldStartingRow(const std::string& nam
 	return 0;
 }
 
+template struct PointMatcher<float>::DataPoints;
+template struct PointMatcher<double>::DataPoints;
+
+
 //! Exchange in place point clouds a and b, with no data copy
 template<typename T>
 void PointMatcher<T>::swapDataPoints(DataPoints& a, DataPoints& b)
@@ -708,5 +712,7 @@ void PointMatcher<T>::swapDataPoints(DataPoints& a, DataPoints& b)
 	swap(a.descriptorLabels, b.descriptorLabels);
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template
+void PointMatcher<float>::swapDataPoints(DataPoints& a, DataPoints& b);
+template
+void PointMatcher<double>::swapDataPoints(DataPoints& a, DataPoints& b);

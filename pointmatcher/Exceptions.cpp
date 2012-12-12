@@ -34,39 +34,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "PointMatcher.h"
-#include "PointMatcherPrivate.h"
 
-//! Construct without parameter
+//! Construct the exception with an error message
 template<typename T>
-PointMatcher<T>::Transformation::Transformation()
-{}
+PointMatcher<T>::ConvergenceError::ConvergenceError(const std::string& reason):
+	runtime_error(reason)
+{} 
 
-//! Construct with parameters
-template<typename T>
-PointMatcher<T>::Transformation::Transformation(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
-	Parametrizable(className,paramsDoc,params)
-{}
-
-//! virtual destructor
-template<typename T>
-PointMatcher<T>::Transformation::~Transformation()
-{}
-
-template struct PointMatcher<float>::Transformation;
-template struct PointMatcher<double>::Transformation;
-
-
-//! Apply this chain to cloud, using parameters, mutates cloud
-template<typename T>
-void PointMatcher<T>::Transformations::apply(DataPoints& cloud, const TransformationParameters& parameters) const
-{
-	DataPoints transformedCloud;
-	for (TransformationsConstIt it = this->begin(); it != this->end(); ++it)
-	{
-		transformedCloud = (*it)->compute(cloud, parameters);
-		swapDataPoints(cloud, transformedCloud);
-	}
-}
-
-template struct PointMatcher<float>::Transformations;
-template struct PointMatcher<double>::Transformations;
+template struct PointMatcher<float>::ConvergenceError;
+template struct PointMatcher<double>::ConvergenceError;
