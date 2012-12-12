@@ -101,6 +101,3 @@ namespace PointMatcherSupport
 		logger.reset(newLogger);
 	}
 }
-
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;

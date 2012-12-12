@@ -86,5 +86,5 @@ template<typename T>
 void PointMatcher<T>::Inspector::finish(const size_t iterationCount)
 {}
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template struct PointMatcher<float>::Inspector;
+template struct PointMatcher<double>::Inspector;

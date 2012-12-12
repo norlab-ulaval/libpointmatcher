@@ -68,5 +68,5 @@ unsigned long PointMatcher<T>::Matcher::getVisitCount() const
 	return visitCounter;
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template struct PointMatcher<float>::Matcher;
+template struct PointMatcher<double>::Matcher;

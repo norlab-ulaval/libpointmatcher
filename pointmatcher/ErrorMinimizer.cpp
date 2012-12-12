@@ -217,5 +217,5 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorM
 	return lastErrorElements;
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template struct PointMatcher<float>::ErrorMinimizer;
+template struct PointMatcher<double>::ErrorMinimizer;

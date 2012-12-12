@@ -77,11 +77,15 @@ void PointMatcher<T>::ICPChainBase::cleanup()
 	inspector.reset();
 }
 
+#ifdef HAVE_YAML_CPP
+
 //! Hook to load addition subclass-specific content from the YAML file
 template<typename T>
 void PointMatcher<T>::ICPChainBase::loadAdditionalYAMLContent(YAML::Node& doc)
 {
 }
+
+#endif // HAVE_YAML_CPP
 
 //! Construct an ICP algorithm that works in most of the cases
 template<typename T>
@@ -152,6 +156,7 @@ unsigned PointMatcher<T>::ICPChainBase::getPrefilteredReferencePtsCount() const
 
 #ifdef HAVE_YAML_CPP
 
+//! Instantiate modules if their names are in the YAML file
 template<typename T>
 template<typename R>
 void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules)
@@ -168,6 +173,7 @@ void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string
 	}
 }
 
+//! Instantiate a module if its name is in the YAML file
 template<typename T>
 template<typename R>
 void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module)
@@ -183,6 +189,10 @@ void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string&
 }
 
 #endif // HAVE_YAML_CPP
+
+template struct PointMatcher<float>::ICPChainBase;
+template struct PointMatcher<double>::ICPChainBase;
+
 
 //! Perform ICP and return optimised transformation matrix
 template<typename T>
@@ -375,6 +385,10 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
 }
 
+template struct PointMatcher<float>::ICP;
+template struct PointMatcher<double>::ICP;
+
+
 //! Return whether the object currently holds a valid map
 template<typename T>
 bool PointMatcher<T>::ICPSequence::hasMap() const
@@ -489,5 +503,5 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn);
 }
 
-template struct PointMatcher<float>;
-template struct PointMatcher<double>;
+template struct PointMatcher<float>::ICPSequence;
+template struct PointMatcher<double>::ICPSequence;
