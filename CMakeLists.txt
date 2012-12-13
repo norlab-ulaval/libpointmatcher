@@ -97,9 +97,9 @@ endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 
 # link rt support if POSIX timers are used
 check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
-if (POSIX_TIMERS)
+if (POSIX_TIMERS AND NOT APPLE)
 	set(EXTRA_LIBS ${EXTRA_LIBS} rt)
-endif (POSIX_TIMERS)
+endif (POSIX_TIMERS AND NOT APPLE)
 
 # include all libs so far
 include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
