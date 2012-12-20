@@ -81,7 +81,7 @@ PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in)
 	for(YAML::Iterator moduleIt = doc.begin(); moduleIt != doc.end(); ++moduleIt)
 	{
 		const YAML::Node& module(*moduleIt);
-		push_back(pm.REG(DataPointsFilter).createFromYAML(module));
+		this->push_back(pm.REG(DataPointsFilter).createFromYAML(module));
 	}
 	
 	#endif // HAVE_YAML_CPP

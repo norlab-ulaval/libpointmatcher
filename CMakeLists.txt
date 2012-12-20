@@ -85,10 +85,7 @@ find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
 	/usr/local/include
 	/usr/include
 )
-find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
-	/usr/local/lib
-	/usr/lib
-NO_DEFAULT_PATH)
+find_library(yaml-cpp_LIBRARIES yaml-cpp)
 if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 	include_directories(${yaml-cpp_INCLUDE_DIRS})
 	set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
