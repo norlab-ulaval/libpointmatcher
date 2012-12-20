@@ -50,17 +50,14 @@ find_package(Boost COMPONENTS thread filesystem system program_options date_time
 find_path(EIGEN_INCLUDE_DIR Eigen/Core
 	/usr/local/include/eigen3
 	/usr/include/eigen3
-	/opt/ros/diamondback/stacks/geometry/eigen/include
 )
 
 # nabo
 find_path(NABO_INCLUDE_DIR nabo/nabo.h
 	/usr/local/include
-	/usr/include
 )
 find_library(NABO_LIBRARY NAMES libnabo.a nabo PATHS
 	/usr/local/lib
-	/usr/lib
 )
 
 # optionally, look for OpenCL library
@@ -83,7 +80,6 @@ endif(USE_OPEN_CL)
 # yaml-cpp
 find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
 	/usr/local/include
-	/usr/include
 )
 find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
 	/usr/local/lib
