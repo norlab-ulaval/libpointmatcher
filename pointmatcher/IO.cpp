@@ -262,7 +262,7 @@ PointMatcherIO<T>::FileInfoVector::FileInfoVector(const std::string& fileName, s
 			info.groundTruthTransformation = getTransform(data, "gT", 2, line);
 		
 		// Build the list
-		push_back(info);
+		this->push_back(info);
 	}
 	
 	// Debug: Print the list

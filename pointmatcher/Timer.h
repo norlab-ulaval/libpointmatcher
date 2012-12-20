@@ -43,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace PointMatcherSupport
 {
 	/**
-		High-precision timer class, using gettimeofday().
+		High-precision timer class, using clock_gettime() or clock_get_time()
 		
 		The interface is a subset of the one boost::timer provides,
 		but the implementation is much more precise
