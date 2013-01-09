@@ -39,13 +39,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <limits>
 
 
 namespace PointMatcherSupport
-{
+{	
 	//! A lexical casting function that is an improvements over boost::lexical_cast that can handle "inf", "-inf", "Nan" for float and doubles
 	template<typename Target>
 	inline Target lexical_cast_scalar_to_string(const std::string& arg)
@@ -149,20 +150,22 @@ namespace PointMatcherSupport
 		*/
 		typedef std::string Parameter; //!< alias
 		typedef std::map<std::string, Parameter> Parameters; //!< Parameters stored as a map of string->string
+		typedef std::set<std::string> ParametersUsed; //!< Parameters whose value has been read
 		
 		const std::string className; //!< name of the class
 		const ParametersDoc parametersDoc; //!< documentation of parameters
 		Parameters parameters; //!< parameters with their values encoded in string
+		ParametersUsed parametersUsed; //!< parameters whose value has actually been read
 		
 		Parametrizable();
 		Parametrizable(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~Parametrizable();
 		
-		std::string getParamValueString(const std::string& paramName) const;
+		std::string getParamValueString(const std::string& paramName);
 		
 		//! Return the value of paramName, lexically-casted to S
 		template<typename S>
-		S get(const std::string& paramName) const { return lexical_cast<S>(getParamValueString(paramName)); }
+		S get(const std::string& paramName) { return lexical_cast<S>(getParamValueString(paramName)); }
 		
 		//! Dump the documentation of this object to a stream
 		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p) { o << p.parametersDoc; return o; }

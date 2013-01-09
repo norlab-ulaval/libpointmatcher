@@ -191,12 +191,13 @@ namespace PointMatcherSupport
 	{}
 
 	//! Get the value of a parameter, as a string
-	std::string Parametrizable::getParamValueString(const std::string& paramName) const
+	std::string Parametrizable::getParamValueString(const std::string& paramName)
 	{
 		Parameters::const_iterator paramIt(parameters.find(paramName));
 		if (paramIt == parameters.end())
 			throw InvalidParameter((boost::format("Parameter %1% does not exist in class %2%") % paramName % className).str());
 		// TODO: use string distance to propose close one, copy/paste code from Aseba
+		this->parametersUsed.insert(paramIt->first);
 		return paramIt->second;
 	}
 } // namespace PointMatcherSupport

@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_REGISTRAR_H
 
 #include "Parametrizable.h"
+#include "PointMatcher.h"
+#include "PointMatcherPrivate.h"
 #include <boost/format.hpp>
 
 #ifdef HAVE_YAML_CPP
@@ -58,7 +60,7 @@ namespace PointMatcherSupport
 			//! Virtual destructor, do nothing
 			virtual ~ClassDescriptor() {}
 			//! Create an instance of Interface using params
-			virtual Interface* createInstance(const Parametrizable::Parameters& params) const = 0;
+			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const = 0;
 			//! Return the description of this class
 			virtual const std::string description() const = 0;
 			//! Return the available parameters for this class
@@ -69,9 +71,13 @@ namespace PointMatcherSupport
 		template<typename C>
 		struct GenericClassDescriptor: public ClassDescriptor
 		{
-			virtual Interface* createInstance(const Parametrizable::Parameters& params) const
+			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
-				return new C(params);
+				C* instance(new C(params));
+				for (auto it(params.begin()); it != params.end() ;++it)
+					if (instance->parametersUsed.find(it->first) == instance->parametersUsed.end())
+						LOG_WARNING_STREAM("Parameter " << it->first << " was not used by module " << className);
+				return instance;
 			}
 			virtual const std::string description() const
 			{
@@ -87,8 +93,10 @@ namespace PointMatcherSupport
 		template<typename C>
 		struct GenericClassDescriptorNoParam: public ClassDescriptor
 		{
-			virtual Interface* createInstance(const Parametrizable::Parameters& params) const
+			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
+				for (auto it(params.begin()); it != params.end() ;++it)
+					LOG_WARNING_STREAM("Parameter " << it->first << " was not used by module " << className);
 				return new C();
 			}
 			virtual const std::string description() const
@@ -134,7 +142,7 @@ namespace PointMatcherSupport
 		//! Create an instance
 		Interface* create(const std::string& name, const Parametrizable::Parameters& params = Parametrizable::Parameters()) const
 		{
-			return getDescriptor(name)->createInstance(params);
+			return getDescriptor(name)->createInstance(name, params);
 		}
 		
 		#ifdef HAVE_YAML_CPP
