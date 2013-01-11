@@ -74,9 +74,21 @@ namespace PointMatcherSupport
 			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
 				C* instance(new C(params));
+				//for (auto it(instance->parametersUsed.begin()); it != instance->parametersUsed.end(); ++it)
+				//{
+				//	std::cout << *it << std::endl;
+				//}
+
+				//std::cout << "+++++++++++++++++" << std::endl;
+
 				for (auto it(params.begin()); it != params.end() ;++it)
+				{
 					if (instance->parametersUsed.find(it->first) == instance->parametersUsed.end())
-						LOG_WARNING_STREAM("Parameter " << it->first << " was not used by module " << className);
+						//LOG_WARNING_STREAM("Parameter " << it->first << " was not used by module " << className);
+						std::cout << "Registrar: Parameter " << it->first << " was not used by module " << className << std::endl;
+				}
+				
+				
 				return instance;
 			}
 			virtual const std::string description() const

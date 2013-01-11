@@ -7,7 +7,7 @@ readingDataPointsFilters:
 
 referenceDataPointsFilters:
   - SamplingSurfaceNormalDataPointsFilter:
-      binSize: 10
+      knn: 10
 
 matcher:
   KDTreeMatcher:
@@ -30,8 +30,8 @@ transformationCheckers:
       smoothLength: 4   
       
 inspector:
-#  NullInspector
-  VTKFileInspector
+  NullInspector
+#  VTKFileInspector
 
 logger:
 #	NullLogger

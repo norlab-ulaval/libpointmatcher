@@ -19,7 +19,7 @@ referenceDataPointsFilters:
 matcher:
   KDTreeMatcher:
     knn: 1
-    epsilon: 10 
+    epsilon: 3.16
 
 outlierFilters:
   - TrimmedDistOutlierFilter:
