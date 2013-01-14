@@ -55,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include "Parametrizable.h"
-#include "Registrar.h"
 
 #if NABO_VERSION_INT < 10001
 	#error "You need libnabo version 1.0.1 or greater"
@@ -107,6 +106,9 @@ namespace PointMatcherSupport
 	//! Data from a CSV file
 	typedef std::map<std::string, std::vector<std::string>> CsvElements;
 }
+
+// registrar is here because it needs to know about Logger
+#include "Registrar.h"
 
 //! Functions and classes that are dependant on scalar type are defined in this templatized class
 template<typename T>
