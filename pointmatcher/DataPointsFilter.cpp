@@ -107,7 +107,7 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 	DataPoints filteredCloud;
 	cloud.assertDescriptorConsistency();
 	const int nbPointsBeforeFilters(cloud.features.cols());
-	LOG_INFO_STREAM("Applying " << this->size() << " filters - " << nbPointsBeforeFilters << " points in");
+	LOG_INFO_STREAM("Applying " << this->size() << " DataPoints filters - " << nbPointsBeforeFilters << " points in");
 
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
 	{
