@@ -85,10 +85,11 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters::comput
 	else
 	{
 		// apply filters, they should take care of infinite distances
+		LOG_INFO_STREAM("Applying " << this->size() << " Outlier filters" );
 		OutlierWeights w = (*this->begin())->compute(filteredReading, filteredReference, input);
+		LOG_INFO_STREAM("* " << (*this->begin())->className );
 		if (this->size() > 1)
 		{
-			LOG_INFO_STREAM("Applying " << this->size() << " Outlier filters" );
 			for (OutlierFiltersConstIt it = (this->begin() + 1); it != this->end(); ++it)
 			{
 				w = w.array() * (*it)->compute(filteredReading, filteredReference, input).array();
