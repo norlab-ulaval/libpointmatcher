@@ -178,9 +178,8 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorM
 
 	assert(j == pointsCount);
 
-	//FIXME: This is not true with multiple knn
-	this->pointUsedRatio = double(j)/double(requestedPts.features.cols());
-	this->weightedPointUsedRatio /= double(requestedPts.features.cols());
+	this->pointUsedRatio = double(j)/double(knn*requestedPts.features.cols());
+	this->weightedPointUsedRatio /= double(knn*requestedPts.features.cols());
 	
 	assert(dimFeat == sourcePts.features.rows());
 	const int dimSourDesc = sourcePts.descriptors.rows();
