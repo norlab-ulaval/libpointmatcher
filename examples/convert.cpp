@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 		}
 		PM::DataPointsFilters f(ifs);
 		f.apply(d);
+
 	}
 	
 	d.save(argv[argc-1]);

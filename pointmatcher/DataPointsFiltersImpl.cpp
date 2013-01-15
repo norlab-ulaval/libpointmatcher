@@ -324,6 +324,9 @@ DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::MaxDensityDataPointsFilter
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::filter(const DataPoints& input)
 {
+	typedef typename DataPoints::View View;
+	typedef typename DataPoints::ConstView ConstView;
+
 	// Force densities to be computed
 	if (!input.descriptorExists("densities"))
 	{
@@ -333,7 +336,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::MaxDensityDataPoi
 	DataPoints output(input.createSimilarEmpty());
 	
 	const int nbPointsIn = output.features.cols();
-	const auto densities(output.getDescriptorViewByName("densities"));
+	ConstView densities = input.getDescriptorViewByName("densities");
 	const T lastDensity = densities.maxCoeff();
 	const int nbSaturatedPts = (densities.cwise() == lastDensity).count();
 
@@ -550,8 +553,11 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPoin
 template<typename T>
 T DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::computeDensity(const Matrix NN)
 {
+	//volume in meter
+	T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff(), 3);
+
 	//volume in decimeter
-	T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff()*10.0, 3);
+	//T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff()*10.0, 3);
 	//const T minVolume = 4.18e-9; // minimum of volume of one millimeter radius
 	//const T minVolume = 0.42; // minimum of volume of one centimeter radius (in dm^3)
 
@@ -850,6 +856,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 		
 		++data.outputInsertionPoint;
 	}
+
 }
 
 template struct DataPointsFiltersImpl<float>::SamplingSurfaceNormalDataPointsFilter;
