@@ -176,7 +176,8 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const Matrix A = wF * F.transpose();
 	if (A.fullPivHouseholderQr().rank() != A.rows())
 	{
-		throw ConvergenceError("encountered singular while minimizing point to plane distance");
+		// TODO: handle that properly
+		//throw ConvergenceError("encountered singular while minimizing point to plane distance");
 	}
 
 	const Matrix deltas = mPts.reading.features - mPts.reference.features;
