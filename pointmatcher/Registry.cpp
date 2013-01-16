@@ -51,6 +51,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
+//! Construct an invalid-element exception
+InvalidElement::InvalidElement(const std::string& reason):
+	runtime_error(reason)
+{}
 
 //! Constructor, populates the registrars
 template<typename T>

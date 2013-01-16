@@ -1,6 +1,3 @@
-transformations:
-  - TransformFeatures
-
 readingDataPointsFilters:
   - RandomSamplingDataPointsFilter:
       prob: 0.5

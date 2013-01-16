@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 #include "Parametrizable.h"
+#include "Registrar.h"
 
 #if NABO_VERSION_INT < 10001
 	#error "You need libnabo version 1.0.1 or greater"
@@ -74,6 +75,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
 {
+	//! An exception thrown when one tries to use a module type that does not exist
+	struct InvalidModuleType: std::runtime_error
+	{
+		InvalidModuleType(const std::string& reason);
+	};
+	
 	//! A vector of std::shared_ptr<S> that behaves like a std::vector<S>
 	template<typename S>
 	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
@@ -106,9 +113,6 @@ namespace PointMatcherSupport
 	//! Data from a CSV file
 	typedef std::map<std::string, std::vector<std::string>> CsvElements;
 }
-
-// registrar is here because it needs to know about Logger
-#include "Registrar.h"
 
 //! Functions and classes that are dependant on scalar type are defined in this templatized class
 template<typename T>
@@ -569,10 +573,10 @@ struct PointMatcher
 		virtual void loadAdditionalYAMLContent(YAML::Node& doc);
 		
 		template<typename R>
-		void createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
+		const std::string& createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
 		template<typename R>
-		void createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
+		const std::string& createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
 		
 		/*template<typename R>
 		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);*/

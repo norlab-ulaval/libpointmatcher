@@ -49,6 +49,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
+//! Construct an invalid--module-type exception
+InvalidModuleType::InvalidModuleType(const std::string& reason):
+	runtime_error(reason)
+{}
+
 //! Protected contstructor, to prevent the creation of this object
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
@@ -116,24 +121,38 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	YAML::Node doc;
 	parser.GetNextDocument(doc);
 	
+	typedef set<string> StringSet;
+	StringSet usedModuleTypes;
+	
 	PointMatcher<T> pm;
 	
-	createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters);
-	createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters);
-	createModulesFromRegistrar("referenceDataPointsFilters", doc, pm.REG(DataPointsFilter), referenceDataPointsFilters);
-	//createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations);
+	usedModuleTypes.insert(createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters));
+	usedModuleTypes.insert(createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters));
+	usedModuleTypes.insert(createModulesFromRegistrar("referenceDataPointsFilters", doc, pm.REG(DataPointsFilter), referenceDataPointsFilters));
+	//usedModuleTypes.insert(createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations));
 	this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
-	createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher);
-	createModulesFromRegistrar("outlierFilters", doc, pm.REG(OutlierFilter), outlierFilters);
-	createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer);
-	createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers);
-	createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector);
+	usedModuleTypes.insert(createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher));
+	usedModuleTypes.insert(createModulesFromRegistrar("outlierFilters", doc, pm.REG(OutlierFilter), outlierFilters));
+	usedModuleTypes.insert(createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer));
+	usedModuleTypes.insert(createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers));
+	usedModuleTypes.insert(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector));
 	{
 		boost::mutex::scoped_lock lock(loggerMutex);
-		createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger);
+		usedModuleTypes.insert(createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger));
 	}
 	
 	loadAdditionalYAMLContent(doc);
+	
+	// check YAML entries that do not correspend to any module
+	for(YAML::Iterator moduleTypeIt = doc.begin(); moduleTypeIt != doc.end(); ++moduleTypeIt)
+	{
+		string moduleType;
+		moduleTypeIt.first() >> moduleType;
+		if (usedModuleTypes.find(moduleType) == usedModuleTypes.end())
+			throw InvalidModuleType(
+				(boost::format("Module type %1% does not exist") % moduleType).str()
+			);
+	}
 	
 	#else // HAVE_YAML_CPP
 	throw runtime_error("Yaml support not compiled in. Install yaml-cpp, configure build and recompile.");
@@ -159,7 +178,7 @@ unsigned PointMatcher<T>::ICPChainBase::getPrefilteredReferencePtsCount() const
 //! Instantiate modules if their names are in the YAML file
 template<typename T>
 template<typename R>
-void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules)
+const std::string& PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules)
 {
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
@@ -171,12 +190,13 @@ void PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string
 			modules.push_back(registrar.createFromYAML(module));
 		}
 	}
+	return regName;
 }
 
 //! Instantiate a module if its name is in the YAML file
 template<typename T>
 template<typename R>
-void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module)
+const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module)
 {
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
@@ -186,6 +206,7 @@ void PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string&
 	}
 	else
 		module.reset();
+	return regName;
 }
 
 #endif // HAVE_YAML_CPP

@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Parametrizable.h"
 #include "PointMatcher.h"
-#include "PointMatcherPrivate.h"
 #include <boost/format.hpp>
 
 #ifdef HAVE_YAML_CPP
@@ -47,6 +46,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace PointMatcherSupport
 {
+	//! An exception thrown when one tries to instanciate an element that does not exist in the registrar
+	struct InvalidElement: std::runtime_error
+	{
+		InvalidElement(const std::string& reason);
+	};
+	
 	//! A factor for subclasses of Interface
 	template<typename Interface>
 	struct Registrar
@@ -74,20 +79,15 @@ namespace PointMatcherSupport
 			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
 				C* instance(new C(params));
-				//for (auto it(instance->parametersUsed.begin()); it != instance->parametersUsed.end(); ++it)
-				//{
-				//	std::cout << *it << std::endl;
-				//}
-
-				//std::cout << "+++++++++++++++++" << std::endl;
-
+				
+				// check that there was no unsed parameter
 				for (auto it(params.begin()); it != params.end() ;++it)
 				{
 					if (instance->parametersUsed.find(it->first) == instance->parametersUsed.end())
-						//LOG_WARNING_STREAM("Parameter " << it->first << " was not used by module " << className);
-						std::cout << "Registrar: Parameter " << it->first << " was not used by module " << className << std::endl;
+						throw Parametrizable::InvalidParameter(
+							(boost::format("Parameter %1% for module %2% was set but is not used") % it->first % className).str()
+						);
 				}
-				
 				
 				return instance;
 			}
@@ -108,7 +108,9 @@ namespace PointMatcherSupport
 			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
 				for (auto it(params.begin()); it != params.end() ;++it)
-					LOG_WARNING_STREAM("Parameter " << it->first << " was not used by module " << className);
+					throw Parametrizable::InvalidParameter(
+							(boost::format("Parameter %1% was set but module %2% dos not use any parameter") % it->first % className).str()
+						);
 				return new C();
 			}
 			virtual const std::string description() const
@@ -146,7 +148,9 @@ namespace PointMatcherSupport
 			{
 				std::cerr << "No element named " << name << " is registered. Known ones are:\n";
 				dump(std::cerr);
-				throw std::runtime_error((boost::format("Trying to instanciate unknown element %1% from registrar") % name).str());
+				throw InvalidElement(
+					(boost::format("Trying to instanciate unknown element %1% from registrar") % name).str()
+				);
 			}
 			return it->second;
 		}
