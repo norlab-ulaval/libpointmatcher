@@ -7,6 +7,6 @@
    zMax: 4.0
    removeInside: 1
 - SamplingSurfaceNormalDataPointsFilter:
-    binSize: 10
+    knn: 10
 - ObservationDirectionDataPointsFilter
 - OrientNormalsDataPointsFilter

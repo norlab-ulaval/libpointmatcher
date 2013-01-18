@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "gtest/gtest.h"
 #include <string>
 
+#include <fstream>
+
 using namespace std;
 using namespace PointMatcherSupport;
 
@@ -224,6 +226,29 @@ TEST(PointCloudTest, ConcatenateDescDiffSize)
 		Labels(Label("DescND", 5))
 	);
 	EXPECT_THROW(lefts.concatenate(rights), DP::InvalidField);
+}
+
+//---------------------------
+// Tests for IO
+//---------------------------
+
+TEST(IOTest, loadYaml)
+{
+
+	// Test loading configuration files for data filters
+	std::ifstream ifs0(dataPath + "default-convert.yaml");
+	EXPECT_NO_THROW(PM::DataPointsFilters filters(ifs0));
+
+	// Test loading configuration files for ICP
+	PM::ICP icp;
+	std::ifstream ifs1(dataPath + "default.yaml");
+	EXPECT_NO_THROW(icp.loadFromYaml(ifs1));
+
+	std::ifstream ifs2(dataPath + "unit_tests/badIcpConfig_InvalidParameter.yaml");
+	EXPECT_THROW(icp.loadFromYaml(ifs2), PointMatcherSupport::Parametrizable::InvalidParameter);
+	
+	std::ifstream ifs3(dataPath + "unit_tests/badIcpConfig_InvalidModuleType.yaml");
+	EXPECT_THROW(icp.loadFromYaml(ifs3), PointMatcherSupport::InvalidModuleType);
 }
 
 //---------------------------
@@ -531,13 +556,12 @@ TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 {
 	// This filter create descriptor AND subsample
 	params = PM::Parameters({
-		{"binSize", "5"}, 
+		{"knn", "5"}, 
 		{"averageExistingDescriptors", "1"}, 
 		{"keepNormals", "1"},
 		{"keepDensities", "1"},
 		{"keepEigenValues", "1"},
-		{"keepEigenVectors", "1" },
-		{"keepMatchedIds" , "1" }
+		{"keepEigenVectors", "1" }
 		});
 	
 	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
