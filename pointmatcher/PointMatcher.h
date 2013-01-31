@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif // EIGEN_USE_NEW_STDVECTOR
 #define EIGEN2_SUPPORT
 #include "Eigen/StdVector"
-#include "Eigen/Eigen"
+#include "Eigen/Core"
 #include "Eigen/Geometry"
 
 #include "nabo/nabo.h"
@@ -68,9 +68,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //! version of the Pointmatcher library as string
-#define POINTMATCHER_VERSION "1.0.1"
+#define POINTMATCHER_VERSION "1.0.2"
 //! version of the Pointmatcher library as an int
-#define POINTMATCHER_VERSION_INT 10001
+#define POINTMATCHER_VERSION_INT 10002
 
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
