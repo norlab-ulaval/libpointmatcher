@@ -66,7 +66,7 @@ struct PointMatcherIO
 	//! Information to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo 
 	{
-		typedef Eigen::Matrix<T, 3, 1> Vector3;
+		typedef Eigen::Matrix<T, 3, 1> Vector3; //!< alias
 		
 		std::string readingFileName; //!< file name of the reading point cloud
 		std::string referenceFileName; //!< file name of the reference point cloud
