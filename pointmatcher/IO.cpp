@@ -41,10 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 #include <ctype.h>
 #include "boost/algorithm/string.hpp"
+#include "boost/filesystem.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/lexical_cast.hpp"
-#include "boost/filesystem.hpp"
 
 
 using namespace std;

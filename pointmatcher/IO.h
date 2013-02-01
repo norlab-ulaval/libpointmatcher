@@ -66,14 +66,16 @@ struct PointMatcherIO
 	//! Information to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo 
 	{
+		typedef Eigen::Matrix<T, 3, 1> Vector3;
+		
 		std::string readingFileName; //!< file name of the reading point cloud
 		std::string referenceFileName; //!< file name of the reference point cloud
 		std::string configFileName; //!< file name of the yaml configuration
 		TransformationParameters initialTransformation; //!< matrix of initial estimate transform
 		TransformationParameters groundTruthTransformation; //!< matrix of the ground-truth transform
-		Eigen::Matrix<T, 3, 1> gravity; //!< gravity vector
+		Vector3 gravity; //!< gravity vector
 
-		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& grativity=Eigen::Matrix<T,3,1>::Zero());
+		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& grativity=Vector3::Zero());
 	};
 
 	//! A vector of file info, to be used in batch processing

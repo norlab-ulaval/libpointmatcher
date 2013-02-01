@@ -15,26 +15,36 @@ execute_process(
 string(REGEX REPLACE ".*\"(.*)\".*" "\\1" PROJECT_VERSION "${PROJECT_VERSION}" )
 
 # c++ 0x
-#if("${CMAKE_CXX_COMPILER_ID}" MATCHES "clang") 
-#	set(CMAKE_COMPILER_IS_CLANGXX)
-#endif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "clang")
-if(CMAKE_COMPILER_IS_GNUCXX)
-	execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-	if (GCC_VERSION VERSION_GREATER 4.4 OR GCC_VERSION VERSION_EQUAL 4.4)
-		add_definitions(-std=gnu++0x)
-	else (GCC_VERSION VERSION_GREATER 4.4 OR GCC_VERSION VERSION_EQUAL 4.4)
-		message(SEND_ERROR "You need GCC version 4.4 or greater to compile this library")
-	endif (GCC_VERSION VERSION_GREATER 4.4 OR GCC_VERSION VERSION_EQUAL 4.4)
-	add_definitions(-Wstrict-overflow=0)
-else(CMAKE_COMPILER_IS_GNUCXX)
-	message(SEND_ERROR "You need partial C++0x support for N2351, N2672, N1984. Currently this build toolchain supports only GCC >= 4.4. If your compiler supports these specifications, please send us a patch.")
-endif(CMAKE_COMPILER_IS_GNUCXX)
+set (COMPILER_IS_CLANG FALSE)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set (COMPILER_IS_CLANG TRUE)
+endif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if(CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
+	# gcc checks
+	if (CMAKE_COMPILER_IS_GNUCXX)
+		execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+		if (GCC_VERSION VERSION_GREATER 4.4 OR GCC_VERSION VERSION_EQUAL 4.4)
+			add_definitions(-std=gnu++0x)
+		else (GCC_VERSION VERSION_GREATER 4.4 OR GCC_VERSION VERSION_EQUAL 4.4)
+			message(SEND_ERROR "You need GCC version 4.4 or greater to compile this library")
+		endif (GCC_VERSION VERSION_GREATER 4.4 OR GCC_VERSION VERSION_EQUAL 4.4)
+		add_definitions(-Wstrict-overflow=0)
+	endif (CMAKE_COMPILER_IS_GNUCXX)
+	# clang checks
+	if (COMPILER_IS_CLANG)
+		message(SEND_ERROR "Although your clang version supports all required features for libpointmatcher, some dependencies (e.g. boost::filesystem3) do not compile properly with clang in C++0x mode. Please use GCC >= 4.4 for now.")
+		add_definitions(-std=c++0x)
+		# TODO: clang version check
+	endif (COMPILER_IS_CLANG)
+else(CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
+	message(SEND_ERROR "You need partial C++0x support for N2351, N2672, N1984. Currently this build toolchain supports GCC >= 4.4. If your compiler supports these specifications, please send us a patch.")
+endif(CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
 # well, this breaks libpointmatcher on non-unix platform,
 # please contribute the define for your favorite compiler
 # It must support (compiler support in parenthesis):
 # - N2351: shared pointers in standard
-# - N2672: Initializer lists (gcc)
-# - N1984: auto-typed variables (gcc, clang)
+# - N2672: Initializer lists (gcc, clang >= 3.1)
+# - N1984: auto-typed variables (gcc, clang >= 2.9)
 
 # Documentation
 set(DOXYFILE_LATEX false)
