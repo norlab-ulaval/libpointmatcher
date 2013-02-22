@@ -1107,7 +1107,7 @@ DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::SimpleSensorNoiseDa
 	sensorType(Parametrizable::get<unsigned>("sensorType")),
 	gain(Parametrizable::get<T>("gain"))
 {
-	std::vector<string> sensorNames = {"SickLMS"};
+	std::vector<string> sensorNames = {"Sick LMS-1xx", "Hokuyo URG-04LX", "Hokuyo UTM-30LX", "Kinect / Xtion"};
 	if (sensorType >= sensorNames.size())
 	{
 		throw InvalidParameter(
@@ -1123,25 +1123,58 @@ template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::filter(
 	const DataPoints& input)
 {
-	typedef typename Eigen::Array<T, 2, Eigen::Dynamic> Array2rows;
-	const int nbPoints = input.features.cols();
-	const int dim = input.features.rows();
+	
 	DataPoints outputCloud(input);
 	outputCloud.allocateDescriptor("simpleSensorNoise", 1);
 	auto noise(outputCloud.getDescriptorViewByName("simpleSensorNoise"));
 
-	if(sensorType == 0)
+	switch(sensorType)
 	{
-		const T minRadius = 0.01; // in meter
-		const T beamAngle = 0.01745; // in rad
-		Array2rows evalNoise = Array2rows::Constant(2, nbPoints, minRadius);
-		evalNoise.row(0) =  sin(beamAngle) * input.features.topRows(dim-1).colwise().norm();
-
-		noise = evalNoise.colwise().maxCoeff();
+	case 0: // Sick LMS-1xx
+	{
+		noise = computeLaserNoise(0.012, 0.0068, 0.0008, input.features);
+		break;
+	}
+	case 1: // Hokuyo URG-04LX
+	{
+		noise = computeLaserNoise(0.028, 0.0013, 0.0001, input.features);
+		break;
+	}
+	case 2: // Hokuyo UTM-30LX
+	{
+		noise = computeLaserNoise(0.018, 0.0006, 0.0015, input.features);
+		break;
+	}
+	case 3: // Kinect / Xtion
+	{
+		const int dim = input.features.rows();
+		noise = 0.5*0.00285*input.features.topRows(dim-1).colwise().norm().array().square();
+		break;
+	}
+	default:
+		throw InvalidParameter(
+			(boost::format("SimpleSensorNoiseDataPointsFilter: Error, cannot compute noise for sensorType id %1% .") % sensorType).str());
 	}
 
 	return outputCloud;
 }
+
+template<typename T>
+typename PointMatcher<T>::Matrix DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::computeLaserNoise(const T minRadius, const T beamAngle, const T beamConst, const Matrix features)
+{
+	typedef typename Eigen::Array<T, 2, Eigen::Dynamic> Array2rows;
+	
+	const int nbPoints = features.cols();
+	const int dim = features.rows();
+	
+	Array2rows evalNoise = Array2rows::Constant(2, nbPoints, minRadius);
+	evalNoise.row(0) =  beamAngle * features.topRows(dim-1).colwise().norm();
+	evalNoise.row(0) += beamConst;
+
+	return evalNoise.colwise().maxCoeff();
+
+}
+
 
 template struct DataPointsFiltersImpl<float>::SimpleSensorNoiseDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SimpleSensorNoiseDataPointsFilter;

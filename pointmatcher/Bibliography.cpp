@@ -123,6 +123,19 @@ namespace PointMatcherSupport
 					{ "doi", "10.1109/IROS.2004.1389948" },
 					{ "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1389948"}
 				})
+			},
+			{ "Pomerleau2012Noise", 
+				StringMap({
+					{ "type", "inproceedings" },
+					{ "title", "Noise Characterization of Depth Sensors for Surface Inspections" },
+					{ "author", "F. Pomerleau, A. Breitenmoser, M. Liu, F. Colas, R. Siegwart" },
+					{ "booktitle", " International Conference on Applied Robotics for the Power Industry, 2012. (CARPI 2012). Proceedings of the IEEE" },
+					{ "year", "2012" },
+					{ "pages", "1--8" },
+					{ "publisher", "IEEE Press" },
+					{ "doi", "" },
+					{ "fulltext", ""}
+				})
 			}
 
 		});

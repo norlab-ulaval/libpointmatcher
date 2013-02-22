@@ -467,13 +467,13 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Add a 1D descriptor named <sensorNoise> that would represent the noise radius expressed in meter based on SICK LMS specifications.";
+			return "Add a 1D descriptor named <sensorNoise> that would represent the noise radius expressed in meter based on SICK LMS specifications \\cite{Pomerleau2012Noise}.";
 		}
 		
 		inline static const ParametersDoc availableParameters()
 		{
 			return ParametersDoc({
-				{ "sensorType", "Type of the sensor used. Choices: 0=SickLMS", "0", "0", "2147483647", &P::Comp<unsigned> },
+				{ "sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Hokuyo URG-04LX, 2=Hokuyo UTM-30LX, 3=Kinect/Xtion", "0", "0", "2147483647", &P::Comp<unsigned> },
 				{ "gain", "If the point cloud is coming from an untrusty source, you can use the gain to augment the uncertainty", "1", "1", "inf", &P::Comp<T> }
 			});
 		}
@@ -485,6 +485,14 @@ struct DataPointsFiltersImpl
 		SimpleSensorNoiseDataPointsFilter(const Parameters& params = Parameters());
 		
 		virtual DataPoints filter(const DataPoints& input);
+
+	private:
+		/// @param minRadius in meter, noise level of depth measurements
+		/// @param beamAngle in rad, half of the total laser beam
+		/// @param beamConst in meter, minimum size of the laser beam
+		/// @param features points from the sensor
+		Matrix computeLaserNoise(const T minRadius, const T beamAngle, const T beamConst, const Matrix features);
+
 	};
 	
 	//! Extract observation direction
