@@ -166,7 +166,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	buildVectorStream(stream, "eigValues", data);
 	buildTensorStream(stream, "eigVectors", data);
 	buildVectorStream(stream, "observationDirections", data);
-	//TODO: add support for colors
+	buildColorStream(stream, "color", data);
 
 }
 
@@ -370,11 +370,19 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::o
 
 	if(desc.rows() != 0)
 	{
-		stream << attribute << " " << nameTag << " float\n";
-		if(attribute.compare("SCALARS") == 0)
-			stream << "LOOKUP_TABLE default\n";
+		if(attribute.compare("COLOR_SCALARS") == 0)
+		{
+			stream << attribute << " " << nameTag << " " << forcedDim << "\n";
+			stream << padWithOnes(desc, forcedDim, desc.cols()).transpose();
+		}
+		else
+		{
+			stream << attribute << " " << nameTag << " float\n";
+			if(attribute.compare("SCALARS") == 0)
+				stream << "LOOKUP_TABLE default\n";
 
-		stream << padWithZeros(desc, forcedDim, desc.cols()).transpose();
+			stream << padWithZeros(desc, forcedDim, desc.cols()).transpose();
+		}
 		stream << "\n";
 	}
 }
@@ -409,6 +417,14 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildTensorStream(std::ostream& st
 	const DataPoints& cloud)
 {
 	buildGenericAttributeStream(stream, "TENSORS", name, cloud, 9);
+}
+
+template<typename T>
+void InspectorsImpl<T>::AbstractVTKInspector::buildColorStream(std::ostream& stream,
+	const std::string& name,
+	const DataPoints& cloud)
+{
+	buildGenericAttributeStream(stream, "COLOR_SCALARS", name, cloud, 4);
 }
 
 template<typename T>
@@ -521,6 +537,26 @@ typename PointMatcher<T>::Matrix InspectorsImpl<T>::AbstractVTKInspector::padWit
 	else
 	{
 		Matrix tmp = Matrix::Zero(expectedRow, expectedCols); 
+		tmp.topLeftCorner(m.rows(), m.cols()) = m;
+		return tmp;
+	}
+
+}
+
+template<typename T>
+typename PointMatcher<T>::Matrix InspectorsImpl<T>::AbstractVTKInspector::padWithOnes(
+	const Matrix m,
+	const int expectedRow,
+	const int expectedCols)
+{
+	assert(m.cols() <= expectedCols || m.rows() <= expectedRow);
+	if(m.cols() == expectedCols && m.rows() == expectedRow)
+	{
+		return m;
+	}
+	else
+	{
+		Matrix tmp = Matrix::Ones(expectedRow, expectedCols); 
 		tmp.topLeftCorner(m.rows(), m.cols()) = m;
 		return tmp;
 	}
