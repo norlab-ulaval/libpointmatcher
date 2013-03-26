@@ -251,6 +251,41 @@ TEST(IOTest, loadYaml)
 	EXPECT_THROW(icp.loadFromYaml(ifs3), PointMatcherSupport::InvalidModuleType);
 }
 
+
+TEST(IOTest, loadSaveVTK)
+{
+	const int nbPts = 10;
+	DP::Labels featureLabels;
+	featureLabels.push_back(DP::Label("x", 1));
+	
+	// Generate fake point cloud
+	//DP ptCloud(PM::Matrix::Random(1, nbPts), featureLabels);
+	DP ptCloud;
+	ptCloud.addFeature("x", PM::Matrix::Random(1, nbPts));
+	ptCloud.addFeature("y", PM::Matrix::Random(1, nbPts));
+	ptCloud.addFeature("z", PM::Matrix::Random(1, nbPts));
+	ptCloud.addFeature("pad", PM::Matrix::Ones(1, nbPts));
+
+	// Set up descriptors
+	ptCloud.addDescriptor("normal", PM::Matrix::Random(3, nbPts));
+	ptCloud.addDescriptor("eigVectors", PM::Matrix::Random(9, nbPts));
+	ptCloud.addDescriptor("color", PM::Matrix::Random(4, nbPts));
+	ptCloud.addDescriptor("genericScalar", PM::Matrix::Random(1, nbPts));
+	ptCloud.addDescriptor("genericVector", PM::Matrix::Random(3, nbPts));
+
+	ptCloud.save("/tmp/unit_test.vtk");
+
+	DP ptCloudFromFile(DP::load("/tmp/unit_test.vtk"));
+
+	EXPECT_TRUE(ptCloudFromFile.features.cols() == ptCloud.features.cols());
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("normal"));
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("eigVectors"));
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("color"));
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericScalar"));
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericVector"));
+
+}
+
 //---------------------------
 // Base for ICP tests
 //---------------------------

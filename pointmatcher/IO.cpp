@@ -662,6 +662,8 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 	
+	DataPoints loadedPoints;
+
 	// parse header
 	string line;
 	getline(is, line);
@@ -674,66 +676,118 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	getline(is, line);
 	if (line != "DATASET POLYDATA")
 		throw runtime_error(string("Wrong data type, expecting DATASET POLYDATA, found ") + line);
-	
-	// parse points
+
+
+	// parse points and descriptors
+	string fieldName;
+	string name;
+	int pointCount = 0;
 	string type;
-	int pointCount;
-	string pad0;
-	is >> type >> pointCount >> pad0;
-	if (type != "POINTS" || !(pad0 == "float" || pad0 == "double"))
-		throw runtime_error(string("Wrong header for points"));
-	
-	// read points (features)
-	Matrix features(4, pointCount);
-	for (int p = 0; p < pointCount; ++p)
+	while (is.good())
 	{
-		is >> features(0, p);
-		is >> features(1, p);
-		is >> features(2, p);
-		features(3, p) = 1.0;
-	}
-	Labels featureLabels;
-	featureLabels.push_back(Label("x", 1));
-	featureLabels.push_back(Label("y", 1));
-	featureLabels.push_back(Label("z", 1));
-	featureLabels.push_back(Label("pad", 1));
-	
-	// read intermediate data (junk)
-	string s;
-	do {
-		is >> s;
-	} while (s != "POINT_DATA" && is.good());
-	if (!is.good())
-		return DataPoints(features, featureLabels);
-	int pointDataCount;
-	is >> pointDataCount;
-	if (pointDataCount != pointCount)
-		throw runtime_error("Different amount of points in the geometry and in attribute sections");
-	getline(is, line);
-	getline(is, line);
-	//if (line != "COLOR_SCALARS lut 4")
-		//throw runtime_error(string("Wrong point data, found ") + line);
-
-	DataPoints loadedPoints;
-
-	if (line == "COLOR_SCALARS lut 4")
-	{
-		// read color (descriptors)
-		Matrix descriptors(4, pointCount);
-		for (int p = 0; p < pointCount; ++p)
+		is >> fieldName;
+		
+		// load features
+		if(fieldName == "POINTS")
 		{
-			is >> descriptors(0, p);
-			is >> descriptors(1, p);
-			is >> descriptors(2, p);
-			is >> descriptors(3, p);
+			is >> pointCount;
+			is >> type;
+			
+			if(!(type == "float" || type == "double"))
+					throw runtime_error(string("Field POINTS can only be of type double or float"));
+
+			Matrix features(4, pointCount);
+			for (int p = 0; p < pointCount; ++p)
+			{
+				is >> features(0, p);
+				is >> features(1, p);
+				is >> features(2, p);
+				features(3, p) = 1.0;
+			}
+			loadedPoints.addFeature("x", features.row(0));
+			loadedPoints.addFeature("y", features.row(1));
+			loadedPoints.addFeature("z", features.row(2));
+			loadedPoints.addFeature("pad", features.row(3));
 		}
-		Labels descriptorLabels;
-		descriptorLabels.push_back(Label("color", 4));
-		loadedPoints = DataPoints(features, featureLabels, descriptors, descriptorLabels);
-	}
-	else
-	{
-		loadedPoints = DataPoints(features, featureLabels);
+		else if(fieldName == "VERTICES")
+		{
+			int size;
+			int verticeSize;
+			is >> size >> verticeSize;
+			// Skip vertice definition
+			for (int p = 0; p < pointCount; p++)
+			{
+				getline(is, line); 
+				if(line == "")
+					p--;
+			}
+		}
+		else if(fieldName == "POINT_DATA")
+		{
+			int descriptorCount;
+			is >> descriptorCount;
+			if(pointCount != descriptorCount)
+				throw runtime_error(string("The size of POINTS is different than POINT_DATA"));
+		}
+		else // Load descriptors
+		{
+			// descriptor name
+			is >> name;
+
+			int dim = 0;
+			bool skipLookupTable = false;
+			if(fieldName == "SCALARS")
+			{
+				dim = 1;
+				is >> type;
+				skipLookupTable = true;
+			}
+			else if(fieldName == "VECTORS")
+			{
+				dim = 3;
+				is >> type;
+			}
+			else if(fieldName == "TENSORS")
+			{
+				dim = 9;
+				is >> type;
+			}
+			else if(fieldName == "NORMALS")
+			{
+				dim = 3;
+				is >> type;
+			}
+			else if(fieldName == "COLOR_SCALARS")
+			{
+				is >> dim;
+				type = "float";
+			}
+			else
+				throw runtime_error(string("Unknown field name " + fieldName + ", expecting SCALARS, VECTORS, TENSORS, NORMALS or COLOR_SCALARS."));
+
+			
+			if(!(type == "float" || type == "double"))
+					throw runtime_error(string("Field " + fieldName + " is " + type + " but can only be of type double or float"));
+					 
+			// Skip LOOKUP_TABLE line
+			if(skipLookupTable)
+			{
+				//FIXME: FP - why the first line is aways empty?
+				getline(is, line); 
+				getline(is, line); 
+			}
+
+			Matrix descriptor(dim, pointCount);
+			for (int p = 0; p < pointCount; ++p)
+			{
+				for(int d = 0; d < dim; d++)
+				{
+					is >> descriptor(d, p);
+				}
+			}
+			loadedPoints.addDescriptor(name, descriptor);
+		}
+			 
 	}
 	
 	return loadedPoints;
@@ -743,6 +797,7 @@ template
 PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadVTK(const std::string& fileName);
 template
 PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadVTK(const std::string& fileName);
+
 
 //! Save point cloud to a file as VTK
 template<typename T>

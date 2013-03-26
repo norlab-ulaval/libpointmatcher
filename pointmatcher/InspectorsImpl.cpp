@@ -35,6 +35,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "InspectorsImpl.h"
 
+#include "PointMatcherPrivate.h"
+
 #include <cassert>
 #include <iostream>
 #include <sstream>
@@ -154,19 +156,57 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		stream << "1 " << i << "\n";
 	
 
+	// Save points
 	stream << "POINT_DATA " << features.cols() << "\n";
-	buildScalarStream(stream, "densities", data);
-	buildScalarStream(stream, "obstacles", data);
-	buildScalarStream(stream, "inclination", data);
-	buildScalarStream(stream, "maxSearchDist", data);
-	buildScalarStream(stream, "inliers", data);
-	buildScalarStream(stream, "groupId", data);
-	buildScalarStream(stream, "simpleSensorNoise", data);
-	buildNormalStream(stream, "normals", data);
-	buildVectorStream(stream, "eigValues", data);
-	buildTensorStream(stream, "eigVectors", data);
-	buildVectorStream(stream, "observationDirections", data);
-	buildColorStream(stream, "color", data);
+
+	// Loop through all descriptor and dispatch appropriate VTK tags
+	for(auto it = data.descriptorLabels.begin(); it != data.descriptorLabels.end(); it++)
+	{
+
+		// handle specific cases
+		if(it->text == "normal")
+		{
+			buildNormalStream(stream, "normal", data);
+		}
+		else if(it->text == "eigVectors")
+		{
+			buildTensorStream(stream, "eigVectors", data);
+		}
+		else if(it->text == "color")
+		{
+			buildColorStream(stream, "color", data);
+		}
+		// handle generic cases
+		else if(it->span == 1)
+		{
+			buildScalarStream(stream, it->text, data);
+		}
+		else if(it->span == 3)
+		{
+			buildVectorStream(stream, it->text, data);
+		}
+		else
+		{
+			LOG_WARNING_STREAM("Could not save label named " << it->text << " (dim=" << it->span << ").");
+		}
+	}
+	
+	//buildScalarStream(stream, "densities", data);
+	//buildScalarStream(stream, "obstacles", data);
+	//buildScalarStream(stream, "inclination", data);
+	//buildScalarStream(stream, "maxSearchDist", data);
+	//buildScalarStream(stream, "inliers", data);
+	//buildScalarStream(stream, "groupId", data);
+	//buildScalarStream(stream, "simpleSensorNoise", data);
+	
+	//buildNormalStream(stream, "normals", data);
+	
+	//buildVectorStream(stream, "observationDirections", data);
+	//buildVectorStream(stream, "eigValues", data);
+	
+	//buildTensorStream(stream, "eigVectors", data);
+	
+	//buildColorStream(stream, "color", data);
 
 }
 

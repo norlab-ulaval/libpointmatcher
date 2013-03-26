@@ -584,11 +584,11 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 	}
 	else // Add at the end if it is a new field
 	{
-		if(pointCount == newPointCount)
+		if(pointCount == newPointCount || pointCount == 0)
 		{
 			const int oldFieldDim(data.rows());
 			const int totalDim = oldFieldDim + newFieldDim;
-			data.conservativeResize(totalDim, pointCount);
+			data.conservativeResize(totalDim, newPointCount);
 			data.bottomRows(newFieldDim) = newField;
 			labels.push_back(Label(name, newFieldDim));
 		}
