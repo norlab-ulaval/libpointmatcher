@@ -18,6 +18,11 @@ simpleSensorNoise				1							SimpleSensorNoiseDataPointsFilter						PointToPoint
 																																									PointToPlaneErrorMinimizer
 
 
+Transformation					Translation		Rotation
+--------------------------------------------------------
+RigidTransformation			features			features
+																			normals (desc.)
+																			observationDirections (desc.)
 
 
 ===================
@@ -26,18 +31,11 @@ VTK Inspector
 
 Descriptor name, 				VTK primitive
 ------------------------------------------
-normals									NORMALS
-densities								SCALARS
-eigValues								VECTORS
+normal(2D, 3D)					NORMALS
 eigVectors							TENSORS
-observationDirections		VECTORS
-simpleSensorNoise				SCALARS
-obstacles								SCALARS
-inclination							SCALARS
-inliers									SCALARS
-groupId									SCALARS
-maxSearchDist						SCALARS
-
+color										COLOR_SCALARS
+any 1D									SCALARS
+any 3D									VECTORS
 
 
 

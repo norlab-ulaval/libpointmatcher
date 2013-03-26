@@ -34,19 +34,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "TransformationsImpl.h"
+#include "Functions.h"
 
 #include <iostream>
 
-// RigidTransformation
+using namespace PointMatcherSupport;
+
+//! Construct a transformation exception
+TransformationError::TransformationError(const std::string& reason):
+	runtime_error(reason)
+{}
+
+//! RigidTransformation
 template<typename T>
 typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation::compute(
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
-	typedef typename PointMatcher<T>::Matrix Matrix;
+	//typedef typename PointMatcher<T>::Matrix Matrix;
 	
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
+
+	const TransformationParameters R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
+
+	if(this->checkParameters(parameters) == false)	
+		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
 	
 	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
 	
@@ -54,7 +67,6 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	transformedCloud.features = parameters * input.features;
 	
 	// Apply the transformation to descriptors
-	const Matrix R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
 	int row(0);
 	const int descCols(input.descriptors.cols());
 	for (size_t i = 0; i < input.descriptorLabels.size(); ++i)
@@ -71,6 +83,58 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	}
 	
 	return transformedCloud;
+}
+
+//! Ensure orthogonality of the rotation matrix
+template<typename T>
+bool TransformationsImpl<T>::RigidTransformation::checkParameters(const TransformationParameters& parameters) const
+{
+	//FIXME: FP - should we put that as function argument?
+	const T epsilon = 0.001;
+
+	const TransformationParameters R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
+	
+	if(anyabs(1 - R.determinant()) > epsilon)
+		return false;
+	else
+		return true;
+}
+
+//! Force orthogonality of the rotation matrix
+template<typename T>
+typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::RigidTransformation::correctParameters(const TransformationParameters& parameters) const
+{
+	TransformationParameters ortho = parameters;
+	if(ortho.cols() == 4)
+	{
+		const Eigen::Matrix<T, 3, 1> col0 = parameters.block(0, 0, 3, 1).normalized();
+		const Eigen::Matrix<T, 3, 1> col1 = parameters.block(0, 1, 3, 1).normalized();
+		const Eigen::Matrix<T, 3, 1> col2 = parameters.block(0, 2, 3, 1).normalized();
+
+
+		ortho.block(0, 0, 3, 1) = col1.cross(col2);
+		ortho.block(0, 1, 3, 1) = col2.cross(col0);
+		ortho.block(0, 2, 3, 1) = col2;
+	}
+	else if(ortho.cols() == 3)
+	{
+		// R = [ a b]
+		//     [-b a]
+		
+		// mean of a and b
+		T a = (parameters(0,0) + parameters(1,1))/2; 	
+		T b = (-parameters(1,0) + parameters(0,1))/2;
+		T sum = sqrt(pow(a,2) + pow(b,2));
+
+		a = a/sum;
+		b = b/sum;
+
+		ortho(0,0) =  a; ortho(0,1) = b;
+		ortho(1,0) = -b; ortho(1,1) = a;
+	}
+
+
+	return ortho;
 }
 
 template struct TransformationsImpl<float>::RigidTransformation;

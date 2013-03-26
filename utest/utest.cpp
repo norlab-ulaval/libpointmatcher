@@ -284,6 +284,8 @@ TEST(IOTest, loadSaveVTK)
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericScalar"));
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericVector"));
 
+	//TODO: check with a known file if the values are correct
+
 }
 
 //---------------------------
@@ -935,6 +937,51 @@ TEST_F(TransformationCheckerTest, BoundTransformationChecker)
 	
 	addFilter("BoundTransformationChecker", params);
 	validate2dTransformation();
+}
+
+//---------------------------
+// Transformation
+//---------------------------
+TEST(Transformation, RigidTransformation)
+{
+	PM::Transformation* rigidTrans;
+	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
+
+	//-------------------------------------
+	// Construct a 3D non-orthogonal matrix
+	PM::Matrix T_3D = PM::Matrix::Identity(4,4);
+	T_3D(0,0) = 2.3;
+	T_3D(0,1) = 0.03;
+
+	EXPECT_FALSE(rigidTrans->checkParameters(T_3D));
+
+	EXPECT_THROW(rigidTrans->compute(data3D, T_3D), TransformationError);
+
+	// Check stability over iterations
+	for(int i = 0; i < 10; i++)
+	{
+		T_3D = rigidTrans->correctParameters(T_3D);
+		EXPECT_TRUE(rigidTrans->checkParameters(T_3D));
+	}
+
+	//-------------------------------------
+	// Construct a 2D non-orthogonal matrix
+	PM::Matrix T_2D = PM::Matrix::Identity(3,3);
+	T_2D(1,0) = 8.99;
+	T_2D(0,1) = 4.03;
+
+	EXPECT_FALSE(rigidTrans->checkParameters(T_2D));
+
+	EXPECT_THROW(rigidTrans->compute(data2D, T_2D), TransformationError);
+
+	// Check stability over iterations
+	for(int i = 0; i < 10; i++)
+	{
+		T_2D = rigidTrans->correctParameters(T_2D);
+		EXPECT_TRUE(rigidTrans->checkParameters(T_2D));
+	}
+
+
 }
 
 //---------------------------

@@ -80,7 +80,12 @@ namespace PointMatcherSupport
 	{
 		InvalidModuleType(const std::string& reason);
 	};
-	
+
+	struct TransformationError: std::runtime_error
+	{
+		TransformationError(const std::string& reason);
+	};
+
 	//! A vector of std::shared_ptr<S> that behaves like a std::vector<S>
 	template<typename S>
 	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
@@ -130,13 +135,16 @@ struct PointMatcher
 	// ---------------------------------
 	// exceptions
 	// ---------------------------------
-	
+
+	//TODO: gather exceptions here and in Exceptions.cpp
+
 	//! Point matcher did not converge
 	struct ConvergenceError: std::runtime_error
 	{
 		ConvergenceError(const std::string& reason);
 	};
-	
+
+
 	// ---------------------------------
 	// eigen and nabo-based types
 	// ---------------------------------
@@ -321,6 +329,13 @@ struct PointMatcher
 		
 		//! Transform input using the transformation matrix
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0; 
+
+		//! Validate if the given parameter respect the expected constrains
+		virtual bool checkParameters(const TransformationParameters& parameters) const = 0;
+
+		//! Return a valide version of the given transformation
+		virtual TransformationParameters correctParameters(const TransformationParameters& parameters) const = 0;
+
 	};
 	
 	//! A chain of Transformation

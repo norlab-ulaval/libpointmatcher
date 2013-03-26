@@ -35,6 +35,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
+//TODO: gather exceptions here and in Exceptions.cpp
+
 //! Construct the exception with an error message
 template<typename T>
 PointMatcher<T>::ConvergenceError::ConvergenceError(const std::string& reason):
