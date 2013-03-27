@@ -75,12 +75,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
 {
+	// TODO: gather all exceptions
+
 	//! An exception thrown when one tries to use a module type that does not exist
 	struct InvalidModuleType: std::runtime_error
 	{
 		InvalidModuleType(const std::string& reason);
 	};
 
+	//! An expection thrown when a transformation has invalid parameters
 	struct TransformationError: std::runtime_error
 	{
 		TransformationError(const std::string& reason);
@@ -330,10 +333,10 @@ struct PointMatcher
 		//! Transform input using the transformation matrix
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0; 
 
-		//! Validate if the given parameter respect the expected constrains
+		//! Return whether the given parameters respect the expected constraints
 		virtual bool checkParameters(const TransformationParameters& parameters) const = 0;
 
-		//! Return a valide version of the given transformation
+		//! Return a valid version of the given transformation
 		virtual TransformationParameters correctParameters(const TransformationParameters& parameters) const = 0;
 
 	};
