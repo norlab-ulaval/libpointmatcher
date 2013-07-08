@@ -89,8 +89,21 @@ Citing
 
 If you use libpointmatcher in an academic context, please cite the following publication:
 
+	@article{Pomerleau12comp,
+		author = {Pomerleau, Fran{\c c}ois and Colas, Francis and Siegwart, Roland and Magnenat, St{\'e}phane},
+		title = {{Comparing ICP Variants on Real-World Data Sets}},
+		journal = {Autonomous Robots},
+		year = {2013},
+		volume = {34},
+		number = {3},
+		pages = {133--148},
+		month = feb
+	}
+
+and/or
+
 	@INPROCEEDINGS{pomerleau11tracking,
-		author = {François Pomerleau and Stéphane Magnenat and Francis Colas and Ming Liu and Roland Siegwart},
+		author = {Fran{\c c}ois Pomerleau and St{\'e}phane Magnenat and Francis Colas and Ming Liu and Roland Siegwart},
 		title = {Tracking a Depth Camera: Parameter Exploration for Fast ICP},
 		booktitle = {Proc. of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
 		publisher = {IEEE Press},
