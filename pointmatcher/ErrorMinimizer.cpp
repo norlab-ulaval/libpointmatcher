@@ -43,6 +43,12 @@ PointMatcher<T>::ErrorMinimizer::ErrorMinimizer():
 	weightedPointUsedRatio(-1.)
 {}
 
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::ErrorMinimizer::ErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params)
+{}
+
 //! virtual destructor
 template<typename T>
 PointMatcher<T>::ErrorMinimizer::~ErrorMinimizer()
@@ -88,6 +94,8 @@ T PointMatcher<T>::ErrorMinimizer::getOverlap() const
 template<typename T>
 typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(const Matrix& A, const Matrix& B)
 {
+	//Note: A = [x, y, z, 1] and B = [x, y, z] for convenience
+
 	// Expecting matched points
 	assert(A.cols() == B.cols());
 
@@ -112,6 +120,7 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(c
 	}
 	else
 	{
+		//pseudo-cross product for 2D vectors
 		cross = Vector(B.cols());
 		cross = A.row(x).cwise() * B.row(y) - A.row(y).cwise() * B.row(x);
 	}

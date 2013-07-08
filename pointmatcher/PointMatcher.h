@@ -456,6 +456,7 @@ struct PointMatcher
 		};
 		
 		ErrorMinimizer();
+		ErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~ErrorMinimizer();
 		
 		T getPointUsedRatio() const;

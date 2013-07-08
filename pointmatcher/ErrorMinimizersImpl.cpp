@@ -130,6 +130,13 @@ template struct ErrorMinimizersImpl<double>::PointToPointErrorMinimizer;
 
 
 // Point To PLANE ErrorMinimizer
+template<typename T>
+ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::PointToPlaneErrorMinimizer(const Parameters& params):
+	ErrorMinimizer("PointToPlaneErrorMinimizer", PointToPlaneErrorMinimizer::availableParameters(), params),
+	force2D(Parametrizable::get<T>("force2D"))
+{
+}
+
 
 template<typename T>
 typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::compute(
@@ -140,18 +147,37 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 {
 	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
 	typedef typename Matches::Ids Ids;
-	
+
 	assert(matches.ids.rows() > 0);
-	
-	// if 2D, use homogenious coordinates [x, y] 
-	// if 3D, use [x, y, z]
 
-	const typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
-	
-	const auto normalRef(mPts.reference.getDescriptorViewByName("normals"));
+	// Fetch paired points
+	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
 
-	// Normal vector must be precalculated to use this error. Use appropriate input filter.
+	const int dim = mPts.reading.features.rows();
+	const int nbPts = mPts.reading.features.cols();
+
+	// Adjust if the user forces 2D minimization on XY-plane
+	if(force2D && dim == 4)
+	{
+		mPts.reading.features.conservativeResize(3, Eigen::NoChange);
+		mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
+		mPts.reference.features.conservativeResize(3, Eigen::NoChange);
+		mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
+	}
+
+	int forcedDim = dim - 1;
+	if(force2D)
+		forcedDim = dim - 2;
+
+
+	// Fetch normal vectors of the reference point cloud (with adjustment if needed)
+	const auto normalRef(mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
+
+
+	// Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
 	assert(normalRef.rows() > 0);
+
+	
 
 	// Compute cross product of cross = cross(reading X normalRef)
 	const Matrix cross = this->crossProduct(mPts.reading.features, normalRef);
@@ -199,7 +225,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	// Transform parameters to matrix
 	Matrix mOut;
-	if(normalRef.rows() == 3)
+	if(dim == 4 && !force2D)
 	{
 		Eigen::Transform<T, 3, Eigen::Affine> transform;
 		// Rotation in Eular angles follow roll-pitch-yaw (1-2-3) rule
@@ -220,7 +246,16 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		transform = Eigen::Rotation2D<T> (x(0));
 		transform.translation() = x.segment(1, 2);
 
-		mOut = transform.matrix();
+		if(force2D)
+		{
+			mOut = Matrix::Identity(dim, dim);
+			mOut.corner(TopLeft, 2, 2) = transform.matrix().corner(TopLeft, 2, 2);
+			mOut.corner(TopRight, 2, 1) = transform.matrix().corner(TopRight, 2, 1);
+		}
+		else
+		{
+			mOut = transform.matrix();
+		}
 	}
 	return mOut; 
 }
