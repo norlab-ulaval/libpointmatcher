@@ -343,11 +343,15 @@ void PointMatcherSupport::validateFile(const std::string& fileName)
 
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
-	#if BOOST_FILESYSTEM_VERSION >= 3
-		throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).native());
-	#else
+    #if BOOST_FILESYSTEM_VERSION >= 3
+      #if BOOST_VERSION >= 105000
+			throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native());
+      #else
+			throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).native());
+      #endif
+    #else
 		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
-	#endif
+    #endif
 }
 
 
