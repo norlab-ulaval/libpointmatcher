@@ -127,7 +127,12 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	// Fix for issue #6: compilation on gcc 4.4.4
 	//PointMatcher<T> pm;
 	const PointMatcher & pm = PointMatcher::get();
-	
+
+	{
+		// NOTE: The logger needs to be initialize first to allow ouput from other contructors
+		boost::mutex::scoped_lock lock(loggerMutex);
+		usedModuleTypes.insert(createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger));
+	}
 	usedModuleTypes.insert(createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters));
 	usedModuleTypes.insert(createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters));
 	usedModuleTypes.insert(createModulesFromRegistrar("referenceDataPointsFilters", doc, pm.REG(DataPointsFilter), referenceDataPointsFilters));
@@ -138,10 +143,7 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	usedModuleTypes.insert(createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer));
 	usedModuleTypes.insert(createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers));
 	usedModuleTypes.insert(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector));
-	{
-		boost::mutex::scoped_lock lock(loggerMutex);
-		usedModuleTypes.insert(createModuleFromRegistrar("logger", doc, pm.REG(Logger), logger));
-	}
+	
 	
 	loadAdditionalYAMLContent(doc);
 	

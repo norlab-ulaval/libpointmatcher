@@ -65,7 +65,7 @@ MatchersImpl<T>::KDTreeMatcher::KDTreeMatcher(const Parameters& params):
 	searchType(NNSearchType(Parametrizable::get<int>("searchType"))),
 	maxDist(Parametrizable::get<T>("maxDist"))
 {
-	LOG_INFO_STREAM("KDTreeMatcher initialized with knn=" << knn << ", epsilon=" << epsilon << ", searchType=" << searchType << " and maxDist=" << maxDist);
+	LOG_INFO_STREAM("* KDTreeMatcher: initialized with knn=" << knn << ", epsilon=" << epsilon << ", searchType=" << searchType << " and maxDist=" << maxDist);
 }
 
 template<typename T>
@@ -110,7 +110,7 @@ MatchersImpl<T>::KDTreeVarDistMatcher::KDTreeVarDistMatcher(const Parameters& pa
 	searchType(NNSearchType(Parametrizable::get<int>("searchType"))),
 	maxDistField(Parametrizable::getParamValueString("maxDistField"))
 {
-	LOG_INFO_STREAM("KDTreeVarDsitMatcher initialized with knn=" << knn << ", epsilon=" << epsilon << ", searchType=" << searchType << " and maxDistField=" << maxDistField);
+	LOG_INFO_STREAM("* KDTreeVarDsitMatcher: initialized with knn=" << knn << ", epsilon=" << epsilon << ", searchType=" << searchType << " and maxDistField=" << maxDistField);
 }
 
 template<typename T>
