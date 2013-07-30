@@ -190,6 +190,9 @@ struct OutlierFiltersImpl
 		SurfaceNormalOutlierFilter(const Parameters& params = Parameters());
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
+
+	
+
 }; // OutlierFiltersImpl
 
 #endif // __POINTMATCHER_OUTLIERFILTERS_H

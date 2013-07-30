@@ -56,6 +56,9 @@ namespace PointMatcherSupport
 			v += 2*M_PI;
 		return v;
 	}
+
+
+
 } // PointMatcherSupport
 
 #endif // __POINTMATCHER_FUNCTIONS_H

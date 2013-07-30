@@ -120,6 +120,7 @@ namespace PointMatcherSupport
 	
 	//! Data from a CSV file
 	typedef std::map<std::string, std::vector<std::string>> CsvElements;
+
 }
 
 //! Functions and classes that are dependant on scalar type are defined in this templatized class
@@ -428,7 +429,9 @@ struct PointMatcher
 	//! A chain of OutlierFilter
 	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<OutlierFilter>
 	{
+		
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+		
 	};
 	
 	typedef typename OutlierFilters::const_iterator OutlierFiltersConstIt; //!< alias
@@ -657,6 +660,46 @@ struct PointMatcher
 	PointMatcher();
 	
 	static const PointMatcher& get();
+
+	//TODO: where to put that?
+	static inline typename PointMatcher<T>::DataPoints extractOutliers(typename PointMatcher<T>::DataPoints reading, typename PointMatcher<T>::DataPoints reference, T maxDist)
+	{
+		typedef typename PointMatcher<T>::DataPoints DataPoints;
+		typedef typename PointMatcher<T>::Matches Matches;
+		typedef typename Nabo::NearestNeighbourSearch<T> NNS;
+		typedef typename NNS::SearchType NNSearchType;
+		
+
+		std::shared_ptr<NNS> featureNNS;
+
+		// build and populate NNS
+		featureNNS.reset( NNS::create(reference.features, reference.features.rows() - 1, NNS::KDTREE_LINEAR_HEAP, NNS::TOUCH_STATISTICS));
+		
+		const int pointsCount(reading.features.cols());
+		Matches matches(
+			typename Matches::Dists(1, pointsCount),
+			typename Matches::Ids(1, pointsCount)
+		);
+		
+		featureNNS->knn(reading.features, matches.ids, matches.dists, 1, 0, NNS::ALLOW_SELF_MATCH, maxDist);
+
+
+		DataPoints output(reading.createSimilarEmpty());
+
+		int j = 0;
+		for (int i = 0; i < pointsCount; ++i)
+		{
+			if (matches.dists(i) > maxDist)
+			{
+				output.setColFrom(j, reading, i);
+				j++;
+			}
+		}
+		
+		output.conservativeResize(j);
+
+		return output;
+	};
 }; // PointMatcher<T>
 
 #endif // __POINTMATCHER_CORE_H

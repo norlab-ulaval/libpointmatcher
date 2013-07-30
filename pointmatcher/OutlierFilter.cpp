@@ -62,10 +62,11 @@ template struct PointMatcher<double>::OutlierFilter;
 //! Apply outlier-detection chain
 template<typename T>
 typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters::compute(
-	const typename PointMatcher<T>::DataPoints& filteredReading,
-	const typename PointMatcher<T>::DataPoints& filteredReference,
-	const typename PointMatcher<T>::Matches& input)
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const Matches& input)
 {
+	//FIXME: Why we filter infinit distance only when no filter?
 	if (this->empty())
 	{
 		// we do not have any filter, therefore we must put 0 weights for infinite distances
@@ -100,6 +101,8 @@ typename PointMatcher<T>::OutlierWeights PointMatcher<T>::OutlierFilters::comput
 		return w;
 	}
 }
+
+
 
 template struct PointMatcher<float>::OutlierFilters;
 template struct PointMatcher<double>::OutlierFilters;
