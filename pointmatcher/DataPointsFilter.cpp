@@ -76,7 +76,9 @@ PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in)
 	YAML::Node doc;
 	parser.GetNextDocument(doc);
 	
-	PointMatcher<T> pm;
+	// Fix for issue #6: compilation on gcc 4.4.4
+	//PointMatcher<T> pm;
+	const PointMatcher & pm = PointMatcher::get();
 	
 	for(YAML::Iterator moduleIt = doc.begin(); moduleIt != doc.end(); ++moduleIt)
 	{

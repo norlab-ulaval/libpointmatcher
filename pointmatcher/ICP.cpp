@@ -124,7 +124,9 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	typedef set<string> StringSet;
 	StringSet usedModuleTypes;
 	
-	PointMatcher<T> pm;
+	// Fix for issue #6: compilation on gcc 4.4.4
+	//PointMatcher<T> pm;
+	const PointMatcher & pm = PointMatcher::get();
 	
 	usedModuleTypes.insert(createModulesFromRegistrar("readingDataPointsFilters", doc, pm.REG(DataPointsFilter), readingDataPointsFilters));
 	usedModuleTypes.insert(createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters));
