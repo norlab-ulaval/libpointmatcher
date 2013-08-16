@@ -1024,15 +1024,22 @@ TEST(Inspectors, PerformanceInspector)
 		{"dumpPerfOnExit", "1"}
 	});
 	PM::Inspector* performances;
-	performances = PM::get().REG(Inspector).create("PerformanceInspector");
+	performances = PM::get().REG(Inspector).create("PerformanceInspector", params);
 
+	//TODO: we only test constructor here, check other things...
 }
 
-//TODO: VTKFileInspector
-//Dump the different steps into VTK files.
-//- baseFileName (default: point-matcher-output) - base file name for the VTK files 
-//- dumpPerfOnExit (default: 0) - dump performance statistics to stderr on exit
-
+TEST(Inspectors, VTKFileInspector)
+{
+	PM::Parameters params({
+		{"baseFileName", "/tmp/utest_vtk"},
+		{"dumpPerfOnExit", "1"}
+	});
+	PM::Inspector* vtkFile;
+	vtkFile = PM::get().REG(Inspector).create("VTKFileInspector", params);
+	
+	//TODO: we only test constructor here, check other things...
+}
 
 //---------------------------
 // Loggers
@@ -1043,7 +1050,18 @@ TEST(Inspectors, PerformanceInspector)
 //- infoFileName (default: /dev/stdout) - name of the file to output infos to
 //- warningFileName (default: /dev/stderr) - name of the file to output warnings to
 //- displayLocation (default: 0) - display the location of message in source code
-
+TEST(Loggers, FileLogger)
+{
+	PM::Parameters params({
+		{"infoFileName", "/tmp/utest_info"},
+		{"warningFileName", "/tmp/utest_warn"},
+		{"displayLocation", "1"},
+	});
+	Logger* fileLog;
+	fileLog = PM::get().REG(Logger).create("FileLogger", params);
+	
+	//TODO: we only test constructor here, check other things...
+}
 
 
 //---------------------------
