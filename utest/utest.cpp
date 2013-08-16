@@ -43,6 +43,12 @@ using namespace std;
 using namespace PointMatcherSupport;
 
 // TODO: avoid global by using testing::Environment
+// TODO: split the test into different cpp files:
+// - ut_DataPoints.cpp
+// - ut_IO.cpp
+// - ut_Icp.cpp
+// - ut_DataFilters.cpp
+// - ut_
 typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
 
@@ -546,28 +552,7 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 	validate3dTransformation();
 }
 
-// TODO; replace by MaxDensityDataPointsFilter
-// TEST_F(DataFilterTest, UniformizeDensityDataPointsFilter)
-// {
-// 	// Ratio has been selected to not affect the points too much
-// 	vector<double> ratio = vector<double>({0.1, 0.15});
-// 
-// 	for(unsigned i=0; i < ratio.size(); i++)
-// 	{
-// 		params = PM::Parameters({{"ratio", toParam(ratio[i])}, {"nbBin", "20"}});
-// 		icp.readingDataPointsFilters.clear();
-// 		addFilter("UniformizeDensityDataPointsFilter", params);
-// 		validate2dTransformation();	
-// 
-// 		const double nbInitPts = data2D.features.cols();
-// 		const double nbRemainingPts = icp.getPrefilteredReadingPtsCount();
-// 		// FIXME: 10% seems of seems a little bit high
-// 		EXPECT_NEAR(nbRemainingPts/nbInitPts, 1-ratio[i], 0.10);
-// 		
-// 		validate3dTransformation();
-// 		//TODO: add expectation on the reduction
-// 	}
-// }
+
 
 TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 {
@@ -587,6 +572,48 @@ TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 	validate2dTransformation();	
 	validate3dTransformation();
 
+	// TODO: standardize how filter are tested:
+	// 1- impact on number of points
+	// 2- impact on descriptors
+	// 3- impact on ICP (that's what we test now)
+}
+
+TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
+{
+	// Ratio has been selected to not affect the points too much
+ 	vector<double> ratio = vector<double>({100, 1000, 5000});
+ 
+ 	for(unsigned i=0; i < ratio.size(); i++)
+ 	{
+ 		icp.readingDataPointsFilters.clear();
+		params = PM::Parameters({
+			{"knn", "5"}, 
+			{"epsilon", "0.1"}, 
+			{"keepNormals", "0"},
+			{"keepDensities", "1"},
+			{"keepEigenValues", "0"},
+			{"keepEigenVectors", "0" },
+			{"keepMatchedIds" , "0" }
+			});
+
+		addFilter("SurfaceNormalDataPointsFilter", params);
+
+ 		params = PM::Parameters({{"maxDensity", toParam(ratio[i])}});
+ 		addFilter("MaxDensityDataPointsFilter", params);
+ 		
+		// FIXME BUG: the density in 2D is not well computed
+		//validate2dTransformation();	
+ 
+ 		//double nbInitPts = data2D.features.cols();
+ 		//double nbRemainingPts = icp.getPrefilteredReadingPtsCount();
+ 		//EXPECT_TRUE(nbRemainingPts < nbInitPts);
+ 		
+ 		validate3dTransformation();
+
+		double nbInitPts = data3D.features.cols();
+ 		double nbRemainingPts = icp.getPrefilteredReadingPtsCount();
+ 		EXPECT_TRUE(nbRemainingPts < nbInitPts);
+ 	}
 }
 
 TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
