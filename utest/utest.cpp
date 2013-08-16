@@ -48,6 +48,10 @@ using namespace PointMatcherSupport;
 // - ut_IO.cpp
 // - ut_Icp.cpp
 // - ut_DataFilters.cpp
+// - ut_Matchers.cpp
+// - ut_Outliers.cpp
+// - ut_ErrorMinimizers.cpp
+// - ut_Transmations.cpp (checker and parameter)
 // - ut_
 typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
@@ -1008,8 +1012,39 @@ TEST(Transformation, RigidTransformation)
 		EXPECT_TRUE(rigidTrans->checkParameters(T_2D));
 	}
 
+}
+
+//---------------------------
+// Inspectors
+//---------------------------
+TEST(Inspectors, PerformanceInspector)
+{
+	PM::Parameters params({
+		{"baseFileName", "/tmp/utest_performances"},
+		{"dumpPerfOnExit", "1"}
+	});
+	PM::Inspector* performances;
+	performances = PM::get().REG(Inspector).create("PerformanceInspector");
 
 }
+
+//TODO: VTKFileInspector
+//Dump the different steps into VTK files.
+//- baseFileName (default: point-matcher-output) - base file name for the VTK files 
+//- dumpPerfOnExit (default: 0) - dump performance statistics to stderr on exit
+
+
+//---------------------------
+// Loggers
+//---------------------------
+
+//TODO: FileLogger
+//Log using std::stream.
+//- infoFileName (default: /dev/stdout) - name of the file to output infos to
+//- warningFileName (default: /dev/stderr) - name of the file to output warnings to
+//- displayLocation (default: 0) - display the location of message in source code
+
+
 
 //---------------------------
 // Main
