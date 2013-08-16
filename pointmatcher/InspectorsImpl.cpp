@@ -46,13 +46,18 @@ using namespace std;
 
 template<typename T>
 InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
-	Inspector(className,paramsDoc,params)
-{
+	Inspector(className,paramsDoc,params),
+	baseFileName(Parametrizable::get<string>("baseFileName")),
+	dumpPerfOnExit(Parametrizable::get<bool>("dumpPerfOnExit"))
+
+{//FIXME: do we need that constructor?
 }
 
 template<typename T>
 InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const Parameters& params):
-	Inspector("PerformanceInspector", PerformanceInspector::availableParameters(), params)
+	Inspector("PerformanceInspector", PerformanceInspector::availableParameters(), params),
+	baseFileName(Parametrizable::get<string>("baseFileName")),
+	dumpPerfOnExit(Parametrizable::get<bool>("dumpPerfOnExit"))
 {}
 
 template<typename T>
@@ -62,7 +67,7 @@ void InspectorsImpl<T>::PerformanceInspector::addStat(const std::string& name, d
 	if (it == stats.end())
 		it = stats.insert(
 			HistogramMap::value_type(name, 
-				Histogram(16, name, Parametrizable::get<string>("baseFileName"), Parametrizable::get<bool>("dumpPerfOnExit"))
+				Histogram(16, name, baseFileName, dumpPerfOnExit)
 			)
 		).first;
 	it->second.push_back(data);

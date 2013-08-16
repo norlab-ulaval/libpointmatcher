@@ -78,6 +78,9 @@ struct InspectorsImpl
 				{ "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" }
 			});
 		}
+
+		const std::string baseFileName;
+		const bool dumpPerfOnExit;
 		
 	protected:
 		typedef PointMatcherSupport::Histogram<double> Histogram;
