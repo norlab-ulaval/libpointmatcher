@@ -39,8 +39,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <boost/format.hpp>
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/operations.hpp"
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 
 using namespace std;
@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 	typedef PointMatcherIO<float> PMIO;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DP;
+	typedef Parametrizable::Parameter Parameter;
 	
 	const int maxMapPointCount = 200000;
 
@@ -100,21 +101,26 @@ int main(int argc, char *argv[])
 				
 				newCloud.features = tp.inverse()*newCloud.features;
 			
-				PM::DataPointsFilter* densityFilter;
-				densityFilter= PM::get().DataPointsFilterRegistrar.create(
-					"SurfaceNormalDataPointsFilter", PM::Parameters({
-						{"binSize", "10"},
-						{"epsilon", "5"}, 
-						{"keepNormals","0"},
-						{"keepDensities","1"}
-						}));
+				PM::DataPointsFilter* densityFilter(
+					PM::get().DataPointsFilterRegistrar.create(
+						"SurfaceNormalDataPointsFilter",
+						map_list_of
+							("binSize", "10")
+							("epsilon", "5") 
+							("keepNormals", "0")
+							("keepDensities", "1")
+					)
+				);
 
-				PM::DataPointsFilter* maxDensitySubsample;
-				PM::Parameters params;
-				params = PM::Parameters({{"maxDensity", toParam(30)}});
-				maxDensitySubsample = PM::get().DataPointsFilterRegistrar.create("MaxDensityDataPointsFilter", params);
+				PM::DataPointsFilter* maxDensitySubsample(
+					PM::get().DataPointsFilterRegistrar.create(
+						"MaxDensityDataPointsFilter",
+						map_list_of
+							("maxDensity", toParam(30))
+					)
+				);
 				
-				// Merge point clouds to map			
+				// Merge point clouds to map
 				mapPointCloud.concatenate(newCloud);
 				mapPointCloud = densityFilter->filter(mapPointCloud);
 				mapPointCloud = maxDensitySubsample->filter(mapPointCloud);
@@ -123,9 +129,13 @@ int main(int argc, char *argv[])
 				const double probToKeep = maxMapPointCount/(double)mapPointCloud.features.cols();
 				if(probToKeep < 1.0)
 				{
-					PM::DataPointsFilter* randSubsample;
-					params = PM::Parameters({{"prob", toParam(probToKeep)}});
-					randSubsample = PM::get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
+					PM::DataPointsFilter* randSubsample(
+						PM::get().DataPointsFilterRegistrar.create(
+							"RandomSamplingDataPointsFilter",
+							map_list_of
+								("prob", toParam(probToKeep))
+						)
+					);
 					mapPointCloud = randSubsample->filter(mapPointCloud);
 				}
 			}

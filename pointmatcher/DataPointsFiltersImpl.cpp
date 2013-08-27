@@ -71,8 +71,8 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::RemoveNaNDataPoin
 	int j = 0;
 	for (int i = 0; i < nbPointsIn; ++i)
 	{
-		const auto colArray(input.features.col(i).array());
-		const bool hasNaN(!(colArray == colArray).all());
+		const BOOST_AUTO(colArray, input.features.col(i).array());
+		const BOOST_AUTO(hasNaN, !(colArray == colArray).all());
 		if (!hasNaN)
 		{
 			output.setColFrom(j, input, i);
@@ -457,10 +457,10 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SurfaceNormalData
 // 	}
 	
 	// Build kd-tree
-	KDTreeMatcher matcher(Parameters({
-		{ "knn", toParam(knn) },
-		{ "epsilon", toParam(epsilon) }
-	}));
+	Parametrizable::Parameters param;
+	boost::assign::insert(param) ( "knn", toParam(knn) );
+	boost::assign::insert(param) ( "epsilon", toParam(epsilon) );
+	KDTreeMatcher matcher(param);
 	matcher.init(input);
 
 	Matches matches(typename Matches::Dists(knn, pointsCount), typename Matches::Ids(knn, pointsCount));
@@ -883,8 +883,8 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::OrientNormalsData
 		throw InvalidField("OrientNormalsDataPointsFilter: Error, cannot find observation directions in descriptors.");
 	
 	DataPoints output(input);
-	auto normals(output.getDescriptorViewByName("normals"));
-	const auto observationDirections(output.getDescriptorViewByName("observationDirections"));
+	BOOST_AUTO(normals, output.getDescriptorViewByName("normals"));
+	const BOOST_AUTO(observationDirections, output.getDescriptorViewByName("observationDirections"));
 	assert(normals.rows() == observationDirections.rows());
 	for (int i = 0; i < input.features.cols(); i++)
 	{
@@ -1071,7 +1071,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ShadowDataPointsF
 	const int dim = input.features.rows();
 	DataPoints output(input.createSimilarEmpty());
 	
-	const auto normals(input.getDescriptorViewByName("normals"));
+	const BOOST_AUTO(normals, input.getDescriptorViewByName("normals"));
 	int j = 0;
 
 	for(int i=0; i < input.features.cols(); i++)
@@ -1107,7 +1107,7 @@ DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::SimpleSensorNoiseDa
 	sensorType(Parametrizable::get<unsigned>("sensorType")),
 	gain(Parametrizable::get<T>("gain"))
 {
-	std::vector<string> sensorNames = {"Sick LMS-1xx", "Hokuyo URG-04LX", "Hokuyo UTM-30LX", "Kinect / Xtion"};
+	std::vector<string> sensorNames = boost::assign::list_of ("Sick LMS-1xx")("Hokuyo URG-04LX")("Hokuyo UTM-30LX")("Kinect / Xtion");
 	if (sensorType >= sensorNames.size())
 	{
 		throw InvalidParameter(
@@ -1126,7 +1126,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SimpleSensorNoise
 	
 	DataPoints outputCloud(input);
 	outputCloud.allocateDescriptor("simpleSensorNoise", 1);
-	auto noise(outputCloud.getDescriptorViewByName("simpleSensorNoise"));
+	BOOST_AUTO(noise, outputCloud.getDescriptorViewByName("simpleSensorNoise"));
 
 	switch(sensorType)
 	{
@@ -1148,7 +1148,8 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::SimpleSensorNoise
 	case 3: // Kinect / Xtion
 	{
 		const int dim = input.features.rows();
-		noise = 0.5*0.00285*input.features.topRows(dim-1).colwise().norm().array().square();
+		const Matrix squaredValues(input.features.topRows(dim-1).colwise().norm().array().square());
+		noise = squaredValues*(0.5*0.00285); 
 		break;
 	}
 	default:
@@ -1210,7 +1211,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ObservationDirect
 	
 	DataPoints outputCloud(input);
 	outputCloud.allocateDescriptor("observationDirections", dim);
-	auto observationDirections(outputCloud.getDescriptorViewByName("observationDirections"));
+	BOOST_AUTO(observationDirections, outputCloud.getDescriptorViewByName("observationDirections"));
 	
 	for (int i = 0; i < input.features.cols(); i++)
 	{

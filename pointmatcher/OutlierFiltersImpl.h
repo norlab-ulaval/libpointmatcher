@@ -73,9 +73,9 @@ struct OutlierFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "maxDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>} 
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "maxDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>) 
+			;
 		}
 		
 		const T maxDist;
@@ -93,9 +93,9 @@ struct OutlierFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "minDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>} 
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "minDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>) 
+			;
 		}
 		
 		const T minDist;
@@ -112,9 +112,9 @@ struct OutlierFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "factor", "points farther away factor * median will be considered outliers.", "3", "0.0000001", "inf", &P::Comp<T>}
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "factor", "points farther away factor * median will be considered outliers.", "3", "0.0000001", "inf", &P::Comp<T>)
+			;
 		}
 		
 		const T factor;
@@ -131,9 +131,9 @@ struct OutlierFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "ratio", "percentage to keep", "0.85", "0.0000001", "0.9999999", &P::Comp<T>}
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "ratio", "percentage to keep", "0.85", "0.0000001", "0.9999999", &P::Comp<T>)
+			;
 		}
 		
 		const T ratio;
@@ -150,11 +150,11 @@ struct OutlierFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "minRatio", "min ratio", "0.05", "0.0000001", "1", &P::Comp<T>},
-				{ "maxRatio", "max ratio", "0.99", "0.0000001", "1", &P::Comp<T>},
-				{ "lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda", "0.95" }
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "minRatio", "min ratio", "0.05", "0.0000001", "1", &P::Comp<T>)
+				( "maxRatio", "max ratio", "0.99", "0.0000001", "1", &P::Comp<T>)
+				( "lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda", "0.95" )
+			;
 		}
 
 		const T minRatio;
@@ -179,9 +179,9 @@ struct OutlierFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "maxAngle", "Maximum authorised angle between the 2 surface normals (in radian)", "1.57", "0.0", "3.1416", &P::Comp<T>}
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "maxAngle", "Maximum authorised angle between the 2 surface normals (in radian)", "1.57", "0.0", "3.1416", &P::Comp<T>)
+			;
 		}
 
 		const T eps;

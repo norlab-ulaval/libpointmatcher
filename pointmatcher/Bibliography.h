@@ -39,24 +39,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 namespace PointMatcherSupport
 {
-	template <typename K, typename V>
-	struct ConvenientMap: public std::map<K, V>
-	{
-		ConvenientMap():std::map<K, V>() {}
-		ConvenientMap(std::initializer_list<typename std::map<K, V>::value_type> list):std::map<K, V>(list) {}
-		bool contains(const K& k) const { auto it(this->find(k)); return (it!=this->end()); }
-		V get(const K& k) const { auto it(this->find(k)); if (it!=this->end()) return it->second; else throw std::runtime_error("unknown key"); }
-	};
-	
 	typedef std::vector<std::string> StringVector;
-	typedef ConvenientMap<std::string, std::string> StringMap;
-	typedef ConvenientMap<std::string, StringMap> StringMapMap;
+	typedef std::map<std::string, std::string> StringMap;
+	typedef std::map<std::string, StringMap> StringMapMap;
 	typedef StringMapMap Bibliography;
-	typedef ConvenientMap<std::string, unsigned> BibIndices;
+	typedef std::map<std::string, unsigned> BibIndices;
 	
 	struct CurrentBibliography
 	{

@@ -37,7 +37,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_TIMER_H
 
 #include <time.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif // WIN32
 
 #ifdef _POSIX_TIMERS
 namespace PointMatcherSupport

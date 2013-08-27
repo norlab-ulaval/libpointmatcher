@@ -40,8 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include <fstream>
 #include <boost/format.hpp>
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/operations.hpp"
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace std;
@@ -140,16 +140,19 @@ int main(int argc, char *argv[])
 			transformations.apply(reference, Tref);
 
 			// Preprare filters
-			PM::DataPointsFilter* subSample;
-			subSample= PM::get().DataPointsFilterRegistrar.create(
-				"RandomSamplingDataPointsFilter", PM::Parameters({
-					{"prob", "0.5"}
-					}));
+			PM::DataPointsFilter* subSample(
+				PM::get().DataPointsFilterRegistrar.create(
+					"RandomSamplingDataPointsFilter", 
+					map_list_of
+						("prob", "0.5")
+				)
+			);
 
-			PM::DataPointsFilter* maxDensity;
-			maxDensity = PM::get().DataPointsFilterRegistrar.create(
-				"MaxDensityDataPointsFilter"
-				);
+			PM::DataPointsFilter* maxDensity(
+				PM::get().DataPointsFilterRegistrar.create(
+					"MaxDensityDataPointsFilter"
+				)
+			);
 			
 			/*PM::DataPointsFilter* cutInHalf;
 			cutInHalf = PM::get().DataPointsFilterRegistrar.create(
@@ -158,12 +161,14 @@ int main(int argc, char *argv[])
 					{"minDist", "0"}
 				}));*/
 
-			PM::DataPointsFilter* computeDensity;
-			computeDensity = PM::get().DataPointsFilterRegistrar.create(
-				"SurfaceNormalDataPointsFilter", PM::Parameters({
-					{"knn", "20"},
-					{"keepDensities", "1"}
-				}));
+			PM::DataPointsFilter* computeDensity(
+				PM::get().DataPointsFilterRegistrar.create(
+					"SurfaceNormalDataPointsFilter", 
+					map_list_of
+						("knn", "20")
+						("keepDensities", "1")
+				)
+			);
 
 			reading = subSample->filter(reading);
 			reading = computeDensity->filter(reading);
@@ -190,16 +195,22 @@ int main(int argc, char *argv[])
 				// Build kd-tree
 				int knn = 20;
 				int knnAll = 50;
-				PM::Matcher* matcherSelf;
-				matcherSelf = PM::get().MatcherRegistrar.create(
-					"KDTreeMatcher", PM::Parameters({{ "knn", toParam(knn) }}));
+				PM::Matcher* matcherSelf(
+					PM::get().MatcherRegistrar.create(
+						"KDTreeMatcher",
+						map_list_of
+							("knn", toParam(knn))
+					)
+				);
 
-				PM::Matcher* matcherTarget;
-				matcherTarget = PM::get().MatcherRegistrar.create(
-					"KDTreeVarDistMatcher", PM::Parameters({
-						{ "knn", toParam(knnAll) },
-						{ "maxDistField", "maxSearchDist" }
-					}));
+				PM::Matcher* matcherTarget(
+					PM::get().MatcherRegistrar.create(
+						"KDTreeVarDistMatcher",
+						map_list_of
+							("knn", toParam(knnAll))
+							("maxDistField", "maxSearchDist")
+					)
+				);
 
 				matcherSelf->init(self);
 				matcherTarget->init(target);
@@ -213,8 +224,8 @@ int main(int argc, char *argv[])
 				Matches targetMatches(knnAll, targetPtsCount);
 				targetMatches = matcherTarget->findClosests(self);
 
-				auto inlierSelf(self.getDescriptorViewByName("inliers"));
-				auto inlierTarget(target.getDescriptorViewByName("inliers"));
+				BOOST_AUTO(inlierSelf, self.getDescriptorViewByName("inliers"));
+				BOOST_AUTO(inlierTarget, target.getDescriptorViewByName("inliers"));
 				for(int i = 0; i < selfPtsCount; i++)
 				{
 					for(int k = 0; k < knnAll; k++)
@@ -231,8 +242,8 @@ int main(int argc, char *argv[])
 				PM::swapDataPoints(self, target);
 			}
 			
-			const auto finalInlierSelf(self.getDescriptorViewByName("inliers"));
-			const auto finalInlierTarget(target.getDescriptorViewByName("inliers"));
+			const BOOST_AUTO(finalInlierSelf, self.getDescriptorViewByName("inliers"));
+			const BOOST_AUTO(finalInlierTarget, target.getDescriptorViewByName("inliers"));
 			const double selfRatio = (finalInlierSelf.array() > 0).count()/(double)finalInlierSelf.cols();
 			const double targetRatio = (finalInlierTarget.array() > 0).count()/(double)finalInlierTarget.cols();
 			

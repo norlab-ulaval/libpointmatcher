@@ -63,7 +63,7 @@ void dumpWiki(const ParametersDoc& paramsDoc)
 {
 	cout << endl;
 	if (!paramsDoc.empty())
-		for (auto it = paramsDoc.cbegin(); it != paramsDoc.cend(); ++it)
+		for (BOOST_AUTO(it, paramsDoc.begin()); it != paramsDoc.end(); ++it)
 		{
 			cout << "`" << it->name << "` (default: `" << it->defaultValue << "`";
 			if (!it->minValue.empty())
@@ -86,7 +86,7 @@ void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, Cu
 		cout << "=== " << name << " ===\n" << endl;
 	else
 		cout << "* " << name << " *\n" << endl;
-	for (auto it = registrar.begin(); it != registrar.end(); ++it)
+	for (BOOST_AUTO(it, registrar.begin()); it != registrar.end(); ++it)
 	{
 		if (bib.mode == CurrentBibliography::ROSWIKI)
 			cout << "==== " << it->first << " ====\n" << endl;
@@ -131,7 +131,7 @@ template<typename R>
 void dumpRegistrarSummary(const PM& pm, const R& registrar, const std::string& name, ModuleNameList& nameList)
 {
 	nameList.push_back(name);
-	for (auto it = registrar.begin(); it != registrar.end(); ++it)
+	for (BOOST_AUTO(it, registrar.begin()); it != registrar.end(); ++it)
 	{
 		// TODO: remove title
 		nameList.push_back(it->first);
@@ -163,7 +163,7 @@ void listModulesSummary(const CurrentBibliography::Mode mode)
 	for (size_t i(0); i < modulesNames.size(); ++i)
 	{
 		unsigned count(0);
-		for (auto jt(modulesNames[i].begin()); jt != modulesNames[i].end(); ++jt)
+		for (BOOST_AUTO(jt, modulesNames[i].begin()); jt != modulesNames[i].end(); ++jt)
 		{
 			const string& name(*jt);
 			if (jt == modulesNames[i].begin())
@@ -191,7 +191,7 @@ void listModulesSummary(const CurrentBibliography::Mode mode)
 	cout << "}\n\\toprule\n";
 	for (unsigned row(0); row < maxCount; ++row)
 	{
-		for (auto it(strippedModulesNames.begin()); it != strippedModulesNames.end(); ++it)
+		for (BOOST_AUTO(it, strippedModulesNames.begin()); it != strippedModulesNames.end(); ++it)
 		{
 			if (row < it->size())
 			{

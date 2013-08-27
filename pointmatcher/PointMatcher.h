@@ -75,6 +75,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
 {
+	using boost::assign::list_of;
+	using boost::assign::map_list_of;
 	// TODO: gather all exceptions
 
 	//! An exception thrown when one tries to use a module type that does not exist
@@ -90,12 +92,12 @@ namespace PointMatcherSupport
 		TransformationError(const std::string& reason);
 	};
 
-	//! A vector of std::shared_ptr<S> that behaves like a std::vector<S>
+	//! A vector of boost::shared_ptr<S> that behaves like a std::vector<S>
 	template<typename S>
-	struct SharedPtrVector: public std::vector<std::shared_ptr<S>>
+	struct SharedPtrVector: public std::vector<boost::shared_ptr<S> >
 	{
 		//! Add an instance of S to the vector, take ownership
-		void push_back(S* v) { std::vector<std::shared_ptr<S>>::push_back(std::shared_ptr<S>(v)); }
+		void push_back(S* v) { std::vector<boost::shared_ptr<S> >::push_back(boost::shared_ptr<S>(v)); }
 	};
 	
 	//! The logger interface, used to output warnings and informations
@@ -120,8 +122,7 @@ namespace PointMatcherSupport
 	void validateFile(const std::string& fileName);
 	
 	//! Data from a CSV file
-	typedef std::map<std::string, std::vector<std::string>> CsvElements;
-
+	typedef std::map<std::string, std::vector<std::string> > CsvElements;
 }
 
 //! Functions and classes that are dependant on scalar type are defined in this templatized class
@@ -570,11 +571,11 @@ struct PointMatcher
 		DataPointsFilters readingStepDataPointsFilters; //!< filters for reading, applied at each step
 		DataPointsFilters referenceDataPointsFilters; //!< filters for reference
 		Transformations transformations; //!< transformations
-		std::shared_ptr<Matcher> matcher; //!< matcher
+		boost::shared_ptr<Matcher> matcher; //!< matcher
 		OutlierFilters outlierFilters; //!< outlier filters
-		std::shared_ptr<ErrorMinimizer> errorMinimizer; //!< error minimizer
+		boost::shared_ptr<ErrorMinimizer> errorMinimizer; //!< error minimizer
 		TransformationCheckers transformationCheckers; //!< transformation checkers
-		std::shared_ptr<Inspector> inspector; //!< inspector
+		boost::shared_ptr<Inspector> inspector; //!< inspector
 		
 		virtual ~ICPChainBase();
 
@@ -599,7 +600,7 @@ struct PointMatcher
 		const std::string& createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
 		template<typename R>
-		const std::string& createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
+		const std::string& createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
 		
 		/*template<typename R>
 		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);*/

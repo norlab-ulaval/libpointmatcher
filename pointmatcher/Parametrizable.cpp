@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Parametrizable.h"
 #include <boost/format.hpp>
+#include <boost/typeof/typeof.hpp>
 
 namespace PointMatcherSupport
 {
@@ -56,14 +57,21 @@ namespace PointMatcherSupport
 		return o;
 	}
 	
+	//! Dump the documentation of this object to a stream
+	std::ostream& operator<< (std::ostream& o, const Parametrizable& p)
+	{
+		o << p.parametersDoc;
+		return o;
+	}
+	
 	//! Dump the documentation of these parameters to a stream
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParametersDoc& p)
 	{
-		for (auto it = p.cbegin(); it != p.cend(); ++it)
+		for (BOOST_AUTO(it,p.begin()); it != p.end(); ++it)
 			o << "- " << *it << endl;
 		return o;
 	}
-
+	
 	//! Return always false
 	bool FalseLexicalComparison(std::string, std::string)
 	{
@@ -119,14 +127,10 @@ namespace PointMatcherSupport
 		comp(FalseLexicalComparison)
 	{}
 	
-	//! Construct a documentation of parameters from a static description in the source
-	Parametrizable::ParametersDoc::ParametersDoc(std::initializer_list<ParameterDoc> list):
+	//! Construct a documentation of parameters from a description in the source
+	/*ParametersDoc(const std::vector<ParameterDoc>& list):
 		std::vector<ParameterDoc>(list)
-	{}
-	
-	//! Construct an empty documentation of parameters
-	Parametrizable::ParametersDoc::ParametersDoc()
-	{}
+	{}*/
 	
 	/*
 	Again, not used because fo gcc bug 9050
@@ -168,7 +172,7 @@ namespace PointMatcherSupport
 		parametersDoc(paramsDoc)
 	{
 		// fill current parameters from either values passed as argument, or default value
-		for (auto it = parametersDoc.cbegin(); it != parametersDoc.cend(); ++it)
+		for (BOOST_AUTO(it, parametersDoc.begin()); it != parametersDoc.end(); ++it)
 		{
 			const string& paramName(it->name);
 			Parameters::const_iterator paramIt(params.find(paramName));

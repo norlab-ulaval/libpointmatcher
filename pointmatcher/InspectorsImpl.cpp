@@ -77,10 +77,10 @@ template<typename T>
 void InspectorsImpl<T>::PerformanceInspector::dumpStats(std::ostream& stream)
 {
 	// Note: this dump format will most probably change in the future
-	for (auto it(stats.begin()); it != stats.end(); ++it)
+	for (BOOST_AUTO(it, stats.begin()); it != stats.end(); ++it)
 	{
 		it->second.dumpStats(stream);
-		auto jt(it);
+		BOOST_AUTO(jt, it);
 		++jt;
 		if (jt != stats.end())
 			stream << ", ";
@@ -90,10 +90,10 @@ void InspectorsImpl<T>::PerformanceInspector::dumpStats(std::ostream& stream)
 template<typename T>
 void InspectorsImpl<T>::PerformanceInspector::dumpStatsHeader(std::ostream& stream)
 {
-	for (auto it(stats.begin()); it != stats.end(); ++it)
+	for (BOOST_AUTO(it, stats.begin()); it != stats.end(); ++it)
 	{
 		it->second.dumpStatsHeader(stream);
-		auto jt(it);
+		BOOST_AUTO(jt, it);
 		++jt;
 		if (jt != stats.end())
 			stream << ", ";
@@ -165,7 +165,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	stream << "POINT_DATA " << features.cols() << "\n";
 
 	// Loop through all descriptor and dispatch appropriate VTK tags
-	for(auto it = data.descriptorLabels.begin(); it != data.descriptorLabels.end(); it++)
+	for(BOOST_AUTO(it, data.descriptorLabels.begin()); it != data.descriptorLabels.end(); it++)
 	{
 
 		// handle specific cases
@@ -410,7 +410,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::o
 	if (!cloud.descriptorExists(nameTag))
 		return;
 		
-	const auto desc(cloud.getDescriptorViewByName(nameTag));
+	const BOOST_AUTO(desc, cloud.getDescriptorViewByName(nameTag));
 	assert(desc.rows() <= forcedDim);
 
 	if(desc.rows() != 0)

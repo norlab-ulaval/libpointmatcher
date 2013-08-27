@@ -171,9 +171,9 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 		
 		// collect labels to be kept
 		Labels newDescLabels;
-		for(auto it(this->descriptorLabels.begin()); it != this->descriptorLabels.end(); ++it)
+		for(BOOST_AUTO(it, this->descriptorLabels.begin()); it != this->descriptorLabels.end(); ++it)
 		{
-			for(auto jt(dp.descriptorLabels.begin()); jt != dp.descriptorLabels.end(); ++jt)
+			for(BOOST_AUTO(jt, dp.descriptorLabels.begin()); jt != dp.descriptorLabels.end(); ++jt)
 			{
 				if (it->text == jt->text)
 				{
@@ -197,7 +197,7 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 			
 			// fill
 			unsigned row(0);
-			for(auto it(newDescLabels.begin()); it != newDescLabels.end(); ++it)
+			for(BOOST_AUTO(it, newDescLabels.begin()); it != newDescLabels.end(); ++it)
 			{
 				View view(newDescriptors.block(row, 0, it->span, newDescriptors.cols()));
 				view.leftCols(nbPoints1) = this->getDescriptorViewByName(it->text);
@@ -310,7 +310,7 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::DataPoints::getFeatureCopyByNa
 
 //! Get a const view on a feature by name, throw an exception if it does not exist
 template<typename T>
-typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getFeatureViewByName(const std::string& name) const
+const typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getFeatureViewByName(const std::string& name) const
 {
 	return getConstViewByName(name, featureLabels, features);
 }
@@ -324,7 +324,7 @@ typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getFeatu
 
 //! Get a const view on a feature row by name and number, throw an exception if it does not exist
 template<typename T>
-typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getFeatureRowViewByName(const std::string& name, const unsigned row) const
+const typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getFeatureRowViewByName(const std::string& name, const unsigned row) const
 {
 	return getConstViewByName(name, featureLabels, features, int(row));
 }
@@ -394,7 +394,7 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::DataPoints::getDescriptorCopyB
 
 //! Get a const view on a descriptor by name, throw an exception if it does not exist
 template<typename T>
-typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name) const
+const typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getDescriptorViewByName(const std::string& name) const
 {
 	return getConstViewByName(name, descriptorLabels, descriptors);
 }
@@ -408,7 +408,7 @@ typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getDescr
 
 //! Get a const view on a descriptor row by name and number, throw an exception if it does not exist
 template<typename T>
-typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getDescriptorRowViewByName(const std::string& name, const unsigned row) const
+const typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getDescriptorRowViewByName(const std::string& name, const unsigned row) const
 {
 	return getConstViewByName(name, descriptorLabels, descriptors, int(row));
 }
@@ -470,7 +470,7 @@ void PointMatcher<T>::DataPoints::assertDescriptorConsistency() const
 				(boost::format("Point cloud has %1% points in features but %2% points in descriptors") % features.cols() % descriptors.cols()).str()
 			);
 		int descDim(0);
-		for (auto it(descriptorLabels.begin()); it != descriptorLabels.end(); ++it)
+		for (BOOST_AUTO(it, descriptorLabels.begin()); it != descriptorLabels.end(); ++it)
 			descDim += it->span;
 		if (descriptors.rows() != descDim)
 			throw std::runtime_error(
@@ -516,7 +516,7 @@ void PointMatcher<T>::DataPoints::allocateFields(const Labels& newLabels, Labels
 	{
 		const string& newName(newLabels[i].text);
 		const size_t newSpan(newLabels[i].span);
-		for(auto it(labels.begin()); it != labels.end(); ++it)
+		for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
 		{
 			if (it->text == newName)
 			{
@@ -604,10 +604,10 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 //! Get a const view on a matrix by name, throw an exception if it does not exist.
 //! If viewRow is given, only return this row, otherwise return the full view
 template<typename T>
-typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data, const int viewRow) const
+const typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data, const int viewRow) const
 {
 	unsigned row(0);
-	for(auto it(labels.begin()); it != labels.end(); ++it)
+	for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
 		{
@@ -633,7 +633,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewByName(const std::string& name, const Labels& labels, Matrix& data, const int viewRow) const
 {
 	unsigned row(0);
-	for(auto it(labels.begin()); it != labels.end(); ++it)
+	for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
 		{
@@ -657,7 +657,7 @@ typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewB
 template<typename T>
 bool PointMatcher<T>::DataPoints::fieldExists(const std::string& name, const unsigned dim, const Labels& labels) const
 {
-	for(auto it(labels.begin()); it != labels.end(); ++it)
+	for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
 		{
@@ -675,7 +675,7 @@ bool PointMatcher<T>::DataPoints::fieldExists(const std::string& name, const uns
 template<typename T>
 unsigned PointMatcher<T>::DataPoints::getFieldDimension(const std::string& name, const Labels& labels) const
 {
-	for(auto it(labels.begin()); it != labels.end(); ++it)
+	for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
 			return it->span;
@@ -689,7 +689,7 @@ template<typename T>
 unsigned PointMatcher<T>::DataPoints::getFieldStartingRow(const std::string& name, const Labels& labels) const
 {
 	unsigned row(0);
-	for(auto it(labels.begin()); it != labels.end(); ++it)
+	for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
 	{
 		if (it->text == name)
 			return row;

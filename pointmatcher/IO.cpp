@@ -46,6 +46,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boost/filesystem/operations.hpp"
 #include "boost/lexical_cast.hpp"
 
+#ifdef WIN32
+#define strtok_r strtok_s
+#endif // WIN32
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -58,7 +61,7 @@ static std::vector<string> csvLineToVector(const char* line)
 	char delimiters[] = " \t,;";
 	char *token;
 	char tmpLine[1024];
-	char *brkt;
+	char *brkt = 0;
 	strcpy(tmpLine, line);
 	token = strtok_r(tmpLine, delimiters, &brkt);
 	if(line[0] != '%') // Jump line if it's commented
@@ -116,7 +119,7 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 
 			for(unsigned int i = 0; i < parsedLine.size(); i++)
 			{
-				for(auto it=keywordCols.begin(); it!=keywordCols.end(); it++)
+				for(BOOST_AUTO(it,keywordCols.begin()); it!=keywordCols.end(); it++)
 				{
 					if(i == (*it).second)
 					{
@@ -131,7 +134,7 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 	
 	// Use for debug
 	
-	//for(auto it=data.begin(); it!=data.end(); it++)
+	//for(BOOST_AUTO(it,data.begin()); it!=data.end(); it++)
 	//{
 	//	cout << "--------------------------" << endl;
 	//	cout << "Header: |" << (*it).first << "|" << endl;
@@ -343,13 +346,13 @@ void PointMatcherSupport::validateFile(const std::string& fileName)
 
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
-    #if BOOST_FILESYSTEM_VERSION >= 3
-      #if BOOST_VERSION >= 105000
-			throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native());
-      #else
-			throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).native());
-      #endif
-    #else
+	#if BOOST_FILESYSTEM_VERSION >= 3
+		#if BOOST_VERSION >= 105000
+				throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).generic_string());
+		#else
+				throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).generic_string());
+		#endif
+	#else
 		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
     #endif
 }
@@ -442,7 +445,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		if(firstLine)
 		{
 			char tmpLine[1024];
-			char *brkt;
+			char *brkt = 0;
 			strcpy(tmpLine, line);
 			token = strtok_r(tmpLine, delimiters, &brkt);
 			while (token)
@@ -517,7 +520,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		}
 
 		// Load data!
-		char *brkt;
+		char *brkt = 0;
 		token = strtok_r(line, delimiters, &brkt);
 		int currentCol = 0;
 		while (token)
@@ -807,8 +810,10 @@ PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadVTK(const std::st
 template<typename T>
 void PointMatcherIO<T>::saveVTK(const DataPoints& data, const std::string& fileName)
 {
-	Parametrizable::Parameters param({{"baseFileName", ""}});
 	typedef typename InspectorsImpl<T>::VTKFileInspector VTKInspector;
+	
+	Parametrizable::Parameters param;
+	boost::assign::insert(param) ("baseFileName", "");
 	VTKInspector vtkInspector(param);
 	vtkInspector.dumpDataPoints(data, fileName);
 }

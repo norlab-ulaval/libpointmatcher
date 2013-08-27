@@ -234,8 +234,8 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 	const DataPoints& filteredReference,
 	const Matches& input)
 {
-	const auto normalsReading(filteredReading.getDescriptorViewByName("normals"));
-	const auto normalsReference(filteredReference.getDescriptorViewByName("normals"));
+	const BOOST_AUTO(normalsReading, filteredReading.getDescriptorViewByName("normals"));
+	const BOOST_AUTO(normalsReference, filteredReference.getDescriptorViewByName("normals"));
 	
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());

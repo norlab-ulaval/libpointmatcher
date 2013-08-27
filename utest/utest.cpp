@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace PointMatcherSupport;
+using boost::assign::map_list_of;
 
 // TODO: avoid global by using testing::Environment
 // TODO: split the test into different cpp files:
@@ -246,18 +247,18 @@ TEST(IOTest, loadYaml)
 {
 
 	// Test loading configuration files for data filters
-	std::ifstream ifs0(dataPath + "default-convert.yaml");
+	std::ifstream ifs0((dataPath + "default-convert.yaml").c_str());
 	EXPECT_NO_THROW(PM::DataPointsFilters filters(ifs0));
 
 	// Test loading configuration files for ICP
 	PM::ICP icp;
-	std::ifstream ifs1(dataPath + "default.yaml");
+	std::ifstream ifs1((dataPath + "default.yaml").c_str());
 	EXPECT_NO_THROW(icp.loadFromYaml(ifs1));
 
-	std::ifstream ifs2(dataPath + "unit_tests/badIcpConfig_InvalidParameter.yaml");
+	std::ifstream ifs2((dataPath + "unit_tests/badIcpConfig_InvalidParameter.yaml").c_str());
 	EXPECT_THROW(icp.loadFromYaml(ifs2), PointMatcherSupport::Parametrizable::InvalidParameter);
 	
-	std::ifstream ifs3(dataPath + "unit_tests/badIcpConfig_InvalidModuleType.yaml");
+	std::ifstream ifs3((dataPath + "unit_tests/badIcpConfig_InvalidModuleType.yaml").c_str());
 	EXPECT_THROW(icp.loadFromYaml(ifs3), PointMatcherSupport::InvalidModuleType);
 }
 
@@ -313,9 +314,11 @@ public:
 	virtual void dumpVTK()
 	{
 		// Make available a VTK inspector for manual inspection
-		icp.inspector.reset(PM::get().InspectorRegistrar.create(
-			"VTKFileInspector", 
-			PM::Parameters({{"baseFileName","./unitTest"}})
+		icp.inspector.reset(
+			PM::get().InspectorRegistrar.create(
+				"VTKFileInspector", 
+				boost::assign::map_list_of
+					("baseFileName","./unitTest")
 			)
 		);
 	}
@@ -325,11 +328,11 @@ public:
 		const PM::TransformationParameters testT = icp(data2D, ref2D);
 		const int dim = validT2d.cols();
 
-		const auto validTrans = validT2d.block(0, dim-1, dim-1, 1).norm();
-		const auto testTrans = testT.block(0, dim-1, dim-1, 1).norm();
+		const BOOST_AUTO(validTrans, validT2d.block(0, dim-1, dim-1, 1).norm());
+		const BOOST_AUTO(testTrans, testT.block(0, dim-1, dim-1, 1).norm());
 	
-		const auto validAngle = acos(validT2d(0,0));
-		const auto testAngle = acos(testT(0,0));
+		const BOOST_AUTO(validAngle, acos(validT2d(0,0)));
+		const BOOST_AUTO(testAngle, acos(testT(0,0)));
 		
 		EXPECT_NEAR(validTrans, testTrans, 0.05);
 		EXPECT_NEAR(validAngle, testAngle, 0.05);
@@ -342,13 +345,13 @@ public:
 		const PM::TransformationParameters testT = icp(data3D, ref3D);
 		const int dim = validT2d.cols();
 
-		const auto validTrans = validT3d.block(0, dim-1, dim-1, 1).norm();
-		const auto testTrans = testT.block(0, dim-1, dim-1, 1).norm();
+		const BOOST_AUTO(validTrans, validT3d.block(0, dim-1, dim-1, 1).norm());
+		const BOOST_AUTO(testTrans, testT.block(0, dim-1, dim-1, 1).norm());
 	
-		const auto testRotation = Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(testT.topLeftCorner(3,3)));
-		const auto validRotation = Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(validT3d.topLeftCorner(3,3)));
+		const BOOST_AUTO(testRotation, Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(testT.topLeftCorner(3,3))));
+		const BOOST_AUTO(validRotation, Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(validT3d.topLeftCorner(3,3))));
 		
-		const auto angleDist = validRotation.angularDistance(testRotation);
+		const BOOST_AUTO(angleDist, validRotation.angularDistance(testRotation));
 		
 		//cout << testT << endl;
 		//cout << "angleDist: " << angleDist << endl;
@@ -455,7 +458,10 @@ TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
 TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 {
 	// Max dist has been selected to not affect the points
-	params = PM::Parameters({{"dim","0"}, {"maxDist", toParam(6.0)}});
+	params = map_list_of<string,string>
+		("dim","0")
+		("maxDist", toParam(6.0))
+	;
 	
 	// Filter on x axis
 	params["dim"] = "0";
@@ -495,7 +501,10 @@ TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 TEST_F(DataFilterTest, MinDistDataPointsFilter)
 {
 	// Min dist has been selected to not affect the points too much
-	params = PM::Parameters({{"dim","0"}, {"minDist", toParam(0.05)}});
+	params = map_list_of<string,string>
+		("dim","0")
+		("minDist", toParam(0.05))
+	;
 	
 	// Filter on x axis
 	params["dim"] = "0";
@@ -532,7 +541,10 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 {
 	// Ratio has been selected to not affect the points too much
 	string ratio = "0.95";
-	params = PM::Parameters({{"dim","0"}, {"ratio", ratio}});
+	params = map_list_of<string,string>
+		("dim","0")
+		("ratio", ratio)
+	;
 	
 	// Filter on x axis
 	params["dim"] = "0";
@@ -561,15 +573,15 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 {
 	// This filter create descriptor, so parameters should'nt impact results
-	params = PM::Parameters({
-		{"knn", "5"}, 
-		{"epsilon", "0.1"}, 
-		{"keepNormals", "1"},
-		{"keepDensities", "1"},
-		{"keepEigenValues", "1"},
-		{"keepEigenVectors", "1" },
-		{"keepMatchedIds" , "1" }
-		});
+	params = map_list_of
+		("knn", "5") 
+		("epsilon", "0.1") 
+		("keepNormals", "1")
+		("keepDensities", "1")
+		("keepEigenValues", "1")
+		("keepEigenVectors", "1" )
+		("keepMatchedIds" , "1" )
+	;
 	// FIXME: the parameter keepMatchedIds seems to do nothing...
 
 	addFilter("SurfaceNormalDataPointsFilter", params);
@@ -585,24 +597,24 @@ TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
 {
 	// Ratio has been selected to not affect the points too much
- 	vector<double> ratio = vector<double>({100, 1000, 5000});
+ 	vector<double> ratio = list_of (100) (1000) (5000);
  
  	for(unsigned i=0; i < ratio.size(); i++)
  	{
  		icp.readingDataPointsFilters.clear();
-		params = PM::Parameters({
-			{"knn", "5"}, 
-			{"epsilon", "0.1"}, 
-			{"keepNormals", "0"},
-			{"keepDensities", "1"},
-			{"keepEigenValues", "0"},
-			{"keepEigenVectors", "0" },
-			{"keepMatchedIds" , "0" }
-			});
+		params = map_list_of
+			("knn", "5") 
+			("epsilon", "0.1") 
+			("keepNormals", "0")
+			("keepDensities", "1")
+			("keepEigenValues", "0")
+			("keepEigenVectors", "0" )
+			("keepMatchedIds" , "0" )
+		;
 
 		addFilter("SurfaceNormalDataPointsFilter", params);
 
- 		params = PM::Parameters({{"maxDensity", toParam(ratio[i])}});
+ 		params = map_list_of ("maxDensity", toParam(ratio[i]));
  		addFilter("MaxDensityDataPointsFilter", params);
  		
 		// FIXME BUG: the density in 2D is not well computed
@@ -623,14 +635,14 @@ TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
 TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 {
 	// This filter create descriptor AND subsample
-	params = PM::Parameters({
-		{"knn", "5"}, 
-		{"averageExistingDescriptors", "1"}, 
-		{"keepNormals", "1"},
-		{"keepDensities", "1"},
-		{"keepEigenValues", "1"},
-		{"keepEigenVectors", "1" }
-		});
+	params = map_list_of
+		("knn", "5")
+		("averageExistingDescriptors", "1")
+		("keepNormals", "1")
+		("keepDensities", "1")
+		("keepEigenValues", "1")
+		("keepEigenVectors", "1")
+	;
 	
 	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
 	validate2dTransformation();
@@ -646,8 +658,9 @@ TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 			"SurfaceNormalDataPointsFilter");
 	icp.readingDataPointsFilters.push_back(extraDataPointFilter);
 	addFilter("ObservationDirectionDataPointsFilter");
-	params = PM::Parameters({{"towardCenter", toParam(false)}});
-	addFilter("OrientNormalsDataPointsFilter", params);
+	addFilter("OrientNormalsDataPointsFilter", map_list_of
+		("towardCenter", toParam(false))
+	);
 	validate2dTransformation();
 	validate3dTransformation();
 }
@@ -655,11 +668,13 @@ TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 
 TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 {
-	vector<double> prob = {0.80, 0.85, 0.90, 0.95};
+	vector<double> prob = list_of (0.80) (0.85) (0.90) (0.95);
 	for(unsigned i=0; i<prob.size(); i++)
 	{
 		// Try to avoid to low value for the reduction to avoid under sampling
-		params = PM::Parameters({{"prob", toParam(prob[i])}});
+		params = map_list_of
+			("prob", toParam(prob[i]))
+		;
 		icp.readingDataPointsFilters.clear();
 		addFilter("RandomSamplingDataPointsFilter", params);
 		validate2dTransformation();
@@ -670,11 +685,13 @@ TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 
 TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 {
-	vector<unsigned> steps = {1, 2, 3};
+	vector<unsigned> steps = list_of (1) (2) (3);
 	for(unsigned i=0; i<steps.size(); i++)
 	{
 		// Try to avoid too low value for the reduction to avoid under sampling
-		params = PM::Parameters({{"startStep", toParam(steps[i])}});
+		params = map_list_of
+			("startStep", toParam(steps[i]))
+		;
 		icp.readingDataPointsFilters.clear();
 		addFilter("FixStepSamplingDataPointsFilter", params);
 		validate2dTransformation();
@@ -716,9 +733,9 @@ public:
 
 TEST_F(MatcherTest, KDTreeMatcher)
 {
-	vector<unsigned> knn = {1, 2, 3};
-	vector<double> epsilon = {0.0, 0.2};
-	vector<double> maxDist = {1.0, 0.5};
+	vector<unsigned> knn = list_of (1) (2) (3);
+	vector<double> epsilon = list_of (0.0) (0.2);
+	vector<double> maxDist = list_of (1.0) (0.5);
 
 	for(unsigned i=0; i < knn.size(); i++)
 	{
@@ -726,12 +743,12 @@ TEST_F(MatcherTest, KDTreeMatcher)
 		{
 			for(unsigned k=0; k < maxDist.size(); k++)
 			{
-				params = PM::Parameters({
-					{"knn", toParam(knn[i])}, // remove end parenthesis for bug
-					{"epsilon", toParam(epsilon[j])}, 
-					{"searchType", "1"},
-					{"maxDist", toParam(maxDist[k])},
-					});
+				params = map_list_of
+					("knn", toParam(knn[i])) // remove end parenthesis for bug
+					("epsilon", toParam(epsilon[j]))
+					("searchType", "1")
+					("maxDist", toParam(maxDist[k]))
+				;
 			
 				addFilter("KDTreeMatcher", params);
 				validate2dTransformation();
@@ -778,15 +795,17 @@ public:
 //No commun parameters were found for 2D and 3D, tests are splited
 TEST_F(OutlierFilterTest, MaxDistOutlierFilter2D)
 {
-	params = PM::Parameters({{"maxDist", toParam(0.015)}});//0.02
-	addFilter("MaxDistOutlierFilter", params);
+	addFilter("MaxDistOutlierFilter", map_list_of
+		("maxDist", toParam(0.015))
+	);
 	validate2dTransformation();
 }
 
 TEST_F(OutlierFilterTest, MaxDistOutlierFilter3D)
 {
-	params = PM::Parameters({{"maxDist", toParam(0.1)}});
-	addFilter("MaxDistOutlierFilter", params);
+	addFilter("MaxDistOutlierFilter", map_list_of
+		("maxDist", toParam(0.1))
+	);
 	validate3dTransformation();
 }
 
@@ -797,13 +816,15 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter2D)
 	// MaxDistOutlierFilter with it
 	PM::OutlierFilter* extraOutlierFilter;
 	
-	params = PM::Parameters({{"maxDist", toParam(0.015)}});
 	extraOutlierFilter = 
-			PM::get().OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
+		PM::get().OutlierFilterRegistrar.create(
+			"MaxDistOutlierFilter", map_list_of 
+				("maxDist", toParam(0.015))
+		)
+	;
 	icp.outlierFilters.push_back(extraOutlierFilter);
 	
-	params = PM::Parameters({{"minDist", toParam(0.0002)}});
-	addFilter("MinDistOutlierFilter", params);
+	addFilter("MinDistOutlierFilter", map_list_of ("minDist", toParam(0.0002)) );
 	
 	validate2dTransformation();
 }
@@ -814,21 +835,22 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter3D)
 	// MaxDistOutlierFilter with it
 	PM::OutlierFilter* extraOutlierFilter;
 	
-	params = PM::Parameters({{"maxDist", toParam(0.1)}});
 	extraOutlierFilter = 
-			PM::get().OutlierFilterRegistrar.create("MaxDistOutlierFilter", params);
+		PM::get().OutlierFilterRegistrar.create(
+			"MaxDistOutlierFilter", map_list_of 
+				("maxDist", toParam(0.1))
+		)
+	;
 	icp.outlierFilters.push_back(extraOutlierFilter);
 	
-	params = PM::Parameters({{"minDist", toParam(0.0002)}});
-	addFilter("MinDistOutlierFilter", params);
+	addFilter("MinDistOutlierFilter", map_list_of ("minDist", toParam(0.0002)) );
 	
 	validate3dTransformation();
 }
 
 TEST_F(OutlierFilterTest, MedianDistOutlierFilter)
 {
-	params = PM::Parameters({{"factor", toParam(3.5)}});
-	addFilter("MedianDistOutlierFilter", params);
+	addFilter("MedianDistOutlierFilter", map_list_of ("factor", toParam(3.5)));
 	validate2dTransformation();
 	validate3dTransformation();
 }
@@ -836,8 +858,7 @@ TEST_F(OutlierFilterTest, MedianDistOutlierFilter)
 
 TEST_F(OutlierFilterTest, TrimmedDistOutlierFilter)
 {
-	params = PM::Parameters({{"ratio", toParam(0.85)}});
-	addFilter("TrimmedDistOutlierFilter", params);
+	addFilter("TrimmedDistOutlierFilter", map_list_of ("ratio", toParam(0.85)) );
 	validate2dTransformation();
 	validate3dTransformation();
 }
@@ -845,12 +866,11 @@ TEST_F(OutlierFilterTest, TrimmedDistOutlierFilter)
 
 TEST_F(OutlierFilterTest, VarTrimmedDistOutlierFilter)
 {
-	params = PM::Parameters({
-		{"minRatio", toParam(0.60)},
-		{"maxRatio", toParam(0.80)},
-		{"lambda", toParam(0.9)},
-	});
-	addFilter("VarTrimmedDistOutlierFilter", params);
+	addFilter("VarTrimmedDistOutlierFilter", map_list_of
+		("minRatio", toParam(0.60))
+		("maxRatio", toParam(0.80))
+		("lambda", toParam(0.9))
+	);
 	validate2dTransformation();
 	validate3dTransformation();
 }
@@ -933,20 +953,17 @@ public:
 
 TEST_F(TransformationCheckerTest, CounterTransformationChecker)
 {
-	params = PM::Parameters({{"maxIterationCount", toParam(20)}});
-	addFilter("CounterTransformationChecker", params);
+	addFilter("CounterTransformationChecker", map_list_of ("maxIterationCount", toParam(20)) );
 	validate2dTransformation();
 }
 
 TEST_F(TransformationCheckerTest, DifferentialTransformationChecker)
 {
-	params = PM::Parameters({
-		{"minDiffRotErr", toParam(0.001)},
-		{"minDiffTransErr", toParam(0.001)},
-		{"smoothLength", toParam(4)}
-	});
-	
-	addFilter("DifferentialTransformationChecker", params);
+	addFilter("DifferentialTransformationChecker", map_list_of
+		("minDiffRotErr", toParam(0.001))
+		("minDiffTransErr", toParam(0.001))
+		("smoothLength", toParam(4))
+	);
 	validate2dTransformation();
 }
 
@@ -957,16 +974,15 @@ TEST_F(TransformationCheckerTest, BoundTransformationChecker)
 	// keep the Counter to get out of the looop	
 	PM::TransformationChecker* extraTransformCheck;
 	
-	params = PM::Parameters({
-		{"maxRotationNorm", toParam(1.0)},
-		{"maxTranslationNorm", toParam(1.0)}
-	});
-	
 	extraTransformCheck = PM::get().TransformationCheckerRegistrar.create(
-		"CounterTransformationChecker");
+		"CounterTransformationChecker"
+	);
 	icp.transformationCheckers.push_back(extraTransformCheck);
 	
-	addFilter("BoundTransformationChecker", params);
+	addFilter("BoundTransformationChecker", map_list_of
+		("maxRotationNorm", toParam(1.0))
+		("maxTranslationNorm", toParam(1.0))
+	);
 	validate2dTransformation();
 }
 
@@ -1019,25 +1035,25 @@ TEST(Transformation, RigidTransformation)
 //---------------------------
 TEST(Inspectors, PerformanceInspector)
 {
-	PM::Parameters params({
-		{"baseFileName", "/tmp/utest_performances"},
-		{"dumpPerfOnExit", "1"}
-	});
-	PM::Inspector* performances;
-	performances = PM::get().REG(Inspector).create("PerformanceInspector", params);
-
+	PM::Inspector* performances =
+		PM::get().REG(Inspector).create(
+			"PerformanceInspector", map_list_of
+				("baseFileName", "/tmp/utest_performances")
+				("dumpPerfOnExit", "1")
+		)
+	;
 	//TODO: we only test constructor here, check other things...
 }
 
 TEST(Inspectors, VTKFileInspector)
 {
-	PM::Parameters params({
-		{"baseFileName", "/tmp/utest_vtk"},
-		{"dumpPerfOnExit", "1"}
-	});
-	PM::Inspector* vtkFile;
-	vtkFile = PM::get().REG(Inspector).create("VTKFileInspector", params);
-	
+	PM::Inspector* vtkFile = 
+		PM::get().REG(Inspector).create(
+			"VTKFileInspector", map_list_of
+				("baseFileName", "/tmp/utest_vtk")
+				("dumpPerfOnExit", "1")
+		)
+	;
 	//TODO: we only test constructor here, check other things...
 }
 
@@ -1052,14 +1068,14 @@ TEST(Inspectors, VTKFileInspector)
 //- displayLocation (default: 0) - display the location of message in source code
 TEST(Loggers, FileLogger)
 {
-	PM::Parameters params({
-		{"infoFileName", "/tmp/utest_info"},
-		{"warningFileName", "/tmp/utest_warn"},
-		{"displayLocation", "1"},
-	});
-	Logger* fileLog;
-	fileLog = PM::get().REG(Logger).create("FileLogger", params);
-	
+	Logger* fileLog = 
+		PM::get().REG(Logger).create(
+			"FileLogger", map_list_of
+				("infoFileName", "/tmp/utest_info")
+				("warningFileName", "/tmp/utest_warn")
+				("displayLocation", "1")
+		)
+	;
 	//TODO: we only test constructor here, check other things...
 }
 

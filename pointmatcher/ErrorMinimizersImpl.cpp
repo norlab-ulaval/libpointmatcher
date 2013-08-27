@@ -113,7 +113,7 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 		return this->weightedPointUsedRatio;
 	}
 
-	const auto noises(this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
+	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
 	int count = 0;
 	for(int i=0; i < nbPoints; i++)
 	{
@@ -157,27 +157,21 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const int nbPts = mPts.reading.features.cols();
 
 	// Adjust if the user forces 2D minimization on XY-plane
+	int forcedDim = dim - 1;
 	if(force2D && dim == 4)
 	{
 		mPts.reading.features.conservativeResize(3, Eigen::NoChange);
 		mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
 		mPts.reference.features.conservativeResize(3, Eigen::NoChange);
 		mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
+		forcedDim = dim - 2;
 	}
 
-	int forcedDim = dim - 1;
-	if(force2D)
-		forcedDim = dim - 2;
-
-
 	// Fetch normal vectors of the reference point cloud (with adjustment if needed)
-	const auto normalRef(mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
-
+	const BOOST_AUTO(normalRef, mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
 
 	// Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
 	assert(normalRef.rows() > 0);
-
-	
 
 	// Compute cross product of cross = cross(reading X normalRef)
 	const Matrix cross = this->crossProduct(mPts.reading.features, normalRef);
@@ -277,8 +271,8 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 		return this->weightedPointUsedRatio;
 	}
 
-	const auto noises(this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
-	const auto normals(this->lastErrorElements.reading.getDescriptorViewByName("normals"));
+	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
+	const BOOST_AUTO(normals, this->lastErrorElements.reading.getDescriptorViewByName("normals"));
 	int count = 0;
 	for(int i=0; i < nbPoints; i++)
 	{

@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parametrizable.h"
 #include "PointMatcher.h"
 #include <boost/format.hpp>
+#include <boost/typeof/typeof.hpp>
 
 #ifdef HAVE_YAML_CPP
 	#include "yaml-cpp/yaml.h"
@@ -81,7 +82,7 @@ namespace PointMatcherSupport
 				C* instance(new C(params));
 				
 				// check that there was no unsed parameter
-				for (auto it(params.begin()); it != params.end() ;++it)
+				for (BOOST_AUTO(it, params.begin()); it != params.end() ;++it)
 				{
 					if (instance->parametersUsed.find(it->first) == instance->parametersUsed.end())
 						throw Parametrizable::InvalidParameter(
@@ -107,7 +108,7 @@ namespace PointMatcherSupport
 		{
 			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
-				for (auto it(params.begin()); it != params.end() ;++it)
+				for (BOOST_AUTO(it, params.begin()); it != params.end() ;++it)
 					throw Parametrizable::InvalidParameter(
 							(boost::format("Parameter %1% was set but module %2% dos not use any parameter") % it->first % className).str()
 						);
@@ -119,7 +120,7 @@ namespace PointMatcherSupport
 			}
 			virtual const Parametrizable::ParametersDoc availableParameters() const
 			{
-				return {};
+				return Parametrizable::ParametersDoc();
 			}
 		};
 		
@@ -131,7 +132,7 @@ namespace PointMatcherSupport
 		//! Destructor, remove all classes descriptors 
 		~Registrar()
 		{
-			for (auto it = classes.begin(); it != classes.end(); ++it)
+			for (BOOST_AUTO(it, classes.begin()); it != classes.end(); ++it)
 				delete it->second;
 		}
 		//! Register a class by storing an instance of a descriptor helper class
@@ -143,7 +144,7 @@ namespace PointMatcherSupport
 		//! Return a descriptor following a name, throw an exception if name is invalid
 		const ClassDescriptor* getDescriptor(const std::string& name) const
 		{
-			auto it = classes.find(name);
+			BOOST_AUTO(it, classes.find(name));
 			if (it == classes.end())
 			{
 				std::cerr << "No element named " << name << " is registered. Known ones are:\n";
@@ -202,7 +203,7 @@ namespace PointMatcherSupport
 		//! Print the list of registered classes to stream
 		void dump(std::ostream &stream) const
 		{
-			for (auto it = classes.begin(); it != classes.end(); ++it)
+			for (BOOST_AUTO(it, classes.begin()); it != classes.end(); ++it)
 				stream << "- " << it->first << "\n";
 		}
 		

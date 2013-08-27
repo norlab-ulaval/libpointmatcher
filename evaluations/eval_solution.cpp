@@ -40,16 +40,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <fstream>
 #include <map>
-#include <thread>
-#include <mutex>
 #include <time.h>
 
 #include <ncurses.h>
 
-#include "boost/program_options.hpp"
-#include "boost/filesystem.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
-#include "boost/date_time/posix_time/posix_time_io.hpp"
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
+
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -191,7 +192,7 @@ int main(int argc, char *argv[])
 	
 	const string yaml_config = vm["icp-config"].as<string>();
 	{
-		ifstream cfgIfs(yaml_config);
+		ifstream cfgIfs(yaml_config.c_str());
 		if (!cfgIfs.good())
 		{
 			cerr << "Cannot open YAML file name: it must exist and be readable." << endl;
@@ -202,7 +203,7 @@ int main(int argc, char *argv[])
 	initscr(); // ncurse screen
 
 	// Starting evaluation
-	for(auto it=config.dataSetStatus.begin(); it != config.dataSetStatus.end(); ++it)
+	for(BOOST_AUTO(it, config.dataSetStatus.begin()); it != config.dataSetStatus.end(); ++it)
 	{
 		if(vm.count("all") || vm.count(it->second.name))
 		{
@@ -243,7 +244,7 @@ int main(int argc, char *argv[])
 			}
 			
 			// List of thread
-			std::thread a_threads[maxNbCore];
+			boost::thread a_threads[maxNbCore];
 			std::vector<EvaluationModule> v_evalModules;
 			
 			const int nbPerThread = eval_list.size()/nbCore;
@@ -259,12 +260,12 @@ int main(int argc, char *argv[])
 				if(j == nbCore-1)
 				{
 					// last core receive the reste
-					a_threads[j] = std::thread(&EvaluationModule::evaluateSolution, &v_evalModules[j], name.str(), yaml_config, j, it_start, eval_list.end());
+					a_threads[j] = boost::thread(&EvaluationModule::evaluateSolution, &v_evalModules[j], name.str(), yaml_config, j, it_start, eval_list.end());
 					//evalCore.evaluateSolution(yaml_config, j, it_start, eval_list.end());
 				}
 				else
 				{
-					a_threads[j] = std::thread(&EvaluationModule::evaluateSolution, &v_evalModules[j], name.str(), yaml_config, j, it_start, it_start + nbPerThread);
+					a_threads[j] = boost::thread(&EvaluationModule::evaluateSolution, &v_evalModules[j], name.str(), yaml_config, j, it_start, it_start + nbPerThread);
 					//evalCore.evaluateSolution(yaml_config, j, it_start, it_start + nbPerThread);
 					it_start += nbPerThread;
 				}
@@ -289,7 +290,7 @@ int main(int argc, char *argv[])
 			move(nbCore+3,0);
 			clrtoeol();
 			mvprintw(nbCore+3, 0, "Last result written to: %s", ss_path_time.str().c_str());
-			std::ofstream fout(ss_path_time.str());
+			std::ofstream fout(ss_path_time.str().c_str());
 			if (!fout.good())
 			{
 				cerr << "Warning, cannot open result file " << ss_path_time << ", results were not saved" << endl;
@@ -309,7 +310,7 @@ int main(int argc, char *argv[])
 			for(unsigned i=0; i<v_evalModules.size(); ++i)
 			{
 				const string tmp_file_name = v_evalModules[i].tmp_file_name;
-				ifstream tmp_file(tmp_file_name);
+				ifstream tmp_file(tmp_file_name.c_str());
 				if(tmp_file.is_open())
 				{
 					fout << tmp_file.rdbuf();
@@ -358,7 +359,7 @@ string outputStatus(map<string, DataSetInfo> dataSetStatus)
 {
 	stringstream ss;
 
-	for(auto it=dataSetStatus.begin(); it != dataSetStatus.end(); ++it)
+	for(BOOST_AUTO(it, dataSetStatus.begin()); it != dataSetStatus.end(); ++it)
 	{
 		string paddedName = it->second.name + ":";
 		while (paddedName.length() < 12) paddedName += " ";
@@ -433,7 +434,7 @@ void saveConfig(Config& config)
 		emitter << YAML::Key << "path_result";
 		emitter << YAML::Value << config.path_result;
 
-		for(auto it=config.dataSetStatus.begin(); it != config.dataSetStatus.end(); ++it)
+		for(BOOST_AUTO(it, config.dataSetStatus.begin()); it != config.dataSetStatus.end(); ++it)
 		{
 			emitter << YAML::Key << it->second.name;
 			emitter << YAML::Value;
@@ -444,7 +445,7 @@ void saveConfig(Config& config)
 		}
 		emitter << YAML::EndMap;
 
-		std::ofstream fout(config.path_config);
+		std::ofstream fout(config.path_config.c_str());
 		if (!fout.good())
 		{
 			cerr << "Warning, cannot open config file " << config.path_config << ", content was not saved" << endl;
@@ -456,7 +457,7 @@ void saveConfig(Config& config)
 
 void loadConfig(Config& config)
 {
-	ifstream f_config(config.path_config);
+	ifstream f_config(config.path_config.c_str());
 	if (!f_config.good())
 	{
 		cerr << "Warning, cannot open config file " << config.path_config << ", content was not loaded" << endl;
@@ -469,7 +470,7 @@ void loadConfig(Config& config)
 	{
 		doc["path_download"] >> config.path_download;
 		doc["path_result"] >> config.path_result;
-		for(auto it=config.dataSetStatus.begin(); it != config.dataSetStatus.end(); ++it)
+		for(BOOST_AUTO(it, config.dataSetStatus.begin()); it != config.dataSetStatus.end(); ++it)
 		{
 			string dataSetName = it->second.name;
 			const YAML::Node &node = doc[dataSetName];
@@ -488,7 +489,7 @@ void downloadDataSets(Config& config, po::variables_map &vm)
 	if(!fs::is_directory(extra_path))
 		fs::create_directories(extra_path);
 
-	for(auto it=config.dataSetStatus.begin(); it != config.dataSetStatus.end(); ++it)
+	for(BOOST_AUTO(it, config.dataSetStatus.begin()); it != config.dataSetStatus.end(); ++it)
 	{
 		if(vm.count("all") || vm.count(it->second.name))
 		{
@@ -555,7 +556,7 @@ void validateFileInfo(const PMIO::FileInfo &fileInfo)
 	
 }
 
-mutex m_display;
+boost::mutex m_display;
 void displayLoadingBar(const int &coreId, const int &i, const int &total, const int &nbFailures, const double sec, const double total_time)
 {
 	const double average_time = total_time/double(i+1);
@@ -599,7 +600,7 @@ void EvaluationModule::evaluateSolution(const string &tmp_file_name, const strin
 	int current_line = 0;
 	timer t_eval_list;
 
-	std::ofstream fout(tmp_file_name);
+	std::ofstream fout(tmp_file_name.c_str());
 	if (!fout.good())
 	{
 		cerr << "Warning, cannot open temporary result file " << tmp_file_name << ", evaluation was skipped" << endl;
@@ -625,7 +626,7 @@ void EvaluationModule::evaluateSolution(const string &tmp_file_name, const strin
 
 		// Build ICP based on config file
 		PM::ICP icp;
-		ifstream ifs(yaml_config);
+		ifstream ifs(yaml_config.c_str());
 		icp.loadFromYaml(ifs);
 
 		const TP Tinit = it_eval->initialTransformation;

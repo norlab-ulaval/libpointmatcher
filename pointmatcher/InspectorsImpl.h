@@ -73,10 +73,10 @@ struct InspectorsImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "baseFileName", "base file name for the statistics files (if empty, disabled)", "" },
-				{ "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" }
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "baseFileName", "base file name for the statistics files (if empty, disabled)", "" )
+				( "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" )
+			;
 		}
 
 		const std::string baseFileName;
@@ -147,10 +147,10 @@ struct InspectorsImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "baseFileName", "base file name for the VTK files ", "point-matcher-output" },
-				{ "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" }
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "baseFileName", "base file name for the VTK files ", "point-matcher-output" )
+				( "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" )
+			;
 		}
 		
 		const std::string baseFileName;

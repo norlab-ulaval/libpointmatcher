@@ -35,110 +35,117 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Bibliography.h"
 
+#include <boost/typeof/typeof.hpp>
 #include <boost/lexical_cast.hpp>
+#define BOOST_ASSIGN_MAX_PARAMS 6
+#include <boost/assign/list_of.hpp>
 #include <iostream>
 #include <cassert>
+#include <stdexcept>
 
 namespace PointMatcherSupport
 {
 	using namespace std;
+	using boost::assign::map_list_of;
+	
+	template<typename M>
+	bool contains(const M& m, const typename M::key_type& k)
+	{
+		BOOST_AUTO(it,m.find(k));
+		return (it!=m.end());
+	}
+	
+	template<typename M>
+	const typename M::mapped_type& get(const M& m, const typename M::key_type& k)
+	{
+		BOOST_AUTO(it,m.find(k));
+		if (it!=m.end())
+			return it->second;
+		else
+			throw std::runtime_error("unknown key");
+	}
 	
 	static Bibliography bibliography()
 	{
-		return Bibliography({
-			{ "Phillips2007VarTrimmed",
-				StringMap({
-					{ "type", "inproceedings" },
-					{ "title", "Outlier robust ICP for minimizing fractional RMSD" },
-					{ "author", "Phillips, J.M. and Liu, R. and Tomasi, C." },
-					{ "booktitle", "3-D Digital Imaging and Modeling, 2007. 3DIM '07. Sixth International Conference on" },
-					{ "year", "2007" },
-					{ "pages", "427--434" },
-					{ "publisher", "IEEE Press" },
-					{ "doi", "10.1109/3DIM.2007.39" },
-					{ "fulltext", "http://x86.cs.duke.edu/~tomasi/papers/phillips/phillips3DIM07.pdf" }
-				})
-			},
-			{ "Chetverikov2002Trimmed", 
-				StringMap({
-					{ "type", "inproceedings" },
-					{ "title", "The Trimmed Iterative Closest Point Algorithm" },
-					{ "author", "Chetverikov, D. and Svirko, D. and Stepanov, D. and Krsek, P." },
-					{ "booktitle", "Pattern Recognition, 2002. Proceedings. 16th International Conference on" },
-					{ "year", "2002" },
-					{ "pages", "545--548" },
-					{ "publisher", "IEEE Press" },
-					{ "doi", "10.1109/ICPR.2002.1047997 " },
-					{ "fulltext", "http://hci.iwr.uni-heidelberg.de/publications/dip/2002/ICPR2002/DATA/10_1_03.PDF"}
-				})
-			},
-			{ "Besl1992Point2Point", 
-				StringMap({
-					{ "type", "inproceedings" },
-					{ "title", "A Method for Registration of 3-D Shapes" },
-					{ "author", "Besl, P.J. and McKay, H.D." },
-					{ "booktitle", "Pattern Analysis and Machine Intelligence, IEEE Transactions" },
-					{ "year", "1992" },
-					{ "pages", "239--256" },
-					{ "publisher", "IEEE Press" },
-					{ "doi", "10.1109/34.121791" },
-					{ "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=121791"}
-				})
-			},
-			{ "Chen1991Point2Plane", 
-				StringMap({
-					{ "type", "inproceedings" },
-					{ "title", "Object modeling by registration of multiple range images" },
-					{ "author", "Chen, Y. and Medioni, G." },
-					{ "booktitle", "Robotics and Automation, 1991. Proceedings., 1991 IEEE International Conference on" },
-					{ "year", "1991" },
-					{ "pages", "2724--2729" },
-					{ "publisher", "IEEE Press" },
-					{ "doi", "10.1109/ROBOT.1991.132043" },
-					{ "fulltext", "http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=132043"}
-				})
-			},
-			{ "Masuda1996Random", 
-				StringMap({
-					{ "type", "inproceedings" },
-					{ "title", "Registration and integration of multiple range images for 3-D model construction" },
-					{ "author", "Masuda, T. and Sakaue, K. and Yokoya, N." },
-					{ "booktitle", "Pattern Recognition, 1996., Proceedings of the 13th International Conference on" },
-					{ "year", "1996" },
-					{ "pages", "879--883" },
-					{ "publisher", "IEEE Press" },
-					{ "doi", "10.1109/ICPR.1996.546150" },
-					{ "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=546150"}
-				})
-			},
-			{ "Diebel2004Median", 
-				StringMap({
-					{ "type", "inproceedings" },
-					{ "title", "Simultaneous Localization and Mapping with Active Stereo Vision" },
-					{ "author", "Diebel, J. and Reutersward, K. and Thrun, S. and Davis, J. and Gupta, R." },
-					{ "booktitle", "Intelligent Robots and Systems, 2004. (IROS 2004). Proceedings. 2004 IEEE/RSJ International Conference on" },
-					{ "year", "2004" },
-					{ "pages", "3436--3443" },
-					{ "publisher", "IEEE Press" },
-					{ "doi", "10.1109/IROS.2004.1389948" },
-					{ "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1389948"}
-				})
-			},
-			{ "Pomerleau2012Noise", 
-				StringMap({
-					{ "type", "inproceedings" },
-					{ "title", "Noise Characterization of Depth Sensors for Surface Inspections" },
-					{ "author", "F. Pomerleau, A. Breitenmoser, M. Liu, F. Colas, R. Siegwart" },
-					{ "booktitle", " International Conference on Applied Robotics for the Power Industry, 2012. (CARPI 2012). Proceedings of the IEEE" },
-					{ "year", "2012" },
-					{ "pages", "1--8" },
-					{ "publisher", "IEEE Press" },
-					{ "doi", "" },
-					{ "fulltext", ""}
-				})
-			}
-
-		});
+		return map_list_of<std::string, StringMap>
+			( "Phillips2007VarTrimmed", map_list_of
+				( "type", "inproceedings" )
+				( "title", "Outlier robust ICP for minimizing fractional RMSD" )
+				( "author", "Phillips, J.M. and Liu, R. and Tomasi, C." )
+				( "booktitle", "3-D Digital Imaging and Modeling, 2007. 3DIM '07. Sixth International Conference on" )
+				( "year", "2007" )
+				( "pages", "427--434" )
+				( "publisher", "IEEE Press" )
+				( "doi", "10.1109/3DIM.2007.39" )
+				( "fulltext", "http://x86.cs.duke.edu/~tomasi/papers/phillips/phillips3DIM07.pdf" )
+			)
+			( "Chetverikov2002Trimmed", map_list_of
+				( "type", "inproceedings" )
+				( "title", "The Trimmed Iterative Closest Point Algorithm" )
+				( "author", "Chetverikov, D. and Svirko, D. and Stepanov, D. and Krsek, P." )
+				( "booktitle", "Pattern Recognition, 2002. Proceedings. 16th International Conference on" )
+				( "year", "2002" )
+				( "pages", "545--548" )
+				( "publisher", "IEEE Press" )
+				( "doi", "10.1109/ICPR.2002.1047997 " )
+				( "fulltext", "http://hci.iwr.uni-heidelberg.de/publications/dip/2002/ICPR2002/DATA/10_1_03.PDF" )
+			)
+			( "Besl1992Point2Point", map_list_of
+				( "type", "inproceedings" )
+				( "title", "A Method for Registration of 3-D Shapes" )
+				( "author", "Besl, P.J. and McKay, H.D." )
+				( "booktitle", "Pattern Analysis and Machine Intelligence, IEEE Transactions" )
+				( "year", "1992" )
+				( "pages", "239--256" )
+				( "publisher", "IEEE Press" )
+				( "doi", "10.1109/34.121791" )
+				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=121791")
+			)
+			( "Chen1991Point2Plane", map_list_of
+				( "type", "inproceedings" )
+				( "title", "Object modeling by registration of multiple range images" )
+				( "author", "Chen, Y. and Medioni, G." )
+				( "booktitle", "Robotics and Automation, 1991. Proceedings., 1991 IEEE International Conference on" )
+				( "year", "1991" )
+				( "pages", "2724--2729" )
+				( "publisher", "IEEE Press" )
+				( "doi", "10.1109/ROBOT.1991.132043" )
+				( "fulltext", "http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=132043")
+			)
+			( "Masuda1996Random", map_list_of
+				( "type", "inproceedings" )
+				( "title", "Registration and integration of multiple range images for 3-D model construction" )
+				( "author", "Masuda, T. and Sakaue, K. and Yokoya, N." )
+				( "booktitle", "Pattern Recognition, 1996., Proceedings of the 13th International Conference on" )
+				( "year", "1996" )
+				( "pages", "879--883" )
+				( "publisher", "IEEE Press" )
+				( "doi", "10.1109/ICPR.1996.546150" )
+				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=546150")
+			)
+			( "Diebel2004Median", map_list_of
+				( "type", "inproceedings" )
+				( "title", "Simultaneous Localization and Mapping with Active Stereo Vision" )
+				( "author", "Diebel, J. and Reutersward, K. and Thrun, S. and Davis, J. and Gupta, R." )
+				( "booktitle", "Intelligent Robots and Systems, 2004. (IROS 2004). Proceedings. 2004 IEEE/RSJ International Conference on" )
+				( "year", "2004" )
+				( "pages", "3436--3443" )
+				( "publisher", "IEEE Press" )
+				( "doi", "10.1109/IROS.2004.1389948" )
+				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1389948")
+			)
+			( "Pomerleau2012Noise", map_list_of
+				( "type", "inproceedings" )
+				( "title", "Noise Characterization of Depth Sensors for Surface Inspections" )
+				( "author", "F. Pomerleau, A. Breitenmoser, M. Liu, F. Colas, R. Siegwart" )
+				( "booktitle", " International Conference on Applied Robotics for the Power Industry, 2012. (CARPI 2012). Proceedings of the IEEE" )
+				( "year", "2012" )
+				( "pages", "1--8" )
+				( "publisher", "IEEE Press" )
+				( "doi", "" )
+				( "fulltext", "")
+			)
+		;
 	}
 	
 	CurrentBibliography::CurrentBibliography(Mode mode):
@@ -162,23 +169,23 @@ namespace PointMatcherSupport
 		for (size_t i = 0; i < entries.size(); ++i)
 		{
 			const string& entryName(entries[i]);
-			if (!biblio.contains(entryName))
+			if (!contains(biblio, entryName))
 				throw runtime_error(string("Broken bibliography, missing entry " + entryName));
-			const StringMap& entry(biblio.get(entryName));
+			const StringMap& entry(get(biblio, entryName));
 			
 			os << "[" << i+1 << "]";
-			if (entry.contains("title"))
-				os << " " << entry.get("title") << ".";
-			if (entry.contains("author"))
-				os << " " << entry.get("author") << "";
-			if (entry.contains("booktitle"))
-				os << " In " << entry.get("booktitle") << ".";
-			if (entry.contains("journal"))
-				os << " " << entry.get("journal") << ".";
-			if (entry.contains("pages"))
-				os << " " << entry.get("pages") << ".";
-			if (entry.contains("year"))
-				os << " " << entry.get("year") << ".";
+			if (contains(entry, "title"))
+				os << " " << get(entry, "title") << ".";
+			if (contains(entry, "author"))
+				os << " " << get(entry, "author") << "";
+			if (contains(entry, "booktitle"))
+				os << " In " << get(entry, "booktitle") << ".";
+			if (contains(entry, "journal"))
+				os << " " << get(entry, "journal") << ".";
+			if (contains(entry, "pages"))
+				os << " " << get(entry, "pages") << ".";
+			if (contains(entry, "year"))
+				os << " " << get(entry, "year") << ".";
 			os << endl << endl;
 		}
 	}
@@ -189,27 +196,27 @@ namespace PointMatcherSupport
 		for (size_t i = 0; i < entries.size(); ++i)
 		{
 			const string& entryName(entries[i]);
-			if (!biblio.contains(entryName))
+			if (!contains(biblio, entryName))
 				throw runtime_error(string("Broken bibliography, missing entry " + entryName));
-			const StringMap& entry(biblio.get(entryName));
+			const StringMap& entry(get(biblio, entryName));
 			
 			os << " * " << "<<Anchor(" << entryName << ")>>[" << i+1 << "] -";
-			if (entry.contains("title"))
-				os << " '''" << entry.get("title") << ".'''";
-			if (entry.contains("author"))
-				os << " " << entry.get("author") << "";
-			if (entry.contains("booktitle"))
-				os << " ''In " << entry.get("booktitle") << ".''";
-			if (entry.contains("journal"))
-				os << " " << entry.get("journal") << ".";
-			if (entry.contains("pages"))
-				os << " " << entry.get("pages") << ".";
-			if (entry.contains("year"))
-				os << " " << entry.get("year") << ".";
-			if (entry.contains("doi"))
-				os << " DOI: [[http://dx.doi.org/" << entry.get("doi") << "|" << entry.get("doi") << "]].";
-			if (entry.contains("fulltext"))
-				os << " [[" << entry.get("fulltext") << "|full text]].";
+			if (contains(entry, "title"))
+				os << " '''" << get(entry, "title") << ".'''";
+			if (contains(entry, "author"))
+				os << " " << get(entry, "author") << "";
+			if (contains(entry, "booktitle"))
+				os << " ''In " << get(entry, "booktitle") << ".''";
+			if (contains(entry, "journal"))
+				os << " " << get(entry, "journal") << ".";
+			if (contains(entry, "pages"))
+				os << " " << get(entry, "pages") << ".";
+			if (contains(entry, "year"))
+				os << " " << get(entry, "year") << ".";
+			if (contains(entry, "doi"))
+				os << " DOI: [[http://dx.doi.org/" << get(entry, "doi") << "|" << get(entry, "doi") << "]].";
+			if (contains(entry, "fulltext"))
+				os << " [[" << get(entry, "fulltext") << "|full text]].";
 			os << endl;
 		}
 	}
@@ -220,23 +227,23 @@ namespace PointMatcherSupport
 		for (size_t i = 0; i < entries.size(); ++i)
 		{
 			const string& entryName(entries[i]);
-			if (!biblio.contains(entryName))
+			if (!contains(biblio, entryName))
 				throw runtime_error(string("Broken bibliography, missing entry " + entryName));
-			const StringMap& entry(biblio.get(entryName));
+			const StringMap& entry(get(biblio, entryName));
 			
-			os << "@" << entry.get("type") << "{" << entryName << endl;
-			if (entry.contains("title"))
-				os << "\ttitle={" << entry.get("title") << "}," << endl;
-			if (entry.contains("author"))
-				os << "\tauthor={" << entry.get("author") << "}," << endl;
-			if (entry.contains("booktitle"))
-				os << "\tbooktitle={" << entry.get("booktitle") << "}," << endl;
-			if (entry.contains("journal"))
-				os << "\tjournal={" << entry.get("journal") << "}," << endl;
-			if (entry.contains("pages"))
-				os << "\tpages={" << entry.get("pages") << "}," << endl;
-			if (entry.contains("year"))
-				os << "\tyear={" << entry.get("year") << "}," << endl;
+			os << "@" << get(entry, "type") << "{" << entryName << endl;
+			if (contains(entry, "title"))
+				os << "\ttitle={" << get(entry, "title") << "}," << endl;
+			if (contains(entry, "author"))
+				os << "\tauthor={" << get(entry, "author") << "}," << endl;
+			if (contains(entry, "booktitle"))
+				os << "\tbooktitle={" << get(entry, "booktitle") << "}," << endl;
+			if (contains(entry, "journal"))
+				os << "\tjournal={" << get(entry, "journal") << "}," << endl;
+			if (contains(entry, "pages"))
+				os << "\tpages={" << get(entry, "pages") << "}," << endl;
+			if (contains(entry, "year"))
+				os << "\tyear={" << get(entry, "year") << "}," << endl;
 			os << "}" << endl << endl;
 		}
 	}
@@ -285,9 +292,9 @@ namespace PointMatcherSupport
 					const string key(keys[j]);
 					if (mode == CurrentBibliography::ROSWIKI)
 						newText += "[[#" + key + "|";
-					if (indices.contains(key))
+					if (contains(indices, key))
 					{
-						newText += boost::lexical_cast<string>(indices.get(key)+1);
+						newText += boost::lexical_cast<string>(get(indices, key)+1);
 					}
 					else
 					{

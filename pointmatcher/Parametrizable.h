@@ -43,6 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <limits>
+#define BOOST_ASSIGN_MAX_PARAMS 6
+#include <boost/assign/list_of.hpp>
+#include <boost/assign/list_inserter.hpp>
 
 
 namespace PointMatcherSupport
@@ -131,13 +134,7 @@ namespace PointMatcherSupport
 		};
 		
 		//! The documentation of all parameters
-		struct ParametersDoc : public std::vector<ParameterDoc>
-		{
-			ParametersDoc(std::initializer_list<ParameterDoc> list);
-			ParametersDoc();
-			
-			friend std::ostream& operator<< (std::ostream& o, const ParametersDoc& p);
-		};
+		typedef std::vector<ParameterDoc> ParametersDoc;
 		
 		/*
 		Again, not used because fo gcc bug 9050
@@ -167,9 +164,9 @@ namespace PointMatcherSupport
 		template<typename S>
 		S get(const std::string& paramName) { return lexical_cast<S>(getParamValueString(paramName)); }
 		
-		//! Dump the documentation of this object to a stream
-		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p) { o << p.parametersDoc; return o; }
+		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p);
 	};
+	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParametersDoc& p);
 } // namespace PointMatcherSupport
 
 #endif // __POINTMATCHER_PARAMETRIZABLE_H

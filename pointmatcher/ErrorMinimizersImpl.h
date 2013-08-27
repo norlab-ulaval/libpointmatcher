@@ -85,9 +85,9 @@ struct ErrorMinimizersImpl
 		
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "force2D", "If set to true(1), the minimization will be force to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>}
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "force2D", "If set to true(1), the minimization will be force to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>)
+			;
 		}
 
 		const bool force2D;

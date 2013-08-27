@@ -34,8 +34,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "TransformationCheckersImpl.h"
-
 #include "Functions.h"
+#include <boost/math/special_functions/fpclassify.hpp> 
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -146,9 +146,9 @@ void TransformationCheckersImpl<T>::DifferentialTransformationChecker::check(con
 	//std::cout << "Abs Rotation: " << this->conditionVariables(0) << " / " << this->limits(0) << std::endl;
 	//std::cout << "Abs Translation: " << this->conditionVariables(1) << " / " << this->limits(1) << std::endl;
 	
-	if (std::isnan(this->conditionVariables(0)))
+	if (boost::math::isnan(this->conditionVariables(0)))
 		throw ConvergenceError("abs rotation norm not a number");
-	if (std::isnan(this->conditionVariables(1)))
+	if (boost::math::isnan(this->conditionVariables(1)))
 		throw ConvergenceError("abs translation norm not a number");
 }
 

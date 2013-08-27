@@ -73,8 +73,8 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	{
 		const int span(input.descriptorLabels[i].span);
 		const std::string& name(input.descriptorLabels[i].text);
-		const auto inputDesc(input.descriptors.block(row, 0, span, descCols));
-		auto outputDesc(transformedCloud.descriptors.block(row, 0, span, descCols));
+		const BOOST_AUTO(inputDesc, input.descriptors.block(row, 0, span, descCols));
+		BOOST_AUTO(outputDesc, transformedCloud.descriptors.block(row, 0, span, descCols));
 		if (name == "normals" || name == "observationDirections")
 			outputDesc = R * inputDesc;
 		else

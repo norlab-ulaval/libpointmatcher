@@ -115,7 +115,7 @@ template<typename R>
 void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name, CurrentBibliography& bib)
 {
 	cout << "* " << name << " *\n" << endl;
-	for (auto it = registrar.begin(); it != registrar.end(); ++it)
+	for (BOOST_AUTO(it, registrar.begin()); it != registrar.end(); ++it)
 	{
 		cout << it->first << endl;
 		cout << getAndReplaceBibEntries(it->second->description(), bib) << endl;

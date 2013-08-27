@@ -60,10 +60,11 @@ namespace PointMatcherSupport
 	Histogram<T>::~Histogram()
 	{
 		T meanV, varV, medianV, lowQt, highQt, minV, maxV;
-		uint64_t bins[binCount];
 		uint64_t maxBinC;
-		if (dumpStdErrOnExit || !filePrefix.empty())
-			computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, bins, maxBinC);
+		if (!dumpStdErrOnExit && filePrefix.empty())
+			return;
+			
+		const vector<uint64_t> bins(computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, maxBinC));
 		
 		if (!filePrefix.empty())
 		{
@@ -75,7 +76,6 @@ namespace PointMatcherSupport
 		
 		if (dumpStdErrOnExit)
 		{
-			std::fill(bins, bins+binCount, uint64_t(0));
 			std::cerr.precision(4);
 			std::cerr.fill(' ');
 			std::cerr.flags(std::ios::left);
@@ -98,9 +98,10 @@ namespace PointMatcherSupport
 	}
 	
 	template<typename T>
-	void Histogram<T>::computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t* bins, uint64_t& maxBinC)
+	vector<uint64_t> Histogram<T>::computeStats(T& meanV, T& varV, T& medianV, T& lowQt, T& highQt, T& minV, T& maxV, uint64_t& maxBinC)
 	{
 		typedef typename std::vector<T>::iterator Iterator;
+		vector<uint64_t> bins(binCount, 0);
 		
 		//assert(this->size() > 0);
 		if(this->size() > 0)
@@ -118,13 +119,13 @@ namespace PointMatcherSupport
 			}
 			meanV /= T(this->size());
 			// var and hist
-			std::fill(bins, bins+binCount, uint64_t(0));
+			std::fill(bins.begin(), bins.end(), uint64_t(0));
 			maxBinC = 0;
 			varV = 0;
 			if (minV == maxV)
 			{
 				medianV = lowQt = highQt = minV;
-				return;
+				return bins;
 			}
 			for (size_t i = 0; i < this->size(); ++i)
 			{
@@ -158,15 +159,15 @@ namespace PointMatcherSupport
 			maxV = std::numeric_limits<T>::quiet_NaN();
 			maxBinC = 0;
 		}
+		return bins;
 	}
 	
 	template<typename T>
 	void Histogram<T>::dumpStats(std::ostream& os)
 	{
 		T meanV, varV, medianV, lowQt, highQt, minV, maxV;
-		uint64_t bins[binCount];
 		uint64_t maxBinC;
-		computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, bins, maxBinC);
+		const vector<uint64_t> bins(computeStats(meanV, varV, medianV, lowQt, highQt, minV, maxV, maxBinC));
 		os << this->size() << ", " << meanV << ", " << varV << ", " << medianV << ", " << lowQt << ", " << highQt << ", " << minV << ", " << maxV << ", " << binCount << ", ";
 		
 		for (size_t i = 0; i < binCount; ++i)

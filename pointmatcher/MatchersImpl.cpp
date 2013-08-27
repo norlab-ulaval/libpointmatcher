@@ -138,7 +138,7 @@ typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeVarDistMatcher::findClo
 		typename Matches::Ids(knn, pointsCount)
 	);
 	
-	const auto maxDists(filteredReading.getDescriptorViewByName(maxDistField));
+	const BOOST_AUTO(maxDists, filteredReading.getDescriptorViewByName(maxDistField));
 	
 	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, maxDists.transpose(), knn, epsilon, NNS::ALLOW_SELF_MATCH);
 
