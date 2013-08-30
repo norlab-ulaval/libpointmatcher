@@ -32,6 +32,6 @@ inspector:
 #  VTKFileInspector
 
 logger:
-#	NullLogger
-  FileLogger
+  NullLogger
+#  FileLogger
 
