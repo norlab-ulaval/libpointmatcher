@@ -35,9 +35,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "pointmatcher/PointMatcher.h"
 #include "gtest/gtest.h"
+
 #include <string>
 
 #include <fstream>
+
+#include "boost/filesystem.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/operations.hpp"
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -252,6 +257,7 @@ TEST(IOTest, loadYaml)
 
 	// Test loading configuration files for ICP
 	PM::ICP icp;
+
 	std::ifstream ifs1((dataPath + "default.yaml").c_str());
 	EXPECT_NO_THROW(icp.loadFromYaml(ifs1));
 
@@ -284,9 +290,10 @@ TEST(IOTest, loadSaveVTK)
 	ptCloud.addDescriptor("genericScalar", PM::Matrix::Random(1, nbPts));
 	ptCloud.addDescriptor("genericVector", PM::Matrix::Random(3, nbPts));
 
-	ptCloud.save("/tmp/unit_test.vtk");
+	string testPathName = "unit_test.vtk";
+	ptCloud.save(testPathName);
 
-	DP ptCloudFromFile(DP::load("/tmp/unit_test.vtk"));
+	DP ptCloudFromFile(DP::load(testPathName));
 
 	EXPECT_TRUE(ptCloudFromFile.features.cols() == ptCloud.features.cols());
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("normal"));
@@ -297,6 +304,8 @@ TEST(IOTest, loadSaveVTK)
 
 	//TODO: check with a known file if the values are correct
 
+	// Remove file from disk
+	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(testPathName)));
 }
 
 //---------------------------
@@ -1068,15 +1077,24 @@ TEST(Inspectors, VTKFileInspector)
 //- displayLocation (default: 0) - display the location of message in source code
 TEST(Loggers, FileLogger)
 {
+	string infoFileName = "utest_info";
+	string warningFileName = "utest_warn";
+
 	Logger* fileLog = 
 		PM::get().REG(Logger).create(
 			"FileLogger", map_list_of
-				("infoFileName", "/tmp/utest_info")
-				("warningFileName", "/tmp/utest_warn")
+				("infoFileName", infoFileName)
+				("warningFileName", warningFileName)
 				("displayLocation", "1")
 		)
 	;
 	//TODO: we only test constructor here, check other things...
+
+	delete fileLog;
+
+	// Remove file from disk
+	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(infoFileName)));
+	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(warningFileName)));
 }
 
 

@@ -57,6 +57,7 @@ namespace PointMatcherSupport
 		}
 		inline static const ParametersDoc availableParameters()
 		{
+			// FIXME: this cause portability problem because of default path set to /dev/stdout which doesn't exist on Windows
 			return boost::assign::list_of<ParameterDoc>
 				( "infoFileName", "name of the file to output infos to", "/dev/stdout" )
 				( "warningFileName", "name of the file to output warnings to", "/dev/stderr" )
