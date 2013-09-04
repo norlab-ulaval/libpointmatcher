@@ -1,3 +1,9 @@
+libpointmatcher (1.1.0) precise; urgency=low
+
+  * new upstream release
+
+ -- Stéphane Magnenat <stephane@nospam.magnenat.net>  Wed, 04 Sep 2013 13:54:46 +0200
+
 libpointmatcher (1.0.0) precise; urgency=low
 
   * new upstream release

@@ -68,9 +68,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //! version of the Pointmatcher library as string
-#define POINTMATCHER_VERSION "1.0.2"
+#define POINTMATCHER_VERSION "1.1.0"
 //! version of the Pointmatcher library as an int
-#define POINTMATCHER_VERSION_INT 10002
+#define POINTMATCHER_VERSION_INT 10100
 
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
