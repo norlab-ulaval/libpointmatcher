@@ -10,17 +10,7 @@ libpointmatcher depends on:
 
 libpointmatcher is being developed by [François Pomerleau](http://www.asl.ethz.ch/people/pomerlef) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
-Release Notes
-=============
-
-Version 1.1.0:
-
- * Removed C++0x dependency 
- * Ensure compatibility with Visual Studio 11
- 
-Version 1.0.0:
-
- * First release with a stable API
+You can read the latest changes in the [release notes](ReleaseNotes.md).
 
 
 Compilation
