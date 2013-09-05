@@ -8,7 +8,19 @@ libpointmatcher depends on:
  * [yaml-cpp], a YAML 1.2 parser and emitter (optional)
  
 
-libpointmatcher is being developed by François Pomerleau and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
+libpointmatcher is being developed by [François Pomerleau](http://www.asl.ethz.ch/people/pomerlef) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
+
+Release Notes
+=============
+
+Version 1.1.0:
+
+ * Removed C++0x dependency 
+ * Ensure compatibility with Visual Studio 11
+ 
+Version 1.0.0:
+
+ * First release with a stable API
 
 
 Compilation
