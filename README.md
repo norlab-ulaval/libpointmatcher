@@ -25,6 +25,10 @@ Binaries for Ubuntu Linux are available on our PPA:
  * [Quantal](https://launchpad.net/~stephane.magnenat/+archive/quantal)
  * [Raring](https://launchpad.net/~stephane.magnenat/+archive/raring)
  
+Once you have added the PPA to your system, you can install libpointmatcher using
+
+	sudo apt-get install libpointmatcher-dev
+ 
 Other
 -----
 
