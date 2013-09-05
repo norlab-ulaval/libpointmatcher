@@ -10,8 +10,25 @@ libpointmatcher depends on:
 
 libpointmatcher is being developed by [François Pomerleau](http://www.asl.ethz.ch/people/pomerlef) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
-You can read the latest changes in the [release notes](ReleaseNotes.md).
+You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 
+Pre-built binaries
+==================
+
+Ubuntu
+------
+
+Binaries for Ubuntu Linux are available on our PPA:
+
+ * [Lucid](https://launchpad.net/~stephane.magnenat/+archive/lucid)
+ * [Precise](https://launchpad.net/~stephane.magnenat/+archive/precise)
+ * [Quantal](https://launchpad.net/~stephane.magnenat/+archive/quantal)
+ * [Raring](https://launchpad.net/~stephane.magnenat/+archive/raring)
+ 
+Other
+-----
+
+If you have built binaries for other systems, please tell us.
 
 Compilation
 ===========
