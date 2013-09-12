@@ -64,11 +64,19 @@ namespace PointMatcherSupport
 		else
 			throw std::runtime_error("unknown key");
 	}
+
+	// Hack: extra indirection to make nested map_list_of work with C++11
+	template<typename T>
+	StringMap makeMap(const T& mapInitializer)
+	{
+		StringMap m = mapInitializer;
+		return m;
+	}
 	
 	static Bibliography bibliography()
 	{
 		return map_list_of<std::string, StringMap>
-			( "Phillips2007VarTrimmed", map_list_of
+			( "Phillips2007VarTrimmed", makeMap(map_list_of
 				( "type", "inproceedings" )
 				( "title", "Outlier robust ICP for minimizing fractional RMSD" )
 				( "author", "Phillips, J.M. and Liu, R. and Tomasi, C." )
@@ -78,8 +86,8 @@ namespace PointMatcherSupport
 				( "publisher", "IEEE Press" )
 				( "doi", "10.1109/3DIM.2007.39" )
 				( "fulltext", "http://x86.cs.duke.edu/~tomasi/papers/phillips/phillips3DIM07.pdf" )
-			)
-			( "Chetverikov2002Trimmed", map_list_of
+			))
+			( "Chetverikov2002Trimmed", makeMap(map_list_of
 				( "type", "inproceedings" )
 				( "title", "The Trimmed Iterative Closest Point Algorithm" )
 				( "author", "Chetverikov, D. and Svirko, D. and Stepanov, D. and Krsek, P." )
@@ -89,8 +97,8 @@ namespace PointMatcherSupport
 				( "publisher", "IEEE Press" )
 				( "doi", "10.1109/ICPR.2002.1047997 " )
 				( "fulltext", "http://hci.iwr.uni-heidelberg.de/publications/dip/2002/ICPR2002/DATA/10_1_03.PDF" )
-			)
-			( "Besl1992Point2Point", map_list_of
+			))
+			( "Besl1992Point2Point", makeMap(map_list_of
 				( "type", "inproceedings" )
 				( "title", "A Method for Registration of 3-D Shapes" )
 				( "author", "Besl, P.J. and McKay, H.D." )
@@ -100,8 +108,8 @@ namespace PointMatcherSupport
 				( "publisher", "IEEE Press" )
 				( "doi", "10.1109/34.121791" )
 				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=121791")
-			)
-			( "Chen1991Point2Plane", map_list_of
+			))
+			( "Chen1991Point2Plane", makeMap(map_list_of
 				( "type", "inproceedings" )
 				( "title", "Object modeling by registration of multiple range images" )
 				( "author", "Chen, Y. and Medioni, G." )
@@ -111,8 +119,8 @@ namespace PointMatcherSupport
 				( "publisher", "IEEE Press" )
 				( "doi", "10.1109/ROBOT.1991.132043" )
 				( "fulltext", "http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=132043")
-			)
-			( "Masuda1996Random", map_list_of
+			))
+			( "Masuda1996Random", makeMap(map_list_of
 				( "type", "inproceedings" )
 				( "title", "Registration and integration of multiple range images for 3-D model construction" )
 				( "author", "Masuda, T. and Sakaue, K. and Yokoya, N." )
@@ -122,8 +130,8 @@ namespace PointMatcherSupport
 				( "publisher", "IEEE Press" )
 				( "doi", "10.1109/ICPR.1996.546150" )
 				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=546150")
-			)
-			( "Diebel2004Median", map_list_of
+			))
+			( "Diebel2004Median", makeMap(map_list_of
 				( "type", "inproceedings" )
 				( "title", "Simultaneous Localization and Mapping with Active Stereo Vision" )
 				( "author", "Diebel, J. and Reutersward, K. and Thrun, S. and Davis, J. and Gupta, R." )
@@ -133,8 +141,8 @@ namespace PointMatcherSupport
 				( "publisher", "IEEE Press" )
 				( "doi", "10.1109/IROS.2004.1389948" )
 				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1389948")
-			)
-			( "Pomerleau2012Noise", map_list_of
+			))
+			( "Pomerleau2012Noise", makeMap(map_list_of
 				( "type", "inproceedings" )
 				( "title", "Noise Characterization of Depth Sensors for Surface Inspections" )
 				( "author", "F. Pomerleau, A. Breitenmoser, M. Liu, F. Colas, R. Siegwart" )
@@ -144,7 +152,7 @@ namespace PointMatcherSupport
 				( "publisher", "IEEE Press" )
 				( "doi", "" )
 				( "fulltext", "")
-			)
+			))
 		;
 	}
 	
