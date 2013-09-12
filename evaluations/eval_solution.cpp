@@ -426,6 +426,7 @@ void setConfig(Config& config)
 
 void saveConfig(Config& config)
 {
+	#ifdef HAVE_YAML_CPP
 	YAML::Emitter emitter;
 		
 		emitter << YAML::BeginMap;
@@ -453,10 +454,14 @@ void saveConfig(Config& config)
 		}
 		fout << emitter.c_str();
 		fout.close();
+	#else // HAVE_YAML_CPP
+	throw runtime_error("Yaml support not compiled in. Install yaml-cpp, configure build and recompile.");
+	#endif // HAVE_YAML_CPP
 }
 
 void loadConfig(Config& config)
 {
+	#ifdef HAVE_YAML_CPP
 	ifstream f_config(config.path_config.c_str());
 	if (!f_config.good())
 	{
@@ -477,6 +482,9 @@ void loadConfig(Config& config)
 			node["downloaded"] >> it->second.downloaded;
 		}
 	}
+	#else // HAVE_YAML_CPP
+	throw runtime_error("Yaml support not compiled in. Install yaml-cpp, configure build and recompile.");
+	#endif // HAVE_YAML_CPP
 }
 
 void downloadDataSets(Config& config, po::variables_map &vm)
