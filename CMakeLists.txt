@@ -73,6 +73,10 @@ if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 	include_directories(${yaml-cpp_INCLUDE_DIRS})
 	set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
 	add_definitions(-DHAVE_YAML_CPP)
+	set(yamlcpp_FOUND)
+	message("-- yaml-cpp found, text-based configuration enabled")
+else (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+	message("-- yaml-cpp not found, text-based configuration and related applications disabled")
 endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 
 # link rt support if POSIX timers are used
