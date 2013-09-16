@@ -141,7 +141,9 @@ install(FILES
 	DESTINATION include/pointmatcher
 )
 install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
+if (DOXYGEN_FOUND)
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
+endif (DOXYGEN_FOUND)
 
 # Example programs
 add_subdirectory(examples)
