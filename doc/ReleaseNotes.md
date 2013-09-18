@@ -7,6 +7,7 @@ Wish list for next release
  * Better user documentation and tutorials
  * Support for OpenMP parallel computing
  * Handle larger point clouds (100 million points and more)
+ * Avoid point cloud copies when filtering
 
 
 Version 1.1.0
