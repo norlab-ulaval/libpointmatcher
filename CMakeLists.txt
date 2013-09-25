@@ -18,6 +18,30 @@ if (NOT GREP_VERSION_RESULT EQUAL 0)
 endif (NOT GREP_VERSION_RESULT EQUAL 0)
 string(REGEX REPLACE ".*\"(.*)\".*" "\\1" PROJECT_VERSION "${PROJECT_VERSION}" )
 
+#======================= installation =====================================
+
+# Offer the user the choice of overriding the installation directories
+set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
+set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
+set(INSTALL_INCLUDE_DIR include CACHE PATH
+  "Installation directory for header files")
+if(WIN32 AND NOT CYGWIN)
+	set(DEF_INSTALL_CMAKE_DIR CMake)
+else()
+	set(DEF_INSTALL_CMAKE_DIR lib/CMake/FooBar)
+endif()
+set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
+
+# Make relative paths absolute (needed later on)
+foreach(p LIB BIN INCLUDE CMAKE)
+	set(var INSTALL_${p}_DIR)
+	if(NOT IS_ABSOLUTE "${${var}}")
+		set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+	endif()
+endforeach()
+
+#===========================================================================
+
 # Documentation
 set(DOXYFILE_LATEX false)
 include(UseDoxygen)
@@ -87,6 +111,7 @@ endif (POSIX_TIMERS AND NOT APPLE)
 
 # include all libs so far
 include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+
 add_definitions(-Wall)
 
 # Pointmatcher lib and install
@@ -145,6 +170,10 @@ if (DOXYGEN_FOUND)
 	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
 endif (DOXYGEN_FOUND)
 
+
+# Gather all libraries under one variable
+set(ALL_LIBS ${NABO_LIBRARY} ${Boost_LIBRARIES} ${EXTRA_LIBS})
+
 # Example programs
 add_subdirectory(examples)
 # Evaluation programs
@@ -153,3 +182,26 @@ add_subdirectory(evaluations)
 # Unit testing
 enable_testing()
 add_subdirectory(utest)
+
+#=============================================
+
+export(PACKAGE pointmatcher)
+
+file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
+
+
+# Find all include directories
+get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
+
+# Generate file required by find_package
+configure_file(pointmatcherConfig.cmake.in "${PROJECT_BINARY_DIR}/pointmatcherConfig.cmake" @ONLY)
+configure_file(pointmatcherConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" @ONLY)
+
+# Install the pointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
+install(FILES "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake" "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+
+
+
+

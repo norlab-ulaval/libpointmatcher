@@ -8,6 +8,7 @@ Wish list for next release
  * Support for OpenMP parallel computing
  * Handle larger point clouds (100 million points and more)
  * Avoid point cloud copies when filtering
+ * Add CMake support for find_package (20 Sept. 2013)
 
 
 Version 1.1.0
