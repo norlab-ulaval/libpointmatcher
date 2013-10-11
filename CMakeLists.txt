@@ -202,6 +202,8 @@ configure_file(pointmatcherConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/pointma
 install(FILES "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake" "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
 
-
+if( MSVC ) # VS2012 does not support tuples correctly yet
+	add_definitions( /D _VARIADIC_MAX=10 )
+endif()
 
 
