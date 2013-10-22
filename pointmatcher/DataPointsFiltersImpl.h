@@ -199,7 +199,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "maxDensity", "Maximum density of points to target. Unit: number of points per dm^3.", "10", "0.0000001", "inf", &P::Comp<T> )
+				( "maxDensity", "Maximum density of points to target. Unit: number of points per m^3.", "10", "0.0000001", "inf", &P::Comp<T> )
 			;
 		}
 		
