@@ -5,6 +5,9 @@ Wish list for next release
 --------------------------
 
  * Better user documentation and tutorials
+ * Support for *.ply point cloud format
+ * Improve *.csv point cloud support
+ * Fix portability problem with FileLogger on Windows
  * Support for OpenMP parallel computing
  * Handle larger point clouds (100 million points and more)
  * Avoid point cloud copies when filtering
