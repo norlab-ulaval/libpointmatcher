@@ -15,9 +15,9 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 ## An Example Point Cloud View of an Appartment
 ![alt text](images/floor_plan.png "Floor plan of the apartment")
 
-![alt text](images/appt_top.png "Top down view of point cloud from appartment dataset")
+The following examples are drawn from the apartment dataset available for [download](http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:apartment:home) from the ASL at ETH Zurich.  A top-down view of the point cloud is depicted below, with the colors showing vertical elevation.  The ceiling has been removed from the point cloud such that the floor (in blue) and the walls (in red) are clearly visible.  Note that the coordinate origin is placed in the kitchen at the starting point of data capture, which is in the top-left of the top-down view and floor plan.
 
-The following examples are drawn from the apartment dataset available for [download](http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:apartment:home) from the ASL at ETH Zurich.  The 
+![alt text](images/appt_top.png "Top down view of point cloud from appartment dataset")
 
 ## Bounding Box Filter
 ### Description
@@ -34,6 +34,7 @@ Points can be excluded from a rectangular bouding region by using this filter.  
 |removeInside   |if set to 1, points contained within the box are removed, else points outside are removed  |1   | 0 or 1|
 
 ### Example
+
 
 
 
