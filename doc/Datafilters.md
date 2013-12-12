@@ -92,7 +92,7 @@ In the following example, a maximum distance threshold of 1m is applied radially
 The size of the point cloud is reduced by randomly rejecting points if the total number of points exceeds a threshold.
 
 |Parameter  |Description  |Default value    |Allowable range|
-|---------  |:---------:  |----------------:|:--------------|
+|---------  |:---------:|----------------:|:--------------|
 |prob        | Probability of keeping a point, 1/decimation factor | 0.75 | min: 0 max:1 |
 |maxCount |number of points beyond which subsampling occurs | 1000 | min: 0, max: 2147483647|
 
@@ -107,8 +107,8 @@ For the following example we apply a maximum count of 1000, noting that there ar
 ### Description
 Points are filtered according to where they lie on a distribution of their positions along a given axis.  The entire distance range is divided into quantiles which lie between 0 and 1.  One can specify the distance quantile above which points are rejected by the filter.
 
- |Parameter  |Description  |Default value    |Allowable range|
-|---------  |:---------:  |----------------:|:--------------|
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------:|----------------:|:--------------|
 |dim        | Dimension over which the distance (from the center) is thresholded | 0 | x:0 y:1 z:2 |
 |ratio |Quantile threshold.  Points whose distance exceed this threshold are rejected by the filter | 0.5 | min: 0.0000001, max: 0.9999999 | 
 
@@ -126,8 +126,8 @@ As opposed to the previous filters, the following does not yield a sub-sample of
 
 The returned direction vector is a vector connecting the point and the sensor, whose positions can be specified in the filter parameters.
 
- |Parameter  |Description  |Default value    |Allowable range|
-|---------  |:---------:  |----------------:|:--------------|
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------:|----------------:|:--------------|
 |x       | x-coordinate of the sensor position | 0.0 | min: -inf, max:inf |
 |y       | y-coordinate of the sensor position | 0.0 | min: -inf, max:inf |
 |z       | z-coordinate of the sensor position | 0.0 | min: -inf, max:inf |
@@ -141,7 +141,7 @@ The returned direction vector is a vector connecting the point and the sensor, w
 
 ## Surface Normal Filter
 
-## Description
+### Description
 The normal to each point is extracted by finding a number of neighboring points and taking the eigen-vector corresponding to the smallest eigen-value of all neighboring points.  For more theoretical background on the estimation of normal vectors for a point cloud the reader is invited to visit [the following][1].
 
 [1]:http://people.maths.ox.ac.uk/wendland/research/old/reconhtml/node3.html "Holger, Wendland, Mathematical Institute, University of Oxford"
