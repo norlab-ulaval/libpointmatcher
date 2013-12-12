@@ -93,9 +93,63 @@ The size of the point cloud is reduced by randomly rejecting points if the total
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------:  |----------------:|:--------------|
-|prob        | Probability of keeping a point, 1/decimation factor | 0: x, 1: y, 2: z, -1: radial|
-|maxDistance or minDistance |Distance threshold (in m) beyond which points are rejected/selected | 1.0 | min: -inf, max: inf|
+|prob        | Probability of keeping a point, 1/decimation factor | 0.75 | min: 0 max:1 |
+|maxCount |number of points beyond which subsampling occurs | 1000 | min: 0, max: 2147483647|
 
+### Example
+For the following example we apply a maximum count of 1000, noting that there are over 400,000 points in the input point cloud and a sampling probability of 0.1.  We observe in the output point cloud a point set representing approximately 10% the original number of points selected evenly from the input cloud. 
+
+![max count after](images/max_num.png "After applying maximum point count filter with a maximum count of 1000 and a sampling probability of 0.1")
+
+**Figure:** After applying maximum point count filter with a maximum count of 1000 and a sampling probability of 0.1.  Input point cloud contains 404,395 points, filtered point cloud contains 40,200 points.
+
+## Maximum Quantile on Axis Filter
+### Description
+Points are filtered according to where they lie on a distribution of their positions along a given axis.  The entire distance range is divided into quantiles which lie between 0 and 1.  One can specify the distance quantile above which points are rejected by the filter.
+
+ |Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------:  |----------------:|:--------------|
+|dim        | Dimension over which the distance (from the center) is thresholded | 0 | x:0 y:1 z:2 |
+|ratio |Quantile threshold.  Points whose distance exceed this threshold are rejected by the filter | 0.5 | min: 0.0000001, max: 0.9999999 | 
+
+### Example
+In the following example, maximum quantile filtering is performed over the x-axis with a quantile threshold of 0.5.  Therefore, points which have an x-value which exceeds the 50% quantile are rejected.  The output of the filter is displayed in white and overlaid with the input point cloud in the image below.  A sampling region centered at the origin and extending in both directions of the x-axis is clearly visible.
+  
+![max quant after](images/max_quant.png "After applying maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5")
+
+**Figure:** Maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5
+
+## Observation Direction Filter
+
+### Description
+As opposed to the previous filters, the following does not yield a sub-sample of points but rather augments the input point cloud with additional information.  In particular, this filter adds a descriptor vector to each point representing its direction to the sensor used for capturing the point cloud.  Remark that adding a direction vector is useful for locally captured point clouds in which the position of the sensor is fixed.  In contrast global point clouds which are formed from several local point clouds do not have a fixed sensor position.
+
+The returned direction vector is a vector connecting the point and the sensor, whose positions can be specified in the filter parameters.
+
+ |Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------:  |----------------:|:--------------|
+|x       | x-coordinate of the sensor position | 0.0 | min: -inf, max:inf |
+|y       | y-coordinate of the sensor position | 0.0 | min: -inf, max:inf |
+|z       | z-coordinate of the sensor position | 0.0 | min: -inf, max:inf |
+
+### Example
+**Remark:** The following example uses a local point cloud representing only a portion of the apartment as opposed to previous examples which used a global point cloud representing the entire apartment.  The filter is used to extract direction informations and a small subset of these directions is shown in the following image.  The arrows point towards the position of the sensor.  The input point cloud is color coded according to the z-elevation of the points (red represents the ceiling and blue the floor).
+
+![dir after](images/appt_dir.png "Applying the observation direction filter to a local point cloud")
+
+**Figure:** Applying the observation direction filter to a local point cloud.  A small subset of point observation directions are displayed.
+
+## Surface Normal Filter
+
+## Description
+The normal to each point is extracted by finding a number of neighboring points and taking the eigen-vector corresponding to the smallest eigen-value of all neighboring points.  For more theoretical background on the estimation of normal vectors for a point cloud the reader is invited to visit [the following][1].
+
+[1]:http://people.maths.ox.ac.uk/wendland/research/old/reconhtml/node3.html "Holger, Wendland, Mathematical Institute, University of Oxford"
+
+
+## Orient Normals Filter
+
+### Description
 
 ## Fixed Step Sampling Filter (To be completed)
 The number of points in a point cloud can be reduced by taking random point subsamples.  The filter is parametrized so that a fixed number of points - selected uniformly at random - are 'rejected' in the filtering process.
