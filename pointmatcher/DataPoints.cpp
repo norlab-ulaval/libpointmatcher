@@ -259,7 +259,6 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 	);
 	if (descriptors.cols() > 0)
 	{
-		assert(descriptors.cols() == pointCount);
 		output.descriptors = Matrix(descriptors.rows(), pointCount);
 		output.descriptorLabels = descriptorLabels;
 	}
