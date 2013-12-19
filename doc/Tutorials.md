@@ -8,7 +8,7 @@ Beginner<a name="beginner"></a>
 ---------
 
 - How to compile libpointmatcher?
-- [What the DataFilters do](DataFilters.md)?
+- [What the DataFilters do](Datafilters.md)?
 - How to do basic registration using ICP?
 - How to create my custom configuration file using yaml?
 - ...
