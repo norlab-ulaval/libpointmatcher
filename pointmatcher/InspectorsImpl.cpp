@@ -48,7 +48,8 @@ template<typename T>
 InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 	Inspector(className,paramsDoc,params),
 	baseFileName(Parametrizable::get<string>("baseFileName")),
-	dumpPerfOnExit(Parametrizable::get<bool>("dumpPerfOnExit"))
+	bDumpPerfOnExit(Parametrizable::get<bool>("dumpPerfOnExit")),
+	bDumpStats(Parametrizable::get<bool>("dumpStats"))
 
 {//FIXME: do we need that constructor?
 }
@@ -57,19 +58,20 @@ template<typename T>
 InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const Parameters& params):
 	Inspector("PerformanceInspector", PerformanceInspector::availableParameters(), params),
 	baseFileName(Parametrizable::get<string>("baseFileName")),
-	dumpPerfOnExit(Parametrizable::get<bool>("dumpPerfOnExit"))
+	bDumpPerfOnExit(Parametrizable::get<bool>("dumpPerfOnExit")),
+	bDumpStats(Parametrizable::get<bool>("dumpStats"))
 {}
 
 template<typename T>
 void InspectorsImpl<T>::PerformanceInspector::addStat(const std::string& name, double data)
 {
-	if (!Parametrizable::get<bool>("dumpStats")) return;
+	if (!bDumpStats) return;
 	
 	HistogramMap::iterator it(stats.find(name));
 	if (it == stats.end())
 		it = stats.insert(
 			HistogramMap::value_type(name, 
-				Histogram(16, name, baseFileName, dumpPerfOnExit)
+				Histogram(16, name, baseFileName, bDumpPerfOnExit)
 			)
 		).first;
 	it->second.push_back(data);
@@ -133,7 +135,11 @@ template struct InspectorsImpl<double>::PerformanceInspector;
 template<typename T>
 InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
 	PerformanceInspector(className,paramsDoc,params),
-	streamIter(0)
+	streamIter(0),
+	bDumpIterationInfo(Parametrizable::get<bool>("dumpIterationInfo")),
+	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
+	bDumpReading(Parametrizable::get<bool>("dumpReading")),
+	bDumpReference(Parametrizable::get<bool>("dumpReference"))
 {
 }
 
@@ -358,25 +364,25 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 	const TransformationCheckers& transCheck)
 {
 
-	if (Parametrizable::get<bool>("dumpDataLinks")){
+	if (bDumpDataLinks){
 		ostream* streamLinks(openStream("link", iterationNumber));
 		dumpDataLinks(filteredReference, reading, matches, outlierWeights, *streamLinks);
 		closeStream(streamLinks);
 	}
 	
-	if (Parametrizable::get<bool>("dumpReading")){
+	if (bDumpReading){
 		ostream* streamRead(openStream("reading", iterationNumber));
 		dumpDataPoints(reading, *streamRead);
 		closeStream(streamRead);
 	}
 	
-	if (Parametrizable::get<bool>("dumpReference")){
+	if (bDumpReference){
 		ostream* streamRef(openStream("reference", iterationNumber));
 		dumpDataPoints(filteredReference, *streamRef);
 		closeStream(streamRef);
 	}
         
-	if (!Parametrizable::get<bool>("dumpIterationInfo")) return;
+	if (!bDumpIterationInfo) return;
 
 	// streamIter must be define by children
 	assert(streamIter);
@@ -631,7 +637,11 @@ void InspectorsImpl<T>::AbstractVTKInspector::finish(const size_t iterationCount
 template<typename T>
 InspectorsImpl<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
 	AbstractVTKInspector("VTKFileInspector", VTKFileInspector::availableParameters(), params),
-	baseFileName(Parametrizable::get<string>("baseFileName"))
+	baseFileName(Parametrizable::get<string>("baseFileName")),
+	bDumpIterationInfo(Parametrizable::get<bool>("dumpIterationInfo")),
+	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
+	bDumpReading(Parametrizable::get<bool>("dumpReading")),
+	bDumpReference(Parametrizable::get<bool>("dumpReference"))
 {
 }
 
@@ -639,10 +649,11 @@ template<typename T>
 void InspectorsImpl<T>::VTKFileInspector::init()
 {
 
-	if (!Parametrizable::get<bool>("dumpIterationInfo")) return;
+	if (!bDumpIterationInfo) return;
  
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
+        std::cerr << "writing to " << oss.str() << std::endl;
 
 	this->streamIter = new ofstream(oss.str().c_str());
 	if (this->streamIter->fail())
@@ -653,7 +664,7 @@ void InspectorsImpl<T>::VTKFileInspector::init()
 template<typename T>
 void InspectorsImpl<T>::VTKFileInspector::finish(const size_t iterationCount)
 {
-        if (!Parametrizable::get<bool>("dumpIterationInfo")) return;
+        if (!bDumpIterationInfo) return;
 	closeStream(this->streamIter);
 }
 
@@ -670,6 +681,7 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 	else
 		oss << filteredStr << ".vtk";
 
+	std::cerr << "writing to " << oss.str() << std::endl;
 	ofstream* file = new ofstream(oss.str().c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");

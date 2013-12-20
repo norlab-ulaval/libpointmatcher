@@ -77,12 +77,12 @@ struct InspectorsImpl
 				( "baseFileName", "base file name for the statistics files (if empty, disabled)", "" )
 				( "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" )
                                 ( "dumpStats", "dump the statistics on first and last step", "0" )
-                                ( "dumpIterationInfo", "dump iteration info", "0" )
 			;
 		}
 
 		const std::string baseFileName;
-		const bool dumpPerfOnExit;
+		const bool bDumpPerfOnExit;
+		const bool bDumpStats;
 		
 	protected:
 		typedef PointMatcherSupport::Histogram<double> Histogram;
@@ -100,6 +100,7 @@ struct InspectorsImpl
 
 	struct AbstractVTKInspector: public PerformanceInspector
 	{
+
 	protected:
 		virtual std::ostream* openStream(const std::string& role) = 0;
 		virtual std::ostream* openStream(const std::string& role, const size_t iterationNumber) = 0;
@@ -109,6 +110,10 @@ struct InspectorsImpl
 		void dumpDataLinks(const DataPoints& ref, const DataPoints& reading, 	const Matches& matches, const OutlierWeights& featureOutlierWeights, std::ostream& stream);
 		
 		std::ostream* streamIter;
+		const bool bDumpIterationInfo;
+		const bool bDumpDataLinks;
+		const bool bDumpReading;
+		const bool bDumpReference;
 
 	public:
 		AbstractVTKInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
@@ -161,6 +166,10 @@ struct InspectorsImpl
 		}
 		
 		const std::string baseFileName;
+		const bool bDumpIterationInfo;
+		const bool bDumpDataLinks;
+		const bool bDumpReading;
+		const bool bDumpReference;
 		
 	protected:
 		virtual std::ostream* openStream(const std::string& role);
