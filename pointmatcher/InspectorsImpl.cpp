@@ -63,6 +63,8 @@ InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const Parameters& 
 template<typename T>
 void InspectorsImpl<T>::PerformanceInspector::addStat(const std::string& name, double data)
 {
+	if (!Parametrizable::get<bool>("dumpStats")) return;
+	
 	HistogramMap::iterator it(stats.find(name));
 	if (it == stats.end())
 		it = stats.insert(
@@ -355,18 +357,27 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 	const OutlierWeights& outlierWeights, 
 	const TransformationCheckers& transCheck)
 {
-	ostream* streamLinks(openStream("link", iterationNumber));
-	dumpDataLinks(filteredReference, reading, matches, outlierWeights, *streamLinks);
-	closeStream(streamLinks);
 
-	ostream* streamRead(openStream("reading", iterationNumber));
-	dumpDataPoints(reading, *streamRead);
-	closeStream(streamRead);
+	if (Parametrizable::get<bool>("dumpDataLinks")){
+		ostream* streamLinks(openStream("link", iterationNumber));
+		dumpDataLinks(filteredReference, reading, matches, outlierWeights, *streamLinks);
+		closeStream(streamLinks);
+	}
 	
-	ostream* streamRef(openStream("reference", iterationNumber));
-	dumpDataPoints(filteredReference, *streamRef);
-	closeStream(streamRef);
+	if (Parametrizable::get<bool>("dumpReading")){
+		ostream* streamRead(openStream("reading", iterationNumber));
+		dumpDataPoints(reading, *streamRead);
+		closeStream(streamRead);
+	}
 	
+	if (Parametrizable::get<bool>("dumpReference")){
+		ostream* streamRef(openStream("reference", iterationNumber));
+		dumpDataPoints(filteredReference, *streamRef);
+		closeStream(streamRef);
+	}
+        
+	if (!Parametrizable::get<bool>("dumpIterationInfo")) return;
+
 	// streamIter must be define by children
 	assert(streamIter);
 
@@ -627,6 +638,9 @@ InspectorsImpl<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
 template<typename T>
 void InspectorsImpl<T>::VTKFileInspector::init()
 {
+
+	if (!Parametrizable::get<bool>("dumpIterationInfo")) return;
+ 
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
 
@@ -639,6 +653,7 @@ void InspectorsImpl<T>::VTKFileInspector::init()
 template<typename T>
 void InspectorsImpl<T>::VTKFileInspector::finish(const size_t iterationCount)
 {
+        if (!Parametrizable::get<bool>("dumpIterationInfo")) return;
 	closeStream(this->streamIter);
 }
 
