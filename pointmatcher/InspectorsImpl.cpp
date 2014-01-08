@@ -653,7 +653,7 @@ void InspectorsImpl<T>::VTKFileInspector::init()
  
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
-        std::cerr << "writing to " << oss.str() << std::endl;
+	std::cerr << "writing to " << oss.str() << std::endl;
 
 	this->streamIter = new ofstream(oss.str().c_str());
 	if (this->streamIter->fail())
@@ -665,7 +665,7 @@ template<typename T>
 void InspectorsImpl<T>::VTKFileInspector::finish(const size_t iterationCount)
 {
         if (!bDumpIterationInfo) return;
-	closeStream(this->streamIter);
+        closeStream(this->streamIter);
 }
 
 template<typename T>
