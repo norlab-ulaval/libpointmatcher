@@ -664,8 +664,8 @@ void InspectorsImpl<T>::VTKFileInspector::init()
 template<typename T>
 void InspectorsImpl<T>::VTKFileInspector::finish(const size_t iterationCount)
 {
-        if (!bDumpIterationInfo) return;
-        closeStream(this->streamIter);
+	if (!bDumpIterationInfo) return;
+	closeStream(this->streamIter);
 }
 
 template<typename T>
