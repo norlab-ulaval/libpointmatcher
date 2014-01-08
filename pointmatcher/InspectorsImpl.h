@@ -81,6 +81,8 @@ struct InspectorsImpl
 		}
 
 		const std::string baseFileName;
+        // Note: Prefix boolean variables with 'b' to avoid conflicts 
+        // with similarly named functions.
 		const bool bDumpPerfOnExit;
 		const bool bDumpStats;
 		
