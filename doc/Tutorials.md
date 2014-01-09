@@ -14,8 +14,8 @@ Beginner<a name="beginner"></a>
 
 Advanced<a name="advanced"></a>
 -------
-
 - How to link my project to libpointmatcher?
+- Applying Datapoint Filters
 - How point clouds are represented?
 - How to move a point cloud using a rigid transformation?
 
