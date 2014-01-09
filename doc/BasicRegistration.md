@@ -92,3 +92,6 @@ Final transformation:
   0.113896  -0.156035   0.981163 -0.0353594
          0          0          0          1
 ```
+![car example](images/car_example.png)
+
+**Figure 2:** Visualization of ICP on car example.  The white points correspond to the reading cloud, red to the reference, and blue to the aligned reading cloud.
