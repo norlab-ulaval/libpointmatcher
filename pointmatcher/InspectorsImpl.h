@@ -76,11 +76,15 @@ struct InspectorsImpl
 			return boost::assign::list_of<ParameterDoc>
 				( "baseFileName", "base file name for the statistics files (if empty, disabled)", "" )
 				( "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" )
+				( "dumpStats", "dump the statistics on first and last step", "0" )
 			;
 		}
 
 		const std::string baseFileName;
-		const bool dumpPerfOnExit;
+		// Note: Prefix boolean variables with 'b' to avoid conflicts 
+		// with similarly named functions.
+		const bool bDumpPerfOnExit;
+		const bool bDumpStats;
 		
 	protected:
 		typedef PointMatcherSupport::Histogram<double> Histogram;
@@ -98,6 +102,7 @@ struct InspectorsImpl
 
 	struct AbstractVTKInspector: public PerformanceInspector
 	{
+
 	protected:
 		virtual std::ostream* openStream(const std::string& role) = 0;
 		virtual std::ostream* openStream(const std::string& role, const size_t iterationNumber) = 0;
@@ -107,6 +112,10 @@ struct InspectorsImpl
 		void dumpDataLinks(const DataPoints& ref, const DataPoints& reading, 	const Matches& matches, const OutlierWeights& featureOutlierWeights, std::ostream& stream);
 		
 		std::ostream* streamIter;
+		const bool bDumpIterationInfo;
+		const bool bDumpDataLinks;
+		const bool bDumpReading;
+		const bool bDumpReference;
 
 	public:
 		AbstractVTKInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
@@ -150,10 +159,19 @@ struct InspectorsImpl
 			return boost::assign::list_of<ParameterDoc>
 				( "baseFileName", "base file name for the VTK files ", "point-matcher-output" )
 				( "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" )
+				( "dumpStats", "dump the statistics on first and last step", "0" )
+				( "dumpIterationInfo", "dump iteration info", "0" )
+				( "dumpDataLinks", "dump data links at each iteration", "0" ) 
+				( "dumpReading", "dump the reading cloud at each iteration", "0" )
+				( "dumpReference", "dump the reference cloud at each iteration", "0" )
 			;
 		}
 		
 		const std::string baseFileName;
+		const bool bDumpIterationInfo;
+		const bool bDumpDataLinks;
+		const bool bDumpReading;
+		const bool bDumpReference;
 		
 	protected:
 		virtual std::ostream* openStream(const std::string& role);
