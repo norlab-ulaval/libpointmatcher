@@ -38,20 +38,25 @@ void validateArgs(int argc, char *argv[], bool& isCSV )
 		exit(1);
 	}
 }
-```cpp
-The following three lines simply rename types that are used in the program into something more convenient.  The `PointMatcher` base class contains all the relevant objects and functions that are used in the ICP process.  The `DataPoints` class represents a point cloud.
 ```
+The following three lines simply rename types that are used in the program into something more convenient.  The `PointMatcher` base class contains all the relevant objects and functions that are used in the ICP process.  The `DataPoints` class represents a point cloud.
+
+```cpp
 typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
 typedef PM::Parameters Parameters;
 ```
+
 We now read the reference and reader from csv files by using the ``load`` function, which outputs a `DataPoints` object.
+
 ```cpp
 // Load point clouds
 const DP ref(DP::load(argv[1]));
 const DP data(DP::load(argv[2]));
 ```
+
 The `ICP` class represents the ICP chain shown in [Figure 1](#icp_chain_diagram).  We create an object instantiation of an ICP chain and apply the default settings using `setDefault`.  A view of the default ICP chain configuration is shown [here](DefaultICPConfiguration.md).
+
 ```cpp
 // Create the default ICP algorithm
 PM::ICP icp;
@@ -59,18 +64,24 @@ PM::ICP icp;
 // See the implementation of setDefault() to create a custom ICP algorithm
 icp.setDefault();
 ```
+
 The entire registration process is performed by applying the functor `TransformationParameters ICP(DataPoints ref, DataPoints data)`.  The optimal transformation is stored in a TransformationParameters object.
+
 ```cpp
 // Compute the transformation to express data in ref
 PM::TransformationParameters T = icp(data, ref);
 ```
+
 We can then apply the obtained transformation to the reading cloud so that it is aligned with the reference.  First we create a new `DataPoints` object to store the aligned reading cloud and then use the `apply(DataPoints out, TransformationParameters param)` to apply the alignment.
+
 ```cpp
 // Transform data to express it in ref
 DP data_out(data);
 icp.transformations.apply(data_out, T);
 ```
+
 In the final step, we save the reference, reading, and aligned reading point clouds to the `examples/` directory.  Note that the files are saved as .vtk files instead of .csv files so that they can be visualized with [ParaView](http://www.paraview.org/).  In the final line, we display the transformation parameters in the console using the `<<` operator on the `TransformationParameters` object.
+
 ```cpp
 // Safe files to see the results
 ref.save("test_ref.vtk");
