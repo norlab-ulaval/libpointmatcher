@@ -72,6 +72,84 @@ PM::TransformationParameters validT2d;
 PM::TransformationParameters validT3d;
 
 //---------------------------
+// Test ICP with all existing filters.
+
+// Algorithm:
+// 1. Iterate over all yaml files in
+//    libpointmatcher/examples/data/icp_data, each file tests ICP
+//    with one or more filters.
+// 2. Run ICP with the given yaml file. The filters in the yaml
+//    file are applied along the way.
+// 3. Write the obtained ICP transform to disk, to the same directory,
+//    with file extension .cur_trans (for easy future comparisons).
+// 4. Load the reference (known as correct) ICP transform from disk,
+//    from the same directory, with file extension .ref_trans.
+// 5. See if the current and reference transforms are equal.
+
+// To update an existing test or add a new test, simply add/modify
+// the desired yaml file, run the tests (they may fail this time), then
+// copy the (just written) desired current transform file on top of the
+// corresponding reference transform file. Run the tests again. This
+// time they will succeed.
+//---------------------------
+
+TEST(icpTest, icpTest)
+{
+	DP ref  = DP::load(dataPath + "cloud.00000.vtk");
+	DP data = DP::load(dataPath + "cloud.00001.vtk");
+
+	namespace fs = boost::filesystem;
+	fs::path config_dir(dataPath + "icp_data");
+	EXPECT_TRUE( fs::exists(config_dir) && fs::is_directory(config_dir) );
+
+	fs::directory_iterator end_iter;
+	for( fs::directory_iterator d(config_dir); d != end_iter; ++d)
+	{
+		if (!fs::is_regular_file(d->status()) ) continue;
+
+		// Load config file, and form ICP object
+		PM::ICP icp;
+		std::string config_file = d->path().string();
+		if (fs::extension(config_file) != ".yaml") continue;
+		std::ifstream ifs(config_file.c_str());
+		EXPECT_NO_THROW(icp.loadFromYaml(ifs));
+
+		// Compute current ICP transform
+		PM::TransformationParameters curT = icp(data, ref);
+
+		// Write current transform to disk (to easily compare it
+		// with reference transform offline)
+		fs::path cur_file = d->path();
+		cur_file.replace_extension(".cur_trans");
+		std::cout << "Writing: " << cur_file << std::endl;
+		std::ofstream otfs(cur_file.c_str());
+		otfs.precision(16);
+		otfs << curT;
+		otfs.close();
+                
+		// Load reference transform
+		fs::path ref_file = d->path();
+		ref_file.replace_extension(".ref_trans");
+		PM::TransformationParameters refT = 0*curT;
+		std::cout << "Reading: " << ref_file << std::endl;
+		std::ifstream itfs(ref_file.c_str());
+		for (int row = 0; row < refT.cols(); row++)
+		{
+			for (int col = 0; col < refT.cols(); col++)
+			{
+				itfs >>refT(row, col);
+			}
+		}
+
+		// See if reference and current transforms agree
+		std::cout.precision(17);
+		std::cout << "refT:\n" << refT << std::endl;
+		std::cout << "curT:\n" << curT << std::endl;
+		EXPECT_TRUE(refT == curT);
+	}
+}
+
+//---------------------------
 // Point-cloud structures
 //---------------------------
 
