@@ -19,3 +19,5 @@ Advanced<a name="advanced"></a>
 - How point clouds are represented?
 - How to move a point cloud using a rigid transformation?
 
+
+Note: if you don't find what you need, don't hesitate to propose or participate to new tutorials. 
