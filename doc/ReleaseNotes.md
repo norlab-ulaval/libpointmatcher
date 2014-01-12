@@ -10,7 +10,7 @@ Wish list for next release
  * Fix portability problem with FileLogger on Windows
  * Support for OpenMP parallel computing
  * Handle larger point clouds (100 million points and more)
- * Avoid point cloud copies when filtering
+ * Avoid point cloud copies when filtering (10 Jan. 2014 thanks to Oleg Alexandrov)
  * Add CMake support for find_package (20 Sept. 2013)
 
 
