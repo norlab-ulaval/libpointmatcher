@@ -11,7 +11,6 @@ Beginner<a name="beginner"></a>
 - [What the different DataFilters do?](Datafilters.md)
 - [Example: basic registration using ICP](BasicRegistration.md)
 - [The ICP chain configuration and its variants](DefaultICPConfig.md)
-
 - How to create my custom configuration file using yaml
 
 Advanced<a name="advanced"></a>
@@ -22,4 +21,4 @@ Advanced<a name="advanced"></a>
 - Writting your own filter TODO: transfer from http://docs.ros.org/groovy/api/libpointmatcher/html/ in the section Extending libpointmatcher
 
 
-Note: if you don't find what you need, don't hesitate to propose or participate to new tutorials. 
+**Note**: if you don't find what you need, don't hesitate to propose or participate to new tutorials. 
