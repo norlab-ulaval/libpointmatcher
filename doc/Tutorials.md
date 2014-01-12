@@ -7,18 +7,19 @@ Beginner<a name="beginner"></a>
 ---------
 
 - [How to compile libpointmatcher?](Compilation.md)
-- [Example: basic registration using ICP](BasicRegistration.md)
-- [The default ICP chain configuration](DefaultICPConfig.md)
+- Example: applying filters to point clouds TODO: based on convert.cpp
 - [What the different DataFilters do?](Datafilters.md)
+- [Example: basic registration using ICP](BasicRegistration.md)
+- [The ICP chain configuration and its variants](DefaultICPConfig.md)
+
 - How to create my custom configuration file using yaml
 
 Advanced<a name="advanced"></a>
 -------
 - How to link my project to libpointmatcher?
-- Applying Datapoint Filters
 - How point clouds are represented?
 - How to move a point cloud using a rigid transformation?
-- Writting your own filter <!--- Samuel: have a look to http://docs.ros.org/groovy/api/libpointmatcher/html/ in the section Extending libpointmatcher-->
+- Writting your own filter TODO: transfer from http://docs.ros.org/groovy/api/libpointmatcher/html/ in the section Extending libpointmatcher
 
 
 Note: if you don't find what you need, don't hesitate to propose or participate to new tutorials. 
