@@ -16,7 +16,7 @@ You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 Documentation and Tutorials
 ===========================
 
-You can find a [growing list of tutorials](doc/Tutorials.md ) in the doc folder written in markdown format. The code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/) but it is suggested to use the one build for your version in `doc/html`.  
+You can find a [growing list of tutorials](doc/Tutorials.md ) in the doc folder written in markdown format. The code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`.  
 
 Pre-built binaries
 ==================
