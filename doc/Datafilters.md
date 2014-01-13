@@ -230,6 +230,14 @@ In this example, we again use a local point cloud of the apartment. You may reco
 ### Description
 As explained previously, neighboring surface normal vectors obtained from the surface normals filter, do not have the same orientation.  This filter enforces this constraint and reorients vectors from the same surface in a consistent direction.  Vectors are reoriented to either point towards the center (inwards), or away from the center (outwards).
 
+__Required descriptors:__  
+  `observationDirections` (see ObservationDirectionDataPointsFilter)  
+  `normals` (see SurfaceNormalDataPointsFilter, SamplingSurfaceNormalDataPointsFilter)    
+__Output descriptor:__ none  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ none
+
+
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------:|----------------:|:--------------|
 |towardCenter     | Orient vectors to point towards the center | 1 | 1: true, 0: false |
@@ -239,9 +247,10 @@ As explained previously, neighboring surface normal vectors obtained from the su
 ### Example
 The same input section is used as for extracting the surface normals in the previous section.  The vectors are reoriented to point towards the center which lies in the bottom left corner of the image below.  We now observe that adjacent surface normal vectors point in a consistent direction.
 
-![norm after](images/orient_norm.png "Normal vectors reoriented to point towards the center")
+|Figure:  Normal vectors reoriented to point towards the center   |Parameters used   |
+|---|:---|
+|![norm after](images/orient_norm.png "Normal vectors reoriented to point towards the center") |towardCenter: 1 |
 
-**Figure:** Normal vectors reoriented to point towards the center
 
 ## Sampling Surface Normal Filter <a name="samplingnormhead"></a>
 
