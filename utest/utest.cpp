@@ -141,11 +141,31 @@ TEST(icpTest, icpTest)
 			}
 		}
 
-		// See if reference and current transforms agree
+		// Dump the reference transform and current one
 		std::cout.precision(17);
 		std::cout << "refT:\n" << refT << std::endl;
 		std::cout << "curT:\n" << curT << std::endl;
-		EXPECT_TRUE(refT == curT);
+
+                // Tolerance for change in rotation and translation
+                double rotTol = 1e-3, transTol = 1e-7;
+
+                // Find how much the reference rotation and translation
+                // differ from the current values.
+                PM::TransformationParameters refRot   = refT.block(0, 0, 3, 3);
+                PM::TransformationParameters refTrans = refT.block(0, 3, 3, 1);
+                PM::TransformationParameters curRot   = curT.block(0, 0, 3, 3);
+                PM::TransformationParameters curTrans = curT.block(0, 3, 3, 1);
+                PM::TransformationParameters rotErrMat = refRot*(curRot.transpose())
+                  - PM::TransformationParameters::Identity(3, 3);
+                PM::TransformationParameters transErrMat = refTrans - curTrans;
+                double rotErr = rotErrMat.array().abs().sum();
+                double transErr = transErrMat.array().abs().sum();
+
+                std::cout << "Rotation error:    " << rotErr   << std::endl;
+                std::cout << "Translation error: " << transErr << std::endl;
+                
+                EXPECT_LT(rotErr,   rotTol);
+                EXPECT_LT(transErr, transTol);
 	}
 }
 
