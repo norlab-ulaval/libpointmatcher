@@ -73,6 +73,7 @@ struct DataPointsFiltersImpl
 		//IdentityDataPointsFilter(const Parameters& params = Parameters());
 		
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 	
 	
@@ -85,6 +86,7 @@ struct DataPointsFiltersImpl
 		}
 		
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 	
 	//! Subsampling. Filter points beyond a maximum distance measured on a specific axis
@@ -108,6 +110,7 @@ struct DataPointsFiltersImpl
 		//! Constructor, uses parameter interface
 		MaxDistDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 	//! Subsampling. Filter points before a minimum distance measured on a specific axis
@@ -127,10 +130,11 @@ struct DataPointsFiltersImpl
 		
 		const int dim;
 		const T minDist;
-		
+
 		//! Constructor, uses parameter interface
 		MinDistDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 	
 	//! Subsampling. Remove point laying in a bounding box
@@ -164,6 +168,7 @@ struct DataPointsFiltersImpl
 		//! Constructor, uses parameter interface
 		BoundingBoxDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 	//! Subsampling. Filter points beyond a maximum quantile measured on a specific axis
@@ -187,6 +192,7 @@ struct DataPointsFiltersImpl
 		//! Constructor, uses parameter interface
 		MaxQuantileOnAxisDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 	//! Subsampling. Reduce the points number by randomly removing points with a dentsity higher than a treshold.
@@ -208,6 +214,7 @@ struct DataPointsFiltersImpl
 		//! Constructor, uses parameter interface
 		MaxDensityDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 	//! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
@@ -241,6 +248,7 @@ struct DataPointsFiltersImpl
 		SurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~SurfaceNormalDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 
 		static Vector computeNormal(const Vector eigenVa, const Matrix eigenVe);
 		static T computeDensity(const Matrix NN);
@@ -284,7 +292,8 @@ struct DataPointsFiltersImpl
 		SamplingSurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~SamplingSurfaceNormalDataPointsFilter() {}
 		virtual DataPoints filter(const DataPoints& input);
-		
+		virtual void inPlaceFilter(DataPoints& cloud);
+
 	protected:
 		struct BuildData
 		{
@@ -292,26 +301,22 @@ struct DataPointsFiltersImpl
 			typedef typename DataPoints::View View;
 			
 			Indices indices;
-			const Matrix& inputFeatures;
-			const Matrix& inputDescriptors;
-			Matrix& outputFeatures;
-			View& outputExistingDescriptors;
+			Indices indicesToKeep;
+			Matrix& features;
+			Matrix& descriptors;
 			boost::optional<View> normals;
 			boost::optional<View> densities;
 			boost::optional<View> eigenValues;
 			boost::optional<View> eigenVectors;
 			int outputInsertionPoint;
 			int unfitPointsCount;
-			
-			BuildData(const Matrix& inputFeatures, const Matrix& inputDescriptors, Matrix &outputFeatures, View& outputExistingDescriptors):
-				inputFeatures(inputFeatures),
-				inputDescriptors(inputDescriptors),
-				outputFeatures(outputFeatures),
-				outputExistingDescriptors(outputExistingDescriptors),
-				outputInsertionPoint(0),
+
+			BuildData(Matrix& features, Matrix& descriptors):
+				features(features),
+				descriptors(descriptors),
 				unfitPointsCount(0)
 			{
-				const int pointsCount(inputFeatures.cols());
+				const int pointsCount(features.cols());
 				indices.reserve(pointsCount);
 				for (int i = 0; i < pointsCount; ++i)
 					indices.push_back(i);
@@ -325,8 +330,8 @@ struct DataPointsFiltersImpl
 			CompareDim(const int dim, const BuildData& buildData):dim(dim),buildData(buildData){}
 			bool operator() (const int& p0, const int& p1)
 			{
-				return  buildData.inputFeatures(dim, p0) < 
-						buildData.inputFeatures(dim, p1);
+				return buildData.features(dim, p0) <
+						buildData.features(dim, p1);
 			}
 		};
 		
@@ -353,6 +358,7 @@ struct DataPointsFiltersImpl
 		OrientNormalsDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~OrientNormalsDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 
 		const bool towardCenter;
 	};
@@ -376,12 +382,11 @@ struct DataPointsFiltersImpl
 		RandomSamplingDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~RandomSamplingDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
-		
+		virtual void inPlaceFilter(DataPoints& cloud);
+
 	protected:
 		RandomSamplingDataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
-		
-	private:
-		DataPoints randomSample(const DataPoints& input) const;
+
 	};
 	
 	//! Maximum number of points
@@ -404,6 +409,7 @@ struct DataPointsFiltersImpl
 		MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~MaxPointCountDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 	//! Systematic sampling, with variation over time
@@ -435,8 +441,7 @@ struct DataPointsFiltersImpl
 		virtual ~FixStepSamplingDataPointsFilter() {};
 		virtual void init();
 		virtual DataPoints filter(const DataPoints& input);
-	private:
-		DataPoints fixstepSample(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 	//! Shadow filter, remove ghost points appearing on edges
@@ -460,6 +465,7 @@ struct DataPointsFiltersImpl
 		ShadowDataPointsFilter(const Parameters& params = Parameters());
 		
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 	//! Sick LMS-xxx noise model
@@ -485,6 +491,7 @@ struct DataPointsFiltersImpl
 		SimpleSensorNoiseDataPointsFilter(const Parameters& params = Parameters());
 		
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 
 	private:
 		/// @param minRadius in meter, noise level of depth measurements
@@ -519,6 +526,7 @@ struct DataPointsFiltersImpl
 		//! Constructor, uses parameter interface
 		ObservationDirectionDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 }; // DataPointsFiltersImpl

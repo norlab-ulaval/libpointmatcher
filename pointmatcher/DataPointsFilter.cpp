@@ -105,8 +105,7 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 {
 	if (this->empty())
 		return;
-	
-	DataPoints filteredCloud;
+
 	cloud.assertDescriptorConsistency();
 	const int nbPointsBeforeFilters(cloud.features.cols());
 	LOG_INFO_STREAM("Applying " << this->size() << " DataPoints filters - " << nbPointsBeforeFilters << " points in");
@@ -116,11 +115,10 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 		const int nbPointsIn(cloud.features.cols());
 		if (nbPointsIn == 0)
 			throw ConvergenceError("no points to filter");
-		
-		filteredCloud = (*it)->filter(cloud);
-		filteredCloud.assertDescriptorConsistency();
-		swapDataPoints(cloud, filteredCloud);
-		
+
+		(*it)->inPlaceFilter(cloud);
+		cloud.assertDescriptorConsistency();
+
 		const int nbPointsOut(cloud.features.cols());
 		LOG_INFO_STREAM("* " << (*it)->className << " - " << nbPointsOut << " points out (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "\%)");
 	}
