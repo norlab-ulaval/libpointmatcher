@@ -1,4 +1,8 @@
+| [Tutorials Home](Tutorials.md)    | [Previous](ApplyingDatafilters.md) | [Next]() |
+| ------------- |:-------------:| -----:|
+
 # An Introduction to ICP Registration
+######Latest update January 9, 2014 by Samuel Charreyron
 
 ## Overview
 
@@ -15,7 +19,7 @@ The ICP algorithm has the following characteristics:
 
 The various components which comprise the ICP registration system are shown in the following diagram.    
 
-![alt text](images/modular_cloud_matcher_icp_chain.png)
+![Default ICP Chain Config](images/modular_cloud_matcher_icp_chain.png)
 
 **Figure 1:** High level diagram of an ICP chain<a name="icp_chain_diagram"></a>
 

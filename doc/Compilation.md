@@ -1,4 +1,8 @@
+| [Tutorials Home](Tutorials.md)    | [Previous](Datafilters.md) | [Next](Configuration.md) |
+| ------------- |:-------------:| -----:|
+
 # Compiling and Installing libpointmatcher on your Computer
+######Latest update January 9, 2014 by Samuel Charreyron
 
 ## Foreword
 *The following instructions are aimed at users of Ubuntu Linux.  The steps from this tutorial were performed on **Ubuntu 13.10** (Saucy Salamander).  These instructions should be identical previous versions of Ubuntu.  Other Linux variants should follow a very similar process as with Mac OSX and other \*nix operating systems.*

@@ -7,11 +7,11 @@ Beginner<a name="beginner"></a>
 ---------
 
 - [How to compile libpointmatcher?](Compilation.md)
-- Example: applying filters to point clouds TODO: based on convert.cpp
-- [What the different DataFilters do?](Datafilters.md)
+- [What the different data filters do?](Datafilters.md)
+- [Example: applying a chain of data filters](ApplyingDatafilters.md)
 - [Example: basic registration using ICP](BasicRegistration.md)
 - [The ICP chain configuration and its variants](DefaultICPConfig.md)
-- How to create my custom configuration file using yaml
+- [How to create my custom configuration file using YAML](Configuration.md)
 
 Advanced<a name="advanced"></a>
 -------
