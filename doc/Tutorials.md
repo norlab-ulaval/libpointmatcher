@@ -11,14 +11,14 @@ Beginner<a name="beginner"></a>
 - [Example: applying a chain of data filters](ApplyingDatafilters.md)
 - [Example: basic registration using ICP](BasicRegistration.md)
 - [The ICP chain configuration and its variants](DefaultICPConfig.md)
-- [How to create my custom configuration file using YAML](Configuration.md)
+- [How to create custom configuration file using YAML](Configuration.md)
 
 Advanced<a name="advanced"></a>
 -------
-- How to link my project to libpointmatcher?
-- How point clouds are represented?
-- How to move a point cloud using a rigid transformation?
-- Writting your own filter TODO: transfer from http://docs.ros.org/groovy/api/libpointmatcher/html/ in the section Extending libpointmatcher
+- [How to link my project to libpointmatcher](LinkingProjects.md)
+- [How are point clouds represented?](Pointclouds.md)
+- [How to move a point cloud using a rigid transformation?](Transformations.md)
+- Writing your own filter TODO: transfer from http://docs.ros.org/groovy/api/libpointmatcher/html/ in the section Extending libpointmatcher
 
 
 **Note**: if you don't find what you need, don't hesitate to propose or participate to new tutorials. 
