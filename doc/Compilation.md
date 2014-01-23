@@ -1,4 +1,4 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](Datafilters.md) | [Next](Configuration.md) |
+| [Tutorials Home](Tutorials.md)    | | [Next](Datafilters.md) |
 | ------------- |:-------------:| -----:|
 
 # Compiling and Installing libpointmatcher on your Computer
