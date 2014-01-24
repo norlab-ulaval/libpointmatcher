@@ -91,7 +91,7 @@ sudo apt-get install libyaml-cpp-dev
 ```
 
 #### Warning for users of Ubuntu 14.04 (Trusty Tahr) or more recent versions
-The yaml-cpp package for trusty tahr uses yaml-cpp0.5.  Libpointmatcher is compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed.
+The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
 
 ### 4. Installing Google Test (Optional)
 libpointmatcher contains some unit tests which require [Google's C++ testing framework](http://code.google.com/p/googletest/).  If you are using Ubuntu, GTest can be installed and linked with libpointmatcher fairly easily.
