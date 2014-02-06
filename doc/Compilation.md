@@ -5,7 +5,7 @@
 ######Latest update January 9, 2014 by Samuel Charreyron
 
 ## Foreword
-*The following instructions are aimed at users of Ubuntu Linux.  The steps from this tutorial were performed on **Ubuntu 13.10** (Saucy Salamander).  These instructions should be identical previous versions of Ubuntu.  Other Linux variants should follow a very similar process as with Mac OSX and other \*nix operating systems.*
+*The following instructions are aimed at users of Ubuntu Linux.  The steps from this tutorial were performed on __Ubuntu 13.10__ (Saucy Salamander).  These instructions should be identical previous versions of Ubuntu.  Other Linux variants should follow a very similar process as with Mac OSX and other \*nix operating systems.*
 
 ## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu)
 A pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
@@ -112,7 +112,16 @@ In more recent versions Google has removed pre-compiled versions of the framewor
 
 libpointmatcher thus far uses the GTest Ubuntu package for unit tests to keep things simple.  Advanced users who wish to compile GTest at the same time as libpointmatcher should make the appropriate changes to the CMake files.
 
-### 5. Installing libpointmatcher
+### 5. Compiling the Documentation
+Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
+
+```
+sudo apt-get doxygen
+```
+
+Once you have compiled libpointmatcher in step 6, you can simply open `/usr/local/share/doc/libpointmatcher/api/html/index.html` in a browser to view the API documentation.
+
+### 6. Installing libpointmatcher
 Clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
 ```
 cd ~/Libraries/

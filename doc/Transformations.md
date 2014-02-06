@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
 ##### Making a Custom Transformation a libpointmatcher Module
 Suppose we have defined a useful transformation that we wish to add to libpointmatcher for future use.  We can as an example make a new libpointmatcher module out of the `PureTranslation` transformation class we just designed.
 
-Transformation modules live in the `pointmatcher/TransformationsImpl.h' and implemented in the cpp file of the same name.  Before copying in our `PureTranslation` class declaration, we will add to it an additional function. The `description` function should return some useful information about the transformation such as its name, requirements, and possible parameters that are used in the transformation.
+Transformation modules live in the `pointmatcher/TransformationsImpl.h` and implemented in the cpp file of the same name.  Before copying in our `PureTranslation` class declaration, we will add to it an additional function. The `description` function should return some useful information about the transformation such as its name, requirements, and possible parameters that are used in the transformation.
 
 ```cpp
 inline static const std::string description()
@@ -203,7 +203,7 @@ Now recompile the library and check that the new transformation is listed as an 
 		   
 
 #### Applying a Manual Transformation
-We can also perform transformations by directly applying a transformation on a point cloud.  Note that this is not recommended as it disregards all of the safeties provided by `Transformation`.  The following example code performs the same transformation as in the previous cases:
+We can also perform transformations by directly applying a transformation on a point cloud.  In the following example, we perform a transformation by multiplying a transformation matrix to the original point cloud.  Note that **this does not apply the transformation to associated descriptors** such as surface normals or orientation directions.  For this reason, this approach is strongly discouraged in practice.  The following example code performs the same transformation as in the previous cases:
 
 ```cpp
 #include <pointmatcher/PointMatcher.h>
@@ -241,3 +241,4 @@ int main(int argc, char *argv[]) {
 	std::cout << "Transformed cloud saved to " << argv[2] << std::endl;
 	return 0;
 }
+```
