@@ -18,7 +18,11 @@ Advanced<a name="advanced"></a>
 - [How to link my project to libpointmatcher](LinkingProjects.md)
 - [How are point clouds represented?](Pointclouds.md)
 - [How to move a point cloud using a rigid transformation?](Transformations.md)
-- Writing your own filter TODO: transfer from http://docs.ros.org/groovy/api/libpointmatcher/html/ in the section Extending libpointmatcher
 
+Developer<a name="developer"></a>
+---------
+- [Creating a DataPointsFilter](DataPointsFilterDev.md)
+- [Creating a transformation](TransformationDev.md)
+- [Creating unit tests](UnitTestDev.md)
 
 **Note**: if you don't find what you need, don't hesitate to propose or participate to new tutorials. 
