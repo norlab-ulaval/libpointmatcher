@@ -7,6 +7,7 @@ Wish list for next release
 
  * Support for *.ply point cloud format
  * Improve *.csv point cloud support
+ * Improve *.vtk legacy format to handle UNSTRUCTURED_GRID format
  * Fix portability problem with FileLogger on Windows
  * Support for OpenMP parallel computing
  * Handle larger point clouds (100 million points and more)
