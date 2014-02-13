@@ -103,6 +103,9 @@ else (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 	message("-- yaml-cpp not found, text-based configuration and related applications disabled")
 endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 
+# gtest
+add_subdirectory(contrib)
+
 # link rt support if POSIX timers are used
 check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
 if (POSIX_TIMERS AND NOT APPLE)
