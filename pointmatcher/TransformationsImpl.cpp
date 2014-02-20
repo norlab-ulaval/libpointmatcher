@@ -140,3 +140,60 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 template struct TransformationsImpl<float>::RigidTransformation;
 template struct TransformationsImpl<double>::RigidTransformation;
 
+template<typename T>
+typename PointMatcher<T>::DataPoints TransformationsImpl<T>::PureTranslation::compute(const DataPoints& input,
+		const TransformationParameters& parameters) const {
+	assert(input.features.rows() == parameters.rows());
+	assert(parameters.rows() == parameters.cols());
+
+	if(this->checkParameters(parameters) == false)
+		throw PointMatcherSupport::TransformationError("PureTranslation: Error, left part  not identity.");
+
+	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
+
+	// Apply the transformation to features
+	transformedCloud.features = parameters * input.features;
+
+	return transformedCloud;
+}
+
+template<typename T>
+typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::PureTranslation::correctParameters(
+		const TransformationParameters& parameters) const {
+	const int rows = parameters.rows();
+	const int cols = parameters.cols();
+
+	// make a copy of the parameters to perform corrections on
+	TransformationParameters correctedParameters(parameters);
+
+	// set the top left block to the identity matrix
+	correctedParameters.block(0,0,rows-1,cols-1).setIdentity();
+
+	// fix the bottom row
+	correctedParameters.block(rows-1,0,1,cols-1).setZero();
+	correctedParameters(rows-1,cols-1) = 1;
+
+	return correctedParameters;
+}
+
+template<typename T>
+bool TransformationsImpl<T>::PureTranslation::checkParameters(
+		const TransformationParameters& parameters) const {
+	const int rows = parameters.rows();
+	const int cols = parameters.cols();
+
+	// make a copy of parameters to perform the check
+	TransformationParameters parameters_(parameters);
+
+	// set the translation components of the transformation matrix to 0
+	parameters_.block(0,cols-1,rows-1,1).setZero();
+
+	// If we have the identity matrix, than this is indeed a pure translation
+	if (parameters_.isApprox(TransformationParameters::Identity(rows,cols)))
+		return true;
+	else
+		return false;
+}
+
+template struct TransformationsImpl<float>::PureTranslation;
+template struct TransformationsImpl<double>::PureTranslation;

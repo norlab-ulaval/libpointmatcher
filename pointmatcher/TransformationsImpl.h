@@ -62,6 +62,19 @@ struct TransformationsImpl
 		virtual bool checkParameters(const TransformationParameters& parameters) const;
 		virtual TransformationParameters correctParameters(const TransformationParameters& parameters) const;
 	};
+
+	struct PureTranslation : public Transformation
+	{
+		inline static const std::string description()
+		{
+			return "Pure translation transformation\nA rigid transformation with no rotation.";
+		}
+
+		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
+		virtual bool checkParameters(const TransformationParameters& parameters) const;
+		virtual TransformationParameters correctParameters(const TransformationParameters& parameters) const;
+	};
+
 }; // TransformationsImpl
 
 #endif // __POINTMATCHER_TRANSFORMATION_H
