@@ -1,0 +1,191 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>html { font-size: 100%; overflow-y: scroll; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+
+body{
+  color:#444;
+  font-family:Georgia, Palatino, 'Palatino Linotype', Times, 'Times New Roman',
+              "Hiragino Sans GB", "STXihei", "微软雅黑", serif;
+  font-size:12px;
+  line-height:1.5em;
+  background:#fefefe;
+  width: 45em;
+  margin: 10px auto;
+  padding: 1em;
+  outline: 1300px solid #FAFAFA;
+}
+
+a{ color: #0645ad; text-decoration:none;}
+a:visited{ color: #0b0080; }
+a:hover{ color: #06e; }
+a:active{ color:#faa700; }
+a:focus{ outline: thin dotted; }
+a:hover, a:active{ outline: 0; }
+
+span.backtick {
+  border:1px solid #EAEAEA;
+  border-radius:3px;
+  background:#F8F8F8;
+  padding:0 3px 0 3px;
+}
+
+::-moz-selection{background:rgba(255,255,0,0.3);color:#000}
+::selection{background:rgba(255,255,0,0.3);color:#000}
+
+a::-moz-selection{background:rgba(255,255,0,0.3);color:#0645ad}
+a::selection{background:rgba(255,255,0,0.3);color:#0645ad}
+
+p{
+margin:1em 0;
+}
+
+img{
+max-width:100%;
+}
+
+h1,h2,h3,h4,h5,h6{
+font-weight:normal;
+color:#111;
+line-height:1em;
+}
+h4,h5,h6{ font-weight: bold; }
+h1{ font-size:2.5em; }
+h2{ font-size:2em; border-bottom:1px solid silver; padding-bottom: 5px; }
+h3{ font-size:1.5em; }
+h4{ font-size:1.2em; }
+h5{ font-size:1em; }
+h6{ font-size:0.9em; }
+
+blockquote{
+color:#666666;
+margin:0;
+padding-left: 3em;
+border-left: 0.5em #EEE solid;
+}
+hr { display: block; height: 2px; border: 0; border-top: 1px solid #aaa;border-bottom: 1px solid #eee; margin: 1em 0; padding: 0; }
+
+
+pre , code, kbd, samp { 
+  color: #000; 
+  font-family: monospace; 
+  font-size: 0.88em; 
+  border-radius:3px;
+  background-color: #F8F8F8;
+  border: 1px solid #CCC; 
+}
+pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; padding: 5px 12px;}
+pre code { border: 0px !important; padding: 0;}
+code { padding: 0 3px 0 3px; }
+
+b, strong { font-weight: bold; }
+
+dfn { font-style: italic; }
+
+ins { background: #ff9; color: #000; text-decoration: none; }
+
+mark { background: #ff0; color: #000; font-style: italic; font-weight: bold; }
+
+sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+
+ul, ol { margin: 1em 0; padding: 0 0 0 2em; }
+li p:last-child { margin:0 }
+dd { margin: 0 0 0 2em; }
+
+img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
+
+table { border-collapse: collapse; border-spacing: 0; }
+td { vertical-align: top; }
+
+@media only screen and (min-width: 480px) {
+body{font-size:14px;}
+}
+
+@media only screen and (min-width: 768px) {
+body{font-size:16px;}
+}
+
+@media print {
+  * { background: transparent !important; color: black !important; filter:none !important; -ms-filter: none !important; }
+  body{font-size:12pt; max-width:100%; outline:none;}
+  a, a:visited { text-decoration: underline; }
+  hr { height: 1px; border:0; border-bottom:1px solid black; }
+  a[href]:after { content: " (" attr(href) ")"; }
+  abbr[title]:after { content: " (" attr(title) ")"; }
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }
+  pre, blockquote { border: 1px solid #999; padding-right: 1em; page-break-inside: avoid; }
+  tr, img { page-break-inside: avoid; }
+  img { max-width: 100% !important; }
+  @page :left { margin: 15mm 20mm 15mm 10mm; }
+  @page :right { margin: 15mm 10mm 15mm 20mm; }
+  p, h2, h3 { orphans: 3; widows: 3; }
+  h2, h3 { page-break-after: avoid; }
+}
+</style><title>UnitTestDev</title></head><body><p>| <a href="file:///home/sam/Libraries/libpointmatcher/doc/Tutorials.md">Tutorials Home</a>    | <a href="file:///home/sam/Libraries/libpointmatcher/doc/TransformationDev.md">Previous</a> | <a href="">Next</a> |
+| ------------- |:-------------:| -----:|</p>
+<h1 id="testing-libpointmatcher-modules">Testing libpointmatcher Modules</h1>
+<p>It is often good practice to accompany the development of new software features with the development of test cases which validate that these features are working correctly.  When developing for an open source project such as libpointmatcher, testing is crucial to maintain stability and avoid the introduction of erronous code.</p>
+<p>Libpointmatcher uses the <a href="https://code.google.com/p/googletest/">C++ testing framework developed by Google</a>.  If you are not sure if you installed libpointmatcher with GTest, go to the libpointmatcher's CMake build directory and run <code>make test</code>.  If the tests do not run, refer back to the <a href="file:///home/sam/Libraries/libpointmatcher/doc/Compilation.md">compilation instructions</a> to recompile with GTest.</p>
+<p>Libpointmatcher's unit tests can be found in <a href="/utest/utest.cpp">utest/utest.cpp</a>.  In this tutorial, we will write a series of tests for validating the voxel grid filter developed in <a href="file:///home/sam/Libraries/libpointmatcher/doc/DataPointsFilterDev.md">this past tutorial</a>.  Note that this test will not cover the myriad of features that GTest provides.  Nevertheless, it is very easy to understand GTest without extensive experience.  For those who wish to have a solid introduction to GTest we recommend to start with this <a href="http://code.google.com/p/googletest/wiki/Primer">this primer</a>.</p>
+<h2 id="a-unit-test-for-the-voxel-grid-filter">A Unit Test for the Voxel Grid Filter</h2>
+<p>Data filter tests are covered by the <code>DataFilterTest</code> test cast in utest.cpp.  We define a new test unit called <code>VoxelGridDataPointsFilterTest</code> following the convention used for the other filters.  This test unit will in fact contain several tests that are detailed subsequently.</p>
+<pre><code class="cpp">TEST(DataFilterTest, VoxelGridDataPointsFilterTest)
+</code></pre>
+
+<h3 id="test-1-2d-case">Test 1: 2D Case</h3>
+<p>In the following test, we create a 2D point cloud point cloud where each voxel contains a grid of unformly spaced points.  We define variables setting the number of divisions of the bounding region to form voxels, and the total number of points that are contained along each division.  We obtain a point cloud of the following form</p>
+<p>|Figure 1:</p>
+<pre><code class="cpp">// Number of divisions in each dimension that form the Voxel Grid
+    const Vector2i numDivs = (Vector2i() &lt;&lt; 10, 10).finished();
+    const Vector2f divSize = (Vector2f() &lt;&lt; 0.1f ,0.1f).finished();
+    const Vector2i pointsPerDiv = (Vector2i() &lt;&lt; 10 , 10).finished();
+
+    const int numPoints = numDivs(0) * pointsPerDiv(0) * numDivs(1) * pointsPerDiv(1);
+
+    const float pointSepX = divSize(0) / (pointsPerDiv(0) + 1); // add 1 because we want all points inside voxel
+    const float pointSepY = divSize(1) / (pointsPerDiv(1) + 1);
+
+    // Input test cloud: Equally spaced points along grid
+    MatrixXf testCloudP(3,numPoints);
+    for (int i = 0; i &lt; (numDivs(0) * pointsPerDiv(0)) ; i++ )
+    {
+        for (int j = 0; j &lt; (numDivs(1) * pointsPerDiv(1) ); j++ )
+        {
+            int p = i + j * numDivs(0) * pointsPerDiv(0);
+
+            testCloudP(0,p) = i/pointsPerDiv(0) * divSize(0) + (i % pointsPerDiv(0) + 1) * pointSepX;
+            testCloudP(1,p) = j/pointsPerDiv(1) * divSize(1) + (j % pointsPerDiv(1) + 1) * pointSepY;
+            testCloudP(2,p) = 1.f;
+        }
+    }
+
+    // Validation cloud: centers of each voxel
+    MatrixXf valCloudP(3,numDivs(0) * numDivs(1));
+    for (int i = 0; i &lt; numDivs(0); i++)
+    {
+        for (int j = 0; j &lt; numDivs(1); j++)
+        {
+            int p = i + j * numDivs(0);
+            valCloudP(0,p) = i * divSize(0) + divSize(0) / 2.f;
+            valCloudP(1,p) = j * divSize(1) + divSize(1) / 2.f;
+            valCloudP(2,p) = 1.f;
+        }
+    }
+
+    DP::Labels featLabels;
+    featLabels.push_back(DP::Label(&quot;X&quot;,1));
+    featLabels.push_back(DP::Label(&quot;Y&quot;,1));
+
+    DP testCloud(testCloudP,featLabels);
+
+    PM::Parameters params = boost::assign::map_list_of(&quot;vSizeX&quot;,toParam(divSize(0)))
+        (&quot;vSizeY&quot;,toParam(divSize(1)));
+
+    VoxelGridDataPointsFilter&lt;float&gt; vFilter(params);
+
+    DP testResults = vFilter.filter(testCloud);
+
+    ASSERT_EQ(testResults.features.cols(), numDivs(0) * numDivs(1) );
+
+
+    EXPECT_TRUE(testResults.features.isApprox(valCloudP));
+</code></pre></body></html>

@@ -1,4 +1,4 @@
-| [Tutorials Home](Tutorials.md)    | [Previous]() | [Next]() |
+| [Tutorials Home](Tutorials.md)    | [Previous](DataPointsFilterDev.md) | [Next](UnitTestDev.md) |
 | ------------- |:-------------:| -----:|
 
 # Extending libpointmatcher Transformations
@@ -126,10 +126,13 @@ inline static const std::string description()
 	}
 ```
 
-After adding the class to `TransformationsImpl`, we will add it to the registry as a libpointmatcher module.  We do so by adding the following macro in `pointmatcher/registrar.cpp`
+After adding the class to `TransformationsImpl`, we will add it to the registry as a libpointmatcher module.  We do so by adding the following macro in [pointmatcher/registrar.cpp](/pointmatcher/registrar.cpp)
 
 ```cpp
 ADD_TO_REGISTRAR_NO_PARAM(Transformation, PureTranslation, typename TransformationsImpl<T>::PureTranslation)
 ```
 
 Now recompile the library and check that the new transformation is listed as an available module by running `pcmip -l | grep -C 10 PureTranslation`.
+
+## Where To Go From Here
+We recommend you try to build your own class of transformations and register it to libpointmatcher.  The [next tutorial](UnitTestDev.md) covers how to write test cases to validate your classes.  While the tutorial covers test cases for a data filter, you should also write test cases to verify that your transformations function correctly.
