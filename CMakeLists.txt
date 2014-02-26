@@ -202,7 +202,7 @@ configure_file(pointmatcherConfig.cmake.in "${PROJECT_BINARY_DIR}/pointmatcherCo
 configure_file(pointmatcherConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" @ONLY)
 
 # Install the pointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
-install(FILES "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake" "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+install(FILES "${PROJECT_BINARY_DIR}/pointmatcherConfig.cmake" "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
 
 if( MSVC ) # VS2012 does not support tuples correctly yet
