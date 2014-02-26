@@ -278,4 +278,82 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 template struct OutlierFiltersImpl<float>::SurfaceNormalOutlierFilter;
 template struct OutlierFiltersImpl<double>::SurfaceNormalOutlierFilter;
 
+// GenericDescriptorOutlierFilter
+template<typename T>
+OutlierFiltersImpl<T>::GenericDescriptorOutlierFilter::GenericDescriptorOutlierFilter(const Parameters& params):
+	OutlierFilter("GenericDescriptorOutlierFilter", GenericDescriptorOutlierFilter::availableParameters(), params),
+	source(Parametrizable::getParamValueString("source")),
+	descName(Parametrizable::getParamValueString("descName")),
+	useSoftThreshold(Parametrizable::get<bool>("useSoftThreshold")),
+	useLargerThan(Parametrizable::get<bool>("useLargerThan")),
+	threshold(Parametrizable::get<T>("threshold"))
+{
+	if(source != "reference" && source != "reading")
+	{
+		throw InvalidParameter(
+		(boost::format("GenericDescriptorOutlierFilter: Error, the parameter named 'source' can only be set to 'reference' or 'reading' but was set to %1%") % source).str());
+	}
+}
+
+template<typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescriptorOutlierFilter::compute(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const Matches& input)
+{
+	const int knn = input.dists.rows();
+	const int readPtsCount = input.dists.cols();
+	
+	OutlierWeights w(knn, readPtsCount);
+
+	const DataPoints *cloud;
+
+	if(source == "reference")
+		cloud = &filteredReference;
+	else
+		cloud = &filteredReference;
+
+	const auto desc(cloud->getDescriptorViewByName(descName));
+
+	if(desc.rows() != 1)
+	{
+		throw InvalidParameter(
+		(boost::format("GenericDescriptorOutlierFilter: Error, the parameter named 'descName' must be a 1D descriptor but the field %1% is %2%D") % descName % desc.rows()).str());
+	}
+
+	for(int k=0; k < knn; k++)
+	{
+		for(int i=0; i < readPtsCount; i++)
+		{
+			if(useSoftThreshold == false)
+			{
+				if(useLargerThan == true)
+				{
+					if(desc(0, input.ids(k,i)) > threshold)
+						w(k,i) = 1;
+					else
+						w(k,i) = 0;
+				}
+				else
+				{
+					if(desc(0, input.ids(k,i)) < threshold)
+						w(k,i) = 1;
+					else
+						w(k,i) = 0;
+				}
+			}
+			else
+			{
+				// use soft threshold by assigning the weight using the descriptor
+				w(k,i) = desc(0, input.ids(k,i));
+			}
+		}
+	}
+
+	return w;
+}
+
+template struct OutlierFiltersImpl<float>::GenericDescriptorOutlierFilter;
+template struct OutlierFiltersImpl<double>::GenericDescriptorOutlierFilter;
+
 
