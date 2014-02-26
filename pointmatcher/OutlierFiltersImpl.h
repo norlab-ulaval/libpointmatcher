@@ -199,13 +199,13 @@ struct OutlierFiltersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return ParametersDoc({
-				{ "source", "Point cloud from which the descriptor will be used: reference or reading", "reference"},
-				{ "descName", "Descriptor name used to weight paired points", "none"},
-				{ "useSoftThreshold", "If set to 1 (true), uses the value of the descriptor as a weight. If set to 0 (false), uses the parameter 'threshold' to set binary weights.", "0", "0", "1", P::Comp<bool>}, 
-				{ "useLargerThan", "If set to 1 (true), values over the 'threshold' will have a weight of one.  If set to 0 (false), values under the 'threshold' will have a weight of one. All other values will have a weight of zero.", "1", "0", "1", P::Comp<bool>}, 
-				{ "threshold", "Value used to determine the binary weights", "0.1", "0.0000001", "inf", &P::Comp<T>}
-			});
+			return boost::assign::list_of<ParameterDoc>
+				( "source", "Point cloud from which the descriptor will be used: reference or reading", "reference")
+				( "descName", "Descriptor name used to weight paired points", "none")
+				( "useSoftThreshold", "If set to 1 (true), uses the value of the descriptor as a weight. If set to 0 (false), uses the parameter 'threshold' to set binary weights.", "0", "0", "1", P::Comp<bool>)
+				( "useLargerThan", "If set to 1 (true), values over the 'threshold' will have a weight of one.  If set to 0 (false), values under the 'threshold' will have a weight of one. All other values will have a weight of zero.", "1", "0", "1", P::Comp<bool>)
+				( "threshold", "Value used to determine the binary weights", "0.1", "0.0000001", "inf", &P::Comp<T>)
+				;
 		}
 		
 		const std::string source;

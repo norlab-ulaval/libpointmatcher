@@ -301,6 +301,8 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	const DataPoints& filteredReference,
 	const Matches& input)
 {
+	typedef typename DataPoints::ConstView ConstView;
+
 	const int knn = input.dists.rows();
 	const int readPtsCount = input.dists.cols();
 	
@@ -313,7 +315,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	else
 		cloud = &filteredReference;
 
-	const auto desc(cloud->getDescriptorViewByName(descName));
+	ConstView desc(cloud->getDescriptorViewByName(descName));
 
 	if(desc.rows() != 1)
 	{
