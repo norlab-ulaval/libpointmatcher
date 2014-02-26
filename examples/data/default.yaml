@@ -25,10 +25,20 @@ transformationCheckers:
       minDiffRotErr: 0.001
       minDiffTransErr: 0.01
       smoothLength: 4   
-      
+
+#inspector:
+#  NullInspector
+
 inspector:
-  NullInspector
-#  VTKFileInspector
+ VTKFileInspector:
+     baseFileName: pointmatcher-run1
+     dumpPerfOnExit: 0
+     dumpStats: 0
+     dumpIterationInfo: 1 
+     dumpDataLinks: 0 
+     dumpReading: 0 
+     dumpReference: 0 
+
 
 logger:
   NullLogger

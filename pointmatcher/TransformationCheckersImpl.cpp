@@ -89,10 +89,10 @@ TransformationCheckersImpl<T>::DifferentialTransformationChecker::DifferentialTr
 	this->limits(0) = minDiffRotErr;
 	this->limits(1) = minDiffTransErr;
 	
-	this->conditionVariableNames.push_back("Mean abs differential trans err");
 	this->conditionVariableNames.push_back("Mean abs differential rot err");
-	this->limitNames.push_back("Min differential translation err");
+	this->conditionVariableNames.push_back("Mean abs differential trans err");
 	this->limitNames.push_back("Min differential rotation err");
+	this->limitNames.push_back("Min differential translation err");
 
 }
 

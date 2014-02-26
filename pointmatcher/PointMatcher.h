@@ -366,9 +366,10 @@ struct PointMatcher
 		DataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 		virtual ~DataPointsFilter();
 		virtual void init();
-		
-		//! Apply this filter to input
+
+		//! Apply these filters to input
 		virtual DataPoints filter(const DataPoints& input) = 0;
+		virtual void inPlaceFilter(DataPoints& cloud) = 0;
 	};
 	
 	//! A chain of DataPointsFilter
