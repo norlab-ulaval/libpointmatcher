@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
-#include "gtest/gtest.h"
+#include "../contrib/gtest/gtest.h"
 
 #include <string>
 
