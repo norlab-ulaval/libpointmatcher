@@ -1443,7 +1443,15 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     // this point will be ovewritten in the input cloud with
     // the output value
 
-    std::vector<Voxel> voxels(numVox);
+    std::vector<Voxel>* voxels;
+
+    // try allocating vector. If too big return error
+    try {
+    	voxels = new std::vector<Voxel>(numVox);
+    } catch (std::bad_alloc&) {
+    	throw InvalidParameter((boost::format("VoxelGridDataPointsFilter: Memory allocation error with %1% voxels.  Try increasing the voxel dimensions.") % numVox).str());
+    }
+
 
     for (int p = 0; p < numPoints; p++ )
     {
@@ -1461,14 +1469,14 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
             idx = i + j * numDivX;
         }
 
-        unsigned int pointsInVox = voxels[idx].numPoints + 1;
+        unsigned int pointsInVox = (*voxels)[idx].numPoints + 1;
 
         if (pointsInVox == 1)
         {
-            voxels[idx].firstPoint = p;
+            (*voxels)[idx].firstPoint = p;
         }
 
-        voxels[idx].numPoints = pointsInVox;
+        (*voxels)[idx].numPoints = pointsInVox;
 
         indices[p] = idx;
 
@@ -1484,7 +1492,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
         for (int p = 0; p < numPoints ; p++)
         {
             unsigned int idx = indices[p];
-            unsigned int firstPoint = voxels[idx].firstPoint;
+            unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
             // If this is the first point in the voxel, leave as is
             // if not sum up this point for centroid calculation
@@ -1511,8 +1519,8 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
         // Some voxels may be empty and are discarded
         for( int idx = 0; idx < numVox; idx++)
         {
-            unsigned int numPoints = voxels[idx].numPoints;
-            unsigned int firstPoint = voxels[idx].firstPoint;
+            unsigned int numPoints = (*voxels)[idx].numPoints;
+            unsigned int firstPoint = (*voxels)[idx].firstPoint;
             if(numPoints > 0)
             {
                 for ( int f = 0; f < (featDim - 1); f++ )
@@ -1536,7 +1544,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     		for (int p = 0; p < numPoints ; p++)
     		{
     			unsigned int idx = indices[p];
-    			unsigned int firstPoint = voxels[idx].firstPoint;
+    			unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
     			// If this is the first point in the voxel, leave as is
     			// if not sum up this point for centroid calculation
@@ -1552,8 +1560,8 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 
         for (int idx = 0; idx < numVox; idx++)
         {
-            unsigned int numPoints = voxels[idx].numPoints;
-            unsigned int firstPoint = voxels[idx].firstPoint;
+            unsigned int numPoints = (*voxels)[idx].numPoints;
+            unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
             if (numPoints > 0)
             {
@@ -1595,6 +1603,9 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
         }
 
     }
+
+    // deallocate memory for voxels information
+    delete voxels;
 
     // Move the points to be kept to the start
     // Bring the data we keep to the front of the arrays then
