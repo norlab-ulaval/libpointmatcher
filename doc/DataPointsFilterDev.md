@@ -61,7 +61,7 @@ inline static const ParametersDoc availableParameters()
 			( "vSizeY", "Dimension of each voxel cell in y direction", "1.0", "-inf", "inf", &P::Comp<T> )
 			( "vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "-inf", "inf", &P::Comp<T> )
 			( "useCentroid", "If 1 (true), down-sample by using centroid of voxel cell.  If false (0), use center of voxel cell.", "1", "0", "1", P::Comp<bool> )
-			( "averageExistingDescriptors", "whether the filter average the descriptor values in a voxel or use a single value", "1" )
+			( "averageExistingDescriptors", "whether the filter average the descriptor values in a voxel or use a single value", "1", "0", "1", &P::Comp<T> )
 		;
 	}
 ```
@@ -185,7 +185,14 @@ std::vector<unsigned int> indices(numPoints);
 // vector to hold the first point in a voxel
 // this point will be ovewritten in the input cloud with
 // the output value
-std::vector<Voxel> voxels(numVox);
+std::vector<Voxel>* voxels;
+
+// try allocating vector. If too big return error
+try {
+    voxels = new std::vector<Voxel>(numVox);
+} catch (std::bad_alloc&) {
+    throw InvalidParameter((boost::format("VoxelGridDataPointsFilter: Memory allocation error with %1% voxels.  Try increasing the voxel dimensions.") % numVox).str());
+}
 
 for (int p = 0; p < numPoints; p++ )
 {
@@ -203,14 +210,14 @@ for (int p = 0; p < numPoints; p++ )
         idx = i + j * numDivX;
     }
 
-    unsigned int pointsInVox = voxels[idx].numPoints + 1;
+    unsigned int pointsInVox = (*voxels)[idx].numPoints + 1;
 
     if (pointsInVox == 1)
     {
-        voxels[idx].firstPoint = p;
+        (*voxels)[idx].firstPoint = p;
     }
 
-    voxels[idx].numPoints = pointsInVox;
+    (*voxels)[idx].numPoints = pointsInVox;
 
     indices[p] = idx;
 
@@ -234,7 +241,7 @@ if (useCentroid)
     for (int p = 0; p < numPoints ; p++)
     {
         unsigned int idx = indices[p];
-        unsigned int firstPoint = voxels[idx].firstPoint;
+        unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
         // If this is the first point in the voxel, leave as is
         // if not sum up this point for centroid calculation
@@ -262,8 +269,8 @@ if (useCentroid)
     // Some voxels may be empty and are discarded
     for( int idx = 0; idx < numVox; idx++)
     {
-        unsigned int numPoints = voxels[idx].numPoints;
-        unsigned int firstPoint = voxels[idx].firstPoint;
+        unsigned int numPoints = (*voxels)[idx].numPoints;
+        unsigned int firstPoint = (*voxels)[idx].firstPoint;
         if(numPoints > 0)
         {
             for ( int f = 0; f < (featDim - 1); f++ )
@@ -291,7 +298,7 @@ if (averageExistingDescriptors)
 	for (int p = 0; p < numPoints ; p++)
 	{
 		unsigned int idx = indices[p];
-		unsigned int firstPoint = voxels[idx].firstPoint;
+		unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
 		// If this is the first point in the voxel, leave as is
 		// if not sum up this point for centroid calculation
@@ -307,8 +314,8 @@ if (averageExistingDescriptors)
 
 for (int idx = 0; idx < numVox; idx++)
 {
-    unsigned int numPoints = voxels[idx].numPoints;
-    unsigned int firstPoint = voxels[idx].firstPoint;
+    unsigned int numPoints = (*voxels)[idx].numPoints;
+    unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
     if (numPoints > 0)
     {
@@ -348,6 +355,9 @@ for (int idx = 0; idx < numVox; idx++)
         pointsToKeep.push_back(firstPoint);
     }
 }
+
+// deallocate voxels vector
+delete voxels;
 ```
 If we are averaging descriptors, we perform a summing step as in the previous case.  We then iterate through the voxels and replace the first point from each non-empty voxel with the voxel center.  If descriptors are averaged, these are normalized as well.  We also record the points to keep during the truncation process.
 
