@@ -93,24 +93,6 @@ sudo apt-get install libyaml-cpp-dev
 #### Warning for users of Ubuntu 14.04 (Trusty Tahr) or more recent versions
 The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
 
-### 4. Installing Google Test (Optional)
-libpointmatcher contains some unit tests which require [Google's C++ testing framework](http://code.google.com/p/googletest/).  If you are using Ubuntu, GTest can be installed and linked with libpointmatcher fairly easily.
-
-#### Instructions for Ubuntu (pre-compiled)
-
-If you are using Ubuntu, the following instructions detail how to install a packaged version of GTest to be used with libpointmatcher. Install the GTest package by using apt as follows:
-```
-sudo apt-get libgtest-dev
-```
-CMake comes with a module that automatically finds the GTest include and installation directories and sets appropriate flags.  You can check that this is the case by running:
-```
-cmake --help-module-list | grep FindGTest
-``` 
-
-#### A Note About Precompiled GTest
-In more recent versions Google has removed pre-compiled versions of the framework for linking with C++ projects.  An explanation can be found [here](http://code.google.com/p/googletest/wiki/FAQ#Why_is_it_not_recommended_to_install_a_pre-compiled_copy_of_Goog).
-
-libpointmatcher thus far uses the GTest Ubuntu package for unit tests to keep things simple.  Advanced users who wish to compile GTest at the same time as libpointmatcher should make the appropriate changes to the CMake files.
 
 ### 5. Compiling the Documentation
 Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
@@ -135,6 +117,15 @@ BUILD_DIR=${SRC_DIR}/build
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
 make
+```
+
+You can optionally verify that the version of libpointmatcher you have compiled is stable by running the unit tests.
+```
+utest/utest --path ../examples/data/
+```
+
+Finally, to install libpointmatcher to your system run the following:
+```
 sudo make install
 ```
 
