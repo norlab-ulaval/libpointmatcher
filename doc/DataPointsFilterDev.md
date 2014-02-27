@@ -12,11 +12,11 @@ The voxel grid filter down-samples the data by taking a spatial average of the p
 
 There are two options as to how to represent the distribution of points in a voxel by a single point.  In the first, we take the centroid or spatial average of the point distribution.  In the second, we simply take the geometrical center of the voxel.  Clearly, the first option is more accurate since it takes into account the point distribution inside the voxels.  However it is more computationally intensive since the centroid must be computed for each voxel.  The computational cost increases linearly with the number of points in the cloud and the number of voxels.
 
-In the following figure we show the application of a 2D voxel filter over a 2D point cloud containing uniformly dispersed points.  We divide each axis into 5 regions resulting in 25 voxels.  The points are down-sampled by taking the centroid of the points within each voxel.  The resulting points are shown in red.
+In the following figure we show the application of a 2D voxel filter over a 2D point cloud containing uniformly dispersed points.  We divide each axis into 5 regions resulting in 25 voxels.  The points are down-sampled by taking the centroid of the points within each voxel.  The centroids are shown in red asterisks.  The centers of the voxels are shown in green squares.
 
 |**Figure 1:** A 2D Voxel Grid with red stars representing the voxel centroids |
 |:---|
-|![2dvoxelgrid](images/2dvxgrid_s.png)|
+|![2dvoxelgrid](images/2dvxgrid.png)|
 
 ## Implementation as a DataPointsFilter
 
