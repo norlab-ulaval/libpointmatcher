@@ -835,13 +835,12 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 			("vSizeY","1")
 			("vSizeZ","1")
 			("useCentroid",toParam(true))
-			("averageExistingDescriptors",toParam(true))
+			("averageExistingDescriptors",toParam(true));
 			icp.readingDataPointsFilters.clear();
 			addFilter("VoxelGridDataPointsFilter", params);
 			validate3dTransformation();
 		}
 	}
-
 }
 
 //---------------------------
