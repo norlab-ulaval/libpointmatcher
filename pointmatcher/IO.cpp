@@ -823,3 +823,105 @@ template
 void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName);
 template
 void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+
+template<typename T>
+typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(const std::string& fileName)
+{
+	ifstream ifs(fileName.c_str());
+	if (!ifs.good())
+		throw runtime_error(string("Cannot open file ") + fileName);
+	return loadPLY(ifs);
+}
+
+template <typename T>
+typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& is)
+{
+	typedef typename DataPoints::Label Label;
+	typedef typename DataPoints::Labels Labels;
+	typedef vector<PLYElement> Elements;
+
+	DataPoints loadedPoints;
+
+	bool format_defined = false;
+	Elements elements;
+
+	// parse header
+	string line;
+	getline(is, line);
+
+	if (line.find("ply") != 0) {
+		throw runtime_error(string("PLY parse error: wrong magic header, found ") + line);
+	}
+
+	 while (getline(is, line))
+	 {
+		 if ( line.empty() )
+			 continue;
+		 istringstream stringstream (line);
+
+		 string keyword;
+		 stringstream >> keyword;
+
+		 // ignore comment
+		 if (keyword == "comment") {
+			 continue;
+		 }
+
+		 if (keyword == "format")
+		 {
+			 if (format_defined)
+				 throw runtime_error("PLY parse error: format already defined");
+
+			 string format_str, version_str;
+			 stringstream >> format_str >> version_str;
+
+			 if (format_str != "ascii" && format_str != "binary_little_endian" && format_str != "binary_big_endian")
+				 throw runtime_error(string("PLY parse error: format ") + format_str + string(" is not supported"));
+
+			 if (version_str != "1.0")
+			 {
+				 throw runtime_error(string("PLY parse error: version ") + version_str + string(" of ply is not supported"));
+			 }
+
+			 format_defined = true;
+
+		 }
+		 else if (keyword == "element")
+		 {
+			 string elem_name, elem_num;
+			 stringstream >> elem_name >> elem_num;
+
+			 if (plyElemSupported(elem_name))
+			 {
+				 PLYElement elem(elem_name,elem_num);
+
+				 // check that element is not already defined
+				 for (Elements::const_iterator it = elements.begin(); it != elements.end(); it++ )
+				 {
+					 if (*it == elem) {
+						 throw runtime_error(string("PLY parse error: element: ") + elem.name + string( "is already defined"));
+					 }
+				 }
+
+				 elements.push_back(elem);
+			 }
+		 } else if (keyword == "property")
+		 {
+			 string prop_type, prop_name;
+			 stringstream >> prop_type >> prop_name;
+		 }
+
+
+
+
+
+	 }
+}
+
+template<typename T>
+void PointMatcherIO<T>::savePLY(const DataPoints& data,
+		const std::string& fileName)
+{
+
+}
+

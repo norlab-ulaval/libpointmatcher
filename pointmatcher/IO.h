@@ -63,6 +63,13 @@ struct PointMatcherIO
 
 	static void saveVTK(const DataPoints& data, const std::string& fileName);
 	
+	// PLY
+
+	static DataPoints loadPLY(const std::string& fileName);
+	static DataPoints loadPLY(std::istream& is);
+
+	static void savePLY(const DataPoints& data, const std::string& fileName);
+
 	//! Information to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo 
 	{
@@ -89,6 +96,61 @@ struct PointMatcherIO
 		bool findTransform(const PointMatcherSupport::CsvElements& data, const std::string& prefix, unsigned dim);
 		TransformationParameters getTransform(const PointMatcherSupport::CsvElements& data, const std::string& prefix, unsigned dim, unsigned line);
 	};
+
+	bool plyElemSupported (const std::string& elemName)
+	{
+		return elemName == "vertex";
+	}
+
+	// a structure containing element information
+
+	struct PLYProperty {
+		static enum PLY_TYPE {
+			CHAR,
+			UCHAR,
+			SHORT,
+			USHORT,
+			INT,
+			UINT,
+			FLOAT,
+			DOUBLE
+		};
+
+		std::string name;
+		PLY_TYPE type;
+	};
+
+	class PLYElement
+	{
+	public:
+		std::string name;
+		unsigned int num;
+		PLYElement(const std::string& name, const unsigned int num) : name(name), num(num) {}
+
+		virtual bool supportsProperty(const PLYProperty& prop) = 0;
+
+		void addProperty(const PLYProperty& prop)
+		{
+			if (supportsProperty(prop))
+				properties.push_back(prop);
+			else
+				throw std::runtime_error(std::string("PLY parse error: property ") + prop.name + std::string(" not supported by element ") + name);
+		}
+
+		std::vector<PLYProperty>& getProperties() const
+		{
+			return properties;
+		}
+
+	protected:
+		std::vector<PLYProperty> properties;
+	};
+
+	bool operator==(const PLYElement& lhs, const PLYElement& rhs)
+	{
+		return lhs.name == rhs.name;
+	}
 };
+
 
 #endif // __POINTMATCHER_IO_H
