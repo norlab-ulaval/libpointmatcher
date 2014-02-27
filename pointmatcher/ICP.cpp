@@ -145,7 +145,8 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	usedModuleTypes.insert(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector));
 	
 	
-	loadAdditionalYAMLContent(doc);
+	// FIXME: this line cause segfault when there is an error in the yaml file...
+	//loadAdditionalYAMLContent(doc);
 	
 	// check YAML entries that do not correspend to any module
 	for(YAML::Iterator moduleTypeIt = doc.begin(); moduleTypeIt != doc.end(); ++moduleTypeIt)

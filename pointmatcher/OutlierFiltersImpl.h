@@ -191,7 +191,32 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
-	
+	struct GenericDescriptorOutlierFilter: public OutlierFilter
+	{
+		inline static const std::string description()
+		{
+			return "This filter weights matched points based on a 1D descriptor of either a single point cloud (either the reference or the reading). The descriptor values must be larger than zero.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return boost::assign::list_of<ParameterDoc>
+				( "source", "Point cloud from which the descriptor will be used: reference or reading", "reference")
+				( "descName", "Descriptor name used to weight paired points", "none")
+				( "useSoftThreshold", "If set to 1 (true), uses the value of the descriptor as a weight. If set to 0 (false), uses the parameter 'threshold' to set binary weights.", "0", "0", "1", P::Comp<bool>)
+				( "useLargerThan", "If set to 1 (true), values over the 'threshold' will have a weight of one.  If set to 0 (false), values under the 'threshold' will have a weight of one. All other values will have a weight of zero.", "1", "0", "1", P::Comp<bool>)
+				( "threshold", "Value used to determine the binary weights", "0.1", "0.0000001", "inf", &P::Comp<T>)
+				;
+		}
+		
+		const std::string source;
+		const std::string descName;
+		const bool useSoftThreshold;
+		const bool useLargerThan;
+		const T threshold;
+		
+		GenericDescriptorOutlierFilter(const Parameters& params = Parameters());
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+	};
 
 }; // OutlierFiltersImpl
 
