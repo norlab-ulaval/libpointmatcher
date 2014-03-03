@@ -468,6 +468,7 @@ struct PointMatcher
 		T getPointUsedRatio() const;
 		T getWeightedPointUsedRatio() const;
 		virtual T getOverlap() const;
+		virtual Matrix getCovariance() const;
 		
 		//! Find the transformation that minimizes the error
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
