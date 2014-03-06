@@ -36,6 +36,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IO.h"
 #include "InspectorsImpl.h"
 
+// For logging
+#include "PointMatcherPrivate.h"
+
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
@@ -824,6 +827,7 @@ void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& dat
 template
 void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
 
+//! @brief Load PLY file from filename
 template<typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(const std::string& fileName)
 {
@@ -833,19 +837,30 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(const std::str
 	return loadPLY(ifs);
 }
 
+template
+PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadPLY(const string& fileName);
+template
+PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPLY(const string& fileName);
+
+
+//! load point cloud from stream as PLY
 template <typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& is)
 {
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
-	typedef vector<PLYElement> Elements;
+	typedef vector<PLYElement*> Elements;
 
-	DataPoints loadedPoints;
-
+	///////////////////////////
+	// PARSE PLY HEADER
 	bool format_defined = false;
-	Elements elements;
+	bool header_processed = false;
 
-	// parse header
+	Elements elements;
+	PLYElementF element_f; // factory
+	PLYElement* current_element = NULL;
+	bool skip_props = false; // flag to skip properties if element is not supported
+	unsigned elem_offset = 0; // keep track of line position of elements that are supported
 	string line;
 	getline(is, line);
 
@@ -853,69 +868,246 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		throw runtime_error(string("PLY parse error: wrong magic header, found ") + line);
 	}
 
-	 while (getline(is, line))
-	 {
-		 if ( line.empty() )
-			 continue;
-		 istringstream stringstream (line);
+	while (!header_processed)
+	{
+		if(!getline(is, line))
+			throw runtime_error("PLY parse error: reached end of file before end of header definition");
 
-		 string keyword;
-		 stringstream >> keyword;
+		if ( line.empty() )
+			continue;
+		istringstream stringstream (line);
 
-		 // ignore comment
-		 if (keyword == "comment") {
-			 continue;
-		 }
+		string keyword;
+		stringstream >> keyword;
 
-		 if (keyword == "format")
-		 {
-			 if (format_defined)
-				 throw runtime_error("PLY parse error: format already defined");
+		// ignore comment
+		if (keyword == "comment") {
+			continue;
+		}
 
-			 string format_str, version_str;
-			 stringstream >> format_str >> version_str;
+		if (keyword == "format")
+		{
+			if (format_defined)
+				throw runtime_error("PLY parse error: format already defined");
 
-			 if (format_str != "ascii" && format_str != "binary_little_endian" && format_str != "binary_big_endian")
-				 throw runtime_error(string("PLY parse error: format ") + format_str + string(" is not supported"));
+			string format_str, version_str;
+			stringstream >> format_str >> version_str;
 
-			 if (version_str != "1.0")
-			 {
-				 throw runtime_error(string("PLY parse error: version ") + version_str + string(" of ply is not supported"));
-			 }
+			if (format_str != "ascii" && format_str != "binary_little_endian" && format_str != "binary_big_endian")
+				throw runtime_error(string("PLY parse error: format ") + format_str + string(" is not supported"));
 
-			 format_defined = true;
+			if (version_str != "1.0")
+			{
+				throw runtime_error(string("PLY parse error: version ") + version_str + string(" of ply is not supported"));
+			}
 
-		 }
-		 else if (keyword == "element")
-		 {
-			 string elem_name, elem_num;
-			 stringstream >> elem_name >> elem_num;
+			format_defined = true;
 
-			 if (plyElemSupported(elem_name))
-			 {
-				 PLYElement elem(elem_name,elem_num);
+		}
+		else if (keyword == "element")
+		{
+			if (current_element != NULL && current_element->getNumSupportedProperties() == 0)
+			{
+				LOG_WARNING_STREAM("PLY parse warning: no supported properties in element " << current_element->name);
+			}
 
-				 // check that element is not already defined
-				 for (Elements::const_iterator it = elements.begin(); it != elements.end(); it++ )
-				 {
-					 if (*it == elem) {
-						 throw runtime_error(string("PLY parse error: element: ") + elem.name + string( "is already defined"));
-					 }
-				 }
+			string elem_name, elem_num_s;
+			stringstream >> elem_name >> elem_num_s;
 
-				 elements.push_back(elem);
-			 }
-		 } else if (keyword == "property")
-		 {
-			 string prop_type, prop_name;
-			 stringstream >> prop_type >> prop_name;
-		 }
+			unsigned elem_num;
+			try
+			{
+				elem_num = boost::lexical_cast<unsigned>(elem_num_s);
+			}
+			catch (boost::bad_lexical_cast& e)
+			{
+				throw runtime_error(string("PLY parse error: bad number of elements ") + elem_num_s + string(" for element ") + elem_name);
+			}
 
+			if (element_f.elementSupported(elem_name))
+			{
+				// Initialize current element
+				PLYElement* elem = element_f.createElement(elem_name, elem_num, elem_offset);
+				current_element = elem;
 
+				// check that element is not already defined
+				for (typename Elements::const_iterator it = elements.begin(); it != elements.end(); it++ )
+				{
+					if (**it == *elem) {
+						throw runtime_error(string("PLY parse error: element: ") + elem_name + string( "is already defined"));
+					}
+				}
+				elements.push_back(elem);
+				skip_props = false;
+			}
+			else
+			{
+				LOG_WARNING_STREAM("PLY parse warning: element " << elem_name << " not supported. Skipping.");
+				skip_props = true;
+			}
 
+			elem_offset += elem_num;
+		}
+		else if (keyword == "property")
+		{
+			if (current_element == NULL)
+			{
+				throw runtime_error("PLY parse error: property listed without defining an element");
+			}
 
+			if (skip_props)
+				continue;
 
-	 }
+			string next, prop_type, prop_name;
+			stringstream >> next;
+
+			// PLY list property
+			if (next == "list")
+			{
+				string prop_idx_type;
+				stringstream >> prop_idx_type >> prop_type >> prop_name;
+
+				PLYProperty list_prop(prop_idx_type, prop_type, prop_name, current_element->total_props);
+
+				if (current_element->supportsProperty(list_prop))
+				{
+					current_element->addProperty(list_prop);
+				}
+				else
+				{
+					LOG_WARNING_STREAM("PLY parse error: element " << current_element->name
+							<< " does not support property " << prop_name << " " << prop_type  );
+				}
+			}
+			// PLY regular property
+			else
+			{
+				prop_type = next;
+				stringstream >> prop_name;
+				PLYProperty prop(prop_type, prop_name, current_element->total_props);
+
+				if (current_element->supportsProperty(prop))
+				{
+					current_element->addProperty(prop);
+				}
+				else
+				{
+					LOG_WARNING_STREAM("PLY parse error: element " << current_element->name <<
+							" does not support property " << prop_name << " " << prop_type  );
+				}
+			}
+
+			current_element->total_props++;
+		}
+		else if (keyword == "end_header")
+		{
+			if (!format_defined)
+			{
+				throw runtime_error(string("PLY parse error: format not defined in header"));
+			}
+
+			if (elements.size() == 0)
+			{
+				throw runtime_error(string("PLY parse error: no elements defined in header"));
+			}
+
+			if (current_element != NULL && current_element->getNumSupportedProperties() == 0)
+			{
+				LOG_WARNING_STREAM("PLY parse warning: no supported properties in element " << current_element->name);
+			}
+
+			header_processed = true;
+		}
+	}
+
+	///////////////////////////
+	// PARSE PLY DATA
+	Matrix features, descriptors;
+	Labels feat_labels, desc_labels;
+
+	int l = 0; // number of elements instances that were processed
+	for (typename Elements::const_iterator el_it = elements.begin(); el_it != elements.end(); el_it++)
+	{
+		vector<PLYProperty> feature_props = (*el_it)->getFeatureProps();
+		vector<PLYProperty> descriptor_props = (*el_it)->getDescriptorProps();
+		const unsigned n_points = (*el_it)->num;
+		const unsigned offset = (*el_it)->offset;
+		const unsigned n_feat = (*el_it)->getNumFeatures();
+		const unsigned n_desc = (*el_it)->getNumDescriptors();
+		int feat_offset = features.rows();
+		int desc_offset = descriptors.rows();
+
+		// Get labels
+		for (typename vector<PLYProperty>::const_iterator it = feature_props.begin(); it != feature_props.end(); it++ )
+		{
+			feat_labels.push_back(Label(it->name));
+		}
+		for (typename vector<PLYProperty>::const_iterator it = descriptor_props.begin(); it != descriptor_props.end(); it++ )
+		{
+			desc_labels.push_back(Label(it->name));
+		}
+
+		// Allocate features and descriptors matrix
+		// If there are more than one element, grow the features matrix
+		// to accommodate new features in this element
+		features.conservativeResize(n_feat+feat_offset,n_points);
+		descriptors.conservativeResize(n_desc+desc_offset,n_points);
+
+		while (l < (offset + n_points) )
+		{
+			if(!getline(is, line))
+				throw runtime_error("PLY parse error: expected more data lines");
+
+			if ( line.empty() )
+				continue;
+
+			istringstream ss (line);
+
+			string first_word, prop_s;
+			ss >> first_word;
+
+			// ignore comment
+			if (first_word == "comment") {
+				continue;
+			}
+
+			// move to offset line
+			if (l < offset)
+			{
+				l++; // increment line count
+				continue;
+			}
+
+			unsigned f = 0; // features dimension
+			unsigned d = 0; // descriptor dimension
+
+			for (int pr = 0; f < n_feat || d < n_desc ; pr++)
+			{
+				unsigned next_f = feature_props[f].pos; // get next supported feature property column
+				unsigned next_d = descriptor_props[d].pos; // get next supported descriptor property column
+				T prop_val;
+				if(!(ss >> prop_val))
+					throw runtime_error(string("PLY parse error: at line ") + boost::lexical_cast<string>(l));
+
+				if (pr == next_f)
+				{
+					features(f+feat_offset,l-offset) = prop_val;
+					f++;
+				}
+
+				else if (pr == next_d)
+				{
+					descriptors(d+desc_offset,l-offset) = prop_val;
+					d++;
+				}
+			}
+
+			l++; // increment line count
+		}
+	}
+
+	DataPoints loadedPoints(features,feat_labels,descriptors,desc_labels);
+	return loadedPoints;
 }
 
 template<typename T>
@@ -924,4 +1116,167 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 {
 
 }
+
+
+//! @(brief) Regular PLY property constructor
+template<typename T>
+PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& type,
+		const std::string& name, const unsigned pos, const bool is_feature) :
+		name(name), type(type), pos(pos), is_feature(is_feature)  {
+	if (plyPropTypeValid(type))
+	{
+		is_list = false;
+	}
+	else
+	{
+		throw std::runtime_error(
+				std::string("PLY parse error: property type ") + type
+						+ std::string(" for property ") + name
+						+ std::string(" is invalid"));
+	}
+}
+
+//! @(brief) PLY property list constructor
+template<typename T>
+PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& idx_type,
+		const std::string& type, const std::string& name, const unsigned pos, const bool is_feature) :
+		name(name), type(type), idx_type(idx_type), pos(pos), is_feature(is_feature)
+{
+	if (plyPropTypeValid(idx_type) && plyPropTypeValid(type)) {
+		is_list = true;
+	} else
+		throw std::runtime_error(
+				std::string("PLY parse error: property list type ") + idx_type
+						+ std::string(" ") + type
+						+ std::string(" for property ") + name
+						+ std::string(" is invalid"));
+}
+
+template
+class PointMatcherIO<float>::PLYElement;
+template
+class PointMatcherIO<double>::PLYElement;
+
+template
+class PointMatcherIO<float>::PLYProperty;
+template
+class PointMatcherIO<double>::PLYProperty;
+
+template <typename T>
+void PointMatcherIO<T>::PLYElement::addProperty(
+		PLYProperty& prop) {
+	if (supportsProperty(prop))
+	{
+		prop.is_feature = (getPMType(prop) == FEATURE);
+
+		if (prop.is_feature)
+		{
+			features.push_back(prop);
+		}
+		else
+		{
+			descriptors.push_back(prop);
+		}
+	}
+	else
+		throw std::runtime_error(
+				std::string("PLY parse error: property ") + prop.name
+						+ std::string(" not supported by element ") + name);
+}
+
+template <typename T>
+int PointMatcherIO<T>::PLYElement::getNumFeatures() const
+{
+	return features.size();
+}
+
+template <typename T>
+int PointMatcherIO<T>::PLYElement::getNumDescriptors() const
+{
+	return descriptors.size();
+}
+
+template <typename T>
+const std::vector<typename PointMatcherIO<T>::PLYProperty>& PointMatcherIO<T>::PLYElement::getFeatureProps() const
+{
+	return features;
+}
+
+template <typename T>
+const std::vector<typename PointMatcherIO<T>::PLYProperty>& PointMatcherIO<T>::PLYElement::getDescriptorProps() const
+{
+	return descriptors;
+}
+
+template <typename T>
+size_t PointMatcherIO<T>::PLYElement::getNumSupportedProperties() const {
+	return features.size() + descriptors.size() ;
+}
+
+template <typename T>
+bool PointMatcherIO<T>::PLYElement::supportsProperty(const PLYProperty& prop) const
+{
+	return getPMType(prop) != UNSUPPORTED;
+}
+
+template<typename T>
+typename PointMatcherIO<T>::PLYElement::PMPropTypes PointMatcherIO<T>::PLYVertex::getPMType(const PLYProperty& prop) const
+{
+	if (prop.name == "x" || prop.name == "y" || prop.name == "z")
+		return this->FEATURE;
+	else if (prop.name == "nx" || prop.name == "ny" || prop.name == "nz")
+		return this->DESCRIPTOR;
+	else
+		return this->UNSUPPORTED;
+}
+
+template <typename T>
+typename PointMatcherIO<T>::PLYElementF::ElementTypes PointMatcherIO<T>::PLYElementF::getElementType(const std::string& elem_name)
+{
+	if (elem_name == "vertex")
+	{
+		return VERTEX;
+	}
+	else
+	{
+		return UNSUPPORTED;
+	}
+}
+
+template <typename T>
+bool PointMatcherIO<T>::PLYElementF::elementSupported(const std::string& elem_name)
+{
+	return getElementType(elem_name) != UNSUPPORTED;
+}
+
+template<typename T>
+typename PointMatcherIO<T>::PLYElement* PointMatcherIO<T>::PLYElementF::createElement(
+		const std::string& elem_name, const int elem_num, const unsigned offset) {
+	ElementTypes type = getElementType(elem_name);
+	if (type == VERTEX)
+		return new PLYVertex(elem_name, elem_num, offset);
+	else
+		return NULL;
+}
+
+template<typename T>
+bool PointMatcherIO<T>::plyPropTypeValid(const std::string& type) {
+	return (type == "char" || type == "uchar" || type == "short"
+			|| type == "ushort" || type == "int" || type == "uint"
+			|| type == "float" || type == "double");
+}
+
+template <typename T>
+bool PointMatcherIO<T>::PLYElement::operator==(const PLYElement& rhs) const
+{
+	return name == rhs.name;
+}
+
+
+template <typename T>
+bool PointMatcherIO<T>::PLYProperty::operator==(const PLYProperty& rhs) const
+{
+	return name == rhs.name && type == rhs.type;
+}
+
 
