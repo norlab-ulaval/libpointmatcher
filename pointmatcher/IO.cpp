@@ -1086,8 +1086,14 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 				unsigned next_f = feature_props[f].pos; // get next supported feature property column
 				unsigned next_d = descriptor_props[d].pos; // get next supported descriptor property column
 				T prop_val;
-				if(!(ss >> prop_val))
-					throw runtime_error(string("PLY parse error: at line ") + boost::lexical_cast<string>(l));
+
+				if (pr > 0)
+				{
+					if(!(ss >> prop_val))
+						throw runtime_error(string("PLY parse error: at line ") + boost::lexical_cast<string>(l));
+				}
+				else
+					prop_val = boost::lexical_cast<T>(first_word);
 
 				if (pr == next_f)
 				{
@@ -1106,6 +1112,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		}
 	}
 
+	// Add homogeneous coordinates padding
+	feat_labels.push_back(Label("pad"));
+	features.conservativeResize(features.rows()+1,features.cols());
+	features.row(features.rows()-1) = Vector::Ones(features.cols());
 	DataPoints loadedPoints(features,feat_labels,descriptors,desc_labels);
 	return loadedPoints;
 }
@@ -1114,9 +1124,59 @@ template<typename T>
 void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		const std::string& fileName)
 {
+	ofstream ofs(fileName.c_str());
+	if (!ofs.good())
+		throw runtime_error(string("Cannot open file ") + fileName);
 
+	const int pointCount(data.features.cols());
+	const int featCount(data.features.rows());
+	const int descCount(data.descriptors.rows());
+
+	if (pointCount == 0)
+	{
+		cerr << "Warning, no points, doing nothing" << endl;
+		return;
+	}
+
+	ofs << "ply\n" <<"format ascii 1.0\n";
+	ofs << "element vertex " << pointCount << "\n";
+	for (int f=0; f <(featCount-1); f++)
+	{
+		ofs << "property float " << data.featureLabels[f].text << "\n";
+	}
+
+	for (int d=0; d <descCount; d++)
+	{
+		ofs << "property float " << data.descriptorLabels[d].text << "\n";
+	}
+
+	ofs << "end_header\n";
+
+	// write points
+	for (int p = 0; p < pointCount; ++p)
+	{
+		for (int f = 0; f < featCount - 1; ++f)
+		{
+			ofs << data.features(f, p);
+			if(f != featCount-2)
+				ofs << " ";
+		}
+		for (int d = 0; d < descCount; ++d)
+		{
+			ofs << data.descriptors(d, p);
+			if(d != descCount-1)
+				ofs << " ";
+		}
+		ofs << "\n";
+	}
+
+	ofs.close();
 }
 
+template
+void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName);
+template
+void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName);
 
 //! @(brief) Regular PLY property constructor
 template<typename T>
