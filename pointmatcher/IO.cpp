@@ -371,6 +371,8 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::load(const std
 		return PointMatcherIO<T>::loadVTK(fileName);
 	else if (boost::iequals(ext, ".csv"))
 		return PointMatcherIO<T>::loadCSV(fileName);
+	else if (boost::iequals(ext, ".ply"))
+		return PointMatcherIO<T>::loadPLY(fileName);
 	else
 		throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
 }
@@ -604,6 +606,8 @@ void PointMatcher<T>::DataPoints::save(const std::string& fileName) const
 		return PointMatcherIO<T>::saveVTK(*this, fileName);
 	else if (boost::iequals(ext, ".csv"))
 		return PointMatcherIO<T>::saveCSV(*this, fileName);
+	else if (boost::iequals(ext, ".ply"))
+		return PointMatcherIO<T>::savePLY(*this, fileName);
 	else
 		throw runtime_error("saveAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
 }
