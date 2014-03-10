@@ -167,7 +167,7 @@ For the following example we apply a maximum count of 1000, noting that there ar
 |![max count after](images/max_num.png "After applying maximum point count filter with a maximum count of 1000 and a sampling probability of 0.1") | maxCount : 1000 <br> prob : 0.1|
 
 
-## Maximum Quantile on Axis Filter <a name="maxquanthead"></a>
+## Maximum Quantile on Axis Filter <a name="maxquantilehead"></a>
 ### Description
 Points are filtered according to where they lie on a distribution of their positions along a given axis.  The entire distance range is divided into quantiles which lie between 0 and 1.  One can specify the distance quantile above which points are rejected by the filter.
 
@@ -188,7 +188,7 @@ In the following example, maximum quantile filtering is performed over the x-axi
 |---|:---|  
 |![max quant after](images/max_quant.png "After applying maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5") | dim : 0 <br> ratio : 0.5 |
 
-## Random Sampling Filter <a name="randsamplinghead"></a>
+## Random Sampling Filter <a name="randomsamplinghead"></a>
 
 ### Description
 This filter behaves similarly to the [Maximum Point Count Filter](#maxpointcounthead) but does not enforce a maximum point constraint.  Instead points are kept by the filter with a fixed probability.
