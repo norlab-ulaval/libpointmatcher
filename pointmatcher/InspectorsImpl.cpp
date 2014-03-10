@@ -177,9 +177,9 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	{
 
 		// handle specific cases
-		if(it->text == "normal")
+		if(it->text == "normals")
 		{
-			buildNormalStream(stream, "normal", data);
+			buildNormalStream(stream, "normals", data);
 		}
 		else if(it->text == "eigVectors")
 		{
