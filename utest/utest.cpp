@@ -789,7 +789,6 @@ TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 	}
 }
 
-
 TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 {
 	vector<unsigned> steps = list_of (1) (2) (3);
@@ -803,6 +802,44 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 		addFilter("FixStepSamplingDataPointsFilter", params);
 		validate2dTransformation();
 		validate3dTransformation();
+	}
+}
+
+TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
+{
+	vector<bool> useCentroid = list_of(false)(true);
+	vector<bool> averageExistingDescriptors = list_of(false)(true);
+	for (unsigned i = 0 ; i < useCentroid.size() ; i++) 
+	{
+		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++) 
+		{
+			params = map_list_of<string,string>
+					("vSizeX","0.02")
+					("vSizeY","0.02")
+					("vSizeZ","0.02")
+					("useCentroid",toParam(true))
+					("averageExistingDescriptors",toParam(true))
+			;
+			icp.readingDataPointsFilters.clear();
+			addFilter("VoxelGridDataPointsFilter", params);
+			validate2dTransformation();
+		}
+	}
+
+	for (unsigned i = 0 ; i < useCentroid.size() ; i++)
+	{
+		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++)
+		{
+			params = map_list_of<string,string>
+			("vSizeX","1")
+			("vSizeY","1")
+			("vSizeZ","1")
+			("useCentroid",toParam(true))
+			("averageExistingDescriptors",toParam(true));
+			icp.readingDataPointsFilters.clear();
+			addFilter("VoxelGridDataPointsFilter", params);
+			validate3dTransformation();
+		}
 	}
 }
 

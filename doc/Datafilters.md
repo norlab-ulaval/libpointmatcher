@@ -17,7 +17,7 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 [Libpointmatcher](https://github.com/ethz-asl/libpointmatcher) provides developers with a number of datapoint filters which process an input point cloud into an intermediate point cloud used in the alignment procedure.  Filters function as independent modules that can and often are combined into chains.  Sequential chains of datapoint filters can thus be adapted to the alignment problem at hand.
 
 ## Filter Index
-### Sub-sampling
+### Down-sampling
 1. [Bounding Box Filter](#boundingboxhead)
 
 2. [Maximum Density Filter](#maxdensityhead)
@@ -35,6 +35,8 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 8. [Remove NaN Filter](#removenanhead)
 
 9. [Shadow Point Filter](#shadowpointhead)
+
+10. [Voxel Grid Filter](#voxelgridhead)
 
 ### Descriptor Augmenting 
 1. [Observation Direction Filter](#obsdirectionhead)
@@ -232,6 +234,37 @@ __Impact on the number of points:__ reduces number of points
 
 *IMPORTANT:* The surface normal descriptors are required in the input point cloud. 
 
+## Voxel Grid Filter <a name="voxelgridhead"></a>
+### Description
+While, the previous filters were sub-sampling filters in that they returned a sub-set of points from the original point cloud, the voxel grid filter instead returns a point cloud with a smaller number of points which should best represent the input point cloud as a whole.
+
+The voxel grid filter down-samples the data by taking a spatial average of the points in the cloud.  In the 2D case, one can simply imagine dividing the plane into a regular grid of rectangles.  While the term is more suited to 3D spaces, these rectangular areas are known as *voxels*.  The sub-sampling rate is adjusted by setting the voxel size along each dimension.  The set of points which lie within the bounds of a voxel are assigned to that voxel and will be combined into one output point.
+
+There are two options as to how to represent the distribution of points in a voxel by a single point.  In the first, we take the centroid or spatial average of the point distribution.  In the second, we simply take the geometrical center of the voxel.  Clearly, the first option is more accurate since it takes into account the point distribution inside the voxels.  However it is more computationally intensive since the centroid must be computed for each voxel.  The computational cost increases linearly with the number of points in the cloud and the number of voxels.
+
+This filter also provides two methods for sub-sampling descriptors.  In the first, all descriptors within a voxel are averaged while in the second, only the first descriptor from a voxel is kept.
+
+__Required descriptors:__  none
+__Output descriptor:__ outputs average or single descriptor per voxel if the input cloud contains descriptors  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ reduces number of points  
+
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|vSizeX     |Size of the voxel along the x-axis | 1.0 | -inf to inf|
+|vSizeY     |Size of the voxel along the y-axis | 1.0 | -inf to inf|
+|vSizeZ     |Size of the voxel along the z-axis | 1.0 | -inf to inf|
+|useCentroid|If 1, down-sample by using the centroid of each voxel.  If 0, use the voxel center | 1 | 1 or 0|
+|averageExistingDescriptors|If 1, descriptors are down-sampled by taking their average in the voxel.  If 0, we use the descriptors from the first point found in the voxel | 1 | 1 or 0|
+
+For more information on the implementation of this filter, refer to [this tutorial](DataPointsFilterDev.md).
+
+### Example
+In this example, we apply the voxel grid filter using centroid down-sampling to the appartment point cloud.  The output points are shown in yellow.  You can observe a regular grid distribution of points corresponding to each voxel.  A finer degree of sub-sampling can be obtained by using smaller voxels.  This comes naturally with an increased computational cost and a larger output point cloud.
+
+|Figure:  Applying the voxel grid filter filter to the appartment point cloud. | Parameters used |
+|---|:---|  
+|![dir after](images/appt_voxel.png "Applying the voxel grid filter filter to a local point cloud") | vSizeX : 0.2 <br> vSizeY : 0.2 <br> vSizeZ : 0,2 <br> useCentroid : 1 |
 
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
 
