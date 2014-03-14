@@ -834,7 +834,8 @@ void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& dat
 //! @brief Load polygon file format (ply) file
 //! @param fileName a string containing the path and the file name
 //!
-//! Note that the PLY does not define a standard for point clouds
+//! Note: that the PLY does not define a standard for point clouds
+//! Warning: Binary PLY files are not supported, only ASCII
 //! Only PLY files with elements named "vertex" are supported
 //! "vertex" should have 2 or 3 properties names "x", "y", "z" to define features.
 //!
@@ -909,6 +910,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			if (format_str != "ascii" && format_str != "binary_little_endian" && format_str != "binary_big_endian")
 				throw runtime_error(string("PLY parse error: format ") + format_str + string(" is not supported"));
 
+			if (format_str == "binary_little_endian" || format_str == "binary_big_endian")
+				throw runtime_error(string("PLY parse error: binary PLY files are not supported"));
 			if (version_str != "1.0")
 			{
 				throw runtime_error(string("PLY parse error: version ") + version_str + string(" of ply is not supported"));
