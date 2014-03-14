@@ -673,8 +673,8 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(const std::strin
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is)
 {
-	typedef typename DataPoints::Label Label;
-	typedef typename DataPoints::Labels Labels;
+	//typedef typename DataPoints::Label Label;
+	//typedef typename DataPoints::Labels Labels;
 	
 	DataPoints loadedPoints;
 
@@ -831,7 +831,16 @@ void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& dat
 template
 void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
 
-//! @brief Load PLY file from filename
+//! @brief Load polygon file format (ply) file
+//! @param fileName a string containing the path and the file name
+//!
+//! Note that the PLY does not define a standard for point clouds
+//! Only PLY files with elements named "vertex" are supported
+//! "vertex" should have 2 or 3 properties names "x", "y", "z" to define features.
+//!
+//! The following additional properties may be defined and will be added as descriptors
+//! nx, ny, nz: components of a normal vector
+//!
 template<typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(const std::string& fileName)
 {
@@ -846,8 +855,8 @@ PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadPLY(const string& f
 template
 PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPLY(const string& fileName);
 
-
-//! load point cloud from stream as PLY
+//! @brief Load polygon file format (PLY) file
+//! @see loadPLY()
 template <typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& is)
 {
@@ -1297,7 +1306,9 @@ typename PointMatcherIO<T>::PLYElement::PMPropTypes PointMatcherIO<T>::PLYVertex
 template <typename T>
 typename PointMatcherIO<T>::PLYElementF::ElementTypes PointMatcherIO<T>::PLYElementF::getElementType(const std::string& elem_name)
 {
-	if (elem_name == "vertex")
+	string lc = elem_name;
+	boost::algorithm::to_lower(lc);
+	if (lc == "vertex")
 	{
 		return VERTEX;
 	}
@@ -1318,7 +1329,7 @@ typename PointMatcherIO<T>::PLYElement* PointMatcherIO<T>::PLYElementF::createEl
 		const std::string& elem_name, const int elem_num, const unsigned offset) {
 	ElementTypes type = getElementType(elem_name);
 	if (type == VERTEX)
-		return new PLYVertex(elem_name, elem_num, offset);
+		return new PLYVertex(elem_num, offset);
 	else
 		return NULL;
 }

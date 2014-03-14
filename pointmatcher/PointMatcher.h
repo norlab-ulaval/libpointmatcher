@@ -367,8 +367,10 @@ struct PointMatcher
 		virtual ~DataPointsFilter();
 		virtual void init();
 
-		//! Apply these filters to input
+		//! Apply filters to input point cloud.  This is the non-destructive version and returns a copy.
 		virtual DataPoints filter(const DataPoints& input) = 0;
+
+		//! Apply these filters to a point cloud without copying.
 		virtual void inPlaceFilter(DataPoints& cloud) = 0;
 	};
 	

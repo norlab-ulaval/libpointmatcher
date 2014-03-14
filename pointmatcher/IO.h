@@ -68,7 +68,7 @@ struct PointMatcherIO
 	static DataPoints loadPLY(const std::string& fileName);
 	static DataPoints loadPLY(std::istream& is);
 
-	static void savePLY(const DataPoints& data, const std::string& fileName); //! save datapoints to PLY point cloud format
+	static void savePLY(const DataPoints& data, const std::string& fileName); //!< save datapoints to PLY point cloud format
 
 	//! Information to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo
@@ -120,9 +120,7 @@ struct PointMatcherIO
 		bool operator==(const PLYProperty& other) const; //! compare with other property
 	};
 
-	/*! Interface for all PLY elements
-	* Must overload supportsProperty to define all properties
-	* which are allowed in this element type */
+	//! Interface for all PLY elements.  Implementations must provide definition of getPMType()
 	class PLYElement
 	{
 
@@ -132,26 +130,36 @@ struct PointMatcherIO
 		unsigned total_props; //!< total number of properties in PLY element
 		unsigned offset; //!< line at which data starts
 
+		//! PLY Element constructor
+		/**
+			@param name name of the ply element (case-sensitive)
+			@param num number of times the element appears in the file
+			@param offset if there are several elements, the line offset at which this element begins.  Note that, as of writing, only one (vertex) element is supported.
+
+			This object holds information about a PLY element contained in the file.
+			It is filled out when reading the header and used when parsing the data.
+		*/
 		PLYElement(const std::string& name, const unsigned num, const unsigned offset) :
-			name(name), num(num), total_props(0), offset(offset) {} //! default ctor
+			name(name), num(num), total_props(0), offset(offset) {}
 
-		bool supportsProperty(const PLYProperty& prop) const; //! Returns true if property pro is supported by element
+		bool supportsProperty(const PLYProperty& prop) const; //!< Returns true if property pro is supported by element
 
-		void addProperty(PLYProperty& prop); //! add a property to vector of properties
+		void addProperty(PLYProperty& prop); //!< add a property to vector of properties
 
-		const std::vector<PLYProperty>& getFeatureProps() const; //! return vector of feature properties
+		const std::vector<PLYProperty>& getFeatureProps() const; //!< return vector of feature properties
 
-		const std::vector<PLYProperty>& getDescriptorProps() const; //! return vector of descriptor properties
+		const std::vector<PLYProperty>& getDescriptorProps() const; //!< return vector of descriptor properties
 
-		size_t getNumSupportedProperties() const; //! return number of properties
+		size_t getNumSupportedProperties() const; //!< return number of properties
 
-		int getNumFeatures() const; //! get number of PM supported feature properties
+		int getNumFeatures() const; //!< get number of PM supported feature properties
 
-		int getNumDescriptors() const; //! get number of PM supported descriptor properties
+		int getNumDescriptors() const; //!< get number of PM supported descriptor properties
 
-		bool operator==(const PLYElement& other) const;
+		bool operator==(const PLYElement& other) const; //!< comparison operator for elements
 
 	protected:
+		//! possible properties: either a libpointmatcher feature, descriptor, or it is unsupported and will be ignored
 		enum PMPropTypes
 		{
 			FEATURE,
@@ -162,7 +170,7 @@ struct PointMatcherIO
 		std::vector<PLYProperty> features; //!< Vector which holds element properties corresponding to PM features
 		std::vector<PLYProperty> descriptors; //!< Vector which holds element properties corresponding to PM descriptors
 
-		virtual PMPropTypes getPMType(const PLYProperty& prop) const = 0; //! return the relation to pointmatcher
+		virtual PMPropTypes getPMType(const PLYProperty& prop) const = 0; //!< return the relation to pointmatcher
 	};
 
 
@@ -170,8 +178,14 @@ struct PointMatcherIO
 	class PLYVertex : public PLYElement
 	{
 	public:
+		//! Constructor
+		/**
+					@param num number of times the element appears in the file
+					@param offset if there are several elements, the line offset at which this element begins.  Note that, as of writing, only one (vertex) element is supported.
 
-		PLYVertex(const std::string& name, const unsigned num, const unsigned offset) : PLYElement(name, num, offset) {} //! ctor
+					Implementation of PLY element interface for the vertex element
+		 */
+		PLYVertex(const unsigned num, const unsigned offset) : PLYElement("vertex", num, offset) {}
 
 		typename PLYElement::PMPropTypes getPMType(const PLYProperty& prop) const; //! implements element interface.
 	};
@@ -187,8 +201,8 @@ struct PointMatcherIO
 
 		static ElementTypes getElementType(const std::string& elem_name);
 	public:
-		bool elementSupported(const std::string& elem_name);
-		static PLYElement* createElement(const std::string& elem_name, const int elem_num, const unsigned offset); //! factory function, build element defined by name with elem_num elements
+		bool elementSupported(const std::string& elem_name); //!< returns true if element named elem_name is supported by this parser
+		static PLYElement* createElement(const std::string& elem_name, const int elem_num, const unsigned offset); //!< factory function, build element defined by name with elem_num elements
 	};
 
 };
