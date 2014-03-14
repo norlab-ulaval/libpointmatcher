@@ -4,8 +4,6 @@ Release Notes
 Wish list for next release
 --------------------------
 
-
- * Support for *.ply point cloud format
  * Improve *.csv point cloud support
  * Improve *.vtk legacy format to handle UNSTRUCTURED_GRID format
  * Fix portability problem with FileLogger on Windows
@@ -17,6 +15,7 @@ Already implemented in the current master:
  * Better user documentation and tutorials (5 Fev. 2014 thanks to Samuel Charreyron)
  * Avoid point cloud copies when filtering (10 Jan. 2014 thanks to Oleg Alexandrov)
  * Add CMake support for find_package (20 Sept. 2013)
+ * Added support for PLY polygon file format (ascii) (14 March, 2014)
 
 
 Version 1.1.0
