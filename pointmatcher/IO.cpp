@@ -1064,7 +1064,9 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		// If there are more than one element, grow the features matrix
 		// to accommodate new features in this element
 		features.conservativeResize(n_feat+feat_offset,n_points);
-		descriptors.conservativeResize(n_desc+desc_offset,n_points);
+
+		if (n_desc > 0)
+			descriptors.conservativeResize(n_desc+desc_offset,n_points);
 
 		while (l < (offset + n_points) )
 		{
@@ -1097,7 +1099,13 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			for (int pr = 0; f < n_feat || d < n_desc ; pr++)
 			{
 				unsigned next_f = feature_props[f].pos; // get next supported feature property column
-				unsigned next_d = descriptor_props[d].pos; // get next supported descriptor property column
+				int next_d;
+				if (n_desc > 0)
+					next_d = descriptor_props[d].pos; // get next supported descriptor property column
+				else
+					next_d = -1;
+
+
 				T prop_val;
 
 				if (pr > 0)
