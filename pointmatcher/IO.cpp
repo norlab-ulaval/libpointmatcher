@@ -701,12 +701,20 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		}
 	}
 	
-	DataPoints dataPoints(features, featureLabels, descriptors, descriptorLabels);
+	if (numDescCols > 0)
+	{
+		DataPoints dataPoints(features, featureLabels, descriptors, descriptorLabels);
+		return dataPoints;
+	}
+	else
+	{
+		DataPoints dataPoints(features, featureLabels);
+		return dataPoints;
+	}
 	//cout << "Loaded " << dataPoints.features.cols() << " points." << endl;
 	//cout << "Find " << dataPoints.features.rows() << " dimensions." << endl;
 	//cout << features << endl;
 
-	return dataPoints;
 }
 
 template
@@ -1307,8 +1315,17 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	feat_labels.push_back(Label("pad"));
 	features.conservativeResize(features.rows()+1,features.cols());
 	features.row(features.rows()-1) = Vector::Ones(features.cols());
-	DataPoints loadedPoints(features,feat_labels,descriptors,desc_labels);
-	return loadedPoints;
+
+	if (descriptors.rows() > 0)
+	{
+		DataPoints loadedPoints(features,feat_labels,descriptors,desc_labels);
+		return loadedPoints;
+	}
+	else
+	{
+		DataPoints loadedPoints(features,feat_labels);
+		return loadedPoints;
+	}
 }
 
 template<typename T>
@@ -1316,7 +1333,7 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		const std::string& fileName)
 {
 	typedef typename DataPoints::Label Label;
-	typedef typename DataPoints::Labels Labels;
+	//typedef typename DataPoints::Labels Labels;
 
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
