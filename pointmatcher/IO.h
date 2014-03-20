@@ -69,6 +69,11 @@ struct PointMatcherIO
 	static void saveCSV(const DataPoints& data, std::ostream& os);
 
 	// VTK
+	enum SupportedVTKDataTypes
+	{
+		POLYDATA,
+		UNSTRUCTURED_GRID
+	};
 
 	static DataPoints loadVTK(const std::string& fileName);
 	static DataPoints loadVTK(std::istream& is);
