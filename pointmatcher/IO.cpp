@@ -433,6 +433,50 @@ std::string PointMatcherIO<T>::getDescLabel(const std::string& colLabel)
 	return getDescAssocationMap().find(colLabel)->second;
 }
 
+template <typename T>
+std::string PointMatcherIO<T>::getColLabel(const Label& label, const int row)
+{
+	std::string colLabel;
+	if (label.text == "normals")
+	{
+		if (row == 0)
+		{
+			colLabel = "nx";
+		}
+		if (row == 1)
+		{
+			colLabel = "ny";
+		}
+		if (row == 2)
+		{
+			colLabel = "nz";
+		}
+	}
+	else if (label.text == "rgb")
+	{
+		if (row == 0)
+		{
+			colLabel = "red";
+		}
+		if (row == 1)
+		{
+			colLabel = "green";
+		}
+		if (row == 2)
+		{
+			colLabel = "blue";
+		}
+	}
+	else if (label.span  == 1)
+	{
+		colLabel = label.text;
+	}
+	else
+		colLabel = label.text + boost::lexical_cast<std::string>(row);
+
+	return colLabel;
+}
+
 
 //! @brief Load comma separated values (csv) file
 //! @see loadCSV()
@@ -707,6 +751,7 @@ void PointMatcherIO<T>::saveCSV(const DataPoints& data, std::ostream& os)
 {
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
+	const int descDimCount(data.descriptors.rows());
 	
 	if (pointCount == 0)
 	{
@@ -714,14 +759,45 @@ void PointMatcherIO<T>::saveCSV(const DataPoints& data, std::ostream& os)
 		return;
 	}
 	
+	// write header
+	for (int i = 0; i < dimCount - 1; i++)
+	{
+		os << data.featureLabels[i].text;
+
+		if (!((i != (dimCount - 2)) && descDimCount == 0))
+			os << ",";
+	}
+
+	int n = 0;
+	for (int i = 0; i < data.descriptorLabels.size(); i++)
+	{
+		Label lab = data.descriptorLabels[i];
+		for (int s = 0; s < lab.span; s++)
+		{
+			os << getColLabel(lab,s);
+			if (n != (descDimCount - 1))
+				os << ",";
+			n++;
+		}
+	}
+
+	os << "\n";
+
 	// write points
 	for (int p = 0; p < pointCount; ++p)
 	{
 		for (int i = 0; i < dimCount-1; ++i)
 		{
 			os << data.features(i, p);
-			if(i != dimCount-2)
+			if(!((i != (dimCount - 2)) && descDimCount == 0))
 				os << " , ";
+		}
+
+		for (int i = 0; i < descDimCount; i++)
+		{
+			os << data.descriptors(i,p);
+			if (i != (descDimCount - 1))
+				os << ",";
 		}
 		os << "\n";
 	}
@@ -1267,48 +1343,9 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 	for (int i = 0; i < data.descriptorLabels.size(); i++)
 	{
 		Label lab = data.descriptorLabels[i];
-		for (int s = 0; s < lab.span; s++) {
-			std::string descPropLabel;
-
-			if (lab.text == "normals")
-			{
-				if (s == 0)
-				{
-					descPropLabel = "nx";
-				}
-				if (s == 1)
-				{
-					descPropLabel = "ny";
-				}
-				if (s == 2)
-				{
-					descPropLabel = "nz";
-				}
-			}
-			else if (lab.text == "rgb")
-			{
-				if (s == 0)
-				{
-					descPropLabel = "red";
-				}
-				if (s == 1)
-				{
-					descPropLabel = "green";
-				}
-				if (s == 2)
-				{
-					descPropLabel = "blue";
-				}
-			}
-			else if (lab.span  == 1)
-			{
-				descPropLabel = lab.text;
-			}
-			else
-				descPropLabel = lab.text + boost::lexical_cast<std::string>(s);
-
-			ofs << "property float " << descPropLabel << "\n";
-
+		for (int s = 0; s < lab.span; s++)
+		{
+			ofs << "property float " << getColLabel(lab,s) << "\n";
 		}
 	}
 
@@ -1399,7 +1436,7 @@ void PointMatcherIO<T>::PLYElement::addProperty(
 		}
 		else if (pm_type == DESCRIPTOR)
 		{
-			descriptor_map[getDescName(prop)].push_back(prop);
+			descriptor_map[getDescLabel(prop.name)].push_back(prop);
 			descriptors.push_back(prop);
 		}
 		else
@@ -1465,41 +1502,10 @@ typename PointMatcherIO<T>::PLYElement::PMPropTypes PointMatcherIO<T>::PLYVertex
 {
 	if (prop.name == "x" || prop.name == "y" || prop.name == "z")
 		return this->FEATURE;
-	else if (prop.name == "nx" || prop.name == "ny" || prop.name == "nz"
-			|| prop.name == "densities" ||
-			prop.name == "intensity" ||
-			prop.name == "red" ||
-			prop.name == "green" ||
-			prop.name == "blue")
+	else if (colLabelRegistered(prop.name))
 		return this->DESCRIPTOR;
 	else
 		return this->UNSUPPORTED;
-}
-
-template<typename T>
-typename std::string PointMatcherIO<T>::PLYVertex::getDescName(const PLYProperty& prop) const
-{
-	std::string desc_name;
-
-	if (prop.name == "nx" )
-		desc_name = "normals";
-	else if (prop.name == "ny" )
-		desc_name = "normals";
-	else if (prop.name == "nz")
-		desc_name = "normals";
-	else if (prop.name == "densities")
-		desc_name = "densitites";
-	else if (prop.name == "intensity")
-		desc_name = "intensity";
-	else if (prop.name == "red")
-		desc_name = "rgb";
-	else if (prop.name == "green")
-		desc_name = "rgb";
-	else if (prop.name == "blue")
-		desc_name = "rgb";
-	else
-		throw runtime_error(string("PLY error: ply descriptor property ") + prop.name + " does not have an associated pointmatcher descriptor");
-	return desc_name;
 }
 
 template <typename T>

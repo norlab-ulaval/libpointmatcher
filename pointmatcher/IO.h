@@ -47,14 +47,19 @@ struct PointMatcherIO
 	typedef typename PointMatcher<T>::DataPoints DataPoints; //!< alias
 	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters; //!< alias
 	typedef typename PointMatcher<T>::Matrix Parameters; //!< alias
+	typedef typename PointMatcher<T>::DataPoints::Label Label; //!< alias
 
+	//! Map to associate common descriptor sublabels to PM descriptor labels
+	//! ex: nx, ny, nz are associated with normals
 	typedef std::map<std::string, std::string > DescAssociationMap;
 
 	// General
 	static DescAssociationMap getDescAssocationMap(); //!< map to store association between common 1d descriptor labels and their PM label and span dimension
 	static bool colLabelRegistered(const std::string& colLabel); //!< returns true if a particular descriptor dim label is registered (ie nx, red...)
-	static std::string getDescLabel(const std::string& colLabel);
-	//static DescLabelDimPair getDescLabelAndDim(const std::string& colLabel);
+	static std::string getDescLabel(const std::string& colLabel); //!< get PM descriptor label associated with sublabel colLabel
+
+	static std::string getColLabel(const Label& label, const int row); //!< convert a descriptor label to an appropriate sub-label
+
 	// CSV
 
 	static DataPoints loadCSV(const std::string& fileName);
@@ -195,7 +200,7 @@ struct PointMatcherIO
 
 		virtual PMPropTypes getPMType(const PLYProperty& prop) const = 0; //!< return the relation to pointmatcher
 
-		virtual std::string getDescName(const PLYProperty& prop) const = 0; //!< for descriptor properties return name of pointmatcher descriptor
+		//virtual std::string getDescName(const PLYProperty& prop) const = 0; //!< for descriptor properties return name of pointmatcher descriptor
 
 };
 
@@ -215,7 +220,7 @@ struct PointMatcherIO
 
 		typename PLYElement::PMPropTypes getPMType(const PLYProperty& prop) const; //! implements element interface
 
-		typename std::string getDescName(const PLYProperty& prop) const; //! implements element interface
+		//typename std::string getDescName(const PLYProperty& prop) const; //! implements element interface
 	};
 
 	//! Factory for PLY elements
