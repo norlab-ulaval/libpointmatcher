@@ -97,6 +97,13 @@ struct PointMatcherIO
 		TransformationParameters getTransform(const PointMatcherSupport::CsvElements& data, const std::string& prefix, unsigned dim, unsigned line);
 	};
 
+	//! A structure to hold information about descriptors contained in a CSV file
+	struct CsvDescriptor {
+		std::string name; //!< name of descriptor
+		unsigned 	start_col; //!< column number at which descriptor starts
+		unsigned 	span; //!< number of columns spanned by descriptor
+	};
+
 	//! Check that property defined by type is a valid PLY type note: type must be lowercase
 	static bool plyPropTypeValid (const std::string& type);
 
@@ -120,10 +127,35 @@ struct PointMatcherIO
 		bool operator==(const PLYProperty& other) const; //! compare with other property
 	};
 
+//	struct PLYDescProperty : public PLYProperty
+//	{
+//		//! Possible descriptor types that are supported in pointmatcher
+//		enum PMDescTypes
+//		{
+//			NORMAL,
+//			INVALID
+//		};
+//
+//		PMDescTypes desc_type; //!< the descriptor type
+//		unsigned view_pos; //!< which row in the descriptor matrix the property corresponds to
+//		std::string desc_name;
+//
+//		PLYDescProperty(const PLYProperty& prop, const PMDescTypes desc_type, const unsigned view_pos) :
+//			PLYProperty(prop),
+//			desc_type(type),
+//			view_pos(view_pos)
+//		{
+//			if (desc_type == NORMAL)
+//				name = "normals";
+//			else
+//				name = "unsupported";
+//		}
+//	};
+
+	typedef std::map<std::string, std::vector<PLYProperty> > PLYDescPropMap;
 	//! Interface for all PLY elements.  Implementations must provide definition of getPMType()
 	class PLYElement
 	{
-
 	public:
 		std::string name; //!< name identifying the PLY element
 		unsigned num; //!< number of occurences of the element
@@ -150,11 +182,15 @@ struct PointMatcherIO
 
 		const std::vector<PLYProperty>& getDescriptorProps() const; //!< return vector of descriptor properties
 
+		const PLYDescPropMap& getDescPropMap() const; //!< return map, descriptor name -> vector of PLY desc properties
+
 		size_t getNumSupportedProperties() const; //!< return number of properties
 
 		int getNumFeatures() const; //!< get number of PM supported feature properties
 
-		int getNumDescriptors() const; //!< get number of PM supported descriptor properties
+		int getNumDescriptors() const; //!< get number of PM descriptors in element
+
+		int getNumDescProp() const; //!< get number of PM supported descriptor properties
 
 		bool operator==(const PLYElement& other) const; //!< comparison operator for elements
 
@@ -168,10 +204,14 @@ struct PointMatcherIO
 		};
 
 		std::vector<PLYProperty> features; //!< Vector which holds element properties corresponding to PM features
-		std::vector<PLYProperty> descriptors; //!< Vector which holds element properties corresponding to PM descriptors
+		std::vector<PLYProperty> descriptors; //!< Vector which holds element properties corresponding to PM features
+		PLYDescPropMap descriptor_map; //!< Map descriptor -> descriptor PLY property
 
 		virtual PMPropTypes getPMType(const PLYProperty& prop) const = 0; //!< return the relation to pointmatcher
-	};
+
+		virtual std::string getDescName(const PLYProperty& prop) const = 0; //!< for descriptor properties return name of pointmatcher descriptor
+
+};
 
 
 	//! Implementation of PLY vertex element
@@ -187,7 +227,9 @@ struct PointMatcherIO
 		 */
 		PLYVertex(const unsigned num, const unsigned offset) : PLYElement("vertex", num, offset) {}
 
-		typename PLYElement::PMPropTypes getPMType(const PLYProperty& prop) const; //! implements element interface.
+		typename PLYElement::PMPropTypes getPMType(const PLYProperty& prop) const; //! implements element interface
+
+		typename std::string getDescName(const PLYProperty& prop) const; //! implements element interface
 	};
 
 	//! Factory for PLY elements

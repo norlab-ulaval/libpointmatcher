@@ -48,6 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/lexical_cast.hpp"
+#include "boost/foreach.hpp"
 
 #ifdef WIN32
 #define strtok_r strtok_s
@@ -500,7 +501,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 				// Check if it is a simple file with only coordinates
 				if (!(dim == 2 || dim == 3))
 				{
-					cout << "WARNING: " << dim << " columns detected. Not obivious which columns to load for x, y or z." << endl;
+					cout << "WARNING: " << dim << " columns detected. Not obvious which columns to load for x, y or z." << endl;
 					cout << endl << "Enter column ID (starting from 0) for x: ";
 					cin >> xCol;
 					cout << "Enter column ID (starting from 0) for y: ";
@@ -1046,21 +1047,35 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	{
 		vector<PLYProperty> feature_props = (*el_it)->getFeatureProps();
 		vector<PLYProperty> descriptor_props = (*el_it)->getDescriptorProps();
+		PLYDescPropMap descriptor_map = (*el_it)->getDescPropMap();
 		const unsigned n_points = (*el_it)->num;
 		const unsigned offset = (*el_it)->offset;
 		const unsigned n_feat = (*el_it)->getNumFeatures();
 		const unsigned n_desc = (*el_it)->getNumDescriptors();
+		const unsigned n_dprop = (*el_it)->getNumDescProp();
 		int feat_offset = features.rows();
 		int desc_offset = descriptors.rows();
+
+		// map to reorder descriptor properties into consecutive rows corresponding to descriptors
+		std::map<std::string,int> descPropToRow;
 
 		// Get labels
 		for (typename vector<PLYProperty>::const_iterator it = feature_props.begin(); it != feature_props.end(); it++ )
 		{
 			feat_labels.push_back(Label(it->name));
 		}
-		for (typename vector<PLYProperty>::const_iterator it = descriptor_props.begin(); it != descriptor_props.end(); it++ )
+
+		int r = 0;
+		for (typename PLYDescPropMap::const_iterator it = descriptor_map.begin(); it != descriptor_map.end(); it++ )
 		{
-			desc_labels.push_back(Label(it->name));
+			desc_labels.push_back(Label(it->first,it->second.size()));
+
+			BOOST_FOREACH(PLYProperty prop, it->second )
+			{
+				descPropToRow[prop.name] = r;
+				r++;
+			}
+
 		}
 
 		// Allocate features and descriptors matrix
@@ -1069,7 +1084,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		features.conservativeResize(n_feat+feat_offset,n_points);
 
 		if (n_desc > 0)
-			descriptors.conservativeResize(n_desc+desc_offset,n_points);
+			descriptors.conservativeResize(n_dprop+desc_offset,n_points);
 
 		while (l < (offset + n_points) )
 		{
@@ -1099,12 +1114,15 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			unsigned f = 0; // features dimension
 			unsigned d = 0; // descriptor dimension
 
-			for (int pr = 0; f < n_feat || d < n_desc ; pr++)
+			for (int pr = 0; f < n_feat || d < n_dprop ; pr++)
 			{
 				unsigned next_f = feature_props[f].pos; // get next supported feature property column
-				int next_d;
+				int next_d, next_d_r;
 				if (n_desc > 0)
-					next_d = descriptor_props[d].pos; // get next supported descriptor property column
+				{
+					next_d 		= descriptor_props[d].pos; // get next supported descriptor property column
+					next_d_r 	= descPropToRow[descriptor_props[d].name]; // get row of next supported descriptor in desc matrix
+				}
 				else
 					next_d = -1;
 
@@ -1127,7 +1145,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 				else if (pr == next_d)
 				{
-					descriptors(d+desc_offset,l-offset) = prop_val;
+					descriptors(next_d_r+desc_offset,l-offset) = prop_val;
 					d++;
 				}
 			}
@@ -1148,13 +1166,17 @@ template<typename T>
 void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		const std::string& fileName)
 {
+	typedef typename DataPoints::Label Label;
+	typedef typename DataPoints::Labels Labels;
+
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
 
 	const int pointCount(data.features.cols());
 	const int featCount(data.features.rows());
-	const int descCount(data.descriptors.rows());
+	const int descRows(data.descriptors.rows());
+
 
 	if (pointCount == 0)
 	{
@@ -1169,9 +1191,13 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		ofs << "property float " << data.featureLabels[f].text << "\n";
 	}
 
-	for (int d=0; d <descCount; d++)
+	for (int i = 0; i < data.descriptorLabels.size(); i++)
 	{
-		ofs << "property float " << data.descriptorLabels[d].text << "\n";
+		Label lab = data.descriptorLabels[i];
+		for (int s = 0; s < lab.span; s++) {
+			std::string descPropLabel = lab.text + boost::lexical_cast<std::string>(s);
+			ofs << "property float " << descPropLabel << "\n";
+		}
 	}
 
 	ofs << "end_header\n";
@@ -1182,13 +1208,13 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		for (int f = 0; f < featCount - 1; ++f)
 		{
 			ofs << data.features(f, p);
-			if(f != featCount-2)
+			if(!(f == featCount-2 && descRows == 0))
 				ofs << " ";
 		}
-		for (int d = 0; d < descCount; ++d)
+		for (int d = 0; d < descRows; ++d)
 		{
 			ofs << data.descriptors(d, p);
-			if(d != descCount-1)
+			if(d != descRows-1)
 				ofs << " ";
 		}
 		ofs << "\n";
@@ -1251,15 +1277,22 @@ void PointMatcherIO<T>::PLYElement::addProperty(
 		PLYProperty& prop) {
 	if (supportsProperty(prop))
 	{
-		prop.is_feature = (getPMType(prop) == FEATURE);
+		//prop.is_feature = (getPMType(prop) == FEATURE);
 
-		if (prop.is_feature)
+		PMPropTypes pm_type = getPMType(prop);
+
+		if (pm_type == FEATURE)
 		{
 			features.push_back(prop);
 		}
+		else if (pm_type == DESCRIPTOR)
+		{
+			descriptor_map[getDescName(prop)].push_back(prop);
+			descriptors.push_back(prop);
+		}
 		else
 		{
-			descriptors.push_back(prop);
+			throw std::runtime_error("PLY parse error: tried at add an unsupported property");
 		}
 	}
 	else
@@ -1277,6 +1310,12 @@ int PointMatcherIO<T>::PLYElement::getNumFeatures() const
 template <typename T>
 int PointMatcherIO<T>::PLYElement::getNumDescriptors() const
 {
+	return descriptor_map.size();
+}
+
+template <typename T>
+int PointMatcherIO<T>::PLYElement::getNumDescProp() const
+{
 	return descriptors.size();
 }
 
@@ -1290,6 +1329,12 @@ template <typename T>
 const std::vector<typename PointMatcherIO<T>::PLYProperty>& PointMatcherIO<T>::PLYElement::getDescriptorProps() const
 {
 	return descriptors;
+}
+
+template <typename T>
+const typename PointMatcherIO<T>::PLYDescPropMap& PointMatcherIO<T>::PLYElement::getDescPropMap() const
+{
+	return descriptor_map;
 }
 
 template <typename T>
@@ -1312,6 +1357,21 @@ typename PointMatcherIO<T>::PLYElement::PMPropTypes PointMatcherIO<T>::PLYVertex
 		return this->DESCRIPTOR;
 	else
 		return this->UNSUPPORTED;
+}
+
+template<typename T>
+typename std::string PointMatcherIO<T>::PLYVertex::getDescName(const PLYProperty& prop) const
+{
+	std::string desc_name;
+	if (prop.name == "nx" )
+		desc_name = "normals";
+	else if (prop.name == "ny" )
+		desc_name = "normals";
+	else if (prop.name == "nz")
+		desc_name = "normals";
+	else
+		throw runtime_error(string("PLY error: ply descriptor property ") + prop.name + " does not have an associated pointmatcher descriptor");
+	return desc_name;
 }
 
 template <typename T>
