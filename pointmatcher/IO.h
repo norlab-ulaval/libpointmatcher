@@ -48,6 +48,13 @@ struct PointMatcherIO
 	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters; //!< alias
 	typedef typename PointMatcher<T>::Matrix Parameters; //!< alias
 
+	typedef std::map<std::string, std::string > DescAssociationMap;
+
+	// General
+	static DescAssociationMap getDescAssocationMap(); //!< map to store association between common 1d descriptor labels and their PM label and span dimension
+	static bool colLabelRegistered(const std::string& colLabel); //!< returns true if a particular descriptor dim label is registered (ie nx, red...)
+	static std::string getDescLabel(const std::string& colLabel);
+	//static DescLabelDimPair getDescLabelAndDim(const std::string& colLabel);
 	// CSV
 
 	static DataPoints loadCSV(const std::string& fileName);

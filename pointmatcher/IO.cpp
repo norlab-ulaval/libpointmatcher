@@ -406,6 +406,34 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(const std::strin
 	return loadCSV(ifs);
 }
 
+template<typename T>
+typename PointMatcherIO<T>::DescAssociationMap PointMatcherIO<T>::getDescAssocationMap()
+{
+	DescAssociationMap assoc_map = boost::assign::map_list_of
+			("nx","normals")
+			("ny","normals")
+			("nz","normals")
+			("densities","densities")
+			("intensity","intensity")
+			("red","rgb")
+			("green","rgb")
+			("blue","rgb");
+	return assoc_map;
+}
+
+template <typename T>
+bool PointMatcherIO<T>::colLabelRegistered(const std::string& colLabel)
+{
+	return getDescAssocationMap().count(colLabel) > 0;
+}
+
+template <typename T>
+std::string PointMatcherIO<T>::getDescLabel(const std::string& colLabel)
+{
+	return getDescAssocationMap().find(colLabel)->second;
+}
+
+
 //! @brief Load comma separated values (csv) file
 //! @see loadCSV()
 template<typename T>
@@ -419,10 +447,14 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 	vector<T> zData;
 	vector<T> padData;
 	vector<string> header;
+	vector<int> descColsToKeep; // Record of which columns will be read into a descriptor
+	map<std::string, vector<int> > descLabelToCols;
+	vector<vector<T> > descCols;
+	int numDescCols;
 	int dim(0);
 	bool firstLine(true);
 	bool hasHeader(false);
-	Labels labels;
+	Labels featureLabels, descriptorLabels;
 	int xCol(-1);
 	int yCol(-1);
 	int zCol(-1);
@@ -470,18 +502,32 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 				
 			if (hasHeader)
 			{
+				int n = 0;
 				// Search for x, y and z tags
 				for(unsigned int i = 0; i < header.size(); i++)
 				{
-					if(header[i].compare("x") == 0)
+					std::string colLabel = header[i];
+					if(colLabel.compare("x") == 0)
 						xCol = i;
 				
-					if(header[i].compare("y") == 0)
+					if(colLabel.compare("y") == 0)
 						yCol = i;
 				
-					if(header[i].compare("z") == 0)
+					if(colLabel.compare("z") == 0)
 						zCol = i;
+
+					if(colLabelRegistered(colLabel))
+					{
+						descColsToKeep.push_back(i);
+						descLabelToCols[getDescLabel(colLabel)].push_back(n);
+						n++;
+					}
 				}
+
+				// alocate descriptor vectors
+				numDescCols = descColsToKeep.size(); // number of descriptor vectors
+				descCols.resize(numDescCols);
+
 				if(xCol == -1 || yCol == -1)
 				{
 					for(unsigned int i = 0; i < header.size(); i++)
@@ -529,6 +575,11 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		char *brkt = 0;
 		token = strtok_r(line, delimiters, &brkt);
 		int currentCol = 0;
+		int d = 0; // descriptor vector iterator
+		int nextDescCol = -1; // next descriptor column to be recorded
+		if (numDescCols > 0)
+			nextDescCol = descColsToKeep[0];
+
 		while (token)
 		{
 			// Load data only if no text is on the line
@@ -540,6 +591,16 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 					yData.push_back(atof(token));
 				if(currentCol == zCol)
 					zData.push_back(atof(token));
+				if(currentCol == nextDescCol)
+				{
+					descCols[d].push_back(atof(token));
+					d++;
+					// check for next descriptor column, if there are no more than we will no longer check
+					if (d < numDescCols)
+						nextDescCol = descColsToKeep[d];
+					else
+						nextDescCol = -1;
+				}
 			}
 
 			token = strtok_r(NULL, delimiters, &brkt);
@@ -556,9 +617,14 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 			{
 				string text;
 				text += char('x' + i);
-				labels.push_back(Label(text, 1));
+				featureLabels.push_back(Label(text, 1));
 			}
-			labels.push_back(Label("pad", 1));
+			featureLabels.push_back(Label("pad", 1));
+
+			for(map<std::string, vector<int> >::const_iterator d_it = descLabelToCols.begin(); d_it != descLabelToCols.end(); d_it++)
+			{
+				descriptorLabels.push_back(Label(d_it->first,d_it->second.size()));
+			}
 		}
 
 		firstLine = false;
@@ -569,6 +635,8 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 
 	// Transfer loaded points in specific structure (eigen matrix)
 	Matrix features(dim+1, nbPoints);
+	Matrix descriptors(numDescCols, nbPoints);
+
 	for(int i=0; i < nbPoints; i++)
 	{
 		features(0,i) = xData[i];
@@ -582,9 +650,14 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		{
 			features(2,i) = 1;
 		}
+
+		for (int d = 0; d < numDescCols; d++)
+		{
+			descriptors(d,i) = descCols[d][i];
+		}
 	}
 	
-	DataPoints dataPoints(features, labels);
+	DataPoints dataPoints(features, featureLabels, descriptors, descriptorLabels);
 	//cout << "Loaded " << dataPoints.features.cols() << " points." << endl;
 	//cout << "Find " << dataPoints.features.rows() << " dimensions." << endl;
 	//cout << features << endl;
