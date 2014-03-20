@@ -1195,8 +1195,47 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 	{
 		Label lab = data.descriptorLabels[i];
 		for (int s = 0; s < lab.span; s++) {
-			std::string descPropLabel = lab.text + boost::lexical_cast<std::string>(s);
+			std::string descPropLabel;
+
+			if (lab.text == "normals")
+			{
+				if (s == 0)
+				{
+					descPropLabel = "nx";
+				}
+				if (s == 1)
+				{
+					descPropLabel = "ny";
+				}
+				if (s == 2)
+				{
+					descPropLabel = "nz";
+				}
+			}
+			else if (lab.text == "rgb")
+			{
+				if (s == 0)
+				{
+					descPropLabel = "red";
+				}
+				if (s == 1)
+				{
+					descPropLabel = "green";
+				}
+				if (s == 2)
+				{
+					descPropLabel = "blue";
+				}
+			}
+			else if (lab.span  == 1)
+			{
+				descPropLabel = lab.text;
+			}
+			else
+				descPropLabel = lab.text + boost::lexical_cast<std::string>(s);
+
 			ofs << "property float " << descPropLabel << "\n";
+
 		}
 	}
 
@@ -1353,7 +1392,12 @@ typename PointMatcherIO<T>::PLYElement::PMPropTypes PointMatcherIO<T>::PLYVertex
 {
 	if (prop.name == "x" || prop.name == "y" || prop.name == "z")
 		return this->FEATURE;
-	else if (prop.name == "nx" || prop.name == "ny" || prop.name == "nz")
+	else if (prop.name == "nx" || prop.name == "ny" || prop.name == "nz"
+			|| prop.name == "densities" ||
+			prop.name == "intensity" ||
+			prop.name == "red" ||
+			prop.name == "green" ||
+			prop.name == "blue")
 		return this->DESCRIPTOR;
 	else
 		return this->UNSUPPORTED;
@@ -1363,12 +1407,23 @@ template<typename T>
 typename std::string PointMatcherIO<T>::PLYVertex::getDescName(const PLYProperty& prop) const
 {
 	std::string desc_name;
+
 	if (prop.name == "nx" )
 		desc_name = "normals";
 	else if (prop.name == "ny" )
 		desc_name = "normals";
 	else if (prop.name == "nz")
 		desc_name = "normals";
+	else if (prop.name == "densities")
+		desc_name = "densitites";
+	else if (prop.name == "intensity")
+		desc_name = "intensity";
+	else if (prop.name == "red")
+		desc_name = "rgb";
+	else if (prop.name == "green")
+		desc_name = "rgb";
+	else if (prop.name == "blue")
+		desc_name = "rgb";
 	else
 		throw runtime_error(string("PLY error: ply descriptor property ") + prop.name + " does not have an associated pointmatcher descriptor");
 	return desc_name;

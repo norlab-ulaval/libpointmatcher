@@ -127,32 +127,11 @@ struct PointMatcherIO
 		bool operator==(const PLYProperty& other) const; //! compare with other property
 	};
 
-//	struct PLYDescProperty : public PLYProperty
-//	{
-//		//! Possible descriptor types that are supported in pointmatcher
-//		enum PMDescTypes
-//		{
-//			NORMAL,
-//			INVALID
-//		};
-//
-//		PMDescTypes desc_type; //!< the descriptor type
-//		unsigned view_pos; //!< which row in the descriptor matrix the property corresponds to
-//		std::string desc_name;
-//
-//		PLYDescProperty(const PLYProperty& prop, const PMDescTypes desc_type, const unsigned view_pos) :
-//			PLYProperty(prop),
-//			desc_type(type),
-//			view_pos(view_pos)
-//		{
-//			if (desc_type == NORMAL)
-//				name = "normals";
-//			else
-//				name = "unsupported";
-//		}
-//	};
+	//! Map from a descriptor name to a list PLY property
+	//! ex: "normals" -> nx, ny ,nz
 
 	typedef std::map<std::string, std::vector<PLYProperty> > PLYDescPropMap;
+
 	//! Interface for all PLY elements.  Implementations must provide definition of getPMType()
 	class PLYElement
 	{
