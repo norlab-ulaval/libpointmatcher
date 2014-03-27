@@ -1,0 +1,25 @@
+<package>
+	<name>pointmatcher</name>
+	<version>1.0.0</version>
+	<description>
+		This package wraps the pointmatcher library in a catkin package
+	</description>
+	<maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
+	<licence>BSD</licence>
+
+	<build_tool_depend>catkin</build_tool_depend>
+
+	<build_depend>boost</build_depend>
+	<build_depend>nabo</build_depend>
+	<build_depend>yaml-cpp</build_depend>
+	<build_depend>eigen</build_depend>
+
+	<run_depend>nabo</run_depend>
+	<run_depend>yaml-cpp</run_depend>
+	<run_depend>eigen</run_depend>
+	<run_depend>catkin</run_depend>
+
+	<export>
+		<build_type>cmake</build_type>
+	</export>
+</package>
