@@ -28,9 +28,11 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH
 if(WIN32 AND NOT CYGWIN)
 	set(DEF_INSTALL_CMAKE_DIR CMake)
 else()
-	set(DEF_INSTALL_CMAKE_DIR lib/CMake/FooBar)
+	set(DEF_INSTALL_CMAKE_DIR lib/CMake/pointmatcher)
 endif()
 set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
+
+
 
 # Make relative paths absolute (needed later on)
 foreach(p LIB BIN INCLUDE CMAKE)
@@ -149,10 +151,10 @@ set(POINTMATCHER_SRC
 set(SHARED_LIBS "false" CACHE BOOL "To build shared (true) or static (false) library")
 if (SHARED_LIBS)
 	add_library(pointmatcher SHARED ${POINTMATCHER_SRC})
-	install(TARGETS pointmatcher LIBRARY DESTINATION lib)
+	install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 else(SHARED_LIBS)
 	add_library(pointmatcher ${POINTMATCHER_SRC})
-	install(TARGETS pointmatcher ARCHIVE DESTINATION lib)
+	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 endif(SHARED_LIBS)
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
@@ -166,7 +168,7 @@ install(FILES
 	pointmatcher/Registrar.h
 	pointmatcher/Timer.h
 	pointmatcher/IO.h
-	DESTINATION include/pointmatcher
+	DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
 )
 install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
 if (DOXYGEN_FOUND)
@@ -187,24 +189,43 @@ enable_testing()
 add_subdirectory(utest)
 
 #=============================================
+# to allow find_package() on pointmatcher
+#=============================================
 
 export(PACKAGE pointmatcher)
 
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
 
-
-# Find all include directories
+# Create the pointmatcherConfig.cmake and pointmatcherConfigVersion files
+file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
+   "${INSTALL_INCLUDE_DIR}")
+# ... for the build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
+configure_file(pointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}/pointmatcherConfig.cmake" @ONLY)
 
-# Generate file required by find_package
-configure_file(pointmatcherConfig.cmake.in "${PROJECT_BINARY_DIR}/pointmatcherConfig.cmake" @ONLY)
-configure_file(pointmatcherConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" @ONLY)
+# Change variables for the install tree
+set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 
-# Install the pointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
-install(FILES "${PROJECT_BINARY_DIR}/pointmatcherConfig.cmake" "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
+set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
+configure_file(pointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake" @ONLY)
+
+# Generate cmake for versionning
+configure_file(pointmatcherConfigVersion.cmake.in
+  "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" @ONLY)
+ 
+# Install the pointmatcherConfig.cmake and pointmatcherConfigVersion.cmake
+install(FILES
+   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake"
+	 "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake"
+		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
 
+
+# For Windows
 if( MSVC ) # VS2012 does not support tuples correctly yet
 	add_definitions( /D _VARIADIC_MAX=10 )
 endif()
