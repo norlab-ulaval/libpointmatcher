@@ -68,7 +68,11 @@ namespace PointMatcherSupport
 		return Time(now.tv_sec) * Time(1000000000) + Time(now.tv_nsec);
 		#else // __MACH__
 		struct timespec ts;
+		#ifdef CLOCK_PROCESS_CPUTIME_ID
 		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
+		#else // BSD and old Linux
+		clock_gettime(CLOCK_PROF, &ts);
+		#endif
 		return Time(ts.tv_sec) * Time(1000000000) + Time(ts.tv_nsec);
 		#endif // __MACH__
 	}
