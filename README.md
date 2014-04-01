@@ -18,7 +18,11 @@ You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 Documentation and Tutorials
 ===========================
 
-You can find a [growing list of tutorials](doc/Tutorials.md ) in the project's doc folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`.  
+You can find a growing list of tutorials on this page: [Tutorials](doc/Tutorials.md ).
+
+Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
+
+Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`.  
 
 Pre-built binaries
 ==================
