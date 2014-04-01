@@ -1,7 +1,7 @@
 | [Tutorials Home](Tutorials.md)    | | [Next](Datafilters.md) |
 | ------------- |:-------------:| -----:|
 
-# Compiling and Installing libpointmatcher on your Computer
+# Compiling and Installing libpointmatcher on Windows
 ######Latest update March 29, 2014 by François Pomerleau
 
 ## Foreword
@@ -16,7 +16,7 @@ If you are used to development project, here what you need:
 
 
 | Name   | Link | Version tested|
-|  -------------  | ------------- | -- |
+| ------ | ---- | ------------- |
 |  git | <http://windows.github.com/> | v1.0 |
 |  libpointmatcher sources   | <https://github.com/ethz-asl/libpointmatcher> | |
 | libnabo sources | <https://github.com/ethz-asl/libnabo> |  |
@@ -24,7 +24,7 @@ If you are used to development project, here what you need:
 | CMake | <http://www.cmake.org/cmake/resources/software.html> | cmake-2.8.11.2-win32-x86.exe|
 | Eigen 3 | <http://eigen.tuxfamily.org/index.php?title=Main_Page#Download>  |v3.2.0 |
 | Boost | <http://www.boost.org/users/download/> | v1.54.0 |
-| yaml-cpp | <https://code.google.com/p/yaml-cpp/downloads/list>| v0.3.0, **Not working with v0.5.0**|
+| yaml-cpp | <https://code.google.com/p/yaml-cpp/downloads/list>| v0.3.0, **not working with v0.5.0**|
 | grep tool | <http://gnuwin32.sourceforge.net/packages/grep.htm>| v2.5.4 |
 | gtest | <https://code.google.com/p/googletest/> | v1.7.0 |
 
