@@ -1,3 +1,4 @@
+
 libpointmatcher is a modular ICP library, useful for robotics and computer vision.
 
 libpointmatcher depends on:
@@ -7,6 +8,9 @@ libpointmatcher depends on:
  * [Doxygen], a documentation-generation tool
  * [yaml-cpp], a YAML 1.2 parser and emitter (optional)
  
+and was compiled on:
+  * [Ubuntu] (/doc/Compilation.md)
+  * [Windows] (/doc/CompilationWindows.md)
 
 libpointmatcher is being developed by [François Pomerleau](http://www.asl.ethz.ch/people/pomerlef) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
