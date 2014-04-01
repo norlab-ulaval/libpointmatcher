@@ -90,6 +90,14 @@ T PointMatcher<T>::ErrorMinimizer::getOverlap() const
 	return weightedPointUsedRatio;
 }
 
+//! If not redefined by child class, return zero matrix
+template<typename T>
+typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::getCovariance() const
+{
+  LOG_INFO_STREAM("ErrorMinimizer - warning, no specific method to compute covariance was provided for the ErrorMinimizer used.");
+  return Matrix::Zero(6,6);
+}
+
 //! Helper funtion doing the cross product in 3D and a pseudo cross product in 2D
 template<typename T>
 typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(const Matrix& A, const Matrix& B)
