@@ -1,7 +1,7 @@
 | [Tutorials Home](Tutorials.md)    | | [Next](Datafilters.md) |
 | ------------- |:-------------:| -----:|
 
-# Compiling and Installing libpointmatcher on your Computer
+# Compiling and Installing libpointmatcher on your Windows
 ######Latest update March 29, 2014 by François Pomerleau
 
 ## Foreword
