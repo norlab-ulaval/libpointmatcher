@@ -6,6 +6,7 @@ This page lists the available tutorials for libpointmatcher. The [Beginner Secti
 Beginner<a name="beginner"></a>
 ---------
 
+- [What can I do with libpointmatch?] (ApplicationsAndPub.md)
 - [Ubuntu: How to compile libpointmatcher?](Compilation.md)
 - [Windows: How to compile libpointmatcher?](CompilationWindows.md)
 - [Mac OS: How to compile libpointmatcher?](Compilation.md)
