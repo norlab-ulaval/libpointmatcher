@@ -1,8 +1,8 @@
 readingDataPointsFilters:
  - FixStepSamplingDataPointsFilter: 
-      startStep: 100
-      endStep: 160
-      stepMult: 3
+      startStep: 10
+      endStep: 10
+      stepMult: 1
 
 referenceDataPointsFilters:
   - SamplingSurfaceNormalDataPointsFilter:
