@@ -1,4 +1,3 @@
-
 # Applications and Publications
 
 ## Youtube Videos
@@ -45,7 +44,7 @@ Click on the image to play.
 </a>
 
 
-#### Lizhbeth: 
+#### Lizhbeth: Shore mapping around lake Zurich
 - Sensor: Velodyne HDL-32E
 - Application: 3D mapping and localization
 
@@ -67,7 +66,7 @@ Click on the image to play.
 
 
 
-#### Kinect tracker: 
+#### Kinect tracker
 - Sensor: Kinect
 - Application: 3D mapping and localization
 
