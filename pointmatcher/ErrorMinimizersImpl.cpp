@@ -468,7 +468,7 @@ template struct ErrorMinimizersImpl<double>::PointToPointWithCovErrorMinimizer;
 // Point To PLANE WITH COV ErrorMinimizer
 template<typename T>
 ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::PointToPlaneWithCovErrorMinimizer(const Parameters& params):
-	ErrorMinimizer("PointToPlaneWithCovErrorMinimizer", PointToPlaneErrorMinimizer::availableParameters(), params),
+	ErrorMinimizer("PointToPlaneWithCovErrorMinimizer", PointToPlaneWithCovErrorMinimizer::availableParameters(), params),
 	force2D(Parametrizable::get<T>("force2D")),
 	sensorStdDev(Parametrizable::get<T>("sensorStdDev"))
 {

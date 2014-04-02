@@ -112,7 +112,7 @@ TEST(icpTest, icpTest)
 		std::string config_file = d->path().string();
 		if (fs::extension(config_file) != ".yaml") continue;
 		std::ifstream ifs(config_file.c_str());
-		EXPECT_NO_THROW(icp.loadFromYaml(ifs));
+		EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
 
 		// Compute current ICP transform
 		PM::TransformationParameters curT = icp(data, ref);
