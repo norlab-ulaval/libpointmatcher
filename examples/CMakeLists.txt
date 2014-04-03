@@ -20,3 +20,5 @@ target_link_libraries(build_map pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boo
 add_executable(compute_overlap compute_overlap.cpp)
 target_link_libraries(compute_overlap pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})
 
+add_executable(ply ply.cpp)
+target_link_libraries(ply pointmatcher ${NABO_LIBRARY} ${EXTRA_LIBS} ${Boost_LIBRARIES})
