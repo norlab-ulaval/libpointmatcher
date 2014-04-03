@@ -7,6 +7,9 @@ libpointmatcher depends on:
  * [Doxygen], a documentation-generation tool
  * [yaml-cpp], a YAML 1.2 parser and emitter (optional)
  
+and was compiled on:
+  * [Ubuntu] (/doc/Compilation.md)
+  * [Windows] (/doc/CompilationWindows.md)
 
 libpointmatcher is being developed by [François Pomerleau](http://www.asl.ethz.ch/people/pomerlef) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
@@ -15,7 +18,11 @@ You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 Documentation and Tutorials
 ===========================
 
-You can find a [growing list of tutorials](doc/Tutorials.md ) in the project's doc folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`.  
+You can find a growing list of tutorials on this page: [Tutorials](doc/Tutorials.md ).
+
+Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
+
+Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`.  
 
 Pre-built binaries
 ==================
@@ -111,6 +118,8 @@ If you are using libpointmatcher in your project and you would like to have it l
  * NASA Ames [Stereo Pipeline](http://ti.arc.nasa.gov/tech/asr/intelligent-robotics/ngt/stereo/): Planetary reconstruction from satellite observations. Results: used for Mars, Moon and Earth point clouds.
  * Armasuisse S+T UGV research program [ARTOR](http://www.artor.ethz.ch/): Development of techniques for reliable autonomous navigation of a wheeled robot in rough, outdoor terrain. Results: [video of urban and dynamic 3D reconstruction](http://www.youtube.com/watch?v=UCCAUf64tD0) and [video of open space 3D reconstruction](http://www.youtube.com/watch?v=M5Y99o7um88) with real-time computation.
  * Swiss National Science Foundation - [Limnobotics](http://www.limnobotics.ch/): Robotic solution for toxic algae monitoring in lacs. Result: [video of 3D shore reconstruction](http://www.youtube.com/watch?v=g8l-Xq4qYeE) with real-time computation.
+
+For a larger list of work realized with libpointmatcher, please see the page [Applications And Publications](/doc/ApplicationsAndPub.md).
 
 
 License

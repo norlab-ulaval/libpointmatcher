@@ -11,6 +11,7 @@ Wish list for next release
 
 Already implemented in the current master:
   
+ * New ErrorMinimizer producing covariance matrix (1 April, 2014, thanks to Francisco J Perez Grau)
  * Better user documentation and tutorials (5 Fev. 2014 thanks to Samuel Charreyron)
  * Avoid point cloud copies when filtering (10 Jan. 2014 thanks to Oleg Alexandrov)
  * Add CMake support for find_package (20 Sept. 2013)

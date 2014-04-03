@@ -494,7 +494,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 	vector<int> descColsToKeep; // Record of which columns will be read into a descriptor
 	map<std::string, vector<int> > descLabelToCols;
 	vector<vector<T> > descCols;
-	int numDescCols;
+	int numDescCols = 0;
 	int dim(0);
 	bool firstLine(true);
 	bool hasHeader(false);

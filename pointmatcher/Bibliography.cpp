@@ -109,6 +109,17 @@ namespace PointMatcherSupport
 				( "doi", "10.1109/34.121791" )
 				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=121791")
 			))
+			( "Censi2007ICPCovariance", makeMap(map_list_of
+				( "type", "inproceedings" )
+				( "title", "An Accurate Closed-Form Estimate of {ICP}'s Covariance" )
+				( "author", "Censi, A." )
+				( "booktitle", "Proceedings of the {IEEE} International Conference on Robotics and Automation ({ICRA})" )
+				( "year", "2007" )
+				( "pages", "3167--3172" )
+				( "publisher", "IEEE Press" )
+				( "doi", "10.1109/ROBOT.2007.363961" )
+				( "fulltext", "http://purl.org/censi/research/2007-icra-icpcov.pdf")
+			))
 			( "Chen1991Point2Plane", makeMap(map_list_of
 				( "type", "inproceedings" )
 				( "title", "Object modeling by registration of multiple range images" )
