@@ -79,7 +79,17 @@ Click on the image to play.
 
 ## Publications
 
+1.	N. Corso and A. Zakhor, “Indoor Localization Algorithms for an Ambulatory Human Operated 3D Mobile Mapping System.,” Remote Sens., vol. 5, no. 12, 2013.
 
+1. M. Gianni, G. Gonnelli, A. Sinha, M. Menna, and F. Pirri, “An Augmented Reality approach for trajectory planning and control of tracked vehicles in rescue environments,” Safety, Security, and Rescue Robotics (SSRR), 2013 IEEE International Symposium on, pp. 1–6, 2013.
+ 
+1.	F. Pomerleau, F. Colas, R. Siegwart, and S. Magnenat, “Comparing ICP Variants on Real-World Data Sets,” Autonomous Robots, vol. 34, no. 3, pp. 133–148, Feb. 2013.
+
+2.	F. Colas, S. Mahesh, F. Pomerleau, M. Liu, and R. Siegwart, “3D path planning and execution for search and rescue ground robots,” presented at the Intelligent Robots and Systems (IROS), 2013 IEEE/RSJ International Conference on, 2013, pp. 722–727.
+
+3.	F. Pomerleau, M. Liu, F. Colas, and R. Siegwart, “Challenging data sets for point cloud registration algorithms,” IJRR, vol. 31, no. 14, pp. 1705–1711, Dec. 2012.
+
+4.	F. Pomerleau, S. Magnenat, F. Colas, M. Liu, and R. Siegwart, “Tracking a depth camera: Parameter exploration for fast ICP,” presented at the Intelligent Robots and Systems, 2011. Proceedings of the IEEE/RSJ International Conference on, 2011, pp. 3824–3829.
 
 
 **Note**: Your application or publication is not here, just fill an issue through GitHub and we will be happy to add your utilization of the library to this page!
