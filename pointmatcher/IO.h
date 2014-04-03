@@ -69,6 +69,7 @@ struct PointMatcherIO
 	static void saveCSV(const DataPoints& data, std::ostream& os);
 
 	// VTK
+	//! Enumeration of legacy VTK data types that can be parsed
 	enum SupportedVTKDataTypes
 	{
 		POLYDATA,
