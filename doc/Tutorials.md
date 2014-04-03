@@ -15,6 +15,7 @@ Beginner<a name="beginner"></a>
 - [Example: basic registration using ICP](BasicRegistration.md)
 - [The ICP chain configuration and its variants](DefaultICPConfig.md)
 - [How to create custom configuration file using YAML](Configuration.md)
+- [Supported file types and importing/exporting point clouds](ImportExport.md)
 
 Advanced<a name="advanced"></a>
 -------
