@@ -984,6 +984,28 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 			if(pointCount != descriptorCount)
 				throw runtime_error(string("The size of POINTS is different than POINT_DATA"));
 		}
+		//////////////////////////////////////////////////////////
+		// Field data is ignored
+		else if (fieldName == "FIELD")
+		{
+			string fieldDataName;
+			int fieldDataCount;
+			is >> fieldDataName >> fieldDataCount;
+
+			for (int f = 0; f < fieldDataCount; f++)
+			{
+				//getline(is, line);
+				string fieldDataArrayName, fieldDataArrayType;
+				int numComponents, numTuples;
+				is >> fieldDataArrayName >> numComponents >> numTuples >> fieldDataArrayType;
+
+				int t_val;
+				for (int t = 0; t < numComponents * numTuples; t++ )
+				{
+					is >> t_val;
+				}
+			}
+		}
 		else // Load descriptors
 		{
 			// descriptor name
