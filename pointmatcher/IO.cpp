@@ -394,8 +394,6 @@ PointMatcher<double>::DataPoints PointMatcher<double>::DataPoints::load(const st
 //!
 //! Otherwise, the user is asked to enter column id manually which might 
 //! block automatic processing.
-//!
-//! @todo Add support to load descriptors (ex. color, ids, etc.)
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(const std::string& fileName)
 {
@@ -1143,9 +1141,6 @@ void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& dat
 //! Only PLY files with elements named "vertex" are supported
 //! "vertex" should have 2 or 3 properties names "x", "y", "z" to define features.
 //!
-//! The following additional properties may be defined and will be added as descriptors
-//! nx, ny, nz: components of a normal vector
-//!
 template<typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(const std::string& fileName)
 {
@@ -1737,21 +1732,261 @@ bool PointMatcherIO<T>::PLYProperty::operator==(const PLYProperty& rhs) const
 	return name == rhs.name && type == rhs.type;
 }
 
+//! @brief Load Point Cloud Library (pcd) file
+//! @param fileName a string containing the path and the file name
 template<typename T>
-typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(const std::string& fileName) {
+typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(const string& fileName) {
 	ifstream ifs(fileName.c_str());
 	if (!ifs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
 	return loadPCD(ifs);
 }
 
+template
+PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadPCD(const string& fileName);
+template
+PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPCD(const string& fileName);
+
+//template
+//PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadPCD(istream& is);
+//template
+//PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPCD(istream& is);
+
+//! @brief Load PCD file
+//! @see loadPCD()
 template<typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& is) {
+
+	typedef typename DataPoints::Label Label;
+	typedef typename DataPoints::Labels Labels;
+
+	size_t numFields = 0;
+	int xFieldCol = -1;
+	int yFieldCol = -1;
+	int zFieldCol = -1;
+
+//	int xFieldBytes = -1;
+//	int yFieldBytes = -1;
+//	int zFieldBytes = -1;
+
+	string xFieldType;
+	string yFieldType;
+	string zFieldType;
+
+	size_t width;
+	size_t height;
+	size_t numPoints;
+	size_t numPointsR; // redundant value specified in POINTS field
+
+	size_t lineNum = 0;
+
+	while (!is.eof())
+	{
+		string line;
+		getline(is, line);
+
+		// get rid of white spaces before/after
+		boost::trim (line);
+
+		// ignore comments
+		if (line.substr(0,1) == "#")
+		{
+			lineNum++;
+			continue;
+		}
+
+		vector<string> tokens;
+		boost::split(tokens, line, boost::is_any_of("\t\r "), boost::token_compress_on);
+
+		string pcd_version_str;
+		if (tokens[0] == "VERSION")
+		{
+			if (tokens[1] != "0.7" && tokens[1] != ".7")
+				throw runtime_error("PCD Parse Error: Only PCD Version 0.7 is supported");
+		}
+
+		else if (tokens[0] == "FIELDS")
+		{
+			numFields = tokens.size() - 1;
+			for (size_t i = 1; i < tokens.size(); i++)
+			{
+				if (tokens[i] == "x")
+					xFieldCol = i - 1;
+				else if (tokens[i] == "y")
+					yFieldCol = i - 1;
+				else if (tokens[i] == "z")
+					zFieldCol = i - 1;
+			}
+		}
+
+		else if (tokens[0] == "SIZE")
+		{
+			if (xFieldCol == -1 || yFieldCol == -1)
+				throw runtime_error("PCD Parse Error: x field or y field not defined");
+			if (tokens.size()  - 1 !=  numFields)
+				throw runtime_error("PCD Parse Error: size not defined for all fields");
+
+//			try {
+//				xFieldBytes = boost::lexical_cast<int>(tokens[xFieldCol + 1]);
+//				yFieldBytes = boost::lexical_cast<int>(tokens[yFieldCol + 1]);
+//				if (zFieldCol > -1)
+//					zFieldBytes = boost::lexical_cast<int>(tokens[zFieldCol + 1]);
+//			}
+//			catch (boost::bad_lexical_cast& e)
+//			{
+//				throw runtime_error("PCD Parse Error: invalid size field");
+//			}
+
+		}
+
+		else if (tokens[0] == "TYPE")
+		{
+			if (xFieldCol == -1 || yFieldCol == -1)
+				throw runtime_error("PCD Parse Error: x field or y field not defined");
+			if (tokens.size()  - 1 !=  numFields)
+				throw runtime_error("PCD Parse Error: type not defined for all fields");
+			xFieldType = tokens[xFieldCol + 1];
+			yFieldType = tokens[yFieldCol + 1];
+
+			if (xFieldType != "I" && xFieldType != "U" && xFieldType != "F" &&
+					yFieldType != "I" && yFieldType != "U" && yFieldType != "F")
+				throw runtime_error("PCD Parse Error: invalid type");
+
+			if (zFieldCol > -1)
+			{
+				zFieldType = tokens[zFieldCol + 1];
+				if (zFieldType != "I" && zFieldType != "U" && zFieldType != "F")
+					throw runtime_error("PCD Parse Error: invalid type");
+			}
+		}
+
+		// ignore descriptors for now
+		else if (tokens[0] == "COUNT")
+		{
+			continue;
+		}
+
+		else if (tokens[0] == "WIDTH")
+		{
+			try
+			{
+				width = boost::lexical_cast<int>(tokens[1]);
+			} catch (boost::bad_lexical_cast& e)
+			{
+				throw runtime_error("PCD Parse Error: invalid width");
+			}
+		}
+
+		else if (tokens[0] == "HEIGHT")
+		{
+			try
+			{
+				height = boost::lexical_cast<int>(tokens[1]);
+			} catch (boost::bad_lexical_cast& e)
+			{
+				throw runtime_error("PCD Parse Error: invalid width");
+			}
+		}
+
+		// ignore viewpoint for now
+		else if (tokens[0] == "VIEWPOINT")
+		{
+			continue;
+		}
+
+		else if (tokens[0] == "POINTS")
+		{
+			try
+			{
+				numPointsR = boost::lexical_cast<int>(tokens[1]);
+			}
+			catch (boost::bad_lexical_cast& e)
+			{
+				throw runtime_error("PCD Parse Error: invalid number of points");
+			}
+		}
+
+		else if (tokens[0] == "DATA")
+		{
+			if (tokens[1] != "ascii")
+				throw runtime_error("PCD Parse Error: only ascii data is supported");
+
+			break;
+		}
+
+		lineNum++;
+	}
+
+	// get number of points
+	numPoints = width * height;
+
+	if (numPoints != numPointsR)
+		throw runtime_error("PCD Parse Error: POINTS field does not match WIDTH and HEIGHT fields");
+
+	// prepare features matrix
+	Matrix features;
+	if (zFieldCol > -1)
+		features = Matrix(4,numPoints);
+	else
+		features = Matrix(3,numPoints);
+
+	// Now read in the data
+	size_t p = 0; // point count
+	while (!is.eof())
+	{
+		string line;
+		getline(is, line);
+
+		// get rid of white spaces before/after
+		boost::trim (line);
+
+		// ignore comments
+		if (line.substr(0,1) == "#")
+		{
+			lineNum++;
+			continue;
+		}
+
+		vector<string> tokens;
+		boost::split(tokens, line, boost::is_any_of("\t\r "), boost::token_compress_on);
+
+		if (tokens.size() != numFields)
+			throw runtime_error(string("PCD Parse Error: number of data columns does not match number of fields at line: ") + boost::lexical_cast<string>(lineNum));
+
+		features(0,p) = boost::lexical_cast<float>(tokens[xFieldCol]);
+		features(1,p) = boost::lexical_cast<float>(tokens[yFieldCol]);
+
+		if (zFieldCol > -1)
+		{
+			features(2,p) = boost::lexical_cast<float>(tokens[zFieldCol]);
+			features(3,p) = 1;
+		} else
+			features(2,p) = 1;
+
+		p++;
+		lineNum++;
+	}
+
+	if (p != numPoints)
+	{
+		boost::format errorFmt("PCD Parse Error: the number of points in the data %1 is less than the specified number of points %2");
+		errorFmt % p % numPoints;
+		throw runtime_error(errorFmt.str());
+	}
+
+	Labels featureLabels;
+	featureLabels.push_back(Label("x"));
+	featureLabels.push_back(Label("y"));
+
+	if (zFieldCol > -1)
+		featureLabels.push_back(Label("z"));
+
+	DataPoints out(features, featureLabels);
+	return out;
 }
 
-template<typename T>
-void PointMatcherIO<T>::savePCD(const DataPoints& data,
-		const std::string& fileName) {
-}
-
+//template<typename T>
+//void PointMatcherIO<T>::savePCD(const DataPoints& data,
+//		const std::string& fileName) {
+//}
 
