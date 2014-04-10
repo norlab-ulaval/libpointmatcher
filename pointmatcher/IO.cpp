@@ -515,7 +515,11 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 	vector<T> padData;
 	vector<string> header;
 	vector<int> descColsToKeep; // Record of which columns will be read into a descriptor
-	map<std::string, vector<int> > descLabelToCols;
+
+	map<int,DescAssociationPair> colToDescPair;
+	map<string,int> descLabelToNumRows;
+	map<string,int> descLabelToStartingRows;
+
 	vector<vector<T> > descCols;
 	int numDescCols = 0;
 	int dim(0);
@@ -569,7 +573,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 				
 			if (hasHeader)
 			{
-				int n = 0;
 				// Search for x, y and z tags
 				for(unsigned int i = 0; i < header.size(); i++)
 				{
@@ -588,19 +591,20 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 						descColsToKeep.push_back(i);
 						DescAssociationPair associationPair = getDescAssociationPair(colLabel);
 
-						std::vector<int>* descColList = &descLabelToCols[associationPair.second];
-						if (associationPair.first >= descColList->size())
-						{
-							descColList->resize(associationPair.first + 1);
-						}
-
-						(*descColList)[associationPair.first]  = n;
-
-						n++;
+						colToDescPair[i] = associationPair;
+						descLabelToNumRows[associationPair.second]++;
 					}
+				}
 
-					// Need to reorder columns if they weren't put in a logical order ex: z,y,x, b,g,r, etc...
+				// Do cumulative sum over number of descriptor rows per decriptor to get the starting
+				// index row of reach descriptor
 
+				// make partial sum
+				int cumSum = 0;
+				for(map<string,int>::const_iterator it = descLabelToNumRows.begin(); it != descLabelToNumRows.end(); it++)
+				{
+					descLabelToStartingRows[it->first] = cumSum;
+					cumSum += it->second;
 				}
 
 				// allocate descriptor vectors
@@ -672,7 +676,9 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 					zData.push_back(atof(token));
 				if(currentCol == nextDescCol)
 				{
-					descCols[d].push_back(atof(token));
+					DescAssociationPair descPair = colToDescPair[nextDescCol];
+					int startingRow = descLabelToStartingRows[descPair.second];
+					descCols[startingRow + descPair.first].push_back(atof(token));
 					d++;
 					// check for next descriptor column, if there are no more than we will no longer check
 					if (d < numDescCols)
@@ -700,9 +706,9 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 			}
 			featureLabels.push_back(Label("pad", 1));
 
-			for(map<std::string, vector<int> >::const_iterator d_it = descLabelToCols.begin(); d_it != descLabelToCols.end(); d_it++)
+			for(map<string,int>::const_iterator d_it = descLabelToNumRows.begin(); d_it != descLabelToNumRows.end(); d_it++)
 			{
-				descriptorLabels.push_back(Label(d_it->first,d_it->second.size()));
+				descriptorLabels.push_back(Label(d_it->first,d_it->second));
 			}
 		}
 
