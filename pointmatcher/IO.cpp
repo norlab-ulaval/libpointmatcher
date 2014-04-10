@@ -1737,4 +1737,21 @@ bool PointMatcherIO<T>::PLYProperty::operator==(const PLYProperty& rhs) const
 	return name == rhs.name && type == rhs.type;
 }
 
+template<typename T>
+typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(const std::string& fileName) {
+	ifstream ifs(fileName.c_str());
+	if (!ifs.good())
+		throw runtime_error(string("Cannot open file ") + fileName);
+	return loadPCD(ifs);
+}
+
+template<typename T>
+typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& is) {
+}
+
+template<typename T>
+void PointMatcherIO<T>::savePCD(const DataPoints& data,
+		const std::string& fileName) {
+}
+
 

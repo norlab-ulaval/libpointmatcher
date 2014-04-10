@@ -11,12 +11,12 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
+ * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
+ * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the <organization> nor the
+ * Neither the name of the <organization> nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -31,7 +31,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 
 #ifndef __POINTMATCHER_IO_H
 #define __POINTMATCHER_IO_H
@@ -64,7 +64,6 @@ struct PointMatcherIO
 	static std::string getColLabel(const Label& label, const int row); //!< convert a descriptor label to an appropriate sub-label
 
 	// CSV
-
 	static DataPoints loadCSV(const std::string& fileName);
 	static DataPoints loadCSV(std::istream& is);
 
@@ -85,11 +84,16 @@ struct PointMatcherIO
 	static void saveVTK(const DataPoints& data, const std::string& fileName);
 
 	// PLY
-
 	static DataPoints loadPLY(const std::string& fileName);
 	static DataPoints loadPLY(std::istream& is);
 
 	static void savePLY(const DataPoints& data, const std::string& fileName); //!< save datapoints to PLY point cloud format
+
+	// PCD
+	static DataPoints loadPCD(const std::string& fileName);
+	static DataPoints loadPCD(std::istream& is);
+
+	static void savePCD(const DataPoints& data, const std::string& fileName); //!< save datapoints to PCD point cloud format
 
 	//! Information to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo
@@ -172,7 +176,7 @@ struct PointMatcherIO
 
 			This object holds information about a PLY element contained in the file.
 			It is filled out when reading the header and used when parsing the data.
-		*/
+		 */
 		PLYElement(const std::string& name, const unsigned num, const unsigned offset) :
 			name(name), num(num), total_props(0), offset(offset) {}
 
@@ -213,7 +217,7 @@ struct PointMatcherIO
 
 		//virtual std::string getDescName(const PLYProperty& prop) const = 0; //!< for descriptor properties return name of pointmatcher descriptor
 
-};
+	};
 
 
 	//! Implementation of PLY vertex element
