@@ -406,6 +406,42 @@ TEST(IOTest, loadSaveVTK)
 	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(testPathName)));
 }
 
+TEST(IOTest, loadSavePLY)
+{
+	const int nbPts = 10;
+	DP::Labels featureLabels;
+	featureLabels.push_back(DP::Label("x", 1));
+
+	// Generate fake point cloud
+	//DP ptCloud(PM::Matrix::Random(1, nbPts), featureLabels);
+	DP ptCloud;
+	ptCloud.addFeature("x", PM::Matrix::Random(1, nbPts));
+	ptCloud.addFeature("y", PM::Matrix::Random(1, nbPts));
+	ptCloud.addFeature("z", PM::Matrix::Random(1, nbPts));
+	ptCloud.addFeature("pad", PM::Matrix::Ones(1, nbPts));
+
+	// Set up descriptors
+	ptCloud.addDescriptor("normals", PM::Matrix::Random(3, nbPts));
+	//ptCloud.addDescriptor("eigVectors", PM::Matrix::Random(3, nbPts));
+	ptCloud.addDescriptor("color", PM::Matrix::Random(4, nbPts));
+
+	string testPathName = "unit_test.ply";
+	ptCloud.save(testPathName);
+
+	DP ptCloudFromFile(DP::load(testPathName));
+
+	EXPECT_TRUE(ptCloudFromFile.features.cols() == ptCloud.features.cols());
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("normals"));
+	//EXPECT_TRUE(ptCloudFromFile.descriptorExists("eigVectors"));
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("color"));
+
+	// Remove file from disk
+	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(testPathName)));
+
+}
+
+
+
 //---------------------------
 // Base for ICP tests
 //---------------------------

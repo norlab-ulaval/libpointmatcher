@@ -374,6 +374,8 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::load(const std
 		return PointMatcherIO<T>::loadCSV(fileName);
 	else if (boost::iequals(ext, ".ply"))
 		return PointMatcherIO<T>::loadPLY(fileName);
+	else if (boost::iequals(ext, ".pcd"))
+		return PointMatcherIO<T>::loadPCD(fileName);
 	else
 		throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
 }
@@ -473,7 +475,7 @@ std::string PointMatcherIO<T>::getColLabel(const Label& label, const int row)
 			colLabel = "blue";
 		}
 	}
-	else if (label.text == "eigVector")
+	else if (label.text == "eigVectors")
 	{
 		if (row == 0)
 		{
@@ -596,8 +598,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 
 				// Do cumulative sum over number of descriptor rows per decriptor to get the starting
 				// index row of reach descriptor
-
-				// make partial sum
 				int cumSum = 0;
 				for(map<string,int>::const_iterator it = descLabelToNumRows.begin(); it != descLabelToNumRows.end(); it++)
 				{
@@ -773,6 +773,8 @@ void PointMatcher<T>::DataPoints::save(const std::string& fileName) const
 		return PointMatcherIO<T>::saveCSV(*this, fileName);
 	else if (boost::iequals(ext, ".ply"))
 		return PointMatcherIO<T>::savePLY(*this, fileName);
+	else if (boost::iequals(ext, ".pcd"))
+		return PointMatcherIO<T>::savePCD(*this, fileName);
 	else
 		throw runtime_error("saveAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
 }
@@ -1765,6 +1767,11 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	int yFieldCol = -1;
 	int zFieldCol = -1;
 
+	vector<int> descFieldsToKeep;
+	map<int,DescAssociationPair> colToDescPair;
+	map<string,int> descLabelToNumRows;
+	map<string,int> descLabelToStartingRows;
+
 //	int xFieldBytes = -1;
 //	int yFieldBytes = -1;
 //	int zFieldBytes = -1;
@@ -1816,6 +1823,15 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 					yFieldCol = i - 1;
 				else if (tokens[i] == "z")
 					zFieldCol = i - 1;
+
+				else if(colLabelRegistered(tokens[i]))
+				{
+					descFieldsToKeep.push_back(i-1);
+					DescAssociationPair associationPair = getDescAssociationPair(tokens[i]);
+
+					colToDescPair[i] = associationPair;
+					descLabelToNumRows[associationPair.second]++;
+				}
 			}
 		}
 
@@ -1930,6 +1946,20 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	else
 		features = Matrix(3,numPoints);
 
+	// Prepare descriptors
+	// Do cumulative sum over number of descriptor rows per decriptor to get the starting
+	// index row of reach descriptor
+	int cumSum = 0;
+	for(map<string,int>::const_iterator it = descLabelToNumRows.begin(); it != descLabelToNumRows.end(); it++)
+	{
+		descLabelToStartingRows[it->first] = cumSum;
+		cumSum += it->second;
+	}
+
+	// allocate descriptor vectors
+	size_t numDescCols = descFieldsToKeep.size(); // number of descriptor vectors
+	Matrix descriptors(numDescCols,numPoints);
+
 	// Now read in the data
 	size_t p = 0; // point count
 	while (!is.eof())
@@ -1953,8 +1983,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 		if (tokens.size() != numFields)
 			throw runtime_error(string("PCD Parse Error: number of data columns does not match number of fields at line: ") + boost::lexical_cast<string>(lineNum));
 
-		features(0,p) = boost::lexical_cast<float>(tokens[xFieldCol]);
-		features(1,p) = boost::lexical_cast<float>(tokens[yFieldCol]);
+		features(0,p) = boost::lexical_cast<T>(tokens[xFieldCol]);
+		features(1,p) = boost::lexical_cast<T>(tokens[yFieldCol]);
 
 		if (zFieldCol > -1)
 		{
@@ -1962,6 +1992,13 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			features(3,p) = 1;
 		} else
 			features(2,p) = 1;
+
+		for (int d = 0; d < numDescCols; d++)
+		{
+			DescAssociationPair descPair = colToDescPair[d];
+			int startingRow = descLabelToStartingRows[descPair.second];
+			descriptors(startingRow + descPair.first,p) = boost::lexical_cast<T>(tokens[d]);
+		}
 
 		p++;
 		lineNum++;
@@ -1978,15 +2015,118 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	featureLabels.push_back(Label("x"));
 	featureLabels.push_back(Label("y"));
 
+	Labels descriptorLabels;
+	for (map<string,int>::const_iterator it = descLabelToNumRows.begin(); it != descLabelToNumRows.end(); it++)
+		descriptorLabels.push_back(Label(it->first,it->second));
+
 	if (zFieldCol > -1)
 		featureLabels.push_back(Label("z"));
 
-	DataPoints out(features, featureLabels);
+	DataPoints out;
+
+	if (numDescCols > 0)
+		out = DataPoints(features, featureLabels, descriptors, descriptorLabels);
+	else
+		out = DataPoints(features, featureLabels);
 	return out;
 }
 
-//template<typename T>
-//void PointMatcherIO<T>::savePCD(const DataPoints& data,
-//		const std::string& fileName) {
-//}
+template<typename T>
+void PointMatcherIO<T>::savePCD(const DataPoints& data,
+		const std::string& fileName) {
+	typedef typename DataPoints::Label Label;
+	//typedef typename DataPoints::Labels Labels;
+
+	ofstream ofs(fileName.c_str());
+	if (!ofs.good())
+		throw runtime_error(string("Cannot open file ") + fileName);
+
+	const int pointCount(data.features.cols());
+	const int featCount(data.features.rows());
+	const int descRows(data.descriptors.rows());
+	const int descCount(data.descriptorLabels.size());
+
+	if (pointCount == 0)
+	{
+		cerr << "Warning, no points, doing nothing" << endl;
+		return;
+	}
+
+	ofs << "# .PCD v.7 - Point Cloud Data file format\n" <<"VERSION .7\n";
+	ofs << "FIELDS";
+
+	for (int f=0; f < (featCount - 1); f++)
+	{
+		ofs << " " << data.featureLabels[f].text;
+	}
+
+	if (descRows == 0)
+		ofs << "\n";
+	else
+	{
+		for (int i = 0; i < descCount; i++)
+		{
+			ofs << " " << data.descriptorLabels[i].text;
+		}
+		ofs << "\n";
+	}
+
+	ofs << "SIZE";
+	for (int i =0; i < featCount - 1 + descCount; i++)
+	{
+		ofs << " 4"; // for float
+	}
+	ofs << "\n";
+
+	ofs << "TYPE";
+	for (int i =0; i < featCount - 1 + descCount; i++)
+	{
+		ofs << " F"; // for float
+	}
+	ofs << "\n";
+
+	ofs << "COUNT";
+	for (int f = 0; f < featCount - 1 ; f++ )
+		ofs << " 1";
+	if (descCount == 0)
+		ofs << "\n";
+	else
+	{
+		for (int i = 0; i < descCount; i++)
+		{
+			ofs << " " << data.descriptorLabels[i].span;
+		}
+		ofs << "\n";
+	}
+
+	ofs << "WIDTH " << pointCount << "\n";
+	ofs << "HEIGHT 1\n";
+	ofs << "POINTS " << pointCount << "\n";
+	ofs << "DATA ascii\n";
+
+	// write points
+	for (int p = 0; p < pointCount; ++p)
+	{
+		for (int f = 0; f < featCount - 1; ++f)
+		{
+			ofs << data.features(f, p);
+			if(!(f == featCount-2 && descRows == 0))
+				ofs << " ";
+		}
+		for (int d = 0; d < descRows; ++d)
+		{
+			ofs << data.descriptors(d, p);
+			if(d != descRows-1)
+				ofs << " ";
+		}
+		ofs << "\n";
+	}
+
+	ofs.close();
+}
+
+template
+void PointMatcherIO<float>::savePCD(const DataPoints& data, const std::string& fileName);
+template
+void PointMatcherIO<double>::savePCD(const DataPoints& data, const std::string& fileName);
 
