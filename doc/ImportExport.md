@@ -9,9 +9,10 @@ There exists a myriad of [graphics file formats](http://en.wikipedia.org/wiki/Ca
 ## Table of Supported File Formats
 | File Type | Extension | Versions Supported | Descriptors Supported | Additional Information |
 | --------- |:---------:|:------------------:|:---------------------:|---------|
-| Comma Separated Values | .csv | NA | yes (see table of descriptor labels) | |
+| Comma Separated Values | .csv | NA | yes (see [table of descriptor labels](#descmaptable)) | |
 | Visualization Toolkit Files | .vtk | Legacy format versions 3.0 and lower (ASCII only) | yes | Only polydata and unstructured grid VTK Datatypes supported.  More information can be found  [here](http://www.vtk.org/VTK/img/file-formats.pdf).|
-| Polygon File Format | .ply | 1.0 (ASCII only) | yes (see table of descriptor labels) | | 
+| Polygon File Format | .ply | 1.0 (ASCII only) | yes (see [table of descriptor labels](#descmaptable)) | | 
+| Point Cloud Library Format | .pcd | 0.7 (ASCII only) | yes (see [table of descriptor labels](#descmaptable)) | |
 
 ## Comma Separated Values (CSV) Files
 The most simple file format supported to store clouds is a plain text file containing comma separated values.  Data is structured in a table format and is separated into rows or lines and columns.  Columns are delimited by commas, tabs, or semicolons.  2D and 3D point features are supported as well as a limited number of point descriptors.
@@ -61,7 +62,15 @@ PLY files contain a header section at the top of the file which defines the elem
 
 The PLY format does not prescribe labels to elements or properties, and therefore files must be encoded with appropriate labels in order to be read by Pointmatcher.  For information on which properties are supported by Pointmatcher, refer to the table in the next section.
 
-## Descriptor Property Identifiers (VTK and CSV)
+## Point Cloud Library File Format (PCD) Files
+The [Point Cloud Library](http://pointclouds.org/)(PCL) is an alternative library for handling 2D and 3D point clouds.  While Pointmatcher only performs the task of and is optimized for point cloud registration, PCL is widespread in its functionality.
+
+The developers of PCL have developed their [own file format](http://pointclouds.org/documentation/tutorials/pcd_file_format.php) for storing point clouds.  Pointmatcher is compatible with this format and can import and export PCD files in the latest format (v 0.7).
+
+The PCD format also exists in binary, however only the plain text (ASCII) version is supported.  Because PCD does not presribe standards for descriptors, pointmatcher utilizes the [same identifier mapping](#descmaptable) for identifying descriptors.   
+
+## Descriptor Property Identifiers (VTK and CSV) <a name="descmaptable"></a>
+
 | Property Label | Description | Feature or Descriptor | Pointmatcher Descriptor Label |
 | -------------- | -------------| --------------------- | ---------------- |
 | x              | x component of point | feature               |   NA        |
@@ -82,4 +91,18 @@ The PLY format does not prescribe labels to elements or properties, and therefor
 | eigVectorsY      | y component of eigen vector of nearest neighbors at point | descriptor | eigVectors |
 | eigVectorsZ      | z component of eigen vector of nearest neighbors at point | descriptor | eigVectors |
 | densities | point density at point | descriptor | densities |
+
+Several identifiers may synonymously point to the same pointmatcher descriptor.  For example, some standards may define the x normal component as *nx* and others as *normal_x*.  **Each file should only use one definition for each descriptor.  For example, it should never contain both "nx" and "normal_x" fields.**
+
+While most files should contain data structured in a natural order ie ("x", "y" then "z", or "red", "green", then "blue") this cannot be guaranteed.  Therefore pointmatcher will attempt to reorder the descriptor components when loading a file, and will always export them in a natural order.
+
+---
+### Note For Pointmatcher Developers
+The association between descriptor properties identifiers and pointmatcher descriptor labels is set in the `getDescAssocationMap` function in [pointmatcher/IO.cpp](/pointmatcher/IO.cpp).  To extend IO support to additional descriptors, you can modify this function.
+
+The `getDescAssocationMap` returns a map which associates a property identifier and a pair consisting of a row number and a point matcher descriptor name.  For example, the descriptor identifier *nx* maps to row 0 of the *normals* pointmatcher descriptor. Ie:
+
+"nx" -> (0, "normals") <br>
+"ny" -> (1, "normals") <br>
+"nz" -> (2, "normals")
    
