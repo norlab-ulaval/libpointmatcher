@@ -6,12 +6,16 @@ This page lists the available tutorials for libpointmatcher. The [Beginner Secti
 Beginner<a name="beginner"></a>
 ---------
 
-- [How to compile libpointmatcher?](Compilation.md)
+- [What can I do with libpointmatcher?] (ApplicationsAndPub.md)
+- [Ubuntu: How to compile libpointmatcher?](Compilation.md)
+- [Windows: How to compile libpointmatcher?](CompilationWindows.md)
+- [Mac OS: How to compile libpointmatcher?](Compilation.md)
 - [What the different data filters do?](Datafilters.md)
 - [Example: applying a chain of data filters](ApplyingDatafilters.md)
 - [Example: basic registration using ICP](BasicRegistration.md)
 - [The ICP chain configuration and its variants](DefaultICPConfig.md)
 - [How to create custom configuration file using YAML](Configuration.md)
+- [Supported file types and importing/exporting point clouds](ImportExport.md)
 
 Advanced<a name="advanced"></a>
 -------

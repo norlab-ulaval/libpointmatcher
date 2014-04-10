@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 					mapPointCloud = randSubsample->filter(mapPointCloud);
 				}
 			}
-			catch (PM::ConvergenceError error)
+			catch (PM::ConvergenceError& error)
 			{
 				cout << "ERROR PM::ICP failed to converge: " << endl;
 				cout << "   " << error.what() << endl;

@@ -367,8 +367,10 @@ struct PointMatcher
 		virtual ~DataPointsFilter();
 		virtual void init();
 
-		//! Apply these filters to input
+		//! Apply filters to input point cloud.  This is the non-destructive version and returns a copy.
 		virtual DataPoints filter(const DataPoints& input) = 0;
+
+		//! Apply these filters to a point cloud without copying.
 		virtual void inPlaceFilter(DataPoints& cloud) = 0;
 	};
 	
@@ -468,6 +470,7 @@ struct PointMatcher
 		T getPointUsedRatio() const;
 		T getWeightedPointUsedRatio() const;
 		virtual T getOverlap() const;
+		virtual Matrix getCovariance() const;
 		
 		//! Find the transformation that minimizes the error
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;

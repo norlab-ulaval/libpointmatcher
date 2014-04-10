@@ -112,7 +112,7 @@ TEST(icpTest, icpTest)
 		std::string config_file = d->path().string();
 		if (fs::extension(config_file) != ".yaml") continue;
 		std::ifstream ifs(config_file.c_str());
-		EXPECT_NO_THROW(icp.loadFromYaml(ifs));
+		EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
 
 		// Compute current ICP transform
 		PM::TransformationParameters curT = icp(data, ref);
@@ -121,7 +121,7 @@ TEST(icpTest, icpTest)
 		// with reference transform offline)
 		fs::path cur_file = d->path();
 		cur_file.replace_extension(".cur_trans");
-		std::cout << "Writing: " << cur_file << std::endl;
+		//std::cout << "Writing: " << cur_file << std::endl;
 		std::ofstream otfs(cur_file.c_str());
 		otfs.precision(16);
 		otfs << curT;
@@ -131,7 +131,7 @@ TEST(icpTest, icpTest)
 		fs::path ref_file = d->path();
 		ref_file.replace_extension(".ref_trans");
 		PM::TransformationParameters refT = 0*curT;
-		std::cout << "Reading: " << ref_file << std::endl;
+		//std::cout << "Reading: " << ref_file << std::endl;
 		std::ifstream itfs(ref_file.c_str());
 		for (int row = 0; row < refT.cols(); row++)
 		{
@@ -142,9 +142,9 @@ TEST(icpTest, icpTest)
 		}
 
 		// Dump the reference transform and current one
-		std::cout.precision(17);
-		std::cout << "refT:\n" << refT << std::endl;
-		std::cout << "curT:\n" << curT << std::endl;
+		//std::cout.precision(17);
+		//std::cout << "refT:\n" << refT << std::endl;
+		//std::cout << "curT:\n" << curT << std::endl;
 
 		// Tolerance for change in rotation and translation
 		double rotTol = 0.1, transTol = 0.1;
@@ -161,11 +161,11 @@ TEST(icpTest, icpTest)
 		double rotErr = rotErrMat.array().abs().sum();
 		double transErr = transErrMat.array().abs().sum();
 
-		std::cout << "Rotation error:    " << rotErr   << std::endl;
-		std::cout << "Translation error: " << transErr << std::endl;
+		//std::cout << "Rotation error:    " << rotErr   << std::endl;
+		//std::cout << "Translation error: " << transErr << std::endl;
 		
-		EXPECT_LT(rotErr,   rotTol);
-		EXPECT_LT(transErr, transTol);
+		EXPECT_LT(rotErr,   rotTol) << "This error was caused by the test file:" << endl << "   " << config_file;
+		EXPECT_LT(transErr, transTol) << "This error was caused by the test file:" <<  endl << "   " << config_file;
 	}
 }
 
