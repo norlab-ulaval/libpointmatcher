@@ -93,7 +93,7 @@ struct PointMatcherIO
 	static DataPoints loadPCD(const std::string& fileName);
 	static DataPoints loadPCD(std::istream& is);
 
-	//static void savePCD(const DataPoints& data, const std::string& fileName); //!< save datapoints to PCD point cloud format
+	static void savePCD(const DataPoints& data, const std::string& fileName); //!< save datapoints to PCD point cloud format
 
 	//! Information to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo
