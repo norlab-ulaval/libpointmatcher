@@ -422,10 +422,23 @@ typename PointMatcherIO<T>::DescAssociationMap PointMatcherIO<T>::getDescAssocat
 			("red", DescAssociationPair(0,"color"))
 			("green", DescAssociationPair(1,"color"))
 			("blue", DescAssociationPair(2,"color"))
+			("alpha", DescAssociationPair(3,"color"))
+			("eigValues0", DescAssociationPair(0,"eigValues"))
+			("eigValues1", DescAssociationPair(1,"eigValues"))
+			("eigValues2", DescAssociationPair(2,"eigValues"))
+			("eigVectors0X", DescAssociationPair(0,"eigVectors"))
+			("eigVectors0Y", DescAssociationPair(1,"eigVectors"))
+			("eigVectors0Z",DescAssociationPair(2,"eigVectors"))
+			("eigVectors1X", DescAssociationPair(3,"eigVectors"))
+			("eigVectors1Y", DescAssociationPair(4,"eigVectors"))
+			("eigVectors1Z",DescAssociationPair(5,"eigVectors"))
+			("eigVectors2X", DescAssociationPair(6,"eigVectors"))
+			("eigVectors2Y", DescAssociationPair(7,"eigVectors"))
+			("eigVectors2Z",DescAssociationPair(8,"eigVectors"))
+			("normals", DescAssociationPair(0,"normals"))
 			("eigValues", DescAssociationPair(0,"eigValues"))
-			("eigVectorsX", DescAssociationPair(0,"eigVectors"))
-			("eigVectorsY", DescAssociationPair(1,"eigVectors"))
-			("eigVectorsZ",DescAssociationPair(2,"eigVectors"));
+			("eigVectors", DescAssociationPair(0,"eigVectors"))
+			("color", DescAssociationPair(0,"color"));
 	return assoc_map;
 }
 
@@ -474,21 +487,25 @@ std::string PointMatcherIO<T>::getColLabel(const Label& label, const int row)
 		{
 			colLabel = "blue";
 		}
+		if (row == 3)
+			colLabel = "alpha";
+	}
+	else if (label.text == "eigValues")
+	{
+		colLabel = "eigValues" + boost::lexical_cast<string>(row);
 	}
 	else if (label.text == "eigVectors")
 	{
-		if (row == 0)
-		{
-			colLabel = "eigVectorsX";
-		}
-		if (row == 0)
-		{
-			colLabel = "eigVectorsY";
-		}
-		if (row == 0)
-		{
-			colLabel = "eigVectorsZ";
-		}
+		// format: eigVectors<0-2><X-Z>
+		colLabel = "eigVectors" + boost::lexical_cast<string>(row/3);
+
+		int row_mod = row % 3;
+		if (row_mod == 0)
+			colLabel += "X";
+		else if (row_mod == 1)
+			colLabel += "Y";
+		else if (row_mod == 2)
+			colLabel += "Z";
 	}
 	else if (label.span  == 1)
 	{
@@ -1763,6 +1780,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	typedef typename DataPoints::Labels Labels;
 
 	size_t numFields = 0;
+	size_t numDataFields = 0; // takes into account the cound of each field for multi row descriptors
 	int xFieldCol = -1;
 	int yFieldCol = -1;
 	int zFieldCol = -1;
@@ -1771,10 +1789,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	map<int,DescAssociationPair> colToDescPair;
 	map<string,int> descLabelToNumRows;
 	map<string,int> descLabelToStartingRows;
-
-//	int xFieldBytes = -1;
-//	int yFieldBytes = -1;
-//	int zFieldBytes = -1;
+	vector<int> descDimensions;
 
 	string xFieldType;
 	string yFieldType;
@@ -1815,6 +1830,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 		else if (tokens[0] == "FIELDS")
 		{
 			numFields = tokens.size() - 1;
+			numDataFields = numFields; // in case COUNT is not defined in which case we assume 1 data field per field
 			for (size_t i = 1; i < tokens.size(); i++)
 			{
 				if (tokens[i] == "x")
@@ -1826,7 +1842,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 
 				else if(colLabelRegistered(tokens[i]))
 				{
-					descFieldsToKeep.push_back(i-1);
+					descFieldsToKeep.push_back(i);
 					DescAssociationPair associationPair = getDescAssociationPair(tokens[i]);
 
 					colToDescPair[i] = associationPair;
@@ -1876,10 +1892,40 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			}
 		}
 
-		// ignore descriptors for now
+		// overwrite descriptor dimension count with values from header
 		else if (tokens[0] == "COUNT")
 		{
-			continue;
+			if (tokens.size() - 1 != numFields)
+				throw runtime_error("PCD Parse Error: COUNT number does not match number of fields");
+
+			// first get total count including fields we aren't using
+			numDataFields = 0;
+
+			// we need to overwrite the col to desc pair since there will be more
+			// columns now that we have several data counts per field
+			map<int, DescAssociationPair> colToDescPair_ = colToDescPair;
+			colToDescPair.clear();
+
+			vector<int>::const_iterator nextFieldToKeepIt = descFieldsToKeep.begin();
+			for (int i = 1; i < tokens.size(); i++)
+			{
+				int count = boost::lexical_cast<int>(tokens[i]);
+
+				if (i == *nextFieldToKeepIt)
+				{
+					string descLabel = colToDescPair_[i].second;
+					descLabelToNumRows[descLabel] = count;
+
+					for (int p = 0; p < count; p++)
+						colToDescPair[numDataFields + p] = DescAssociationPair(p, descLabel);
+
+					if (nextFieldToKeepIt != descFieldsToKeep.end())
+						nextFieldToKeepIt++;
+				}
+
+				numDataFields += count;
+
+			}
 		}
 
 		else if (tokens[0] == "WIDTH")
@@ -1957,7 +2003,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	}
 
 	// allocate descriptor vectors
-	size_t numDescCols = descFieldsToKeep.size(); // number of descriptor vectors
+	size_t numDescCols = cumSum; // number of descriptor vectors
 	Matrix descriptors(numDescCols,numPoints);
 
 	// Now read in the data
@@ -1980,7 +2026,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 		vector<string> tokens;
 		boost::split(tokens, line, boost::is_any_of("\t\r "), boost::token_compress_on);
 
-		if (tokens.size() != numFields)
+		if (tokens.size() != numDataFields)
 			throw runtime_error(string("PCD Parse Error: number of data columns does not match number of fields at line: ") + boost::lexical_cast<string>(lineNum));
 
 		features(0,p) = boost::lexical_cast<T>(tokens[xFieldCol]);
@@ -1993,15 +2039,19 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 		} else
 			features(2,p) = 1;
 
-		for (int d = 0; d < numDescCols; d++)
+		for (map<int,DescAssociationPair>::const_iterator cit = colToDescPair.begin();
+				cit != colToDescPair.end(); cit++)
 		{
-			DescAssociationPair descPair = colToDescPair[d];
-			int startingRow = descLabelToStartingRows[descPair.second];
-			descriptors(startingRow + descPair.first,p) = boost::lexical_cast<T>(tokens[d]);
+			int startingRow = descLabelToStartingRows[cit->second.second];
+			descriptors(startingRow + cit->second.first,p) = boost::lexical_cast<T>(tokens[cit->first]);
 		}
 
 		p++;
 		lineNum++;
+
+		if (p == numPoints)
+			break;
+
 	}
 
 	if (p != numPoints)
@@ -2016,8 +2066,12 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	featureLabels.push_back(Label("y"));
 
 	Labels descriptorLabels;
+	int n = 0;
 	for (map<string,int>::const_iterator it = descLabelToNumRows.begin(); it != descLabelToNumRows.end(); it++)
+	{
 		descriptorLabels.push_back(Label(it->first,it->second));
+		n++;
+	}
 
 	if (zFieldCol > -1)
 		featureLabels.push_back(Label("z"));
