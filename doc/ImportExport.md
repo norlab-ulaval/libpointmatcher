@@ -69,7 +69,7 @@ The developers of PCL have developed their [own file format](http://pointclouds.
 
 The PCD format also exists in binary, however only the plain text (ASCII) version is supported.  Because PCD does not presribe standards for descriptors, pointmatcher utilizes the [same identifier mapping](#descmaptable) for identifying descriptors.   
 
-## Descriptor Property Identifiers (VTK and CSV) <a name="descmaptable"></a>
+## Descriptor Property Identifiers (PLY, CSV, PCD) <a name="descmaptable"></a>
 
 | Property Label | Description | Feature or Descriptor | Pointmatcher Descriptor Label |
 | -------------- | -------------| --------------------- | ---------------- |
@@ -85,11 +85,10 @@ The PCD format also exists in binary, however only the plain text (ASCII) versio
 | red            | red value (0-255) of RGB color code | descriptor |  color |
 | green          | green value (0-255) of RGB color code | descriptor |  color |
 | blue           | blue value (0-255) of RGB color code | descriptor |  color |
+| alpha          | alpha value (0-255) of RGBA color code | descriptor | color | 
 | intensity    | laser scan intensity at point | descriptor | intensity |
-| eigValues       | eigen value of nearest neighbors at point | descriptor | eigValue |
-| eigVectorsX       | x component of eigen vector of nearest neighbors at point | descriptor | eigVectors |
-| eigVectorsY      | y component of eigen vector of nearest neighbors at point | descriptor | eigVectors |
-| eigVectorsZ      | z component of eigen vector of nearest neighbors at point | descriptor | eigVectors |
+| eigValues0-2           | eigen values of nearest neighbors at point. Format is eigValues followed by the number of the eigen value (2 for 2D and 3 for 3D) | descriptor | eigValue |
+| eigVectors0-2X-Z       | eigen vectors of nearest neighbors at point.  Format is eigVectors followed by the number of the eigen vector (2 for 2D and 3 for 3D) followed by the axis identifier (X, Y or Z) | descriptor | eigVectors |
 | densities | point density at point | descriptor | densities |
 
 Several identifiers may synonymously point to the same pointmatcher descriptor.  For example, some standards may define the x normal component as *nx* and others as *normal_x*.  **Each file should only use one definition for each descriptor.  For example, it should never contain both "nx" and "normal_x" fields.**
@@ -105,4 +104,5 @@ The `getDescAssocationMap` returns a map which associates a property identifier 
 "nx" -> (0, "normals") <br>
 "ny" -> (1, "normals") <br>
 "nz" -> (2, "normals")
-   
+
+For converting pointmatcher descriptors back to a property identifier, you must modify the  `getColLabel` function in [pointmatcher/IO.cpp](/pointmatcher/IO.cpp).
