@@ -55,6 +55,10 @@ It only needs to be downloaded and extracted.
 [libnabo] must be downloaded and installed, please follow the [libnabo]'s documentation to do so.
 If you want to use YAML-enabled config files, you have to install [yaml-cpp]; on Ubuntu, [ROS repositories](http://www.ros.org/wiki/electric/Installation/Ubuntu) provide `yaml-cpp0.2.6-dev`.
 
+#####Important Note:
+
+A new version (version 0.5.\*) of yaml-cpp has been released with significant changes to the API.  As of now, **Pointmatcher only supports the older api (version 0.3.0)**.  Make sure that your cmake configuration points to the old API or you will not be able to compile.
+
 
 Compilation & Installation 
 ==========================

@@ -84,8 +84,8 @@ This will compile libnabo in a `/build` directory and install it on your system.
 
 *Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags.
 
-### 3. Installing yaml-cpp (Optional)
-Configuration files can be managed using YAML in libpointmatcher.  This allows users to edit configuration files in a readable format.  To support this, you need to install [yaml-cpp](http://code.google.com/p/yaml-cpp/). Either compile and install from the source or install package by running:
+### 3. Installing yaml-cpp 0.3.0 (Optional)
+Configuration files can be managed using YAML in libpointmatcher.  This allows users to edit configuration files in a readable format.  To support this, you need to install [yaml-cpp](http://code.google.com/p/yaml-cpp/).  **It is important that you install the older version (0.3.0) of lib-yaml or you will not be able to install Pointmatcher.**  If you are using versions of Ubuntu newer than 12.04, see the warning below. Either compile and install from the source or install package by running:
 ```
 sudo apt-get install libyaml-cpp-dev
 ```
@@ -94,7 +94,7 @@ sudo apt-get install libyaml-cpp-dev
 The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
 
 
-### 5. Compiling the Documentation
+### 4. Compiling the Documentation
 Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
 
 ```
@@ -103,7 +103,7 @@ sudo apt-get doxygen
 
 Once you have compiled libpointmatcher in step 6, you can simply open `/usr/local/share/doc/libpointmatcher/api/html/index.html` in a browser to view the API documentation.
 
-### 6. Installing libpointmatcher
+### 5. Installing libpointmatcher
 Clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
 ```
 cd ~/Libraries/
