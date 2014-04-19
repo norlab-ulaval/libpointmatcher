@@ -1,15 +1,15 @@
 Tutorials
 =========
 
-This page lists the available tutorials for libpointmatcher. The [Beginner Section](#beginner) is aimed at the more casual user and contains high-level information on the various steps of point cloud registration. The [Advanced Section](#advanced) is targeted at those with existing experience with point cloud registration and proficiency in C++ development.
+This page lists the available tutorials for libpointmatcher. The [Beginner Section](#beginner) is aimed at the more casual user and contains high-level information on the various steps of point cloud registration. The [Advanced Section](#advanced) is targeted at those with existing experience with point cloud registration and proficiency in C++ development.  Those who wish to contribute to libpointmatcher can follow the guidelines in the [Developer](#developer) section.
 
 Beginner<a name="beginner"></a>
 ---------
 
-- [What can I do with libpointmatcher?] (ApplicationsAndPub.md)
-- [Ubuntu: How to compile libpointmatcher?](Compilation.md)
-- [Windows: How to compile libpointmatcher?](CompilationWindows.md)
-- [Mac OS: How to compile libpointmatcher?](Compilation.md)
+- [What can I do with libpointmatcher](ApplicationsAndPub.md)
+- [Ubuntu: How to compile libpointmatcher](Compilation.md)
+- [Windows: How to compile libpointmatcher](CompilationWindows.md)
+- [Mac OS X: How to compile libpointmatcher](CompilationMac.md)
 - [What the different data filters do?](Datafilters.md)
 - [Example: applying a chain of data filters](ApplyingDatafilters.md)
 - [Example: basic registration using ICP](BasicRegistration.md)

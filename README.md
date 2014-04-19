@@ -8,8 +8,9 @@ libpointmatcher depends on:
  * [yaml-cpp], a YAML 1.2 parser and emitter (optional)
  
 and was compiled on:
-  * [Ubuntu] (/doc/Compilation.md)
-  * [Windows] (/doc/CompilationWindows.md)
+  * [Ubuntu](/doc/Compilation.md)
+  * [Windows](/doc/CompilationWindows.md)
+  * [Mac OS X](/doc/CompilationMac.md)
 
 libpointmatcher is being developed by [François Pomerleau](http://www.asl.ethz.ch/people/pomerlef) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
