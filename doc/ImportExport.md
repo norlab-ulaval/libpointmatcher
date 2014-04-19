@@ -60,7 +60,7 @@ The PLY file format was developed at the Stanford Graphics Lab for storing 3D gr
 
 PLY files contain a header section at the top of the file which defines the elements and properties that are used in the file.  The rest of the file contains numerical data.  The PLY format exists in plain text (ASCII) and in binary, however Pointmatcher only supports the plain text version.
 
-The PLY format does not prescribe labels to elements or properties, and therefore files must be encoded with appropriate labels in order to be read by Pointmatcher.  For information on which properties are supported by Pointmatcher, refer to the table in the next section.
+The PLY format does not prescribe labels to elements or properties, and therefore files must be encoded with appropriate labels in order to be read by Pointmatcher.  For information on which properties are supported by Pointmatcher, refer to [this table](#descmaptable).
 
 ## Point Cloud Library File Format (PCD) Files
 The [Point Cloud Library](http://pointclouds.org/)(PCL) is an alternative library for handling 2D and 3D point clouds.  While Pointmatcher only performs the task of and is optimized for point cloud registration, PCL is widespread in its functionality.
