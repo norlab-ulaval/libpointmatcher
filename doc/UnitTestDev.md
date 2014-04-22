@@ -163,7 +163,7 @@ ASSERT_EQ(testResults.features.cols(), numDivs(0) * numDivs(1) * numDivs(2) );
 EXPECT_TRUE(testResults.features.isApprox(valCloudP));
 ```
 
-### Test 3, Averaging Descriptors
+### Test 3: Averaging Descriptors
 To make sure that descriptors are averaged correctly, we use the same 2D point cloud as in Test 1.  For each voxel, we make each descriptor in the left half equal to a vector containing the value 1.  We make descriptors in the right half equal to a vector containing the value -1.  We expect to obtain a zero vector when averaging these vectors.
 
 After filtering, we check that the number of descriptors is equal to the number of voxels:
@@ -243,4 +243,4 @@ You can check that these tests are run succesfully by executing the following co
 utest/utest --path ../examples/data/ --gtest_filter=DataFilterTest.VoxelGridDataPointsFilter
 ```
 
-## Where To Go From Here
+<!--## Where To Go From Here>

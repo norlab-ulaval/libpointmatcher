@@ -5,7 +5,7 @@
 ######Latest update April 18, 2014 by Samuel Charreyron
 
 ## Foreword
-*The following instructions are aimed at users of Mac OS X.  The steps from this tutorial were performed on __OS X 10.9.2__ (Mavericks).  These instructions should be identical previous versions of Mac OS X.*
+*The following instructions are aimed at users of Mac OS X.  The steps from this tutorial were performed on __OS X 10.9.2__ (Mavericks).  These instructions should be identical on previous versions of Mac OS X.*
 
 ### Some Basic Requirements 
 #### a. Installing Xcode via the App Store (OS X 10.6.6  and later)
