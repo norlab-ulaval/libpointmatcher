@@ -352,6 +352,10 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 		}
 	}
 
+	//Normalize
+	if(useSoftThreshold)
+		w = w/w.maxCoeff();
+
 	return w;
 }
 
