@@ -121,7 +121,7 @@ make
 
 You can optionally verify that the version of libpointmatcher you have compiled is stable by running the unit tests.
 ```
-utest/utest --path ../examples/data/
+utest/utest --path [libpointmatcher root]/examples/data/
 ```
 
 Finally, to install libpointmatcher to your system run the following:
