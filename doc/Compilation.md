@@ -59,7 +59,7 @@ sudo apt-get install cmake cmake-gui
 ### 1. Installing Eigen
 The Eigen linear algebra is required before installing libpointmatcher and can be found [here](http://eigen.tuxfamily.org/).  Either download and compile Eigen following instructions from the package website or simply install package via apt by running:
 ```
-sudo apt-get libeigen3-dev
+sudo apt-get install libeigen3-dev
 ```
 
 ### 2. Installing libnabo
@@ -98,7 +98,7 @@ The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is co
 Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
 
 ```
-sudo apt-get doxygen
+sudo apt-get install doxygen
 ```
 
 Once you have compiled libpointmatcher in step 6, you can simply open `/usr/local/share/doc/libpointmatcher/api/html/index.html` in a browser to view the API documentation.
