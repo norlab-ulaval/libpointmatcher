@@ -11,7 +11,7 @@
 #### a. Installing Xcode via the App Store (OS X 10.6.6  and later)
 Mac OS X does not come with a built-in C++ command-line compiler.  You must therefore install XCode by visiting the App Store.
 
-Once Xcode is installed on your machine, you can launch it.  Navigate to preferences, and next to the Downloads tab.  In the components list, install the Command Line Tools component.
+Once Xcode is installed on your machine, launch it.  Navigate to preferences, to the downloads tab.  In the components list, install the Command Line Tools component.
 
 You should now have a working version of gcc.  You can check by running the following command in your terminal:
 
@@ -25,7 +25,7 @@ A message similar to the following should appear
 	Thread model: posix
 
 #### b. Installing Homebrew
-Because Mac OS X does not come with a built-in package manager like Ubuntu, you need to install your own.  This allows you to install, uninstall, update and maintain software packages with ease.  There are several possibilities including [Macports](http://www.macports.org/) and [Homebrew](http://brew.sh/).  While both are good options, we have a slight preference for homebrew which is easier to use.
+Because Mac OS X does not come with a built-in package manager like in Ubuntu, you need to install one on your own.  A package manager is handy because it allows you to install, uninstall, update and maintain software packages with ease.  There are several possibilities including [Macports](http://www.macports.org/) and [Homebrew](http://brew.sh/).  While both are good options, we have a slight preference for homebrew which is easier to use.
 
 You do not need a package manager to install libpointmatcher, but it simplifies things.  The following instructions will make use of homebrew and will thus assume that it is installed on your system.
 
@@ -44,7 +44,7 @@ Once the scripts finishes installing, you are good to go!
 #### d. Installing Git
 [Git](http://git-scm.com/) is a version control system similar to SVN designed for collaboration on large code projects.  Because libpointmatcher is hosted on Github, you should the git application to keep track of code revisions, and bug fixes pushed to the public repository.
 
-After installing the Xcode Command Line Tools, Git should already be installed on your system but you can check if it is by running
+After installing the Xcode Command Line Tools, Git should already be installed on your system but you can check that it is there by running
 
 ```
 git --version 
@@ -63,7 +63,7 @@ brew install git
 	brew install cmake
 
 ### 1. Installing Eigen
-The Eigen linear algebra is required before installing libpointmatcher and can be found [here](http://eigen.tuxfamily.org/).  Either download and compile Eigen following instructions from the package website or simply install package via apt by running:
+The Eigen linear algebra is required before installing libpointmatcher and can be found [here](http://eigen.tuxfamily.org/).  Either download and compile Eigen following instructions from the package website or simply install the package via homebrew by running:
 
 	brew install eigen
 

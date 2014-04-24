@@ -5,7 +5,7 @@
 ######Latest update January 9, 2014 by Samuel Charreyron
 
 ## Foreword
-*The following instructions are aimed at users of Ubuntu Linux.  The steps from this tutorial were performed on __Ubuntu 13.10__ (Saucy Salamander).  These instructions should be identical previous versions of Ubuntu.  Other Linux variants should follow a very similar process as with Mac OSX and other \*nix operating systems.*
+*The following instructions are aimed at users of Ubuntu Linux.  The steps from this tutorial were performed on __Ubuntu 13.10__ (Saucy Salamander).  These instructions should be identical previous versions of Ubuntu.  Other Linux variants or *nix operating systems should follow a very similar process.*
 
 ## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu)
 A pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
@@ -13,6 +13,7 @@ A pre-built version of the library is available on the [following](https://launc
 ```
 sudo apt-get install libpointmatcher-dev
 ```
+
 to install libpointmatcher to your system.
 
 ## Option 2: Detailed Installation Instructions 
@@ -41,23 +42,31 @@ Git should already be installed on your system but you can check if it is by run
 ```
 git --version 
 ```
+
 If Git is installed, you should see a message of the form
+
 ```
 git version 1.8.3.2
 ```
+
 If not refer to the Git homepage for installation instructions or install via the package manager by running
+
 ```
 sudo apt-get install git-core
 ```
+
 #### c. Installing CMake
 [CMake](http://www.cmake.org/) is a cross-platform build system and is used for building the libpointmatcher library.  Refer to the homepage for installation instructions, or you can once again use the package manager
+
 ```
 sudo apt-get install cmake cmake-gui
 ```
-*NOTE:* CMake has a GUI called cmake-gui which can be useful for configuring builds.  We recommend you install this as well as it will be referred to in this tutorial.
+
+*NOTE:* CMake has a GUI called cmake-gui which can be useful for configuring builds.  We recommend you install this as well since it will be referred to in this tutorial.
 
 ### 1. Installing Eigen
-The Eigen linear algebra is required before installing libpointmatcher and can be found [here](http://eigen.tuxfamily.org/).  Either download and compile Eigen following instructions from the package website or simply install package via apt by running:
+The Eigen linear algebra library is required before installing libpointmatcher and can be found [here](http://eigen.tuxfamily.org/).  Either download and compile Eigen following instructions from the package website or simply install package via apt by running:
+
 ```
 sudo apt-get install libeigen3-dev
 ```
@@ -80,19 +89,20 @@ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
 make
 sudo make install
 ```
+
 This will compile libnabo in a `/build` directory and install it on your system.
 
 *Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags.
 
 ### 3. Installing yaml-cpp 0.3.0 (Optional)
 Configuration files can be managed using YAML in libpointmatcher.  This allows users to edit configuration files in a readable format.  To support this, you need to install [yaml-cpp](http://code.google.com/p/yaml-cpp/).  **It is important that you install the older version (0.3.0) of lib-yaml or you will not be able to install Pointmatcher.**  If you are using versions of Ubuntu newer than 12.04, see the warning below. Either compile and install from the source or install package by running:
+
 ```
 sudo apt-get install libyaml-cpp-dev
 ```
 
 #### Warning for users of Ubuntu 14.04 (Trusty Tahr) or more recent versions
-The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
-
+The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is so far only compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
 
 ### 4. Compiling the Documentation
 Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
@@ -105,6 +115,7 @@ Once you have compiled libpointmatcher in step 6, you can simply open `/usr/loca
 
 ### 5. Installing libpointmatcher
 Clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
+
 ```
 cd ~/Libraries/
 git clone git://github.com/ethz-asl/libpointmatcher.git
@@ -130,7 +141,8 @@ sudo make install
 ```
 
 #### Possible Caveats
-If Eigen, libnabo, yaml-cpp, or GTest are not found during the installation, you will have to manually supply their installation locations by setting the CMake flags.  You can do so using the CMake GUI.
+If Eigen, libnabo, yaml-cpp are not found during the installation, you will have to manually supply their installation locations by setting the CMake flags.  You can do so using the CMake GUI.
+
 ```
 cd build
 cmake-gui .
@@ -142,12 +154,8 @@ cmake-gui .
 dpkg -L libyaml-cpp-dev
 ```
 -->
-You can then set `EIGEN_INCLUDE_DIR`, `NABO_INCLUDE_DIR`, `NABO_LIBRARY`, `GTEST_ROOT`, `yaml-cpp_INCLUDE_DIRS`, `yaml-cpp_LIBRARIES` to point to your installation directories as shown in the screenshot above.  Then, generate the make files by clicking generate and rerun the following inside `/build`:
+You can then set `EIGEN_INCLUDE_DIR`, `NABO_INCLUDE_DIR`, `NABO_LIBRARY`, `yaml-cpp_INCLUDE_DIRS`, `yaml-cpp_LIBRARIES` to point to your installation directories as shown in the screenshot above.  Then, generate the make files by clicking generate and rerun the following inside `/build`:
 ```
 make
 sudo make install
 ```
-
-
-| [Tutorials Home](Tutorials.md)    | | [Next](Datafilters.md) |
-| ------------- |:-------------:| -----:|
