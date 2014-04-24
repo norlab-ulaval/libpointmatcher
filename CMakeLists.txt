@@ -42,6 +42,9 @@ foreach(p LIB BIN INCLUDE CMAKE)
 	endif()
 endforeach()
 
+# Install package.xml for catkin
+install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
+
 #===========================================================================
 
 # Documentation
@@ -223,8 +226,6 @@ install(FILES
    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake"
 	 "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake"
 		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
-
-
 
 # For Windows
 if( MSVC ) # VS2012 does not support tuples correctly yet
