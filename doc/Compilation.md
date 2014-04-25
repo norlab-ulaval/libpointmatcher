@@ -7,6 +7,8 @@
 ## Foreword
 *The following instructions are aimed at users of Ubuntu Linux.  The steps from this tutorial were performed on __Ubuntu 13.10__ (Saucy Salamander).  These instructions should be identical previous versions of Ubuntu.  Other Linux variants should follow a very similar process as with Mac OSX and other \*nix operating systems.*
 
+Note: we only support 64-bit systems because of some issues with Eigen. 
+
 ## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu)
 A pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
 
