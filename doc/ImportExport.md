@@ -56,7 +56,7 @@ Data contained in these attributes are loaded into the Datapoints feature matric
 | Any other 3D descriptor       | VECTORS               |  
 
 ## Polygon File Format (PLY or Stanford Triangle) Files
-The PLY file format was developed at the Stanford Graphics Lab for storing 3D graphics in a relatively straight-forward fashion.  PLY files are flexible and data is structured by defining elements and properties.  Elements usually represent some geometrical construct such as a vertex or triangular face.  Elements are associated to scalar properties such as the a x, y, z coordinate in the case of vertices.  Properties can contain any information however including colors, normal vector components, densities etc...
+The PLY file format was developed at the Stanford Graphics Lab for storing 3D graphics in a relatively straight-forward fashion.  PLY files are flexible and data is structured by defining elements and properties.  Elements usually represent some geometrical construct such as a vertex or triangular face.  Elements are associated to scalar properties such as the x, y, z coordinate in the case of vertices.  Properties can contain any information however including colors, normal vector components, densities etc...
 
 PLY files contain a header section at the top of the file which defines the elements and properties that are used in the file.  The rest of the file contains numerical data.  The PLY format exists in plain text (ASCII) and in binary, however Pointmatcher only supports the plain text version.
 
@@ -67,7 +67,7 @@ The [Point Cloud Library](http://pointclouds.org/)(PCL) is an alternative librar
 
 The developers of PCL have developed their [own file format](http://pointclouds.org/documentation/tutorials/pcd_file_format.php) for storing point clouds.  Pointmatcher is compatible with this format and can import and export PCD files in the latest format (v 0.7).
 
-The PCD format also exists in binary, however only the plain text (ASCII) version is supported.  Because PCD does not presribe standards for descriptors, pointmatcher utilizes the [same identifier mapping](#descmaptable) for identifying descriptors.   
+The PCD format also exists in binary, however only the plain text (ASCII) version is supported.  Because PCD does not prescribe standards for descriptors, pointmatcher utilizes the [same identifier mapping](#descmaptable) for identifying descriptors.   
 
 ## Descriptor Property Identifiers (PLY, CSV, PCD) <a name="descmaptable"></a>
 
