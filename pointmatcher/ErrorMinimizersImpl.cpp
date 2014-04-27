@@ -101,6 +101,9 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 template<typename T>
 T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 {
+	//NOTE: computing overlap of 2 point clouds can be complicated due to
+	// the sparse nature of the representation. Here is only an estimate 
+	// of the true overlap.
 	const int nbPoints = this->lastErrorElements.reading.features.cols();
 	if(nbPoints == 0)
 	{
@@ -114,15 +117,20 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 	}
 
 	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
+
+	const Vector dists = (this->lastErrorElements.reading.features - this->lastErrorElements.reference.features).colwise().norm();
+	const T mean = dists.sum()/nbPoints;
+
 	int count = 0;
 	for(int i=0; i < nbPoints; i++)
 	{
-		const T dist = (this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i)).norm();
-		if(dist < noises(0,i))
+		if(dists(i) < (mean + noises(0,i)))
+		{
 			count++;
+		}
 	}
 
-	return count/nbPoints;
+	return (T)count/(T)nbPoints;
 }
 
 template struct ErrorMinimizersImpl<float>::PointToPointErrorMinimizer;
@@ -450,9 +458,10 @@ T ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::getOverlap() const
 		const T dist = (this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i)).norm();
 		if(dist < noises(0,i))
 			count++;
+
 	}
 
-	return count/nbPoints;
+	return (T)count/(T)nbPoints;
 }
 
 template<typename T>
