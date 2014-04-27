@@ -60,6 +60,6 @@ g++ -I/usr/local/include/pointmatcher -o myProgram.o -c myProgram.cpp
 ```
 You can then link to the pointmatcher library using:
 ```
-g++ myProgram.o  -o myProgram -llibpointmatcher -lnabo -lboost_system
+g++ myProgram.o   -o myProgram -lpointmatcher -lnabo -lboost_system -lyaml-cpp -lboost_filesystem -lrt
 ```
 Nevertheless, it is always more convenient to use a builder such as CMake.
