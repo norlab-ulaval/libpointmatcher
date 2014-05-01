@@ -242,5 +242,3 @@ You can check that these tests are run succesfully by executing the following co
 ```
 utest/utest --path ../examples/data/ --gtest_filter=DataFilterTest.VoxelGridDataPointsFilter
 ```
-
-<!--## Where To Go From Here>
