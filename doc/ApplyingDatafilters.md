@@ -1,8 +1,8 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](Datafilters.md) | [Next](BasicRegistration.md) |
+| [Tutorials Home](Tutorials.md)    | [Previous](Datafilters.md) | [Next](ICPIntro.md) |
 | ------------- |:-------------:| -----:|
 
 # Applying Data Point Filters
-######Latest update January 16, 2014 by Samuel Charreyron
+######Latest update May 1, 2014 by Samuel Charreyron
 
 ## Overview
 The following will go through the steps for writing a simple program which configures a chain of data filters, and applies this chain to a point cloud.  For information on datafilters, refer to the [datapoint filters tutorial](Datafilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/convert.cpp](../examples/convert.cpp).
@@ -111,5 +111,5 @@ The [last filter](Datafilters.md#orientnormalshead) is used to reorient normal v
 ```
 
 ## Where To Go From Here
-For more information on building your own configurations, refer to the tutorial on [building yaml configurations]().
+For more information on building your own configurations, refer to the tutorial on [building yaml configurations](Configuration.md).  For an introduction on how to perform ICP registration on an example dataset, refer to the [next tutorial](ICPIntro.md).
 

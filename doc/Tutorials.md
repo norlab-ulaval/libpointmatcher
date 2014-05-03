@@ -12,7 +12,7 @@ Beginner<a name="beginner"></a>
 - [Mac OS X: How to compile libpointmatcher](CompilationMac.md)
 - [What the different data filters do?](Datafilters.md)
 - [Example: applying a chain of data filters](ApplyingDatafilters.md)
-- [Example: basic registration using ICP](BasicRegistration.md)
+- [Example: An introduction to ICP](ICPIntro.md)
 - [The ICP chain configuration and its variants](DefaultICPConfig.md)
 - [How to create custom configuration file using YAML](Configuration.md)
 - [Supported file types and importing/exporting point clouds](ImportExport.md)
@@ -21,6 +21,7 @@ Advanced<a name="advanced"></a>
 -------
 - [How to link my project to libpointmatcher](LinkingProjects.md)
 - [How are point clouds represented?](Pointclouds.md)
+- [Example: Writing a program which performs ICP](BasicRegistration.md)
 - [How to move a point cloud using a rigid transformation?](Transformations.md)
 
 Developer<a name="developer"></a>

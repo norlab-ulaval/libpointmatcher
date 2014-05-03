@@ -1,8 +1,8 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](ApplyingDatafilters.md) | [Next](Configuration.md) |
+| [Tutorials Home](Pointclouds.md)    | [Previous](Pointclouds.md) | [Next](Transformations.md) |
 | ------------- |:-------------:| -----:|
 
-# An Introduction to ICP Registration
-######Latest update January 9, 2014 by Samuel Charreyron
+# Writing a program which performs ICP
+######Latest update May 1, 2014 by Samuel Charreyron
 
 ## Overview
 
