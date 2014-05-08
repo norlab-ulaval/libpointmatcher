@@ -18,6 +18,22 @@ if (NOT GREP_VERSION_RESULT EQUAL 0)
 endif (NOT GREP_VERSION_RESULT EQUAL 0)
 string(REGEX REPLACE ".*\"(.*)\".*" "\\1" PROJECT_VERSION "${PROJECT_VERSION}" )
 
+# Check if 32 bit platform
+# By default, libpointmatcher is not compatible with and will not build on a 
+# 32 bit system
+if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 ) 
+    MESSAGE(SEND_ERROR "32 bits compiler detected. Libpointmatcher is only supported in 64 bits." )
+    SET( EX_PLATFORM 32 )
+    SET( EX_PLATFORM_NAME "x86" )
+endif( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
+
+## To force install as a 32 bit library, set BUILD_32 to true
+if( BUILD_32 )
+	MESSAGE(STATUS "Building as a 32 bit library")
+	SET(CMAKE_CXX_FLAGS "-m32")
+endif( BUILD_32 )
+
+
 #======================= installation =====================================
 
 # Offer the user the choice of overriding the installation directories
