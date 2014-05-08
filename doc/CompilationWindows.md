@@ -150,7 +150,3 @@ If you are used to development project, here what you need:
     ```
     
     Note that the flag /m:X defines the number of core to use.
- 
- 
-| [Tutorials Home](Tutorials.md)    | | [Next](Datafilters.md) |
-| ------------- |:-------------:| -----:|
