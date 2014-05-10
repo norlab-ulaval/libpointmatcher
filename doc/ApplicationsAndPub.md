@@ -77,7 +77,7 @@ Click on the image to play.
 
 
 
-## Publications
+## Publications using libpointmatcher
 
 1.	N. Corso and A. Zakhor, “Indoor Localization Algorithms for an Ambulatory Human Operated 3D Mobile Mapping System.,” Remote Sens., vol. 5, no. 12, 2013.
 
