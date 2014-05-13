@@ -1,4 +1,15 @@
+
+
+Documentation and Tutorials
+===========================
 libpointmatcher is a modular ICP library, useful for robotics and computer vision.
+
+**Quick link for the tutorial pages: [Tutorials](doc/Tutorials.md ).**
+
+Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
+
+Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`.  
+
 
 libpointmatcher depends on:
 
@@ -12,18 +23,9 @@ and was compiled on:
   * [Windows](/doc/CompilationWindows.md)
   * [Mac OS X](/doc/CompilationMac.md)
 
-libpointmatcher is being developed by [François Pomerleau](http://www.asl.ethz.ch/people/pomerlef) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
+libpointmatcher is being developed by [François Pomerleau](mailto:f.pomerleau@gmail.com) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
 You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
-
-Documentation and Tutorials
-===========================
-
-You can find a growing list of tutorials on this page: [Tutorials](doc/Tutorials.md ).
-
-Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
-
-Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`.  
 
 Pre-built binaries
 ==================
