@@ -1,7 +1,18 @@
 # Applications and Publications
+Here some applications and scientific publications using libpointmatcher.
 
 ## Youtube Videos
 Click on the image to play.
+
+
+#### ARTOR: Long-term 3D map maintenance in dynamic environments
+- Sensor: Velodyne HDL-32E
+- Application: 3D mapping and localization
+
+<a href="https://www.youtube.com/watch?v=cMgLyLpnsoU" target="_blank">
+<img src="http://img.youtube.com/vi/cMgLyLpnsoU/0.jpg" 
+ width="240" height="180" border="10" />
+</a>
 
 #### NIFTi: railyard mapping
 - Sensor: Sick LMS-151
@@ -23,7 +34,7 @@ Click on the image to play.
 </a>
 
 
-#### Artor: Navigation in urban scene
+#### ARTOR: Navigation in urban scene
 - Sensor: Velodyne HDL-32E
 - Application: Navigation
 
@@ -34,7 +45,7 @@ Click on the image to play.
 
 
 
-#### Artor: Mapping rough terrain
+#### ARTOR: Mapping rough terrain
 - Sensor: Velodyne HDL-32E
 - Application: 3D mapping and localization
 
