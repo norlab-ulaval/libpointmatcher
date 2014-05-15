@@ -49,7 +49,6 @@ endif()
 set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
 
 
-
 # Make relative paths absolute (needed later on)
 foreach(p LIB BIN INCLUDE CMAKE)
 	set(var INSTALL_${p}_DIR)

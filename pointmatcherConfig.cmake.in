@@ -8,3 +8,6 @@ get_filename_component(POINTMATCHER_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set(POINTMATCHER_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
   
 set(POINTMATCHER_LIBRARIES "@POINTMATCHER_LIB@;@ALL_LIBS@")
+
+# This causes catkin simple to link against these libraries
+set(POINTMATCHER_FOUND_CATKIN_PROJECT true)
