@@ -66,6 +66,8 @@ sudo apt-get install cmake cmake-gui
 
 *NOTE:* CMake has a GUI called cmake-gui which can be useful for configuring builds.  We recommend you install this as well since it will be referred to in this tutorial.
 
+*NOTE 2:* Some functionalities like find_package() (only useful if you intent to link with your own project) will only work if you have CMake 2.8.11 or over. On Ubuntu 12.04, only 2.8.7 is available using apt-get. If you intent to use such functionality, you will have to compile CMake from sources.
+
 ### 1. Installing Eigen
 The Eigen linear algebra library is required before installing libpointmatcher and can be found [here](http://eigen.tuxfamily.org/).  Either download and compile Eigen following instructions from the package website or simply install package via apt by running:
 
