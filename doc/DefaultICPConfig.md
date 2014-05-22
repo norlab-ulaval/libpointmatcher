@@ -1,4 +1,4 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](ICPIntro.md) | [Next](ImportExport.md) |
+| [Tutorials Home](Tutorials.md)    | [Previous](ICPIntro.md) | [Next](Configuration.md) |
 | ------------- |:-------------:| -----:|
 
 # Default Configuration of the ICP Chain
