@@ -62,7 +62,7 @@ const DP ref(DP::load(argv[1]));
 const DP data(DP::load(argv[2]));
 ```
 
-The `ICP` class represents the ICP chain shown in [Figure 1](#icp_chain_diagram).  We create an object instantiation of an ICP chain and apply the default settings using `setDefault`.  A view of the default ICP chain configuration is shown [here](DefaultICPConfiguration.md).
+The `ICP` class represents the ICP chain shown in [Figure 1](#icp_chain_diagram).  We create an object instantiation of an ICP chain and apply the default settings using `setDefault`.  A view of the default ICP chain configuration is shown [here](DefaultICPConfig.md).
 
 ```cpp
 // Create the default ICP algorithm
