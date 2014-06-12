@@ -1439,7 +1439,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			for (int pr = 0; f < n_feat || d < n_dprop ; pr++)
 			{
 				unsigned next_f = feature_props[f].pos; // get next supported feature property column
-				int next_d, next_d_r;
+				int next_d 		= 0;
+				int next_d_r 	= 0;
 				if (n_desc > 0)
 				{
 					next_d 		= descriptor_props[d].pos; // get next supported descriptor property column
@@ -1800,8 +1801,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	string yFieldType;
 	string zFieldType;
 
-	size_t width;
-	size_t height;
+	size_t width = 0;
+	size_t height = 0;
 	size_t numPoints;
 	size_t numPointsR; // redundant value specified in POINTS field
 
@@ -2093,9 +2094,6 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 template<typename T>
 void PointMatcherIO<T>::savePCD(const DataPoints& data,
 		const std::string& fileName) {
-	typedef typename DataPoints::Label Label;
-	//typedef typename DataPoints::Labels Labels;
-
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
