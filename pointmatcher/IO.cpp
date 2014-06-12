@@ -551,13 +551,15 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 	char *token;
 	while (!is.eof())
 	{
-		char line[1024];
-		is.getline(line, sizeof(line));
-		line[sizeof(line)-1] = 0;
+		//char line[1024];
+      string line;
+      safeGetLine(is, line);
+		//is.getline(line, sizeof(line));
+		//line[sizeof(line)-1] = 0;
 	
 		// Look for text header
-		unsigned int len = strspn(line, " ,+-.1234567890Ee");
-		if(len != strlen(line))
+		unsigned int len = strspn(line.c_str(), " ,+-.1234567890Ee");
+		if(len != line.length())
 		{
 			//cout << "Header detected" << endl;
 			hasHeader = true;
@@ -570,9 +572,10 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		// Count dimension using first line
 		if(firstLine)
 		{
+         
 			char tmpLine[1024];
+         strcpy(tmpLine, line.c_str());
 			char *brkt = 0;
-			strcpy(tmpLine, line);
 			token = strtok_r(tmpLine, delimiters, &brkt);
 			while (token)
 			{
@@ -671,7 +674,9 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 
 		// Load data!
 		char *brkt = 0;
-		token = strtok_r(line, delimiters, &brkt);
+      char line_c[1024];
+      strcpy(line_c,line.c_str());
+		token = strtok_r(line_c, delimiters, &brkt);
 		int currentCol = 0;
 		int d = 0; // descriptor vector iterator
 		int nextDescCol = -1; // next descriptor column to be recorded
@@ -1434,7 +1439,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			for (int pr = 0; f < n_feat || d < n_dprop ; pr++)
 			{
 				unsigned next_f = feature_props[f].pos; // get next supported feature property column
-				int next_d, next_d_r;
+				int next_d 		= 0;
+				int next_d_r 	= 0;
 				if (n_desc > 0)
 				{
 					next_d 		= descriptor_props[d].pos; // get next supported descriptor property column
@@ -1795,8 +1801,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	string yFieldType;
 	string zFieldType;
 
-	size_t width;
-	size_t height;
+	size_t width = 0;
+	size_t height = 0;
 	size_t numPoints;
 	size_t numPointsR; // redundant value specified in POINTS field
 
@@ -2088,9 +2094,6 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 template<typename T>
 void PointMatcherIO<T>::savePCD(const DataPoints& data,
 		const std::string& fileName) {
-	typedef typename DataPoints::Label Label;
-	//typedef typename DataPoints::Labels Labels;
-
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
@@ -2183,4 +2186,39 @@ template
 void PointMatcherIO<float>::savePCD(const DataPoints& data, const std::string& fileName);
 template
 void PointMatcherIO<double>::savePCD(const DataPoints& data, const std::string& fileName);
+
+template<typename T>
+istream & PointMatcherIO<T>::safeGetLine( istream& is, string & t)
+{
+   t.clear();
+
+       // The characters in the stream are read one-by-one using a std::streambuf.
+       // That is faster than reading them one-by-one using the std::istream.
+       // Code that uses streambuf this way must be guarded by a sentry object.
+       // The sentry object performs various tasks,
+       // such as thread synchronization and updating the stream state.
+
+       std::istream::sentry se(is, true);
+       std::streambuf* sb = is.rdbuf();
+
+       for(;;) {
+           int c = sb->sbumpc();
+           switch (c) {
+           case '\n':
+               return is;
+           case '\r':
+               if(sb->sgetc() == '\n')
+                   sb->sbumpc();
+               return is;
+           case EOF:
+               // Also handle the case when the last line has no line ending
+               if(t.empty())
+                   is.setstate(std::ios::eofbit);
+               return is;
+           default:
+               t += (char)c;
+           }
+       }
+}
+
 

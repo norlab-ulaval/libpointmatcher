@@ -66,9 +66,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
 	const Matches& matches)
-{
-	typedef typename Matches::Ids Ids;
-	
+{	
 	assert(matches.ids.rows() > 0);
 
 	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
@@ -153,9 +151,6 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const OutlierWeights& outlierWeights,
 	const Matches& matches)
 {
-	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
-	typedef typename Matches::Ids Ids;
-
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
@@ -316,9 +311,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
 	const Matches& matches)
-{
-	typedef typename Matches::Ids Ids;
-	
+{	
 	assert(matches.ids.rows() > 0);
 
 	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
@@ -491,9 +484,6 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const OutlierWeights& outlierWeights,
 	const Matches& matches)
 {
-	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
-	typedef typename Matches::Ids Ids;
-
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points

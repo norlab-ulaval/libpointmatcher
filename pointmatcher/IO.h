@@ -252,7 +252,10 @@ struct PointMatcherIO
 		bool elementSupported(const std::string& elem_name); //!< returns true if element named elem_name is supported by this parser
 		static PLYElement* createElement(const std::string& elem_name, const int elem_num, const unsigned offset); //!< factory function, build element defined by name with elem_num elements
 	};
-
+   
+   static std::istream & safeGetLine( std::istream& os, std::string & line);
+   
 };
+
 
 #endif // __POINTMATCHER_IO_H
