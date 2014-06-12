@@ -82,10 +82,10 @@ The PCD format also exists in binary, however only the plain text (ASCII) versio
 | normal_x             | x component of normal vector at point | descriptor            | normals          |
 | normal_y             | y component of normal vector at point | descriptor            | normals          |
 | normal_z             | z component of normal vector at point | descriptor            | normals          |
-| red            | red value (0-255) of RGB color code | descriptor |  color |
-| green          | green value (0-255) of RGB color code | descriptor |  color |
-| blue           | blue value (0-255) of RGB color code | descriptor |  color |
-| alpha          | alpha value (0-255) of RGBA color code | descriptor | color | 
+| red            | red value (0.0-1.0) of RGB color code | descriptor |  color |
+| green          | green value (0.0-1.0) of RGB color code | descriptor |  color |
+| blue           | blue value (0.0-1.0) of RGB color code | descriptor |  color |
+| alpha          | alpha value (0.0-1.0) of RGBA color code | descriptor | color | 
 | intensity    | laser scan intensity at point | descriptor | intensity |
 | eigValues0-2           | eigen values of nearest neighbors at point. Format is eigValues followed by the number of the eigen value (2 for 2D and 3 for 3D) | descriptor | eigValue |
 | eigVectors0-2X-Z       | eigen vectors of nearest neighbors at point.  Format is eigVectors followed by the number of the eigen vector (2 for 2D and 3 for 3D) followed by the axis identifier (X, Y or Z) | descriptor | eigVectors |
