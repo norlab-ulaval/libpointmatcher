@@ -38,7 +38,7 @@ On the top-left, you can find a pipeline browser which displays the various "lay
 On the bottom-left you can find options for editing properties, and retrieving information about a given layer.
 
 ### Opening the Point Clouds in Paraview
-Go to File -> Open and open [examples/icp_tutorial/cloud_0.vtk](examples/icp_tutorial/cloud_0.vtk).  Don't forget to click the apply button in the properties pane in order to load the point cloud into the viewer.  Now we will change some properties of the point cloud to make it easer to visualize in the viewer.  In the properties pane, change the representation style from surface to points, and change the point size to 1.
+Go to File -> Open and open [examples/icp_tutorial/cloud_0.vtk](../examples/icp_tutorial/cloud_0.vtk).  Don't forget to click the apply button in the properties pane in order to load the point cloud into the viewer.  Now we will change some properties of the point cloud to make it easer to visualize in the viewer.  In the properties pane, change the representation style from surface to points, and change the point size to 1.
 
 |Figure 4: Point properties window of Paraview|
 |:------------|
