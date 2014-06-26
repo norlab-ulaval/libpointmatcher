@@ -210,18 +210,18 @@ add_subdirectory(utest)
 # to allow find_package() on pointmatcher
 #=============================================
 
-export(PACKAGE pointmatcher)
+export(PACKAGE libpointmatcher)
 
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
 
-# Create the pointmatcherConfig.cmake and pointmatcherConfigVersion files
+# Create the libpointmatcherConfig.cmake and libpointmatcherConfigVersion files
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
    "${INSTALL_INCLUDE_DIR}")
 # ... for the build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
-configure_file(pointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/pointmatcherConfig.cmake" @ONLY)
+configure_file(libpointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" @ONLY)
 
 # Change variables for the install tree
 set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
@@ -229,17 +229,17 @@ list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR})
 
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
 set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
-configure_file(pointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake" @ONLY)
+configure_file(libpointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" @ONLY)
 
 # Generate cmake for versionning
-configure_file(pointmatcherConfigVersion.cmake.in
-  "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" @ONLY)
+configure_file(libpointmatcherConfigVersion.cmake.in
+  "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" @ONLY)
  
-# Install the pointmatcherConfig.cmake and pointmatcherConfigVersion.cmake
+# Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
 install(FILES
-   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake"
-	 "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake"
+   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
+	 "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
 		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
 # For Windows
