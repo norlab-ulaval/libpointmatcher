@@ -424,6 +424,11 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::AnnealledSigmoid
 	const DataPoints& filteredReference,
 	const Matches& input)
 {
+  const int knn = input.dists.rows();
+  const int readPtsCount = input.dists.cols();
+
+  OutlierWeights w(knn, readPtsCount);
+
   T temp;
   if (iter >= tempSteps)
     {
@@ -432,18 +437,48 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::AnnealledSigmoid
   else 
     {
       // linear steps
-      temp = tempStart + (tempStop-tempStart)*iter/tempSteps;
+      //temp = tempStart + (tempStop-tempStart)*iter/tempSteps;
 
       // log steps
       temp = exp(log(tempStart)+ (log(tempStop)-log(tempStart))*iter/tempSteps);
     }
 
   ++iter;
+  
+  // w = 1/(1+exp((x^2-scale^2)/(scale^2*2T)))
+  T scale2 = scale*scale;
 
-  // w = 1/(1+exp((x^2-scale^2)/(2T)))
-  OutlierWeights w(((((input.dists.array()-scale*scale)/(2*temp)).exp() + T(1)).inverse()).template cast<T>());
+  //const BOOST_AUTO(normalsReading, filteredReading.getDescriptorViewByName("normals"));
+  const BOOST_AUTO(normalsReference, filteredReference.getDescriptorViewByName("normals"));
+  if (normalsReference.cols() !=0) 
+  {
+    for (int x = 0; x < w.cols(); ++x) // pts in reading
+      {
+	//const Vector normalRead = normalsReading.col(x).normalized();
+	
+	for (int y = 0; y < w.rows(); ++y) // knn 
+	  {
+	    const int idRef = input.ids(y, x);
+	    
+	    const Vector normalRef = normalsReference.col(idRef).normalized();
+
+	    // compute point to plane distance
+	    const T err = normalRef.dot(
+					filteredReference.features.col(idRef).head(normalRef.size())-
+					filteredReading.features.col(x).head(normalRef.size())
+					);
+	    w(y, x) = T(1)/(T(1)+exp( (err*err-scale2)/(scale2*2*temp) ));
+	  }
+      }
+  }
+  else 
+  {
+      w = (((((input.dists.array()-scale2)/(scale2*2*temp)).exp() + T(1)).inverse()).template cast<T>());
+  }
+  //w /= w.maxCoeff();
 
   LOG_INFO_STREAM("Iteration: " << iter << " temp: " << temp << " wsum: " << w.sum());
+  LOG_INFO_STREAM("size " << w.rows() << " " << w.cols())
   return w;
 }
 

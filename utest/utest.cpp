@@ -971,7 +971,7 @@ public:
 	{
 		icp.setDefault();
 		// Uncomment for consol outputs
-		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
+		setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 		
 		icp.outlierFilters.clear();
 	}
@@ -1069,6 +1069,38 @@ TEST_F(OutlierFilterTest, VarTrimmedDistOutlierFilter)
 		("lambda", toParam(0.9))
 	);
 	validate2dTransformation();
+	validate3dTransformation();
+}
+
+TEST_F(OutlierFilterTest, CauchyDistOutlierFilter2D)
+{
+	addFilter("CauchyDistOutlierFilter", map_list_of
+		("rbar", toParam(0.005))
+		("rbarStart", toParam(.5))
+		("rbarSteps", toParam(10))
+	);
+	validate2dTransformation();
+}
+
+TEST_F(OutlierFilterTest, AnnealledSigmoidDistOutlierFilter2D)
+{
+	addFilter("AnnealledSigmoidDistOutlierFilter", map_list_of
+		("scale", toParam(0.015))
+		("tempStart", toParam(10))
+		("tempStop", toParam(0.01))
+		("tempSteps", toParam(5))
+	);
+	validate2dTransformation();
+}
+
+TEST_F(OutlierFilterTest, AnnealledSigmoidDistOutlierFilter3D)
+{
+	addFilter("AnnealledSigmoidDistOutlierFilter", map_list_of
+		("scale", toParam(0.1))
+		("tempStart", toParam(100))
+		("tempStop", toParam(0.1))
+		("tempSteps", toParam(15))
+	);
 	validate3dTransformation();
 }
 
