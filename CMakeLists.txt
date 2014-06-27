@@ -83,10 +83,10 @@ find_path(EIGEN_INCLUDE_DIR Eigen/Core
 
 # nabo
 find_path(NABO_INCLUDE_DIR nabo/nabo.h
-	/usr/local/include
+	/usr/local/include ${LIBNABO_INSTALL_DIR}/include
 )
 find_library(NABO_LIBRARY NAMES libnabo.a nabo PATHS
-	/usr/local/lib
+	/usr/local/lib ${LIBNABO_INSTALL_DIR}/lib
 )
 
 # optionally, look for OpenCL library
