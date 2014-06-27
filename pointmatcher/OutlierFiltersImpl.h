@@ -218,6 +218,63 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
+	struct CauchyDistOutlierFilter: public OutlierFilter
+	{
+		inline static const std::string description()
+		{
+			return "Weight the outliers based on a Cauchy function of the match residual";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return boost::assign::list_of<ParameterDoc>
+			  ( "rbar", "rbar the value at which the weight is 0.5", "1", "0.0000001", "inf", &P::Comp<T>)
+			  ( "rbarStart", "initial value of rbar","10","0.00000001","inf", &P::Comp<T>)
+			  ( "rbarSteps", "number of steps in which to converge rbar","0","0","100000", &P::Comp<int>)
+			;
+		}
+
+		const T rbarStart;
+		const T rbarStop;
+		const int rbarSteps;
+
+		CauchyDistOutlierFilter(const Parameters& params = Parameters());
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+		
+	private:
+		int iter;
+
+	};
+	
+	struct AnnealledSigmoidDistOutlierFilter: public OutlierFilter
+	{
+		inline static const std::string description()
+		{
+			return "Weight the outliers based on an annealled sigmoid function of the match residual";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return boost::assign::list_of<ParameterDoc>
+			  ( "scale", "The soft outlier threshold", "1", "0.0000001", "inf", &P::Comp<T>)
+			  ( "tempStart", "initial value of the temperature","10","0.000001","inf", &P::Comp<T>)
+			  ( "tempStop", "final value of the temperature","0.1","0.000001","inf", &P::Comp<T>)
+			  ( "tempSteps", "number of steps in which to converge the temperature","10","0","100000", &P::Comp<int>)
+			;
+		}
+
+		const T scale;
+		const T tempStart;
+		const T tempStop;
+		const int tempSteps;
+
+		AnnealledSigmoidDistOutlierFilter(const Parameters& params = Parameters());
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+		
+	private:
+		int iter;
+		
+	};
+	
+
 }; // OutlierFiltersImpl
 
 #endif // __POINTMATCHER_OUTLIERFILTERS_H

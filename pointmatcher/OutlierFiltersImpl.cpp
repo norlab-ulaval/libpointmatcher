@@ -363,3 +363,90 @@ template struct OutlierFiltersImpl<float>::GenericDescriptorOutlierFilter;
 template struct OutlierFiltersImpl<double>::GenericDescriptorOutlierFilter;
 
 
+// CauchyDistOutlierFilter
+template<typename T>
+OutlierFiltersImpl<T>::CauchyDistOutlierFilter::CauchyDistOutlierFilter(const Parameters& params):
+	OutlierFilter("CauchyDistOutlierFilter", CauchyDistOutlierFilter::availableParameters(), params),
+	rbarStart(Parametrizable::get<T>("rbarStart")), 
+	rbarStop(Parametrizable::get<T>("rbar")), 
+	rbarSteps(Parametrizable::get<int>("rbarSteps"))
+{
+  iter = 0;
+}
+
+template<typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::CauchyDistOutlierFilter::compute(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const Matches& input)
+{
+
+  T rbar;
+  if (iter >= rbarSteps)
+    {
+      rbar = rbarStop;
+    }
+  else 
+    {
+      // linear steps
+      rbar = rbarStart + (rbarStop-rbarStart)*iter/rbarSteps;
+
+      // log steps
+      rbar = exp(log(rbarStart)+ (log(rbarStop)-log(rbarStart))*iter/rbarSteps);
+    }
+
+  ++iter;
+
+  OutlierWeights w(((input.dists.array()/(rbar*rbar) + T(1)).inverse()).template cast<T>());
+
+  LOG_INFO_STREAM("Iteration: " << iter << " rbar: " << rbar << " wsum: " << w.sum());
+  return w;
+}
+
+template struct OutlierFiltersImpl<float>::CauchyDistOutlierFilter;
+template struct OutlierFiltersImpl<double>::CauchyDistOutlierFilter;
+
+// AnnealledSigmoidDistOutlierFilter
+template<typename T>
+OutlierFiltersImpl<T>::AnnealledSigmoidDistOutlierFilter::AnnealledSigmoidDistOutlierFilter(const Parameters& params):
+	OutlierFilter("AnnealledSigmoidDistOutlierFilter", AnnealledSigmoidDistOutlierFilter::availableParameters(), params),
+	scale(Parametrizable::get<T>("scale")), 
+	tempStart(Parametrizable::get<T>("tempStart")), 
+	tempStop(Parametrizable::get<T>("tempStop")), 
+	tempSteps(Parametrizable::get<int>("tempSteps"))
+{
+  iter = 0;
+}
+
+template<typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::AnnealledSigmoidDistOutlierFilter::compute(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const Matches& input)
+{
+  T temp;
+  if (iter >= tempSteps)
+    {
+      temp = tempStop;
+    }
+  else 
+    {
+      // linear steps
+      temp = tempStart + (tempStop-tempStart)*iter/tempSteps;
+
+      // log steps
+      temp = exp(log(tempStart)+ (log(tempStop)-log(tempStart))*iter/tempSteps);
+    }
+
+  ++iter;
+
+  // w = 1/(1+exp((x^2-scale^2)/(2T)))
+  OutlierWeights w(((((input.dists.array()-scale*scale)/(2*temp)).exp() + T(1)).inverse()).template cast<T>());
+
+  LOG_INFO_STREAM("Iteration: " << iter << " temp: " << temp << " wsum: " << w.sum());
+  return w;
+}
+
+template struct OutlierFiltersImpl<float>::AnnealledSigmoidDistOutlierFilter;
+template struct OutlierFiltersImpl<double>::AnnealledSigmoidDistOutlierFilter;
+
