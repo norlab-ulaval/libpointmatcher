@@ -145,7 +145,7 @@ __Impact on the number of points:__ reduces number of points
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
 |dim        | Dimension over which the distance is thresholded.  If -1, then the threshold is a radial distance from the center | -1 | 0: x, 1: y, 2: z, -1: radial|
-|maxDistance |Distance threshold (in m) beyond which points are selected | 1.0 | min: -inf, max: inf|
+|minDistance |Distance threshold (in m) beyond which points are selected | 1.0 | min: -inf, max: inf|
 
 ## Maximum Point Count Filter <a name="maxpointcounthead"></a>
 ### Description
