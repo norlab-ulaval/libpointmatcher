@@ -124,7 +124,7 @@ __Impact on the number of points:__ reduces number of points
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
 |dim        | Dimension over which the distance is thresholded.  If -1, then the threshold is a radial distance from the center | -1 | 0: x, 1: y, 2: z, -1: radial|
-|maxDistance |Distance threshold (in m) beyond which points are rejected | 1.0 | min: -inf, max: inf|
+|maxDist |Distance threshold (in m) beyond which points are rejected | 1.0 | min: -inf, max: inf|
 
 ### Example
 In the following example, a maximum distance threshold of 1m is applied radially by setting the dimension parameter to -1.  As shown on the image below, points which lie within a sphere of radius 1m centered at the origin are selected by the filter and are displayed in white.  All other points are rejected by the filter.  Were a maximum distance filter to be replaced by an equivalent minimum distance filter, only points outside the sphere would be selected. 
@@ -145,7 +145,7 @@ __Impact on the number of points:__ reduces number of points
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
 |dim        | Dimension over which the distance is thresholded.  If -1, then the threshold is a radial distance from the center | -1 | 0: x, 1: y, 2: z, -1: radial|
-|minDistance |Distance threshold (in m) beyond which points are selected | 1.0 | min: -inf, max: inf|
+|minDist |Distance threshold (in m) beyond which points are selected | 1.0 | min: -inf, max: inf|
 
 ## Maximum Point Count Filter <a name="maxpointcounthead"></a>
 ### Description
