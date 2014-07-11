@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace YAML
+namespace YAML_PM
 {
     class Node;
     

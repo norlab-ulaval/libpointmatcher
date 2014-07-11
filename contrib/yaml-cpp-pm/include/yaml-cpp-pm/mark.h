@@ -8,7 +8,7 @@
 
 #include "yaml-cpp/dll.h"
 
-namespace YAML
+namespace YAML_PM
 {
 	struct YAML_CPP_API Mark {
 		Mark(): pos(0), line(0), column(0) {}

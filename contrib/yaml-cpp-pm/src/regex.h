@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-namespace YAML
+namespace YAML_PM
 {
 	class Stream;
 

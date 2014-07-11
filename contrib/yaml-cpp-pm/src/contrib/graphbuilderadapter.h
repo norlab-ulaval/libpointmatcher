@@ -12,7 +12,7 @@
 #include "yaml-cpp-pm/contrib/anchordict.h"
 #include "yaml-cpp-pm/contrib/graphbuilder.h"
 
-namespace YAML
+namespace YAML_PM
 {
   class GraphBuilderAdapter : public EventHandler
   {

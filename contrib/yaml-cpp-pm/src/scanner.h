@@ -16,7 +16,7 @@
 #include "stream.h"
 #include "token.h"
 
-namespace YAML
+namespace YAML_PM
 {
 	class Node;
 	class RegEx;

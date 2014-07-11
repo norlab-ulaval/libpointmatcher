@@ -12,7 +12,7 @@
 #include <string>
 #include <sstream>
 
-namespace YAML
+namespace YAML_PM
 {
 	// error messages
 	namespace ErrorMsg

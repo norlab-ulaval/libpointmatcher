@@ -6,7 +6,7 @@
 #endif
 
 
-namespace YAML
+namespace YAML_PM
 {
 	template <typename>
 	struct is_numeric { enum { value = false }; };

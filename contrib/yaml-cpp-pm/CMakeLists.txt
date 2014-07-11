@@ -19,7 +19,7 @@ set(YAML_CPP_BUILD_CONTRIB  OFF)
 # --> General
 # see http://www.cmake.org/cmake/help/cmake2.6docs.html#variable:BUILD_SHARED_LIBS
 #     http://www.cmake.org/cmake/help/cmake2.6docs.html#command:add_library
-set(BUILD_SHARED_LIBS ON)
+set(BUILD_SHARED_LIBS OFF)
 
 # --> Apple
 option(APPLE_UNIVERSAL_BIN "Apple: Build universal binary" OFF)
@@ -161,7 +161,7 @@ endif()
 ###
 ### Library
 ###
-add_library(yaml-cpp
+add_library(yaml-cpp-pm
 	${sources}
 	${public_headers}
 	${private_headers}
@@ -170,7 +170,7 @@ add_library(yaml-cpp
 	${contrib_private_headers}
 )
 
-set_target_properties(yaml-cpp PROPERTIES
+set_target_properties(yaml-cpp-pm PROPERTIES
 	VERSION "${YAML_CPP_VERSION}"
 	SOVERSION "${YAML_CPP_VERSION_MAJOR}.${YAML_CPP_VERSION_MINOR}"
 	PROJECT_LABEL "yaml-cpp ${LABEL_SUFFIX}"

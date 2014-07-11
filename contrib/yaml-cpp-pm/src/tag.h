@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace YAML
+namespace YAML_PM
 {
 	struct Token;
 	struct Directives;

@@ -6,7 +6,7 @@
 #endif
 
 
-namespace YAML
+namespace YAML_PM
 {
 	template <typename T, typename U>
 	struct is_same_type {

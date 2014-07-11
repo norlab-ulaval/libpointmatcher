@@ -9,7 +9,7 @@
 #include "yaml-cpp-pm/noncopyable.h"
 #include <cstddef>
 
-namespace YAML
+namespace YAML_PM
 {
 	class StreamCharSource
 	{

@@ -7,7 +7,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace YAML
+namespace YAML_PM
 {
 	namespace Utils
 	{

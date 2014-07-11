@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #include "yaml-cpp/yaml.h"
 #else
 	#include "yaml-cpp-pm/yaml.h"
+    namespace YAML = YAML_PM;
 #endif // HAVE_YAML_CPP
 
 namespace PointMatcherSupport
@@ -165,7 +166,7 @@ namespace PointMatcherSupport
 		}
 				
 		//! Create an instance from a YAML node
-		Interface* createFromYAML(const YAML::Node& module) const
+        Interface* createFromYAML(const YAML::Node& module) const
 		{
 			Parametrizable::Parameters params;
 			std::string name;
@@ -178,9 +179,9 @@ namespace PointMatcherSupport
 			else
 			{
 				// get parameters
-				YAML::Iterator mapIt(module.begin());
+                YAML::Iterator mapIt(module.begin());
 				mapIt.first() >> name;
-				for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
+                for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
 				{
 					std::string key, value;
 					paramIt.first() >> key;

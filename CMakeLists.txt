@@ -70,6 +70,9 @@ include(UseDoxygen)
 # initially
 set(EXTRA_LIBS "")
 
+# gtest and yaml-cpp
+add_subdirectory(contrib)
+
 # boost
 find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
 if (Boost_MINOR_VERSION GREATER 47)
@@ -129,12 +132,9 @@ if(USE_SYSTEM_YAML_CPP)
     endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 else(USE_SYSTEM_YAML_CPP)
             include_directories(contrib/yaml-cpp-pm/include)
-            set(EXTRA_LIBS ${EXTRA_LIBS} yaml-cpp)
+            set(EXTRA_LIBS ${EXTRA_LIBS} yaml-cpp-pm)
             message("-- yaml-cpp found, text-based configuration enabled")
 endif(USE_SYSTEM_YAML_CPP)
-
-# gtest and yaml-cpp
-add_subdirectory(contrib)
 
 # link rt support if POSIX timers are used
 check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
@@ -181,10 +181,10 @@ file(GLOB POINTMATCHER_HEADERS "pointmatcher/*.h")
 
 set(SHARED_LIBS "false" CACHE BOOL "To build shared (true) or static (false) library")
 if (SHARED_LIBS)
-        add_library(pointmatcher SHARED ${POINTMATCHER_SRC})
+        add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
 	install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 else(SHARED_LIBS)
-        add_library(pointmatcher ${POINTMATCHER_SRC})
+        add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 endif(SHARED_LIBS)
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)

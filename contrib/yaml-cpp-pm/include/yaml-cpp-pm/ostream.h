@@ -8,7 +8,7 @@
 
 #include <string>
 
-namespace YAML
+namespace YAML_PM
 {
 	class ostream
 	{

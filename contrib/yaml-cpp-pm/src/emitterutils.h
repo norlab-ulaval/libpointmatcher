@@ -9,7 +9,7 @@
 #include "yaml-cpp-pm/ostream.h"
 #include <string>
 
-namespace YAML
+namespace YAML_PM
 {
     class Binary;
     

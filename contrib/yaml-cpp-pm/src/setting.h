@@ -10,7 +10,7 @@
 #include <vector>
 #include "yaml-cpp-pm/noncopyable.h"
 
-namespace YAML
+namespace YAML_PM
 {
 	class SettingChangeBase;
 	

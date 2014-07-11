@@ -8,7 +8,7 @@
 #include "yaml-cpp/dll.h"
 #include <memory>
 
-namespace YAML
+namespace YAML_PM
 {
 	class Node;
 	struct IterPriv;

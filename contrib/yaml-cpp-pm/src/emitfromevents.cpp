@@ -5,14 +5,14 @@
 #include <sstream>
 
 namespace {
-	std::string ToString(YAML::anchor_t anchor) {
+	std::string ToString(YAML_PM::anchor_t anchor) {
 		std::stringstream stream;
 		stream << anchor;
 		return stream.str();
 	}
 }
 
-namespace YAML
+namespace YAML_PM
 {
 	EmitFromEvents::EmitFromEvents(Emitter& emitter): m_emitter(emitter)
 	{

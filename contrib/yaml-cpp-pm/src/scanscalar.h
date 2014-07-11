@@ -10,7 +10,7 @@
 #include "regex.h"
 #include "stream.h"
 
-namespace YAML
+namespace YAML_PM
 {
 	enum CHOMP { STRIP = -1, CLIP, KEEP };
 	enum ACTION { NONE, BREAK, THROW };

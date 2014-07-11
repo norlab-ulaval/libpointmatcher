@@ -8,7 +8,7 @@
 #include "yaml-cpp-pm/eventhandler.h"
 #include <stack>
 
-namespace YAML
+namespace YAML_PM
 {
 	class Emitter;
 	

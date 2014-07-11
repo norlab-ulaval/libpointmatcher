@@ -2,7 +2,7 @@
 #include "yaml-cpp-pm/exceptions.h"
 #include <sstream>
 
-namespace YAML
+namespace YAML_PM
 {
 	namespace Exp
 	{

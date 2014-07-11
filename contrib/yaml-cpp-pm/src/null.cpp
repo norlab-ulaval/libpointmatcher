@@ -1,7 +1,7 @@
 #include "yaml-cpp-pm/null.h"
 #include "yaml-cpp-pm/node.h"
 
-namespace YAML
+namespace YAML_PM
 {
 	_Null Null;
 

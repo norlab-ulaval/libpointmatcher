@@ -6,7 +6,7 @@
 #endif
 
 
-namespace YAML
+namespace YAML_PM
 {
 	class Node;
 

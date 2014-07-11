@@ -5,7 +5,7 @@
 #include <cassert>
 #include <memory>
 
-namespace YAML
+namespace YAML_PM
 {
 	Scanner::Scanner(std::istream& in)
 		: INPUT(in), m_startedStream(false), m_endedStream(false), m_simpleKeyAllowed(false), m_canBeJSONFlow(false)

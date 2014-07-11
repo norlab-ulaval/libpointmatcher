@@ -2,7 +2,7 @@
 #include "yaml-cpp-pm/exceptions.h"
 #include <limits>
 
-namespace YAML
+namespace YAML_PM
 {
 	EmitterState::EmitterState(): m_isGood(true), m_curIndent(0), m_requiresSoftSeparation(false), m_requiresHardSeparation(false)
 	{

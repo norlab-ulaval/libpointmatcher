@@ -8,7 +8,7 @@
 
 #include <cstddef>
 
-namespace YAML
+namespace YAML_PM
 {
 	class StringCharSource
 	{

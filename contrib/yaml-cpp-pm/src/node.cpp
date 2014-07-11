@@ -12,7 +12,7 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace YAML
+namespace YAML_PM
 {
 	bool ltnode::operator()(const Node *pNode1, const Node *pNode2) const {
 		return *pNode1 < *pNode2;

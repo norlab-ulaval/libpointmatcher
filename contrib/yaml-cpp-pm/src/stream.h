@@ -15,7 +15,7 @@
 #include <set>
 #include <string>
 
-namespace YAML
+namespace YAML_PM
 {
 	class Stream: private noncopyable
 	{
