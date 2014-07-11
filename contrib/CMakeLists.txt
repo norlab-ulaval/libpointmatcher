@@ -1,4 +1,9 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+# External libraries packed with libpointmatcher
+
+# GTest
 add_library(gtest gtest/gtest-all.cc)
 
-add_subdirectory(yaml-cpp)
+# Wrapped yaml-cpp
+if(NOT USE_SYSTEM_YAML_CPP)
+add_subdirectory(yaml-cpp-pm)
+endif()

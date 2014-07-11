@@ -108,21 +108,28 @@ if (USE_OPEN_CL)
 endif(USE_OPEN_CL)
 
 # yaml-cpp
-#find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
-#	/usr/local/include
-#)
-#find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
-#	/usr/local/lib
-#)
-#if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-#	include_directories(${yaml-cpp_INCLUDE_DIRS})
-#	set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
-#	add_definitions(-DHAVE_YAML_CPP)
-#	set(yamlcpp_FOUND)
-#	message("-- yaml-cpp found, text-based configuration enabled")
-#else (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-#	message("-- yaml-cpp not found, text-based configuration and related applications disabled")
-#endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+option(USE_SYSTEM_YAML_CPP "Use system version of yaml-cpp rather than one packaged with libpointmatcher" FALSE)
+
+if(USE_SYSTEM_YAML_CPP)
+    message(STATUS "Looking for yaml-cpp on system")
+    find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
+            /usr/local/include
+    )
+    find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
+            /usr/local/lib
+    )
+    if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+            include_directories(${yaml-cpp_INCLUDE_DIRS})
+            set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
+            add_definitions(-DSYSTEM_YAML_CPP)
+            set(yamlcpp_FOUND)
+            message("-- yaml-cpp found, text-based configuration enabled")
+    else(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+            message("-- yaml-cpp not found, text-based configuration and related applications disabled")
+    endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+else(USE_SYSTEM_YAML_CPP)
+    include_directories(contrib/yaml-cpp-pm/include)
+endif(USE_SYSTEM_YAML_CPP)
 
 # gtest and yaml-cpp
 add_subdirectory(contrib)

@@ -41,9 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
 
-#ifdef HAVE_YAML_CPP
-	#include "yaml-cpp/yaml.h"
-#endif // HAVE_YAML_CPP
+//#ifdef SYSTEM_YAML_CPP
+//    #include "yaml-cpp/yaml.h"
+//#else
+	#include "yaml-cpp-pm/yaml.h"
+//#endif // HAVE_YAML_CPP
 
 namespace PointMatcherSupport
 {
