@@ -82,15 +82,11 @@ void PointMatcher<T>::ICPChainBase::cleanup()
 	inspector.reset();
 }
 
-#ifdef HAVE_YAML_CPP
-
 //! Hook to load addition subclass-specific content from the YAML file
 template<typename T>
 void PointMatcher<T>::ICPChainBase::loadAdditionalYAMLContent(YAML::Node& doc)
 {
 }
-
-#endif // HAVE_YAML_CPP
 
 //! Construct an ICP algorithm that works in most of the cases
 template<typename T>
@@ -113,8 +109,6 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 template<typename T>
 void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 {
-	#ifdef HAVE_YAML_CPP
-	
 	this->cleanup();
 	
 	YAML::Parser parser(in);
@@ -158,10 +152,6 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 				(boost::format("Module type %1% does not exist") % moduleType).str()
 			);
 	}
-	
-	#else // HAVE_YAML_CPP
-	throw runtime_error("Yaml support not compiled in. Install yaml-cpp, configure build and recompile.");
-	#endif // HAVE_YAML_CPP
 }
 
 //! Return the remaining number of points in reading after prefiltering but before the iterative process
@@ -177,8 +167,6 @@ unsigned PointMatcher<T>::ICPChainBase::getPrefilteredReferencePtsCount() const
 {
 	return prefilteredReferencePtsCount;
 }
-
-#ifdef HAVE_YAML_CPP
 
 //! Instantiate modules if their names are in the YAML file
 template<typename T>
@@ -213,8 +201,6 @@ const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(cons
 		module.reset();
 	return regName;
 }
-
-#endif // HAVE_YAML_CPP
 
 template struct PointMatcher<float>::ICPChainBase;
 template struct PointMatcher<double>::ICPChainBase;

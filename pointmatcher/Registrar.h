@@ -41,11 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
 
-//#ifdef SYSTEM_YAML_CPP
-//    #include "yaml-cpp/yaml.h"
-//#else
+#ifdef SYSTEM_YAML_CPP
+    #include "yaml-cpp/yaml.h"
+#else
 	#include "yaml-cpp-pm/yaml.h"
-//#endif // HAVE_YAML_CPP
+#endif // HAVE_YAML_CPP
 
 namespace PointMatcherSupport
 {
@@ -163,9 +163,7 @@ namespace PointMatcherSupport
 		{
 			return getDescriptor(name)->createInstance(name, params);
 		}
-		
-		#ifdef HAVE_YAML_CPP
-		
+				
 		//! Create an instance from a YAML node
 		Interface* createFromYAML(const YAML::Node& module) const
 		{
@@ -193,9 +191,7 @@ namespace PointMatcherSupport
 			
 			return create(name, params);
 		}
-		
-		#endif // HAVE_YAML_CPP
-		
+				
 		//! Get the description of a class
 		const std::string getDescription(const std::string& name) const
 		{

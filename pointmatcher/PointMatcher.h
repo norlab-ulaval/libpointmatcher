@@ -597,7 +597,6 @@ struct PointMatcher
 		
 		void cleanup();
 		
-		#ifdef HAVE_YAML_CPP
 		virtual void loadAdditionalYAMLContent(YAML::Node& doc);
 		
 		template<typename R>
@@ -608,7 +607,6 @@ struct PointMatcher
 		
 		/*template<typename R>
 		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);*/
-		#endif // HAVE_YAML_CPP
 	};
 	
 	//! ICP algorithm

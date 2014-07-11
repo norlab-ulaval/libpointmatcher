@@ -128,7 +128,9 @@ if(USE_SYSTEM_YAML_CPP)
             message("-- yaml-cpp not found, text-based configuration and related applications disabled")
     endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 else(USE_SYSTEM_YAML_CPP)
-    include_directories(contrib/yaml-cpp-pm/include)
+            include_directories(contrib/yaml-cpp-pm/include)
+            set(EXTRA_LIBS ${EXTRA_LIBS} yaml-cpp)
+            message("-- yaml-cpp found, text-based configuration enabled")
 endif(USE_SYSTEM_YAML_CPP)
 
 # gtest and yaml-cpp
@@ -174,12 +176,15 @@ set(POINTMATCHER_SRC
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp
 )
+
+file(GLOB POINTMATCHER_HEADERS "pointmatcher/*.h")
+
 set(SHARED_LIBS "false" CACHE BOOL "To build shared (true) or static (false) library")
 if (SHARED_LIBS)
-	add_library(pointmatcher SHARED ${POINTMATCHER_SRC})
+        add_library(pointmatcher SHARED ${POINTMATCHER_SRC})
 	install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 else(SHARED_LIBS)
-	add_library(pointmatcher ${POINTMATCHER_SRC})
+        add_library(pointmatcher ${POINTMATCHER_SRC})
 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 endif(SHARED_LIBS)
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)

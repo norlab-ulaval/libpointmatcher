@@ -70,8 +70,6 @@ PointMatcher<T>::DataPointsFilters::DataPointsFilters()
 template<typename T>
 PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in)
 {
-	#ifdef HAVE_YAML_CPP
-	
 	YAML::Parser parser(in);
 	YAML::Node doc;
 	parser.GetNextDocument(doc);
@@ -85,8 +83,6 @@ PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in)
 		const YAML::Node& module(*moduleIt);
 		this->push_back(pm.REG(DataPointsFilter).createFromYAML(module));
 	}
-	
-	#endif // HAVE_YAML_CPP
 }
 
 //! Init the chain
