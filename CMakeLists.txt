@@ -27,6 +27,7 @@ if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
     SET( EX_PLATFORM_NAME "x86" )
 endif( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
 
+## WARNING: unsupported
 ## To force install as a 32 bit library, set BUILD_32 to true
 if( BUILD_32 )
 	MESSAGE(STATUS "Building as a 32 bit library")
@@ -107,23 +108,23 @@ if (USE_OPEN_CL)
 endif(USE_OPEN_CL)
 
 # yaml-cpp
-find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
-	/usr/local/include
-)
-find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
-	/usr/local/lib
-)
-if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-	include_directories(${yaml-cpp_INCLUDE_DIRS})
-	set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
-	add_definitions(-DHAVE_YAML_CPP)
-	set(yamlcpp_FOUND)
-	message("-- yaml-cpp found, text-based configuration enabled")
-else (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-	message("-- yaml-cpp not found, text-based configuration and related applications disabled")
-endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+#find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
+#	/usr/local/include
+#)
+#find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
+#	/usr/local/lib
+#)
+#if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+#	include_directories(${yaml-cpp_INCLUDE_DIRS})
+#	set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
+#	add_definitions(-DHAVE_YAML_CPP)
+#	set(yamlcpp_FOUND)
+#	message("-- yaml-cpp found, text-based configuration enabled")
+#else (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+#	message("-- yaml-cpp not found, text-based configuration and related applications disabled")
+#endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 
-# gtest
+# gtest and yaml-cpp
 add_subdirectory(contrib)
 
 # link rt support if POSIX timers are used
