@@ -11,7 +11,7 @@
 #include <ios>
 #include "stream.h"
 
-namespace YAML_PM
+namespace YAML
 {
 	////////////////////////////////////////////////////////////////////////////////
 	// Here we store a bunch of expressions for matching different parts of the file.

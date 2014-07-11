@@ -1,6 +1,6 @@
 #include "graphbuilderadapter.h"
 
-namespace YAML_PM
+namespace YAML
 {
   int GraphBuilderAdapter::ContainerFrame::sequenceMarker;
   

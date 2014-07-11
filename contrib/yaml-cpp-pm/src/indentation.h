@@ -9,7 +9,7 @@
 #include "yaml-cpp-pm/ostream.h"
 #include <iostream>
 
-namespace YAML_PM
+namespace YAML
 {
 	struct Indentation {
 		Indentation(unsigned n_): n(n_) {}

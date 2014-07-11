@@ -9,7 +9,7 @@
 #include <string>
 #include <map>
 
-namespace YAML_PM
+namespace YAML
 {
 	struct Version {
 		bool isDefault;

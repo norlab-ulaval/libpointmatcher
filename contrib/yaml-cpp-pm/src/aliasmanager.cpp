@@ -3,7 +3,7 @@
 #include <cassert>
 #include <sstream>
 
-namespace YAML_PM
+namespace YAML
 {
 	AliasManager::AliasManager(): m_curAnchor(0)
 	{

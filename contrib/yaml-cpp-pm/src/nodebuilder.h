@@ -11,7 +11,7 @@
 #include <stack>
 #include <vector>
 
-namespace YAML_PM
+namespace YAML
 {
 	class Node;
 	

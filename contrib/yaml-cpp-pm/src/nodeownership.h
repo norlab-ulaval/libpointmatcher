@@ -10,7 +10,7 @@
 #include "ptr_vector.h"
 #include <set>
 
-namespace YAML_PM
+namespace YAML
 {
 	class Node;
 	

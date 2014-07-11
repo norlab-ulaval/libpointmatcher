@@ -11,10 +11,10 @@
 #include <memory>
 #include <vector>
 
-namespace YAML_PM {
+namespace YAML {
 	
 	template <typename T>
-	class ptr_vector: private YAML_PM::noncopyable
+	class ptr_vector: private YAML::noncopyable
 	{
 	public:
 		ptr_vector() {}

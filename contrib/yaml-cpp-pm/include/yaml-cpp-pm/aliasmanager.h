@@ -8,7 +8,7 @@
 #include "yaml-cpp-pm/anchor.h"
 #include <map>
 
-namespace YAML_PM
+namespace YAML
 {
 	class Node;
 	

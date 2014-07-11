@@ -4,7 +4,7 @@
 #include "yaml-cpp-pm/exceptions.h"
 #include "token.h"
 
-namespace YAML_PM
+namespace YAML
 {
 	// ScanScalar
 	// . This is where the scalar magic happens.

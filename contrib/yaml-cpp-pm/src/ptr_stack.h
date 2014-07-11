@@ -12,7 +12,7 @@
 #include <vector>
 
 template <typename T>
-class ptr_stack: private YAML_PM::noncopyable
+class ptr_stack: private YAML::noncopyable
 {
 public:
 	ptr_stack() {}

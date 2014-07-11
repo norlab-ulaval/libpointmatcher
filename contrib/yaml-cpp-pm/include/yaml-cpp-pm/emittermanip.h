@@ -8,7 +8,7 @@
 
 #include <string>
 
-namespace YAML_PM
+namespace YAML
 {
 	enum EMITTER_MANIP {
 		// general manipulators

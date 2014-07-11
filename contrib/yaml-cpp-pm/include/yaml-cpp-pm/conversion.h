@@ -12,7 +12,7 @@
 #include <string>
 #include <sstream>
 
-namespace YAML_PM
+namespace YAML
 {
 	// traits for conversion
 	

@@ -8,7 +8,7 @@
 #include "yaml-cpp-pm/anchor.h"
 #include <string>
 
-namespace YAML_PM
+namespace YAML
 {
 	struct Mark;
 	

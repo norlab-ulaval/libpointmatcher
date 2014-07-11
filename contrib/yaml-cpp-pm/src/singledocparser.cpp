@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <algorithm>
 
-namespace YAML_PM
+namespace YAML
 {
 	SingleDocParser::SingleDocParser(Scanner& scanner, const Directives& directives): m_scanner(scanner), m_directives(directives), m_pCollectionStack(new CollectionStack), m_curAnchor(0)
 	{

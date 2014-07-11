@@ -11,7 +11,7 @@
 #include <set>
 #include <map>
 
-namespace YAML_PM
+namespace YAML
 {
 	template<typename Seq>
 	inline Emitter& EmitSeq(Emitter& emitter, const Seq& seq) {

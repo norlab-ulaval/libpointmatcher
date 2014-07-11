@@ -8,7 +8,7 @@
 
 #include "yaml-cpp/dll.h"
 
-namespace YAML_PM
+namespace YAML
 {
 	class Node;
 	

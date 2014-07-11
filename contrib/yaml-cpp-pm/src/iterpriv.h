@@ -10,7 +10,7 @@
 #include <vector>
 #include <map>
 
-namespace YAML_PM
+namespace YAML
 {
 	class Node;
 

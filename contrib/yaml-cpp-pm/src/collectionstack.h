@@ -9,7 +9,7 @@
 #include <stack>
 #include <cassert>
 
-namespace YAML_PM
+namespace YAML
 {
 	struct CollectionType {
 		enum value { None, BlockMap, BlockSeq, FlowMap, FlowSeq, CompactMap };
