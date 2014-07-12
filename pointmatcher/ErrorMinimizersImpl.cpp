@@ -179,7 +179,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// Compute cross product of cross = cross(reading X normalRef)
 	const Matrix cross = this->crossProduct(mPts.reading.features, normalRef);
 
-	// wF = [weights*cross, normals]
+	// wF = [weights*cross, weights*normals]
 	// F  = [cross, normals]
 	Matrix wF(normalRef.rows()+ cross.rows(), normalRef.cols());
 	Matrix F(normalRef.rows()+ cross.rows(), normalRef.cols());
@@ -191,7 +191,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	}
 	for(int i=0; i < normalRef.rows(); i++)
 	{
-		wF.row(i + cross.rows()) = normalRef.row(i);
+    	        wF.row(i + cross.rows()) = mPts.weights.cwise() * normalRef.row(i);
 		F.row(i + cross.rows()) = normalRef.row(i);
 	}
 
@@ -225,10 +225,14 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	if(dim == 4 && !force2D)
 	{
 		Eigen::Transform<T, 3, Eigen::Affine> transform;
+		// PLEASE DONT USE EULAR ANGLES!!!!
 		// Rotation in Eular angles follow roll-pitch-yaw (1-2-3) rule
-		transform = Eigen::AngleAxis<T>(x(0), Eigen::Matrix<T,1,3>::UnitX())
+		/*transform = Eigen::AngleAxis<T>(x(0), Eigen::Matrix<T,1,3>::UnitX())
 				* Eigen::AngleAxis<T>(x(1), Eigen::Matrix<T,1,3>::UnitY())
-				* Eigen::AngleAxis<T>(x(2), Eigen::Matrix<T,1,3>::UnitZ());
+				* Eigen::AngleAxis<T>(x(2), Eigen::Matrix<T,1,3>::UnitZ());*/
+
+		transform = Eigen::AngleAxis<T>(x.head(3).norm(),x.head(3).normalized());
+
 		// Reverse roll-pitch-yaw conversion, very useful piece of knowledge, keep it with you all time!
 		/*const T pitch = -asin(transform(2,0));
 		const T roll = atan2(transform(2,1), transform(2,2));
@@ -512,7 +516,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// Compute cross product of cross = cross(reading X normalRef)
 	const Matrix cross = this->crossProduct(mPts.reading.features, normalRef);
 
-	// wF = [weights*cross, normals]
+	// wF = [weights*cross, weight*normals]
 	// F  = [cross, normals]
 	Matrix wF(normalRef.rows()+ cross.rows(), normalRef.cols());
 	Matrix F(normalRef.rows()+ cross.rows(), normalRef.cols());
@@ -524,7 +528,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	}
 	for(int i=0; i < normalRef.rows(); i++)
 	{
-		wF.row(i + cross.rows()) = normalRef.row(i);
+       	        wF.row(i + cross.rows()) = mPts.weights.cwise() * normalRef.row(i);
 		F.row(i + cross.rows()) = normalRef.row(i);
 	}
 
@@ -558,15 +562,18 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	if(dim == 4 && !force2D)
 	{
 		Eigen::Transform<T, 3, Eigen::Affine> transform;
+		// IT IS NOT CORRECT TO USE EULER ANGLES!
 		// Rotation in Eular angles follow roll-pitch-yaw (1-2-3) rule
-		transform = Eigen::AngleAxis<T>(x(0), Eigen::Matrix<T,1,3>::UnitX())
+		/*transform = Eigen::AngleAxis<T>(x(0), Eigen::Matrix<T,1,3>::UnitX())
 				* Eigen::AngleAxis<T>(x(1), Eigen::Matrix<T,1,3>::UnitY())
-				* Eigen::AngleAxis<T>(x(2), Eigen::Matrix<T,1,3>::UnitZ());
+				* Eigen::AngleAxis<T>(x(2), Eigen::Matrix<T,1,3>::UnitZ()); */
 		// Reverse roll-pitch-yaw conversion, very useful piece of knowledge, keep it with you all time!
 		/*const T pitch = -asin(transform(2,0));
 		const T roll = atan2(transform(2,1), transform(2,2));
 		const T yaw = atan2(transform(1,0) / cos(pitch), transform(0,0) / cos(pitch));
 		std::cerr << "d angles" << x(0) - roll << ", " << x(1) - pitch << "," << x(2) - yaw << std::endl;*/
+
+		transform = Eigen::AngleAxis<T>(x.head(3).norm(),x.head(3).normalized());
 		transform.translation() = x.segment(3, 3);
 		mOut = transform.matrix();
 	}
