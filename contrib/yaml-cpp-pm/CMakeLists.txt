@@ -94,7 +94,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 		set(GCC_EXTRA_OPTIONS "${GCC_EXTRA_OPTIONS} ${FLAG_TESTED}")
 	endif()
 	#
-	set(CMAKE_CXX_FLAGS "-Wall ${GCC_EXTRA_OPTIONS} -pedantic -Wno-long-long ${CMAKE_CXX_FLAGS}")
+	set(CMAKE_CXX_FLAGS "-Wall ${GCC_EXTRA_OPTIONS} -fPIC -pedantic -Wno-long-long ${CMAKE_CXX_FLAGS}")
 	#
 	add_custom_target(debuggable $(MAKE) clean
 		COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug ${CMAKE_SOURCE_DIR}
