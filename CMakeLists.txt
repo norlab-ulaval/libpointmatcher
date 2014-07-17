@@ -132,7 +132,7 @@ if(USE_SYSTEM_YAML_CPP)
     endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 else(USE_SYSTEM_YAML_CPP)
             include_directories(contrib/yaml-cpp-pm/include)
-            set(EXTRA_LIBS ${EXTRA_LIBS} yaml-cpp-pm)
+            set(EXTRA_LIBS ${EXTRA_LIBS} ${CMAKE_CURRENT_BINARY_DIR}/contrib/yaml-cpp-pm/libyaml-cpp-pm.a)
             message("-- yaml-cpp found, text-based configuration enabled")
 endif(USE_SYSTEM_YAML_CPP)
 
@@ -179,7 +179,7 @@ set(POINTMATCHER_SRC
 
 file(GLOB POINTMATCHER_HEADERS "pointmatcher/*.h")
 
-set(SHARED_LIBS "false" CACHE BOOL "To build shared (true) or static (false) library")
+set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
 if (SHARED_LIBS)
         add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
 	install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
@@ -254,6 +254,8 @@ install(FILES
    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
 	 "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
 		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
 
 # For Windows
 if( MSVC ) # VS2012 does not support tuples correctly yet
