@@ -70,23 +70,19 @@ PointMatcher<T>::DataPointsFilters::DataPointsFilters()
 template<typename T>
 PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in)
 {
-	#ifdef HAVE_YAML_CPP
-	
-	YAML::Parser parser(in);
-	YAML::Node doc;
+    YAML::Parser parser(in);
+    YAML::Node doc;
 	parser.GetNextDocument(doc);
 	
 	// Fix for issue #6: compilation on gcc 4.4.4
 	//PointMatcher<T> pm;
 	const PointMatcher & pm = PointMatcher::get();
 	
-	for(YAML::Iterator moduleIt = doc.begin(); moduleIt != doc.end(); ++moduleIt)
+    for(YAML::Iterator moduleIt = doc.begin(); moduleIt != doc.end(); ++moduleIt)
 	{
-		const YAML::Node& module(*moduleIt);
+        const YAML::Node& module(*moduleIt);
 		this->push_back(pm.REG(DataPointsFilter).createFromYAML(module));
 	}
-	
-	#endif // HAVE_YAML_CPP
 }
 
 //! Init the chain

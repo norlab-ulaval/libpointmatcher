@@ -253,6 +253,7 @@ struct PointMatcherIO
 		static PLYElement* createElement(const std::string& elem_name, const int elem_num, const unsigned offset); //!< factory function, build element defined by name with elem_num elements
 	};
    
+   //! Replaces getline for handling windows style CR/LF line endings
    static std::istream & safeGetLine( std::istream& os, std::string & line);
    
 };

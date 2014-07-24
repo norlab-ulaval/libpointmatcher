@@ -27,6 +27,7 @@ if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
     SET( EX_PLATFORM_NAME "x86" )
 endif( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
 
+## WARNING: unsupported
 ## To force install as a 32 bit library, set BUILD_32 to true
 if( BUILD_32 )
 	MESSAGE(STATUS "Building as a 32 bit library")
@@ -69,6 +70,9 @@ include(UseDoxygen)
 # initially
 set(EXTRA_LIBS "")
 
+# gtest and yaml-cpp
+add_subdirectory(contrib)
+
 # boost
 find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
 if (Boost_MINOR_VERSION GREATER 47)
@@ -107,24 +111,30 @@ if (USE_OPEN_CL)
 endif(USE_OPEN_CL)
 
 # yaml-cpp
-find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
-	/usr/local/include
-)
-find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
-	/usr/local/lib
-)
-if (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-	include_directories(${yaml-cpp_INCLUDE_DIRS})
-	set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
-	add_definitions(-DHAVE_YAML_CPP)
-	set(yamlcpp_FOUND)
-	message("-- yaml-cpp found, text-based configuration enabled")
-else (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-	message("-- yaml-cpp not found, text-based configuration and related applications disabled")
-endif (yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+option(USE_SYSTEM_YAML_CPP "Use system version of yaml-cpp rather than one packaged with libpointmatcher" FALSE)
 
-# gtest
-add_subdirectory(contrib)
+if(USE_SYSTEM_YAML_CPP)
+    message(STATUS "Looking for yaml-cpp on system")
+    find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
+            /usr/local/include
+    )
+    find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
+            /usr/local/lib
+    )
+    if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+            include_directories(${yaml-cpp_INCLUDE_DIRS})
+            set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
+            add_definitions(-DSYSTEM_YAML_CPP)
+            set(yamlcpp_FOUND)
+            message("-- yaml-cpp found, text-based configuration enabled")
+    else(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+            message("-- yaml-cpp not found, text-based configuration and related applications disabled")
+    endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+else(USE_SYSTEM_YAML_CPP)
+            include_directories(contrib/yaml-cpp-pm/include)
+            set(EXTRA_LIBS ${EXTRA_LIBS} ${CMAKE_CURRENT_BINARY_DIR}/contrib/yaml-cpp-pm/libyaml-cpp-pm.a)
+            message("-- yaml-cpp found, text-based configuration enabled")
+endif(USE_SYSTEM_YAML_CPP)
 
 # link rt support if POSIX timers are used
 check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
@@ -166,12 +176,15 @@ set(POINTMATCHER_SRC
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp
 )
-set(SHARED_LIBS "false" CACHE BOOL "To build shared (true) or static (false) library")
+
+file(GLOB POINTMATCHER_HEADERS "pointmatcher/*.h")
+
+set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
 if (SHARED_LIBS)
-	add_library(pointmatcher SHARED ${POINTMATCHER_SRC})
+        add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
 	install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 else(SHARED_LIBS)
-	add_library(pointmatcher ${POINTMATCHER_SRC})
+        add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 endif(SHARED_LIBS)
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
@@ -210,18 +223,18 @@ add_subdirectory(utest)
 # to allow find_package() on pointmatcher
 #=============================================
 
-export(PACKAGE pointmatcher)
+export(PACKAGE libpointmatcher)
 
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
 
-# Create the pointmatcherConfig.cmake and pointmatcherConfigVersion files
+# Create the libpointmatcherConfig.cmake and libpointmatcherConfigVersion files
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
    "${INSTALL_INCLUDE_DIR}")
 # ... for the build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
-configure_file(pointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/pointmatcherConfig.cmake" @ONLY)
+configure_file(libpointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" @ONLY)
 
 # Change variables for the install tree
 set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
@@ -229,18 +242,20 @@ list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR})
 
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
 set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
-configure_file(pointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake" @ONLY)
+configure_file(libpointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" @ONLY)
 
 # Generate cmake for versionning
-configure_file(pointmatcherConfigVersion.cmake.in
-  "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake" @ONLY)
+configure_file(libpointmatcherConfigVersion.cmake.in
+  "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" @ONLY)
  
-# Install the pointmatcherConfig.cmake and pointmatcherConfigVersion.cmake
+# Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
 install(FILES
-   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/pointmatcherConfig.cmake"
-	 "${PROJECT_BINARY_DIR}/pointmatcherConfigVersion.cmake"
+   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
+	 "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
 		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
 
 # For Windows
 if( MSVC ) # VS2012 does not support tuples correctly yet

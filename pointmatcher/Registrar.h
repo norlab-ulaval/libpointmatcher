@@ -41,8 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
 
-#ifdef HAVE_YAML_CPP
-	#include "yaml-cpp/yaml.h"
+#ifdef SYSTEM_YAML_CPP
+    #include "yaml-cpp/yaml.h"
+#else
+	#include "yaml-cpp-pm/yaml.h"
+    namespace YAML = YAML_PM;
 #endif // HAVE_YAML_CPP
 
 namespace PointMatcherSupport
@@ -161,11 +164,9 @@ namespace PointMatcherSupport
 		{
 			return getDescriptor(name)->createInstance(name, params);
 		}
-		
-		#ifdef HAVE_YAML_CPP
-		
+				
 		//! Create an instance from a YAML node
-		Interface* createFromYAML(const YAML::Node& module) const
+        Interface* createFromYAML(const YAML::Node& module) const
 		{
 			Parametrizable::Parameters params;
 			std::string name;
@@ -178,9 +179,9 @@ namespace PointMatcherSupport
 			else
 			{
 				// get parameters
-				YAML::Iterator mapIt(module.begin());
+                YAML::Iterator mapIt(module.begin());
 				mapIt.first() >> name;
-				for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
+                for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
 				{
 					std::string key, value;
 					paramIt.first() >> key;
@@ -191,9 +192,7 @@ namespace PointMatcherSupport
 			
 			return create(name, params);
 		}
-		
-		#endif // HAVE_YAML_CPP
-		
+				
 		//! Get the description of a class
 		const std::string getDescription(const std::string& name) const
 		{
