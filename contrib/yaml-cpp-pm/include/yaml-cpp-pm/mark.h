@@ -6,7 +6,7 @@
 #endif
 
 
-#include "yaml-cpp/dll.h"
+#include "yaml-cpp-pm/dll.h"
 
 namespace YAML_PM
 {

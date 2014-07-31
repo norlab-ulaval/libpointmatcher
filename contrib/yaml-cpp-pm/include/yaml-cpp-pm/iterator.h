@@ -5,7 +5,7 @@
 #pragma once
 #endif
 
-#include "yaml-cpp/dll.h"
+#include "yaml-cpp-pm/dll.h"
 #include <memory>
 
 namespace YAML_PM

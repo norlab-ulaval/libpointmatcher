@@ -41,6 +41,7 @@ file(GLOB private_headers "src/[a-zA-Z]*.h")
 
 add_definitions(-DYAML_CPP_NO_CONTRIB)
 
+message(STATUS "current source ${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 ###
