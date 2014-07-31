@@ -73,6 +73,7 @@ namespace PointMatcherSupport
 			PointMatcherSupport::logger->finishWarningEntry(__FILE__, __LINE__, __POINTMATCHER_FUNCTION__); \
 		} \
 	}
+
 };
 
 #endif // __POINTMATCHER_PRIVATE_H

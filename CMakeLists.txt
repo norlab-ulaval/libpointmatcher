@@ -123,17 +123,18 @@ if(USE_SYSTEM_YAML_CPP)
     )
     if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
             include_directories(${yaml-cpp_INCLUDE_DIRS})
-            set(EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES})
             add_definitions(-DSYSTEM_YAML_CPP)
             set(yamlcpp_FOUND)
+            set ( EXTRA_LIBS ${EXTRA_LIBS} ${yaml-cpp_LIBRARIES} )
             message("-- yaml-cpp found, text-based configuration enabled")
     else(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
             message("-- yaml-cpp not found, text-based configuration and related applications disabled")
     endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 else(USE_SYSTEM_YAML_CPP)
-            include_directories(contrib/yaml-cpp-pm/include)
-            set(EXTRA_LIBS ${EXTRA_LIBS} ${CMAKE_CURRENT_BINARY_DIR}/contrib/yaml-cpp-pm/libyaml-cpp-pm.a)
-            message("-- yaml-cpp found, text-based configuration enabled")
+        include_directories(contrib/yaml-cpp-pm/include)
+        set(yaml-cpp_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/contrib/yaml-cpp-pm/libyaml-cpp-pm.a)
+        set(yamlcpp_FOUND)
+        message("-- using built in yaml-cpp, text-based configuration enabled")
 endif(USE_SYSTEM_YAML_CPP)
 
 # link rt support if POSIX timers are used
@@ -155,6 +156,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/Matches.cpp
 	pointmatcher/ICP.cpp
 	pointmatcher/Registry.cpp
+	pointmatcher/Registrar.cpp
 	pointmatcher/DataPointsFilter.cpp
 	pointmatcher/Matcher.cpp
 	pointmatcher/OutlierFilter.cpp
@@ -187,6 +189,7 @@ else(SHARED_LIBS)
         add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 endif(SHARED_LIBS)
+target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES})
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
 # create doc before installing
@@ -238,10 +241,13 @@ configure_file(libpointmatcherConfig.cmake.in
 
 # Change variables for the install tree
 set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
-list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR})
+# gather all the includes but remove ones in the source tree
+# because we added an include for the local yaml-cpp-pm we should also remove it
+list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
 
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
 set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
+
 configure_file(libpointmatcherConfig.cmake.in
   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" @ONLY)
 

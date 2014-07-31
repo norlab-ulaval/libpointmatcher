@@ -170,6 +170,8 @@ add_library(yaml-cpp-pm
 	${contrib_private_headers}
 )
 
+get_target_property(yaml-cpp-pm_LIB yaml-cpp-pm LOCATION)
+
 set_target_properties(yaml-cpp-pm PROPERTIES
 	VERSION "${YAML_CPP_VERSION}"
 	SOVERSION "${YAML_CPP_VERSION_MAJOR}.${YAML_CPP_VERSION_MINOR}"
@@ -187,15 +189,3 @@ if(MSVC)
 		)
 	endif()
 endif()
-
-
-###
-### Install 
-###
-install( DIRECTORY include/yaml-cpp-pm DESTINATION ${INSTALL_INCLUDE_DIR} )
-
-if (BUILD_SHARED_LIBS)
-	install( TARGETS yaml-cpp-pm LIBRARY DESTINATION ${INSTALL_LIB_DIR} )
-else (BUILD_SHARED_LIBS)
-	install (TARGETS yaml-cpp-pm ARCHIVE DESTINATION ${INSTALL_LIB_DIR} )
-endif(BUILD_SHARED_LIBS)

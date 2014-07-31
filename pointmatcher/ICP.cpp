@@ -46,6 +46,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TransformationCheckersImpl.h"
 #include "InspectorsImpl.h"
 
+#ifdef SYSTEM_YAML_CPP
+    #include "yaml-cpp/yaml.h"
+#else
+	#include "yaml-cpp-pm/yaml.h"
+    namespace YAML = YAML_PM;
+#endif // HAVE_YAML_CPP
+
 using namespace std;
 using namespace PointMatcherSupport;
 

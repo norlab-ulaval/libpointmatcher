@@ -41,15 +41,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
 
+
 #ifdef SYSTEM_YAML_CPP
-    #include "yaml-cpp/yaml.h"
+	namespace YAML
+	{
+		class Node;
+	}
 #else
-	#include "yaml-cpp-pm/yaml.h"
+	namespace YAML_PM
+	{
+		class Node;
+	}
     namespace YAML = YAML_PM;
 #endif // HAVE_YAML_CPP
 
 namespace PointMatcherSupport
 {
+	void getNameParamsFromYAML(const YAML::Node& module, std::string& name, Parametrizable::Parameters& params);
+
 	//! An exception thrown when one tries to instanciate an element that does not exist in the registrar
 	struct InvalidElement: std::runtime_error
 	{
@@ -168,27 +177,10 @@ namespace PointMatcherSupport
 		//! Create an instance from a YAML node
         Interface* createFromYAML(const YAML::Node& module) const
 		{
-			Parametrizable::Parameters params;
 			std::string name;
-			
-			if (module.size() != 1)
-			{
-				// parameter-less entry
-				name = module.to<std::string>();
-			}
-			else
-			{
-				// get parameters
-                YAML::Iterator mapIt(module.begin());
-				mapIt.first() >> name;
-                for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
-				{
-					std::string key, value;
-					paramIt.first() >> key;
-					paramIt.second() >> value;
-					params[key] = value;
-				}
-			}
+			Parametrizable::Parameters params;
+
+			getNameParamsFromYAML(module, name, params);
 			
 			return create(name, params);
 		}
@@ -208,7 +200,7 @@ namespace PointMatcherSupport
 		
 		//! begin for const iterator over classes descriptions
 		typename DescriptorMap::const_iterator begin() const
-		{
+		{	
 			return classes.begin();
 		}
 		//! end for const iterator over classes descriptions
