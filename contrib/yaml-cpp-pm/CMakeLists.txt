@@ -187,3 +187,15 @@ if(MSVC)
 		)
 	endif()
 endif()
+
+
+###
+### Install 
+###
+install( DIRECTORY include/yaml-cpp-pm DESTINATION ${INSTALL_INCLUDE_DIR} )
+
+if (BUILD_SHARED_LIBS)
+	install( TARGETS yaml-cpp-pm LIBRARY DESTINATION ${INSTALL_LIB_DIR} )
+else (BUILD_SHARED_LIBS)
+	install (TARGETS yaml-cpp-pm ARCHIVE DESTINATION ${INSTALL_LIB_DIR} )
+endif(BUILD_SHARED_LIBS)
