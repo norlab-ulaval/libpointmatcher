@@ -41,7 +41,6 @@ file(GLOB private_headers "src/[a-zA-Z]*.h")
 
 add_definitions(-DYAML_CPP_NO_CONTRIB)
 
-message(STATUS "current source ${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 ###
@@ -170,8 +169,6 @@ add_library(yaml-cpp-pm
 	${contrib_public_headers}
 	${contrib_private_headers}
 )
-
-get_target_property(yaml-cpp-pm_LIB yaml-cpp-pm LOCATION)
 
 set_target_properties(yaml-cpp-pm PROPERTIES
 	VERSION "${YAML_CPP_VERSION}"
