@@ -2,8 +2,8 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.2 (2014-08-05)
+------------------
 * Yaml-cpp0.3 now built with libpointmatcher for compatibility with newer Ubuntu systems using yaml-cpp0.5
 
 1.2.1
