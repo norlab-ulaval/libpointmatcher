@@ -194,7 +194,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		{
 			buildScalarStream(stream, it->text, data);
 		}
-		else if(it->span == 3)
+		else if(it->span == 3 || it->span == 2)
 		{
 			buildVectorStream(stream, it->text, data);
 		}
