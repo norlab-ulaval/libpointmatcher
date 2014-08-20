@@ -336,6 +336,13 @@ void PointMatcher<T>::DataPoints::addFeature(const std::string& name, const Matr
 	addField(name, newFeature, featureLabels, features);
 }
 
+//! Remove a feature by name, the whole matrix will be copied
+template<typename T>
+void PointMatcher<T>::DataPoints::removeFeature(const std::string& name)
+{
+	removeField(name, featureLabels, features);
+}
+
 //! Get feature by name, return a matrix containing a copy of the requested feature
 template<typename T>
 typename PointMatcher<T>::Matrix PointMatcher<T>::DataPoints::getFeatureCopyByName(const std::string& name) const
@@ -419,6 +426,14 @@ void PointMatcher<T>::DataPoints::addDescriptor(const std::string& name, const M
 {
 	addField(name, newDescriptor, descriptorLabels, descriptors);
 }
+
+//! Remove a descriptor by name, the whole matrix will be copied
+template<typename T>
+void PointMatcher<T>::DataPoints::removeDescriptor(const std::string& name)
+{
+	removeField(name, descriptorLabels, descriptors);
+}
+
 
 //! Get descriptor by name, return a matrix containing a copy of the requested descriptor
 template<typename T>
@@ -635,6 +650,13 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 		}
 	}
 }
+//! Add a descriptor or feature by name, remove first if already exists
+template<typename T>
+void PointMatcher<T>::DataPoints::removeField(const std::string& name, Labels& labels, Matrix& data) const
+{
+	//FIXME: finish here
+}
+
 
 //! Get a const view on a matrix by name, throw an exception if it does not exist.
 //! If viewRow is given, only return this row, otherwise return the full view

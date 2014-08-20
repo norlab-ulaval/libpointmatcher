@@ -364,6 +364,13 @@ TEST(PointCloudTest, GetInfo)
 
 }
 
+TEST(PointCloudTest, AddRemove)
+{
+	//Add features
+	//Remove features
+	//Add descriptors
+	//Remove descriptors
+}
 
 //---------------------------
 // Tests for IO
