@@ -418,6 +418,7 @@ TEST(IOTest, loadPLY)
 	"end_header\n"
 	"3 2 1 99 33 22 11\n"
 	"3 2 1 99 33 22 11\n"
+	"\n" //empty line
 	"3 2 1 99 33 22 11 3 2 1 99 33 22 11\n" // no line break
 	"3 2 1 99 33 22 11\n"
 
