@@ -75,6 +75,7 @@ struct PointMatcherIO
 			UNSUPPORTED
 		};//TODO: add time here too
 
+	//! Structure containing all information required to map external information to PointMatcher internal representation
 	struct SupportedLabel
 	{
 		const std::string internalName; //!< name used in PointMatcher
@@ -126,6 +127,7 @@ struct PointMatcherIO
 			return labels;
 	}
 
+	//! Generate a vector of Labels by checking for collision is the same name is reused.
 	class LabelGenerator
 	{
 		Labels labels;

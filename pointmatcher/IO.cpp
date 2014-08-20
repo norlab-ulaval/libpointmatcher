@@ -501,7 +501,7 @@ template<typename T>
 void PointMatcherIO<T>::LabelGenerator::add(std::string internalName)
 {
 	bool findLabel = false;
-	for(int i=0; i<labels.size(); ++i)
+	for(size_t i=0; i<labels.size(); ++i)
 	{
 		if(internalName == labels[i].text)
 		{
@@ -917,10 +917,10 @@ void PointMatcherIO<T>::saveCSV(const DataPoints& data, std::ostream& os)
 	}
 
 	int n = 0;
-	for (int i = 0; i < data.descriptorLabels.size(); i++)
+	for (size_t i = 0; i < data.descriptorLabels.size(); i++)
 	{
 		Label lab = data.descriptorLabels[i];
-		for (int s = 0; s < lab.span; s++)
+		for (size_t s = 0; s < lab.span; s++)
 		{
 			os << getColLabel(lab,s);
 			if (n != (descDimCount - 1))
@@ -1454,7 +1454,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	LabelGenerator featLabelGen, descLabelGen;
 	
 	// Loop through all known external names (ordered list)
-	for(int i=0; i<externalLabels.size(); i++)
+	for(size_t i=0; i<externalLabels.size(); i++)
 	{
 		const SupportedLabel supLabel = externalLabels[i];
 
@@ -1598,10 +1598,10 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		ofs << "property float " << data.featureLabels[f].text << "\n";
 	}
 
-	for (int i = 0; i < data.descriptorLabels.size(); i++)
+	for (size_t i = 0; i < data.descriptorLabels.size(); i++)
 	{
 		Label lab = data.descriptorLabels[i];
-		for (int s = 0; s < lab.span; s++)
+		for (size_t s = 0; s < lab.span; s++)
 		{
 			ofs << "property float " << getColLabel(lab,s) << "\n";
 		}
@@ -1930,11 +1930,11 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			colToDescPair.clear();
 
 			vector<int>::const_iterator nextFieldToKeepIt = descFieldsToKeep.begin();
-			for (int i = 1; i < tokens.size(); i++)
+			for (size_t i = 1; i < tokens.size(); i++)
 			{
 				int count = boost::lexical_cast<int>(tokens[i]);
 
-				if (i == *nextFieldToKeepIt)
+				if ((int)i == *nextFieldToKeepIt)
 				{
 					string descLabel = colToDescPair_[i].second;
 					descLabelToNumRows[descLabel] = count;
