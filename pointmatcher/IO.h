@@ -60,10 +60,10 @@ struct PointMatcherIO
 	// General
 	static SublabelAssociationMap getFeatAssocationMap(); //!< map to store association between common 1d feature labels and their PM label and span dimension
 	static SublabelAssociationMap getDescAssocationMap(); //!< map to store association between common 1d descriptor labels and their PM label and span dimension
-	static bool featSublabelRegistered(const std::string& sublabelName); //!< returns true if a particular feature dim label is registered (ie x, y...)
-	static bool descSublabelRegistered(const std::string& sublabelName); //!< returns true if a particular descriptor dim label is registered (ie nx, red...)
-	static LabelAssociationPair getFeatAssociationPair(const std::string& sublabelName); //!< get PM feature label associated with sublabel
-	static LabelAssociationPair getDescAssociationPair(const std::string& sublabelName); //!< get PM descriptor label associated with sublabel
+	static bool featSublabelRegistered(const std::string& externalName); //!< returns true if a particular feature dim label is registered (ie x, y...)
+	static bool descSublabelRegistered(const std::string& externalName); //!< returns true if a particular descriptor dim label is registered (ie nx, red...)
+	static LabelAssociationPair getFeatAssociationPair(const std::string& externalName); //!< get PM feature label associated with sublabel
+	static LabelAssociationPair getDescAssociationPair(const std::string& externalName); //!< get PM descriptor label associated with sublabel
 
 	static std::string getColLabel(const Label& label, const int row); //!< convert a descriptor label to an appropriate sub-label
 	
@@ -82,9 +82,11 @@ struct PointMatcherIO
 		const std::string externalName; //!< name used in external format
 		const PMPropTypes type; //!< type of information in PointMatcher
 
+		//! Constructor
 		SupportedLabel(const std::string& internalName, const std::string& externalName, const PMPropTypes& type);
 	};
 
+	//! Vector of supported labels in PointMatcher and their external names
 	typedef std::vector<SupportedLabel> SupportedLabels;
 
 	//! Vector containing the mapping of all external names to PointMatcher representation.
@@ -130,16 +132,19 @@ struct PointMatcherIO
 	//! Generate a vector of Labels by checking for collision is the same name is reused.
 	class LabelGenerator
 	{
-		Labels labels;
+		Labels labels; //!< vector of labels used to cumulat information
 
 	public:
+		//! add a name to the vector of labels. If already there, will increament the dimension.
 		void add(std::string internalName);
 
+		//! Return the vector of labels used to build a DataPoints
 		Labels getLabels() const;
 	};
 
 
-	static PMPropTypes getPMType(const std::string& sublabelName); //! Return the type of information specific to a DataPoints based on a sulabel name
+	//! Associate an external name to a DataPoints type of information
+	static PMPropTypes getPMType(const std::string& externalName); //! Return the type of information specific to a DataPoints based on a sulabel name
 
 	// CSV
 	static DataPoints loadCSV(const std::string& fileName);
@@ -222,7 +227,7 @@ struct PointMatcherIO
 		
 		//PointMatcher information:
 		PMPropTypes pmType; //!< type of information in PointMatcher
-		int pmRowID;
+		int pmRowID; //!< row id used in a DataPoints 
 
 		//TODO: remove that (now pmType):
 		bool is_feature; //!<member is true if is a PM feature, if not, it is a descriptor
@@ -242,7 +247,10 @@ struct PointMatcherIO
 	//! ex: "normals" -> nx, ny ,nz
 	typedef std::map<std::string, std::vector<PLYProperty> > PLYDescPropMap;
 	
+	//! Vector of properties specific to PLY files
 	typedef std::vector<PLYProperty> PLYProperties;
+
+	//! Iterator for a vector of PLY properties
 	typedef typename PLYProperties::iterator it_PLYProp;
 
 	//! Interface for all PLY elements. 
@@ -253,9 +261,10 @@ struct PointMatcherIO
 		unsigned num; //!< number of occurences of the element
 		unsigned total_props; //!< total number of properties in PLY element
 		unsigned offset; //!< line at which data starts
-		PLYProperties properties;
-		unsigned nbFeatures;
-		unsigned nbDescriptors;
+		PLYProperties properties; //!< all properties found in the header
+		unsigned nbFeatures; //!< number of valid features found in the header
+		unsigned nbDescriptors; //!< number of valid descriptors found in the header
+
 
 		//! PLY Element constructor
 		/**

@@ -461,35 +461,35 @@ typename PointMatcherIO<T>::SublabelAssociationMap PointMatcherIO<T>::getDescAss
 }
 
 template <typename T>
-bool PointMatcherIO<T>::featSublabelRegistered(const std::string& sublabelName)
+bool PointMatcherIO<T>::featSublabelRegistered(const std::string& externalName)
 {
-	return getFeatAssocationMap().count(sublabelName) > 0;
+	return getFeatAssocationMap().count(externalName) > 0;
 }
 
 template <typename T>
-bool PointMatcherIO<T>::descSublabelRegistered(const std::string& sublabelName)
+bool PointMatcherIO<T>::descSublabelRegistered(const std::string& externalName)
 {
-	return getDescAssocationMap().count(sublabelName) > 0;
+	return getDescAssocationMap().count(externalName) > 0;
 }
 
 template <typename T>
-typename PointMatcherIO<T>::LabelAssociationPair PointMatcherIO<T>::getFeatAssociationPair(const std::string& sublabelName)
+typename PointMatcherIO<T>::LabelAssociationPair PointMatcherIO<T>::getFeatAssociationPair(const std::string& externalName)
 {
-	return getFeatAssocationMap().find(sublabelName)->second;
+	return getFeatAssocationMap().find(externalName)->second;
 }
 
 template <typename T>
-typename PointMatcherIO<T>::LabelAssociationPair PointMatcherIO<T>::getDescAssociationPair(const std::string& sublabelName)
+typename PointMatcherIO<T>::LabelAssociationPair PointMatcherIO<T>::getDescAssociationPair(const std::string& externalName)
 {
-	return getDescAssocationMap().find(sublabelName)->second;
+	return getDescAssocationMap().find(externalName)->second;
 }
 
 template<typename T>
-typename PointMatcherIO<T>::PMPropTypes PointMatcherIO<T>::getPMType(const std::string& sublabelName)
+typename PointMatcherIO<T>::PMPropTypes PointMatcherIO<T>::getPMType(const std::string& externalName)
 {
-	if (featSublabelRegistered(sublabelName))
+	if (featSublabelRegistered(externalName))
 		return FEATURE;
-	else if (descSublabelRegistered(sublabelName))
+	else if (descSublabelRegistered(externalName))
 		return DESCRIPTOR;
 	else
 		return UNSUPPORTED;
@@ -534,64 +534,64 @@ template <typename T>
 
 std::string PointMatcherIO<T>::getColLabel(const Label& label, const int row)
 {
-	std::string sublabelName;
+	std::string externalName;
 	if (label.text == "normals")
 	{
 		if (row == 0)
 		{
-			sublabelName = "nx";
+			externalName = "nx";
 		}
 		if (row == 1)
 		{
-			sublabelName = "ny";
+			externalName = "ny";
 		}
 		if (row == 2)
 		{
-			sublabelName = "nz";
+			externalName = "nz";
 		}
 	}
 	else if (label.text == "color")
 	{
 		if (row == 0)
 		{
-			sublabelName = "red";
+			externalName = "red";
 		}
 		if (row == 1)
 		{
-			sublabelName = "green";
+			externalName = "green";
 		}
 		if (row == 2)
 		{
-			sublabelName = "blue";
+			externalName = "blue";
 		}
 		if (row == 3)
-			sublabelName = "alpha";
+			externalName = "alpha";
 	}
 	else if (label.text == "eigValues")
 	{
-		sublabelName = "eigValues" + boost::lexical_cast<string>(row);
+		externalName = "eigValues" + boost::lexical_cast<string>(row);
 	}
 	else if (label.text == "eigVectors")
 	{
 		// format: eigVectors<0-2><X-Z>
-		sublabelName = "eigVectors" + boost::lexical_cast<string>(row/3);
+		externalName = "eigVectors" + boost::lexical_cast<string>(row/3);
 
 		int row_mod = row % 3;
 		if (row_mod == 0)
-			sublabelName += "X";
+			externalName += "X";
 		else if (row_mod == 1)
-			sublabelName += "Y";
+			externalName += "Y";
 		else if (row_mod == 2)
-			sublabelName += "Z";
+			externalName += "Z";
 	}
 	else if (label.span  == 1)
 	{
-		sublabelName = label.text;
+		externalName = label.text;
 	}
 	else
-		sublabelName = label.text + boost::lexical_cast<std::string>(row);
+		externalName = label.text + boost::lexical_cast<std::string>(row);
 
-	return sublabelName;
+	return externalName;
 }
 
 

@@ -19,9 +19,9 @@ namespace PointMatcherSupport
 		else
 		{
 			// get parameters
-	        YAML::Iterator mapIt(module.begin());
+      YAML::Iterator mapIt(module.begin());
 			mapIt.first() >> name;
-	        for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
+      for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
 			{
 				std::string key, value;
 				paramIt.first() >> key;

@@ -57,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace PointMatcherSupport
 {
+	//! Retrieve name and parameters from a yaml node
 	void getNameParamsFromYAML(const YAML::Node& module, std::string& name, Parametrizable::Parameters& params);
 
 	//! An exception thrown when one tries to instanciate an element that does not exist in the registrar
