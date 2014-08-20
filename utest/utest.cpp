@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "pointmatcher/PointMatcher.h"
+#include "pointmatcher/IO.h"
 #include "../contrib/gtest/gtest.h"
 
 #include <string>
@@ -366,6 +367,79 @@ TEST(IOTest, loadYaml)
 	EXPECT_THROW(icp.loadFromYaml(ifs3), PointMatcherSupport::InvalidModuleType);
 }
 
+TEST(IOTest, loadPLY)
+{
+	typedef PointMatcherIO<float> IO;
+	std::istringstream is;
+	
+	is.str(
+	""
+	);
+
+	EXPECT_THROW(IO::loadPLY(is), runtime_error);
+
+	is.clear();
+	is.str(
+	"ply\n"
+	"format binary_big_endian 1.0\n"
+	);
+
+	EXPECT_THROW(IO::loadPLY(is), runtime_error);
+	
+	is.clear();
+	is.str(
+	"ply\n"
+	"format ascii 2.0\n"
+	);
+	
+	EXPECT_THROW(IO::loadPLY(is), runtime_error);
+
+	is.clear();
+	is.str(
+	"ply\n"
+	"format ascii 1.0\n"
+	);
+	
+	EXPECT_THROW(IO::loadPLY(is), runtime_error);
+
+	is.clear();
+	is.str(
+	"ply\n"
+	"format ascii 1.0\n"
+	"element vertex 5\n"
+	"\n" //empty line
+	"property float z\n" // wrong order
+	"property float y\n"
+	"property float x\n"
+	"property float grrrr\n" //unknown property
+	"property float nz\n" // wrong order
+	"property float ny\n"
+	"property float nx\n"
+	"end_header\n"
+	"3 2 1 99 33 22 11\n"
+	"3 2 1 99 33 22 11\n"
+	"3 2 1 99 33 22 11 3 2 1 99 33 22 11\n" // no line break
+	"3 2 1 99 33 22 11\n"
+
+	);
+	
+	DP pointCloud = IO::loadPLY(is);
+	
+	// Confirm sizes and dimensions
+	EXPECT_TRUE(pointCloud.features.cols() == 5);
+	EXPECT_TRUE(pointCloud.features.rows() == 4);
+	EXPECT_TRUE(pointCloud.descriptors.cols() == 5);
+	EXPECT_TRUE(pointCloud.descriptors.rows() == 3);
+	
+	// Random value check
+	EXPECT_TRUE(pointCloud.features(0, 0) == 1);
+	EXPECT_TRUE(pointCloud.features(2, 2) == 3);
+	EXPECT_TRUE(pointCloud.descriptors(1, 1) == 22);
+	EXPECT_TRUE(pointCloud.descriptors(2, 4) == 33);
+
+}
+
+
 class IOLoadSaveTest : public testing::Test
 {
 
@@ -456,7 +530,6 @@ TEST_F(IOLoadSaveTest, CSV)
 {
 	loadSaveTest("unit_test.csv");
 }
-
 
 
 //---------------------------

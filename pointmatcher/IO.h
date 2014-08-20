@@ -271,29 +271,7 @@ struct PointMatcherIO
 
 		void addProperty(PLYProperty& prop); //!< add a property to vector of properties
 
-		const PLYProperties& getFeatureProps() const; //!< return vector of feature properties
-
-		const PLYProperties& getDescriptorProps() const; //!< return vector of descriptor properties
-
-		const PLYDescPropMap& getDescPropMap() const; //!< return map, descriptor name -> vector of PLY desc properties
-
-		size_t getNumSupportedProperties() const; //!< return number of properties
-
-		int getNumFeatures() const; //!< get number of PM supported feature properties
-
-		int getNumDescriptors() const; //!< get number of PM descriptors in element
-
-		int getNumDescProp() const; //!< get number of PM supported descriptor properties
-
 		bool operator==(const PLYElement& other) const; //!< comparison operator for elements
-
-	protected:
-		//! possible properties: either a libpointmatcher feature, descriptor, or it is unsupported and will be ignored
-		
-
-		PLYProperties features; //!< Vector which holds element properties corresponding to PM features
-		PLYProperties descriptors; //!< Vector which holds element properties corresponding to PM features
-		PLYDescPropMap descriptor_map; //!< Map descriptor -> descriptor PLY property
 
 	};
 

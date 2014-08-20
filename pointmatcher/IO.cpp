@@ -1299,7 +1299,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	getline(is, line);
 
 	if (line.find("ply") != 0) {
-		throw runtime_error(string("PLY parse error: wrong magic header, found ") + line);
+		throw runtime_error(string("PLY parse error: wrong magic header, found <") + line + string(">"));
 	}
 
 	while (!header_processed)
@@ -1330,13 +1330,13 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			stringstream >> format_str >> version_str;
 
 			if (format_str != "ascii" && format_str != "binary_little_endian" && format_str != "binary_big_endian")
-				throw runtime_error(string("PLY parse error: format ") + format_str + string(" is not supported"));
+				throw runtime_error(string("PLY parse error: format <") + format_str + string("> is not supported"));
 
 			if (format_str == "binary_little_endian" || format_str == "binary_big_endian")
 				throw runtime_error(string("PLY parse error: binary PLY files are not supported"));
 			if (version_str != "1.0")
 			{
-				throw runtime_error(string("PLY parse error: version ") + version_str + string(" of ply is not supported"));
+				throw runtime_error(string("PLY parse error: version <") + version_str + string("> of ply is not supported"));
 			}
 
 			format_defined = true;
@@ -1344,10 +1344,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		}
 		else if (keyword == "element")
 		{
-			if (current_element != NULL && current_element->getNumSupportedProperties() == 0)
-			{
-				LOG_WARNING_STREAM("PLY parse warning: no supported properties in element " << current_element->name);
-			}
+			
 
 			string elem_name, elem_num_s;
 			stringstream >> elem_name >> elem_num_s;
@@ -1407,15 +1404,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 				PLYProperty list_prop(prop_idx_type, prop_type, prop_name, current_element->total_props);
 
-				if (current_element->supportsProperty(list_prop))
-				{
-					current_element->addProperty(list_prop);
-				}
-				else
-				{
-					LOG_WARNING_STREAM("PLY parse error: element " << current_element->name
-							<< " does not support property " << prop_name << " " << prop_type  );
-				}
+				current_element->addProperty(list_prop);
 			}
 			// PLY regular property
 			else
@@ -1424,15 +1413,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 				stringstream >> prop_name;
 				PLYProperty prop(prop_type, prop_name, current_element->total_props);
 
-				if (current_element->supportsProperty(prop))
-				{
-					current_element->addProperty(prop);
-				}
-				else
-				{
-					LOG_WARNING_STREAM("PLY parse error: element " << current_element->name <<
-							" does not support property " << prop_name << " " << prop_type  );
-				}
+				current_element->addProperty(prop);
 			}
 
 			current_element->total_props++;
@@ -1447,11 +1428,6 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			if (elements.size() == 0)
 			{
 				throw runtime_error(string("PLY parse error: no elements defined in header"));
-			}
-
-			if (current_element != NULL && current_element->getNumSupportedProperties() == 0)
-			{
-				LOG_WARNING_STREAM("PLY parse warning: no supported properties in element " << current_element->name);
 			}
 
 			header_processed = true;
@@ -1724,93 +1700,20 @@ class PointMatcherIO<double>::PLYProperty;
 
 template <typename T>
 void PointMatcherIO<T>::PLYElement::addProperty(
-		PLYProperty& prop) {
-	if (supportsProperty(prop))
+		PLYProperty& prop) 
+{
+	if (prop.pmType == FEATURE)
 	{
-
-		if (prop.pmType == FEATURE)
-		{
-			prop.is_feature = true;
-			features.push_back(prop);
-			nbFeatures++;
-		}
-		else if (prop.pmType == DESCRIPTOR)
-		{
-			LabelAssociationPair associationPair = getDescAssociationPair(prop.name);
-
-			// Handle shuffling of
-			// if property is in the right order, push back to the end of vector
-			std::vector<PLYProperty>* propList = &descriptor_map[associationPair.second];
-
-			// if property is to be put in a later place, you need to resize the vector first
-			if (associationPair.first >= propList->size())
-			{
-				propList->resize(associationPair.first + 1);
-				(*propList)[associationPair.first] = prop;
-			}
-			// if to be put before, no need to resize
-			else
-				(*propList)[associationPair.first] = prop;
-
-			descriptors.push_back(prop);
-			features.push_back(prop);
-			nbDescriptors++;
-		}
-		else
-		{
-			throw std::runtime_error("PLY parse error: tried at add an unsupported property");
-		}
-			
-		properties.push_back(prop);
+		nbFeatures++;
 	}
-	else
-		throw std::runtime_error(
-				std::string("PLY parse error: property ") + prop.name
-						+ std::string(" not supported by element ") + name);
+	else if (prop.pmType == DESCRIPTOR)
+	{
+		nbDescriptors++;
+	}
+		
+	properties.push_back(prop);
 }
 
-template <typename T>
-int PointMatcherIO<T>::PLYElement::getNumFeatures() const
-{
-	//return features.size();
-	return nbFeatures;
-}
-
-template <typename T>
-int PointMatcherIO<T>::PLYElement::getNumDescriptors() const
-{
-	return descriptor_map.size();
-}
-
-template <typename T>
-int PointMatcherIO<T>::PLYElement::getNumDescProp() const
-{
-	//return descriptors.size();
-	return nbDescriptors;
-}
-
-template <typename T>
-const std::vector<typename PointMatcherIO<T>::PLYProperty>& PointMatcherIO<T>::PLYElement::getFeatureProps() const
-{
-	return features;
-}
-
-template <typename T>
-const std::vector<typename PointMatcherIO<T>::PLYProperty>& PointMatcherIO<T>::PLYElement::getDescriptorProps() const
-{
-	return descriptors;
-}
-
-template <typename T>
-const typename PointMatcherIO<T>::PLYDescPropMap& PointMatcherIO<T>::PLYElement::getDescPropMap() const
-{
-	return descriptor_map;
-}
-
-template <typename T>
-size_t PointMatcherIO<T>::PLYElement::getNumSupportedProperties() const {
-	return features.size() + descriptors.size() ;
-}
 
 template <typename T>
 bool PointMatcherIO<T>::PLYElement::supportsProperty(const PLYProperty& prop) const
