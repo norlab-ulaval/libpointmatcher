@@ -124,6 +124,42 @@ PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& fe
 	descriptorLabels(descriptorLabels)
 {}
 
+//! Return the number of points contained in the point cloud
+template<typename T>
+int PointMatcher<T>::DataPoints::getNbPoints()
+{
+	return features.cols();
+}
+
+//! Return the dimension of the point cloud
+template<typename T>
+int PointMatcher<T>::DataPoints::getEuclideanDim()
+{
+	return (features.rows() - 1);
+}
+
+//! Return the dimension of the point cloud in homogeneous coordinates (one more than Euclidean dimension)
+template<typename T>
+int PointMatcher<T>::DataPoints::getHomogeneousDim()
+{
+	return features.rows();
+}
+
+//! Return the number of grouped descriptors (e.g., normals can have 3 components but would count as only one)
+template<typename T>
+int PointMatcher<T>::DataPoints::getNbGroupedDescriptors()
+{
+	return descriptorLabels.size();
+}
+
+//! Return the total number of descriptors
+template<typename T>
+int PointMatcher<T>::DataPoints::getDescriptorDim()
+{
+	return descriptors.rows();
+}
+
+
 //! Return whether two point-clouds are identical (same data and same labels)
 template<typename T>
 bool PointMatcher<T>::DataPoints::operator ==(const DataPoints& that) const

@@ -237,7 +237,13 @@ struct PointMatcher
 		DataPoints(const Matrix& features, const Labels& featureLabels);
 		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
 		bool operator ==(const DataPoints& that) const;
-		
+	
+		int getNbPoints();
+		int getEuclideanDim();
+		int getHomogeneousDim();
+		int getNbGroupedDescriptors();
+		int getDescriptorDim();
+
 		void save(const std::string& fileName) const;
 		static DataPoints load(const std::string& fileName);
 		

@@ -343,6 +343,28 @@ TEST(PointCloudTest, ConcatenateDescDiffSize)
 	EXPECT_THROW(lefts.concatenate(rights), DP::InvalidField);
 }
 
+TEST(PointCloudTest, GetInfo)
+{
+	//cerr << ref2D.features.rows() << endl;
+	//cerr << ref2D.features.cols() << endl;
+	//cerr << ref2D.descriptors.rows() << endl;
+	//cerr << ref2D.descriptors.cols() << endl;
+	
+	EXPECT_TRUE(ref3D.getNbPoints() == 24989);
+	EXPECT_TRUE(ref3D.getEuclideanDim() == 3);
+	EXPECT_TRUE(ref3D.getHomogeneousDim() == 4);
+	EXPECT_TRUE(ref3D.getNbGroupedDescriptors() == 1);
+	EXPECT_TRUE(ref3D.getDescriptorDim() == 3);
+	
+	EXPECT_TRUE(ref2D.getNbPoints() == 361);
+	EXPECT_TRUE(ref2D.getEuclideanDim() == 2);
+	EXPECT_TRUE(ref2D.getHomogeneousDim() == 3);
+	EXPECT_TRUE(ref2D.getNbGroupedDescriptors() == 0);
+	EXPECT_TRUE(ref2D.getDescriptorDim() == 0);
+
+}
+
+
 //---------------------------
 // Tests for IO
 //---------------------------
@@ -1313,6 +1335,7 @@ TEST(Inspectors, PerformanceInspector)
 				("dumpPerfOnExit", "1")
 		)
 	;
+
 	//TODO: we only test constructor here, check other things...
 }
 
