@@ -350,26 +350,75 @@ TEST(PointCloudTest, GetInfo)
 	//cerr << ref2D.descriptors.rows() << endl;
 	//cerr << ref2D.descriptors.cols() << endl;
 	
-	EXPECT_TRUE(ref3D.getNbPoints() == 24989);
-	EXPECT_TRUE(ref3D.getEuclideanDim() == 3);
-	EXPECT_TRUE(ref3D.getHomogeneousDim() == 4);
-	EXPECT_TRUE(ref3D.getNbGroupedDescriptors() == 1);
-	EXPECT_TRUE(ref3D.getDescriptorDim() == 3);
+	EXPECT_EQ(ref3D.getNbPoints(), 24989u);
+	EXPECT_EQ(ref3D.getEuclideanDim(), 3u);
+	EXPECT_EQ(ref3D.getHomogeneousDim(), 4u);
+	EXPECT_EQ(ref3D.getNbGroupedDescriptors(), 1u);
+	EXPECT_EQ(ref3D.getDescriptorDim(), 3u);
 	
-	EXPECT_TRUE(ref2D.getNbPoints() == 361);
-	EXPECT_TRUE(ref2D.getEuclideanDim() == 2);
-	EXPECT_TRUE(ref2D.getHomogeneousDim() == 3);
-	EXPECT_TRUE(ref2D.getNbGroupedDescriptors() == 0);
-	EXPECT_TRUE(ref2D.getDescriptorDim() == 0);
+	EXPECT_EQ(ref2D.getNbPoints(), 361u);
+	EXPECT_EQ(ref2D.getEuclideanDim(), 2u);
+	EXPECT_EQ(ref2D.getHomogeneousDim(), 3u);
+	EXPECT_EQ(ref2D.getNbGroupedDescriptors(), 0u);
+	EXPECT_EQ(ref2D.getDescriptorDim(), 0u);
 
 }
 
 TEST(PointCloudTest, AddRemove)
 {
-	//Add features
-	//Remove features
-	//Add descriptors
-	//Remove descriptors
+	DP ref3DCopy = ref3D;
+	const int testedValue = 9;
+
+	//////Add features
+	PM::Matrix newFeature = PM::Matrix::Ones(1,ref3DCopy.getNbPoints())*testedValue;
+	ref3DCopy.addFeature("testF", newFeature);
+
+	//Is the new row added?
+	EXPECT_EQ(ref3DCopy.getHomogeneousDim(), ref3D.getHomogeneousDim()+1);
+	
+	//Is padding still at the end?
+	EXPECT_EQ(ref3DCopy.featureLabels.back().text, "pad");
+
+	//Is the value right?
+	DP::View newFeatureView = ref3DCopy.getFeatureViewByName("testF");
+	EXPECT_EQ(newFeatureView(0,0), testedValue);
+
+	//////Remove features
+	ref3DCopy.removeFeature("testF");
+
+	// Is the extra data removed?
+	EXPECT_TRUE(ref3DCopy.features.isApprox(ref3D.features));
+
+
+	//////Add descriptors
+	const int testedValue2 = 88;
+	PM::Matrix newDescriptor4D = PM::Matrix::Ones(4,ref3DCopy.getNbPoints())*testedValue;
+	PM::Matrix newDescriptor2D = PM::Matrix::Ones(2,ref3DCopy.getNbPoints())*testedValue2;
+
+	ref3DCopy.addDescriptor("test4D", newDescriptor4D);
+	ref3DCopy.addDescriptor("test2D", newDescriptor2D);
+	
+	//Is the new row added?
+	EXPECT_EQ(ref3DCopy.getDescriptorDim(), ref3D.getDescriptorDim()+6);
+	EXPECT_EQ(ref3DCopy.getNbGroupedDescriptors(), ref3D.getNbGroupedDescriptors()+2);
+
+	//Is the value right?
+	DP::View newDescriptor4DView = ref3DCopy.getDescriptorViewByName("test4D");
+	EXPECT_EQ(newDescriptor4DView(0,0), testedValue);
+	DP::View newDescriptor2DView = ref3DCopy.getDescriptorViewByName("test2D");
+	EXPECT_EQ(newDescriptor2DView(0,0), testedValue2);
+
+
+	//////Remove descriptors
+	ref3DCopy.removeDescriptor("test4D");
+	ref3DCopy.removeDescriptor("test2D");
+	
+	//removing random name shoudn't have any effect
+	ref3DCopy.removeDescriptor("grrrrr");
+
+	// Is the extra data removed?
+	EXPECT_TRUE(ref3DCopy.descriptors.isApprox(ref3D.descriptors));
+
 }
 
 //---------------------------

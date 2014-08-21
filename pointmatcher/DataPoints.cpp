@@ -126,35 +126,35 @@ PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& fe
 
 //! Return the number of points contained in the point cloud
 template<typename T>
-int PointMatcher<T>::DataPoints::getNbPoints()
+unsigned PointMatcher<T>::DataPoints::getNbPoints() const
 {
 	return features.cols();
 }
 
 //! Return the dimension of the point cloud
 template<typename T>
-int PointMatcher<T>::DataPoints::getEuclideanDim()
+unsigned PointMatcher<T>::DataPoints::getEuclideanDim() const
 {
 	return (features.rows() - 1);
 }
 
 //! Return the dimension of the point cloud in homogeneous coordinates (one more than Euclidean dimension)
 template<typename T>
-int PointMatcher<T>::DataPoints::getHomogeneousDim()
+unsigned PointMatcher<T>::DataPoints::getHomogeneousDim() const
 {
 	return features.rows();
 }
 
 //! Return the number of grouped descriptors (e.g., normals can have 3 components but would count as only one)
 template<typename T>
-int PointMatcher<T>::DataPoints::getNbGroupedDescriptors()
+unsigned PointMatcher<T>::DataPoints::getNbGroupedDescriptors() const
 {
 	return descriptorLabels.size();
 }
 
 //! Return the total number of descriptors
 template<typename T>
-int PointMatcher<T>::DataPoints::getDescriptorDim()
+unsigned PointMatcher<T>::DataPoints::getDescriptorDim() const
 {
 	return descriptors.rows();
 }
@@ -329,11 +329,13 @@ void PointMatcher<T>::DataPoints::allocateFeatures(const Labels& newLabels)
 	allocateFields(newLabels, featureLabels, features);
 }
 
-//! Add a feature by name, remove first if already exists
+//! Add a feature by name, remove first if already exists. The 'pad' field will stay at the end for homogeneous transformation 
 template<typename T>
 void PointMatcher<T>::DataPoints::addFeature(const std::string& name, const Matrix& newFeature)
 {
+	removeFeature("pad");
 	addField(name, newFeature, featureLabels, features);
+	addField("pad", Matrix::Ones(1, features.cols()), featureLabels, features);
 }
 
 //! Remove a feature by name, the whole matrix will be copied
@@ -650,11 +652,38 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 		}
 	}
 }
-//! Add a descriptor or feature by name, remove first if already exists
+//! Remove a descriptor or feature by name, no copy is done.
 template<typename T>
 void PointMatcher<T>::DataPoints::removeField(const std::string& name, Labels& labels, Matrix& data) const
 {
-	//FIXME: finish here
+
+	const unsigned deleteId = getFieldStartingRow(name, labels);
+	const unsigned span = getFieldDimension(name, labels);
+	const unsigned keepAfterId = deleteId + span;
+	const unsigned lastId = data.rows() - 1;
+	const unsigned sizeKeep = data.rows() - keepAfterId;
+	const unsigned nbPoints = data.cols();
+
+
+	// check if the data to be removed at the end
+	if(keepAfterId <= lastId)
+	{
+		data.block(deleteId, 0, sizeKeep, nbPoints) = data.block(keepAfterId, 0, sizeKeep, nbPoints);
+	}
+
+	//Remove the last rows
+	data.conservativeResize(data.rows()-span, nbPoints);
+
+	// remove label from the label list
+	for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
+	{
+		if (it->text == name)
+		{
+			labels.erase(it);
+			break;
+		}
+	}
+
 }
 
 
