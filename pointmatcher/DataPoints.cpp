@@ -164,11 +164,23 @@ unsigned PointMatcher<T>::DataPoints::getDescriptorDim() const
 template<typename T>
 bool PointMatcher<T>::DataPoints::operator ==(const DataPoints& that) const
 {
-	return
-		(features == that.features) &&
-		(featureLabels == that.featureLabels) &&
-		(descriptors == that.descriptors) &&
-		(featureLabels == that.featureLabels);
+	// Note comparing matrix withou the same dimensions trigger an assert
+	bool isEqual = false;
+	if((features.rows() == that.features.rows()) &&
+		(features.cols() == that.features.cols()) &&
+		(descriptors.rows() == that.descriptors.rows()) &&
+		(descriptors.cols() == that.descriptors.cols()))
+	{
+		isEqual = (features == that.features) &&
+			(featureLabels == that.featureLabels) &&
+			(descriptors == that.descriptors) &&
+			(featureLabels == that.featureLabels);
+	}
+
+	//TODO: add time here
+
+	return isEqual;
+		
 }
 
 //! Add an other point cloud after the current one

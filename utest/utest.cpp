@@ -184,15 +184,6 @@ TEST(PointCloudTest, CopyConstructor2D)
 	EXPECT_TRUE(ref2DCopy == ref2D);
 }
 
-TEST(PointCloudTest, CopyConstructor3D)
-{
-	const DP ref3DCopy(ref3D);
-	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
-	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
-	EXPECT_TRUE(ref3DCopy.descriptors == ref3D.descriptors);
-	EXPECT_TRUE(ref3DCopy.descriptorLabels == ref3D.descriptorLabels);
-	EXPECT_TRUE(ref3DCopy == ref3D);
-}
 
 TEST(PointCloudTest, FeatureConstructor2D)
 {
@@ -206,12 +197,48 @@ TEST(PointCloudTest, FeatureConstructor2D)
 
 TEST(PointCloudTest, FeatureConstructor3D)
 {
-	const DP ref3DCopy(ref3D.features, ref3D.featureLabels);
-	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
-	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
-	EXPECT_TRUE(ref3DCopy == ref3D);
+	// Note: this test cover also the operator ==
+
+	////// 1-Empty constructor
+	DP ref3DCopy = DP();
+	EXPECT_TRUE(ref3DCopy.features.rows() == 0);
+	EXPECT_TRUE(ref3DCopy.features.cols() == 0);
 	EXPECT_TRUE(ref3DCopy.descriptors.rows() == 0);
 	EXPECT_TRUE(ref3DCopy.descriptors.cols() == 0);
+
+
+	////// 2-Constructor with only features
+	ref3DCopy = DP(ref3D.features, ref3D.featureLabels);
+	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
+	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
+	
+	// descriptor missing in ref3DCopy
+	EXPECT_FALSE(ref3DCopy == ref3D); 
+	
+	EXPECT_TRUE(ref3DCopy.descriptors.rows() == 0);
+	EXPECT_TRUE(ref3DCopy.descriptors.cols() == 0);
+
+	////// 3-Constructor with features and descriptors
+	ref3DCopy = DP(ref3D.features, ref3D.featureLabels, ref3D.descriptors, ref3D.descriptorLabels);
+	
+	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
+	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
+	EXPECT_TRUE(ref3DCopy.descriptors== ref3D.descriptors);
+	EXPECT_TRUE(ref3DCopy.descriptorLabels == ref3D.descriptorLabels);
+	
+
+	EXPECT_TRUE(ref3DCopy == ref3D); 
+	
+	////// 4-Copy constructor
+	ref3DCopy = DP(ref3D);
+	
+	EXPECT_TRUE(ref3DCopy.features == ref3D.features);
+	EXPECT_TRUE(ref3DCopy.featureLabels == ref3D.featureLabels);
+	EXPECT_TRUE(ref3DCopy.descriptors== ref3D.descriptors);
+	EXPECT_TRUE(ref3DCopy.descriptorLabels == ref3D.descriptorLabels);
+	
+
+	EXPECT_TRUE(ref3DCopy == ref3D);
 }
 
 TEST(PointCloudTest, ConcatenateFeatures2D)
@@ -243,7 +270,7 @@ TEST(PointCloudTest, ConcatenateFeatures3D)
 		ref3D.featureLabels
 	);
 	lefts.concatenate(rights);
-	EXPECT_TRUE(lefts == ref3D);
+	EXPECT_TRUE(lefts.features == ref3D.features);
 }
 
 TEST(PointCloudTest, ConcatenateDescSame)
