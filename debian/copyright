@@ -3,7 +3,7 @@ Upstream-Name: libpointmatcher
 Source: https://github.com/ethz-asl/libpointmatcher
 
 Files: *
-Copyright: 2010--2012, François Pomerleau <f dot pomerleau at gmail dot com> and Stephane Magnenat <stephane at magnenat dot net>, ASL, ETHZ, Switzerland
+Copyright: 2010--2014, François Pomerleau <f dot pomerleau at gmail dot com> and Stephane Magnenat <stephane at magnenat dot net>, ASL, ETHZ, Switzerland
 License: BSD-3-Clause
 
 Files: debian/*
