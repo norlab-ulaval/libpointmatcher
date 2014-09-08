@@ -1,4 +1,4 @@
-#include "../utest.hpp"
+#include "../utest.h"
 
 using namespace std;
 using namespace PointMatcherSupport;

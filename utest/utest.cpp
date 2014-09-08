@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "utest.hpp"
+#include "utest.h"
 
 using namespace std;
 using namespace PointMatcherSupport;
