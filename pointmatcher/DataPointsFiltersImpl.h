@@ -600,7 +600,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "fieldName", "Name of the descriptor to consider.", "density")
+				( "fieldName", "Name of the descriptor to consider.", "densities")
 				( "level", "Level at which to cut.", "0")
 			;
 		}
@@ -624,7 +624,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "fieldName", "Name of the descriptor to consider.", "density")
+				( "fieldName", "Name of the descriptor to consider.", "densities")
 				( "level", "Level at which to cut.", "0")
 			;
 		}
