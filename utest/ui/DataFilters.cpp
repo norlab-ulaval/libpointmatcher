@@ -345,3 +345,92 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 		}
 	}
 }
+
+TEST_F(DataFilterTest, CutAboveLevelDataPointsFilter)
+{
+	// Ratio has been selected to not affect the points too much
+	vector<double> levels = list_of (100) (1000) (5000);
+
+	for(unsigned i=0; i < levels.size(); i++)
+	{
+		DP ref3DCopy = ref3D;
+		icp.readingDataPointsFilters.clear();
+		params = map_list_of
+			("knn", "5") 
+			("epsilon", "0.1") 
+			("keepNormals", "0")
+			("keepDensities", "1")
+			("keepEigenValues", "0")
+			("keepEigenVectors", "0" )
+			("keepMatchedIds" , "0" )
+		;
+
+		addFilter("SurfaceNormalDataPointsFilter", params);
+		icp.readingDataPointsFilters.apply(ref3DCopy);
+
+		icp.readingDataPointsFilters.clear();
+		params = map_list_of
+			("fieldName", toParam("densities"))
+			("level", toParam(levels[i]))
+		;
+
+		addFilter("CutAboveLevelDataPointsFilter", params);
+
+		int goodCount=0;
+		PM::DataPoints::View densities = ref3DCopy.getDescriptorViewByName("densities");
+		for (unsigned j=0; j < densities.cols(); ++j)
+		{
+			if (densities(0, j) <= levels[i])
+			{
+				++goodCount;
+			}
+		}
+		icp.readingDataPointsFilters.apply(ref3DCopy);
+		EXPECT_TRUE(ref3DCopy.features.cols() == goodCount);
+	}
+}
+
+TEST_F(DataFilterTest, CutBelowLevelDataPointsFilter)
+{
+	// Ratio has been selected to not affect the points too much
+	vector<double> levels = list_of (100) (1000) (5000);
+
+	for(unsigned i=0; i < levels.size(); i++)
+	{
+		DP ref3DCopy = ref3D;
+		icp.readingDataPointsFilters.clear();
+		params = map_list_of
+			("knn", "5") 
+			("epsilon", "0.1") 
+			("keepNormals", "0")
+			("keepDensities", "1")
+			("keepEigenValues", "0")
+			("keepEigenVectors", "0" )
+			("keepMatchedIds" , "0" )
+		;
+
+		addFilter("SurfaceNormalDataPointsFilter", params);
+		icp.readingDataPointsFilters.apply(ref3DCopy);
+
+		icp.readingDataPointsFilters.clear();
+		params = map_list_of
+			("fieldName", toParam("densities"))
+			("level", toParam(levels[i]))
+		;
+
+		addFilter("CutBelowLevelDataPointsFilter", params);
+
+		int goodCount=0;
+		PM::DataPoints::View densities = ref3DCopy.getDescriptorViewByName("densities");
+		for (unsigned j=0; j < densities.cols(); ++j)
+		{
+			if (densities(0, j) >= levels[i])
+			{
+				++goodCount;
+			}
+		}
+		icp.readingDataPointsFilters.apply(ref3DCopy);
+		EXPECT_TRUE(ref3DCopy.features.cols() == goodCount);
+	}
+}
+
