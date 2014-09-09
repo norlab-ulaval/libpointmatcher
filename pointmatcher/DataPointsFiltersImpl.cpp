@@ -1627,3 +1627,60 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 
 template struct DataPointsFiltersImpl<float>::VoxelGridDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::VoxelGridDataPointsFilter;
+
+
+// CutAboveLevelDataPointsFilter
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::CutAboveLevelDataPointsFilter::CutAboveLevelDataPointsFilter(const Parameters& params):
+	DataPointsFilter("CutAboveLevelDataPointsFilter", CutAboveLevelDataPointsFilter::availableParameters(), params),
+	fieldName(Parametrizable::get<std::string>("fieldName")),
+	level(Parametrizable::get<T>("level"))
+{
+}
+
+// Compute
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::CutAboveLevelDataPointsFilter::filter(
+	const DataPoints& input)
+{
+	DataPoints output(input);
+	inPlaceFilter(output);
+	return output;
+}
+
+// In-place filter
+template<typename T>
+void DataPointsFiltersImpl<T>::CutAboveLevelDataPointsFilter::inPlaceFilter(
+	DataPoints& cloud)
+{
+	typedef typename DataPoints::View View;
+	typedef typename DataPoints::ConstView ConstView;
+
+	// Check field exists
+	if (!cloud.descriptorExists(fieldName))
+	{
+		throw InvalidField("CutAboveLevelDataPointsFilter: Error, field not found in descriptors.");
+	}
+
+	const int nbPointsIn = cloud.features.cols();
+	View values = cloud.getDescriptorViewByName(fieldName);
+
+	// fill cloud values
+	int j = 0;
+	for (int i = 0; i < nbPointsIn; i++)
+	{
+		const T value(values(0,i));
+		if (value <= level)
+		{
+			cloud.setColFrom(j, cloud, i);
+			j++;
+		}
+	}
+
+	cloud.conservativeResize(j);
+}
+
+template struct DataPointsFiltersImpl<float>::CutAboveLevelDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::CutAboveLevelDataPointsFilter;
+

@@ -590,6 +590,30 @@ struct DataPointsFiltersImpl
 
 	};	
 
+	//! Subsampling. Cut points with value of a given descriptor above a given level.
+	struct CutAboveLevelDataPointsFilter: public DataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			return "Subsampling. Cut points with value of a given descriptor above a given level.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return boost::assign::list_of<ParameterDoc>
+				( "fieldName", "Name of the descriptor to consider.", "density")
+				( "level", "Level at which to cut.", "0")
+			;
+		}
+		
+		const std::string fieldName; 
+		const T level;
+		
+		//! Constructor, uses parameter interface
+		CutAboveLevelDataPointsFilter(const Parameters& params = Parameters());
+		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
+	};
+
 }; // DataPointsFiltersImpl
 
 #endif // __POINTMATCHER_DATAPOINTSFILTERS_H
