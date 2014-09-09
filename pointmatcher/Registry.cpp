@@ -81,6 +81,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, ObservationDirectionDataPointsFilter, typename DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, VoxelGridDataPointsFilter, typename DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, CutAboveLevelDataPointsFilter, typename DataPointsFiltersImpl<T>::CutAboveLevelDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, CutBelowLevelDataPointsFilter, typename DataPointsFiltersImpl<T>::CutBelowLevelDataPointsFilter)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)
