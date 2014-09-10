@@ -1629,19 +1629,20 @@ template struct DataPointsFiltersImpl<float>::VoxelGridDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::VoxelGridDataPointsFilter;
 
 
-// CutAboveLevelDataPointsFilter
+// CutAtDescriptorThresholdDataPointsFilter
 // Constructor
 template<typename T>
-DataPointsFiltersImpl<T>::CutAboveLevelDataPointsFilter::CutAboveLevelDataPointsFilter(const Parameters& params):
-	DataPointsFilter("CutAboveLevelDataPointsFilter", CutAboveLevelDataPointsFilter::availableParameters(), params),
-	fieldName(Parametrizable::get<std::string>("fieldName")),
-	level(Parametrizable::get<T>("level"))
+DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter::CutAtDescriptorThresholdDataPointsFilter(const Parameters& params):
+	DataPointsFilter("CutAtDescriptorThresholdDataPointsFilter", CutAtDescriptorThresholdDataPointsFilter::availableParameters(), params),
+	descName(Parametrizable::get<std::string>("descName")),
+	useLargerThan(Parametrizable::get<bool>("useLargerThan")),
+	threshold(Parametrizable::get<T>("threshold"))
 {
 }
 
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::CutAboveLevelDataPointsFilter::filter(
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter::filter(
 	const DataPoints& input)
 {
 	DataPoints output(input);
@@ -1651,92 +1652,47 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::CutAboveLevelData
 
 // In-place filter
 template<typename T>
-void DataPointsFiltersImpl<T>::CutAboveLevelDataPointsFilter::inPlaceFilter(
+void DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter::inPlaceFilter(
 	DataPoints& cloud)
 {
-	typedef typename DataPoints::View View;
-	typedef typename DataPoints::ConstView ConstView;
-
 	// Check field exists
-	if (!cloud.descriptorExists(fieldName))
+	if (!cloud.descriptorExists(descName))
 	{
-		throw InvalidField("CutAboveLevelDataPointsFilter: Error, field not found in descriptors.");
+		throw InvalidField("CutAtDescriptorThresholdDataPointsFilter: Error, field not found in descriptors.");
 	}
 
 	const int nbPointsIn = cloud.features.cols();
-	View values = cloud.getDescriptorViewByName(fieldName);
+	typename DataPoints::View values = cloud.getDescriptorViewByName(descName);
 
 	// fill cloud values
 	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
+	if (useLargerThan)
 	{
-		const T value(values(0,i));
-		if (value <= level)
+		for (int i = 0; i < nbPointsIn; i++)
 		{
-			cloud.setColFrom(j, cloud, i);
-			j++;
+			const T value(values(0,i));
+			if (value <= threshold)
+			{
+				cloud.setColFrom(j, cloud, i);
+				j++;
+			}
 		}
 	}
-
+	else
+	{
+		for (int i = 0; i < nbPointsIn; i++)
+		{
+			const T value(values(0,i));
+			if (value >= threshold)
+			{
+				cloud.setColFrom(j, cloud, i);
+				j++;
+			}
+		}
+	}
 	cloud.conservativeResize(j);
 }
 
-template struct DataPointsFiltersImpl<float>::CutAboveLevelDataPointsFilter;
-template struct DataPointsFiltersImpl<double>::CutAboveLevelDataPointsFilter;
-
-
-// CutBelowLevelDataPointsFilter
-// Constructor
-template<typename T>
-DataPointsFiltersImpl<T>::CutBelowLevelDataPointsFilter::CutBelowLevelDataPointsFilter(const Parameters& params):
-	DataPointsFilter("CutBelowLevelDataPointsFilter", CutBelowLevelDataPointsFilter::availableParameters(), params),
-	fieldName(Parametrizable::get<std::string>("fieldName")),
-	level(Parametrizable::get<T>("level"))
-{
-}
-
-// Compute
-template<typename T>
-typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::CutBelowLevelDataPointsFilter::filter(
-	const DataPoints& input)
-{
-	DataPoints output(input);
-	inPlaceFilter(output);
-	return output;
-}
-
-// In-place filter
-template<typename T>
-void DataPointsFiltersImpl<T>::CutBelowLevelDataPointsFilter::inPlaceFilter(
-	DataPoints& cloud)
-{
-	typedef typename DataPoints::View View;
-	typedef typename DataPoints::ConstView ConstView;
-
-	// Check field exists
-	if (!cloud.descriptorExists(fieldName))
-	{
-		throw InvalidField("CutBelowLevelDataPointsFilter: Error, field not found in descriptors.");
-	}
-
-	const int nbPointsIn = cloud.features.cols();
-	View values = cloud.getDescriptorViewByName(fieldName);
-
-	// fill cloud values
-	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
-	{
-		const T value(values(0,i));
-		if (value >= level)
-		{
-			cloud.setColFrom(j, cloud, i);
-			j++;
-		}
-	}
-
-	cloud.conservativeResize(j);
-}
-
-template struct DataPointsFiltersImpl<float>::CutBelowLevelDataPointsFilter;
-template struct DataPointsFiltersImpl<double>::CutBelowLevelDataPointsFilter;
+template struct DataPointsFiltersImpl<float>::CutAtDescriptorThresholdDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::CutAtDescriptorThresholdDataPointsFilter;
 

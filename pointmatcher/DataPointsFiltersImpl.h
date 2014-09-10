@@ -590,50 +590,28 @@ struct DataPointsFiltersImpl
 
 	};	
 
-	//! Subsampling. Cut points with value of a given descriptor above a given level.
-	struct CutAboveLevelDataPointsFilter: public DataPointsFilter
+	//! Subsampling. Cut points with value of a given descriptor above or below a given threshold.
+	struct CutAtDescriptorThresholdDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
-			return "Subsampling. Cut points with value of a given descriptor above a given level.";
+			return "Subsampling. Cut points with value of a given descriptor above or below a given threshold.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "fieldName", "Name of the descriptor to consider.", "densities")
-				( "level", "Level at which to cut.", "0")
+				( "descName", "Descriptor name used to cut points", "none")
+				( "useLargerThan", "If set to 1 (true), points with values above the 'threshold' will be cut.  If set to 0 (false), points with values below the 'threshold' will be cut.", "1", "0", "1", P::Comp<bool>)
+				( "threshold", "Value at which to cut.", "0", "-inf", "inf", &P::Comp<T>)
 			;
 		}
 		
-		const std::string fieldName; 
-		const T level;
+		const std::string descName; 
+		const bool useLargerThan;
+		const T threshold;
 		
 		//! Constructor, uses parameter interface
-		CutAboveLevelDataPointsFilter(const Parameters& params = Parameters());
-		virtual DataPoints filter(const DataPoints& input);
-		virtual void inPlaceFilter(DataPoints& cloud);
-	};
-
-	//! Subsampling. Cut points with value of a given descriptor below a given level.
-	struct CutBelowLevelDataPointsFilter: public DataPointsFilter
-	{
-		inline static const std::string description()
-		{
-			return "Subsampling. Cut points with value of a given descriptor below a given level.";
-		}
-		inline static const ParametersDoc availableParameters()
-		{
-			return boost::assign::list_of<ParameterDoc>
-				( "fieldName", "Name of the descriptor to consider.", "densities")
-				( "level", "Level at which to cut.", "0")
-			;
-		}
-		
-		const std::string fieldName; 
-		const T level;
-		
-		//! Constructor, uses parameter interface
-		CutBelowLevelDataPointsFilter(const Parameters& params = Parameters());
+		CutAtDescriptorThresholdDataPointsFilter(const Parameters& params = Parameters());
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
