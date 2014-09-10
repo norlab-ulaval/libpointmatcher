@@ -351,6 +351,7 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 	// Copied from density ratio above
 	vector<double> thresholds = list_of (100) (1000) (5000);
 
+	DP ref3Ddensities = ref3D;
 	// Adding descriptor "densities"
 	icp.readingDataPointsFilters.clear();
 	params = map_list_of
@@ -364,7 +365,7 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 	;
 
 	addFilter("SurfaceNormalDataPointsFilter", params);
-	icp.readingDataPointsFilters.apply(ref3D);
+	icp.readingDataPointsFilters.apply(ref3Ddensities);
 
 	for(unsigned i=0; i < thresholds.size(); i++)
 	{
@@ -372,7 +373,7 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 		int aboveCount=0;
 
 		// counting points above and below
-		PM::DataPoints::View densities = ref3D.getDescriptorViewByName("densities");
+		PM::DataPoints::View densities = ref3Ddensities.getDescriptorViewByName("densities");
 		for (unsigned j=0; j < densities.cols(); ++j)
 		{
 			if (densities(0, j) <= thresholds[i])
@@ -387,7 +388,7 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 
 		for(bool useLargerThan(true); useLargerThan; useLargerThan=false)
 		{
-			DP ref3DCopy = ref3D;
+			DP ref3DCopy = ref3Ddensities;
 
 			icp.readingDataPointsFilters.clear();
 			params = map_list_of
