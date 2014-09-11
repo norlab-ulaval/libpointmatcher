@@ -1627,3 +1627,72 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 
 template struct DataPointsFiltersImpl<float>::VoxelGridDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::VoxelGridDataPointsFilter;
+
+
+// CutAtDescriptorThresholdDataPointsFilter
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter::CutAtDescriptorThresholdDataPointsFilter(const Parameters& params):
+	DataPointsFilter("CutAtDescriptorThresholdDataPointsFilter", CutAtDescriptorThresholdDataPointsFilter::availableParameters(), params),
+	descName(Parametrizable::get<std::string>("descName")),
+	useLargerThan(Parametrizable::get<bool>("useLargerThan")),
+	threshold(Parametrizable::get<T>("threshold"))
+{
+}
+
+// Compute
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter::filter(
+	const DataPoints& input)
+{
+	DataPoints output(input);
+	inPlaceFilter(output);
+	return output;
+}
+
+// In-place filter
+template<typename T>
+void DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter::inPlaceFilter(
+	DataPoints& cloud)
+{
+	// Check field exists
+	if (!cloud.descriptorExists(descName))
+	{
+		throw InvalidField("CutAtDescriptorThresholdDataPointsFilter: Error, field not found in descriptors.");
+	}
+
+	const int nbPointsIn = cloud.features.cols();
+	typename DataPoints::View values = cloud.getDescriptorViewByName(descName);
+
+	// fill cloud values
+	int j = 0;
+	if (useLargerThan)
+	{
+		for (int i = 0; i < nbPointsIn; i++)
+		{
+			const T value(values(0,i));
+			if (value <= threshold)
+			{
+				cloud.setColFrom(j, cloud, i);
+				j++;
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < nbPointsIn; i++)
+		{
+			const T value(values(0,i));
+			if (value >= threshold)
+			{
+				cloud.setColFrom(j, cloud, i);
+				j++;
+			}
+		}
+	}
+	cloud.conservativeResize(j);
+}
+
+template struct DataPointsFiltersImpl<float>::CutAtDescriptorThresholdDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::CutAtDescriptorThresholdDataPointsFilter;
+

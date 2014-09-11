@@ -345,3 +345,69 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 		}
 	}
 }
+
+TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
+{
+	// Copied from density ratio above
+	vector<double> thresholds = list_of (100) (1000) (5000);
+
+	DP ref3Ddensities = ref3D;
+	// Adding descriptor "densities"
+	icp.readingDataPointsFilters.clear();
+	params = map_list_of
+		("knn", "5") 
+		("epsilon", "0.1") 
+		("keepNormals", "0")
+		("keepDensities", "1")
+		("keepEigenValues", "0")
+		("keepEigenVectors", "0" )
+		("keepMatchedIds" , "0" )
+	;
+
+	addFilter("SurfaceNormalDataPointsFilter", params);
+	icp.readingDataPointsFilters.apply(ref3Ddensities);
+
+	for(unsigned i=0; i < thresholds.size(); i++)
+	{
+		int belowCount=0;
+		int aboveCount=0;
+
+		// counting points above and below
+		PM::DataPoints::View densities = ref3Ddensities.getDescriptorViewByName("densities");
+		for (unsigned j=0; j < densities.cols(); ++j)
+		{
+			if (densities(0, j) <= thresholds[i])
+			{
+				++belowCount;
+			}
+			if (densities(0, j) >= thresholds[i])
+			{
+				++aboveCount;
+			}
+		}
+
+		for(bool useLargerThan(true); useLargerThan; useLargerThan=false)
+		{
+			DP ref3DCopy = ref3Ddensities;
+
+			icp.readingDataPointsFilters.clear();
+			params = map_list_of
+				("descName", toParam("densities"))
+				("useLargerThan", toParam(useLargerThan))
+				("threshold", toParam(thresholds[i]))
+			;
+
+			addFilter("CutAtDescriptorThresholdDataPointsFilter", params);
+			icp.readingDataPointsFilters.apply(ref3DCopy);
+			if (useLargerThan)
+			{
+				EXPECT_TRUE(ref3DCopy.features.cols() == belowCount);
+			}
+			else
+			{
+				EXPECT_TRUE(ref3DCopy.features.cols() == aboveCount);
+			}
+		}
+	}
+}
+
