@@ -103,6 +103,7 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 	// the sparse nature of the representation. Here is only an estimate 
 	// of the true overlap.
 	const int nbPoints = this->lastErrorElements.reading.features.cols();
+	const int dim = this->lastErrorElements.reading.features.rows();
 	if(nbPoints == 0)
 	{
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
@@ -116,7 +117,7 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 
 	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
 
-	const Vector dists = (this->lastErrorElements.reading.features - this->lastErrorElements.reference.features).colwise().norm();
+	const Vector dists = (this->lastErrorElements.reading.features.topRows(dim-1) - this->lastErrorElements.reference.features.topRows(dim-1)).colwise().norm();
 	const T mean = dists.sum()/nbPoints;
 
 	int count = 0;
@@ -280,16 +281,20 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 
 	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
 	const BOOST_AUTO(normals, this->lastErrorElements.reading.getDescriptorViewByName("normals"));
+	
+
+	const Matrix delta = (this->lastErrorElements.reading.features.topRows(dim-1) - this->lastErrorElements.reference.features.topRows(dim-1));
+	const T mean = delta.colwise().norm().sum()/nbPoints;
+	cerr << "mean:" << mean << endl;
+
 	int count = 0;
 	for(int i=0; i < nbPoints; i++)
 	{
-		if(this->lastErrorElements.matches.dists(0, i) != numeric_limits<T>::infinity())
+		const Vector n = normals.col(i);
+		const T projectionDist = delta.col(i).dot(n.normalized());
+		if(anyabs(projectionDist) < (mean + noises(0,i)))
 		{
-			const Vector d = this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i);
-			const Vector n = normals.col(i);
-			const T projectionDist = d.head(dim-1).dot(n.normalized());
-			if(anyabs(projectionDist) < noises(0,i))
-				count++;
+			count++;
 		}
 	}
 
