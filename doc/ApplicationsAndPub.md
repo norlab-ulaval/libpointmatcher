@@ -9,9 +9,10 @@ Click on the image to play.
 - Sensor: Velodyne HDL-32E
 - Application: 3D mapping and localization
 
+
 <a href="https://www.youtube.com/watch?v=cMgLyLpnsoU" target="_blank">
-<img src="http://img.youtube.com/vi/cMgLyLpnsoU/0.jpg" 
- width="240" height="180" border="10" />
+ <img src="images/youtube-play-button.png" style="background: url(http://img.youtube.com/vi/cMgLyLpnsoU/0.jpg); background-size: 240px 180px;" width="240" height="180"/>
+ 
 </a>
 
 #### NIFTi: railyard mapping
