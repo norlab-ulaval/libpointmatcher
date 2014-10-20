@@ -4,14 +4,6 @@ Here some applications and scientific publications using libpointmatcher.
 ## Youtube Videos
 Click on the image to play.
 
-#### ARTOR: Long-term 3D map maintenance in dynamic environments
-- Sensor: Velodyne HDL-32E
-- Application: 3D mapping and localization
-
-
-<a href="https://www.youtube.com/watch?v=cMgLyLpnsoU" target="_blank">
- <img src="images/youtubeCovers/cMgLyLpnsoU.jpg" width="240" height="180"/>
-</a>
 
 #### ARTOR: Long-term 3D map maintenance in dynamic environments
 - Sensor: Velodyne HDL-32E
