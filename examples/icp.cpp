@@ -74,6 +74,14 @@ int main(int argc, const char *argv[])
 	const DP ref(DP::load(refFile));
 	const DP data(DP::load(dataFile));
 
+	//TODO: add initial transformation from command line
+	PM::TransformationParameters Tinit = PM::TransformationParameters(4,4);
+	
+	Tinit << 1,0,0,0,
+	         0,1,0,0,
+			 0,0,1,0,
+			 0,0,0,1;
+
 	// Create the default ICP algorithm
 	PM::ICP icp;
 	
@@ -94,7 +102,7 @@ int main(int argc, const char *argv[])
 	}
 
 	// Compute the transformation to express data in ref
-	PM::TransformationParameters T = icp(data, ref);
+	PM::TransformationParameters T = icp(data, ref, Tinit);
 	cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 
 	// Transform data to express it in ref
