@@ -53,6 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <ostream>
 #include <memory>
+//#include <cstdint>
+#include <boost/cstdint.hpp>
 
 #include "Parametrizable.h"
 #include "Registrar.h"
@@ -169,6 +171,9 @@ struct PointMatcher
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
+	//! A dense unsigned 64-bits matrix
+	//FIXME: this is C++0x, continue here...
+	typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
 	
 	//! A matrix holding the parameters a transformation.
 	/**
@@ -253,6 +258,7 @@ struct PointMatcher
 		DataPoints createSimilarEmpty(Index pointCount) const;
 		void setColFrom(Index thisCol, const DataPoints& that, Index thatCol);
 		
+		// methods related to features
 		void allocateFeature(const std::string& name, const unsigned dim);
 		void allocateFeatures(const Labels& newLabels);
 		void addFeature(const std::string& name, const Matrix& newFeature);
@@ -267,6 +273,7 @@ struct PointMatcher
 		unsigned getFeatureDimension(const std::string& name) const;
 		unsigned getFeatureStartingRow(const std::string& name) const;
 		
+		// methods related to descriptors
 		void allocateDescriptor(const std::string& name, const unsigned dim);
 		void allocateDescriptors(const Labels& newLabels);
 		void addDescriptor(const std::string& name, const Matrix& newDescriptor);
@@ -282,10 +289,28 @@ struct PointMatcher
 		unsigned getDescriptorStartingRow(const std::string& name) const;
 		void assertDescriptorConsistency() const;
 		
+		// methods related to times
+		void allocateTime(const std::string& name, const unsigned dim);
+		void allocateTimes(const Labels& newLabels);
+		void addTime(const std::string& name, const Matrix& newDescriptor);
+		void removeTime(const std::string& name);
+		Matrix getTimeCopyByName(const std::string& name) const;
+		ConstView getTimeViewByName(const std::string& name) const;
+		View getTimeViewByName(const std::string& name);
+		ConstView getTimeRowViewByName(const std::string& name, const unsigned row) const;
+		View getTimeRowViewByName(const std::string& name, const unsigned row);
+		bool timeExists(const std::string& name) const;
+		bool timeExists(const std::string& name, const unsigned dim) const;
+		unsigned getTimeDimension(const std::string& name) const;
+		unsigned getTimeStartingRow(const std::string& name) const;
+		void assertTimeConsistency() const;
+
 		Matrix features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features
 		Matrix descriptors; //!< descriptors of points in the cloud, might be empty
 		Labels descriptorLabels; //!< labels of descriptors
+		Uint64Matrix times; //!< time associated to each points, might be empty
+		Labels timeLabels; //!< labels of times.
 	
 	private:
 		void allocateFields(const Labels& newLabels, Labels& labels, Matrix& data) const;
