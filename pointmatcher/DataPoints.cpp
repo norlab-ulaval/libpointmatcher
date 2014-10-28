@@ -543,6 +543,37 @@ void PointMatcher<T>::DataPoints::assertDescriptorConsistency() const
 	}
 }
 
+//! Assert if a marrix is not consistent with features
+template<typename T>
+void PointMatcher<T>::DataPoints::assertConsistency(const std::string& dataName, const Matrix& data, const Labels& labels) const
+{
+	if (data.rows() == 0)
+	{
+		if (data.cols() != 0)
+			throw std::runtime_error(
+				(boost::format("Point cloud has degenerate %2% dimensions of rows=0, cols=%1%") % data.cols() % dataName).str()
+			);
+		if (labels.size() > 0)
+			throw std::runtime_error(
+				(boost::format("Point cloud has no %2% data but %1% descriptor labels") % labels.size() % dataName).str()
+			);
+	}
+	else
+	{
+		if (data.cols() != features.cols())
+			throw std::runtime_error(
+				(boost::format("Point cloud has %1% points in features but %2% points in %3%") % features.cols() % data.cols() % dataName).str()
+			);
+		int descDim(0);
+		for (BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
+			descDim += it->span;
+		if (data.rows() != descDim)
+			throw std::runtime_error(
+				(boost::format("Labels from %3% return %1% total dimensions but there are %2% in the %3% matrix") % descDim % data.rows() % dataName).str()
+			);
+	}
+}
+
 //! Make sure a field of a given name exists, if present, check its dimensions
 template<typename T>
 void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data) const

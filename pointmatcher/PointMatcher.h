@@ -313,6 +313,7 @@ struct PointMatcher
 		Labels timeLabels; //!< labels of times.
 	
 	private:
+		void assertConsistency(const std::string& dataName, const Matrix& data, const Labels& labels) const;
 		void allocateFields(const Labels& newLabels, Labels& labels, Matrix& data) const;
 		void allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data) const;
 		void addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data) const;
