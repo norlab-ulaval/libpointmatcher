@@ -296,7 +296,6 @@ struct PointMatcher
 		// methods related to times
 		void allocateTime(const std::string& name, const unsigned dim);
 		void allocateTimes(const Labels& newLabels);
-<<<<<<< HEAD
 		void addTime(const std::string& name, const Uint64Matrix& newTime);
 		void removeTime(const std::string& name);
 		Uint64Matrix getTimeCopyByName(const std::string& name) const;
@@ -304,24 +303,11 @@ struct PointMatcher
 		TimeView getTimeViewByName(const std::string& name);
 		TimeConstView getTimeRowViewByName(const std::string& name, const unsigned row) const;
 		TimeView getTimeRowViewByName(const std::string& name, const unsigned row);
-=======
-		void addTime(const std::string& name, const Matrix& newDescriptor);
-		void removeTime(const std::string& name);
-		Matrix getTimeCopyByName(const std::string& name) const;
-		ConstView getTimeViewByName(const std::string& name) const;
-		View getTimeViewByName(const std::string& name);
-		ConstView getTimeRowViewByName(const std::string& name, const unsigned row) const;
-		View getTimeRowViewByName(const std::string& name, const unsigned row);
->>>>>>> c85f03a1ed7a7ee14bf59aa6d42d28e50ed28d2c
 		bool timeExists(const std::string& name) const;
 		bool timeExists(const std::string& name, const unsigned dim) const;
 		unsigned getTimeDimension(const std::string& name) const;
 		unsigned getTimeStartingRow(const std::string& name) const;
-<<<<<<< HEAD
 		void assertTimesConsistency() const;
-=======
-		void assertTimeConsistency() const;
->>>>>>> c85f03a1ed7a7ee14bf59aa6d42d28e50ed28d2c
 
 		Matrix features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features
