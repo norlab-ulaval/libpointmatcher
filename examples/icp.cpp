@@ -136,7 +136,7 @@ int main(int argc, const char *argv[])
     data_out.save(outputBaseFile + "_data_out.vtk");
     if(isTransfoSaved){
         ofstream transfoFile;
-        string transfoFileName = outputBaseFile + "_transformation_matrix.txt";
+        string transfoFileName = outputBaseFile + "_transformation_matrices.txt";
         transfoFile.open(transfoFileName.c_str());
         if(transfoFile.is_open()) {
             transfoFile << "Initial transformation :" << endl;
