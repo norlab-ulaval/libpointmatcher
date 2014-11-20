@@ -86,12 +86,10 @@ find_path(EIGEN_INCLUDE_DIR Eigen/Core
 )
 
 # nabo
-find_path(NABO_INCLUDE_DIR nabo/nabo.h
-	/usr/local/include ${LIBNABO_INSTALL_DIR}/include
-)
-find_library(NABO_LIBRARY NAMES libnabo.a nabo PATHS
-	/usr/local/lib ${LIBNABO_INSTALL_DIR}/lib
-)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LIBNABO_INSTALL_DIR}/share/libnabo/cmake/")
+find_package(libnabo)
+include(libnaboConfig)
+include_directories(${libnabo_INCLUDE_DIRS})
 
 # optionally, look for OpenCL library
 set(USE_OPEN_CL "false" CACHE BOOL "Set to ON to look for OpenCL, if your libnabo was compiled with CL support")
@@ -189,7 +187,7 @@ else(SHARED_LIBS)
         add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 endif(SHARED_LIBS)
-target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES})
+target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
 # create doc before installing
