@@ -56,8 +56,10 @@ int validateArgs(const int argc, const char *argv[],
                  string& configFile,
                  string& outputBaseFile,
                  string& initTranslation, string& initRotation);
-PM::TransformationParameters parseTranslation(string& translation);
-PM::TransformationParameters parseRotation(string& rotation);
+PM::TransformationParameters parseTranslation(string& translation,
+                                              const int cloudDimension);
+PM::TransformationParameters parseRotation(string& rotation,
+                                           const int cloudDimension);
 void usage(const char *argv[]);
 
 /**
@@ -78,7 +80,9 @@ int main(int argc, const char *argv[])
     const int ret = validateArgs(argc, argv, isCSV, isTransfoSaved, configFile,
                                  outputBaseFile, initTranslation, initRotation);
     if (ret != 0)
+    {
         return ret;
+    }
     const char *refFile(argv[argc-2]);
     const char *dataFile(argv[argc-1]);
 
@@ -105,19 +109,40 @@ int main(int argc, const char *argv[])
         icp.loadFromYaml(ifs);
     }
 
+    int cloudDimension = 0;
+    if (ref.getFeatureDimension("x") == 1
+            && ref.getFeatureDimension("y") == 1
+            && data.getFeatureDimension("x") == 1
+            && data.getFeatureDimension("y") == 1) {
+        if (ref.getFeatureDimension("z") == 1
+                && data.getFeatureDimension("z") == 1) {
+            cloudDimension = 3;
+        }
+        else if (ref.getFeatureDimension("z") == 0
+                 && data.getFeatureDimension("z") == 0){
+            cloudDimension = 2;
+        }
+    }
+    if (cloudDimension == 0) {
+        cerr << "Invalid input point clouds dimension" << endl;
+        exit(1);
+    }
+
     PM::TransformationParameters translation =
-            parseTranslation(initTranslation);
-    PM::TransformationParameters rotation = parseRotation(initRotation);
+            parseTranslation(initTranslation, cloudDimension);
+    PM::TransformationParameters rotation =
+            parseRotation(initRotation, cloudDimension);
     PM::TransformationParameters initTransfo = translation*rotation;
 
     PM::Transformation* rigidTrans;
-        rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
+    rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
 
     if (!rigidTrans->checkParameters(initTransfo)) {
         cerr << endl
              << "Initial transformation is not rigid, identiy will be used"
              << endl;
-        initTransfo = PM::TransformationParameters::Identity(4,4);
+        initTransfo = PM::TransformationParameters::Identity(
+                    cloudDimension+1,cloudDimension+1);
     }
 
     const DP initializedData = rigidTrans->compute(data, initTransfo);
@@ -134,20 +159,34 @@ int main(int argc, const char *argv[])
     ref.save(outputBaseFile + "_ref.vtk");
     data.save(outputBaseFile + "_data_in.vtk");
     data_out.save(outputBaseFile + "_data_out.vtk");
-    if(isTransfoSaved){
+    if(isTransfoSaved) {
         ofstream transfoFile;
-        string transfoFileName = outputBaseFile + "_transformation_matrices.txt";
-        transfoFile.open(transfoFileName.c_str());
+        string initFileName = outputBaseFile + "_init_transfo.txt";
+        string icpFileName = outputBaseFile + "_icp_transfo.txt";
+        string completeFileName = outputBaseFile + "_complete_transfo.txt";
+
+        transfoFile.open(initFileName.c_str());
         if(transfoFile.is_open()) {
-            transfoFile << "Initial transformation :" << endl;
-            transfoFile << initTransfo << endl << endl;
-            transfoFile << "ICP transformation :" << endl;
-            transfoFile << T << endl << endl;
-            transfoFile << "Complete transformation :" << endl;
-            transfoFile << T*initTransfo;
+            transfoFile << initTransfo << endl;
             transfoFile.close();
         } else {
-            cout << "Unable to write the transformation matrix file\n" << endl;
+            cout << "Unable to write the initial transformation file\n" << endl;
+        }
+
+        transfoFile.open(icpFileName.c_str());
+        if(transfoFile.is_open()) {
+            transfoFile << T << endl;
+            transfoFile.close();
+        } else {
+            cout << "Unable to write the ICP transformation file\n" << endl;
+        }
+
+        transfoFile.open(completeFileName.c_str());
+        if(transfoFile.is_open()) {
+            transfoFile << T*initTransfo << endl;
+            transfoFile.close();
+        } else {
+            cout << "Unable to write the complete transformation file\n" << endl;
         }
     }
     else {
@@ -262,9 +301,11 @@ int validateArgs(const int argc, const char *argv[],
     return 0;
 }
 
-PM::TransformationParameters parseTranslation(string& translation) {
+PM::TransformationParameters parseTranslation(string& translation,
+                                              const int cloudDimension) {
     PM::TransformationParameters parsedTranslation;
-    parsedTranslation = PM::TransformationParameters::Identity(4,4);
+    parsedTranslation = PM::TransformationParameters::Identity(
+                cloudDimension+1,cloudDimension+1);
 
     translation.erase(std::remove(translation.begin(), translation.end(), '['),
                       translation.end());
@@ -275,7 +316,7 @@ PM::TransformationParameters parseTranslation(string& translation) {
 
     float translationValues[3] = {0};
     stringstream translationStringStream(translation);
-    for( int i = 0; i < 3; i++) {
+    for( int i = 0; i < cloudDimension; i++) {
         if(!(translationStringStream >> translationValues[i])) {
             cerr << "An error occured while trying to parse the initial "
                  << "translation." << endl
@@ -283,38 +324,52 @@ PM::TransformationParameters parseTranslation(string& translation) {
             return parsedTranslation;
         }
     }
+    float extraOutput = 0;
+    if((translationStringStream >> extraOutput)) {
+        cerr << "Wrong initial translation size" << endl
+             << "No initial translation will be used" << endl;
+        return parsedTranslation;
+    }
 
-    for( int i = 0; i < 3; i++) {
-        parsedTranslation(i,3) = translationValues[i];
+    for( int i = 0; i < cloudDimension; i++) {
+        parsedTranslation(i,cloudDimension) = translationValues[i];
     }
 
     return parsedTranslation;
 }
 
-PM::TransformationParameters parseRotation(string &rotation){
+PM::TransformationParameters parseRotation(string &rotation,
+                                           const int cloudDimension){
     PM::TransformationParameters parsedRotation;
-    parsedRotation = PM::TransformationParameters::Identity(4,4);
+    parsedRotation = PM::TransformationParameters::Identity(
+                cloudDimension+1,cloudDimension+1);
 
     rotation.erase(std::remove(rotation.begin(), rotation.end(), '['),
-                      rotation.end());
+                   rotation.end());
     rotation.erase(std::remove(rotation.begin(), rotation.end(), ']'),
-                      rotation.end());
+                   rotation.end());
     std::replace( rotation.begin(), rotation.end(), ',', ' ');
     std::replace( rotation.begin(), rotation.end(), ';', ' ');
 
     float rotationMatrix[9] = {0};
-    stringstream translationStringStream(rotation);
-    for( int i = 0; i < 9; i++) {
-        if(!(translationStringStream >> rotationMatrix[i])) {
+    stringstream rotationStringStream(rotation);
+    for( int i = 0; i < cloudDimension*cloudDimension; i++) {
+        if(!(rotationStringStream >> rotationMatrix[i])) {
             cerr << "An error occured while trying to parse the initial "
                  << "rotation." << endl
-                 << "No initial translation will be used" << endl;
+                 << "No initial rotation will be used" << endl;
             return parsedRotation;
         }
     }
+    float extraOutput = 0;
+    if((rotationStringStream >> extraOutput)) {
+        cerr << "Wrong initial rotation size" << endl
+             << "No initial rotation will be used" << endl;
+        return parsedRotation;
+    }
 
-    for( int i = 0; i < 9; i++) {
-        parsedRotation(i/3,i%3) = rotationMatrix[i];
+    for( int i = 0; i < cloudDimension*cloudDimension; i++) {
+        parsedRotation(i/cloudDimension,i%cloudDimension) = rotationMatrix[i];
     }
 
     return parsedRotation;
