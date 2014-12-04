@@ -108,6 +108,23 @@ PointMatcher<T>::DataPoints::DataPoints(const Labels& featureLabels, const Label
 		descriptors.resize(descriptorLabels.totalDim(), pointCount);
 }
 
+//! Construct a point cloud from existing descriptions
+template<typename T>
+PointMatcher<T>::DataPoints::DataPoints(const Labels& featureLabels,
+                                        const Labels& descriptorLabels,
+                                        const Labels& timeLabels,
+                                        const size_t pointCount):
+  featureLabels(featureLabels),
+  descriptorLabels(descriptorLabels),
+  timeLabels(timeLabels)
+{
+  features.resize(featureLabels.totalDim(), pointCount);
+  if(descriptorLabels.totalDim())
+    descriptors.resize(descriptorLabels.totalDim(), pointCount);
+  if(timeLabels.totalDim())
+    times.resize(timeLabels.totalDim(), pointCount);
+}
+
 //! Construct a point cloud from existing features without any descriptor
 template<typename T>
 PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels):

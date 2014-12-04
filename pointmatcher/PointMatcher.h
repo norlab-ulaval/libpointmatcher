@@ -242,6 +242,7 @@ struct PointMatcher
 		
 		DataPoints();
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount);
+		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const Labels& timeLabels, const size_t pointCount);
 		DataPoints(const Matrix& features, const Labels& featureLabels);
 		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
 		bool operator ==(const DataPoints& that) const;
