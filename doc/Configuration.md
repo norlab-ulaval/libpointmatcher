@@ -75,7 +75,7 @@ Below find a list of modules and their possible configurations:
 To load an ICP configuration from a YAML file, use the `PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)` function where `in` represents a `std::istream` to your YAML file.
 
 ## Where To Go From Here
-Now that you have the tools to configure your own ICP chain, we recommend that you make a copy of the default configuration file located at [examples/data/default.yaml](examples/data/default.yaml).  For example:
+Now that you have the tools to configure your own ICP chain, we recommend that you make a copy of the default configuration file located at [examples/data/default.yaml](../examples/data/default.yaml).  For example:
 
 `cp examples/data/default.yaml my_config.yaml`
 
