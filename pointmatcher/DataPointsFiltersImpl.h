@@ -340,6 +340,112 @@ struct DataPointsFiltersImpl
 		void fuseRange(BuildData& data, const int first, const int last) const;
 	};
 
+	//! Subsampling Surfels (Elipsoids) filter. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
+	  struct ElipsoidsDataPointsFilter: public DataPointsFilter
+	  {
+	    inline static const std::string description()
+	    {
+	      return "Subsampling, Surfels (Elipsoids). This filter decomposes the point-cloud space in boxes, by recursively splitting the cloud through axis-aligned hyperplanes such as to maximize the evenness of the aspect ratio of the box. When the number of points in a box reaches a value knn or lower, the filter computes the center of mass of these points and its normal by taking the eigenvector corresponding to the smallest eigenvalue of all points in the box.";
+	    }
+	    inline static const ParametersDoc availableParameters()
+	    {
+	      return boost::assign::list_of<ParameterDoc>
+	        ( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> )
+	        ( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
+	        ( "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> )
+	        ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
+	        ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
+          ( "maxTimeWindow", "maximum spread of times in a surfel", "inf" )
+	        ( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
+	        ( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" )
+	        ( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
+	        ( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
+          ( "keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" )
+	        ( "keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0" )
+	        ( "keepWeights", "whether the original number of points should be added as descriptors to the resulting cloud", "0" )
+	        ( "keepShapes", "whether the shape parameters of cylindricity (C), sphericality (S) and planarity (P) shall be calculated", "0" )
+	      ;
+	    }
+
+	    const T ratio;
+	    const unsigned knn;
+	    const unsigned samplingMethod;
+	    const T maxBoxDim;
+	    const T maxTimeWindow;
+	    const bool averageExistingDescriptors;
+	    const bool keepNormals;
+	    const bool keepDensities;
+	    const bool keepEigenValues;
+	    const bool keepEigenVectors;
+	    const bool keepCovariances;
+	    const bool keepWeights;
+	    const bool keepMeans;
+	    const bool keepShapes;
+
+
+	  public:
+	    ElipsoidsDataPointsFilter(const Parameters& params = Parameters());
+	    virtual ~ElipsoidsDataPointsFilter() {}
+	    virtual DataPoints filter(const DataPoints& input);
+	    virtual void inPlaceFilter(DataPoints& cloud);
+
+	  protected:
+	    struct BuildData
+	    {
+	      typedef std::vector<int> Indices;
+	      typedef typename DataPoints::View View;
+	      typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
+	      typedef typename Eigen::Matrix<boost::uint64_t, 1, Eigen::Dynamic> Uint64Vector;
+
+	      Indices indices;
+	      Indices indicesToKeep;
+	      Matrix& features;
+	      Matrix& descriptors;
+	      Uint64Matrix& times;
+	      boost::optional<View> normals;
+	      boost::optional<View> densities;
+	      boost::optional<View> eigenValues;
+	      boost::optional<View> eigenVectors;
+	      boost::optional<View> weights;
+	      boost::optional<View> covariances;
+	      boost::optional<View> means;
+	      boost::optional<View> shapes;
+	      int outputInsertionPoint;
+	      int unfitPointsCount;
+
+	      BuildData(Matrix& features, Matrix& descriptors, Uint64Matrix& times):
+	        features(features),
+	        descriptors(descriptors),
+	        times(times),
+	        unfitPointsCount(0)
+	      {
+	        const int pointsCount(features.cols());
+	        indices.reserve(pointsCount);
+	        for (int i = 0; i < pointsCount; ++i)
+	          indices.push_back(i);
+	        std::cout << "times in: " <<times<<std::endl;
+	        std::cout << "times in cols: " <<times.cols() << " times in rows: " <<times.rows()<<std::endl;
+	        std::cout << "times now:" <<this->times <<std::endl;
+	      }
+	    };
+
+	    struct CompareDim
+	    {
+	      const int dim;
+	      const BuildData& buildData;
+	      CompareDim(const int dim, const BuildData& buildData):dim(dim),buildData(buildData){}
+	      bool operator() (const int& p0, const int& p1)
+	      {
+	        return buildData.features(dim, p0) <
+	            buildData.features(dim, p1);
+	      }
+	    };
+
+	  protected:
+	    void buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const;
+	    void fuseRange(BuildData& data, const int first, const int last) const;
+	  };
+
 	//! Reorientation of normals
 	struct OrientNormalsDataPointsFilter: public DataPointsFilter
 	{
