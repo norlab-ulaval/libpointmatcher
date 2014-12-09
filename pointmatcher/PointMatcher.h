@@ -644,6 +644,7 @@ struct PointMatcher
 	};
 	
 	//! ICP alogrithm, taking a sequence of clouds and using a map
+	//! Warning: used with caution, you need to set the map manually.
 	struct ICPSequence: public ICP
 	{
 		TransformationParameters operator()(
