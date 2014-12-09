@@ -1382,7 +1382,7 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::VoxelGridDataPoin
 template <typename T>
 void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoints& cloud)
 {
-    const int numPoints(cloud.features.cols());
+    const unsigned int numPoints(cloud.features.cols());
 	const int featDim(cloud.features.rows());
 	const int descDim(cloud.descriptors.rows());
 
@@ -1453,7 +1453,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     }
 
 
-    for (int p = 0; p < numPoints; p++ )
+    for (unsigned int p = 0; p < numPoints; p++ )
     {
         unsigned int i = floor(cloud.features(0,p)/vSizeX - minBoundX);
         unsigned int j = floor(cloud.features(1,p)/vSizeY- minBoundY);
@@ -1489,7 +1489,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     if (useCentroid)
     {
         // Iterate through the indices and sum values to compute centroid
-        for (int p = 0; p < numPoints ; p++)
+        for (unsigned int p = 0; p < numPoints ; p++)
         {
             unsigned int idx = indices[p];
             unsigned int firstPoint = (*voxels)[idx].firstPoint;
@@ -1517,7 +1517,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
         // Now iterating through the voxels
         // Normalize sums to get centroid (average)
         // Some voxels may be empty and are discarded
-        for( int idx = 0; idx < numVox; idx++)
+        for(unsigned int idx = 0; idx < numVox; idx++)
         {
             unsigned int numPoints = (*voxels)[idx].numPoints;
             unsigned int firstPoint = (*voxels)[idx].firstPoint;
@@ -1541,7 +1541,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     	if (averageExistingDescriptors)
     	{
     		// Iterate through the indices and sum values to compute centroid
-    		for (int p = 0; p < numPoints ; p++)
+    		for (unsigned int p = 0; p < numPoints ; p++)
     		{
     			unsigned int idx = indices[p];
     			unsigned int firstPoint = (*voxels)[idx].firstPoint;
@@ -1558,7 +1558,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     		}
     	}
 
-        for (int idx = 0; idx < numVox; idx++)
+        for (unsigned int idx = 0; idx < numVox; idx++)
         {
             unsigned int numPoints = (*voxels)[idx].numPoints;
             unsigned int firstPoint = (*voxels)[idx].firstPoint;

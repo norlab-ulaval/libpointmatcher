@@ -473,9 +473,13 @@ template<typename T>
 const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getMap() const
 {
 	DataPoints globalMap(mapPointCloud);
-	const int dim(mapPointCloud.features.rows());
-	const Vector meanMapNonHomo(T_refIn_refMean.block(0,dim-1, dim-1, 1));
-	globalMap.features.topRows(dim-1).colwise() += meanMapNonHomo;
+	if(this->hasMap())
+	{
+		const int dim(mapPointCloud.features.rows());
+		const Vector meanMapNonHomo(T_refIn_refMean.block(0,dim-1, dim-1, 1));
+		globalMap.features.topRows(dim-1).colwise() += meanMapNonHomo;
+	}
+
 	return globalMap;
 }
 
