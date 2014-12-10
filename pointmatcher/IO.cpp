@@ -1821,7 +1821,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	size_t width = 0;
 	size_t height = 0;
 	size_t numPoints;
-	size_t numPointsR; // redundant value specified in POINTS field
+	size_t numPointsR = 0; // redundant value specified in POINTS field
 
 	size_t lineNum = 0;
 

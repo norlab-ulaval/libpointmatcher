@@ -148,6 +148,54 @@ TEST(icpTest, icpTest)
 	}
 }
 
+
+TEST(icpTest, icpSequenceTest)
+{
+	DP pts0 = DP::load(dataPath + "cloud.00000.vtk");
+	DP pts1 = DP::load(dataPath + "cloud.00001.vtk");
+	DP pts2 = DP::load(dataPath + "cloud.00002.vtk");
+	
+	PM::TransformationParameters Ticp   = PM::Matrix::Identity(4,4);
+
+	PM::ICPSequence icpSequence;
+
+	std::ifstream ifs((dataPath + "default.yaml").c_str());
+	icpSequence.loadFromYaml(ifs);
+
+	EXPECT_FALSE(icpSequence.hasMap());
+
+	DP map = icpSequence.getInternalMap();
+	EXPECT_EQ(map.getNbPoints(), 0u);
+	EXPECT_EQ(map.getHomogeneousDim(), 0u);
+	
+	map = icpSequence.getMap();
+	EXPECT_EQ(map.getNbPoints(), 0u);
+	EXPECT_EQ(map.getHomogeneousDim(), 0u);
+
+	icpSequence.setMap(pts0);
+	map = icpSequence.getInternalMap();
+	EXPECT_EQ(map.getNbPoints(), pts0.getNbPoints());
+	EXPECT_EQ(map.getHomogeneousDim(), pts0.getHomogeneousDim());
+
+	Ticp = icpSequence(pts1);
+	map = icpSequence.getMap();
+	EXPECT_EQ(map.getNbPoints(), pts0.getNbPoints());
+	EXPECT_EQ(map.getHomogeneousDim(), pts0.getHomogeneousDim());
+	
+	Ticp = icpSequence(pts2);
+	map = icpSequence.getMap();
+	EXPECT_EQ(map.getNbPoints(), pts0.getNbPoints());
+	EXPECT_EQ(map.getHomogeneousDim(), pts0.getHomogeneousDim());
+
+	icpSequence.clearMap();
+	map = icpSequence.getInternalMap();
+	EXPECT_EQ(map.getNbPoints(), 0u);
+	EXPECT_EQ(map.getHomogeneousDim(), 0u);
+
+
+
+}
+
 // Utility classes
 class GenericTest: public IcpHelper
 {
