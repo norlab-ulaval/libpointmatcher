@@ -325,7 +325,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 	assertTimesConsistency();
 	if (times.cols() > 0)
 	{
-		output.times = Uint64Matrix(times.rows(), nbPoints);
+		output.times = Int64Matrix(times.rows(), nbPoints);
 		output.timeLabels = timeLabels;
 	}
 
@@ -351,7 +351,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 	assertTimesConsistency();
 	if (times.cols() > 0)
 	{
-		output.times = Uint64Matrix(times.rows(), pointCount);
+		output.times = Int64Matrix(times.rows(), pointCount);
 		output.timeLabels = timeLabels;
 	}
 
@@ -594,7 +594,7 @@ void PointMatcher<T>::DataPoints::allocateTimes(const Labels& newLabels)
 
 //! Add a time by name, remove first if already exists
 template<typename T>
-void PointMatcher<T>::DataPoints::addTime(const std::string& name, const Uint64Matrix& newTime)
+void PointMatcher<T>::DataPoints::addTime(const std::string& name, const Int64Matrix& newTime)
 {
 	addField(name, newTime, timeLabels, times);
 }
@@ -608,9 +608,9 @@ void PointMatcher<T>::DataPoints::removeTime(const std::string& name)
 
 //! Get time by name, return a matrix containing a copy of the requested time 
 template<typename T>
-typename PointMatcher<T>::Uint64Matrix PointMatcher<T>::DataPoints::getTimeCopyByName(const std::string& name) const
+typename PointMatcher<T>::Int64Matrix PointMatcher<T>::DataPoints::getTimeCopyByName(const std::string& name) const
 {
-	return Uint64Matrix(getTimeViewByName(name));
+	return Int64Matrix(getTimeViewByName(name));
 }
 
 

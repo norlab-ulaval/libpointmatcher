@@ -172,7 +172,7 @@ struct PointMatcher
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	//! A dense unsigned 64-bits matrix
-	typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
+	typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	
 	//! A matrix holding the parameters a transformation.
 	/**
@@ -208,11 +208,11 @@ struct PointMatcher
 		//! A view on a feature or descriptor
 		typedef Eigen::Block<Matrix> View;
 		//! A view on a time
-		typedef Eigen::Block<Uint64Matrix> TimeView;
+		typedef Eigen::Block<Int64Matrix> TimeView;
 		//! A view on a const feature or const descriptor
 		typedef const Eigen::Block<const Matrix> ConstView;
 		//! a view on a const time
-		typedef const Eigen::Block<const Uint64Matrix> TimeConstView;
+		typedef const Eigen::Block<const Int64Matrix> TimeConstView;
 		//! An index to a row or a column
 		typedef typename Matrix::Index Index;
 		
@@ -296,9 +296,9 @@ struct PointMatcher
 		// methods related to times
 		void allocateTime(const std::string& name, const unsigned dim);
 		void allocateTimes(const Labels& newLabels);
-		void addTime(const std::string& name, const Uint64Matrix& newTime);
+		void addTime(const std::string& name, const Int64Matrix& newTime);
 		void removeTime(const std::string& name);
-		Uint64Matrix getTimeCopyByName(const std::string& name) const;
+		Int64Matrix getTimeCopyByName(const std::string& name) const;
 		TimeConstView getTimeViewByName(const std::string& name) const;
 		TimeView getTimeViewByName(const std::string& name);
 		TimeConstView getTimeRowViewByName(const std::string& name, const unsigned row) const;
@@ -313,7 +313,7 @@ struct PointMatcher
 		Labels featureLabels; //!< labels of features
 		Matrix descriptors; //!< descriptors of points in the cloud, might be empty
 		Labels descriptorLabels; //!< labels of descriptors
-		Uint64Matrix times; //!< time associated to each points, might be empty
+		Int64Matrix times; //!< time associated to each points, might be empty
 		Labels timeLabels; //!< labels of times.
 	
 	private:
