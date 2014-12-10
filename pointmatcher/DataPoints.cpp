@@ -159,31 +159,39 @@ unsigned PointMatcher<T>::DataPoints::getDescriptorDim() const
 	return descriptors.rows();
 }
 
+//! Return the total number of times
+template<typename T>
+unsigned PointMatcher<T>::DataPoints::getTimeDim() const
+{
+	return times.rows();
+}
 
 //! Return whether two point-clouds are identical (same data and same labels)
 template<typename T>
 bool PointMatcher<T>::DataPoints::operator ==(const DataPoints& that) const
 {
-	// Note comparing matrix withou the same dimensions trigger an assert
+	// Note comparing matrix without the same dimensions trigger an assert
 	bool isEqual = false;
 	if((features.rows() == that.features.rows()) &&
 		(features.cols() == that.features.cols()) &&
 		(descriptors.rows() == that.descriptors.rows()) &&
-		(descriptors.cols() == that.descriptors.cols()))
+		(descriptors.cols() == that.descriptors.cols())	&&
+		(times.rows() == that.times.rows()) &&
+		(times.cols() == that.times.cols()))
 	{
 		isEqual = (features == that.features) &&
 			(featureLabels == that.featureLabels) &&
 			(descriptors == that.descriptors) &&
-			(featureLabels == that.featureLabels);
+			(descriptorLabels == that.descriptorLabels)&&
+			(times == that.times) &&
+			(timeLabels == that.timeLabels);
 	}
-
-	//TODO: add time here
 
 	return isEqual;
 		
 }
 
-//! Add an other point cloud after the current one
+//! Add another point cloud after the current one. Faster merge will be achieved if all descriptor and time labels are the same. If not, only the commun labels with be kept.
 template<typename T>
 void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 {
@@ -204,13 +212,33 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 	this->features.rightCols(nbPoints2) = dp.features;
 	
 	// concatenate descriptors
-	if (this->descriptorLabels == dp.descriptorLabels)
+	concatenateLabelledMatrix(&descriptorLabels, &descriptors, dp.descriptorLabels, dp.descriptors);
+	assertDescriptorConsistency();
+	
+	// concatenate time
+	concatenateLabelledMatrix(&timeLabels, &times, dp.timeLabels, dp.times);
+	assertTimesConsistency();
+	
+}
+
+
+//! Add another matrix after the current one. Faster merge will be achieved if all labels are the same. If not, only the commun labels with be kept.
+template<typename T>
+template<typename MatrixType>
+void PointMatcher<T>::DataPoints::concatenateLabelledMatrix(Labels* labels, MatrixType* data, const Labels extraLabels, const MatrixType extraData)
+{
+	const int nbPoints1 = data->cols();
+	const int nbPoints2 = extraData.cols();
+	const int nbPointsTotal = nbPoints1 + nbPoints2;
+
+
+	if (*labels == extraLabels)
 	{
-		if (this->descriptorLabels.size() > 0)
+		if (labels->size() > 0)
 		{
 			// same descriptors, fast merge
-			this->descriptors.conservativeResize(Eigen::NoChange, nbPointsTotal);
-			this->descriptors.rightCols(nbPoints2) = dp.descriptors;
+			data->conservativeResize(Eigen::NoChange, nbPointsTotal);
+			data->rightCols(nbPoints2) = extraData;
 		}
 	}
 	else
@@ -218,10 +246,10 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 		// different descriptors, slow merge
 		
 		// collect labels to be kept
-		Labels newDescLabels;
-		for(BOOST_AUTO(it, this->descriptorLabels.begin()); it != this->descriptorLabels.end(); ++it)
+		Labels newLabels;
+		for(BOOST_AUTO(it, labels->begin()); it != labels->end(); ++it)
 		{
-			for(BOOST_AUTO(jt, dp.descriptorLabels.begin()); jt != dp.descriptorLabels.end(); ++jt)
+			for(BOOST_AUTO(jt, extraLabels.begin()); jt != extraLabels.end(); ++jt)
 			{
 				if (it->text == jt->text)
 				{
@@ -229,41 +257,40 @@ void PointMatcher<T>::DataPoints::concatenate(const DataPoints& dp)
 						throw InvalidField(
 						(boost::format("The field %1% has dimension %2% in this, different than dimension %3% in that") % it->text % it->span % jt->span).str()
 					);
-					newDescLabels.push_back(*it);
+					newLabels.push_back(*it);
 					break;
 				}
 			}
 		}
 		
 		// allocate new descriptors
-		if (newDescLabels.size() > 0)
+		if (newLabels.size() > 0)
 		{
-			Matrix newDescriptors;
+			MatrixType newData;
 			Labels filledLabels;
-			this->allocateFields(newDescLabels, filledLabels, newDescriptors);
-			assert(newDescLabels == filledLabels);
+			this->allocateFields(newLabels, filledLabels, newData);
+			assert(newLabels == filledLabels);
 			
 			// fill
 			unsigned row(0);
-			for(BOOST_AUTO(it, newDescLabels.begin()); it != newDescLabels.end(); ++it)
+			for(BOOST_AUTO(it, newLabels.begin()); it != newLabels.end(); ++it)
 			{
-				View view(newDescriptors.block(row, 0, it->span, newDescriptors.cols()));
-				view.leftCols(nbPoints1) = this->getDescriptorViewByName(it->text);
-				view.rightCols(nbPoints2) = dp.getDescriptorViewByName(it->text);
+				Eigen::Block<MatrixType> view(newData.block(row, 0, it->span, newData.cols()));
+				view.leftCols(nbPoints1) = getViewByName(it->text, *labels, *data);
+				view.rightCols(nbPoints2) = getViewByName(it->text, extraLabels, extraData);
 				row += it->span;
 			}
 			
 			// swap descriptors
-			this->descriptors.swap(newDescriptors);
-			this->descriptorLabels = newDescLabels;
+			data->swap(newData);
+			*labels = newLabels;
 		}
 		else
 		{
-			this->descriptors = Matrix();
-			this->descriptorLabels = Labels();
+			*data = MatrixType();
+			*labels = Labels();
 		}
 	}
-	assertDescriptorConsistency();
 }
 
 //! Resize the cloud to pointCount points, conserving existing ones
@@ -273,9 +300,12 @@ void PointMatcher<T>::DataPoints::conservativeResize(Index pointCount)
 	features.conservativeResize(Eigen::NoChange, pointCount);
 	if (descriptors.cols() > 0)
 		descriptors.conservativeResize(Eigen::NoChange, pointCount);
+
+	if (times.cols() > 0)
+		times.conservativeResize(Eigen::NoChange, pointCount);
 }
 
-//! Create an empty DataPoints of similar dimensions and labels, both for features and descriptors
+//! Create an empty DataPoints of similar dimensions and labels  for features, descriptors and times
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarEmpty() const
 {
@@ -284,16 +314,21 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 		Matrix(features.rows(), nbPoints),
 		featureLabels
 	);
+
+	assertDescriptorConsistency();
 	if (descriptors.cols() > 0)
 	{
-		assert(descriptors.cols() == nbPoints);
 		output.descriptors = Matrix(descriptors.rows(), nbPoints);
 		output.descriptorLabels = descriptorLabels;
 	}
-	else
+
+	assertTimesConsistency();
+	if (times.cols() > 0)
 	{
-		assert(descriptors.rows() == 0);
+		output.times = Uint64Matrix(times.rows(), nbPoints);
+		output.timeLabels = timeLabels;
 	}
+
 	return output;
 }
 
@@ -305,15 +340,21 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 		Matrix(features.rows(), pointCount),
 		featureLabels
 	);
+
+	assertDescriptorConsistency();
 	if (descriptors.cols() > 0)
 	{
 		output.descriptors = Matrix(descriptors.rows(), pointCount);
 		output.descriptorLabels = descriptorLabels;
 	}
-	else
+
+	assertTimesConsistency();
+	if (times.cols() > 0)
 	{
-		assert(descriptors.rows() == 0);
+		output.times = Uint64Matrix(times.rows(), pointCount);
+		output.timeLabels = timeLabels;
 	}
+
 	return output;
 }
 
@@ -322,9 +363,18 @@ template<typename T>
 void PointMatcher<T>::DataPoints::setColFrom(Index thisCol, const DataPoints& that, Index thatCol)
 {
 	features.col(thisCol) = that.features.col(thatCol);
+	
 	if (descriptors.cols() > 0)
 		descriptors.col(thisCol) = that.descriptors.col(thatCol);
+
+	if (times.cols() > 0)
+		times.col(thisCol) = that.times.col(thatCol);
+
 }
+
+//------------------------------------
+// Methods related to features
+//------------------------------------
 
 
 //! Makes sure a feature of a given name exists, if present, check its dimensions
@@ -346,8 +396,8 @@ template<typename T>
 void PointMatcher<T>::DataPoints::addFeature(const std::string& name, const Matrix& newFeature)
 {
 	removeFeature("pad");
-	addField(name, newFeature, featureLabels, features);
-	addField("pad", Matrix::Ones(1, features.cols()), featureLabels, features);
+	addField<Matrix>(name, newFeature, featureLabels, features);
+	addField<Matrix>("pad", Matrix::Ones(1, features.cols()), featureLabels, features);
 }
 
 //! Remove a feature by name, the whole matrix will be copied
@@ -419,6 +469,10 @@ unsigned PointMatcher<T>::DataPoints::getFeatureStartingRow(const std::string& n
 {
 	return getFieldStartingRow(name, featureLabels);
 }
+
+//------------------------------------
+// Methods related to descriptors
+//------------------------------------
 
 //! Makes sure a descriptor of a given name exists, if present, check its dimensions
 template<typename T>
@@ -516,36 +570,149 @@ unsigned PointMatcher<T>::DataPoints::getDescriptorStartingRow(const std::string
 template<typename T>
 void PointMatcher<T>::DataPoints::assertDescriptorConsistency() const
 {
-	if (descriptors.rows() == 0)
+	assertConsistency("descriptors", descriptors.rows(), descriptors.cols(), descriptorLabels);
+}
+
+//------------------------------------
+// Methods related to time
+//------------------------------------
+
+//! Makes sure a time of a given name exists, if present, check its dimensions
+template<typename T>
+void PointMatcher<T>::DataPoints::allocateTime(const std::string& name, const unsigned dim)
+{
+	allocateField(name, dim, timeLabels, times);
+}
+
+//! Make sure a vector of time of given names exist
+template<typename T>
+void PointMatcher<T>::DataPoints::allocateTimes(const Labels& newLabels)
+{
+	allocateFields(newLabels, timeLabels, times);
+}
+
+
+//! Add a time by name, remove first if already exists
+template<typename T>
+void PointMatcher<T>::DataPoints::addTime(const std::string& name, const Uint64Matrix& newTime)
+{
+	addField(name, newTime, timeLabels, times);
+}
+
+//! Remove a descriptor by name, the whole matrix will be copied
+template<typename T>
+void PointMatcher<T>::DataPoints::removeTime(const std::string& name)
+{
+	removeField(name, timeLabels, times);
+}
+
+//! Get time by name, return a matrix containing a copy of the requested time 
+template<typename T>
+typename PointMatcher<T>::Uint64Matrix PointMatcher<T>::DataPoints::getTimeCopyByName(const std::string& name) const
+{
+	return Uint64Matrix(getTimeViewByName(name));
+}
+
+
+//! Get a const view on a time by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::TimeConstView PointMatcher<T>::DataPoints::getTimeViewByName(const std::string& name) const
+{
+	return getConstViewByName(name, timeLabels, times);
+}
+
+//! Get a view on a time by name, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::TimeView PointMatcher<T>::DataPoints::getTimeViewByName(const std::string& name)
+{
+	return getViewByName(name, timeLabels, times);
+}
+
+//! Get a const view on a time row by name and number, throw an exception if it does not exist
+template<typename T>
+const typename PointMatcher<T>::DataPoints::TimeConstView PointMatcher<T>::DataPoints::getTimeRowViewByName(const std::string& name, const unsigned row) const
+{
+	return getConstViewByName(name, timeLabels, times, int(row));
+}
+
+//! Get a view on a time by row name and number, throw an exception if it does not exist
+template<typename T>
+typename PointMatcher<T>::DataPoints::TimeView PointMatcher<T>::DataPoints::getTimeRowViewByName(const std::string& name, const unsigned row)
+{
+	return getViewByName(name, timeLabels, times, int(row));
+}
+
+
+//! Look if a time with a given name exist
+template<typename T>
+bool PointMatcher<T>::DataPoints::timeExists(const std::string& name) const
+{
+	return fieldExists(name, 0, timeLabels);
+}
+
+//! Look if a time with a given name and dimension exist
+template<typename T>
+bool PointMatcher<T>::DataPoints::timeExists(const std::string& name, const unsigned dim) const
+{
+	return fieldExists(name, dim, timeLabels);
+}
+
+//! Return the dimension of a time with a given name. Return 0 if the name is not found
+template<typename T>
+unsigned PointMatcher<T>::DataPoints::getTimeDimension(const std::string& name) const
+{
+	return getFieldDimension(name, timeLabels);
+}
+
+//! Return the starting row of a time with a given name. Return 0 if the name is not found
+template<typename T>
+unsigned PointMatcher<T>::DataPoints::getTimeStartingRow(const std::string& name) const
+{
+	return getFieldStartingRow(name, timeLabels);
+}
+
+//! Assert if times are not consistent with features
+template<typename T>
+void PointMatcher<T>::DataPoints::assertTimesConsistency() const
+{
+	assertConsistency("times", times.rows(), times.cols(), timeLabels);
+}
+
+//! Assert if a matrix is not consistent with features
+template<typename T>
+void PointMatcher<T>::DataPoints::assertConsistency(const std::string& dataName,  const int dataRows, const int dataCols, const Labels& labels) const
+{
+	if (dataRows == 0)
 	{
-		if (descriptors.cols() != 0)
+		if (dataCols != 0)
 			throw std::runtime_error(
-				(boost::format("Point cloud has degenerate descriptor dimensions of rows=0, cols=%1%") % descriptors.cols()).str()
+				(boost::format("Point cloud has degenerate %2% dimensions of rows=0, cols=%1%") % dataCols % dataName).str()
 			);
-		if (descriptorLabels.size() > 0)
+		if (labels.size() > 0)
 			throw std::runtime_error(
-				(boost::format("Point cloud has no descriptor data but %1% descriptor labels") % descriptorLabels.size()).str()
+				(boost::format("Point cloud has no %2% data but %1% descriptor labels") % labels.size() % dataName).str()
 			);
 	}
 	else
 	{
-		if (descriptors.cols() != features.cols())
+		if (dataCols != features.cols())
 			throw std::runtime_error(
-				(boost::format("Point cloud has %1% points in features but %2% points in descriptors") % features.cols() % descriptors.cols()).str()
+				(boost::format("Point cloud has %1% points in features but %2% points in %3%") % features.cols() % dataCols % dataName).str()
 			);
 		int descDim(0);
-		for (BOOST_AUTO(it, descriptorLabels.begin()); it != descriptorLabels.end(); ++it)
+		for (BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
 			descDim += it->span;
-		if (descriptors.rows() != descDim)
+		if (dataRows != descDim)
 			throw std::runtime_error(
-				(boost::format("Descriptor labels return %1% total dimensions but there are %2% in the descriptors matrix") % descDim % descriptors.rows()).str()
+				(boost::format("Labels from %3% return %1% total dimensions but there are %2% in the %3% matrix") % descDim % dataRows % dataName).str()
 			);
 	}
 }
 
 //! Make sure a field of a given name exists, if present, check its dimensions
 template<typename T>
-void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data) const
+template<typename MatrixType>
+void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const unsigned dim, Labels& labels, MatrixType& data) const
 {
 	if (fieldExists(name, 0, labels))
 	{
@@ -569,7 +736,8 @@ void PointMatcher<T>::DataPoints::allocateField(const std::string& name, const u
 
 //! Make sure a vector of fields of given names exist
 template<typename T>
-void PointMatcher<T>::DataPoints::allocateFields(const Labels& newLabels, Labels& labels, Matrix& data) const
+template<typename MatrixType>
+void PointMatcher<T>::DataPoints::allocateFields(const Labels& newLabels, Labels& labels, MatrixType& data) const
 {
 	typedef vector<bool> BoolVector;
 	BoolVector present(newLabels.size(), false);
@@ -610,7 +778,8 @@ void PointMatcher<T>::DataPoints::allocateFields(const Labels& newLabels, Labels
 
 //! Add a descriptor or feature by name, remove first if already exists
 template<typename T>
-void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data) const
+template<typename MatrixType>
+void PointMatcher<T>::DataPoints::addField(const std::string& name, const MatrixType& newField, Labels& labels, MatrixType& data) const
 {
 	const int newFieldDim = newField.rows();
 	const int newPointCount = newField.cols();
@@ -666,7 +835,8 @@ void PointMatcher<T>::DataPoints::addField(const std::string& name, const Matrix
 }
 //! Remove a descriptor or feature by name, no copy is done.
 template<typename T>
-void PointMatcher<T>::DataPoints::removeField(const std::string& name, Labels& labels, Matrix& data) const
+template<typename MatrixType>
+void PointMatcher<T>::DataPoints::removeField(const std::string& name, Labels& labels, MatrixType& data) const
 {
 
 	const unsigned deleteId = getFieldStartingRow(name, labels);
@@ -702,7 +872,8 @@ void PointMatcher<T>::DataPoints::removeField(const std::string& name, Labels& l
 //! Get a const view on a matrix by name, throw an exception if it does not exist.
 //! If viewRow is given, only return this row, otherwise return the full view
 template<typename T>
-const typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoints::getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data, const int viewRow) const
+template<typename MatrixType>
+const typename Eigen::Block<const MatrixType> PointMatcher<T>::DataPoints::getConstViewByName(const std::string& name, const Labels& labels, const MatrixType& data, const int viewRow) const
 {
 	unsigned row(0);
 	for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
@@ -728,7 +899,8 @@ const typename PointMatcher<T>::DataPoints::ConstView PointMatcher<T>::DataPoint
 //! Get a view on a matrix by name, throw an exception if it does not exist
 //! If viewRow is given, only return this row, otherwise return the full view
 template<typename T>
-typename PointMatcher<T>::DataPoints::View PointMatcher<T>::DataPoints::getViewByName(const std::string& name, const Labels& labels, Matrix& data, const int viewRow) const
+template<typename MatrixType>
+typename Eigen::Block<MatrixType> PointMatcher<T>::DataPoints::getViewByName(const std::string& name, const Labels& labels, MatrixType& data, const int viewRow) const
 {
 	unsigned row(0);
 	for(BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
@@ -808,6 +980,8 @@ void PointMatcher<T>::swapDataPoints(DataPoints& a, DataPoints& b)
 	swap(a.featureLabels, b.featureLabels);
 	a.descriptors.swap(b.descriptors);
 	swap(a.descriptorLabels, b.descriptorLabels);
+	a.times.swap(b.times);
+	swap(a.timeLabels, b.timeLabels);
 }
 
 template
