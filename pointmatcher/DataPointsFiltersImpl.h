@@ -423,9 +423,6 @@ struct DataPointsFiltersImpl
 	        indices.reserve(pointsCount);
 	        for (int i = 0; i < pointsCount; ++i)
 	          indices.push_back(i);
-	        std::cout << "times in: " <<times<<std::endl;
-	        std::cout << "times in cols: " <<times.cols() << " times in rows: " <<times.rows()<<std::endl;
-	        std::cout << "times now:" <<this->times <<std::endl;
 	      }
 	    };
 

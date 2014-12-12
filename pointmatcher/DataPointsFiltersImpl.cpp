@@ -1269,6 +1269,9 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
           (vals << eigenVa(1),eigenVa(2),eigenVa(3));
           data.shapes->col(k) = shapeMat * vals;//eigenVa;
         }
+        if(keepWeights) {
+          (*data.weights)(0,k) = colCount;
+        }
       }
     }
   }
@@ -1320,6 +1323,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
       (vals << eigenVa(1),eigenVa(2),eigenVa(3));
       data.shapes->col(k) = shapeMat * vals; //eigenVa;
     }
+    if(keepWeights)
+      (*data.weights)(0,k) = colCount;
   }
 
 }
