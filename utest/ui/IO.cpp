@@ -27,6 +27,46 @@ TEST(IOTest, loadYaml)
 	EXPECT_THROW(icp.loadFromYaml(ifs3), PointMatcherSupport::InvalidModuleType);
 }
 
+TEST(IOTest, loadCsv)
+{
+  typedef PointMatcherIO<float> IO;
+	std::istringstream is;
+  std::ostringstream os;
+
+  // csv with time
+  int64_t time0 = 1410264593275569438;
+  int64_t time1 = 1410264593325569391;
+  int64_t time2 = 1410264593425569295;
+  int64_t time3 = 1410264593522569417;
+
+	os <<
+	"x, y, z, time\n"
+	"1, 1, 1, " << time0 << "\n"
+	"2, 1, 1, " << time1 << "\n"
+	"3, 1, 1, " << time2 << "\n"
+	"4, 1, 1, " << time3 << "\n"
+	;
+
+  cout << os.str();
+  is.str(os.str());
+
+  DP pts = IO::loadCSV(is);
+  EXPECT_EQ(4u, pts.getNbPoints());
+  EXPECT_EQ(3u, pts.getEuclideanDim());
+  EXPECT_EQ(0u, pts.getDescriptorDim());
+  EXPECT_EQ(1u, pts.getTimeDim());
+  EXPECT_EQ(time3, pts.times(0,3));
+
+  cout << "dim: " << pts.getEuclideanDim() << endl;
+  cout << "nb pts: " << pts.getNbPoints() << endl;
+  cout << "desc dim: " << pts.getDescriptorDim() << endl;
+  cout << "time dim: " << pts.getTimeDim() << endl;
+
+
+  //TODO: finish here!
+
+}
+
 TEST(IOTest, loadPLY)
 {
 	typedef PointMatcherIO<float> IO;
