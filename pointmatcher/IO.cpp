@@ -744,7 +744,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 								rowIdTime++;
 								break;
 							default:
-								throw runtime_error(string("PLY parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
+								throw runtime_error(string("CSV parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
 								break;
 						}
 					}
@@ -757,6 +757,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 				if(csvHeader[i].matrixType == UNSUPPORTED)
 				{
 					csvHeader[i].matrixRowId = rowIdDescriptors;
+					csvHeader[i].matrixType = DESCRIPTOR;
 					descLabelGen.add(csvHeader[i].name);
 					rowIdDescriptors++;
 				}
@@ -764,7 +765,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		
 
 			//3- RESERVE MEMORY
-			if(hasHeader)
+			if(hasHeader && line_count > 0)
 				line_count--;
 
 			const unsigned int featDim = featLabelGen.getLabels().totalDim();
@@ -813,7 +814,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 						times(matrixRow, matrixCol) = lexical_cast_scalar_to_string<boost::int64_t>(token);
 						break;
 					default:
-						throw runtime_error(string("PLY parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
+						throw runtime_error(string("CSV parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
 						break;
 
 				}
