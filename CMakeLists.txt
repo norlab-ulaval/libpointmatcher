@@ -27,7 +27,7 @@ remake_doc(
 )
 
 remake_pack_deb(
-  DEPENDS libnabo libyaml-cpp0.3 libboost-system[0-9.]*
+  DEPENDS libnabo libyaml-cpp0.3|yaml-cpp[0-9.]* libboost-system[0-9.]*
     libboost-filesystem[0-9.]*
 )
 remake_pack_deb(
