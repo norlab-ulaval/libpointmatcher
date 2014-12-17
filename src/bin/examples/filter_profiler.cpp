@@ -1,5 +1,5 @@
 /*
- * filterProfiler.cpp
+ * filter_profiler.cpp
  *
  *  Created on: Feb 27, 2014
  *      Author: sam
@@ -9,6 +9,7 @@
 #include <pointmatcher/PointMatcher.h>
 #include <boost/assign.hpp>
 #include <ctime>
+#include <cstdio>
 #include <time.h>
 
 using namespace PointMatcherSupport;
@@ -24,7 +25,7 @@ int main(int argc, char *argv[])
 
 	if (argc < 2 || argc > 3)
 		{
-	        std::cerr << "USAGE: filterProfiler <path_to_input_cloud> <useCentroids (optional) 1 or 0>" << std::endl;
+	        std::cerr << "USAGE: filter_profiler <path_to_input_cloud> <useCentroids (optional) 1 or 0>" << std::endl;
 	        return -1;
 		}
 

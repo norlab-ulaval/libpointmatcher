@@ -14,7 +14,7 @@ else(EIGEN3_FOUND)
 endif(EIGEN3_FOUND)
 remake_find_package(libnabo CONFIG)
 remake_find_package(yaml-cpp CONFIG)
-remake_find_package(ncurses CONFIG)
+remake_find_library(ncurses ncurses.h PACKAGE ncurses)
 remake_find_package(Threads REQUIRED)
 
 remake_define(SYSTEM_YAML_CPP ON)
@@ -24,6 +24,7 @@ remake_include(
   ${EIGEN${LIBPOINTMATCHER_EIGEN_VERSION}_INCLUDE_DIRS}
   ${LIBNABO_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIRS}
+  ${NCURSES_HEADERS}
 )
 
 remake_add_directories(lib bin)

@@ -1,3 +1,12 @@
+libpointmatcher (1.2.1-686) unstable; urgency=low
+
+  * Reverted to remake_find_library() for ncurses as pkg-config file
+    is not provided by lucid package
+  * Renamed filterProfiler to filter_profiler
+  * Added missing include to filter_profiler
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 17 Dec 2014 09:32:00 +0100
+
 libpointmatcher (1.2.1-685) unstable; urgency=low
 
   * Another attempt to fix yaml-cpp build dependencies
