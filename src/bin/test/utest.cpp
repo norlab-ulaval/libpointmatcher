@@ -101,7 +101,7 @@ TEST(icpTest, icpTest)
 		fs::path cur_file = d->path();
 		cur_file.replace_extension(".cur_trans");
 		//std::cout << "Writing: " << cur_file << std::endl;
-		std::ofstream otfs(cur_file.c_str());
+		std::ofstream otfs(cur_file.string().c_str());
 		otfs.precision(16);
 		otfs << curT;
 		otfs.close();
@@ -111,7 +111,7 @@ TEST(icpTest, icpTest)
 		ref_file.replace_extension(".ref_trans");
 		PM::TransformationParameters refT = 0*curT;
 		//std::cout << "Reading: " << ref_file << std::endl;
-		std::ifstream itfs(ref_file.c_str());
+		std::ifstream itfs(ref_file.string().c_str());
 		for (int row = 0; row < refT.cols(); row++)
 		{
 			for (int col = 0; col < refT.cols(); col++)
