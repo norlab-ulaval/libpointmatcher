@@ -1,0 +1,4165 @@
+libpointmatcher (1.2.1-682) unstable; urgency=low
+
+  * ReMake build system port
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 17 Dec 2014 07:55:00 +0100
+
+libpointmatcher (1.2.1-681) unstable; urgency=low
+
+  * update usage text and retab
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 10 Dec 2014 20:06:14 +0100
+
+libpointmatcher (1.2.1-680) unstable; urgency=low
+
+  * Merge branch 'master' of https://github.com/smichaud/libpointmatcher into
+    smichaud-master
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 10 Dec 2014 16:35:08 +0100
+
+libpointmatcher (1.2.1-679) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 10 Dec 2014 00:40:04 +0100
+
+libpointmatcher (1.2.1-678) unstable; urgency=low
+
+  * Remove compilation warnings (finally...)
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 10 Dec 2014 00:39:14 +0100
+
+libpointmatcher (1.2.1-677) unstable; urgency=low
+
+  * add unit test for ICPSequence
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 10 Dec 2014 00:38:25 +0100
+
+libpointmatcher (1.2.1-676) unstable; urgency=low
+
+  * Merge branch 'fix/issue56' of https://github.com/kruesip/libpointmatcher into
+    kruesip-fix/issue56
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 09 Dec 2014 17:46:26 +0100
+
+libpointmatcher (1.2.1-675) unstable; urgency=low
+
+  * fix broken link
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Mon, 08 Dec 2014 15:53:58 +0100
+
+libpointmatcher (1.2.1-674) unstable; urgency=low
+
+  * added application of reference data points filters for ICPSequence objects
+
+ -- Philipp Kruesi <philipp.kruesi@mavt.ethz.ch>  Fri, 05 Dec 2014 17:08:14 +0100
+
+libpointmatcher (1.2.1-673) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 04 Dec 2014 23:52:49 +0100
+
+libpointmatcher (1.2.1-672) unstable; urgency=low
+
+  * fix problem with libnabo linking
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 04 Dec 2014 23:52:31 +0100
+
+libpointmatcher (1.2.1-671) unstable; urgency=low
+
+  * Update README.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Thu, 04 Dec 2014 23:45:34 +0100
+
+libpointmatcher (1.2.1-670) unstable; urgency=low
+
+  * Adapted the code to handle 2D point clouds and decided to split the
+    initial/icp/complete transformation matrices in 3 differents files. It should
+    be easier to post process the transformations.
+
+ -- smichaud <smichaud@smichaud-Z68A-D3H-B3.(none)>  Thu, 20 Nov 2014 21:48:14 +0100
+
+libpointmatcher (1.2.1-669) unstable; urgency=low
+
+  * Libnabo linking
+
+ -- Simon Lynen <simon.lynen@mavt.ethz.ch>  Thu, 20 Nov 2014 18:48:19 +0100
+
+libpointmatcher (1.2.1-668) unstable; urgency=low
+
+  * Changed matrix for matrices as output suffix
+
+ -- smichaud <smichaud@smichaud-Z68A-D3H-B3.(none)>  Tue, 18 Nov 2014 17:59:00 +0100
+
+libpointmatcher (1.2.1-667) unstable; urgency=low
+
+  * Changed the icp example (pmicp) to accept initial translation/rotation input
+    and allow to output the transformation matrices
+
+ -- smichaud <smichaud@smichaud-Z68A-D3H-B3.(none)>  Tue, 18 Nov 2014 17:47:50 +0100
+
+libpointmatcher (1.2.1-666) unstable; urgency=low
+
+  * Update Compilation.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Thu, 13 Nov 2014 16:56:38 +0100
+
+libpointmatcher (1.2.1-665) unstable; urgency=low
+
+  * Update Compilation.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Thu, 13 Nov 2014 16:54:07 +0100
+
+libpointmatcher (1.2.1-664) unstable; urgency=low
+
+  * remove duplicate
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Mon, 20 Oct 2014 21:41:20 +0200
+
+libpointmatcher (1.2.1-663) unstable; urgency=low
+
+  * add play button on all youtub links
+
+ -- pomerlef <f.pomerleau@gmail.com>  Mon, 20 Oct 2014 21:40:37 +0200
+
+libpointmatcher (1.2.1-662) unstable; urgency=low
+
+  * add play button on videos
+
+ -- pomerlef <f.pomerleau@gmail.com>  Mon, 20 Oct 2014 19:52:28 +0200
+
+libpointmatcher (1.2.1-661) unstable; urgency=low
+
+  * ensure that overlap is computed in 2D
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 30 Sep 2014 01:16:36 +0200
+
+libpointmatcher (1.2.1-660) unstable; urgency=low
+
+  * fixed test by copying point cloud
+
+ -- Francis Colas <francis.colas@mavt.ethz.ch>  Wed, 10 Sep 2014 21:55:22 +0200
+
+libpointmatcher (1.2.1-659) unstable; urgency=low
+
+  * fusing CutAboveLevel and CutBelowLevel and renaming
+
+ -- Francis Colas <francis.colas@mavt.ethz.ch>  Wed, 10 Sep 2014 16:19:31 +0200
+
+libpointmatcher (1.2.1-658) unstable; urgency=low
+
+  * test for CutAboveLevel and CutBelowLevel filters
+
+ -- Francis Colas <francis.colas@mavt.ethz.ch>  Tue, 09 Sep 2014 19:27:46 +0200
+
+libpointmatcher (1.2.1-657) unstable; urgency=low
+
+  * corrected name of default field
+
+ -- Francis Colas <francis.colas@mavt.ethz.ch>  Tue, 09 Sep 2014 19:25:30 +0200
+
+libpointmatcher (1.2.1-656) unstable; urgency=low
+
+  * CutBelowLevelDataPointsFilter
+
+ -- Francis Colas <francis.colas@mavt.ethz.ch>  Tue, 09 Sep 2014 16:24:40 +0200
+
+libpointmatcher (1.2.1-655) unstable; urgency=low
+
+  * CutAboveLevelDataPointsFilter
+
+ -- Francis Colas <francis.colas@mavt.ethz.ch>  Tue, 09 Sep 2014 16:19:20 +0200
+
+libpointmatcher (1.2.1-654) unstable; urgency=low
+
+  * renamed .hpp as .h
+
+ -- Renaud Dube <renaud.dube@mavt.ethz.ch>  Mon, 08 Sep 2014 11:45:54 +0200
+
+libpointmatcher (1.2.1-653) unstable; urgency=low
+
+  * splitted unit tests
+
+ -- Renaud Dube <renaud.dube@mavt.ethz.ch>  Thu, 04 Sep 2014 12:34:24 +0200
+
+libpointmatcher (1.2.1-652) unstable; urgency=low
+
+  * Delete descriptorsStandards.txt
+  * this was moved in the tutorial section
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Mon, 25 Aug 2014 19:48:23 +0200
+
+libpointmatcher (1.2.1-651) unstable; urgency=low
+
+  * Delete roadmap.txt
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Mon, 25 Aug 2014 19:47:41 +0200
+
+libpointmatcher (1.2.1-650) unstable; urgency=low
+
+  * change year to 2014
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Mon, 25 Aug 2014 19:46:54 +0200
+
+libpointmatcher (1.2.1-649) unstable; urgency=low
+
+  * correct bug in DataPoints operator==
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 22 Aug 2014 21:14:32 +0200
+
+libpointmatcher (1.2.1-648) unstable; urgency=low
+
+  * add a methode to remove features or descriptors
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 21 Aug 2014 22:44:03 +0200
+
+libpointmatcher (1.2.1-647) unstable; urgency=low
+
+  * add empty function for removing features and descriptors
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 21 Aug 2014 00:05:07 +0200
+
+libpointmatcher (1.2.1-646) unstable; urgency=low
+
+  * add functions to DataPoints avoiding error on rows and cols
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Aug 2014 23:49:00 +0200
+
+libpointmatcher (1.2.1-645) unstable; urgency=low
+
+  * fill missing documentation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Aug 2014 22:07:04 +0200
+
+libpointmatcher (1.2.1-644) unstable; urgency=low
+
+  * resolve warning from unsigned to int in IO.cpp
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Aug 2014 21:37:43 +0200
+
+libpointmatcher (1.2.1-643) unstable; urgency=low
+
+  * add extra empty line in utest
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Aug 2014 21:03:44 +0200
+
+libpointmatcher (1.2.1-642) unstable; urgency=low
+
+  * add extra unit tests and resolve remaining bugs
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Aug 2014 21:02:00 +0200
+
+libpointmatcher (1.2.1-641) unstable; urgency=low
+
+  * Refactorized how to load PLY files
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Aug 2014 17:45:29 +0200
+
+libpointmatcher (1.2.1-640) unstable; urgency=low
+
+  * Allow 2D descriptors
+  * Allow saving 2D descriptors coming from a 2Dmap, that are converted
+    to 3D when writing to the file but needed after if we want to load the map
+    as 2D.
+
+ -- chipironcin <jamarin.shurtugal@hotmail.com>  Wed, 13 Aug 2014 13:47:04 +0200
+
+libpointmatcher (1.2.1-639) unstable; urgency=low
+
+  * 1.2.2
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Tue, 05 Aug 2014 10:19:52 +0200
+
+libpointmatcher (1.2.1-638) unstable; urgency=low
+
+  * updating changelog
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Tue, 05 Aug 2014 10:04:40 +0200
+
+libpointmatcher (1.2.1-637) unstable; urgency=low
+
+  * changing yaml-cpp_LIBRARIES to point to built in target
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 31 Jul 2014 17:04:03 +0200
+
+libpointmatcher (1.2.1-636) unstable; urgency=low
+
+  * changed cmake_current_binary to cmake_binary to see if builds on ros
+    farm
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 31 Jul 2014 16:41:53 +0200
+
+libpointmatcher (1.2.1-635) unstable; urgency=low
+
+  * debug message to check why yaml-cpp-pm target not made in ros
+    buildfarm
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 31 Jul 2014 16:36:47 +0200
+
+libpointmatcher (1.2.1-634) unstable; urgency=low
+
+  * cleaning up yaml-cpp-pm cmakelists
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 31 Jul 2014 16:28:36 +0200
+
+libpointmatcher (1.2.1-633) unstable; urgency=low
+
+  * some badd yaml-cpp includes
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 31 Jul 2014 16:08:12 +0200
+
+libpointmatcher (1.2.1-632) unstable; urgency=low
+
+  * removed external dependence on yaml-cpp
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 31 Jul 2014 15:59:18 +0200
+
+libpointmatcher (1.2.1-631) unstable; urgency=low
+
+  * added install rules for builtin yaml-cpp0.3
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 31 Jul 2014 11:20:07 +0200
+
+libpointmatcher (1.2.1-630) unstable; urgency=low
+
+  * updated changelog
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 24 Jul 2014 17:39:18 +0200
+
+libpointmatcher (1.2.1-629) unstable; urgency=low
+
+  * changed pointmatcher version variable
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 24 Jul 2014 17:31:31 +0200
+
+libpointmatcher (1.2.0-628) unstable; urgency=low
+
+  * 1.2.1
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 24 Jul 2014 17:17:09 +0200
+
+libpointmatcher (1.2.0-627) unstable; urgency=low
+
+  * added changelog
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 24 Jul 2014 17:16:39 +0200
+
+libpointmatcher (1.2.0-626) unstable; urgency=low
+
+  * deleted old cmake config file for new name
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 24 Jul 2014 16:46:36 +0200
+
+libpointmatcher (1.2.0-625) unstable; urgency=low
+
+  * Merge branch 'unstable'
+  * Conflicts:
+  	pointmatcherConfig.cmake.in
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 24 Jul 2014 16:45:10 +0200
+
+libpointmatcher (1.2.0-624) unstable; urgency=low
+
+  * install config.cmake to path where will be findeable by catkin
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 17 Jul 2014 18:44:50 +0200
+
+libpointmatcher (1.2.0-623) unstable; urgency=low
+
+  * added -fPIC option for accompanying yaml-cpp
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 17 Jul 2014 18:44:26 +0200
+
+libpointmatcher (1.2.0-622) unstable; urgency=low
+
+  * Merge pull request #37 from ethz-asl/fix/weighted_error_minimization
+  * Fixed bug with soft outlier weights in error minimization
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Sat, 12 Jul 2014 04:03:56 +0200
+
+libpointmatcher (1.2.0-621) unstable; urgency=low
+
+  * moved accompanying yaml-cpp functionality back to YAML_PM namespace
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 18:30:36 +0200
+
+libpointmatcher (1.2.0-620) unstable; urgency=low
+
+  * removed HAVE_YAML_CPP flags which are no longer valid
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 17:23:02 +0200
+
+libpointmatcher (1.2.0-619) unstable; urgency=low
+
+  * renamed YAML_PM namespace to YAML
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 16:42:17 +0200
+
+libpointmatcher (1.2.0-618) unstable; urgency=low
+
+  * oops deleted a necessary include for gtest
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 15:54:34 +0200
+
+libpointmatcher (1.2.0-617) unstable; urgency=low
+
+  * Distinguish system found yaml-cpp version from accompanying yaml-cpp-pm
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 15:50:22 +0200
+
+libpointmatcher (1.2.0-616) unstable; urgency=low
+
+  * documented safeGetLine function
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 15:06:09 +0200
+
+libpointmatcher (1.2.0-615) unstable; urgency=low
+
+  * changed package found variables to libpointmatcher prefix instead of
+    POINTMATCHER
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 12:00:36 +0200
+
+libpointmatcher (1.2.0-614) unstable; urgency=low
+
+  * changed POINTMATCHER_VERSION to 1.2
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 11:59:50 +0200
+
+libpointmatcher (1.2.0-613) unstable; urgency=low
+
+  * adding yaml-cpp0.3 to contrib
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 12:01:39 +0200
+
+libpointmatcher (1.2.0-612) unstable; urgency=low
+
+  * changed package found variables to libpointmatcher prefix instead of
+    POINTMATCHER
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 12:00:36 +0200
+
+libpointmatcher (1.2.0-611) unstable; urgency=low
+
+  * changed POINTMATCHER_VERSION to 1.2
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 11 Jul 2014 11:59:50 +0200
+
+libpointmatcher (1.1.0-610) unstable; urgency=low
+
+  * Update Datafilters.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Sun, 06 Jul 2014 16:41:33 +0200
+
+libpointmatcher (1.1.0-609) unstable; urgency=low
+
+  * Update Datafilters.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Sun, 06 Jul 2014 16:37:43 +0200
+
+libpointmatcher (1.1.0-608) unstable; urgency=low
+
+  * added cur_trans and build to gitignore
+
+ -- Mike Bosse <mike.bosse@mavt.ethz.ch>  Mon, 30 Jun 2014 10:00:58 +0200
+
+libpointmatcher (1.1.0-607) unstable; urgency=low
+
+  * Merge branch 'master' into fix/weighted_error_minimization
+
+ -- Mike Bosse <mike.bosse@mavt.ethz.ch>  Mon, 30 Jun 2014 09:59:10 +0200
+
+libpointmatcher (1.1.0-606) unstable; urgency=low
+
+  * Allow injection of non-system install path of nabo. Fixes #38
+
+ -- Simon Lynen <simon.lynen@mavt.ethz.ch>  Sat, 28 Jun 2014 00:27:54 +0200
+
+libpointmatcher (1.1.0-605) unstable; urgency=low
+
+  * Fixed bug with soft outlier weights in error minimization
+
+ -- Mike Bosse <mike.bosse@mavt.ethz.ch>  Fri, 27 Jun 2014 23:24:58 +0200
+
+libpointmatcher (1.1.0-604) unstable; urgency=low
+
+  * renamed cmake package name to libpointmatcher instead of pointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 26 Jun 2014 17:51:16 +0200
+
+libpointmatcher (1.1.0-603) unstable; urgency=low
+
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 26 Jun 2014 17:47:45 +0200
+
+libpointmatcher (1.1.0-602) unstable; urgency=low
+
+  * fixed build type to cmake in package.xml
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 26 Jun 2014 17:47:00 +0200
+
+libpointmatcher (1.1.0-601) unstable; urgency=low
+
+  * Update ICPIntro.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Mon, 23 Jun 2014 15:52:35 +0200
+
+libpointmatcher (1.1.0-600) unstable; urgency=low
+
+  * Update ICPIntro.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Mon, 23 Jun 2014 04:22:30 +0200
+
+libpointmatcher (1.1.0-599) unstable; urgency=low
+
+  * incremented version to 1.2.0 in package.xml
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 20 Jun 2014 17:06:42 +0200
+
+libpointmatcher (1.1.0-598) unstable; urgency=low
+
+  * updated debian to 1.2.0
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 20 Jun 2014 15:45:36 +0200
+
+libpointmatcher (1.1.0-597) unstable; urgency=low
+
+  * merging in changes to IO
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 12 Jun 2014 18:28:27 +0200
+
+libpointmatcher (1.1.0-596) unstable; urgency=low
+
+  * removed unused typedef warnings in later gcc versions
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 12 Jun 2014 18:19:18 +0200
+
+libpointmatcher (1.1.0-595) unstable; urgency=low
+
+  * changed build type to catkin in package.xml
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 12 Jun 2014 13:35:48 +0200
+
+libpointmatcher (1.1.0-594) unstable; urgency=low
+
+  * changed doc for color ranges (0-1) instead of (0-255)
+
+ -- Samuel <samlcharreyron@gmail.com>  Thu, 12 Jun 2014 10:40:52 +0200
+
+libpointmatcher (1.1.0-593) unstable; urgency=low
+
+  * changed doc for color ranges in (0-1) instead of (0-255)
+
+ -- Samuel <samlcharreyron@gmail.com>  Thu, 12 Jun 2014 10:35:09 +0200
+
+libpointmatcher (1.1.0-592) unstable; urgency=low
+
+  * Update BasicRegistration.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Mon, 26 May 2014 20:11:03 +0200
+
+libpointmatcher (1.1.0-591) unstable; urgency=low
+
+  * Update Datafilters.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Thu, 22 May 2014 22:25:53 +0200
+
+libpointmatcher (1.1.0-590) unstable; urgency=low
+
+  * Update DefaultICPConfig.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Thu, 22 May 2014 22:23:42 +0200
+
+libpointmatcher (1.1.0-589) unstable; urgency=low
+
+  * Update Compilation.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Wed, 21 May 2014 19:51:52 +0200
+
+libpointmatcher (1.1.0-588) unstable; urgency=low
+
+  * fixed name for catkinization
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 15 May 2014 14:32:29 +0200
+
+libpointmatcher (1.1.0-587) unstable; urgency=low
+
+  * fixed loadCSV to support windows CRLF
+
+ -- Samuel <samlcharreyron@gmail.com>  Tue, 13 May 2014 23:25:19 +0200
+
+libpointmatcher (1.1.0-586) unstable; urgency=low
+
+  * Update README.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Tue, 13 May 2014 17:02:23 +0200
+
+libpointmatcher (1.1.0-585) unstable; urgency=low
+
+  * Update README.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Tue, 13 May 2014 17:01:04 +0200
+
+libpointmatcher (1.1.0-584) unstable; urgency=low
+
+  * Update ApplicationsAndPub.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Tue, 13 May 2014 16:43:43 +0200
+
+libpointmatcher (1.1.0-583) unstable; urgency=low
+
+  * Update ApplicationsAndPub.md
+
+ -- François Pomerleau <f.pomerleau@gmail.com>  Sat, 10 May 2014 15:40:58 +0200
+
+libpointmatcher (1.1.0-582) unstable; urgency=low
+
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+  * Conflicts:
+  	doc/ApplyingDatafilters.md
+  	doc/Tutorials.md
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 08 May 2014 10:29:43 +0200
+
+libpointmatcher (1.1.0-581) unstable; urgency=low
+
+  * checking for 32 bit platform
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 08 May 2014 10:23:26 +0200
+
+libpointmatcher (1.1.0-580) unstable; urgency=low
+
+  * new registration tutorial
+
+ -- Samuel <samlcharreyron@gmail.com>  Sat, 03 May 2014 14:05:48 +0200
+
+libpointmatcher (1.1.0-579) unstable; urgency=low
+
+  * some cleanup in the doc
+
+ -- Samuel <samlcharreyron@gmail.com>  Thu, 01 May 2014 10:21:40 +0200
+
+libpointmatcher (1.1.0-578) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sun, 27 Apr 2014 22:03:29 +0200
+
+libpointmatcher (1.1.0-577) unstable; urgency=low
+
+  * correct bug in overlap computation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sun, 27 Apr 2014 22:02:58 +0200
+
+libpointmatcher (1.1.0-576) unstable; urgency=low
+
+  * add missing lib and correct lib name
+
+ -- pomerlef <f.pomerleau@gmail.com>  Fri, 25 Apr 2014 21:17:42 +0200
+
+libpointmatcher (1.1.0-575) unstable; urgency=low
+
+  * Typos
+
+ -- pomerlef <f.pomerleau@gmail.com>  Fri, 25 Apr 2014 21:14:49 +0200
+
+libpointmatcher (1.1.0-574) unstable; urgency=low
+
+  * Update Compilation.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Fri, 25 Apr 2014 16:44:17 +0200
+
+libpointmatcher (1.1.0-573) unstable; urgency=low
+
+  * correcting some typos in the doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 24 Apr 2014 16:14:42 +0200
+
+libpointmatcher (1.1.0-572) unstable; urgency=low
+
+  * Update ReleaseNotes.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Thu, 24 Apr 2014 16:05:49 +0200
+
+libpointmatcher (1.1.0-571) unstable; urgency=low
+
+  * Update ReleaseNotes.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Thu, 24 Apr 2014 16:03:24 +0200
+
+libpointmatcher (1.1.0-570) unstable; urgency=low
+
+  * catkinized
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 24 Apr 2014 13:59:36 +0200
+
+libpointmatcher (1.1.0-569) unstable; urgency=low
+
+  * Update Compilation.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Wed, 23 Apr 2014 22:46:21 +0200
+
+libpointmatcher (1.1.0-568) unstable; urgency=low
+
+  * Update Compilation.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Wed, 23 Apr 2014 22:42:53 +0200
+
+libpointmatcher (1.1.0-567) unstable; urgency=low
+
+  * correct bug with generic outlier: normalize the weight
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 23 Apr 2014 22:13:42 +0200
+
+libpointmatcher (1.1.0-566) unstable; urgency=low
+
+  * fixing some typos in the doc
+
+ -- Samuel <samlcharreyron@gmail.com>  Wed, 23 Apr 2014 00:04:41 +0200
+
+libpointmatcher (1.1.0-565) unstable; urgency=low
+
+  * added link to import export doc
+
+ -- Samuel <samlcharreyron@gmail.com>  Sat, 19 Apr 2014 22:56:45 +0200
+
+libpointmatcher (1.1.0-564) unstable; urgency=low
+
+  * new Mac compilation instructions
+
+ -- Samuel <samlcharreyron@gmail.com>  Sat, 19 Apr 2014 20:35:40 +0200
+
+libpointmatcher (1.1.0-563) unstable; urgency=low
+
+  * Some warnings about the new yaml-cpp API
+
+ -- Samuel <samlcharreyron@gmail.com>  Fri, 18 Apr 2014 18:54:54 +0200
+
+libpointmatcher (1.1.0-562) unstable; urgency=low
+
+  * removed ply.cpp from example CMakeLists which should'nt have been
+    there
+
+ -- Samuel <samlcharreyron@gmail.com>  Fri, 18 Apr 2014 14:23:37 +0200
+
+libpointmatcher (1.1.0-561) unstable; urgency=low
+
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 17 Apr 2014 18:16:27 +0200
+
+libpointmatcher (1.1.0-560) unstable; urgency=low
+
+  * updated IO doc for new formats
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 17 Apr 2014 18:15:47 +0200
+
+libpointmatcher (1.1.0-559) unstable; urgency=low
+
+  * new unit tests for loading/saving different file formats
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 17 Apr 2014 18:15:30 +0200
+
+libpointmatcher (1.1.0-558) unstable; urgency=low
+
+  * fixed descriptor support in loading PCD files
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 17 Apr 2014 18:14:48 +0200
+
+libpointmatcher (1.1.0-557) unstable; urgency=low
+
+  * doc for PCD Import/Export
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 10 Apr 2014 18:40:20 +0200
+
+libpointmatcher (1.1.0-556) unstable; urgency=low
+
+  * writing unit tests for PLY import/export
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 10 Apr 2014 18:40:03 +0200
+
+libpointmatcher (1.1.0-555) unstable; urgency=low
+
+  * saving PCD point clouds
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 10 Apr 2014 18:17:38 +0200
+
+libpointmatcher (1.1.0-554) unstable; urgency=low
+
+  * loading PCD files (features only)
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 10 Apr 2014 16:27:00 +0200
+
+libpointmatcher (1.1.0-553) unstable; urgency=low
+
+  * should now support reordering of desc columns in CSV files
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 10 Apr 2014 12:12:54 +0200
+
+libpointmatcher (1.1.0-552) unstable; urgency=low
+
+  * merging over from master
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 10 Apr 2014 11:34:37 +0200
+
+libpointmatcher (1.1.0-551) unstable; urgency=low
+
+  * continuing reshuffling of badly ordered descriptors for loadCSV
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 10 Apr 2014 11:32:48 +0200
+
+libpointmatcher (1.1.0-550) unstable; urgency=low
+
+  * Update ApplicationsAndPub.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Thu, 03 Apr 2014 21:42:59 +0200
+
+libpointmatcher (1.1.0-549) unstable; urgency=low
+
+  * Documentation for Import/Export
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 03 Apr 2014 18:26:57 +0200
+
+libpointmatcher (1.1.0-548) unstable; urgency=low
+
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 03 Apr 2014 18:23:55 +0200
+
+libpointmatcher (1.1.0-547) unstable; urgency=low
+
+  * working on support of misordered descriptors
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 03 Apr 2014 18:18:56 +0200
+
+libpointmatcher (1.1.0-546) unstable; urgency=low
+
+  * Update Tutorials.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Thu, 03 Apr 2014 17:48:26 +0200
+
+libpointmatcher (1.1.0-545) unstable; urgency=low
+
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 03 Apr 2014 17:14:23 +0200
+
+libpointmatcher (1.1.0-544) unstable; urgency=low
+
+  * put in support for FIELD in legacy vtk files
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 03 Apr 2014 11:59:36 +0200
+
+libpointmatcher (1.1.0-543) unstable; urgency=low
+
+  * documented supportedVTKDataTypes enum
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 03 Apr 2014 10:03:51 +0200
+
+libpointmatcher (1.1.0-542) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 02 Apr 2014 22:30:50 +0200
+
+libpointmatcher (1.1.0-541) unstable; urgency=low
+
+  * add unit test for new ErrorMinimizer (with cov) and fix bug related
+    to them
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 02 Apr 2014 22:30:40 +0200
+
+libpointmatcher (1.1.0-540) unstable; urgency=low
+
+  * Update ReleaseNotes.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 23:35:30 +0200
+
+libpointmatcher (1.1.0-539) unstable; urgency=low
+
+  * Merge pull request #26 from fjperezgrau/master
+  * Added errorMinimizers with ICP's covariance estimation
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 23:27:24 +0200
+
+libpointmatcher (1.1.0-538) unstable; urgency=low
+
+  * Update README.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 23:18:30 +0200
+
+libpointmatcher (1.1.0-537) unstable; urgency=low
+
+  * Update ApplicationsAndPub.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 23:11:02 +0200
+
+libpointmatcher (1.1.0-536) unstable; urgency=low
+
+  * Update README.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 23:10:26 +0200
+
+libpointmatcher (1.1.0-535) unstable; urgency=low
+
+  * Update Tutorials.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 22:06:13 +0200
+
+libpointmatcher (1.1.0-534) unstable; urgency=low
+
+  * Update ApplicationsAndPub.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 22:04:30 +0200
+
+libpointmatcher (1.1.0-533) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 21:46:21 +0200
+
+libpointmatcher (1.1.0-532) unstable; urgency=low
+
+  * add a page for videos and publications
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 21:43:34 +0200
+
+libpointmatcher (1.1.0-531) unstable; urgency=low
+
+  * Update README.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 21:12:44 +0200
+
+libpointmatcher (1.1.0-530) unstable; urgency=low
+
+  * Update CompilationWindows.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 20:56:39 +0200
+
+libpointmatcher (1.1.0-529) unstable; urgency=low
+
+  * Update CompilationWindows.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 20:56:28 +0200
+
+libpointmatcher (1.1.0-528) unstable; urgency=low
+
+  * Update CompilationWindows.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 20:53:40 +0200
+
+libpointmatcher (1.1.0-527) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 20:49:17 +0200
+
+libpointmatcher (1.1.0-526) unstable; urgency=low
+
+  * Add doc for Windows compilation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 20:49:04 +0200
+
+libpointmatcher (1.1.0-525) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 16:54:16 +0200
+
+libpointmatcher (1.1.0-524) unstable; urgency=low
+
+  * Fix the second bug related to issue #29
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 01 Apr 2014 16:54:01 +0200
+
+libpointmatcher (1.1.0-523) unstable; urgency=low
+
+  * Make test now displays the result of the tests.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 01 Apr 2014 09:46:58 +0200
+
+libpointmatcher (1.1.0-522) unstable; urgency=low
+
+  * fix problem with defaultFixStepSamplingDataPointsFilter test
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 31 Mar 2014 21:27:28 +0200
+
+libpointmatcher (1.1.0-521) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 31 Mar 2014 20:38:05 +0200
+
+libpointmatcher (1.1.0-520) unstable; urgency=low
+
+  * fix bugs making the unit tests failed
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 31 Mar 2014 20:33:17 +0200
+
+libpointmatcher (1.1.0-519) unstable; urgency=low
+
+  * Merge branch 'fix-bsd-clock' of https://github.com/pierriko/libpointmatcher into
+    pierriko-fix-bsd-clock
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 31 Mar 2014 17:37:13 +0200
+
+libpointmatcher (1.1.0-518) unstable; urgency=low
+
+  * Fix for issue #29
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 31 Mar 2014 16:48:22 +0200
+
+libpointmatcher (1.1.0-517) unstable; urgency=low
+
+  * resolve issue #27
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 28 Mar 2014 22:43:38 +0100
+
+libpointmatcher (1.1.0-516) unstable; urgency=low
+
+  [timer] use CLOCK_PROF on NetBSD
+
+ -- Pierrick Koch <pierrick.koch@gmail.com>  Thu, 27 Mar 2014 19:14:21 +0100
+
+libpointmatcher (1.1.0-515) unstable; urgency=low
+
+  * added package.xml so that libpointmatcher can be built as an external
+    catkin package
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Mar 2014 19:24:37 +0100
+
+libpointmatcher (1.1.0-514) unstable; urgency=low
+
+  * fixed bug in CSV file output and added support for VTK legacy unstructure_grid
+    data type
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 20 Mar 2014 18:13:32 +0100
+
+libpointmatcher (1.1.0-513) unstable; urgency=low
+
+  * fixed bug with files containing no descriptors and updated release
+    notes
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 20 Mar 2014 17:04:01 +0100
+
+libpointmatcher (1.1.0-512) unstable; urgency=low
+
+  * exporting of descriptors in CSV support
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 20 Mar 2014 16:24:35 +0100
+
+libpointmatcher (1.1.0-511) unstable; urgency=low
+
+  * added descriptors to CSV
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 20 Mar 2014 15:43:05 +0100
+
+libpointmatcher (1.1.0-510) unstable; urgency=low
+
+  * added some more descriptors to PLY support
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 20 Mar 2014 12:24:48 +0100
+
+libpointmatcher (1.1.0-509) unstable; urgency=low
+
+  * better support of descriptors in PLY
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 20 Mar 2014 11:27:52 +0100
+
+libpointmatcher (1.1.0-508) unstable; urgency=low
+
+  * updated release notes
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 14 Mar 2014 17:09:09 +0100
+
+libpointmatcher (1.1.0-507) unstable; urgency=low
+
+  * added check for PLY binary files
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 14 Mar 2014 17:07:41 +0100
+
+libpointmatcher (1.1.0-506) unstable; urgency=low
+
+  * fixed bug when no descriptors in PLY file
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 14 Mar 2014 16:50:59 +0100
+
+libpointmatcher (1.1.0-505) unstable; urgency=low
+
+  * documented PLY support in source
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Fri, 14 Mar 2014 16:28:42 +0100
+
+libpointmatcher (1.1.0-504) unstable; urgency=low
+
+  * Merge remote-tracking branch 'remotes/origin/unstable'
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 12 Mar 2014 23:07:08 +0100
+
+libpointmatcher (1.1.0-503) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 10 Mar 2014 16:51:03 +0100
+
+libpointmatcher (1.1.0-502) unstable; urgency=low
+
+  * put back proper name tag to output normals in VTK
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 10 Mar 2014 16:47:35 +0100
+
+libpointmatcher (1.1.0-501) unstable; urgency=low
+
+  * Datapoints can now load/save to ply files
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 06 Mar 2014 20:38:13 +0100
+
+libpointmatcher (1.1.0-500) unstable; urgency=low
+
+  * added PLY save function
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 06 Mar 2014 20:33:50 +0100
+
+libpointmatcher (1.1.0-499) unstable; urgency=low
+
+  * wrote load PLY files
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 06 Mar 2014 19:39:37 +0100
+
+libpointmatcher (1.1.0-498) unstable; urgency=low
+
+  * Added errorMinimizers with ICP's covariance estimation
+
+ -- Francisco J Perez Grau <fjperezgrau@gmail.com>  Mon, 03 Mar 2014 21:05:21 +0100
+
+libpointmatcher (1.1.0-497) unstable; urgency=low
+
+  * started writing PLY file parser
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 18:42:46 +0100
+
+libpointmatcher (1.1.0-496) unstable; urgency=low
+
+  * updated doc for built-in GTest
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 18:38:26 +0100
+
+libpointmatcher (1.1.0-495) unstable; urgency=low
+
+  * updated doc for included gtest
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 18:36:58 +0100
+
+libpointmatcher (1.1.0-494) unstable; urgency=low
+
+  * Added voxel grid filter to data filters tutorial
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 16:09:37 +0100
+
+libpointmatcher (1.1.0-493) unstable; urgency=low
+
+  * added small program to compare running time of 2 data filters
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 15:31:32 +0100
+
+libpointmatcher (1.1.0-492) unstable; urgency=low
+
+  * changed gtest include path to point to local version
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 15:24:35 +0100
+
+libpointmatcher (1.1.0-491) unstable; urgency=low
+
+  * fixed gtest include to point to local version
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 15:22:36 +0100
+
+libpointmatcher (1.1.0-490) unstable; urgency=low
+
+  * Merging in changes from master
+  * Merge branch 'master' into unstable
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 14:14:13 +0100
+
+libpointmatcher (1.1.0-489) unstable; urgency=low
+
+  "merging in Francois changes"
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 14:13:21 +0100
+
+libpointmatcher (1.1.0-488) unstable; urgency=low
+
+  * fixed some links in datafilters
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 14:11:14 +0100
+
+libpointmatcher (1.1.0-487) unstable; urgency=low
+
+  * Check for memory allocation error when using too small voxels
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 10:50:12 +0100
+
+libpointmatcher (1.1.0-486) unstable; urgency=low
+
+  * registered voxel filter average descriptors param as bool
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 10:31:34 +0100
+
+libpointmatcher (1.1.0-485) unstable; urgency=low
+
+  * Added unit test for Voxel Grid Filter
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 27 Feb 2014 10:24:24 +0100
+
+libpointmatcher (1.1.0-484) unstable; urgency=low
+
+  * fix cmake install file missing
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 26 Feb 2014 18:25:28 +0100
+
+libpointmatcher (1.1.0-483) unstable; urgency=low
+
+  * corrected to work without c++0x
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 26 Feb 2014 18:12:48 +0100
+
+libpointmatcher (1.1.0-482) unstable; urgency=low
+
+  * Merge /home/frank/research/nifti_svn/bleeding-edge/stacks/ethzasl_icp_mapping/libpointmatcher/upstream_src
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 26 Feb 2014 18:04:50 +0100
+
+libpointmatcher (1.0.2-481) unstable; urgency=low
+
+  * added a generic outlierFilter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 26 Feb 2014 18:04:22 +0100
+
+libpointmatcher (1.1.0-480) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 26 Feb 2014 16:32:11 +0100
+
+libpointmatcher (1.1.0-479) unstable; urgency=low
+
+  * commented a unused line
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 26 Feb 2014 16:31:33 +0100
+
+libpointmatcher (1.1.0-478) unstable; urgency=low
+
+  * created rigid transformation class and voxel filter with accompanying
+    test
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 20 Feb 2014 18:55:36 +0100
+
+libpointmatcher (1.1.0-477) unstable; urgency=low
+
+  * new developer tutorials
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 20 Feb 2014 18:53:43 +0100
+
+libpointmatcher (1.1.0-476) unstable; urgency=low
+
+  * Added gtest.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 13 Feb 2014 14:59:00 +0100
+
+libpointmatcher (1.1.0-475) unstable; urgency=low
+
+  * Update ReleaseNotes.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Sun, 09 Feb 2014 21:42:20 +0100
+
+libpointmatcher (1.1.0-474) unstable; urgency=low
+
+  * more changes to doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 06 Feb 2014 19:00:00 +0100
+
+libpointmatcher (1.1.0-473) unstable; urgency=low
+
+  * merging in
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 06 Feb 2014 10:59:00 +0100
+
+libpointmatcher (1.1.0-472) unstable; urgency=low
+
+  * simplified README and some fixes in transformations doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 06 Feb 2014 10:56:37 +0100
+
+libpointmatcher (1.1.0-471) unstable; urgency=low
+
+  * Update ReleaseNotes.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Wed, 05 Feb 2014 16:54:40 +0100
+
+libpointmatcher (1.1.0-470) unstable; urgency=low
+
+  * merging back changes
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 30 Jan 2014 18:31:22 +0100
+
+libpointmatcher (1.1.0-469) unstable; urgency=low
+
+  * Completed transformations doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 30 Jan 2014 18:30:35 +0100
+
+libpointmatcher (1.1.0-468) unstable; urgency=low
+
+  * Update Compilation.md
+  * clarify trusty
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 24 Jan 2014 17:03:27 +0100
+
+libpointmatcher (1.1.0-467) unstable; urgency=low
+
+  * fixed some links and redid transformations example
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 23 Jan 2014 18:32:22 +0100
+
+libpointmatcher (1.1.0-466) unstable; urgency=low
+
+  * new tutorials
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 23 Jan 2014 18:10:30 +0100
+
+libpointmatcher (1.1.0-465) unstable; urgency=low
+
+  * Changes in data filters tutorial. New applying filters, configuration tutorials
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 16 Jan 2014 18:15:44 +0100
+
+libpointmatcher (1.1.0-464) unstable; urgency=low
+
+  * utest: This tol passed on OSX, maybe it will work here?
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Tue, 14 Jan 2014 18:33:13 +0100
+
+libpointmatcher (1.1.0-463) unstable; urgency=low
+
+  * Increase tol to rotTol = 1e-2, transTol = 1e-3, hope it passes
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Tue, 14 Jan 2014 15:52:54 +0100
+
+libpointmatcher (1.1.0-462) unstable; urgency=low
+
+  * Indentation fixes
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Tue, 14 Jan 2014 02:40:48 +0100
+
+libpointmatcher (1.1.0-461) unstable; urgency=low
+
+  * Tolerance added in utest
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Tue, 14 Jan 2014 02:26:08 +0100
+
+libpointmatcher (1.1.0-460) unstable; urgency=low
+
+  * Add in-place filters
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Fri, 10 Jan 2014 06:54:22 +0100
+
+libpointmatcher (1.1.0-459) unstable; urgency=low
+
+  * Unit tests for all filters added
+  * Wipe unneeded stuff
+  * Renamed some tests to reflect better their use
+  * Renamed some tests to reflect better their use
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Fri, 10 Jan 2014 03:02:42 +0100
+
+libpointmatcher (1.1.0-458) unstable; urgency=low
+
+  * Update Datafilters.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 14 Jan 2014 00:17:58 +0100
+
+libpointmatcher (1.1.0-457) unstable; urgency=low
+
+  * Update ReleaseNotes.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Sun, 12 Jan 2014 18:03:31 +0100
+
+libpointmatcher (1.1.0-456) unstable; urgency=low
+
+  * Update README.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Sun, 12 Jan 2014 17:59:44 +0100
+
+libpointmatcher (1.1.0-455) unstable; urgency=low
+
+  * Update README.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Sun, 12 Jan 2014 17:59:14 +0100
+
+libpointmatcher (1.1.0-454) unstable; urgency=low
+
+  * Update Tutorials.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Sun, 12 Jan 2014 17:48:35 +0100
+
+libpointmatcher (1.1.0-453) unstable; urgency=low
+
+  * Update Tutorials.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Sun, 12 Jan 2014 17:47:09 +0100
+
+libpointmatcher (1.1.0-452) unstable; urgency=low
+
+  * Update Tutorials.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Sun, 12 Jan 2014 17:38:58 +0100
+
+libpointmatcher (1.1.0-451) unstable; urgency=low
+
+  * Update Tutorials.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Sat, 11 Jan 2014 03:47:06 +0100
+
+libpointmatcher (1.1.0-450) unstable; urgency=low
+
+  * Some small changes from Stephanes comments on the doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 09 Jan 2014 18:23:08 +0100
+
+libpointmatcher (1.1.0-449) unstable; urgency=low
+
+  * fixed highlighting
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 09 Jan 2014 17:19:34 +0100
+
+libpointmatcher (1.1.0-448) unstable; urgency=low
+
+  * added code highlighting basic registration doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 09 Jan 2014 17:16:37 +0100
+
+libpointmatcher (1.1.0-447) unstable; urgency=low
+
+  * added image to car example
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 09 Jan 2014 17:01:28 +0100
+
+libpointmatcher (1.1.0-446) unstable; urgency=low
+
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+  * Merging recent code changes
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 09 Jan 2014 16:57:59 +0100
+
+libpointmatcher (1.1.0-445) unstable; urgency=low
+
+  * wrote basic registration tutorial and description of default ICP
+    configuration
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 09 Jan 2014 16:57:25 +0100
+
+libpointmatcher (1.1.0-444) unstable; urgency=low
+
+  * fixed compilation file extension
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 09 Jan 2014 12:44:13 +0100
+
+libpointmatcher (1.1.0-443) unstable; urgency=low
+
+  * Finished compilation tutorial, needs proofreading
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 09 Jan 2014 12:10:55 +0100
+
+libpointmatcher (1.1.0-442) unstable; urgency=low
+
+  * Merge pull request #22 from oleg-alexandrov/inspector
+  * Fine level control of the Inspector module.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 09 Jan 2014 11:12:14 +0100
+
+libpointmatcher (1.1.0-441) unstable; urgency=low
+
+  * More indentation fixes
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Wed, 08 Jan 2014 21:44:54 +0100
+
+libpointmatcher (1.1.0-440) unstable; urgency=low
+
+  * More indentation fixes
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Wed, 08 Jan 2014 21:41:15 +0100
+
+libpointmatcher (1.1.0-439) unstable; urgency=low
+
+  * And fix indentation
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Wed, 08 Jan 2014 21:15:56 +0100
+
+libpointmatcher (1.1.0-438) unstable; urgency=low
+
+  * Explanation of hungarian notation
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Wed, 08 Jan 2014 21:08:27 +0100
+
+libpointmatcher (1.1.0-437) unstable; urgency=low
+
+  * changed parameter ordering for gtest output
+
+ -- Simon Lynen <simon.lynen@mavt.ethz.ch>  Tue, 31 Dec 2013 10:39:57 +0100
+
+libpointmatcher (1.1.0-436) unstable; urgency=low
+
+  * Added xml output to gtest
+
+ -- Simon Lynen <simon.lynen@mavt.ethz.ch>  Tue, 31 Dec 2013 09:38:48 +0100
+
+libpointmatcher (1.1.0-435) unstable; urgency=low
+
+  * Inspector: Allow the yaml file to control the inspector
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Fri, 20 Dec 2013 18:11:26 +0100
+
+libpointmatcher (1.1.0-434) unstable; urgency=low
+
+  * InspectorsImpl: Fine level control for what gets dumped
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Fri, 20 Dec 2013 03:03:46 +0100
+
+libpointmatcher (1.1.0-433) unstable; urgency=low
+
+  * TransformationCheckersImpl: Fix minor bug with column names
+
+ -- Oleg Alexandrov <oleg.alexandrov@gmail.com>  Fri, 20 Dec 2013 02:23:26 +0100
+
+libpointmatcher (1.1.0-432) unstable; urgency=low
+
+  * started writing compilation doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 19 Dec 2013 18:27:01 +0100
+
+libpointmatcher (1.1.0-431) unstable; urgency=low
+
+  * changed tutorials doc a bit
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 19 Dec 2013 17:12:40 +0100
+
+libpointmatcher (1.1.0-430) unstable; urgency=low
+
+  * mostly done with datafilters doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 19 Dec 2013 17:06:17 +0100
+
+libpointmatcher (1.1.0-429) unstable; urgency=low
+
+  * small display fixes in datafilters.md
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 12 Dec 2013 18:47:28 +0100
+
+libpointmatcher (1.1.0-428) unstable; urgency=low
+
+  * continuing filters doc
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 12 Dec 2013 18:42:46 +0100
+
+libpointmatcher (1.1.0-427) unstable; urgency=low
+
+  * fixing assert in createSimilarEmpty
+  * Merge branch 'master' of https://github.com/ethz-asl/libpointmatcher
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 12 Dec 2013 15:53:41 +0100
+
+libpointmatcher (1.1.0-426) unstable; urgency=low
+
+  * more doc and changed CMake for gtest
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 12 Dec 2013 15:53:36 +0100
+
+libpointmatcher (1.1.0-425) unstable; urgency=low
+
+  * Removed wrong assert
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 12 Dec 2013 15:52:02 +0100
+
+libpointmatcher (1.1.0-424) unstable; urgency=low
+
+  * add a Tutorial page for the doc
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 12 Dec 2013 09:49:52 +0100
+
+libpointmatcher (1.1.0-423) unstable; urgency=low
+
+  * more changes in datafilter
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 05 Dec 2013 18:30:13 +0100
+
+libpointmatcher (1.1.0-422) unstable; urgency=low
+
+  * started box filter docu
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 05 Dec 2013 18:28:01 +0100
+
+libpointmatcher (1.1.0-421) unstable; urgency=low
+
+  * Started writing high level doc for datafilters
+
+ -- Samuel Charreyron <samlcharreyron@gmail.com>  Thu, 05 Dec 2013 16:43:40 +0100
+
+libpointmatcher (1.1.0-420) unstable; urgency=low
+
+  * Update ReleaseNotes.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Wed, 13 Nov 2013 11:45:32 +0100
+
+libpointmatcher (1.1.0-419) unstable; urgency=low
+
+  * Added definition for MSVC compilation with gtest
+
+ -- pomerlef <f.pomerleau@gmail.com>  Fri, 11 Oct 2013 16:25:28 +0200
+
+libpointmatcher (1.1.0-418) unstable; urgency=low
+
+  * Change doc error on MaxDensity
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 22 Oct 2013 09:42:37 +0200
+
+libpointmatcher (1.1.0-417) unstable; urgency=low
+
+  * Add CMake support for find_package()
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 25 Sep 2013 11:15:42 +0200
+
+libpointmatcher (1.1.0-416) unstable; urgency=low
+
+  * Update ReleaseNotes.md
+
+ -- pomerlef <f.pomerleau@gmail.com>  Wed, 18 Sep 2013 11:21:54 +0200
+
+libpointmatcher (1.1.0-415) unstable; urgency=low
+
+  * Fix broken install when doxygen is not found
+
+ -- Chris Foster <chris42f@gmail.com>  Sat, 14 Sep 2013 04:36:12 +0200
+
+libpointmatcher (1.1.0-414) unstable; urgency=low
+
+  * Fixed issue #15
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 12 Sep 2013 18:22:22 +0200
+
+libpointmatcher (1.1.0-413) unstable; urgency=low
+
+  * Make nested boost::assign::map_list_of work in C++11 mode
+  * Adding a layer of indirection here seems necessary to avoid ambiguities
+  * introduced by new C++11 features.  The extra layer forces a call to
+    the
+  * implicit conversion operator defined for converting the boost
+  * initialization list format to std::map.
+
+ -- Chris Foster <chris42f@gmail.com>  Thu, 12 Sep 2013 15:04:27 +0200
+
+libpointmatcher (1.1.0-412) unstable; urgency=low
+
+  * added wish list for next release
+
+ -- pomerlef <f.pomerleau@gmail.com>  Fri, 06 Sep 2013 11:19:25 +0200
+
+libpointmatcher (1.1.0-411) unstable; urgency=low
+
+  * Added list of projects using libpointmatcher in the Readme
+
+ -- pomerlef <f.pomerleau@gmail.com>  Fri, 06 Sep 2013 11:14:24 +0200
+
+libpointmatcher (1.1.0-410) unstable; urgency=low
+
+  * Added note about Ubuntu installation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 05 Sep 2013 12:32:19 +0200
+
+libpointmatcher (1.1.0-409) unstable; urgency=low
+
+  * Moved release notes, added info about Ubuntu packages.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 05 Sep 2013 12:30:48 +0200
+
+libpointmatcher (1.1.0-408) unstable; urgency=low
+
+  * Added release notes.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 05 Sep 2013 12:26:52 +0200
+
+libpointmatcher (1.1.0-407) unstable; urgency=low
+
+  * Added revision note to the readme
+
+ -- pomerlef <f.pomerleau@gmail.com>  Thu, 05 Sep 2013 10:55:55 +0200
+
+libpointmatcher (1.1.0-406) unstable; urgency=low
+
+  * Added support for ubuntu version of yaml cpp
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 04 Sep 2013 16:41:19 +0200
+
+libpointmatcher (1.1.0-405) unstable; urgency=low
+
+  * Added dependency on libboost-all-dev for debian packages.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 04 Sep 2013 15:52:46 +0200
+
+libpointmatcher (1.1.0-404) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 04 Sep 2013 13:56:01 +0200
+
+libpointmatcher (1.1.0-403) unstable; urgency=low
+
+  * Updated version number.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 04 Sep 2013 13:55:58 +0200
+
+libpointmatcher (1.0.2-402) unstable; urgency=low
+
+  * Ensure that all unit test run on Windows
+
+ -- pomerlef <f.pomerleau@gmail.com>  Fri, 30 Aug 2013 12:03:34 +0200
+
+libpointmatcher (1.0.2-401) unstable; urgency=low
+
+  * Backported to C++03, made it compile with MSVC.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 27 Aug 2013 11:43:11 +0200
+
+libpointmatcher (1.0.2-400) unstable; urgency=low
+
+  * Correct bug related to Issue #12
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 16 Aug 2013 13:20:46 +0200
+
+libpointmatcher (1.0.2-399) unstable; urgency=low
+
+  * add unit test for Loggers and Inspectors
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 16 Aug 2013 13:19:59 +0200
+
+libpointmatcher (1.0.2-398) unstable; urgency=low
+
+  * Add unit test for MaxDensityFilter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 16 Aug 2013 12:40:29 +0200
+
+libpointmatcher (1.0.2-397) unstable; urgency=low
+
+  * Add unit test for MaxDensityFilter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 16 Aug 2013 12:23:36 +0200
+
+libpointmatcher (1.0.2-396) unstable; urgency=low
+
+  * Remove extract ouliers function which is more an application than a
+    library functionality
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 16 Aug 2013 12:22:53 +0200
+
+libpointmatcher (1.0.2-395) unstable; urgency=low
+
+  * add outlier extraction functionnality
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 30 Jul 2013 19:37:59 +0200
+
+libpointmatcher (1.0.2-394) unstable; urgency=low
+
+  * remove the check for positive distances
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 30 Jul 2013 14:25:00 +0200
+
+libpointmatcher (1.0.2-393) unstable; urgency=low
+
+  * fixed issue 8: problem with outlier having zero distances
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 30 Jul 2013 14:13:58 +0200
+
+libpointmatcher (1.0.2-392) unstable; urgency=low
+
+  * fixed issue 6: compilation problem with gcc 4.4.4
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 30 Jul 2013 11:08:46 +0200
+
+libpointmatcher (1.0.2-391) unstable; urgency=low
+
+  * adapt to boost 1.5 filesystem naming
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 11 Jul 2013 15:10:41 +0200
+
+libpointmatcher (1.0.2-390) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 08 Jul 2013 12:16:29 +0200
+
+libpointmatcher (1.0.2-389) unstable; urgency=low
+
+  * added parameter to force 2D minimization in the pointToPlaneErrorMinimizer
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 08 Jul 2013 12:15:25 +0200
+
+libpointmatcher (1.0.2-388) unstable; urgency=low
+
+  * add reference to journal paper
+
+ -- pomerlef <f.pomerleau@gmail.com>  Mon, 27 May 2013 18:54:34 +0200
+
+libpointmatcher (1.0.2-387) unstable; urgency=low
+
+  * correct some error in documentation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 27 Mar 2013 12:39:15 +0100
+
+libpointmatcher (1.0.2-386) unstable; urgency=low
+
+  * add expection to rigid transformation with unit test
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 26 Mar 2013 20:12:23 +0100
+
+libpointmatcher (1.0.2-385) unstable; urgency=low
+
+  * clean VTK load/save with unit test
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 26 Mar 2013 10:25:20 +0100
+
+libpointmatcher (1.0.2-384) unstable; urgency=low
+
+  * Merge commit '669186527a3a0e6783d904e3b49beb1086690ce0' into HEAD
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 26 Feb 2013 16:40:45 +0100
+
+libpointmatcher (1.0.2-383) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 22 Feb 2013 16:54:16 +0100
+
+libpointmatcher (1.0.2-382) unstable; urgency=low
+
+  * Added noise model for more sensors
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 22 Feb 2013 16:52:12 +0100
+
+libpointmatcher (1.0.2-381) unstable; urgency=low
+
+  * add descriptor doc and color to VTK files
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 18 Feb 2013 16:53:24 +0100
+
+libpointmatcher (1.0.2-380) unstable; urgency=low
+
+  * Added doc.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 01 Feb 2013 14:32:07 +0100
+
+libpointmatcher (1.0.2-379) unstable; urgency=low
+
+  * Added note about clang
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 01 Feb 2013 11:32:05 +0100
+
+libpointmatcher (1.0.2-378) unstable; urgency=low
+
+  * Include Eigen/Core not all Eigen. Bumped minor version number.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 Jan 2013 15:27:48 +0100
+
+libpointmatcher (1.0.1-377) unstable; urgency=low
+
+  * added unit test for YAML load exceptions, corrected broken tests
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 18 Jan 2013 13:18:40 +0100
+
+libpointmatcher (1.0.1-376) unstable; urgency=low
+
+  * Added exception when module types are defined but not used.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 16 Jan 2013 17:23:09 +0100
+
+libpointmatcher (1.0.1-375) unstable; urgency=low
+
+  * correct bug in max density filter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 15 Jan 2013 18:00:03 +0100
+
+libpointmatcher (1.0.1-374) unstable; urgency=low
+
+  * remove log info
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 15 Jan 2013 17:59:27 +0100
+
+libpointmatcher (1.0.1-373) unstable; urgency=low
+
+  * Remove exeption when rank is lower than dimension
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 15 Jan 2013 17:58:40 +0100
+
+libpointmatcher (1.0.1-372) unstable; urgency=low
+
+  * corrected outlier log
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 14 Jan 2013 11:35:41 +0100
+
+libpointmatcher (1.0.1-371) unstable; urgency=low
+
+  * Merge branch 'master' of git://github.com/ethz-asl/libpointmatcher into
+    HEAD
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 14 Jan 2013 11:03:59 +0100
+
+libpointmatcher (1.0.1-370) unstable; urgency=low
+
+  * add stream info for outlier
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 14 Jan 2013 11:03:26 +0100
+
+libpointmatcher (1.0.1-369) unstable; urgency=low
+
+  * correct overlap computation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 14 Jan 2013 11:02:51 +0100
+
+libpointmatcher (1.0.1-368) unstable; urgency=low
+
+  * correct overlap computation for multiple knn matches
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 11 Jan 2013 15:08:54 +0100
+
+libpointmatcher (1.0.1-367) unstable; urgency=low
+
+  * correct default.yaml
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 11 Jan 2013 11:25:12 +0100
+
+libpointmatcher (1.0.1-366) unstable; urgency=low
+
+  * Added warning when there are paremeters defined but not used by
+    modules.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 09 Jan 2013 18:35:46 +0100
+
+libpointmatcher (1.0.1-365) unstable; urgency=low
+
+  * More cleanup
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 20 Dec 2012 22:10:12 +0100
+
+libpointmatcher (1.0.1-364) unstable; urgency=low
+
+  * Merge /u/smagnenat/build/groovy/ethzasl_icp_mapping/libpointmatcher/upstream_src
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 20 Dec 2012 22:09:21 +0100
+
+libpointmatcher (1.0.1-363) unstable; urgency=low
+
+  * Cleanup
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 20 Dec 2012 22:09:16 +0100
+
+libpointmatcher (1.0.1-362) unstable; urgency=low
+
+  * Quantal fix
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 20 Dec 2012 22:08:43 +0100
+
+libpointmatcher (1.0.1-361) unstable; urgency=low
+
+  * Fixed quantal compilation error.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 20 Dec 2012 19:38:13 +0100
+
+libpointmatcher (1.0.1-360) unstable; urgency=low
+
+  * Applied OS X patch from Vincent Regis
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 13 Dec 2012 01:21:44 +0100
+
+libpointmatcher (1.0.1-359) unstable; urgency=low
+
+  * Be as restrictive as possible when instanciating templates
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 12 Dec 2012 04:25:05 +0100
+
+libpointmatcher (1.0.1-358) unstable; urgency=low
+
+  * Moved empty functions to cpp files to fix compilation on Mac
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 12 Dec 2012 00:14:46 +0100
+
+libpointmatcher (1.0.1-357) unstable; urgency=low
+
+  * Cleaned-up DataPointFilters.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 05 Dec 2012 23:26:24 +0100
+
+libpointmatcher (1.0.1-356) unstable; urgency=low
+
+  * Fixed RemoveNaNDataPointsFilter, added corresponding unit test.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 05 Dec 2012 03:10:50 +0100
+
+libpointmatcher (1.0.1-355) unstable; urgency=low
+
+  * corrected bug in DataPoint and TransChecker
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 04 Dec 2012 19:21:28 +0100
+
+libpointmatcher (1.0.1-354) unstable; urgency=low
+
+  * corrected bug in inspec, added filter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Nov 2012 16:40:17 +0100
+
+libpointmatcher (1.0.1-353) unstable; urgency=low
+
+  * Added functions to fetch a single row of a field.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 16 Nov 2012 04:25:01 +0100
+
+libpointmatcher (1.0.0-352) unstable; urgency=low
+
+  * Updated debian changes.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 12 Nov 2012 18:54:54 +0100
+
+libpointmatcher (1.0.0-351) unstable; urgency=low
+
+  * Moved compute_overlapp to examples, removed tools.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 12 Nov 2012 18:43:39 +0100
+
+libpointmatcher (1.0.0-350) unstable; urgency=low
+
+  * Fixed naming of fields in TransformationChecker.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 10 Nov 2012 01:10:06 +0100
+
+libpointmatcher (1.0.0-349) unstable; urgency=low
+
+  * Minor corrections.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 10 Nov 2012 00:45:12 +0100
+
+libpointmatcher (1.0.0-348) unstable; urgency=low
+
+  * Added general documentation from paper.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 10 Nov 2012 00:44:07 +0100
+
+libpointmatcher (1.0.0-347) unstable; urgency=low
+
+  * Also install IO.h
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 09 Nov 2012 23:14:51 +0100
+
+libpointmatcher (1.0.0-346) unstable; urgency=low
+
+  * Moved IO functions out of PointMatcher<T> into PointMatcherIO<T>
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 09 Nov 2012 23:12:25 +0100
+
+libpointmatcher (0.9.0-345) unstable; urgency=low
+
+  * Documentation update.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 09 Nov 2012 00:41:54 +0100
+
+libpointmatcher (0.9.0-344) unstable; urgency=low
+
+  * Cleaned-up TODO/FIXME.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 09 Nov 2012 00:28:48 +0100
+
+libpointmatcher (0.9.0-343) unstable; urgency=low
+
+  * Cleaned-up error elements and moved into PointMatcherSupport stuff that
+    do not depend on template parameter.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 09 Nov 2012 00:16:52 +0100
+
+libpointmatcher (0.9.0-342) unstable; urgency=low
+
+  * Added unit testing point clouds. Fixed concatenation. Added point-cloud
+    consistency check in filters.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 08 Nov 2012 23:17:06 +0100
+
+libpointmatcher (0.9.0-341) unstable; urgency=low
+
+  * Improved the performances of point-cloud concatenation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 08 Nov 2012 22:00:38 +0100
+
+libpointmatcher (0.9.0-340) unstable; urgency=low
+
+  * Added missing reference.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 08 Nov 2012 05:20:41 +0100
+
+libpointmatcher (0.9.0-339) unstable; urgency=low
+
+  * Fixed check for normal computation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 08 Nov 2012 04:16:49 +0100
+
+libpointmatcher (0.9.0-338) unstable; urgency=low
+
+  * Added some consts.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 08 Nov 2012 03:08:19 +0100
+
+libpointmatcher (0.9.0-337) unstable; urgency=low
+
+  * Optimized memory allocations for normal-creation filters.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 08 Nov 2012 03:01:59 +0100
+
+libpointmatcher (0.9.0-336) unstable; urgency=low
+
+  * Consider points of too uneven boxes as unfit.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 07 Nov 2012 04:42:32 +0100
+
+libpointmatcher (0.9.0-335) unstable; urgency=low
+
+  * Consider points of too uneven boxes as unfit.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 07 Nov 2012 04:42:23 +0100
+
+libpointmatcher (0.9.0-334) unstable; urgency=low
+
+  * Added parameters to specify max box size considered for method 1 of
+    SamplingSurfaceNormalDataPointsFilter
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 07 Nov 2012 04:29:59 +0100
+
+libpointmatcher (0.9.0-333) unstable; urgency=low
+
+  * Use conservativeResize from Eigen.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 07 Nov 2012 04:17:53 +0100
+
+libpointmatcher (0.9.0-332) unstable; urgency=low
+
+  * Fixed uninitialized descriptors in SamplingSurfaceNormalDataPointsFilter
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 07 Nov 2012 02:48:16 +0100
+
+libpointmatcher (0.9.0-331) unstable; urgency=low
+
+  * Added note on libnabo version.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 07 Nov 2012 00:55:48 +0100
+
+libpointmatcher (0.9.0-330) unstable; urgency=low
+
+  * Armored file opening and closing.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 01 Nov 2012 00:13:54 +0100
+
+libpointmatcher (0.9.0-329) unstable; urgency=low
+
+  * Added debian dependancy for ncurses.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 31 Oct 2012 23:31:22 +0100
+
+libpointmatcher (0.9.0-328) unstable; urgency=low
+
+  * Added checks for libnabo's version.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 31 Oct 2012 23:29:12 +0100
+
+libpointmatcher (0.9.0-327) unstable; urgency=low
+
+  * Use proper cmake command for gtest.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 31 Oct 2012 23:06:51 +0100
+
+libpointmatcher (0.9.0-326) unstable; urgency=low
+
+  * Use proper cmake command to find ncurses and pthread.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 31 Oct 2012 23:03:20 +0100
+
+libpointmatcher (0.9.0-325) unstable; urgency=low
+
+  * reduce the number of print on screen for default.yaml
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 31 Oct 2012 12:23:47 +0100
+
+libpointmatcher (0.9.0-324) unstable; urgency=low
+
+  * correct default yaml file
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 31 Oct 2012 11:59:05 +0100
+
+libpointmatcher (0.9.0-323) unstable; urgency=low
+
+  * remove typo
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 31 Oct 2012 11:47:40 +0100
+
+libpointmatcher (0.9.0-322) unstable; urgency=low
+
+  * remove custom transformation from icp.cpp
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 31 Oct 2012 11:40:22 +0100
+
+libpointmatcher (0.9.0-321) unstable; urgency=low
+
+  * add pthread in the linking of utest
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 31 Oct 2012 10:48:29 +0100
+
+libpointmatcher (0.9.0-320) unstable; urgency=low
+
+  * change to log result transformation instead of initial...
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 29 Oct 2012 18:40:21 +0100
+
+libpointmatcher (0.9.0-319) unstable; urgency=low
+
+  * put evaluation stuff in there own folder
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 29 Oct 2012 16:07:44 +0100
+
+libpointmatcher (0.9.0-318) unstable; urgency=low
+
+  * add download of validation and protocol files
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 29 Oct 2012 15:55:11 +0100
+
+libpointmatcher (0.9.0-317) unstable; urgency=low
+
+  * finish functionnality for testing icp
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sun, 28 Oct 2012 00:58:06 +0200
+
+libpointmatcher (0.9.0-316) unstable; urgency=low
+
+  * add multi thread to evalutions
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sat, 27 Oct 2012 18:35:17 +0200
+
+libpointmatcher (0.9.0-315) unstable; urgency=low
+
+  * Some English correction.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 27 Oct 2012 02:06:36 +0200
+
+libpointmatcher (0.9.0-314) unstable; urgency=low
+
+  * Doxygen does not generate any warning anymore, yeeaaa.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 27 Oct 2012 01:46:27 +0200
+
+libpointmatcher (0.9.0-313) unstable; urgency=low
+
+  * Updated Doxyfile to track refactoring.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 27 Oct 2012 00:47:34 +0200
+
+libpointmatcher (0.9.0-312) unstable; urgency=low
+
+  * Updated (c) to 2012
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 27 Oct 2012 00:40:41 +0200
+
+libpointmatcher (0.9.0-311) unstable; urgency=low
+
+  * Merged with Francois.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 27 Oct 2012 00:25:03 +0200
+
+libpointmatcher (0.9.0-310) unstable; urgency=low
+
+  * Splitted content of Core.cpp into multiple files with clearly-defined purprose.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sat, 27 Oct 2012 00:20:05 +0200
+
+libpointmatcher (0.9.0-309) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sat, 27 Oct 2012 00:14:38 +0200
+
+libpointmatcher (0.9.0-308) unstable; urgency=low
+
+  * adding a new evaluation application
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sat, 27 Oct 2012 00:14:31 +0200
+
+libpointmatcher (0.9.0-307) unstable; urgency=low
+
+  * Updated programs to the new API.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 26 Oct 2012 23:31:39 +0200
+
+libpointmatcher (0.9.0-306) unstable; urgency=low
+
+  * Added more documentation. Cleaned-up API of matcher: findClosest() does
+    not take reference any more, as it is passed in init() (was not used
+    anyway).
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 26 Oct 2012 23:30:55 +0200
+
+libpointmatcher (0.9.0-305) unstable; urgency=low
+
+  * Improved documentation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 26 Oct 2012 04:18:33 +0200
+
+libpointmatcher (0.9.0-304) unstable; urgency=low
+
+  * Removed HOWTO.txt as the same information is available in the doxygen
+    file.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 26 Oct 2012 02:36:00 +0200
+
+libpointmatcher (0.9.0-303) unstable; urgency=low
+
+  * Updated documentation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 26 Oct 2012 02:34:57 +0200
+
+libpointmatcher (0.9.0-302) unstable; urgency=low
+
+  * Added option to list latex table summarizing modules.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 25 Oct 2012 02:09:33 +0200
+
+libpointmatcher (0.9.0-301) unstable; urgency=low
+
+  * Removed info duplicated in InputFilters.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 09 Oct 2012 22:51:39 +0200
+
+libpointmatcher (0.9.0-300) unstable; urgency=low
+
+  * Prettified output.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 09 Oct 2012 22:43:54 +0200
+
+libpointmatcher (0.9.0-299) unstable; urgency=low
+
+  * Prettyfied filters output
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 09 Oct 2012 22:30:57 +0200
+
+libpointmatcher (0.9.0-298) unstable; urgency=low
+
+  * Made information about point filtering more generic
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 09 Oct 2012 21:58:05 +0200
+
+libpointmatcher (0.9.0-297) unstable; urgency=low
+
+  * Do not crash if sensor noise is not present.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 09 Oct 2012 04:22:08 +0200
+
+libpointmatcher (0.9.0-296) unstable; urgency=low
+
+  * Fixed getMap(), added getInternalMap().
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 09 Oct 2012 00:39:25 +0200
+
+libpointmatcher (0.9.0-295) unstable; urgency=low
+
+  * Implemented getMap() function.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 08 Oct 2012 23:59:14 +0200
+
+libpointmatcher (0.9.0-294) unstable; urgency=low
+
+  * Added function to clear the map in ICPSequence.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 08 Oct 2012 23:52:23 +0200
+
+libpointmatcher (0.9.0-293) unstable; urgency=low
+
+  * Cleaned-up ICPSequence, factored common code with ICP.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 08 Oct 2012 23:32:14 +0200
+
+libpointmatcher (0.9.0-292) unstable; urgency=low
+
+  * Added generic save function.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 04 Oct 2012 23:06:05 +0200
+
+libpointmatcher (0.9.0-291) unstable; urgency=low
+
+  * Fixed bug in the csv parser when generating the feature labels.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 11 Sep 2012 12:17:16 +0200
+
+libpointmatcher (0.9.0-290) unstable; urgency=low
+
+  * Fixed channel name
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 06 Jul 2012 14:00:56 +0200
+
+libpointmatcher (0.9.0-289) unstable; urgency=low
+
+  * Added optional initial transformation to ICP sequence.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 02 Jul 2012 16:15:39 +0200
+
+libpointmatcher (0.9.0-288) unstable; urgency=low
+
+  * Added filter for sampling clouds if the number of points is above a
+    threshold.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 02 Jul 2012 15:13:41 +0200
+
+libpointmatcher (0.9.0-287) unstable; urgency=low
+
+  * Fixed bug in view getters.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 18 Jun 2012 18:23:53 +0200
+
+libpointmatcher (0.9.0-286) unstable; urgency=low
+
+  * Added static instances of PointMatcher and getter for them.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 08 Jun 2012 12:01:10 +0200
+
+libpointmatcher (0.9.0-285) unstable; urgency=low
+
+  * Added NaN-removal filter.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 07 Jun 2012 15:10:15 +0200
+
+libpointmatcher (0.9.0-284) unstable; urgency=low
+
+  * Fixed bug
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 07 Jun 2012 09:43:46 +0200
+
+libpointmatcher (0.9.0-283) unstable; urgency=low
+
+  * Fixed bug
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 07 Jun 2012 09:42:11 +0200
+
+libpointmatcher (0.9.0-282) unstable; urgency=low
+
+  * Cleaned-up feature and descriptor API and implementation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 06 Jun 2012 19:34:00 +0200
+
+libpointmatcher (0.9.0-281) unstable; urgency=low
+
+  * Fixed bug.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 19:04:29 +0200
+
+libpointmatcher (0.9.0-280) unstable; urgency=low
+
+  * Added example in help.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 18:53:22 +0200
+
+libpointmatcher (0.9.0-279) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 18:49:57 +0200
+
+libpointmatcher (0.9.0-278) unstable; urgency=low
+
+  * Working on yaml-based filter.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 18:49:53 +0200
+
+libpointmatcher (0.9.0-277) unstable; urgency=low
+
+  * Working on yaml-based filter.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 18:49:42 +0200
+
+libpointmatcher (0.9.0-276) unstable; urgency=low
+
+  * change old density filter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 31 May 2012 18:49:04 +0200
+
+libpointmatcher (0.9.0-275) unstable; urgency=low
+
+  * correct header
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 31 May 2012 18:35:19 +0200
+
+libpointmatcher (0.9.0-274) unstable; urgency=low
+
+  * add list for sequence
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 31 May 2012 18:34:39 +0200
+
+libpointmatcher (0.9.0-273) unstable; urgency=low
+
+  * Added YAML for filters.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 18:15:10 +0200
+
+libpointmatcher (0.9.0-272) unstable; urgency=low
+
+  * Fixed bug in inspector due to new api.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 17:50:50 +0200
+
+libpointmatcher (0.9.0-271) unstable; urgency=low
+
+  * Added missing dump.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 17:46:16 +0200
+
+libpointmatcher (0.9.0-270) unstable; urgency=low
+
+  * Fixed bugs.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 17:32:54 +0200
+
+libpointmatcher (0.9.0-269) unstable; urgency=low
+
+  * Fixes.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 17:24:43 +0200
+
+libpointmatcher (0.9.0-268) unstable; urgency=low
+
+  * Fixed bug.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 16:56:32 +0200
+
+libpointmatcher (0.9.0-267) unstable; urgency=low
+
+  * Unified transformation for descriptors and features.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 16:36:59 +0200
+
+libpointmatcher (0.9.0-266) unstable; urgency=low
+
+  * added observation directions.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 16:11:23 +0200
+
+libpointmatcher (0.9.0-265) unstable; urgency=low
+
+  * Added allocation of descriptors, optimized some filters thanks to
+    it.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 15:51:45 +0200
+
+libpointmatcher (0.9.0-264) unstable; urgency=low
+
+  * Fixed merge and adapted code.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 15:01:19 +0200
+
+libpointmatcher (0.9.0-263) unstable; urgency=low
+
+  * First draft of view for descriptors.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 31 May 2012 14:52:33 +0200
+
+libpointmatcher (0.9.0-262) unstable; urgency=low
+
+  * reclean convertCSVtoVTK
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 31 May 2012 11:15:14 +0200
+
+libpointmatcher (0.9.0-261) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 31 May 2012 11:09:46 +0200
+
+libpointmatcher (0.9.0-260) unstable; urgency=low
+
+  * add new datapoint filter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 31 May 2012 11:09:33 +0200
+
+libpointmatcher (0.9.0-259) unstable; urgency=low
+
+  * Transformed FeatureOutlierFilter into OutlierFilter.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 25 May 2012 16:05:04 +0200
+
+libpointmatcher (0.9.0-258) unstable; urgency=low
+
+  * add new ploting tools
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 26 Apr 2012 10:58:29 +0200
+
+libpointmatcher (0.9.0-257) unstable; urgency=low
+
+  * small modif on output file names
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 17 Apr 2012 13:39:25 +0200
+
+libpointmatcher (0.9.0-256) unstable; urgency=low
+
+  * add standard starting poses
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 17 Apr 2012 10:51:01 +0200
+
+libpointmatcher (0.9.0-255) unstable; urgency=low
+
+  * change example from ./example to ./tools
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 17 Apr 2012 10:35:07 +0200
+
+libpointmatcher (0.9.0-254) unstable; urgency=low
+
+  * a tool kit for experiment on dataset
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 17 Apr 2012 10:29:40 +0200
+
+libpointmatcher (0.9.0-253) unstable; urgency=low
+
+  * finish main base for the tests
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sun, 15 Apr 2012 17:30:07 +0200
+
+libpointmatcher (0.9.0-252) unstable; urgency=low
+
+  * Added config path.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 17:46:56 +0200
+
+libpointmatcher (0.9.0-251) unstable; urgency=low
+
+  * Fixed PerformanceInspector
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 17:18:06 +0200
+
+libpointmatcher (0.9.0-250) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 17:04:41 +0200
+
+libpointmatcher (0.9.0-249) unstable; urgency=low
+
+  * add icp computation to evaluate_dataset
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 13 Apr 2012 16:57:32 +0200
+
+libpointmatcher (0.9.0-248) unstable; urgency=low
+
+  * Allow parent path to be specified.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 15:50:17 +0200
+
+libpointmatcher (0.9.0-247) unstable; urgency=low
+
+  * add new executable to test datasets
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 13 Apr 2012 15:36:43 +0200
+
+libpointmatcher (0.9.0-246) unstable; urgency=low
+
+  * Add number of elements in vector to stats.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 15:20:37 +0200
+
+libpointmatcher (0.9.0-245) unstable; urgency=low
+
+  * Added perf. stats to normal ICP in addition to ICPSequence.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 15:18:29 +0200
+
+libpointmatcher (0.9.0-244) unstable; urgency=low
+
+  * Added header to stats.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 14:49:10 +0200
+
+libpointmatcher (0.9.0-243) unstable; urgency=low
+
+  * Added support for new fields in FileInfo.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 14:23:56 +0200
+
+libpointmatcher (0.9.0-242) unstable; urgency=low
+
+  * Refactored FileInfo.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 13 Apr 2012 13:57:59 +0200
+
+libpointmatcher (0.9.0-241) unstable; urgency=low
+
+  * clean transformation implementation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 03 Apr 2012 13:46:00 +0200
+
+libpointmatcher (0.9.0-240) unstable; urgency=low
+
+  * add getOverlap method
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Mar 2012 18:40:42 +0100
+
+libpointmatcher (0.9.0-239) unstable; urgency=low
+
+  * Merge branch 'master' of git://github.com/ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Mar 2012 14:06:09 +0100
+
+libpointmatcher (0.9.0-238) unstable; urgency=low
+
+  * add VTK file to dump groupId for clustering algorims and a simple sensor
+    noise filter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Mar 2012 14:06:04 +0100
+
+libpointmatcher (0.9.0-237) unstable; urgency=low
+
+  * Fixed compilation on Ubuntu 11.10
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Sun, 18 Mar 2012 11:08:52 +0100
+
+libpointmatcher (0.9.0-236) unstable; urgency=low
+
+  * add vtk outputs for obstacles and inclination fields
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 13 Mar 2012 12:54:40 +0100
+
+libpointmatcher (0.9.0-235) unstable; urgency=low
+
+  * fix bug with outlier
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 24 Feb 2012 10:33:46 +0100
+
+libpointmatcher (0.9.0-234) unstable; urgency=low
+
+  * add concatenate to DataPoint structure
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 14 Feb 2012 14:31:24 +0100
+
+libpointmatcher (0.9.0-233) unstable; urgency=low
+
+  * add build_map exe
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 19 Jan 2012 14:27:46 +0100
+
+libpointmatcher (0.9.0-232) unstable; urgency=low
+
+  * add outilier filter based on surface normal angle
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 19 Dec 2011 14:09:52 +0100
+
+libpointmatcher (0.9.0-231) unstable; urgency=low
+
+  * resolve conflict
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 12 Dec 2011 18:56:36 +0100
+
+libpointmatcher (0.9.0-230) unstable; urgency=low
+
+  * add the possibility to load a csv file containing a list of path to
+    process
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 12 Dec 2011 18:48:38 +0100
+
+libpointmatcher (0.9.0-229) unstable; urgency=low
+
+  * Fixed compilation
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 09 Dec 2011 18:27:23 +0100
+
+libpointmatcher (0.9.0-228) unstable; urgency=low
+
+  * Fixed conflict.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 09 Dec 2011 18:23:56 +0100
+
+libpointmatcher (0.9.0-227) unstable; urgency=low
+
+  * Cleaned-up source tree, written a significative bunch of documentation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 09 Dec 2011 18:21:04 +0100
+
+libpointmatcher (0.9.0-226) unstable; urgency=low
+
+  * correct UniformDensityFilter and modify SamplingSurfaceNormal
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 05 Dec 2011 18:56:06 +0100
+
+libpointmatcher (0.9.0-225) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 30 Nov 2011 17:26:09 +0100
+
+libpointmatcher (0.9.0-224) unstable; urgency=low
+
+  * add shadow filter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 30 Nov 2011 17:25:50 +0100
+
+libpointmatcher (0.9.0-223) unstable; urgency=low
+
+  * Improved documentation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 30 Nov 2011 13:56:55 +0100
+
+libpointmatcher (0.9.0-222) unstable; urgency=low
+
+  * Removed useless file prefix.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 11 Nov 2011 12:06:05 +0100
+
+libpointmatcher (0.9.0-221) unstable; urgency=low
+
+  * Fixed doc.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 10 Nov 2011 11:28:40 +0100
+
+libpointmatcher (0.9.0-220) unstable; urgency=low
+
+  * Fixed missing boost dependencies.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 09 Nov 2011 20:12:10 +0100
+
+libpointmatcher (0.9.0-219) unstable; urgency=low
+
+  * Fixed some litian reports.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 09 Nov 2011 19:45:11 +0100
+
+libpointmatcher (0.9.0-218) unstable; urgency=low
+
+  * Fixed some litian reports.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 09 Nov 2011 19:38:09 +0100
+
+libpointmatcher (0.9.0-217) unstable; urgency=low
+
+  * Added rules to make binary.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 09 Nov 2011 19:28:36 +0100
+
+libpointmatcher (0.9.0-216) unstable; urgency=low
+
+  * Changed dep of yaml.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 09 Nov 2011 19:04:17 +0100
+
+libpointmatcher (0.9.0-215) unstable; urgency=low
+
+  * Finished API change for const ref for string.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 04 Nov 2011 14:13:05 +0100
+
+libpointmatcher (0.9.0-214) unstable; urgency=low
+
+  * Changed stat system, passing stat name as parameter. Began changing
+    the API towards const ref for std::string.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 04 Nov 2011 14:09:27 +0100
+
+libpointmatcher (0.9.0-213) unstable; urgency=low
+
+  * Really resolved conflict
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 04 Nov 2011 12:01:48 +0100
+
+libpointmatcher (0.9.0-212) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 04 Nov 2011 11:50:04 +0100
+
+libpointmatcher (0.9.0-211) unstable; urgency=low
+
+  * Added back Histogram.h to install
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 04 Nov 2011 11:49:59 +0100
+
+libpointmatcher (0.9.0-210) unstable; urgency=low
+
+  * Resolve conflic
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 04 Nov 2011 11:21:30 +0100
+
+libpointmatcher (0.9.0-209) unstable; urgency=low
+
+  * Remove dim from ICP_sequence
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 04 Nov 2011 11:20:07 +0100
+
+libpointmatcher (0.9.0-208) unstable; urgency=low
+
+  * Moved perf stat into PerformanceInspector.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 03 Nov 2011 17:57:49 +0100
+
+libpointmatcher (0.9.0-207) unstable; urgency=low
+
+  * Moved private things to PointMatcherPrivate.h
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 03 Nov 2011 17:33:30 +0100
+
+libpointmatcher (0.9.0-206) unstable; urgency=low
+
+  * Fixed memory bug
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 03 Nov 2011 16:05:28 +0100
+
+libpointmatcher (0.9.0-205) unstable; urgency=low
+
+  * Install timer header as well.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 27 Oct 2011 09:45:40 +0200
+
+libpointmatcher (0.9.0-204) unstable; urgency=low
+
+  * Moved #include of Timer.h to Core.h, fixing compilation from installed
+    libpointmatcher.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 27 Oct 2011 09:37:16 +0200
+
+libpointmatcher (0.9.0-203) unstable; urgency=low
+
+  * Fixed compilation on oneiric.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 26 Oct 2011 21:28:24 +0200
+
+libpointmatcher (0.9.0-202) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 26 Oct 2011 09:59:01 +0200
+
+libpointmatcher (0.9.0-201) unstable; urgency=low
+
+  * Added dep to yaml-cpp
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 26 Oct 2011 09:58:46 +0200
+
+libpointmatcher (0.9.0-200) unstable; urgency=low
+
+  * finished test in 3D
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 25 Oct 2011 17:10:08 +0200
+
+libpointmatcher (0.9.0-199) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 25 Oct 2011 17:07:23 +0200
+
+libpointmatcher (0.9.0-198) unstable; urgency=low
+
+  * Added compat file.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 16:04:01 +0200
+
+libpointmatcher (0.9.0-197) unstable; urgency=low
+
+  * Added missing format file.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 15:59:00 +0200
+
+libpointmatcher (0.9.0-196) unstable; urgency=low
+
+  * Fixed buggy library list
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 15:27:05 +0200
+
+libpointmatcher (0.9.0-195) unstable; urgency=low
+
+  * Fixed lib name
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 15:14:14 +0200
+
+libpointmatcher (0.9.0-194) unstable; urgency=low
+
+  * Added empty changelog.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 15:02:04 +0200
+
+libpointmatcher (0.9.0-193) unstable; urgency=low
+
+  * Added TODO/FIXME notes.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 15:00:15 +0200
+
+libpointmatcher (0.9.0-192) unstable; urgency=low
+
+  * Added debian package.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 15:00:02 +0200
+
+libpointmatcher (0.9.0-191) unstable; urgency=low
+
+  * Fixed doc.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 12:20:43 +0200
+
+libpointmatcher (0.9.0-190) unstable; urgency=low
+
+  * Changed name of ICP
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 12:19:57 +0200
+
+libpointmatcher (0.9.0-189) unstable; urgency=low
+
+  * Added option to ICP to list modules
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 12:12:21 +0200
+
+libpointmatcher (0.9.0-188) unstable; urgency=low
+
+  * Moved all bibliography-related code into Bibliography.* in main
+    lib.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 11:56:49 +0200
+
+libpointmatcher (0.9.0-187) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 21 Oct 2011 10:57:39 +0200
+
+libpointmatcher (0.9.0-186) unstable; urgency=low
+
+  * fix compilation on oeniric
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 21 Oct 2011 10:57:33 +0200
+
+libpointmatcher (0.9.0-185) unstable; urgency=low
+
+  * Cleaned-up makefiles for tests and examples, added make test.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 21 Oct 2011 10:17:08 +0200
+
+libpointmatcher (0.1-184) unstable; urgency=low
+
+  * refactorize the test, now shorter code to test
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 20 Oct 2011 20:47:12 +0200
+
+libpointmatcher (0.1-183) unstable; urgency=low
+
+  * add references in the documentation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 20 Oct 2011 15:38:42 +0200
+
+libpointmatcher (0.1-182) unstable; urgency=low
+
+  * Finish Transformation checker unit test
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 20 Oct 2011 12:40:05 +0200
+
+libpointmatcher (0.1-181) unstable; urgency=low
+
+  * Finish test for OutlierFilters
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 20 Oct 2011 11:53:02 +0200
+
+libpointmatcher (0.1-180) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 19 Oct 2011 21:01:44 +0200
+
+libpointmatcher (0.1-179) unstable; urgency=low
+
+  * Tracking libnabo's lib naming.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 19 Oct 2011 21:01:34 +0200
+
+libpointmatcher (0.1-178) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 19 Oct 2011 18:02:33 +0200
+
+libpointmatcher (0.1-177) unstable; urgency=low
+
+  * finish test for error minimization and correct Point-to-point
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 19 Oct 2011 17:58:30 +0200
+
+libpointmatcher (0.1-176) unstable; urgency=low
+
+  * Use new libnabo's name.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 19 Oct 2011 17:38:09 +0200
+
+libpointmatcher (0.1-175) unstable; urgency=low
+
+  * trace for gcc segfault
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 17 Oct 2011 18:57:51 +0200
+
+libpointmatcher (0.1-174) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 17 Oct 2011 18:11:54 +0200
+
+libpointmatcher (0.1-173) unstable; urgency=low
+
+  * add multiple match for error minimazation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 17 Oct 2011 18:11:47 +0200
+
+libpointmatcher (0.1-172) unstable; urgency=low
+
+  * Cleaned-up pointmatcher's header.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 17 Oct 2011 18:04:59 +0200
+
+libpointmatcher (0.1-171) unstable; urgency=low
+
+  * Cleaned-up histograms.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 17 Oct 2011 18:01:07 +0200
+
+libpointmatcher (0.1-170) unstable; urgency=low
+
+  * Added missing file.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 17 Oct 2011 17:49:31 +0200
+
+libpointmatcher (0.1-169) unstable; urgency=low
+
+  * Cleaned-up timer library.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 17 Oct 2011 17:48:57 +0200
+
+libpointmatcher (0.1-168) unstable; urgency=low
+
+  * Renammed Core.h to PointMatcher.h, removed TypeAliases.h
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 17 Oct 2011 17:31:35 +0200
+
+libpointmatcher (0.1-167) unstable; urgency=low
+
+  * change help string in utest
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 17 Oct 2011 13:51:51 +0200
+
+libpointmatcher (0.1-166) unstable; urgency=low
+
+  * resolve uninitialize variable in UniformDataFilter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 17 Oct 2011 13:49:51 +0200
+
+libpointmatcher (0.1-165) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 17 Oct 2011 12:01:08 +0200
+
+libpointmatcher (0.1-164) unstable; urgency=low
+
+  * Made logger global.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 17 Oct 2011 12:01:04 +0200
+
+libpointmatcher (0.1-163) unstable; urgency=low
+
+  * Finish modif in FixStepDataFilter, bug with logger in constructor
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 17 Oct 2011 11:31:24 +0200
+
+libpointmatcher (0.1-162) unstable; urgency=low
+
+  * Finish unit test for datafilter and change parameter for fixStepSampling
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 17 Oct 2011 10:47:16 +0200
+
+libpointmatcher (0.1-161) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 14 Oct 2011 17:39:35 +0200
+
+libpointmatcher (0.1-160) unstable; urgency=low
+
+  * utest require path for examples now
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 14 Oct 2011 17:39:12 +0200
+
+libpointmatcher (0.1-159) unstable; urgency=low
+
+  * Added bibtex mode.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 14 Oct 2011 17:19:36 +0200
+
+libpointmatcher (0.1-158) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 14 Oct 2011 16:32:02 +0200
+
+libpointmatcher (0.1-157) unstable; urgency=low
+
+  * change orientNormalDatafilter to take argument for orientation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 14 Oct 2011 16:31:53 +0200
+
+libpointmatcher (0.1-156) unstable; urgency=low
+
+  * Added automatic bibliography support.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 14 Oct 2011 16:29:26 +0200
+
+libpointmatcher (0.1-155) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 14 Oct 2011 12:19:58 +0200
+
+libpointmatcher (0.1-154) unstable; urgency=low
+
+  * continiuing unit test
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 14 Oct 2011 12:19:52 +0200
+
+libpointmatcher (0.1-153) unstable; urgency=low
+
+  * Moved IO operations into PointMatcher<T> struct.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 14 Oct 2011 12:14:31 +0200
+
+libpointmatcher (0.1-152) unstable; urgency=low
+
+  * utest for MaxdistDataFilter on 2D
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 13 Oct 2011 18:27:08 +0200
+
+libpointmatcher (0.1-151) unstable; urgency=low
+
+  * buggy utest with optimization
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 13 Oct 2011 15:06:08 +0200
+
+libpointmatcher (0.1-150) unstable; urgency=low
+
+  * add first utest in 2D
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 13 Oct 2011 12:21:44 +0200
+
+libpointmatcher (0.1-149) unstable; urgency=low
+
+  * Moved implementations of modules into their own private .h files.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 12 Oct 2011 16:18:39 +0200
+
+libpointmatcher (0.1-148) unstable; urgency=low
+
+  * Removed/cleaned up todo/fixme.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 11 Oct 2011 17:09:06 +0200
+
+libpointmatcher (0.1-147) unstable; urgency=low
+
+  * Remove sandbox
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 11 Oct 2011 16:06:21 +0200
+
+libpointmatcher (0.1-146) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 11 Oct 2011 16:02:07 +0200
+
+libpointmatcher (0.1-145) unstable; urgency=low
+
+  * Remove iterate flag from all modules except transformationCheckers
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 11 Oct 2011 16:01:59 +0200
+
+libpointmatcher (0.1-144) unstable; urgency=low
+
+  * Renamed TransformDescriptors to TransformNormals and set default behaviour
+    for these transformations (not affected by settings).
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 11 Oct 2011 16:00:03 +0200
+
+libpointmatcher (0.1-143) unstable; urgency=low
+
+  * remove debug comments
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 10 Oct 2011 10:05:05 +0200
+
+libpointmatcher (0.1-142) unstable; urgency=low
+
+  * change cmake to link to boost thread
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 07 Oct 2011 17:56:17 +0200
+
+libpointmatcher (0.1-141) unstable; urgency=low
+
+  * Extended ability of logger.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 06 Oct 2011 17:13:38 +0200
+
+libpointmatcher (0.1-140) unstable; urgency=low
+
+  * Added file/line/func info to logging.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 06 Oct 2011 15:54:07 +0200
+
+libpointmatcher (0.1-139) unstable; urgency=low
+
+  * clean some TODO
+
+ -- pomerlef <f.pomerleau@gmail.com>  Thu, 06 Oct 2011 11:12:26 +0200
+
+libpointmatcher (0.1-138) unstable; urgency=low
+
+  * Added inline keyword to functions returning documentation and parameter
+    descriptions
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 04 Oct 2011 09:47:32 +0200
+
+libpointmatcher (0.1-137) unstable; urgency=low
+
+  * Added link to publication in readme.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 26 Sep 2011 15:32:39 +0200
+
+libpointmatcher (0.1-136) unstable; urgency=low
+
+  * Restaured default file to default.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 26 Sep 2011 15:29:28 +0200
+
+libpointmatcher (0.1-135) unstable; urgency=low
+
+  * Fixed thread-local storage bug.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 26 Sep 2011 15:17:22 +0200
+
+libpointmatcher (0.1-134) unstable; urgency=low
+
+  * Fixed bug introduced by recent merges.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 26 Sep 2011 15:10:05 +0200
+
+libpointmatcher (0.1-133) unstable; urgency=low
+
+  * finish testing icp_sequence
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sat, 24 Sep 2011 23:00:27 +0200
+
+libpointmatcher (0.1-132) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Sep 2011 19:38:38 +0200
+
+libpointmatcher (0.1-131) unstable; urgency=low
+
+  * untested transformation frame correction
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Sep 2011 19:38:32 +0200
+
+libpointmatcher (0.1-130) unstable; urgency=low
+
+  * Added roswiki output.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 17:53:29 +0200
+
+libpointmatcher (0.1-129) unstable; urgency=low
+
+  * Balanced doc.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 17:11:35 +0200
+
+libpointmatcher (0.1-128) unstable; urgency=low
+
+  * Test markdown local link - failure.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 17:10:56 +0200
+
+libpointmatcher (0.1-127) unstable; urgency=low
+
+  * Test markdown local link.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 17:10:11 +0200
+
+libpointmatcher (0.1-126) unstable; urgency=low
+
+  * Improved documentation.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 17:08:39 +0200
+
+libpointmatcher (0.1-125) unstable; urgency=low
+
+  * Fixed link in readme.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 17:00:13 +0200
+
+libpointmatcher (0.1-124) unstable; urgency=low
+
+  * Updated roadmap and doc.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 16:58:14 +0200
+
+libpointmatcher (0.1-123) unstable; urgency=low
+
+  * Renammed and simplified icp_simple.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 16:22:29 +0200
+
+libpointmatcher (0.1-122) unstable; urgency=low
+
+  * Fixed bug in FileLogger.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 16:18:35 +0200
+
+libpointmatcher (0.1-121) unstable; urgency=low
+
+  * Fixed default output name in ICP program. Check whether file logger
+    was able to open files
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 15:50:13 +0200
+
+libpointmatcher (0.1-120) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Sep 2011 15:45:51 +0200
+
+libpointmatcher (0.1-119) unstable; urgency=low
+
+  * Added logger to YAML config loader.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 15:45:22 +0200
+
+libpointmatcher (0.1-118) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Sep 2011 15:30:43 +0200
+
+libpointmatcher (0.1-117) unstable; urgency=low
+
+  * on going modif for transformation change
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Sep 2011 15:30:37 +0200
+
+libpointmatcher (0.1-116) unstable; urgency=low
+
+  * Added yaml command-line option to control ICP.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 15:24:02 +0200
+
+libpointmatcher (0.1-115) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 13:46:57 +0200
+
+libpointmatcher (0.1-114) unstable; urgency=low
+
+  * Added test yaml file.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 13:46:51 +0200
+
+libpointmatcher (0.1-113) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Sep 2011 13:32:43 +0200
+
+libpointmatcher (0.1-112) unstable; urgency=low
+
+  * change doc for icp help
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Sep 2011 13:32:28 +0200
+
+libpointmatcher (0.1-111) unstable; urgency=low
+
+  * Added YAML input to library, not tested yet.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 12:14:05 +0200
+
+libpointmatcher (0.1-110) unstable; urgency=low
+
+  * Fixed CMakeLists.txt.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 11:16:32 +0200
+
+libpointmatcher (0.1-109) unstable; urgency=low
+
+  * Naming class by hand for parametrized objects.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 11:12:20 +0200
+
+libpointmatcher (0.1-108) unstable; urgency=low
+
+  * correction of call without parameter bound
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 23 Sep 2011 10:59:47 +0200
+
+libpointmatcher (0.1-107) unstable; urgency=low
+
+  * Improved boost::lexical_cast for inf and nan
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 10:37:48 +0200
+
+libpointmatcher (0.1-106) unstable; urgency=low
+
+  * Fixed buggy parameter name.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 09:35:02 +0200
+
+libpointmatcher (0.1-105) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 09:26:44 +0200
+
+libpointmatcher (0.1-104) unstable; urgency=low
+
+  * Fixed format of boost::format
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 23 Sep 2011 09:26:35 +0200
+
+libpointmatcher (0.1-103) unstable; urgency=low
+
+  * correct sandbox_icp
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 22 Sep 2011 19:14:07 +0200
+
+libpointmatcher (0.1-102) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 22 Sep 2011 18:30:02 +0200
+
+libpointmatcher (0.1-101) unstable; urgency=low
+
+  * make the documentation lighter to write
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 22 Sep 2011 18:29:54 +0200
+
+libpointmatcher (0.1-100) unstable; urgency=low
+
+  * Added logging infrastructure.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 22 Sep 2011 18:20:18 +0200
+
+libpointmatcher (0.1-99) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 22 Sep 2011 17:22:18 +0200
+
+libpointmatcher (0.1-98) unstable; urgency=low
+
+  * correct parameter list doc
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 22 Sep 2011 17:22:05 +0200
+
+libpointmatcher (0.1-97) unstable; urgency=low
+
+  * Moved SharedPtrVector out of PointMatcher<T>
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 22 Sep 2011 17:16:46 +0200
+
+libpointmatcher (0.1-96) unstable; urgency=low
+
+  * Added missng &
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 22 Sep 2011 16:44:50 +0200
+
+libpointmatcher (0.1-95) unstable; urgency=low
+
+  * merged
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 22 Sep 2011 16:38:18 +0200
+
+libpointmatcher (0.1-94) unstable; urgency=low
+
+  * More worked-around gcc bug 9050 ;-(
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 22 Sep 2011 16:32:51 +0200
+
+libpointmatcher (0.1-93) unstable; urgency=low
+
+  * Worked-around gcc bug 9050 ;-(
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 22 Sep 2011 16:24:29 +0200
+
+libpointmatcher (0.1-92) unstable; urgency=low
+
+  * Removed dim from icp_sequence
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 22 Sep 2011 14:40:15 +0200
+
+libpointmatcher (0.1-91) unstable; urgency=low
+
+  * Now use shared_ptr for holding modules.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 22 Sep 2011 11:25:30 +0200
+
+libpointmatcher (0.1-90) unstable; urgency=low
+
+  * Improved API of registry. Minor clean-up. Updated roadmap.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 22 Sep 2011 10:43:37 +0200
+
+libpointmatcher (0.1-89) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 22 Sep 2011 08:54:25 +0200
+
+libpointmatcher (0.1-88) unstable; urgency=low
+
+  * Edited roadmap to represent changes.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 22 Sep 2011 08:54:20 +0200
+
+libpointmatcher (0.1-87) unstable; urgency=low
+
+  * All modules now use the new parameter system.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 21 Sep 2011 18:12:45 +0200
+
+libpointmatcher (0.1-86) unstable; urgency=low
+
+  * DataPointsFilters now uses the new param mechanism.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 20 Sep 2011 18:33:47 +0200
+
+libpointmatcher (0.1-85) unstable; urgency=low
+
+  * one todo resoled
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 20 Sep 2011 18:25:01 +0200
+
+libpointmatcher (0.1-84) unstable; urgency=low
+
+  * add TODOs founded in the code
+
+ -- pomerlef <f.pomerleau@gmail.com>  Tue, 20 Sep 2011 15:27:02 +0200
+
+libpointmatcher (0.1-83) unstable; urgency=low
+
+  * test on uniformDensityFilter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Tue, 20 Sep 2011 15:12:03 +0200
+
+libpointmatcher (0.1-82) unstable; urgency=low
+
+  * Moved Parametrizable to support namespace.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 20 Sep 2011 10:38:49 +0200
+
+libpointmatcher (0.1-81) unstable; urgency=low
+
+  * Added PointMatcherSupport namespace for stuff not in PointMatcher<T>.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 20 Sep 2011 10:20:30 +0200
+
+libpointmatcher (0.1-80) unstable; urgency=low
+
+  * Added parameter mechanism, using C++0x for nice construction. Mechanism
+    is working but not yet applied.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 19 Sep 2011 18:03:26 +0200
+
+libpointmatcher (0.1-79) unstable; urgency=low
+
+  * Renammed MetricSpaceAligner to the more user-friendl PointMatcher.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 19 Sep 2011 15:37:13 +0200
+
+libpointmatcher (0.1-78) unstable; urgency=low
+
+  * Use consistent naming for files.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 19 Sep 2011 15:29:46 +0200
+
+libpointmatcher (0.1-77) unstable; urgency=low
+
+  * Distributed prototypes of instance of operations to respective header
+    files.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 19 Sep 2011 15:25:06 +0200
+
+libpointmatcher (0.1-76) unstable; urgency=low
+
+  * assignation before IROS presentation
+
+ -- pomerlef <f.pomerleau@gmail.com>  Mon, 19 Sep 2011 11:09:28 +0200
+
+libpointmatcher (0.1-75) unstable; urgency=low
+
+  * Add todo for yaml files
+
+ -- pomerlef <f.pomerleau@gmail.com>  Mon, 22 Aug 2011 22:06:54 +0200
+
+libpointmatcher (0.1-74) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 18 Aug 2011 11:17:35 +0200
+
+libpointmatcher (0.1-73) unstable; urgency=low
+
+  * add uniforme density data filter
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 18 Aug 2011 11:17:06 +0200
+
+libpointmatcher (0.1-72) unstable; urgency=low
+
+  * Removed INSTALL.txt as README.md was reworked.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 15 Aug 2011 17:29:55 +0200
+
+libpointmatcher (0.1-71) unstable; urgency=low
+
+  * Fixed README.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 15 Aug 2011 17:08:26 +0200
+
+libpointmatcher (0.1-70) unstable; urgency=low
+
+  * Fixed README.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 15 Aug 2011 17:06:41 +0200
+
+libpointmatcher (0.1-69) unstable; urgency=low
+
+  * Fixed detection of library.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 15 Aug 2011 17:04:52 +0200
+
+libpointmatcher (0.1-68) unstable; urgency=low
+
+  * Updated README.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 15 Aug 2011 16:57:12 +0200
+
+libpointmatcher (0.1-67) unstable; urgency=low
+
+  * Updated README.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 15 Aug 2011 16:56:38 +0200
+
+libpointmatcher (0.1-66) unstable; urgency=low
+
+  * Updated README.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 15 Aug 2011 16:50:49 +0200
+
+libpointmatcher (0.1-65) unstable; urgency=low
+
+  * change VTK output to create cells
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Jul 2011 15:42:40 +0200
+
+libpointmatcher (0.1-64) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Jul 2011 14:08:19 +0200
+
+libpointmatcher (0.1-63) unstable; urgency=low
+
+  * change CSV loader to take more complex files
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 20 Jul 2011 14:07:54 +0200
+
+libpointmatcher (0.1-62) unstable; urgency=low
+
+  * Added missing define to link line.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 11 Jul 2011 15:05:33 +0200
+
+libpointmatcher (0.1-61) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 11 Jul 2011 14:57:32 +0200
+
+libpointmatcher (0.1-60) unstable; urgency=low
+
+  * Added function to query whether ICPSequence already has a keyframe or
+    not.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 05 Jul 2011 11:05:13 +0200
+
+libpointmatcher (0.1-59) unstable; urgency=low
+
+  * change the misterious transformation order...
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 23 Jun 2011 13:58:45 +0200
+
+libpointmatcher (0.1-58) unstable; urgency=low
+
+  * clean transformation notation and fix a transformation bug in
+    ICP
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 22 Jun 2011 09:59:37 +0200
+
+libpointmatcher (0.1-57) unstable; urgency=low
+
+  * fixed conflic
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 16 Jun 2011 12:13:48 +0200
+
+libpointmatcher (0.1-56) unstable; urgency=low
+
+  * fixed bound trans check bug
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 16 Jun 2011 12:07:29 +0200
+
+libpointmatcher (0.1-55) unstable; urgency=low
+
+  * Refactored ICP/ICPSequence to abstract common code into ICPChainBase
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 16 Jun 2011 11:56:26 +0200
+
+libpointmatcher (0.1-54) unstable; urgency=low
+
+  * fix bug for VTK iteration inspector
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 15 Jun 2011 13:52:05 +0200
+
+libpointmatcher (0.1-53) unstable; urgency=low
+
+  * Add alignment flag for Eigen in Bound
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 15 Jun 2011 11:02:53 +0200
+
+libpointmatcher (0.1-52) unstable; urgency=low
+
+  * Added doc and cleanup private/public.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 14 Jun 2011 14:41:03 +0200
+
+libpointmatcher (0.1-51) unstable; urgency=low
+
+  * Removed memory leak in setDefault(), unified descriptor and feature
+    outlier filters.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 09 Jun 2011 21:12:06 +0200
+
+libpointmatcher (0.1-50) unstable; urgency=low
+
+  * Renammed k to binSize in SamplingSurfaceNormalDataPointsFilter
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 09 Jun 2011 16:36:20 +0200
+
+libpointmatcher (0.1-49) unstable; urgency=low
+
+  * Added normals to IO, we should really unify this with Inspectors (Steph's
+    comment)
+
+ -- Andreas Breitenmoser <andreas.breitenmoser@mavt.ethz.ch>  Fri, 27 May 2011 17:53:23 +0200
+
+libpointmatcher (0.1-48) unstable; urgency=low
+
+  * add sandbox directory for dev test, use the flag COMPILE_SANDBOX with
+    ccmake to activate compilation
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Sun, 22 May 2011 17:38:31 +0200
+
+libpointmatcher (0.1-47) unstable; urgency=low
+
+  * enhance example code and add noise to position of test data
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 12 May 2011 20:15:30 +0200
+
+libpointmatcher (0.1-46) unstable; urgency=low
+
+  * change to constant input for ICP and ICPSequence
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 29 Apr 2011 17:55:24 +0200
+
+libpointmatcher (0.1-45) unstable; urgency=low
+
+  * Add default configuration for ICP algorithm
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 29 Apr 2011 11:33:45 +0200
+
+libpointmatcher (0.1-44) unstable; urgency=low
+
+  * refactorization of VarTrimmedOutlierRejection
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Fri, 22 Apr 2011 17:45:17 +0200
+
+libpointmatcher (0.1-43) unstable; urgency=low
+
+  * add unit tests and extra example data file for sequence icp
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 21 Apr 2011 18:47:57 +0200
+
+libpointmatcher (0.1-42) unstable; urgency=low
+
+  * Add outlier rejection for variable ratio
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Thu, 21 Apr 2011 10:26:04 +0200
+
+libpointmatcher (0.1-41) unstable; urgency=low
+
+  * change eigen solver to be constructed only once
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 18 Apr 2011 18:26:14 +0200
+
+libpointmatcher (0.1-40) unstable; urgency=low
+
+  * check manually conflic with master branch
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 18 Apr 2011 16:54:55 +0200
+
+libpointmatcher (0.1-39) unstable; urgency=low
+
+  * Clean up examples code
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 18 Apr 2011 16:49:13 +0200
+
+libpointmatcher (0.1-38) unstable; urgency=low
+
+  * clean up example
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Mon, 18 Apr 2011 15:00:34 +0200
+
+libpointmatcher (0.1-37) unstable; urgency=low
+
+  * Added maxdist in matcher.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 15 Apr 2011 10:16:25 +0200
+
+libpointmatcher (0.1-36) unstable; urgency=low
+
+  * cleaning test executable to make examples
+
+ -- Francois Pomerleau <f.pomerleau@gmail.com>  Wed, 13 Apr 2011 17:23:50 +0200
+
+libpointmatcher (0.1-35) unstable; urgency=low
+
+  * Added possibility to get delta transform to ICPSequence.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 04 Apr 2011 18:00:39 +0200
+
+libpointmatcher (0.1-34) unstable; urgency=low
+
+  * Merge branch 'master' of github.com:ethz-asl/libpointmatcher
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 04 Apr 2011 11:40:29 +0200
+
+libpointmatcher (0.1-33) unstable; urgency=low
+
+  * Talk about Eigen 3 in README
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 04 Apr 2011 11:40:10 +0200
+
+libpointmatcher (0.1-32) unstable; urgency=low
+
+  * Fixed initialisation of transformation checkers.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 23 Mar 2011 16:59:12 +0100
+
+libpointmatcher (0.1-31) unstable; urgency=low
+
+  * add todo in the surface computation to avoid eigenSolver to be called
+    2 times (via github)
+
+ -- pomerlef <f.pomerleau@gmail.com>  Wed, 16 Mar 2011 15:08:36 +0100
+
+libpointmatcher (0.1-30) unstable; urgency=low
+
+  * Added random phase to fix step filter.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 14 Mar 2011 09:54:29 +0100
+
+libpointmatcher (0.1-29) unstable; urgency=low
+
+  * Change an assert for a if in Matcher destructor
+
+ -- pomerlef <pomerlef@data.asl.ethz.ch>  Thu, 10 Mar 2011 20:00:58 +0100
+
+libpointmatcher (0.1-28) unstable; urgency=low
+
+  * Improved histogram.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 10 Mar 2011 16:01:57 +0100
+
+libpointmatcher (0.1-27) unstable; urgency=low
+
+  * Handle no point to filter exception, put NaN if there is no value in
+    histogram
+
+ -- pomerlef <pomerlef@data.asl.ethz.ch>  Thu, 10 Mar 2011 15:12:51 +0100
+
+libpointmatcher (0.1-26) unstable; urgency=low
+
+  * add an exception on datafilter surfaceSampling to avoid crash when no
+    points are send
+
+ -- pomerlef <pomerlef@data.asl.ethz.ch>  Thu, 10 Mar 2011 12:00:35 +0100
+
+libpointmatcher (0.1-25) unstable; urgency=low
+
+  * Fixed bug.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 07 Mar 2011 12:35:44 +0100
+
+libpointmatcher (0.1-24) unstable; urgency=low
+
+  * merged
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 07 Mar 2011 12:32:26 +0100
+
+libpointmatcher (0.1-23) unstable; urgency=low
+
+  * Added median
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Mon, 07 Mar 2011 12:31:15 +0100
+
+libpointmatcher (0.1-22) unstable; urgency=low
+
+  * Fix missing space in variance ouput
+
+ -- pomerlef <pomerlef@data.asl.ethz.ch>  Fri, 04 Mar 2011 17:56:47 +0100
+
+libpointmatcher (0.1-21) unstable; urgency=low
+
+  * Added variance
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 04 Mar 2011 17:43:32 +0100
+
+libpointmatcher (0.1-20) unstable; urgency=low
+
+  * Fixed error in case of no points for keyframe.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 03 Mar 2011 16:48:25 +0100
+
+libpointmatcher (0.1-19) unstable; urgency=low
+
+  * Search for eigen (3) not explicitely eigen 2.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 02 Mar 2011 18:58:22 +0100
+
+libpointmatcher (0.1-18) unstable; urgency=low
+
+  * Switched to clock_gettime()
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 24 Feb 2011 13:59:34 +0100
+
+libpointmatcher (0.1-17) unstable; urgency=low
+
+  * Added own timer class that use gettimeofday() to work around limited
+    precision of clock(), see related bug: http://sourceware.org/bugzilla/show_bug.cgi?id=12515
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 24 Feb 2011 13:45:43 +0100
+
+libpointmatcher (0.1-16) unstable; urgency=low
+
+  * Improved histogramm.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 24 Feb 2011 11:15:08 +0100
+
+libpointmatcher (0.1-15) unstable; urgency=low
+
+  * Switched to Eigen 3.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 23 Feb 2011 17:41:09 +0100
+
+libpointmatcher (0.1-14) unstable; urgency=low
+
+  * Added pre filter for reading. Added histogram for easy debug.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Fri, 04 Feb 2011 17:40:36 +0100
+
+libpointmatcher (0.1-13) unstable; urgency=low
+
+  * Added input filters to remove points based on dist.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 03 Feb 2011 17:10:56 +0100
+
+libpointmatcher (0.1-12) unstable; urgency=low
+
+  * Added ICP Seq for tracker
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 02 Feb 2011 18:17:40 +0100
+
+libpointmatcher (0.1-11) unstable; urgency=low
+
+  * Added interfaces for distance extractors.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 27 Jan 2011 17:07:09 +0100
+
+libpointmatcher (0.1-10) unstable; urgency=low
+
+  * Renamed strategy to ICP
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 27 Jan 2011 15:32:09 +0100
+
+libpointmatcher (0.1-9) unstable; urgency=low
+
+  * Cleaned-up outdated typedefs.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 27 Jan 2011 10:57:26 +0100
+
+libpointmatcher (0.1-8) unstable; urgency=low
+
+  * Moved meshing stuff to libpointmesher.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 27 Jan 2011 10:41:23 +0100
+
+libpointmatcher (0.1-7) unstable; urgency=low
+
+  * Fixed name in README
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Thu, 27 Jan 2011 10:17:26 +0100
+
+libpointmatcher (0.1-6) unstable; urgency=low
+
+  * Fixed Eigen includes.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Wed, 19 Jan 2011 13:38:51 +0100
+
+libpointmatcher (0.1-5) unstable; urgency=low
+
+  * Safe email address for François
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 18 Jan 2011 13:39:35 +0100
+
+libpointmatcher (0.1-4) unstable; urgency=low
+
+  * Fixed md syntax
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 18 Jan 2011 12:14:01 +0100
+
+libpointmatcher (0.1-3) unstable; urgency=low
+
+  * Fixed md syntax
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 18 Jan 2011 12:12:27 +0100
+
+libpointmatcher (0.1-2) unstable; urgency=low
+
+  * Added missing files.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 18 Jan 2011 12:09:25 +0100
+
+libpointmatcher (0.1-1) unstable; urgency=low
+
+  * Imported from aslforge.
+
+ -- Stéphane Magnenat <stephane@magnenat.net>  Tue, 18 Jan 2011 12:08:04 +0100
