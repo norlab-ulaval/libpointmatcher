@@ -17,7 +17,6 @@ remake_find_package(yaml-cpp CONFIG)
 remake_find_library(ncurses ncurses.h PACKAGE ncurses)
 remake_find_package(Threads REQUIRED)
 
-remake_define(SYSTEM_YAML_CPP ON)
 remake_include(
   lib
   ${Boost_INCLUDE_DIRS}

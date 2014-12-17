@@ -1,11 +1,6 @@
 #include "PointMatcher.h"
 
-#ifdef SYSTEM_YAML_CPP
-    #include "yaml-cpp/yaml.h"
-#else
-	#include "yaml-cpp-pm/yaml.h"
-    namespace YAML = YAML_PM;
-#endif // HAVE_YAML_CPP
+#include "yaml-cpp/yaml.h"
 
 namespace PointMatcherSupport
 {

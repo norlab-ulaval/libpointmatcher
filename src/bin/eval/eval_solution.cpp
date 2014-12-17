@@ -51,12 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-#ifdef SYSTEM_YAML_CPP
-    #include "yaml-cpp/yaml.h"
-#else
-	#include "yaml-cpp-pm/yaml.h"
-    namespace YAML = YAML_PM;
-#endif // HAVE_YAML_CPP
+#include "yaml-cpp/yaml.h"
 
 using namespace std;
 using namespace PointMatcherSupport;

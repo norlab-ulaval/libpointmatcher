@@ -42,18 +42,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/typeof/typeof.hpp>
 
 
-#ifdef SYSTEM_YAML_CPP
-	namespace YAML
-	{
-		class Node;
-	}
-#else
-	namespace YAML_PM
-	{
-		class Node;
-	}
-    namespace YAML = YAML_PM;
-#endif // HAVE_YAML_CPP
+namespace YAML
+{
+class Node;
+}
 
 namespace PointMatcherSupport
 {

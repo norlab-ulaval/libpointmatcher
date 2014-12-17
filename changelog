@@ -1,3 +1,10 @@
+libpointmatcher (1.2.1-688) unstable; urgency=low
+
+  * Removed SYSTEM_YAML_CPP conditions as the system includes are the
+    default in this branch
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 17 Dec 2014 15:33:00 +0100
+
 libpointmatcher (1.2.1-687) unstable; urgency=low
 
   * Fixed boost compatibility bug in utest
