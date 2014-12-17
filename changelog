@@ -1,3 +1,9 @@
+libpointmatcher (1.2.1-683) unstable; urgency=low
+
+  * Added libgtest-dev to build dependencies
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 17 Dec 2014 08:24:00 +0100
+
 libpointmatcher (1.2.1-682) unstable; urgency=low
 
   * ReMake build system port

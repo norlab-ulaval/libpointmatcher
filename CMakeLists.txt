@@ -64,7 +64,7 @@ remake_distribute_deb(
   UPLOAD ppa:kralf/asl
   DEPENDS libnabo-dev yaml-cpp0.2.6-dev libboost-system-dev libncurses5-dev
     libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev 
-    libeigen3-dev remake pkg-config doxygen
+    libeigen3-dev libgtest-dev remake pkg-config doxygen
   PASS CMAKE_BUILD_TYPE LIBPOINTMATCHER_GIT_REVISION
 )
 remake_distribute_deb(
@@ -73,7 +73,7 @@ remake_distribute_deb(
   UPLOAD ppa:kralf/asl
   DEPENDS libnabo-dev yaml-cpp libboost-system-dev libncurses5-dev
     libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev 
-    libeigen3-dev remake pkg-config doxygen
+    libeigen3-dev libgtest-dev remake pkg-config doxygen
   PASS CMAKE_BUILD_TYPE LIBPOINTMATCHER_GIT_REVISION
 )
 remake_distribute_deb(
@@ -82,6 +82,6 @@ remake_distribute_deb(
   UPLOAD ppa:kralf/asl
   DEPENDS libnabo-dev libyaml-cpp0.3-dev libboost-system-dev libncurses5-dev
     libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev 
-    libeigen3-dev remake pkg-config doxygen
+    libeigen3-dev libgtest-dev remake pkg-config doxygen
   PASS CMAKE_BUILD_TYPE LIBPOINTMATCHER_GIT_REVISION
 )
