@@ -1025,7 +1025,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
   if (keepEigenVectors)
     cloudLabels.push_back(Label("eigVectors", dimEigVectors));
   if (keepCovariances)
-    cloudLabels.push_back(Label("covariances", dimCovariances));
+    cloudLabels.push_back(Label("covariance", dimCovariances));
   if (keepWeights)
     cloudLabels.push_back(Label("weights", dimWeights));
   if (keepMeans)
@@ -1054,7 +1054,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
   if (keepEigenVectors)
     buildData.eigenVectors = cloud.getDescriptorViewByName("eigVectors");
   if (keepCovariances)
-    buildData.covariances = cloud.getDescriptorViewByName("covariances");
+    buildData.covariance = cloud.getDescriptorViewByName("covariance");
   if (keepWeights)
     buildData.weights = cloud.getDescriptorViewByName("weights");
   if (keepMeans)
@@ -1093,7 +1093,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
     if(keepWeights)
       buildData.weights->col(i) = buildData.weights->col(k);
     if(keepCovariances)
-      buildData.covariances->col(i) = buildData.covariances->col(k);
+      buildData.covariance->col(i) = buildData.covariance->col(k);
     if(keepMeans)
       buildData.means->col(i) = buildData.means->col(k);
     if(keepShapes)
@@ -1258,7 +1258,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
         if(keepEigenVectors)
           data.eigenVectors->col(k) = serialEigVector;
         if(keepCovariances)
-          data.covariances->col(k) = serialCovVector;
+          data.covariance->col(k) = serialCovVector;
         if(keepMeans)
           data.means->col(k) = mean;
         // a 4d vecetor of shape parameters: planarity (P), cylindricality (C), sphericality (S)
@@ -1313,7 +1313,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
     if(keepEigenVectors)
       data.eigenVectors->col(k) = serialEigVector;
     if(keepCovariances)
-      data.covariances->col(k) = serialCovVector;
+      data.covariance->col(k) = serialCovVector;
     if(keepMeans)
       data.means->col(k) = mean;
     if(keepShapes) {

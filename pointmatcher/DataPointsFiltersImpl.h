@@ -407,7 +407,7 @@ struct DataPointsFiltersImpl
 	      boost::optional<View> eigenValues;
 	      boost::optional<View> eigenVectors;
 	      boost::optional<View> weights;
-	      boost::optional<View> covariances;
+	      boost::optional<View> covariance;
 	      boost::optional<View> means;
 	      boost::optional<View> shapes;
 	      int outputInsertionPoint;
