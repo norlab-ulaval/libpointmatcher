@@ -1207,6 +1207,18 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
       data.unfitPointsCount += colCount;
       return;
     }
+    if(minPlanarity > 0 ) {
+      Eigen::Matrix<T, 3, 1> vals;
+      (vals << eigenVa(0),eigenVa(1),eigenVa(2));
+      vals = vals/eigenVa.sum();
+      T planarity = 2 * vals(0)-2*vals(1);//eigenVa;
+      // throw out surfel if it does not meet planarity criteria
+      if (planarity < minPlanarity)
+      {
+        data.unfitPointsCount += colCount;
+        return;
+      }
+    }
   }
 
   Vector normal;
@@ -1263,18 +1275,13 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
         if(keepMeans)
           data.means->col(k) = mean;
         // a 3d vecetor of shape parameters: planarity (P), cylindricality (C), sphericality (S)
-        if(keepShapes || minPlanarity > 0) {
+        if(keepShapes) {
           Eigen::Matrix<T, 3, 3> shapeMat;
           (shapeMat << 0, 2, -2, 1, -1, 0, 0, 0, 3);
           Eigen::Matrix<T, 3, 1> vals;
-          (vals << eigenVa(1),eigenVa(2),eigenVa(3));
+          (vals << eigenVa(0),eigenVa(1),eigenVa(2));
+          vals = vals/eigenVa.sum();
           data.shapes->col(k) = shapeMat * vals;//eigenVa;
-          // throw out surfel if it does not meet planarity criteria
-          if (data.shapes->col(k)(0) < minPlanarity)
-          {
-            data.unfitPointsCount += colCount;
-            return;
-          }
 
         }
         if(keepWeights) {
@@ -1324,18 +1331,13 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
       data.covariance->col(k) = serialCovVector;
     if(keepMeans)
       data.means->col(k) = mean;
-    if(keepShapes || minPlanarity > 0) {
+    if(keepShapes) {
       Eigen::Matrix<T, 3, 3> shapeMat;
       (shapeMat << 0, 2, -2, 1, -1, 0, 0, 0, 3);
       Eigen::Matrix<T, 3, 1> vals;
-      (vals << eigenVa(1),eigenVa(2),eigenVa(3));
+      (vals << eigenVa(0),eigenVa(1),eigenVa(2));
+      vals = vals/eigenVa.sum();
       data.shapes->col(k) = shapeMat * vals; //eigenVa;
-      // throw out surfel if it does not meet planarity criteria
-      if (data.shapes->col(k)(0) < minPlanarity)
-      {
-        data.unfitPointsCount += colCount;
-        return;
-      }
     }
     if(keepWeights)
       (*data.weights)(0,k) = colCount;
