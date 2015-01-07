@@ -954,6 +954,7 @@ knn(Parametrizable::get<int>("knn")),
 samplingMethod(Parametrizable::get<int>("samplingMethod")),
 maxBoxDim(Parametrizable::get<T>("maxBoxDim")),
 maxTimeWindow(Parametrizable::get<T>("maxTimeWindow")),
+minPlanarity(Parametrizable::get<T>("minPlanarity")),
 averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
 keepNormals(Parametrizable::get<bool>("keepNormals")),
 keepDensities(Parametrizable::get<bool>("keepDensities")),
@@ -1166,7 +1167,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
 
   // build nearest neighbors list
   Matrix d(featDim-1, colCount);
-    Uint64Matrix t(1, colCount);
+  Uint64Matrix t(1, colCount);
   for (int i = 0; i < colCount; ++i) {
     d.col(i) = data.features.block(0,data.indices[first+i],featDim-1, 1);
     t.col(i) = data.times.col(data.indices[first + i]); //, 0);
@@ -1193,7 +1194,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   Vector eigenVa = Vector::Identity(featDim-1, 1);
   Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
   // Ensure that the matrix is suited for eigenvalues calculation
-  if(keepNormals || keepEigenValues || keepEigenVectors || keepCovariances || keepShapes)
+  if(keepNormals || keepEigenValues || keepEigenVectors || keepCovariances || keepShapes || minPlanarity > 0)
   {
     if(C.fullPivHouseholderQr().rank()+1 >= featDim-1)
     {
@@ -1244,9 +1245,9 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
         data.indicesToKeep.push_back(k);
 
         // write the updated times: min, max, mean
-            data.times(0, k) = minTime;
-            data.times(1, k) = maxTime;
-            data.times(2, k) = meanTime;
+        data.times(0, k) = minTime;
+        data.times(1, k) = maxTime;
+        data.times(2, k) = meanTime;
 
         // Build new descriptors
         if(keepNormals)
@@ -1261,13 +1262,20 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
           data.covariance->col(k) = serialCovVector;
         if(keepMeans)
           data.means->col(k) = mean;
-        // a 4d vecetor of shape parameters: planarity (P), cylindricality (C), sphericality (S)
-        if(keepShapes) {
+        // a 3d vecetor of shape parameters: planarity (P), cylindricality (C), sphericality (S)
+        if(keepShapes || minPlanarity > 0) {
           Eigen::Matrix<T, 3, 3> shapeMat;
           (shapeMat << 0, 2, -2, 1, -1, 0, 0, 0, 3);
           Eigen::Matrix<T, 3, 1> vals;
           (vals << eigenVa(1),eigenVa(2),eigenVa(3));
           data.shapes->col(k) = shapeMat * vals;//eigenVa;
+          // throw out surfel if it does not meet planarity criteria
+          if (data.shapes->col(k)(0) < minPlanarity)
+          {
+            data.unfitPointsCount += colCount;
+            return;
+          }
+
         }
         if(keepWeights) {
           (*data.weights)(0,k) = colCount;
@@ -1316,12 +1324,18 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
       data.covariance->col(k) = serialCovVector;
     if(keepMeans)
       data.means->col(k) = mean;
-    if(keepShapes) {
+    if(keepShapes || minPlanarity > 0) {
       Eigen::Matrix<T, 3, 3> shapeMat;
       (shapeMat << 0, 2, -2, 1, -1, 0, 0, 0, 3);
       Eigen::Matrix<T, 3, 1> vals;
       (vals << eigenVa(1),eigenVa(2),eigenVa(3));
       data.shapes->col(k) = shapeMat * vals; //eigenVa;
+      // throw out surfel if it does not meet planarity criteria
+      if (data.shapes->col(k)(0) < minPlanarity)
+      {
+        data.unfitPointsCount += colCount;
+        return;
+      }
     }
     if(keepWeights)
       (*data.weights)(0,k) = colCount;

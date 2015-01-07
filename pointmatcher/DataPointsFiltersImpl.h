@@ -356,6 +356,7 @@ struct DataPointsFiltersImpl
 	        ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
 	        ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
           ( "maxTimeWindow", "maximum spread of times in a surfel", "inf" )
+          ( "minPlanarity", "to what extend planarity of surfels needs to be enforced", "0")
 	        ( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
 	        ( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" )
 	        ( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
@@ -372,6 +373,7 @@ struct DataPointsFiltersImpl
 	    const unsigned samplingMethod;
 	    const T maxBoxDim;
 	    const T maxTimeWindow;
+	    const T minPlanarity;
 	    const bool averageExistingDescriptors;
 	    const bool keepNormals;
 	    const bool keepDensities;
