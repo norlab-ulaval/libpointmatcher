@@ -1211,7 +1211,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
       Eigen::Matrix<T, 3, 1> vals;
       (vals << eigenVa(0),eigenVa(1),eigenVa(2));
       vals = vals/eigenVa.sum();
-      T planarity = 2 * vals(0)-2*vals(1);//eigenVa;
+      T planarity = 2 * vals(1)-2*vals(2);//eigenVa;
       // throw out surfel if it does not meet planarity criteria
       if (planarity < minPlanarity)
       {
