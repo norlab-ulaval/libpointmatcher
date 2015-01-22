@@ -625,7 +625,7 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(co
 	Matrix normals = reference.getDescriptorViewByName("normals");
 
 	if (normals.rows() < 3)    // Make sure there are normals in DataPoints
-		return Matrix::Zero(6,6);
+		return std::numeric_limits<T>::max() * Matrix::Identity(6,6);
 
 	T beta = -asin(transformation(2,0));
 	T alpha = atan2(transformation(2,1), transformation(2,2));
