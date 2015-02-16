@@ -2,7 +2,7 @@
 | ------------- |:-------------:| -----:|
 
 # Compiling and Installing libpointmatcher on your Computer (Mac OS X Instructions)
-######Latest update April 18, 2014 by Samuel Charreyron
+
 
 ## Foreword
 *The following instructions are aimed at users of Mac OS X.  The steps from this tutorial were performed on __OS X 10.10.2__ (Yosemite).  These instructions should be identical on previous versions of Mac OS X.*
@@ -149,7 +149,9 @@ sudo make install
 ### Working Versions
 Here are the tested versions for this tutorial. If you have any problems, please report any deviations from those.
 
-|Dependency  |Version |
+
+
+|Dependency  |Version* |
 |------------|--------|
 |MacOS       | 10.10.2  |
 |gcc         | 4.2.1 |
@@ -160,10 +162,11 @@ Here are the tested versions for this tutorial. If you have any problems, please
 |eigen       | 3.2.4 |
 |doxygen (opt.) | 1.8.9.1 |
 
+*Tested Feb. 16, 2015
 
 
 
-Usefull commands for the different version:
+Useful commands for the different version:
 
 	sw_vers -productVersion 
 	gcc --version
