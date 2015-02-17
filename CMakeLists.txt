@@ -204,14 +204,25 @@ set(POINTMATCHER_SRC
 
 file(GLOB POINTMATCHER_HEADERS "pointmatcher/*.h")
 
-set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
-if (SHARED_LIBS)
-        add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
-	install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-else(SHARED_LIBS)
-        add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
+# MacOS deals with shared/dynamic library differently. For
+# simplicity, we only authorize static library in that case.
+if(APPLE)
+
+	add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
-endif(SHARED_LIBS)
+
+else(APPLE)
+	set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
+
+	if (SHARED_LIBS)
+		add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
+		install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+	else(SHARED_LIBS)
+		add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
+		install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+	endif(SHARED_LIBS)
+endif(APPLE)
+
 target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
