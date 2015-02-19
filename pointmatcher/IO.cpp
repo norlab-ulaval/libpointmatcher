@@ -1269,8 +1269,7 @@ PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPLY(const string&
 template <typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& is)
 {
-	//typedef typename DataPoints::Label Label;
-	//typedef typename DataPoints::Labels Labels;
+	//TODO: adapt following loadCSV()
 	typedef vector<PLYElement*> Elements;
 
 	/*
