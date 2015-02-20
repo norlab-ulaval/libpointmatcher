@@ -19,6 +19,7 @@ If you are used to development project, here is what you need:
 |eigen          | 3.2.4                 |
 |doxygen (opt.) | 1.8.9.1               |
 
+The rest of this tutorial will guide you through the different requirements step by step.
 
 ### Some Basic Requirements 
 #### a. Installing Xcode via the App Store (OS X 10.10.2  and later)
