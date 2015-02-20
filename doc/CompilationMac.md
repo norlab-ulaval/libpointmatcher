@@ -5,7 +5,7 @@
 
 
 ## In short...
-If you are used to development project, here what you need:
+If you are used to development project, here is what you need:
 
 |Name           |Version  <br> (Tested Feb. 16, 2015)          |
 |---------------|-----------------------|
