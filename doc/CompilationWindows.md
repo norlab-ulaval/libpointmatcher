@@ -2,21 +2,17 @@
 | ------------- |:-------------:| -----:|
 
 # Compiling and Installing libpointmatcher on Windows
-######Latest update March 29, 2014 by François Pomerleau
-
-## Foreword
-*The following instructions are aimed at users of Windows.  The steps from this tutorial were performed on __Windows 7__.  These instructions should be identical previous versions of Windows.*
-
 
 ## Compiling using MSVC (Microsoft Visual Studio)
 
 ### In Short...
 
-If you are used to development project, here what you need:
+If you are used to development project, here is what you need:
 
 
 | Name   | Link | Version tested|
 | ------ | ---- | ------------- |
+| Windows |     | 7              |
 |  git | <http://windows.github.com/> | v1.0 |
 |  libpointmatcher sources   | <https://github.com/ethz-asl/libpointmatcher> | |
 | libnabo sources | <https://github.com/ethz-asl/libnabo> |  |
@@ -28,7 +24,7 @@ If you are used to development project, here what you need:
 | grep tool | <http://gnuwin32.sourceforge.net/packages/grep.htm>| v2.5.4 |
 | gtest | <https://code.google.com/p/googletest/> | v1.7.0 |
 
-
+The rest of this tutorial will guide you through the different requirements step by step.
 
 ### Building Boost
 1. Open a console that knows the path to the MSVC compiler command (cl). We suggest to use **Windows PowerShell**. An alternative is from the Start menu in the Visual Studio section; for instance for VS 2012, it is called Developer Command Prompt for VS2012.
