@@ -13,11 +13,14 @@ If you are used to development project, here is what you need:
 |Xcode          | todo                  |      
 |gcc            | 4.2.1                 |
 |brew           | 0.9.5                 |
-|boost          | 1.57.0                |
 |git            | 1.9.3                 |
 |cmake          | 3.0.2                 |
+| | |
+|boost          | 1.57.0                |
 |eigen          | 3.2.4                 |
 |doxygen (opt.) | 1.8.9.1               |
+|libnabo        | [from source](https://github.com/ethz-asl/libnabo)       |
+|libpointmatcher| [from source](https://github.com/ethz-asl/libpointmatcher) |
 
 The rest of this tutorial will guide you through the different requirements step by step.
 
