@@ -4,8 +4,24 @@
 # Compiling and Installing libpointmatcher on your Computer (Mac OS X Instructions)
 
 
-## Foreword
-*The following instructions are aimed at users of Mac OS X.  The steps from this tutorial were performed on __OS X 10.10.2__ (Yosemite).  These instructions should be identical on previous versions of Mac OS X.*
+## In short...
+If you are used to development project, here what you need:
+
+
+|Name           |Version                |
+|               |(Tested Feb. 16, 2015) |
+|---------------|-----------------------|
+|MacOS          | 10.10.2               |
+|Xcode          | todo                  |      
+|gcc            | 4.2.1                 |
+|brew           | 0.9.5                 |
+|boost          | 1.57.0                |
+|git            | 1.9.3                 |
+|cmake          | 3.0.2                 |
+|eigen          | 3.2.4                 |
+|doxygen (opt.) | 1.8.9.1               |
+
+
 
 ### Some Basic Requirements 
 #### a. Installing Xcode via the App Store (OS X 10.10.2  and later)
@@ -151,18 +167,7 @@ Here are the tested versions for this tutorial. If you have any problems, please
 
 
 
-|Dependency  |Version* |
-|------------|--------|
-|MacOS       | 10.10.2  |
-|gcc         | 4.2.1 |
-|brew        | 0.9.5  |
-|boost       | 1.57.0  |
-|git         | 1.9.3 |
-|cmake       | 3.0.2 |
-|eigen       | 3.2.4 |
-|doxygen (opt.) | 1.8.9.1 |
 
-*Tested Feb. 16, 2015
 
 
 
