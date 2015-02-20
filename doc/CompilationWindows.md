@@ -10,7 +10,7 @@
 If you are used to development project, here is what you need:
 
 
-| Name   | Link | Version tested|
+| Name   | Link | Version <br> (Tested March 29, 2014)|
 | ------ | ---- | ------------- |
 | Windows |     | 7              |
 |  git | <http://windows.github.com/> | v1.0 |
