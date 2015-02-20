@@ -22,6 +22,8 @@ If you are used to development project, here is what you need:
 |libnabo        | [from source](https://github.com/ethz-asl/libnabo)       |
 |libpointmatcher| [from source](https://github.com/ethz-asl/libpointmatcher) |
 
+__Note:__ Other versions will most probably work but you'll have to try yourself to know for sure.
+
 The rest of this tutorial will guide you through the different requirements step by step.
 
 ### Some Basic Requirements 
