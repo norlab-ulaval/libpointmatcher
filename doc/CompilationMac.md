@@ -7,9 +7,7 @@
 ## In short...
 If you are used to development project, here what you need:
 
-
-|Name           |Version                |
-|               |(Tested Feb. 16, 2015) |
+|Name           |Version  <br> (Tested Feb. 16, 2015)          |
 |---------------|-----------------------|
 |MacOS          | 10.10.2               |
 |Xcode          | todo                  |      
@@ -20,7 +18,6 @@ If you are used to development project, here what you need:
 |cmake          | 3.0.2                 |
 |eigen          | 3.2.4                 |
 |doxygen (opt.) | 1.8.9.1               |
-
 
 
 ### Some Basic Requirements 
@@ -162,24 +159,41 @@ make
 sudo make install
 ```
 
-### Working Versions
-Here are the tested versions for this tutorial. If you have any problems, please report any deviations from those.
+# Having problems?
 
+Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. 
 
+Here are useful commands for the different version:
 
-
-
-
-
-Useful commands for the different version:
+MacOS version:
 
 	sw_vers -productVersion 
+
+Compiler version:
+
 	gcc --version
+
+Homebrew:
+
 	brew --version
+
+Boost:
+
 	brew info boost
+
+Git:
+
 	git --version
+
+CMake:
+
 	cmake --version
+
+Eigen:
+
 	brew info eigen
+
+Doxygen:
 	brew info doxygen
 
 	
