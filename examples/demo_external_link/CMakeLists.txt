@@ -11,3 +11,4 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${libpointmatcher_INCLUDE_DIRS})
 add_executable(${PROJECT_NAME} convert.cpp)
 
 target_link_libraries(${PROJECT_NAME} ${libpointmatcher_LIBRARIES})
+message("libpointmatcher_LIBRARIES: ${libpointmatcher_LIBRARIES}")

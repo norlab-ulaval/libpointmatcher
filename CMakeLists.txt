@@ -98,6 +98,7 @@ set(EXTERNAL_LIBS "")
 # compile local version of gtest and yaml-cpp
 add_subdirectory(contrib)
 
+
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
@@ -119,15 +120,21 @@ find_path(EIGEN_INCLUDE_DIR Eigen/Core
 include_directories(${EIGEN_INCLUDE_DIR})
 #note: no library to add, eigen rely only on headers 
 
+#TODO: this should be a more standard way
+#find_package(Eigen3 REQUIRED)
+#message("-- eigen3 found, version ${Eigen3_VERSION}")
+
+
 
 #--------------------
 # DEPENDENCY: nabo
 #--------------------
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LIBNABO_INSTALL_DIR}/share/libnabo/cmake/")
-find_package(libnabo)
+find_package(libnabo REQUIRED)
 #include(libnaboConfig)
 include_directories(${libnabo_INCLUDE_DIRS})
 set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
+message("-- libnabo found, version ${libnabo_VERSION}")
 
 
 #--------------------
@@ -146,6 +153,7 @@ if (USE_OPEN_CL)
 	# if found, add
 	if (OPENCL_LIBRARIES)
 		set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${OPENCL_LIBRARIES})
+    message("-- openCL found, parallel computer enabled for kd-tree")
 	endif (OPENCL_LIBRARIES)
 endif(USE_OPEN_CL)
 
@@ -174,9 +182,18 @@ if(USE_SYSTEM_YAML_CPP)
     endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 else(USE_SYSTEM_YAML_CPP)
         include_directories(contrib/yaml-cpp-pm/include)
-        set (EXTERNAL_LIBS ${EXTERNAL_LIBS} yaml-cpp-pm )
+        
+#note: this is not working....
+        #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
+        #include_directories(${yaml-cpp-pm_INCLUDE})
+        
+        get_property(yaml-cpp-pm_LIB TARGET yaml-cpp-pm PROPERTY LOCATION)
+        set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp-pm_LIB} )
         set(yamlcpp_FOUND)
-        message("-- using built in yaml-cpp, text-based configuration enabled")
+
+        get_property(yaml-cpp-pm_VERSION TARGET yaml-cpp-pm PROPERTY VERSION)
+        message("-- using built-in yaml-cpp, version ${yaml-cpp-pm_VERSION}")
+        message("   -- text-based configuration enabled")
 endif(USE_SYSTEM_YAML_CPP)
 
 
@@ -191,6 +208,7 @@ endif (POSIX_TIMERS AND NOT APPLE)
 
 
 # SOURCE
+
 # Pointmatcher lib and install
 set(POINTMATCHER_SRC
 	pointmatcher/Logger.cpp
@@ -271,14 +289,6 @@ if (DOXYGEN_FOUND)
 endif (DOXYGEN_FOUND)
 
 
-# Gather all libraries under one variable
-#set(ALL_LIBS ${libnabo_LIBRARIES} ${Boost_LIBRARIES} ${EXTERNAL_LIBS})
-set(ALL_LIBS ${EXTERNAL_LIBS})
-
-message("All lib: ${ALL_LIBS}")
-
-
-
 #=============== trigger other makefile ======================
 
 # Example programs
@@ -286,7 +296,6 @@ add_subdirectory(examples)
 # Evaluation programs
 add_subdirectory(evaluations)
 # Unit testing
-enable_testing()
 add_subdirectory(utest)
 
 
