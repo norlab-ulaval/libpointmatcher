@@ -15,12 +15,13 @@ If you are used to development project, here is what you need:
 |brew           | 0.9.5                 |
 |git            | 1.9.3                 |
 |cmake          | 3.0.2                 |
+|doxygen (opt.) | 1.8.9.1               |
 | | |
+|_Dependency:_ ||
 |boost          | 1.57.0                |
 |eigen          | 3.2.4                 |
-|doxygen (opt.) | 1.8.9.1               |
 |libnabo        | [from source](https://github.com/ethz-asl/libnabo)       |
-|libpointmatcher| [from source](https://github.com/ethz-asl/libpointmatcher) |
+
 
 __Note:__ Other versions will most probably work but you'll have to try yourself to know for sure.
 
