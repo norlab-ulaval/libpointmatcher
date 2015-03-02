@@ -15,8 +15,7 @@ libpointmatcher depends on:
 
  * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
  * [libnabo] version 1.0.1, a fast K Nearest Neighbour library for low-dimensional spaces.
- * [Doxygen], a documentation-generation tool
- * [yaml-cpp], a YAML 1.2 parser and emitter (optional)
+ * [Doxygen], a documentation-generation tool (optional)
  
 and was compiled on:
   * [Ubuntu](/doc/Compilation.md)
@@ -33,7 +32,7 @@ Pre-built binaries
 Ubuntu
 ------
 
-Binaries for Ubuntu Linux are available on our PPA:
+It's better to compile from the sources, but binaries for Ubuntu Linux are available on our PPA:
 
  * [Lucid](https://launchpad.net/~stephane.magnenat/+archive/lucid)
  * [Precise](https://launchpad.net/~stephane.magnenat/+archive/precise)
