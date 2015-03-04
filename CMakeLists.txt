@@ -257,7 +257,6 @@ else(APPLE)
 
 	if (SHARED_LIBS)
 		add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
-		target_link_libraries(pointmatcher ${Boost_LIBRARIES} ${NABO_LIBRARY})
 		install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 	else(SHARED_LIBS)
 		add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
