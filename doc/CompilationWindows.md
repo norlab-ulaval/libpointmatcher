@@ -26,6 +26,13 @@ If you are used to development project, here is what you need:
 
 The rest of this tutorial will guide you through the different requirements step by step.
 
+### Install grep tool
+Install `grep` by following the instructions in <http://gnuwin32.sourceforge.net/packages/grep.htm>. You might need to modify the Path environment variables to make sure that grep can be run from anywhere. To test:
+```
+cd\
+grep --version
+```
+
 ### Building Boost
 1. Open a console that knows the path to the MSVC compiler command (cl). We suggest to use **Windows PowerShell**. An alternative is from the Start menu in the Visual Studio section; for instance for VS 2012, it is called Developer Command Prompt for VS2012.
 1. Go to your Boost source directory, and do:
