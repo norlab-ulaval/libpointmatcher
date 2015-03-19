@@ -94,6 +94,7 @@ include(UseDoxygen)
 
 # initially
 set(EXTERNAL_LIBS "")
+set(EXTRA_DEPS "")
 
 # compile local version of gtest and yaml-cpp
 add_subdirectory(contrib)
@@ -189,6 +190,7 @@ else(USE_SYSTEM_YAML_CPP)
         
         get_property(yaml-cpp-pm_LIB TARGET yaml-cpp-pm PROPERTY LOCATION)
         set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp-pm_LIB} )
+        set (EXTRA_DEPS ${EXTRA_DEPS} yaml-cpp-pm)
         set(yamlcpp_FOUND)
 
         get_property(yaml-cpp-pm_VERSION TARGET yaml-cpp-pm PROPERTY VERSION)
@@ -269,6 +271,7 @@ endif(APPLE)
 add_definitions(-Wall)
 #target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
 target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
+add_dependencies(pointmatcher ${EXTRA_DEPS})
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
 # create doc before installing
