@@ -271,7 +271,10 @@ endif(APPLE)
 add_definitions(-Wall)
 #target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
 target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
-add_dependencies(pointmatcher ${EXTRA_DEPS})
+
+if(EXTRA_DEPS)
+	add_dependencies(pointmatcher ${EXTRA_DEPS})
+endif(EXTRA_DEPS)
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
 # create doc before installing
