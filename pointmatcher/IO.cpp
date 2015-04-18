@@ -1446,7 +1446,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	}
 		
 	// Known features and descriptors
-	const SupportedLabels externalLabels = getSupportedExternalLabels();
+	const SupportedLabels & externalLabels = getSupportedExternalLabels();
 	
 	int rowIdFeatures = 0;
 	int rowIdDescriptors = 0;
@@ -1456,7 +1456,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	// Loop through all known external names (ordered list)
 	for(size_t i=0; i<externalLabels.size(); i++)
 	{
-		const SupportedLabel supLabel = externalLabels[i];
+		const SupportedLabel & supLabel = externalLabels[i];
 
 		//Search if that feature exist
 		for(it_PLYProp it=vertex->properties.begin(); it!=vertex->properties.end(); ++it)
