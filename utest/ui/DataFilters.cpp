@@ -310,9 +310,9 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 
 TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 {
-	vector<bool> useCentroid = list_of(false)(true);
+	vector<int> summarizationMethod = list_of(0)(1)(2);
 	vector<bool> averageExistingDescriptors = list_of(false)(true);
-	for (unsigned i = 0 ; i < useCentroid.size() ; i++) 
+	for (unsigned i = 0 ; i < summarizationMethod.size() ; i++)
 	{
 		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++) 
 		{
@@ -320,7 +320,7 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 					("vSizeX","0.02")
 					("vSizeY","0.02")
 					("vSizeZ","0.02")
-					("useCentroid",toParam(true))
+					("summarizationMethod",toParam(1))
 					("averageExistingDescriptors",toParam(true))
 			;
 			icp.readingDataPointsFilters.clear();
@@ -329,7 +329,7 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 		}
 	}
 
-	for (unsigned i = 0 ; i < useCentroid.size() ; i++)
+	for (unsigned i = 0 ; i < summarizationMethod.size() ; i++)
 	{
 		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++)
 		{
@@ -337,7 +337,7 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 			("vSizeX","1")
 			("vSizeY","1")
 			("vSizeZ","1")
-			("useCentroid",toParam(true))
+			("summarizationMethod",toParam(1))
 			("averageExistingDescriptors",toParam(true));
 			icp.readingDataPointsFilters.clear();
 			addFilter("VoxelGridDataPointsFilter", params);

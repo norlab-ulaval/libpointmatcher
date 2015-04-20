@@ -365,6 +365,7 @@ struct DataPointsFiltersImpl
 	        ( "keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0" )
 	        ( "keepWeights", "whether the original number of points should be added as descriptors to the resulting cloud", "0" )
 	        ( "keepShapes", "whether the shape parameters of cylindricity (C), sphericality (S) and planarity (P) shall be calculated", "0" )
+	        ( "keepIndices", "whether the indices of points an ellipsoid is constructed of shall be kept", "0" )
 	      ;
 	    }
 
@@ -383,6 +384,7 @@ struct DataPointsFiltersImpl
 	    const bool keepWeights;
 	    const bool keepMeans;
 	    const bool keepShapes;
+	    const bool keepIndices;
 
 
 	  public:
@@ -412,6 +414,11 @@ struct DataPointsFiltersImpl
 	      boost::optional<View> covariance;
 	      boost::optional<View> means;
 	      boost::optional<View> shapes;
+	      boost::optional<View> pointIds;
+	      boost::optional<View> pointX;
+	      boost::optional<View> pointY;
+	      boost::optional<View> pointZ;
+	      boost::optional<View> numOfNN;
 	      int outputInsertionPoint;
 	      int unfitPointsCount;
 
@@ -668,7 +675,7 @@ struct DataPointsFiltersImpl
 			( "vSizeX", "Dimension of each voxel cell in x direction", "1.0", "-inf", "inf", &P::Comp<T> )
 			( "vSizeY", "Dimension of each voxel cell in y direction", "1.0", "-inf", "inf", &P::Comp<T> )
 			( "vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "-inf", "inf", &P::Comp<T> )
-			( "useCentroid", "If 1 (true), down-sample by using centroid of voxel cell.  If false (0), use center of voxel cell.", "1", "0", "1", P::Comp<bool> )
+			( "summarizationMethod", "If 2, use random point in cell. If 1 , down-sample by using centroid of voxel cell.  If 0, use center of voxel cell.", "1", "0", "2", P::Comp<int> )
 			( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1", "0", "1", P::Comp<bool> )
 			;
 		}
@@ -676,7 +683,7 @@ struct DataPointsFiltersImpl
 		const T vSizeX;
 		const T vSizeY;
 		const T vSizeZ;
-		const bool useCentroid;
+		const int summarizationMethod;
 		const bool averageExistingDescriptors;
 
 		struct Voxel {

@@ -963,7 +963,8 @@ keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors")),
 keepCovariances(Parametrizable::get<bool>("keepCovariances")),
 keepWeights(Parametrizable::get<bool>("keepWeights")),
 keepMeans(Parametrizable::get<bool>("keepMeans")),
-keepShapes(Parametrizable::get<bool>("keepShapes"))
+keepShapes(Parametrizable::get<bool>("keepShapes")),
+keepIndices(Parametrizable::get<bool>("keepIndices"))
 {
 }
 
@@ -1014,9 +1015,17 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
   const int dimMeans(featDim-1);
   const int dimCovariances((featDim-1)*(featDim-1));
   const int dimShapes(featDim-1);
+  const int dimPointIds(knn);
 
   // Allocate space for new descriptors
   Labels cloudLabels, timeLabels;
+  if (keepIndices) {
+    cloudLabels.push_back(Label("pointIds", dimPointIds));
+    cloudLabels.push_back(Label("pointX", dimPointIds));
+    cloudLabels.push_back(Label("pointY", dimPointIds));
+    cloudLabels.push_back(Label("pointZ", dimPointIds));
+    cloudLabels.push_back(Label("numOfNN", 1));
+  }
   if (keepNormals)
     cloudLabels.push_back(Label("normals", dimNormals));
   if (keepDensities)
@@ -1046,6 +1055,13 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
   BuildData buildData(cloud.features, cloud.descriptors, cloud.times);
 
   // get views
+  if (keepIndices) {
+    buildData.pointIds = cloud.getDescriptorViewByName("pointIds");
+    buildData.pointX = cloud.getDescriptorViewByName("pointX");
+    buildData.pointY = cloud.getDescriptorViewByName("pointY");
+    buildData.pointZ = cloud.getDescriptorViewByName("pointZ");
+    buildData.numOfNN = cloud.getDescriptorViewByName("numOfNN");
+  }
   if (keepNormals)
     buildData.normals = cloud.getDescriptorViewByName("normals");
   if (keepDensities)
@@ -1083,6 +1099,13 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
     cloud.times.col(i) = cloud.times.col(k);
     if (cloud.descriptors.rows() != 0)
       cloud.descriptors.col(i) = cloud.descriptors.col(k);
+    if(keepIndices) {
+      buildData.pointIds->col(i) = buildData.pointIds->col(k);
+      buildData.pointX->col(i) = buildData.pointX->col(k);
+      buildData.pointY->col(i) = buildData.pointY->col(k);
+      buildData.pointZ->col(i) = buildData.pointZ->col(k);
+      buildData.numOfNN->col(i) = buildData.numOfNN->col(k);
+    }
     if(keepNormals)
       buildData.normals->col(i) = buildData.normals->col(k);
     if(keepDensities)
@@ -1181,10 +1204,12 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   if (boxDim > maxBoxDim || timeBox > maxTimeWindow)
   {
     data.unfitPointsCount += colCount;
+//    data.numOfNN -= 1;
     return;
   }
   const Vector mean = d.rowwise().sum() / T(colCount);
   const Matrix NN = (d.colwise() - mean);
+
   boost::uint64_t minTime = t.minCoeff();
   boost::uint64_t maxTime = t.maxCoeff();
   boost::uint64_t meanTime = t.sum() / T(colCount);
@@ -1205,6 +1230,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
     else
     {
       data.unfitPointsCount += colCount;
+//      data.numOfNN -= 1;
       return;
     }
     if(minPlanarity > 0 ) {
@@ -1216,8 +1242,20 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
       if (planarity < minPlanarity)
       {
         data.unfitPointsCount += colCount;
+//        data.numOfNN -= 1;
         return;
       }
+    }
+  }
+
+  // keep the indices of each ellipsoid?
+  Vector pointIds(1,colCount);
+  Matrix points(3,colCount);
+
+  if(keepIndices) {
+    for (int i = 0; i < colCount; ++i) {
+      pointIds(i) = data.indices[first+i];
+      points.col(i) = data.features.block(0,data.indices[first+i],2, 1);
     }
   }
 
@@ -1262,6 +1300,13 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
         data.times(2, k) = meanTime;
 
         // Build new descriptors
+        if(keepIndices) {
+          data.pointIds->col(k) = pointIds;
+          data.pointX->col(k) = points.row(0);
+          data.pointY->col(k) = points.row(1);
+          data.pointZ->col(k) = points.row(2);
+          (*data.numOfNN)(0,k) = NN.cols();
+        }
         if(keepNormals)
           data.normals->col(k) = normal;
         if(keepDensities)
@@ -1319,6 +1364,12 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
     }
 
     // Build new descriptors
+    if(keepIndices) {
+      data.pointIds->col(k) = pointIds;
+      data.pointX->col(k) = points.row(0);
+      data.pointY->col(k) = points.row(1);
+      data.pointZ->col(k) = points.row(2);
+    }
     if(keepNormals)
       data.normals->col(k) = normal;
     if(keepDensities)
@@ -1765,7 +1816,7 @@ DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::VoxelGridDataPointsFilter()
 vSizeX(1),
 vSizeY(1),
 vSizeZ(1),
-useCentroid(true),
+summarizationMethod(1),
 averageExistingDescriptors(true) {}
 
 template <typename T>
@@ -1774,7 +1825,7 @@ DataPointsFilter("VoxelGridDataPointsFilter", VoxelGridDataPointsFilter::availab
 vSizeX(Parametrizable::get<T>("vSizeX")),
 vSizeY(Parametrizable::get<T>("vSizeY")),
 vSizeZ(Parametrizable::get<T>("vSizeZ")),
-useCentroid(Parametrizable::get<bool>("useCentroid")),
+summarizationMethod(Parametrizable::get<int>("summarizationMethod")),
 averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors"))
 {
 
@@ -1895,7 +1946,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
   std::vector<unsigned int> pointsToKeep;
 
   // Store voxel centroid in output
-  if (useCentroid)
+  if (summarizationMethod == 1)
   {
     // Iterate through the indices and sum values to compute centroid
     for (int p = 0; p < numPoints ; p++)
@@ -1943,6 +1994,62 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
         pointsToKeep.push_back(firstPoint);
       }
     }
+  }
+  // Store random point within cell in output
+  else if (summarizationMethod == 2)
+  {
+    // Although we don't sum over the features, we may still need to sum the descriptors
+    if (averageExistingDescriptors)
+    {
+      // Iterate through the indices and sum values to compute centroid
+      for (int p = 0; p < numPoints ; p++)
+      {
+        unsigned int idx = indices[p];
+        unsigned int firstPoint = (*voxels)[idx].firstPoint;
+
+        // If this is the first point in the voxel, leave as is
+        // if not sum up this point for centroid calculation
+        if (firstPoint != p)
+        {
+          for (int d = 0; d < descDim; d++ )
+          {
+            cloud.descriptors(d,firstPoint) += cloud.descriptors(d,p);
+          }
+        }
+      }
+    }
+
+    for (int idx = 0; idx < numVox; idx++)
+    {
+      unsigned int numPoints = (*voxels)[idx].numPoints;
+      unsigned int firstPoint = (*voxels)[idx].firstPoint;
+
+      if (numPoints > 0)
+      {
+        // get back voxel indices in grid format
+        // If we are in the last division, the voxel is smaller in size
+        // We adjust the center as from the end of the last voxel to the bounding area
+
+        // choose random point in voxel
+        int randomIndex = std::rand() % numPoints;
+        if (featDim == 4)
+        {
+
+          cloud.features(3,firstPoint) = cloud.features(3,randomIndex);
+        }
+        cloud.features(1,firstPoint) = cloud.features(3,randomIndex);
+        cloud.features(2,firstPoint) = cloud.features(3,randomIndex);
+
+        // Descriptors : normalize if we are averaging or keep as is
+        if (averageExistingDescriptors) {
+          for ( int d = 0; d < descDim; d++ )
+            cloud.descriptors(d,firstPoint) /= numPoints;
+        }
+
+        pointsToKeep.push_back(firstPoint);
+      }
+    }
+
   }
   else
   {

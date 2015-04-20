@@ -28,7 +28,7 @@ We will now implement the voxel grid within the framework of libpointmatcher.  O
 |vSizeX     |Size of the voxel along the x-axis | 1.0 | -inf to inf|
 |vSizeY     |Size of the voxel along the y-axis | 1.0 | -inf to inf|
 |vSizeZ     |Size of the voxel along the z-axis | 1.0 | -inf to inf|
-|useCentroid|If 1, down-sample by using the centroid of each voxel.  If 0, use the voxel center | 1 | 1 or 0|
+|summarizationMethod|If 2, use random point in cell. If 1 , down-sample by using centroid of voxel cell.  If 0, use center of voxel cell. | 1 | 2 or 1 or 0|
 |averageExistingDescriptors|If 1, descriptors are down-sampled by taking their average in the voxel.  If 0, we use the descriptors from the first point found in the voxel | 1 | 1 or 0|
 
 ### Declaration
@@ -60,7 +60,7 @@ inline static const ParametersDoc availableParameters()
 			( "vSizeX", "Dimension of each voxel cell in x direction", "1.0", "-inf", "inf", &P::Comp<T> )
 			( "vSizeY", "Dimension of each voxel cell in y direction", "1.0", "-inf", "inf", &P::Comp<T> )
 			( "vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "-inf", "inf", &P::Comp<T> )
-			( "useCentroid", "If 1 (true), down-sample by using centroid of voxel cell.  If false (0), use center of voxel cell.", "1", "0", "1", P::Comp<bool> )
+			( "summarizationMethod", "If 2, use random point in cell. If 1 , down-sample by using centroid of voxel cell.  If 0, use center of voxel cell.", "1", "0", "2", P::Comp<int> )
 			( "averageExistingDescriptors", "whether the filter average the descriptor values in a voxel or use a single value", "1", "0", "1", &P::Comp<T> )
 		;
 	}
@@ -81,7 +81,7 @@ VoxelGridDataPointsFilter(const Parameters& params);
 const T vSizeX;
 const T vSizeY;
 const T vSizeZ;
-const bool useCentroid;
+const int summarizationMethod;
 const bool averageExistingDescriptors;
 ```
 
@@ -235,7 +235,7 @@ Each voxel is identified by a unique linear index.  If i,j,k represent the voxel
 std::vector<unsigned int> pointsToKeep;
 
 // Store voxel centroid in output
-if (useCentroid)
+if (summarizationMethod == 1)
 {
     // Iterate through the indices and sum values to compute centroid
     for (int p = 0; p < numPoints ; p++)

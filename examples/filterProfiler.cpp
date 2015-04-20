@@ -24,21 +24,21 @@ int main(int argc, char *argv[])
 
 	if (argc < 2 || argc > 3)
 		{
-	        std::cerr << "USAGE: filterProfiler <path_to_input_cloud> <useCentroids (optional) 1 or 0>" << std::endl;
+	        std::cerr << "USAGE: filterProfiler <path_to_input_cloud> <summarizationMethod (optional) 2 or 1 or 0>" << std::endl;
 	        return -1;
 		}
 
-	char* useCentroid;
+	int* summarizationMethod;
 	if (argc == 3) {
-		if (strcmp(argv[2],"1") != 0 && strcmp(argv[2],"0")) {
-			cerr << "param useCentroid must be 1 or 0" << endl;
+		if (strcmp(argv[2],"2") != 0 && strcmp(argv[2],"1") != 0 && strcmp(argv[2],"0")) {
+			cerr << "param summarizationMethod must be 2 or 1 or 0" << endl;
 			return -1;
 		} else
 		{
-			useCentroid = argv[2];
+		  summarizationMethod = argv[2];
 		}
 	} else {
-		useCentroid = "1";
+	  summarizationMethod = "1";
 	}
 
 		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
@@ -75,12 +75,12 @@ int main(int argc, char *argv[])
 						("vSizeX", "0.2")
 						("vSizeY", "0.2")
 						("vSizeZ", "0.2")
-						("useCentroid",useCentroid)
+						("summarizationMethod",summarizationMethod)
 						("averageExistingDescriptors","0")
 				)
 		);
 
-		cout << "starting voxel grid sample filter, useCentroid: " << useCentroid << endl;
+		cout << "starting voxel grid sample filter, summarizationMethod: " << summarizationMethod << endl;
 		time_a = clock();
 		voxelf->inPlaceFilter(in);
 		time_b = clock();
