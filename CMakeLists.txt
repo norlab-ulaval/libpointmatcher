@@ -34,6 +34,31 @@ if( BUILD_32 )
 	SET(CMAKE_CXX_FLAGS "-m32")
 endif( BUILD_32 )
 
+# Ensure proper build type
+if (NOT CMAKE_BUILD_TYPE)
+  message("-- No build type specified; defaulting to CMAKE_BUILD_TYPE=Release.")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+    FORCE)
+else (NOT CMAKE_BUILD_TYPE)
+  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message("\n=================================================================================")
+    message("\n-- Build type: Debug. Performance will be terrible!")
+    message("-- Add -DCMAKE_BUILD_TYPE=Release to the CMake command line to get an optimized build.")
+    message("\n=================================================================================")
+  endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+endif (NOT CMAKE_BUILD_TYPE)
+
+
+#================= extra building definitions ==============================
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_definitions(-O3)
+endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+# For Windows
+if( MSVC ) # VS2012 does not support tuples correctly yet
+	add_definitions( /D _VARIADIC_MAX=10 )
+endif()
 
 #======================= installation =====================================
 
@@ -86,12 +111,10 @@ find_path(EIGEN_INCLUDE_DIR Eigen/Core
 )
 
 # nabo
-find_path(NABO_INCLUDE_DIR nabo/nabo.h
-	/usr/local/include ${LIBNABO_INSTALL_DIR}/include
-)
-find_library(NABO_LIBRARY NAMES libnabo.a nabo PATHS
-	/usr/local/lib ${LIBNABO_INSTALL_DIR}/lib
-)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LIBNABO_INSTALL_DIR}/share/libnabo/cmake/")
+find_package(libnabo)
+#include(libnaboConfig)
+include_directories(${libnabo_INCLUDE_DIRS})
 
 # optionally, look for OpenCL library
 set(USE_OPEN_CL "false" CACHE BOOL "Set to ON to look for OpenCL, if your libnabo was compiled with CL support")
@@ -144,7 +167,7 @@ if (POSIX_TIMERS AND NOT APPLE)
 endif (POSIX_TIMERS AND NOT APPLE)
 
 # include all libs so far
-include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${NABO_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 add_definitions(-Wall)
 
@@ -189,7 +212,7 @@ else(SHARED_LIBS)
         add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 endif(SHARED_LIBS)
-target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES})
+target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
 # create doc before installing
@@ -222,50 +245,72 @@ add_subdirectory(evaluations)
 enable_testing()
 add_subdirectory(utest)
 
-#=============================================
-# to allow find_package() on pointmatcher
-#=============================================
+#=================== allow find_package() =========================
+# 
+# the following case be used in an external project requiring libnabo:
+#  ...
+#  find_package(libpointmatcher) 
+#  include_directories(${libpointmatcher_INCLUDE_DIRS}) 
+#  target_link_libraries(executableName ${libpointmatcher_LIBRARIES})
+#  ...
 
+# 1- local build #
+
+# Register the local build in case one doesn't use "make install"
 export(PACKAGE libpointmatcher)
 
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
-
-# Create the libpointmatcherConfig.cmake and libpointmatcherConfigVersion files
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
    "${INSTALL_INCLUDE_DIR}")
-# ... for the build tree
+
+# Create variable for the local build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+
+# Create variable with the library location
 get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
+
+# Configure config file for local build tree
 configure_file(libpointmatcherConfig.cmake.in
   "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" @ONLY)
 
-# Change variables for the install tree
+# 2- installation build #
+
+# Change the include location for the case of an install location
 set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
+
+#FIXME: this will only be applied to installed files. Confirm that we want that.
 # gather all the includes but remove ones in the source tree
 # because we added an include for the local yaml-cpp-pm we should also remove it
 list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
 
+# Change the library location for an install location
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
 set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
 
+# We put the generated file for installation in a different repository (i.e., ./CMakeFiles/)
 configure_file(libpointmatcherConfig.cmake.in
   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" @ONLY)
 
-# Generate cmake for versionning
+# The same versioning file can be used for both cases
 configure_file(libpointmatcherConfigVersion.cmake.in
   "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" @ONLY)
  
+
 # Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
 install(FILES
    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
 	 "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
 		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
-
-# For Windows
-if( MSVC ) # VS2012 does not support tuples correctly yet
-	add_definitions( /D _VARIADIC_MAX=10 )
-endif()
+# TODO: confirm that the following line is useless
+#install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
 
 
+#====================== uninstall target ===============================
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)

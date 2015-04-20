@@ -10,7 +10,7 @@
 Note: we only support 64-bit systems because of some issues with Eigen. 
 
 ## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu)
-A pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
+We recommand to compile from source to access the latest bug fixes, but for convenience a pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
 
 ```
 sudo apt-get install libpointmatcher-dev
@@ -97,7 +97,7 @@ sudo make install
 This will compile libnabo in a `/build` directory and install it on your system.
 
 *Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags.
-
+<!--
 ### 3. Installing yaml-cpp 0.3.0 (Optional)
 Configuration files can be managed using YAML in libpointmatcher.  This allows users to edit configuration files in a readable format.  To support this, you need to install [yaml-cpp](http://code.google.com/p/yaml-cpp/).  **It is important that you install the older version (0.3.0) of lib-yaml or you will not be able to install Pointmatcher.**  If you are using versions of Ubuntu newer than 12.04, see the warning below. Either compile and install from the source or install package by running:
 
@@ -107,6 +107,7 @@ sudo apt-get install libyaml-cpp-dev
 
 #### Warning for users of Ubuntu 14.04 (Trusty Tahr) or more recent versions
 The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is so far only compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
+-->
 
 ### 4. Compiling the Documentation
 Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:

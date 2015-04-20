@@ -473,9 +473,13 @@ template<typename T>
 const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getMap() const
 {
 	DataPoints globalMap(mapPointCloud);
-	const int dim(mapPointCloud.features.rows());
-	const Vector meanMapNonHomo(T_refIn_refMean.block(0,dim-1, dim-1, 1));
-	globalMap.features.topRows(dim-1).colwise() += meanMapNonHomo;
+	if(this->hasMap())
+	{
+		const int dim(mapPointCloud.features.rows());
+		const Vector meanMapNonHomo(T_refIn_refMean.block(0,dim-1, dim-1, 1));
+		globalMap.features.topRows(dim-1).colwise() += meanMapNonHomo;
+	}
+
 	return globalMap;
 }
 
@@ -519,7 +523,15 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	this->inspector->init();
 	
-	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn);
+	// Apply reference filters
+	// reference is express in frame <refIn>
+	DataPoints reference(mapPointCloud);
+	this->referenceDataPointsFilters.init();
+	this->referenceDataPointsFilters.apply(reference);
+	
+	this->matcher->init(reference);
+	
+	return this->computeWithTransformedReference(cloudIn, reference, T_refIn_refMean, T_refIn_dataIn);
 }
 
 template struct PointMatcher<float>::ICPSequence;
