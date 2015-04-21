@@ -254,8 +254,6 @@ struct DataPointsFiltersImpl
     static Eigen::Matrix<T,3,1> sortEigenValues(const Vector eigenVa);
     static T computeDensity(const Matrix NN);
     static Vector serializeEigVec(const Matrix eigenVe);
-    static Vector calculateAngles(const Matrix points);
-    static Vector calculateRadii(const Matrix points);
   };
 
   //! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
@@ -496,6 +494,8 @@ struct DataPointsFiltersImpl
     virtual DataPoints filter(const DataPoints& input);
     virtual void inPlaceFilter(DataPoints& cloud);
     typename PointMatcher<T>::Vector serializeGestaltMatrix(const Matrix gestaltFeatures) const;
+    typename PointMatcher<T>::Vector calculateAngles(const Matrix points) const;
+    typename PointMatcher<T>::Vector calculateRadii(const Matrix points) const;
 
 
    protected:

@@ -653,28 +653,6 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPoin
 }
 
 template<typename T>
-typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::calculateAngles(const Matrix points)
-{
-  Vector angles(points.cols());
-  for (size_t i = 0; i<points.cols(); ++i) {
-    angles(i) = atan2(points(0,i), points(1,i));
-    if (angles(i) < 0)
-      angles(i) += 2 * M_PI;
-  }
-  return angles;
-}
-
-template<typename T>
-typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::calculateRadii(const Matrix points)
-{
-  Vector radii(points.cols());
-  for (size_t i = 0; i<points.cols(); ++i) {
-    radii(i) = sqrt(points(0,i) * points(0,i) + points(1,i) * points(1,i));
-  }
-  return radii;
-}
-
-template<typename T>
 T DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::computeDensity(const Matrix NN)
 {
 	//volume in meter
@@ -1731,7 +1709,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       Eigen::Matrix<T,3,1> eigenVaSort = SurfaceNormalDataPointsFilter::sortEigenValues(eigenVa);
       double planarity = 2 * (eigenVaSort(1) - eigenVaSort(0))/eigenVaSort.sum();
       double cylindricality = (eigenVaSort(2) - eigenVaSort(1))/eigenVaSort.sum();
-      // discard keyoints with high planarity
+      // discard keypoints with high planarity
       if(planarity > 0.9) {
         data.unfitPointsCount += colCount;
         return;
@@ -1744,15 +1722,14 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
         data.warpedXYZ->col(i) = newBasis * data.features.block(0,i,3,1);
       }
     }
-
   }
 
   Vector angles, radii, heights;
   Matrix gestaltMeans(4, 8), gestaltVariances(2, 8), numOfValues(4, 8);
   if(keepGestaltFeatures) {
     // calculate the polar coordinates of points
-    angles = SurfaceNormalDataPointsFilter::calculateAngles(*data.warpedXYZ);
-    radii = SurfaceNormalDataPointsFilter::calculateRadii(*data.warpedXYZ);
+    angles = GestaltDataPointsFilter::calculateAngles(*data.warpedXYZ);
+    radii = GestaltDataPointsFilter::calculateRadii(*data.warpedXYZ);
     heights = data.warpedXYZ->row(2);
     // sort points into Gestalt bins
     T angularBinWidth = M_PI/4;
@@ -1855,6 +1832,28 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilt
         gestaltFeatures.row(k).transpose();
     }
   return output;
+}
+
+template<typename T>
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateAngles(const Matrix points) const
+{
+  Vector angles(points.cols());
+  for (size_t i = 0; i<points.cols(); ++i) {
+    angles(i) = atan2(points(0,i), points(1,i));
+    if (angles(i) < 0)
+      angles(i) += 2 * M_PI;
+  }
+  return angles;
+}
+
+template<typename T>
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateRadii(const Matrix points) const
+{
+  Vector radii(points.cols());
+  for (size_t i = 0; i<points.cols(); ++i) {
+    radii(i) = sqrt(points(0,i) * points(0,i) + points(1,i) * points(1,i));
+  }
+  return radii;
 }
 
 template struct DataPointsFiltersImpl<float>::GestaltDataPointsFilter;
