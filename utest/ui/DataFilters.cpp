@@ -280,7 +280,6 @@ TEST_F(DataFilterTest, GestaltDataPointsFilter)
 {
   // This filter create descriptor AND subsample
   params = map_list_of
-    ("knn", "5")
     ("averageExistingDescriptors", "1")
     ("keepNormals", "1")
     ("keepEigenValues", "1")

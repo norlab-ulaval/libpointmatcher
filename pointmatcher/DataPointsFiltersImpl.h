@@ -484,7 +484,6 @@ struct DataPointsFiltersImpl
     const T maxTimeWindow;
     const bool averageExistingDescriptors;
     const bool keepNormals;
-    const bool keepDensities;
     const bool keepEigenValues;
     const bool keepEigenVectors;
     const bool keepCovariances;
@@ -513,10 +512,8 @@ struct DataPointsFiltersImpl
       Matrix& descriptors;
       Uint64Matrix& times;
       boost::optional<View> normals;
-      boost::optional<View> densities;
       boost::optional<View> eigenValues;
       boost::optional<View> eigenVectors;
-      boost::optional<View> weights;
       boost::optional<View> covariance;
       boost::optional<View> means;
       boost::optional<View> gestaltMeans;

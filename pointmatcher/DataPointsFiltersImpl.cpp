@@ -1474,7 +1474,6 @@ maxBoxDim(Parametrizable::get<T>("maxBoxDim")),
 maxTimeWindow(Parametrizable::get<T>("maxTimeWindow")),
 averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
 keepNormals(Parametrizable::get<bool>("keepNormals")),
-keepDensities(Parametrizable::get<bool>("keepDensities")),
 keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
 keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors")),
 keepCovariances(Parametrizable::get<bool>("keepCovariances")),
@@ -1589,8 +1588,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
       cloud.descriptors.col(i) = cloud.descriptors.col(k);
     if(keepNormals)
       buildData.normals->col(i) = buildData.normals->col(k);
-    if(keepDensities)
-      (*buildData.densities)(0,i) = (*buildData.densities)(0,k);
     if(keepEigenValues)
       buildData.eigenValues->col(i) = buildData.eigenValues->col(k);
     if(keepEigenVectors)
