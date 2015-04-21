@@ -1727,7 +1727,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       newBasis << newX(0), newY(0), up(0),
           newX(1), newY(1), up(1),
           newX(2), newY(2), up(2);
-      //    std::cout << "new basis" <<std::endl << data.features.block(0,i,3,1) * newBasis.inverse() << std::endl;
+
       Eigen::Matrix<T,3,1> eigenVaSort = SurfaceNormalDataPointsFilter::sortEigenValues(eigenVa);
       double planarity = 2 * (eigenVaSort(1) - eigenVaSort(0))/eigenVaSort.sum();
       double cylindricality = (eigenVaSort(2) - eigenVaSort(1))/eigenVaSort.sum();
@@ -1739,7 +1739,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       // TODO: also discard points with bad x-axis direction
 
       // define features in new basis that is oriented with the covariance
-
       // TODO: verify frames:
       for (int i = 0; i < colCount; ++i) {
         data.warpedXYZ->col(i) = newBasis * data.features.block(0,i,3,1);
@@ -1752,10 +1751,9 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
   Matrix gestaltMeans(4, 8), gestaltVariances(2, 8), numOfValues(4, 8);
   if(keepGestaltFeatures) {
     // calculate the polar coordinates of points
-    // TODO input must be the warped features (warpedXYZ) not the plain features; x,y is enough; heights is not really needed
-    angles = SurfaceNormalDataPointsFilter::calculateAngles(data.features.block(0,0,2,colCount));
-    radii = SurfaceNormalDataPointsFilter::calculateRadii(data.features.block(0,0,2,colCount));
-    heights = data.features.block(2,0,2,colCount);
+    angles = SurfaceNormalDataPointsFilter::calculateAngles(*data.warpedXYZ);
+    radii = SurfaceNormalDataPointsFilter::calculateRadii(*data.warpedXYZ);
+    heights = data.warpedXYZ->row(2);
     // sort points into Gestalt bins
     T angularBinWidth = M_PI/4;
     T radialBinWidth = radius/4;
