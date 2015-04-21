@@ -82,6 +82,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, VoxelGridDataPointsFilter, typename DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, CutAtDescriptorThresholdDataPointsFilter, typename DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter)
   ADD_TO_REGISTRAR(DataPointsFilter, ElipsoidsDataPointsFilter, typename DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter)
+  ADD_TO_REGISTRAR(DataPointsFilter, GestaltDataPointsFilter, typename DataPointsFiltersImpl<T>::GestaltDataPointsFilter)
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)

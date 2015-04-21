@@ -257,7 +257,39 @@ TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
+}
 
+TEST_F(DataFilterTest, ElipsoidsDataPointsFilter)
+{
+  // This filter create descriptor AND subsample
+  params = map_list_of
+    ("knn", "5")
+    ("averageExistingDescriptors", "1")
+    ("keepNormals", "1")
+    ("keepDensities", "1")
+    ("keepEigenValues", "1")
+    ("keepEigenVectors", "1")
+  ;
+
+  addFilter("ElipsoidsDataPointsFilter", params);
+  validate2dTransformation();
+  validate3dTransformation();
+}
+
+TEST_F(DataFilterTest, GestaltDataPointsFilter)
+{
+  // This filter create descriptor AND subsample
+  params = map_list_of
+    ("knn", "5")
+    ("averageExistingDescriptors", "1")
+    ("keepNormals", "1")
+    ("keepEigenValues", "1")
+    ("keepEigenVectors", "1")
+    ("keepGestaltFeatures", "1")
+  ;
+  addFilter("GestaltDataPointsFilter", params);
+  validate2dTransformation();
+  validate3dTransformation();
 }
 
 TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
