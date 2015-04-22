@@ -19,8 +19,8 @@ libpointmatcher depends on:
  
 and was compiled on:
   * [Ubuntu](/doc/Compilation.md)
-  * [Windows](/doc/CompilationWindows.md)
   * [Mac OS X](/doc/CompilationMac.md)
+  * [Windows](/doc/CompilationWindows.md) (partially supported)
 
 libpointmatcher is being developed by [François Pomerleau](mailto:f.pomerleau@gmail.com) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
