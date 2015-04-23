@@ -153,3 +153,14 @@ grep --version
     ```
     
     Note that the flag /m:X defines the number of core to use.
+
+## Reporting Issues
+
+Currently, we don't have a developer fully supporting compilation on Windows. If you can help refreshing this documentation, your help is more than welcome.
+
+Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side.
+
+## Limited version of libpointmatcher in `C#`
+
+The user braddodson ported a version of libpointmacher with a limited set of features here: https://github.com/braddodson/pointmatcher.net
+
