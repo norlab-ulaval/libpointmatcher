@@ -2477,22 +2477,24 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
   else if (summarizationMethod == 2)
   {
     // Although we don't sum over the features, we may still need to sum the descriptors
-    if (averageExistingDescriptors)
-    {
-      // Iterate through the indices and sum values to compute centroid
-      for (int p = 0; p < numPoints ; p++)
-      {
-        unsigned int idx = indices[p];
-        unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
-        // If this is the first point in the voxel, leave as is
-        // if not sum up this point for centroid calculation
-        if (firstPoint != p)
+    // Iterate through the indices and sum values to compute averaged descriptor
+    for (int p = 0; p < numPoints ; p++)
+    {
+      unsigned int idx = indices[p];
+      unsigned int firstPoint = (*voxels)[idx].firstPoint;
+
+      // Choose random point in voxel
+      int randomIndex = std::rand() % numPoints;
+      for (int f = 0; f < (featDim - 1); f++ )
+      {
+        cloud.features(f,firstPoint) = cloud.features(f,randomIndex);
+      }
+      if (averageExistingDescriptors)
+      {
+        for (int d = 0; d < descDim; d++ )
         {
-          for (int d = 0; d < descDim; d++ )
-          {
-            cloud.descriptors(d,firstPoint) += cloud.descriptors(d,p);
-          }
+          cloud.descriptors(d,firstPoint) += cloud.descriptors(d,p);
         }
       }
     }
@@ -2507,16 +2509,6 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
         // get back voxel indices in grid format
         // If we are in the last division, the voxel is smaller in size
         // We adjust the center as from the end of the last voxel to the bounding area
-
-        // choose random point in voxel
-        int randomIndex = std::rand() % numPoints;
-        if (featDim == 4)
-        {
-
-          cloud.features(3,firstPoint) = cloud.features(3,randomIndex);
-        }
-        cloud.features(1,firstPoint) = cloud.features(3,randomIndex);
-        cloud.features(2,firstPoint) = cloud.features(3,randomIndex);
 
         // Descriptors : normalize if we are averaging or keep as is
         if (averageExistingDescriptors) {
