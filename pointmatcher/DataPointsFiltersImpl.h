@@ -465,6 +465,8 @@ struct DataPointsFiltersImpl
       return boost::assign::list_of<ParameterDoc>
       ( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.1", "0.0000001", "0.9999999", &P::Comp<T> )
       ( "radius", "is the radius of the gestalt descriptor, will be divided into 4 circular and 8 radial bins = 32 bins", "5", "0.1", "2147483647", &P::Comp<T> )
+      ( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
+      ( "keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" )
       ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
       ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
       ( "maxTimeWindow", "maximum spread of times in a surfel", "inf" )
@@ -478,8 +480,10 @@ struct DataPointsFiltersImpl
 
     const T ratio;
     const T radius;
+    const unsigned knn;
     const T maxBoxDim;
     const T maxTimeWindow;
+    const bool keepMeans;
     const bool averageExistingDescriptors;
     const bool keepNormals;
     const bool keepEigenValues;
@@ -512,10 +516,10 @@ struct DataPointsFiltersImpl
       Matrix& descriptors;
       Uint64Matrix& times;
       boost::optional<View> normals;
+      boost::optional<View> means;
       boost::optional<View> eigenValues;
       boost::optional<View> eigenVectors;
       boost::optional<View> covariance;
-      boost::optional<View> means;
       boost::optional<View> gestaltMeans;
       boost::optional<View> gestaltVariances;
       boost::optional<View> warpedXYZ;

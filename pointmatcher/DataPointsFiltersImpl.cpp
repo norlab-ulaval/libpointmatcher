@@ -1448,8 +1448,10 @@ DataPointsFiltersImpl<T>::GestaltDataPointsFilter::GestaltDataPointsFilter(const
 DataPointsFilter("GestaltDataPointsFilter", GestaltDataPointsFilter::availableParameters(), params),
 ratio(Parametrizable::get<T>("ratio")),
 radius(Parametrizable::get<T>("radius")),
+knn(Parametrizable::get<int>("knn")),
 maxBoxDim(Parametrizable::get<T>("maxBoxDim")),
 maxTimeWindow(Parametrizable::get<T>("maxTimeWindow")),
+keepMeans(Parametrizable::get<bool>("keepMeans")),
 averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
 keepNormals(Parametrizable::get<bool>("keepNormals")),
 keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
@@ -1499,6 +1501,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
 
   // Compute space requirement for new descriptors
   const int dimNormals(featDim-1);
+  const int dimMeans(featDim-1);
   const int dimEigValues(featDim-1);
   const int dimEigVectors((featDim-1)*(featDim-1));
   const int dimCovariances((featDim-1)*(featDim-1));
@@ -1509,6 +1512,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
 
   if (keepNormals)
     cloudLabels.push_back(Label("normals", dimNormals));
+  if (keepMeans)
+    cloudLabels.push_back(Label("means", dimMeans));
   if (keepEigenValues)
     cloudLabels.push_back(Label("eigValues", dimEigValues));
   if (keepEigenVectors)
@@ -1533,6 +1538,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
   // get views
   if (keepNormals)
     buildData.normals = cloud.getDescriptorViewByName("normals");
+  if(keepMeans)
+    buildData.means = cloud.getDescriptorViewByName("means");
   if (keepEigenValues)
     buildData.eigenValues = cloud.getDescriptorViewByName("eigValues");
   if (keepEigenVectors)
@@ -1566,6 +1573,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
       cloud.descriptors.col(i) = cloud.descriptors.col(k);
     if(keepNormals)
       buildData.normals->col(i) = buildData.normals->col(k);
+    if(keepMeans)
+      buildData.means->col(i) = buildData.means->col(k);
     if(keepEigenValues)
       buildData.eigenValues->col(i) = buildData.eigenValues->col(k);
     if(keepEigenVectors)
@@ -1592,7 +1601,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
 {
   const int count(last - first);
   // TODO was <knn before - still valid?
-  if (count <= int(data.features.cols()))
+  if (count <= int(knn))
   {
     // compute for this range
     fuseRange(data, first, last);
@@ -1643,6 +1652,9 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
   const int featDim(data.features.rows());
   const int timesDim(data.times.rows());
 
+  std::cout << "features n in fuseRange: " << data.features.cols() << std::endl;
+  std::cout << "colCount: " << colCount << std::endl;
+
   // build nearest neighbors list
   Matrix d(featDim-1, colCount);
   Uint64Matrix t(1, colCount);
@@ -1658,6 +1670,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
   // todo check, that this behaves correct with times also sensecheck with the minTime and maxTime
   if (boxDim > maxBoxDim || timeBox > maxTimeWindow)
   {
+    std::cout << "kill coeffs 1" << std::endl;
     data.unfitPointsCount += colCount;
     return;
   }
@@ -1683,6 +1696,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
     }
     else
     {
+      std::cout << "kill coeffs 2" << std::endl;
       data.unfitPointsCount += colCount;
       return;
     }
@@ -1711,6 +1725,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       double cylindricality = (eigenVaSort(2) - eigenVaSort(1))/eigenVaSort.sum();
       // discard keypoints with high planarity
       if(planarity > 0.9) {
+        std::cout << "kill coeffs 3" << std::endl;
         data.unfitPointsCount += colCount;
         return;
       }
@@ -1727,6 +1742,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
   Vector angles, radii, heights;
   Matrix gestaltMeans(4, 8), gestaltVariances(2, 8), numOfValues(4, 8);
   if(keepGestaltFeatures) {
+
     // calculate the polar coordinates of points
     angles = GestaltDataPointsFilter::calculateAngles(*data.warpedXYZ);
     radii = GestaltDataPointsFilter::calculateRadii(*data.warpedXYZ);
@@ -1806,6 +1822,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       // Build new descriptors
       if(keepNormals)
         data.normals->col(k) = normal;
+      if(keepMeans)
+        data.means->col(k) = mean;
       if(keepEigenValues)
         data.eigenValues->col(k) = eigenVa;
       if(keepEigenVectors)
