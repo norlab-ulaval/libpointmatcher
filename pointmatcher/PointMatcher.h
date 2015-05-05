@@ -606,16 +606,16 @@ struct PointMatcher
 		
 		void cleanup();
 		
-        virtual void loadAdditionalYAMLContent(YAML::Node& doc);
+        virtual void loadAdditionalYAMLContent(PointMatcherSupport::YAML::Node& doc);
 		
 		template<typename R>
-        const std::string& createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
+        const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
 		template<typename R>
-        const std::string& createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
+        const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
 		
 		/*template<typename R>
-		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);*/
+		typename R::TargetType* createModuleFromRegistrar(const PointMatcherSupport::YAML::Node& module, const R& registrar);*/
 	};
 	
 	//! ICP algorithm
