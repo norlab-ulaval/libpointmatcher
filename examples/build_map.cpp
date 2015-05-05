@@ -52,7 +52,10 @@ vector<string> loadYamlFile(string listFileName);
 
 /**
   * Code example for DataFilter taking a sequence of point clouds with  
-  * their global coordinates and build a map with a fix (manageable) number of points
+  * their global coordinates and build a map with a fix (manageable) number of points.
+  * The example shows how to generate filters in the source code. 
+  * For an example generating filters using yaml configuration, see demo_cmake/convert.cpp
+  * For an example with a registration solution, see icp.cpp
   */
 int main(int argc, char *argv[])
 {
@@ -77,16 +80,10 @@ int main(int argc, char *argv[])
 	TP T = TP::Identity(4,4);
 
 	// Define transformation chain
-	PM::Transformations transformations;
-	PM::Transformation* transformPoints;
-	transformPoints = PM::get().TransformationRegistrar.create("TransformFeatures");
-	PM::Transformation* transformNormals;
-	transformNormals = PM::get().TransformationRegistrar.create("TransformNormals");
-	
-	transformations.push_back(transformPoints);
-	transformations.push_back(transformNormals);
+	PM::Transformation* transformation;
+	transformation = PM::get().REG(Transformation).create("RigidTransformation");
 
-	// Define filters for later use
+	// This filter will remove a sphere of 1 m radius. Easy way to remove the sensor self-scanning.
 	PM::DataPointsFilter* removeScanner(
 		PM::get().DataPointsFilterRegistrar.create(
 			"MinDistDataPointsFilter", 
@@ -95,6 +92,7 @@ int main(int argc, char *argv[])
 		)
 	);
 	
+	// This filter will randomly remove 35% of the points.
 	PM::DataPointsFilter* randSubsample(
 		PM::get().DataPointsFilterRegistrar.create(
 			"RandomSamplingDataPointsFilter", 
@@ -103,14 +101,16 @@ int main(int argc, char *argv[])
 		)
 	);
 
+	// For a complete description of filter, see 
+	// https://github.com/ethz-asl/libpointmatcher/blob/master/doc/Datafilters.md
 	PM::DataPointsFilter* normalFilter(
 		PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter",
 			map_list_of
-				("binSize", "10")
-				("epsilon", "5") 
-				("keepNormals","1")
-				("keepDensities","0")
+				("knn", toParam(10))
+				("epsilon", toParam(5)) 
+				("keepNormals",toParam(1))
+				("keepDensities",toParam(0))
 		)
 	);
 
@@ -118,13 +118,19 @@ int main(int argc, char *argv[])
 		PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter",
 			map_list_of
-				("binSize", "10")
+				("knn", "10")
 				("epsilon", "5") 
 				("keepNormals","0")
 				("keepDensities","1")
 		)
 	);
-
+	
+	PM::DataPointsFilter* observationDirectionFilter(
+		PM::get().DataPointsFilterRegistrar.create(
+			"ObservationDirectionDataPointsFilter"
+		)
+	);
+	
 	PM::DataPointsFilter* orientNormalFilter(
 		PM::get().DataPointsFilterRegistrar.create(
 			"OrientNormalsDataPointsFilter",
@@ -132,7 +138,7 @@ int main(int argc, char *argv[])
 				("towardCenter", "1")
 		)
 	);
-
+	
 	PM::DataPointsFilter* uniformSubsample(
 		PM::get().DataPointsFilterRegistrar.create(
 			"MaxDensityDataPointsFilter",
@@ -149,9 +155,12 @@ int main(int argc, char *argv[])
 
 	for(unsigned i=0; i < list.size(); i++)
 	{
+		cout << endl << "-----------------------------" << endl;
+		cout << "Loading " << list[i].readingFileName;
 		newCloud = DP::load(list[i].readingFileName);
 
-		cout << "Point cloud loaded" << endl;
+		cout << " found " << newCloud.getNbPoints() << " points. " << endl;
+
 	
 		if(list[i].groundTruthTransformation.rows() != 0)
 			T = list[i].groundTruthTransformation;
@@ -172,11 +181,13 @@ int main(int argc, char *argv[])
 		
 		// Build filter to remove shadow points and down-sample
 		newCloud = normalFilter->filter(newCloud);
+		newCloud = observationDirectionFilter->filter(newCloud);
 		newCloud = orientNormalFilter->filter(newCloud);
 		newCloud = shadowFilter->filter(newCloud);
 
 		// Transforme pointCloud
-		transformations.apply(newCloud, T);
+		cout << "Transformation matrix: " << endl << T << endl;
+		newCloud = transformation->compute(newCloud, T);
 
 		if(i==0)
 		{
@@ -210,21 +221,22 @@ int main(int argc, char *argv[])
 		}
 
 		stringstream outputFileNameIter;
-		outputFileNameIter << boost::filesystem::path(outputFileName).stem() << "_" << i << ".vtk";
+		outputFileNameIter << boost::filesystem::path(outputFileName).stem().c_str() << "_" << i << ".vtk";
 		
-		cout << "Number of points: " << mapCloud.features.cols() << endl;
 		mapCloud.save(outputFileNameIter.str());
-		cout << "OutputFileName: " << outputFileNameIter.str() << endl;
 	}
 	
 	mapCloud = densityFilter->filter(mapCloud);
 	mapCloud = uniformSubsample->filter(mapCloud);
 	
 	mapCloud = densityFilter->filter(mapCloud);
-	
-	cout << "Number of points: " << mapCloud.features.cols() << endl;
+
+	cout << endl ;
+	cout <<  "-----------------------------" << endl;
+	cout <<  "-----------------------------" << endl;
+	cout << "Final number of points in the map: " << mapCloud.getNbPoints() << endl;
 	mapCloud.save(outputFileName);
-	cout << "OutputFileName: " << outputFileName << endl;
+	cout << endl ;
 
 	return 0;
 }
@@ -233,7 +245,25 @@ void validateArgs(int argc, char *argv[])
 {
 	if (!(argc == 4))
 	{
-		cerr << "Error in command line, usage " << argv[0] << " listOfFiles.csv maxPoint outputFileName.vtk/.csv" << endl;
+		cerr << endl;
+		cerr << "Error in command line, usage " << argv[0] << " listOfFiles.csv maxPoint outputFileName.{vtk,csv,ply}" << endl;
+		cerr << endl;
+		cerr << "   example using file from example/data: " << endl;
+		cerr << "        " << argv[0] << " carCloudList.csv 30000 test.vtk" << endl;
+		cerr << endl;
+		cerr << "Note: the file listOfFiles.csv need to include a serialize transformation matrix. For example:" << endl;
+		cerr << "      fileName1.vtk, T00, T01, T02, T03, T10, T11, T12, T13, T20, T21, T22, T23, T30, T31, T32" << endl;
+		cerr << endl;
+		cerr << "Where Txy would be a 4x4 transformation matrix:" << endl;
+		cerr << "      [T00 T01 T02 T03] " << endl;
+		cerr << "      [T10 T11 T12 T13] " << endl;
+		cerr << "      [T20 T21 T22 T23] " << endl;
+		cerr << "      [T30 T31 T32 T33] (i.e., 0,0,0,1)" << endl;
+		cerr << endl;
+		cerr << "For more data visit:" << endl;
+		cerr << "      http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:laserregistration" << endl;
+		cerr << endl;
+
 		abort();
 	}
 }
