@@ -2,8 +2,8 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.3 (2015-05-15)
+------------------
 * Support including other versions of YAML in compilation units that also include the YAML version packed with libpointmatcher (PR #80)
 * Changed immutability concept for SupportLabel to support MSVC 2012 (#78)
 * Fixed build system related bugs (#79, #70, ..).
