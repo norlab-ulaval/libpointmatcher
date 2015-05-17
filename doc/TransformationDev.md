@@ -126,7 +126,7 @@ inline static const std::string description()
 	}
 ```
 
-After adding the class to `TransformationsImpl`, we will add it to the registry as a libpointmatcher module.  We do so by adding the following macro in [pointmatcher/registrar.cpp](/pointmatcher/registrar.cpp)
+After adding the class to `TransformationsImpl`, we will add it to the registry as a libpointmatcher module.  We do so by adding the following macro in [pointmatcher/Registry.cpp](/pointmatcher/Registry.cpp)
 
 ```cpp
 ADD_TO_REGISTRAR_NO_PARAM(Transformation, PureTranslation, typename TransformationsImpl<T>::PureTranslation)
