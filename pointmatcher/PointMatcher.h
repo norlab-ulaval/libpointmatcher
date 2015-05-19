@@ -3,7 +3,7 @@
 /*
 
 Copyright (c) 2010--2012,
-François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
+Francois Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
 You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
 
@@ -478,6 +478,7 @@ struct PointMatcher
 		
 		T getPointUsedRatio() const;
 		T getWeightedPointUsedRatio() const;
+		ErrorElements getErrorElements() const; //TODO: ensure that is return a usable value
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
 		
@@ -485,14 +486,15 @@ struct PointMatcher
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
 		
 		
-	protected:
+	//protected:
 		// helper functions
-		static Matrix crossProduct(const Matrix& A, const Matrix& B);
+		static Matrix crossProduct(const Matrix& A, const Matrix& B);//TODO: this might go in pointmatcher_support namespace
 		ErrorElements& getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
 		
 	protected:
 		T pointUsedRatio; //!< the ratio of how many points were used for error minimization
 		T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+		//TODO: standardize the use of this variable
 		ErrorElements lastErrorElements; //!< memory of the last computed error
 	};
 	

@@ -75,6 +75,14 @@ T PointMatcher<T>::ErrorMinimizer::getPointUsedRatio() const
 	return pointUsedRatio;
 }
 
+//! Return the last the ErrorElements structure that was used for error minimization.
+template<typename T>
+typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMinimizer::getErrorElements() const
+{
+	//Warning: the use of the variable lastErrorElements is not standardized yet.
+	return lastErrorElements;
+}
+
 //! Return the ratio of how many points were used (with weight) for error minimization
 template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getWeightedPointUsedRatio() const
