@@ -74,7 +74,7 @@ struct OutlierFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "maxDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>) 
+				( "maxDist", "threshold distance (Euclidean norm)", "1", "0.0000001", "inf", &P::Comp<T>) 
 			;
 		}
 		
@@ -94,7 +94,7 @@ struct OutlierFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "minDist", "threshold distance", "1", "0.0000001", "inf", &P::Comp<T>) 
+				( "minDist", "threshold distance (Euclidean norm)", "1", "0.0000001", "inf", &P::Comp<T>) 
 			;
 		}
 		
