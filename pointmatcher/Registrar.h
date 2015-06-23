@@ -52,11 +52,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	{
 		class Node;
 	}
-    namespace YAML = YAML_PM;
 #endif // HAVE_YAML_CPP
 
 namespace PointMatcherSupport
 {
+#ifdef SYSTEM_YAML_CPP
+	namespace YAML = ::YAML;
+#else
+	namespace YAML = ::YAML_PM;
+#endif
+
 	//! Retrieve name and parameters from a yaml node
 	void getNameParamsFromYAML(const YAML::Node& module, std::string& name, Parametrizable::Parameters& params);
 

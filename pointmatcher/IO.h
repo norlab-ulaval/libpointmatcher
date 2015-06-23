@@ -78,9 +78,9 @@ struct PointMatcherIO
 	//! Structure containing all information required to map external information to PointMatcher internal representation
 	struct SupportedLabel
 	{
-		const std::string internalName; //!< name used in PointMatcher
-		const std::string externalName; //!< name used in external format
-		const PMPropTypes type; //!< type of information in PointMatcher
+		std::string internalName; //!< name used in PointMatcher
+		std::string externalName; //!< name used in external format
+		PMPropTypes type; //!< type of information in PointMatcher
 
 		//! Constructor
 		SupportedLabel(const std::string& internalName, const std::string& externalName, const PMPropTypes& type);
@@ -92,11 +92,11 @@ struct PointMatcherIO
 	//! Vector containing the mapping of all external names to PointMatcher representation.
 	//! The order is important (i.e., nx before ny). This can also be used to remap 
 	//! 1D descriptor name to a better one.
-	static SupportedLabels getSupportedExternalLabels()
+	static const SupportedLabels & getSupportedExternalLabels()
 	{
 		//Can be read:
 		// (internalName, externalName, type)
-		const SupportedLabels labels = boost::assign::list_of<SupportedLabel>
+		const static SupportedLabels labels = boost::assign::list_of<SupportedLabel>
 			("x", "x", FEATURE)
 			("y", "y", FEATURE)
 			("z", "z", FEATURE)

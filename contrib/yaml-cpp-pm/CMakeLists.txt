@@ -179,7 +179,7 @@ set_target_properties(yaml-cpp-pm PROPERTIES
 if(MSVC)
 	if(NOT BUILD_SHARED_LIBS)
 		# correct library names
-		set_target_properties(yaml-cpp PROPERTIES
+		set_target_properties(yaml-cpp-pm PROPERTIES
 			DEBUG_POSTFIX "${LIB_TARGET_SUFFIX}d"
 			RELEASE_POSTFIX "${LIB_TARGET_SUFFIX}"
 			MINSIZEREL_POSTFIX "${LIB_TARGET_SUFFIX}"

@@ -2,21 +2,17 @@
 | ------------- |:-------------:| -----:|
 
 # Compiling and Installing libpointmatcher on Windows
-######Latest update March 29, 2014 by François Pomerleau
-
-## Foreword
-*The following instructions are aimed at users of Windows.  The steps from this tutorial were performed on __Windows 7__.  These instructions should be identical previous versions of Windows.*
-
 
 ## Compiling using MSVC (Microsoft Visual Studio)
 
 ### In Short...
 
-If you are used to development project, here what you need:
+If you are used to development project, here is what you need:
 
 
-| Name   | Link | Version tested|
+| Name   | Link | Version <br> (Tested March 29, 2014)|
 | ------ | ---- | ------------- |
+| Windows |     | 7              |
 |  git | <http://windows.github.com/> | v1.0 |
 |  libpointmatcher sources   | <https://github.com/ethz-asl/libpointmatcher> | |
 | libnabo sources | <https://github.com/ethz-asl/libnabo> |  |
@@ -28,7 +24,14 @@ If you are used to development project, here what you need:
 | grep tool | <http://gnuwin32.sourceforge.net/packages/grep.htm>| v2.5.4 |
 | gtest | <https://code.google.com/p/googletest/> | v1.7.0 |
 
+The rest of this tutorial will guide you through the different requirements step by step.
 
+### Install grep tool
+Install `grep` by following the instructions in <http://gnuwin32.sourceforge.net/packages/grep.htm>. You might need to modify the Path environment variables to make sure that grep can be run from anywhere. To test:
+```
+cd\
+grep --version
+```
 
 ### Building Boost
 1. Open a console that knows the path to the MSVC compiler command (cl). We suggest to use **Windows PowerShell**. An alternative is from the Start menu in the Visual Studio section; for instance for VS 2012, it is called Developer Command Prompt for VS2012.
@@ -150,3 +153,14 @@ If you are used to development project, here what you need:
     ```
     
     Note that the flag /m:X defines the number of core to use.
+
+## Reporting Issues
+
+Currently, we don't have a developer fully supporting compilation on Windows. If you can help refreshing this documentation, your help is more than welcome.
+
+Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side.
+
+## Limited version of libpointmatcher in `C#`
+
+The user braddodson ported a version of libpointmacher with a limited set of features here: https://github.com/braddodson/pointmatcher.net
+
