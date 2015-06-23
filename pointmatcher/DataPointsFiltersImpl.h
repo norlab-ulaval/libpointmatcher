@@ -466,6 +466,9 @@ struct DataPointsFiltersImpl
       ( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.1", "0.0000001", "0.9999999", &P::Comp<T> )
       ( "radius", "is the radius of the gestalt descriptor, will be divided into 4 circular and 8 radial bins = 32 bins", "5", "0.1", "2147483647", &P::Comp<T> )
       ( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
+      ( "vSizeX", "Dimension of each voxel cell in x direction", "1.0", "-inf", "inf", &P::Comp<T> )
+      ( "vSizeY", "Dimension of each voxel cell in y direction", "1.0", "-inf", "inf", &P::Comp<T> )
+      ( "vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "-inf", "inf", &P::Comp<T> )
       ( "keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" )
       ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
       ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
@@ -481,6 +484,9 @@ struct DataPointsFiltersImpl
     const T ratio;
     const T radius;
     const unsigned knn;
+    const T vSizeX;
+    const T vSizeY;
+    const T vSizeZ;
     const T maxBoxDim;
     const T maxTimeWindow;
     const bool keepMeans;
@@ -498,8 +504,8 @@ struct DataPointsFiltersImpl
     virtual DataPoints filter(const DataPoints& input);
     virtual void inPlaceFilter(DataPoints& cloud);
     typename PointMatcher<T>::Vector serializeGestaltMatrix(const Matrix gestaltFeatures) const;
-    typename PointMatcher<T>::Vector calculateAngles(const Matrix points) const;
-    typename PointMatcher<T>::Vector calculateRadii(const Matrix points) const;
+    typename PointMatcher<T>::Vector calculateAngles(const Matrix points, const Eigen::Matrix<T,3,1>) const;
+    typename PointMatcher<T>::Vector calculateRadii(const Matrix points, const Eigen::Matrix<T,3,1>) const;
 
 
    protected:
@@ -522,6 +528,7 @@ struct DataPointsFiltersImpl
       boost::optional<View> covariance;
       boost::optional<View> gestaltMeans;
       boost::optional<View> gestaltVariances;
+      boost::optional<View> gestaltShapes;
       boost::optional<View> warpedXYZ;
       int outputInsertionPoint;
       int unfitPointsCount;
@@ -554,6 +561,8 @@ struct DataPointsFiltersImpl
    protected:
     void buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const;
     void fuseRange(BuildData& data, const int first, const int last) const;
+    void fuseRanger(BuildData& data, DataPoints& input, const int first, const int last) const;
+
   };
 
   //! Reorientation of normals
