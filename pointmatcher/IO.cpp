@@ -1524,6 +1524,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			const int row = vertex->properties[propID].pmRowID;
 			const PMPropTypes type = vertex->properties[propID].pmType;
 			
+			if (vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" || vertex->properties[propID].name == "alpha") {
+				value /= 255.0;
+			}
+
 			if(type == FEATURE)
 			{
 				features(row, col) = value;

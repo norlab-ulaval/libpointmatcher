@@ -301,6 +301,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	//const int nbPtsReading = reading.features.cols();
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
+	readingFiltered = reading;
 	
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
