@@ -66,7 +66,7 @@ grep --version
 
 1. Click on the button Configure again, then on Generate. Here is an example of what your CMake should look like:
  
-	![alt text](images/win_cmake_libnabo.png "Floor plan of the apartment")
+	![alt text](images/win_cmake_libnabo.png "CMake libnabo")
 
 
 1. Locate the Microsoft Visual Studio Solution file (libnabo.sln) in the your build folder and open it. Visual Studio should open.
@@ -89,7 +89,7 @@ grep --version
 
 1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
 
-	![alt text](images/win_cmake_yaml_cpp.png "Floor plan of the apartment")
+	![alt text](images/win_cmake_yaml_cpp.png "CMake yaml-cpp")
 
 
 1. In Visual Studio, build the solution: BUILD -> Build Solution
@@ -177,7 +177,7 @@ Before reporting new building issues, have a look in the current/past list of is
 
 Special thanks to the following users in helping us with the Windows support:
 
-- kwill for keeping the documentation up-to-date and investing time to make libpointmatcher compiling on Window.
-- braddodson for porting a version of libpointmacher in `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
+- [kwill](https://github.com/kwill) for keeping the documentation up-to-date and investing time to make libpointmatcher compiling on Window.
+- [braddodson](https://github.com/braddodson) for porting a version of libpointmacher in `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
 
 
