@@ -177,7 +177,7 @@ Before reporting new building issues, have a look in the current/past list of is
 
 Special thanks to the following users in helping us with the Windows support:
 
-- [kwill](https://github.com/kwill) for keeping the documentation up-to-date and investing time to make libpointmatcher compiling on Window.
+- [kwill](https://github.com/kwill) for keeping the documentation up-to-date and investing time to make libpointmatcher compiling on Windows.
 - [braddodson](https://github.com/braddodson) for porting a version of libpointmacher in `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
 
 
