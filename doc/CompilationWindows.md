@@ -45,7 +45,7 @@ grep --version
 1. It may take a while to finish.
 
 
-### Build libnabo 
+### Build libnabo
 1. Start **CMake GUI**
 
 1. Add the path of your libnabo source folder in the field _Where is the source code_.
@@ -64,7 +64,10 @@ grep --version
 
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
 
-1. Click on the button Configure again, then on Generate
+1. Click on the button Configure again, then on Generate. Here is an example of what your CMake should look like:
+ 
+	![alt text](images/win_cmake_libnabo.png "Floor plan of the apartment")
+
 
 1. Locate the Microsoft Visual Studio Solution file (libnabo.sln) in the your build folder and open it. Visual Studio should open.
 
@@ -84,7 +87,10 @@ grep --version
 
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
 
-1. Click on the button Configure, then on Generate
+1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
+
+	![alt text](images/win_cmake_yaml_cpp.png "Floor plan of the apartment")
+
 
 1. In Visual Studio, build the solution: BUILD -> Build Solution
 
@@ -136,16 +142,20 @@ grep --version
 
 1. You will need to manually add and set the following variables:
 
-    1. **EIGEN_INCLUDE_DIR** (PATH type) to _(your eigen source folder)_
-    1. **NABO_INCLUDE_DIR** (PATH type) to _(your libnabo source folder)_
-    1. **NABO_LIBRARY** (FILEPATH type) to _(your libnabo source folder)_/build/RelWithDebInfo/nabo.lib
-    1. **libnabo_DIR** will automatically be set to your libnabo build folder
-    1. **yaml-cpp_INCLUDE_DIRS** (PATH type) to _(your yaml-cpp source folder)_
-    1. **yaml-cpp_LIBRARIES** (FILEPATH type) to _(your yaml-cpp source folder)_/build/RelWithDebInfo/libyaml-cppmd.lib
-    1. **GTEST_INCLUDE_DIR** (PATH type) to _(your gtest source folder)_
-    1. **GTEST_LIBRARY** (FILEPATH type) to _(your gtest source folder)_/build/RelWithDebInfo/gtest.lib
-    1. **GTEST_MAIN_LIBRARY** (FILEPATH type) to _(your gtest source folder)_/build/RelWithDebInfo/gtest_main.lib
+    - **EIGEN_INCLUDE_DIR** (PATH type) to _(your eigen source folder)_
+    - **NABO_INCLUDE_DIR** (PATH type) to _(your libnabo source folder)_
+    - **NABO_LIBRARY** (FILEPATH type) to _(your libnabo source folder)_/build/RelWithDebInfo/nabo.lib
+    - **libnabo_DIR** will automatically be set to your libnabo build folder
+    - **yaml-cpp_INCLUDE_DIRS** (PATH type) to _(your yaml-cpp source folder)_
+    - **yaml-cpp_LIBRARIES** (FILEPATH type) to _(your yaml-cpp source folder)_/build/RelWithDebInfo/libyaml-cppmd.lib
+    - **GTEST_INCLUDE_DIR** (PATH type) to _(your gtest source folder)_
+    - **GTEST_LIBRARY** (FILEPATH type) to _(your gtest source folder)_/build/RelWithDebInfo/gtest.lib
+    - **GTEST_MAIN_LIBRARY** (FILEPATH type) to _(your gtest source folder)_/build/RelWithDebInfo/gtest_main.lib
 
+1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
+
+	![alt text](images/win_cmake_libpointmatcher.png "CMake libpointmatcher")
+	
 1. In Visual Studio, build the solution: BUILD -> Build Solution
 
     Alternatively, you can build the solution from the command line. In _(your libpointmatcher folder)_/build:
@@ -163,7 +173,11 @@ Currently, we don't have a developer fully supporting compilation on Windows. If
 
 Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side.
 
-## Limited version of libpointmatcher in `C#`
+## Special Thanks
 
-The user braddodson ported a version of libpointmacher with a limited set of features here: https://github.com/braddodson/pointmatcher.net
+Special thanks to the following users in helping us with the Windows support:
+
+- kwill for keeping the documentation up-to-date and investing time to make libpointmatcher compiling on Window.
+- braddodson for porting a version of libpointmacher in `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
+
 
