@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_DATAPOINTSFILTERS_H
 
 #include "PointMatcher.h"
+#include "time.h"
+#include "stdlib.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -405,6 +407,7 @@ struct DataPointsFiltersImpl
 		}
 		
 		const unsigned maxCount;
+		unsigned seed;
 		
 		MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~MaxPointCountDataPointsFilter() {};

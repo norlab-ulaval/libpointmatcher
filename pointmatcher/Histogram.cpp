@@ -86,7 +86,7 @@ namespace PointMatcherSupport
 			std::cerr.fill(' ');
 			std::cerr.flags(std::ios::left);
 			std::cerr << "Histogram " << name << ":\n";
-			std::cerr << "  count: " << this->size() << ", mean: " << meanV << ", var: " << varV << ", median: " << medianV << ", min: " << minV << ", max: " << maxV << "\n";
+			std::cerr << "  count: " << this->size() << ", mean: " << meanV << ", var: " << varV << ", median: " << medianV << ", min: " << minV << ", max: " << maxV << ", lowQt: " << lowQt << ", highQt: " << highQt << ", maxBinC: " << maxBinC << "\n";
 			if(this->size() > 1)
 			{
 				for (size_t i = 0; i < binCount; ++i)
@@ -94,8 +94,10 @@ namespace PointMatcherSupport
 					const T v(minV + i * (maxV - minV) / T(binCount));
 					std::cerr << "  " << std::setw(10) << v << " (" << std::setw(6) << bins[i] << ") : ";
 					//std::cerr << (bins[i] * 60) / maxBinC << " " ;
-					for (size_t j = 0; j < (bins[i] * 60) / maxBinC; ++j)
-						std::cerr << "*";
+					if (maxBinC > 0) {
+						for (size_t j = 0; j < (bins[i] * 60) / maxBinC; ++j)
+							std::cerr << "*";
+					}
 					std::cerr << "\n";
 				}
 				std::cerr << std::endl;
