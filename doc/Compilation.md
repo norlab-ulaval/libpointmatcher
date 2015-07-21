@@ -23,7 +23,7 @@ __Note:__ we only support 64-bit systems because of some issues with Eigen. Othe
 
 The rest of this tutorial will guide you through the different requirements step by step.
 
-## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu)
+## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu) - Not recommended
 We recommand to compile from source to access the latest bug fixes, but for convenience a pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
 
 ```
