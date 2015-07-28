@@ -37,8 +37,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_DATAPOINTSFILTERS_H
 
 #include "PointMatcher.h"
-#include "time.h"
-#include "stdlib.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -392,7 +390,7 @@ struct DataPointsFiltersImpl
 	};
 	
 	//! Maximum number of points
-	struct MaxPointCountDataPointsFilter: public RandomSamplingDataPointsFilter
+	struct MaxPointCountDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
@@ -401,7 +399,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T> )
+				( "seed", "srand seed", "1", "0", "2147483647", &P::Comp<unsigned> )
 				( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<unsigned> )
 			;
 		}

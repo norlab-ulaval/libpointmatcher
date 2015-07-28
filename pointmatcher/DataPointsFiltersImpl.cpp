@@ -1056,13 +1056,13 @@ template struct DataPointsFiltersImpl<double>::RandomSamplingDataPointsFilter;
 // Constructor
 template<typename T>
 DataPointsFiltersImpl<T>::MaxPointCountDataPointsFilter::MaxPointCountDataPointsFilter(const Parameters& params):
-	RandomSamplingDataPointsFilter("MaxPointCountDataPointsFilter", MaxPointCountDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("MaxPointCountDataPointsFilter", MaxPointCountDataPointsFilter::availableParameters(), params),
 	maxCount(Parametrizable::get<unsigned>("maxCount"))
 {
 	try {
 		seed = Parametrizable::get<unsigned>("seed");
 	} catch (const InvalidParameter& e) {
-		seed = static_cast<unsigned int> (time (NULL));
+		seed = static_cast<unsigned int> (1); // rand default seed number
 	}
 }
 

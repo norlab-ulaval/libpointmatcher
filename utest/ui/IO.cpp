@@ -128,9 +128,29 @@ public:
 		ptCloud.addDescriptor(descriptorName, PM::Matrix::Random(rows, nbPts));
 	}
 
-	virtual void loadSaveTest(const string& testFileName, const int nbPts = 10)
+	virtual void loadSaveTest(const string& testFileName, bool plyFormat = false, const int nbPts = 10)
 	{
 		this->testFileName = testFileName;
+
+		if (plyFormat) {
+			// make sure randam values generated for colors are within ply format range
+			int pointCount(ptCloud.features.cols());
+			int descRows(ptCloud.descriptors.rows());
+			bool datawithColor = ptCloud.descriptorExists("color");
+			int colorStartingRow = ptCloud.getDescriptorStartingRow("color");
+			int colorEndRow = colorStartingRow + ptCloud.getDescriptorDimension("color");
+			for (int p = 0; p < pointCount; ++p)
+			{
+				for (int d = 0; d < descRows; ++d)
+				{
+					if (datawithColor && d >= colorStartingRow && d < colorEndRow) {
+						if (ptCloud.descriptors(d, p) < 0) { ptCloud.descriptors.coeffRef(d, p) = -(ptCloud.descriptors(d, p)); }
+						ptCloud.descriptors.coeffRef(d, p) = (static_cast<unsigned>(ptCloud.descriptors(d, p) * 255.0)) / 255.0;
+					}
+				}
+			}
+		}
+
 		ptCloud.save(testFileName);
 
 		ptCloudFromFile = DP::load(testFileName);
@@ -143,7 +163,11 @@ public:
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("eigVectors",9));
 		EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("eigVectors").isApprox(ptCloud.getDescriptorViewByName("eigVectors")));
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("color",4));
-		EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("color").isApprox(ptCloud.getDescriptorViewByName("color")));
+		if (plyFormat) {
+			EXPECT_TRUE(((ptCloudFromFile.getDescriptorViewByName("color") * 255.0)).isApprox((ptCloud.getDescriptorViewByName("color") * 255.0), 1.0));
+		} else {
+			EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("color").isApprox(ptCloud.getDescriptorViewByName("color")));
+		}
 
 		EXPECT_TRUE(ptCloudFromFile.features.isApprox(ptCloud.features));
 
@@ -169,7 +193,7 @@ TEST_F(IOLoadSaveTest, VTK)
 	ptCloud.addDescriptor("genericScalar", PM::Matrix::Random(1, nbPts));
 	ptCloud.addDescriptor("genericVector", PM::Matrix::Random(3, nbPts));
 
-	loadSaveTest("unit_test.vtk");
+	loadSaveTest(dataPath + "unit_test.vtk");
 
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericScalar",1));
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericVector",3));
@@ -178,15 +202,15 @@ TEST_F(IOLoadSaveTest, VTK)
 
 TEST_F(IOLoadSaveTest, PLY)
 {
-	loadSaveTest("unit_test.ply");
+	loadSaveTest(dataPath + "unit_test.ply", true);
 }
 
 TEST_F(IOLoadSaveTest, PCD)
 {
-	loadSaveTest("unit_test.pcd");
+	loadSaveTest(dataPath + "unit_test.pcd");
 }
 
 TEST_F(IOLoadSaveTest, CSV)
 {
-	loadSaveTest("unit_test.csv");
+	loadSaveTest(dataPath + "unit_test.csv");
 }
