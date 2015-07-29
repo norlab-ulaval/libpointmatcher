@@ -636,13 +636,16 @@ struct PointMatcher
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
-	
+			const DataPoints& getReadingFiltered() const { return readingFiltered; }
+
 	protected:
 		TransformationParameters computeWithTransformedReference(
 			const DataPoints& readingIn, 
 			const DataPoints& reference, 
 			const TransformationParameters& T_refIn_refMean,
 			const TransformationParameters& initialTransformationParameters);
+
+		DataPoints readingFiltered;
 	};
 	
 	//! ICP alogrithm, taking a sequence of clouds and using a map

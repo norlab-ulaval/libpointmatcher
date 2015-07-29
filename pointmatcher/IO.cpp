@@ -1524,6 +1524,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			const int row = vertex->properties[propID].pmRowID;
 			const PMPropTypes type = vertex->properties[propID].pmType;
 			
+			if (vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" || vertex->properties[propID].name == "alpha") {
+				value /= 255.0;
+			}
+
 			if(type == FEATURE)
 			{
 				features(row, col) = value;
@@ -1618,9 +1622,17 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 			if(!(f == featCount-2 && descRows == 0))
 				ofs << " ";
 		}
+
+		bool datawithColor = data.descriptorExists("color");
+		int colorStartingRow = data.getDescriptorStartingRow("color");
+		int colorEndRow = colorStartingRow + data.getDescriptorDimension("color");
 		for (int d = 0; d < descRows; ++d)
 		{
-			ofs << data.descriptors(d, p);
+			if (datawithColor && d >= colorStartingRow && d < colorEndRow) {
+				ofs << static_cast<unsigned>(data.descriptors(d, p) * 255.0);
+			} else {
+				ofs << data.descriptors(d, p);
+			}
 			if(d != descRows-1)
 				ofs << " ";
 		}
