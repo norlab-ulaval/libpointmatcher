@@ -343,6 +343,10 @@ set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 # because we added an include for the local yaml-cpp-pm we should also remove it
 list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
 
+if(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
+  list(REMOVE_ITEM EXTERNAL_LIBS ${yaml-cpp-pm_LIB})
+endif(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
+
 # Change the library location for an install location
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
 set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
