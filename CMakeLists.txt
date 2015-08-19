@@ -357,10 +357,12 @@ configure_file(libpointmatcherConfigVersion.cmake.in
  
 
 # Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
-install(FILES
-   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
-	 "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
-		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+install(
+  FILES
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
+    "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
+  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev
+)
 
 # useful for TRADR european project. TODO: check to use the other install
 install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
