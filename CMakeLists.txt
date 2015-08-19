@@ -365,8 +365,12 @@ install(
 )
 
 # useful for TRADR european project. TODO: check to use the other install
-install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
-
+# required for ros deployment, too
+install (
+  FILES 
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" 
+  DESTINATION "share/${PROJECT_NAME}/cmake/"
+)
 
 #====================== uninstall target ===============================
 configure_file(
