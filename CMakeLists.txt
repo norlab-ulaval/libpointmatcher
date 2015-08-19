@@ -369,6 +369,7 @@ install(
 install (
   FILES 
     "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" 
+    "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" 
   DESTINATION "share/${PROJECT_NAME}/cmake/"
 )
 
