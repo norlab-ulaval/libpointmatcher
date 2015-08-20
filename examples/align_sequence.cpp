@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
 	typedef PointMatcherIO<float> PMIO;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DP;
-	typedef Parametrizable::Parameter Parameter;
 	
 	const int maxMapPointCount = 200000;
 
