@@ -343,6 +343,10 @@ set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 # because we added an include for the local yaml-cpp-pm we should also remove it
 list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
 
+if(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
+  list(REMOVE_ITEM EXTERNAL_LIBS ${yaml-cpp-pm_LIB})
+endif(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
+
 # Change the library location for an install location
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
 set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
@@ -357,14 +361,21 @@ configure_file(libpointmatcherConfigVersion.cmake.in
  
 
 # Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
-install(FILES
-   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
-	 "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
-		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+install(
+  FILES
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
+    "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
+  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev
+)
 
 # useful for TRADR european project. TODO: check to use the other install
-install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
-
+# required for ros deployment, too
+install (
+  FILES 
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" 
+    "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" 
+  DESTINATION "share/${PROJECT_NAME}/cmake/"
+)
 
 #====================== uninstall target ===============================
 configure_file(
