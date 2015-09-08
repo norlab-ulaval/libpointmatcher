@@ -157,19 +157,19 @@ public:
 
 		EXPECT_TRUE(ptCloudFromFile.features.cols() == ptCloud.features.cols());
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("normals",3));
-		//EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("normals").isApprox(ptCloud.getDescriptorViewByName("normals")));
+		EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("normals").isApprox(ptCloud.getDescriptorViewByName("normals")));
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("eigValues",3));
-		//EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("eigValues").isApprox(ptCloud.getDescriptorViewByName("eigValues")));
+		EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("eigValues").isApprox(ptCloud.getDescriptorViewByName("eigValues")));
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("eigVectors",9));
-		//EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("eigVectors").isApprox(ptCloud.getDescriptorViewByName("eigVectors")));
+		EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("eigVectors").isApprox(ptCloud.getDescriptorViewByName("eigVectors")));
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("color",4));
 		if (plyFormat) {
-			//EXPECT_TRUE(((ptCloudFromFile.getDescriptorViewByName("color") * 255.0)).isApprox((ptCloud.getDescriptorViewByName("color") * 255.0), 1.0));
+			EXPECT_TRUE(((ptCloudFromFile.getDescriptorViewByName("color") * 255.0)).isApprox((ptCloud.getDescriptorViewByName("color") * 255.0), 1.0));
 		} else {
-			//EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("color").isApprox(ptCloud.getDescriptorViewByName("color")));
+			EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("color").isApprox(ptCloud.getDescriptorViewByName("color")));
 		}
 
-		//EXPECT_TRUE(ptCloudFromFile.features.isApprox(ptCloud.features));
+		EXPECT_TRUE(ptCloudFromFile.features.isApprox(ptCloud.features));
 
 	}
 
