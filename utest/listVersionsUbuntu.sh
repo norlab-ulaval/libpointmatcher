@@ -4,7 +4,7 @@ echo -e "\n Copy-paste those information when reporting a bug in libpointmatcher
 
 echo -e "Name \t\t| Version"
 echo -e "----------------|-------------------------------"
-echo -e "ubuntu: \t|" $(lsb_release -r)
+echo -e "ubuntu: \t|" $(lsb_release -d)
 echo -e "architecture: \t|" $(getconf LONG_BIT)"-bit"
 echo -e "gcc: \t\t|" $(gcc --version | grep gcc)
 echo -e "git: \t\t|" $(git --version)
