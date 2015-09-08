@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EIGEN_USE_NEW_STDVECTOR
 #define EIGEN_USE_NEW_STDVECTOR
 #endif // EIGEN_USE_NEW_STDVECTOR
-#define EIGEN2_SUPPORT
+//#define EIGEN2_SUPPORT
 #include "Eigen/StdVector"
 #include "Eigen/Core"
 #include "Eigen/Geometry"

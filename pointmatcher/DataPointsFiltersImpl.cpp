@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Eigenvalues
 #include "Eigen/QR"
+#include "Eigen/Eigenvalues"
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -396,7 +397,7 @@ void DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::inPlaceFilter(
 	const int nbPointsIn = cloud.features.cols();
 	View densities = cloud.getDescriptorViewByName("densities");
 	const T lastDensity = densities.maxCoeff();
-	const int nbSaturatedPts = (densities.cwise() == lastDensity).count();
+	const int nbSaturatedPts = (densities.array() == lastDensity).count();
 
 	// fill cloud values
 	int j = 0;
