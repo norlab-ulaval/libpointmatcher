@@ -180,13 +180,19 @@ sudo make install
 ```
 
 #Having problems?
-Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using.
+Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/ethz-asl/libpointmatcher/issues). You may need to ensure that the file is executable:
 
-Here are useful commands for the different version:
+```
+chmod +x ./utest/listVersionsUbuntu.sh 
+./utest/listVersionsUbuntu.sh 
+```
+
+
+Here are the list of useful commands used in the bash script:
 
 Ubuntu version:
 
-    lsb_release -a
+    lsb_release -r
 
 32-bit or 64-bit architecture:
 
