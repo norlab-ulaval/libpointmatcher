@@ -47,12 +47,12 @@ TEST_F(MatcherTest, KDTreeMatcher)
 		{
 			for(unsigned k=0; k < maxDist.size(); k++)
 			{
-				params = map_list_of
-					("knn", toParam(knn[i])) // remove end parenthesis for bug
-					("epsilon", toParam(epsilon[j]))
-					("searchType", "1")
-					("maxDist", toParam(maxDist[k]))
-				;
+				params = PM::Parameters();
+				params["knn"] = toParam(knn[i]); // remove end parenthesis for bug
+				params["epsilon"] = toParam(epsilon[j]);
+				params["searchType"] = "1";
+				params["maxDist"] = toParam(maxDist[k]);
+				
 			
 				addFilter("KDTreeMatcher", params);
 				validate2dTransformation();
