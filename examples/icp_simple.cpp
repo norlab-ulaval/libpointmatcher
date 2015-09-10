@@ -53,7 +53,6 @@ int main(int argc, char *argv[])
 	
 	typedef PointMatcher<float> PM;
 	typedef PM::DataPoints DP;
-	typedef PM::Parameters Parameters;
 	
 	// Load point clouds
 	const DP ref(DP::load(argv[1]));

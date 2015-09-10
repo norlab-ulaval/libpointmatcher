@@ -386,7 +386,6 @@ void DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::inPlaceFilter(
 	DataPoints& cloud)
 {
 	typedef typename DataPoints::View View;
-	typedef typename DataPoints::ConstView ConstView;
 
 	// Force densities to be computed
 	if (!cloud.descriptorExists("densities"))
@@ -668,7 +667,6 @@ template<typename T>
 void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::inPlaceFilter(
 	DataPoints& cloud)
 {
-	typedef Matrix Features;
 	typedef typename DataPoints::View View;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
