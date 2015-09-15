@@ -132,7 +132,7 @@ struct OutlierFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "ratio", "percentage to keep", "0.85", "0.0000001", "0.9999999", &P::Comp<T>)
+				( "ratio", "percentage to keep", "0.85", "0.0000001", "1.0", &P::Comp<T>)
 			;
 		}
 		

@@ -182,7 +182,7 @@ struct DataPointsFiltersImpl
 		{
 			return boost::assign::list_of<ParameterDoc>
 				( "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2", &P::Comp<unsigned> )
-				( "ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> )
+				( "ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "1.0", &P::Comp<T> )
 			;
 		}
 		
@@ -265,7 +265,7 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> )
+				( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "1.0", &P::Comp<T> )
 				( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
 				( "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> )
 				( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
