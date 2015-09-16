@@ -258,6 +258,14 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		{
 			mOut = transform.matrix();
 		}
+
+	}
+
+	if (mOut != mOut) 
+	{
+		// Degenerate situation, for example, when all residuals are zero. The matrix
+		// is full of NaNs. The correct transform is the identity.
+		mOut = Matrix::Identity(dim, dim);
 	}
 	return mOut; 
 }
