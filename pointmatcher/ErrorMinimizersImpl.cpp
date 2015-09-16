@@ -241,6 +241,14 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		std::cerr << "d angles" << x(0) - roll << ", " << x(1) - pitch << "," << x(2) - yaw << std::endl;*/
 		transform.translation() = x.segment(3, 3);
 		mOut = transform.matrix();
+
+		if (mOut != mOut) 
+		{
+			// Degenerate situation. This can happen when the source and reading clouds
+			// are identical, and then b and x above are 0, and the rotation matrix cannot
+			// be determined, it comes out full of NaNs. The correct rotation is the identity.
+			mOut.block(0, 0, dim-1, dim-1) = Matrix::Identity(dim-1, dim-1);
+		}	
 	}
 	else
 	{
