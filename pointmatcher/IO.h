@@ -91,6 +91,7 @@ struct PointMatcherIO
 	//! Vector of supported labels in PointMatcher and their external names
 	typedef std::vector<SupportedLabel> SupportedLabels;
 
+	//! Helper structure designed to parse file headers
 	struct GenericInputHeader
 	{
 		std::string name; //!< name found in the file
@@ -98,6 +99,7 @@ struct PointMatcherIO
 		unsigned int matrixRowId; //!< on which row the information will be loaded
 		PMPropTypes matrixType; //!< in which matrix the information will be loaded
 
+		//! Constructor
 		//TODO: move that to .cpp
 		GenericInputHeader(const std::string name)
 		{

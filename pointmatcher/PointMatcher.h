@@ -655,9 +655,11 @@ struct PointMatcher
 		
         virtual void loadAdditionalYAMLContent(PointMatcherSupport::YAML::Node& doc);
 		
+		//! Instantiate modules if their names are in the YAML file
 		template<typename R>
         const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
+		//! Instantiate a module if its name is in the YAML file
 		template<typename R>
         const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
 		
@@ -681,7 +683,9 @@ struct PointMatcher
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
-			const DataPoints& getReadingFiltered() const { return readingFiltered; }
+
+		//! Return the filtered point cloud reading used in the ICP chain
+		const DataPoints& getReadingFiltered() const { return readingFiltered; }
 
 	protected:
 		TransformationParameters computeWithTransformedReference(
@@ -690,7 +694,7 @@ struct PointMatcher
 			const TransformationParameters& T_refIn_refMean,
 			const TransformationParameters& initialTransformationParameters);
 
-		DataPoints readingFiltered;
+		DataPoints readingFiltered; //!< reading point cloud after the filters were applied
 	};
 	
 	//! ICP alogrithm, taking a sequence of clouds and using a map
