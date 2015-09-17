@@ -246,8 +246,8 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		{
 			// Degenerate situation. This can happen when the source and reading clouds
 			// are identical, and then b and x above are 0, and the rotation matrix cannot
-			// be determined, it comes out full of NaNs. The correct transform is the identity.
-			mOut = Matrix::Identity(dim, dim);
+			// be determined, it comes out full of NaNs. The correct rotation is the identity.
+			mOut.block(0, 0, dim-1, dim-1) = Matrix::Identity(dim-1, dim-1);
 		}	
 	}
 	else
@@ -269,12 +269,6 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
 	}
 
-	if (mOut != mOut) 
-	{
-		// Degenerate situation, for example, when all residuals are zero. The matrix
-		// is full of NaNs. The correct transform is the identity.
-		mOut = Matrix::Identity(dim, dim);
-	}
 	return mOut; 
 }
 
