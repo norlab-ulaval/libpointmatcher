@@ -53,6 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <ostream>
 #include <memory>
+//#include <cstdint>
+#include <boost/cstdint.hpp>
 
 #include "Parametrizable.h"
 #include "Registrar.h"
@@ -169,6 +171,8 @@ struct PointMatcher
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
+	//! A dense unsigned 64-bits matrix
+	typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	
 	//! A matrix holding the parameters a transformation.
 	/**
@@ -203,8 +207,12 @@ struct PointMatcher
 	{
 		//! A view on a feature or descriptor
 		typedef Eigen::Block<Matrix> View;
+		//! A view on a time
+		typedef Eigen::Block<Int64Matrix> TimeView;
 		//! A view on a const feature or const descriptor
 		typedef const Eigen::Block<const Matrix> ConstView;
+		//! a view on a const time
+		typedef const Eigen::Block<const Int64Matrix> TimeConstView;
 		//! An index to a row or a column
 		typedef typename Matrix::Index Index;
 		
@@ -243,6 +251,7 @@ struct PointMatcher
 		unsigned getHomogeneousDim() const;
 		unsigned getNbGroupedDescriptors() const;
 		unsigned getDescriptorDim() const;
+		unsigned getTimeDim() const;
 
 		void save(const std::string& fileName) const;
 		static DataPoints load(const std::string& fileName);
@@ -253,6 +262,7 @@ struct PointMatcher
 		DataPoints createSimilarEmpty(Index pointCount) const;
 		void setColFrom(Index thisCol, const DataPoints& that, Index thatCol);
 		
+		// methods related to features
 		void allocateFeature(const std::string& name, const unsigned dim);
 		void allocateFeatures(const Labels& newLabels);
 		void addFeature(const std::string& name, const Matrix& newFeature);
@@ -267,6 +277,7 @@ struct PointMatcher
 		unsigned getFeatureDimension(const std::string& name) const;
 		unsigned getFeatureStartingRow(const std::string& name) const;
 		
+		// methods related to descriptors
 		void allocateDescriptor(const std::string& name, const unsigned dim);
 		void allocateDescriptors(const Labels& newLabels);
 		void addDescriptor(const std::string& name, const Matrix& newDescriptor);
@@ -282,21 +293,49 @@ struct PointMatcher
 		unsigned getDescriptorStartingRow(const std::string& name) const;
 		void assertDescriptorConsistency() const;
 		
+		// methods related to times
+		void allocateTime(const std::string& name, const unsigned dim);
+		void allocateTimes(const Labels& newLabels);
+		void addTime(const std::string& name, const Int64Matrix& newTime);
+		void removeTime(const std::string& name);
+		Int64Matrix getTimeCopyByName(const std::string& name) const;
+		TimeConstView getTimeViewByName(const std::string& name) const;
+		TimeView getTimeViewByName(const std::string& name);
+		TimeConstView getTimeRowViewByName(const std::string& name, const unsigned row) const;
+		TimeView getTimeRowViewByName(const std::string& name, const unsigned row);
+		bool timeExists(const std::string& name) const;
+		bool timeExists(const std::string& name, const unsigned dim) const;
+		unsigned getTimeDimension(const std::string& name) const;
+		unsigned getTimeStartingRow(const std::string& name) const;
+		void assertTimesConsistency() const;
+
 		Matrix features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features
 		Matrix descriptors; //!< descriptors of points in the cloud, might be empty
 		Labels descriptorLabels; //!< labels of descriptors
+		Int64Matrix times; //!< time associated to each points, might be empty
+		Labels timeLabels; //!< labels of times.
 	
 	private:
-		void allocateFields(const Labels& newLabels, Labels& labels, Matrix& data) const;
-		void allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data) const;
-		void addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data) const;
-		void removeField(const std::string& name, Labels& labels, Matrix& data) const;
-		ConstView getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data, const int viewRow = -1) const;
-		View getViewByName(const std::string& name, const Labels& labels, Matrix& data, const int viewRow = -1) const;
+		void assertConsistency(const std::string& dataName, const int dataRows, const int dataCols, const Labels& labels) const;
+		template<typename MatrixType> 
+		void allocateFields(const Labels& newLabels, Labels& labels, MatrixType& data) const;
+		template<typename MatrixType> 
+		void allocateField(const std::string& name, const unsigned dim, Labels& labels, MatrixType& data) const;
+		template<typename MatrixType> 
+		void addField(const std::string& name, const MatrixType& newField, Labels& labels, MatrixType& data) const;
+		template<typename MatrixType>
+		void removeField(const std::string& name, Labels& labels, MatrixType& data) const;
+		template<typename MatrixType>
+		const Eigen::Block<const MatrixType> getConstViewByName(const std::string& name, const Labels& labels, const MatrixType& data, const int viewRow = -1) const;
+		template<typename MatrixType>
+		Eigen::Block<MatrixType> getViewByName(const std::string& name, const Labels& labels, MatrixType& data, const int viewRow = -1) const;
 		bool fieldExists(const std::string& name, const unsigned dim, const Labels& labels) const;
 		unsigned getFieldDimension(const std::string& name, const Labels& labels) const;
 		unsigned getFieldStartingRow(const std::string& name, const Labels& labels) const;
+
+		template<typename MatrixType>
+		void concatenateLabelledMatrix(Labels* labels, MatrixType* data, const Labels extraLabels, const MatrixType extraData);
 	};
 	
 	static void swapDataPoints(DataPoints& a, DataPoints& b);

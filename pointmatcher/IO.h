@@ -44,6 +44,7 @@ struct PointMatcherIO
 {
 	typedef typename PointMatcher<T>::Vector Vector; //!< alias
 	typedef typename PointMatcher<T>::Matrix Matrix; //!< alias
+	typedef typename PointMatcher<T>::Int64Matrix Int64Matrix; //!< alias
 	typedef typename PointMatcher<T>::DataPoints DataPoints; //!< alias
 	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters; //!< alias
 	typedef typename PointMatcher<T>::Matrix Parameters; //!< alias
@@ -72,8 +73,9 @@ struct PointMatcherIO
 		{
 			FEATURE,
 			DESCRIPTOR,
+			TIME,
 			UNSUPPORTED
-		};//TODO: add time here too
+		};
 
 	//! Structure containing all information required to map external information to PointMatcher internal representation
 	struct SupportedLabel
@@ -88,6 +90,34 @@ struct PointMatcherIO
 
 	//! Vector of supported labels in PointMatcher and their external names
 	typedef std::vector<SupportedLabel> SupportedLabels;
+
+	struct GenericInputHeader
+	{
+		std::string name; //!< name found in the file
+		bool isKnownName; //!< is the name exist in the list of known elements
+		unsigned int matrixRowId; //!< on which row the information will be loaded
+		PMPropTypes matrixType; //!< in which matrix the information will be loaded
+
+		//TODO: move that to .cpp
+		GenericInputHeader(const std::string name)
+		{
+			init(name);
+		};
+
+		GenericInputHeader()
+		{
+			init("");
+		};
+
+		private:
+		void init(std::string name)
+		{
+			this->name = name;
+			this->isKnownName = false;
+			this->matrixRowId = 0;
+			this->matrixType = UNSUPPORTED;
+		};
+	};
 
 	//! Vector containing the mapping of all external names to PointMatcher representation.
 	//! The order is important (i.e., nx before ny). This can also be used to remap 
@@ -124,6 +154,8 @@ struct PointMatcherIO
 			("eigVectors", "eigVectors2Y", DESCRIPTOR)
 			("eigVectors", "eigVectors2Z", DESCRIPTOR)
 			//("", "", DESCRIPTOR)
+			("time", "time", TIME)
+			//("", "", TIME)
 			;
 
 			return labels;

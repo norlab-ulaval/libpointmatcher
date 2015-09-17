@@ -202,6 +202,33 @@ TEST(PointCloudTest, ConcatenateDescDiffSize)
 	EXPECT_THROW(lefts.concatenate(rights), DP::InvalidField);
 }
 
+TEST(PointCloudTest, AssertConsistency)
+{
+	DP ref2DCopy(ref2D);
+
+  // Point cloud is in order after loading it
+  EXPECT_NO_THROW(ref2DCopy.assertDescriptorConsistency());
+
+  // We add only a descriptor label without descriptor
+  PM::DataPoints::Labels labels;
+  labels.push_back(PM::DataPoints::Label("FakeDesc", 2));
+  ref2DCopy.descriptorLabels = labels;
+	EXPECT_THROW(ref2DCopy.assertDescriptorConsistency(), std::runtime_error);
+ 
+
+  // We add a descriptor with the wrong number of points
+  PM::Matrix descriptors = PM::Matrix::Random(2, 10);
+  ref2DCopy.descriptors = descriptors;
+	
+  EXPECT_THROW(ref2DCopy.assertDescriptorConsistency(), std::runtime_error);
+  
+  // We add a descriptor with the wrong dimension
+  descriptors = PM::Matrix::Random(1, ref2DCopy.getNbPoints());
+  ref2DCopy.descriptors = descriptors;
+  EXPECT_THROW(ref2DCopy.assertDescriptorConsistency(), std::runtime_error);
+
+}
+
 TEST(PointCloudTest, GetInfo)
 {
 	//cerr << ref2D.features.rows() << endl;
