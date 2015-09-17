@@ -23,7 +23,7 @@ The library has a light dependency list:
 
  * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
  * [boost] version 1.48 and up, portable C++ source libraries,
- * [libnabo] version 1.0.1, a fast K Nearest Neighbour library for low-dimensional spaces,
+ * [libnabo] version 1.0.6, a fast K Nearest Neighbour library for low-dimensional spaces,
  
 and was compiled on:
   * Ubuntu ([see how](/doc/Compilation.md))
