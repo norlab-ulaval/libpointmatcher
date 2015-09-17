@@ -38,6 +38,8 @@ TEST(PointCloudTest, FeatureConstructor3D)
 	EXPECT_TRUE(ref3DCopy.features.cols() == 0);
 	EXPECT_TRUE(ref3DCopy.descriptors.rows() == 0);
 	EXPECT_TRUE(ref3DCopy.descriptors.cols() == 0);
+	EXPECT_TRUE(ref3DCopy.times.rows() == 0);
+	EXPECT_TRUE(ref3DCopy.times.cols() == 0);
 
 
 	////// 2-Constructor with only features
@@ -72,6 +74,43 @@ TEST(PointCloudTest, FeatureConstructor3D)
 	
 
 	EXPECT_TRUE(ref3DCopy == ref3D);
+}
+
+
+TEST(PointCloudTest, ConstructorWithData)
+{
+	const int nbPoints = 100;
+	const int dimFeatures = 4;
+	const int dimDescriptors = 3;
+	const int dimTime = 2;
+
+	PM::Matrix randFeat = PM::Matrix::Random(dimFeatures, nbPoints);
+	DP::Labels featLabels;
+	featLabels.push_back(DP::Label("x", 1));
+	featLabels.push_back(DP::Label("y", 1));
+	featLabels.push_back(DP::Label("z", 1));
+	featLabels.push_back(DP::Label("pad", 1));
+
+	PM::Matrix randDesc = PM::Matrix::Random(dimDescriptors, nbPoints);
+	DP::Labels descLabels;
+	descLabels.push_back(DP::Label("dummyDesc", 3));
+
+	PM::Int64Matrix randTimes = PM::Int64Matrix::Random(dimTime, nbPoints);
+	DP::Labels timeLabels;
+	timeLabels.push_back(DP::Label("dummyTime", 2));
+
+	// Construct the point cloud from the generated matrices
+	DP pointCloud = DP(randFeat, featLabels, randDesc, descLabels, randTimes, timeLabels);
+	
+	EXPECT_EQ(pointCloud.features.rows(), dimFeatures);
+	EXPECT_EQ(pointCloud.features.cols(), nbPoints);
+	EXPECT_EQ(pointCloud.descriptors.rows(), dimDescriptors);
+	EXPECT_EQ(pointCloud.descriptors.cols(), nbPoints);
+	EXPECT_EQ(pointCloud.times.rows(), dimTime);
+	EXPECT_EQ(pointCloud.times.cols(), nbPoints);
+
+
+
 }
 
 TEST(PointCloudTest, ConcatenateFeatures2D)

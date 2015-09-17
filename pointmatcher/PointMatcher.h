@@ -240,10 +240,16 @@ struct PointMatcher
 			InvalidField(const std::string& reason);
 		};
 		
+		// Constructors from descriptions (reserve memory)
 		DataPoints();
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount);
+		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const Labels& timeLabels, const size_t pointCount);
+
+		// Copy constructors from partial data
 		DataPoints(const Matrix& features, const Labels& featureLabels);
 		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
+		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels, const Int64Matrix& times, const Labels& timeLabels);
+		
 		bool operator ==(const DataPoints& that) const;
 	
 		unsigned getNbPoints() const;
