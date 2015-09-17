@@ -14,13 +14,14 @@ In this following example, we build a very simple CMake project containing one e
 cmake_minimum_required (VERSION 2.6)
 project (myProject)
 
-find_package(pointmatcher 1.1.0 REQUIRED)
-include_directories("${POINTMATCHER_INCLUDE_DIRS}")
-message(STATUS "Using libpointmatcher version ${pointmatcher_VERSION}")
+find_package(libpointmatcher 1.1.0 REQUIRED)
+include_directories("${libpointmatcher_INCLUDE_DIRS}")
+message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 
 add_executable(myProgram myProgram.cpp)
-target_link_libraries(myProgram ${POINTMATCHER_LIBRARIES})
+target_link_libraries(myProgram ${libpointmatcher_LIBRARIES})
 ```
+A working example of how to link to an external project can be found in [./examples/demo_cmake](../examples/demo_cmake).
 
 ## Option 2: Using Eclipse
 ### Using the Native Eclipse Builder

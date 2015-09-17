@@ -2,13 +2,33 @@
 | ------------- |:-------------:| -----:|
 
 # Compiling and Installing libpointmatcher on your Computer (Mac OS X Instructions)
-######Latest update April 18, 2014 by Samuel Charreyron
 
-## Foreword
-*The following instructions are aimed at users of Mac OS X.  The steps from this tutorial were performed on __OS X 10.9.2__ (Mavericks).  These instructions should be identical on previous versions of Mac OS X.*
+
+## In short...
+If you are used to development project, here is what you need:
+
+|Name           |Version  <br> (Tested Feb. 16, 2015)          |
+|---------------|-----------------------|
+|MacOS          | 10.10.2               |
+|Xcode          | todo                  |      
+|gcc            | 4.2.1                 |
+|brew           | 0.9.5                 |
+|git            | 1.9.3                 |
+|cmake          | 3.0.2                 |
+|doxygen (opt.) | 1.8.9.1               |
+| | |
+|_Dependency:_ ||
+|boost          | 1.57.0                |
+|eigen          | 3.2.4                 |
+|libnabo        | [from source](https://github.com/ethz-asl/libnabo)       |
+
+
+__Note:__ Other versions will most probably work but you'll have to try yourself to know for sure.
+
+The rest of this tutorial will guide you through the different requirements step by step.
 
 ### Some Basic Requirements 
-#### a. Installing Xcode via the App Store (OS X 10.6.6  and later)
+#### a. Installing Xcode via the App Store (OS X 10.10.2  and later)
 Mac OS X does not come with a built-in C++ command-line compiler.  You must therefore install XCode by visiting the App Store.
 
 Once Xcode is installed on your machine, launch it.  Navigate to preferences, to the downloads tab.  In the components list, install the Command Line Tools component.
@@ -20,8 +40,8 @@ You should now have a working version of gcc.  You can check by running the foll
 A message similar to the following should appear
 
 	Configured with: --prefix=/Applications/Xcode.app/Contents/Developer/usr --with-gxx-include-dir=/usr/include/c++/4.2.1
-	Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn)
-	Target: x86_64-apple-darwin13.1.0
+	Apple LLVM version 6.0 (clang-600.0.56) (based on LLVM 3.5svn)
+	Target: x86_64-apple-darwin14.1.0
 	Thread model: posix
 
 #### b. Installing Homebrew
@@ -32,7 +52,7 @@ You do not need a package manager to install libpointmatcher, but it simplifies 
 Installing Homebrew is extremely easy and can be done by entering the following single command in your terminal
 
 ```
-ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 Once the scripts finishes installing, you are good to go!
 
@@ -67,82 +87,71 @@ The Eigen linear algebra is required before installing libpointmatcher and can b
 
 	brew install eigen
 
-### 2. Installing libnabo
-libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/ethz-asl/libnabo).  Clone the source repository into a local directory of your choice.
-```
-mkdir ~/Libraries/
-cd ~/Libraries
-git clone git://github.com/ethz-asl/libnabo.git
-cd libnabo
-``` 
-
-Now you can compile libnabo by entering the following commands
-```
-SRC_DIR=`pwd`
-BUILD_DIR=${SRC_DIR}/build
-mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
-make
-sudo make install
-```
-This will compile libnabo in a `/build` directory and install it on your system.
-
-*Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags.
-
-### 3. Installing yaml-cpp 0.3.0 (Optional)
-Configuration files can be managed using YAML in libpointmatcher.  This allows users to edit configuration files in a readable format.  To support this, you need to install [yaml-cpp](http://code.google.com/p/yaml-cpp/).  
-
-Homebrew installs the latest version of yaml-cpp, which is not compatible with Pointmatcher.  **It is important that you install the older version (0.3.0) of lib-yaml.**  You can install the older version of yaml-cpp in homebrew by doing the following:
-
-	brew versions yaml-cpp
-
-This should produce a list like the following 
-
-	0.5.1    git checkout e2d162d Library/Formula/yaml-cpp.rb
-	0.5.0    git checkout 5fc0071 Library/Formula/yaml-cpp.rb
-	0.3.0    git checkout 6e32f8c Library/Formula/yaml-cpp.rb
-	0.2.5    git checkout ebe6663 Library/Formula/yaml-cpp.rb
-
-Copy the command corresponding to version 0.3.0 and enter it in the terminal
-
-	git checkout 6e32f8c Library/Formula/yaml-cpp.rb
-
-Finally, install yaml-cpp
-
-	brew install yaml-cpp
-
-### 4. Compiling the Documentation
+### 2. Compiling the Documentation (optional)
 Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
 
 	brew install doxygen
 
 Once you have compiled libpointmatcher in step 6, you can simply open `/usr/local/share/doc/libpointmatcher/api/html/index.html` in a browser to view the API documentation.
 
-### 5. Installing libpointmatcher
+### 3. Installing libnabo
+libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/ethz-asl/libnabo).  Clone the source repository into a local directory of your choice.
+
+	mkdi r ~/Libraries/
+	cd ~/Libraries
+	git clone git://github.com/ethz-asl/libnabo.git
+	cd libnabo
+
+
+Now you can compile libnabo by entering the following commands
+
+	SRC_DIR=`pwd`
+	BUILD_DIR=${SRC_DIR}/build
+	mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+	cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
+	make
+
+
+To make sure that everything is working properly, run the unit tests:
+
+	make test
+
+This will run multiple nearest-neighbor searches performances and may take some minutes. 
+
+	sudo make install
+
+*Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags. You can use the following command to default flags:
+
+	ccmake .
+
+
+
+
+### 4. Installing libpointmatcher
 Clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
-```
-cd ~/Libraries/
-git clone git://github.com/ethz-asl/libpointmatcher.git
-cd libpointmatcher
-```
+
+	cd ~/Libraries/
+	git clone git://github.com/ethz-asl/libpointmatcher.git
+	cd libpointmatcher
+
 Now, libpointmatcher is compiled into a `/build` directory.
-```
-SRC_DIR=`pwd`
-BUILD_DIR=${SRC_DIR}/build
-mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
-make
-```
+
+	SRC_DIR=`pwd`
+	BUILD_DIR=${SRC_DIR}/build
+	mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+	cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
+	make
+
 
 You can optionally verify that the version of libpointmatcher you have compiled is stable by running the unit tests.
-```
-utest/utest --path ../examples/data/
-```
+
+	utest/utest --path ../examples/data/
+
 
 Finally, to install libpointmatcher to your system run the following:
-```
-sudo make install
-```
+
+	sudo make install
+
 
 #### Possible Caveats
 If Eigen, libnabo, yaml-cpp, or GTest are not found during the installation, you will have to manually supply their installation locations by setting the CMake flags.  You can do so using the ccmake tool.
@@ -156,3 +165,45 @@ You can then set `EIGEN_INCLUDE_DIR`, `NABO_INCLUDE_DIR`, `NABO_LIBRARY`, `yaml-
 make
 sudo make install
 ```
+
+# Having problems?
+
+Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. 
+
+Here are useful commands for the different version:
+
+MacOS version:
+
+	sw_vers -productVersion 
+
+Compiler version:
+
+	gcc --version
+
+Homebrew:
+
+	brew --version
+
+Boost:
+
+	brew info boost
+
+Git:
+
+	git --version
+
+CMake:
+
+	cmake --version
+
+Eigen:
+
+	brew info eigen
+
+Doxygen:
+
+	brew info doxygen
+
+	
+
+

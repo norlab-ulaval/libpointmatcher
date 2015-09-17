@@ -51,12 +51,15 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
-	//typedef typename PointMatcher<T>::Matrix Matrix;
+	typedef typename PointMatcher<T>::Matrix Matrix;
 	
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
-	const TransformationParameters R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
+	const unsigned int nbRows = parameters.rows()-1;
+	const unsigned int nbCols = parameters.cols()-1;
+
+	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
 
 	if(this->checkParameters(parameters) == false)	
 		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
@@ -91,13 +94,16 @@ bool TransformationsImpl<T>::RigidTransformation::checkParameters(const Transfor
 {
 	//FIXME: FP - should we put that as function argument?
 	const T epsilon = 0.001;
+	const unsigned int nbRows = parameters.rows()-1;
+	const unsigned int nbCols = parameters.cols()-1;
 
-	const TransformationParameters R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
+	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
 	
 	if(anyabs(1 - R.determinant()) > epsilon)
 		return false;
 	else
 		return true;
+
 }
 
 //! Force orthogonality of the rotation matrix

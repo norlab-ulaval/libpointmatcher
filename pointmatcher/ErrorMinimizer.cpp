@@ -75,6 +75,14 @@ T PointMatcher<T>::ErrorMinimizer::getPointUsedRatio() const
 	return pointUsedRatio;
 }
 
+//! Return the last the ErrorElements structure that was used for error minimization.
+template<typename T>
+typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMinimizer::getErrorElements() const
+{
+	//Warning: the use of the variable lastErrorElements is not standardized yet.
+	return lastErrorElements;
+}
+
 //! Return the ratio of how many points were used (with weight) for error minimization
 template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getWeightedPointUsedRatio() const
@@ -122,17 +130,16 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(c
 	{
 		cross = Matrix(B.rows(), B.cols());
 				
-		cross.row(x) = A.row(y).cwise() * B.row(z) - A.row(z).cwise() * B.row(y);
-		cross.row(y) = A.row(z).cwise() * B.row(x) - A.row(x).cwise() * B.row(z);
-		cross.row(z) = A.row(x).cwise() * B.row(y) - A.row(y).cwise() * B.row(x);
+		cross.row(x) = A.row(y).array() * B.row(z).array() - A.row(z).array() * B.row(y).array();
+		cross.row(y) = A.row(z).array() * B.row(x).array() - A.row(x).array() * B.row(z).array();
+		cross.row(z) = A.row(x).array() * B.row(y).array() - A.row(y).array() * B.row(x).array();
 	}
 	else
 	{
 		//pseudo-cross product for 2D vectors
 		cross = Vector(B.cols());
-		cross = A.row(x).cwise() * B.row(y) - A.row(y).cwise() * B.row(x);
+		cross = A.row(x).array() * B.row(y).array() - A.row(y).array() * B.row(x).array();
 	}
-
 	return cross;
 }
 
@@ -159,7 +166,7 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorM
 	const int dimReqDesc = requestedPts.descriptors.rows();
 
 	// Count points with no weights
-	const int pointsCount = (outlierWeights.cwise() != 0.0).count();
+	const int pointsCount = (outlierWeights.array() != 0.0).count();
 	if (pointsCount == 0)
 		throw ConvergenceError("ErrorMnimizer: no point to minimize");
 

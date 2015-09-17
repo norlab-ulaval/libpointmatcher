@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Eigenvalues
 #include "Eigen/QR"
+#include "Eigen/Eigenvalues"
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -385,7 +386,6 @@ void DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::inPlaceFilter(
 	DataPoints& cloud)
 {
 	typedef typename DataPoints::View View;
-	typedef typename DataPoints::ConstView ConstView;
 
 	// Force densities to be computed
 	if (!cloud.descriptorExists("densities"))
@@ -396,7 +396,7 @@ void DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::inPlaceFilter(
 	const int nbPointsIn = cloud.features.cols();
 	View densities = cloud.getDescriptorViewByName("densities");
 	const T lastDensity = densities.maxCoeff();
-	const int nbSaturatedPts = (densities.cwise() == lastDensity).count();
+	const int nbSaturatedPts = (densities.array() == lastDensity).count();
 
 	// fill cloud values
 	int j = 0;
@@ -667,7 +667,6 @@ template<typename T>
 void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::inPlaceFilter(
 	DataPoints& cloud)
 {
-	typedef Matrix Features;
 	typedef typename DataPoints::View View;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
@@ -1056,9 +1055,14 @@ template struct DataPointsFiltersImpl<double>::RandomSamplingDataPointsFilter;
 // Constructor
 template<typename T>
 DataPointsFiltersImpl<T>::MaxPointCountDataPointsFilter::MaxPointCountDataPointsFilter(const Parameters& params):
-	RandomSamplingDataPointsFilter("MaxPointCountDataPointsFilter", MaxPointCountDataPointsFilter::availableParameters(), params),
+	DataPointsFilter("MaxPointCountDataPointsFilter", MaxPointCountDataPointsFilter::availableParameters(), params),
 	maxCount(Parametrizable::get<unsigned>("maxCount"))
 {
+	try {
+		seed = Parametrizable::get<unsigned>("seed");
+	} catch (const InvalidParameter& e) {
+		seed = static_cast<unsigned int> (1); // rand default seed number
+	}
 }
 
 // Compute
@@ -1076,9 +1080,36 @@ template<typename T>
 void DataPointsFiltersImpl<T>::MaxPointCountDataPointsFilter::inPlaceFilter(
 	DataPoints& cloud)
 {
-	if (unsigned(cloud.features.cols()) <= maxCount)
-		return;
-	RandomSamplingDataPointsFilter::inPlaceFilter(cloud);
+	unsigned N = static_cast<unsigned> (cloud.features.cols());
+	if (maxCount < N) {
+		DataPoints cloud_filtered = cloud.createSimilarEmpty(maxCount);
+		std::srand(seed);
+
+		unsigned top = N - maxCount;
+		unsigned i = 0;
+		unsigned index = 0;
+		for (size_t n = maxCount; n >= 2; n--)
+		{
+			float V = static_cast<float>(rand () / double (RAND_MAX));
+			unsigned S = 0;
+			float quot = static_cast<float> (top) / static_cast<float> (N);
+			while (quot > V)
+			{
+				S++;
+				top--;
+				N--;
+				quot = quot * static_cast<float> (top) / static_cast<float> (N);
+			}
+			index += S;
+			cloud_filtered.setColFrom(i++, cloud, index++);
+			N--;
+		}
+
+		index += N * static_cast<unsigned> (static_cast<float>(rand () / double (RAND_MAX)));
+		cloud_filtered.setColFrom(i++, cloud, index++);
+		PointMatcher<T>::swapDataPoints(cloud, cloud_filtered);
+		cloud.conservativeResize(i);
+	}
 }
 
 template struct DataPointsFiltersImpl<float>::MaxPointCountDataPointsFilter;
@@ -1213,7 +1244,7 @@ DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::SimpleSensorNoiseDa
 	sensorType(Parametrizable::get<unsigned>("sensorType")),
 	gain(Parametrizable::get<T>("gain"))
 {
-	std::vector<string> sensorNames = boost::assign::list_of ("Sick LMS-1xx")("Hokuyo URG-04LX")("Hokuyo UTM-30LX")("Kinect / Xtion");
+  std::vector<string> sensorNames = boost::assign::list_of ("Sick LMS-1xx")("Hokuyo URG-04LX")("Hokuyo UTM-30LX")("Kinect / Xtion")("Sick Tim3xx");
 	if (sensorType >= sensorNames.size())
 	{
 		throw InvalidParameter(
@@ -1267,6 +1298,11 @@ void DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::inPlaceFilter(
 		noise = squaredValues*(0.5*0.00285);
 		break;
 	}
+  case 4: // Sick Tim3xx
+  {
+    noise = computeLaserNoise(0.004, 0.0053, -0.0092, cloud.features);
+    break;
+  }
 	default:
 		throw InvalidParameter(
 			(boost::format("SimpleSensorNoiseDataPointsFilter: Error, cannot compute noise for sensorType id %1% .") % sensorType).str());

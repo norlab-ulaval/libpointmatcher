@@ -68,8 +68,14 @@ namespace PointMatcherSupport
 		
 		if (!filePrefix.empty())
 		{
-			std::cerr << "writing to " << (filePrefix + name) << std::endl;
-			std::ofstream ofs((filePrefix + name).c_str());
+			std::cerr << "writing to " << (filePrefix + name + "Stats.csv") << std::endl;
+			std::ofstream ofs_stats((filePrefix + name + "Stats.csv").c_str());
+			dumpStatsHeader(ofs_stats);
+			ofs_stats << endl;
+			dumpStats(ofs_stats);
+
+			std::cerr << "writing to " << (filePrefix + name + ".csv") << std::endl;
+			std::ofstream ofs((filePrefix + name + ".csv").c_str());
 			for (size_t i = 0; i < this->size(); ++i)
 				ofs << ((*this)[i]) << "\n";
 		}
@@ -80,7 +86,7 @@ namespace PointMatcherSupport
 			std::cerr.fill(' ');
 			std::cerr.flags(std::ios::left);
 			std::cerr << "Histogram " << name << ":\n";
-			std::cerr << "  count: " << this->size() << ", mean: " << meanV << "\n";
+			std::cerr << "  count: " << this->size() << ", mean: " << meanV << ", var: " << varV << ", median: " << medianV << ", min: " << minV << ", max: " << maxV << ", lowQt: " << lowQt << ", highQt: " << highQt << ", maxBinC: " << maxBinC << "\n";
 			if(this->size() > 1)
 			{
 				for (size_t i = 0; i < binCount; ++i)
@@ -88,8 +94,10 @@ namespace PointMatcherSupport
 					const T v(minV + i * (maxV - minV) / T(binCount));
 					std::cerr << "  " << std::setw(10) << v << " (" << std::setw(6) << bins[i] << ") : ";
 					//std::cerr << (bins[i] * 60) / maxBinC << " " ;
-					for (size_t j = 0; j < (bins[i] * 60) / maxBinC; ++j)
-						std::cerr << "*";
+					if (maxBinC > 0) {
+						for (size_t j = 0; j < (bins[i] * 60) / maxBinC; ++j)
+							std::cerr << "*";
+					}
 					std::cerr << "\n";
 				}
 				std::cerr << std::endl;

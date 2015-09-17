@@ -2,14 +2,28 @@
 | ------------- |:-------------:| -----:|
 
 # Compiling and Installing libpointmatcher on your Computer
-######Latest update January 9, 2014 by Samuel Charreyron
 
-## Foreword
-*The following instructions are aimed at users of Ubuntu Linux.  The steps from this tutorial were performed on __Ubuntu 13.10__ (Saucy Salamander).  These instructions should be identical previous versions of Ubuntu.  Other Linux variants or *nix operating systems should follow a very similar process.*
+## In short...
+If you are used to development projects, here is what you need:
 
-Note: we only support 64-bit systems because of some issues with Eigen. 
+|Name           |Version  <br> (Tested Feb. 20, 2015)          |
+|---------------|-----------------------|
+|Ubuntu         | 12.04.5 LTS (64 bit)  |
+|gcc            | 4.6.3                 |
+|git            | 1.7.9.5               |
+|cmake          | 2.8.11.2              |
+|doxygen (opt.) | 1.7.6.1              |
+|||
+| _Dependency:_| |
+|boost          | 1.48.0.2             |
+|eigen          | 3.0.5                |
+|libnabo        | [from source](https://github.com/ethz-asl/libnabo)       |
 
-## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu)
+__Note:__ we only support 64-bit systems because of some issues with Eigen. Other versions will most probably work but you'll have to try yourself to know for sure.
+
+The rest of this tutorial will guide you through the different requirements step by step.
+
+## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu) - Not recommended
 We recommand to compile from source to access the latest bug fixes, but for convenience a pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
 
 ```
@@ -164,3 +178,46 @@ You can then set `EIGEN_INCLUDE_DIR`, `NABO_INCLUDE_DIR`, `NABO_LIBRARY`, `yaml-
 make
 sudo make install
 ```
+
+#Having problems?
+Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/ethz-asl/libpointmatcher/issues). You may need to ensure that the file is executable:
+
+```
+chmod +x ./utest/listVersionsUbuntu.sh 
+./utest/listVersionsUbuntu.sh 
+```
+
+
+Here are the list of useful commands used in the bash script:
+
+Ubuntu version:
+
+    lsb_release -r
+
+32-bit or 64-bit architecture:
+
+    getconf LONG_BIT
+
+Compiler version:
+
+    gcc --version
+
+Git version:
+
+    git --version
+  
+CMake:
+
+    cmake --version
+
+Boost version:
+
+    dpkg -s libboost-dev | grep Version
+    
+Eigen3:
+
+    dpkg -s libeigen3-dev | grep Version
+
+Doxygen:
+
+    dpkg -s doxygen | grep Version

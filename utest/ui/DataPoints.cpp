@@ -133,7 +133,6 @@ TEST(PointCloudTest, ConcatenateDescSame)
 TEST(PointCloudTest, ConcatenateDescSame2)
 {
 	typedef DP::Label Label;
-	typedef DP::Labels Labels;
 	
 	DP ref3DCopy(ref3D.features, ref3D.featureLabels);
 	ref3DCopy.descriptorLabels.push_back(Label("Desc5D", 5));

@@ -3,7 +3,7 @@
 /*
 
 Copyright (c) 2010--2012,
-François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
+Francois Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
 You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
 
@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EIGEN_USE_NEW_STDVECTOR
 #define EIGEN_USE_NEW_STDVECTOR
 #endif // EIGEN_USE_NEW_STDVECTOR
-#define EIGEN2_SUPPORT
+//#define EIGEN2_SUPPORT
 #include "Eigen/StdVector"
 #include "Eigen/Core"
 #include "Eigen/Geometry"
@@ -58,9 +58,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Parametrizable.h"
 #include "Registrar.h"
-
-#if NABO_VERSION_INT < 10001
-	#error "You need libnabo version 1.0.1 or greater"
+ 
+#if NABO_VERSION_INT < 10006
+	#error "You need libnabo version 1.0.6 or greater"
 #endif
 
 /*! 
@@ -70,9 +70,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //! version of the Pointmatcher library as string
-#define POINTMATCHER_VERSION "1.2.1"
+#define POINTMATCHER_VERSION "1.2.3"
 //! version of the Pointmatcher library as an int
-#define POINTMATCHER_VERSION_INT 10201
+#define POINTMATCHER_VERSION_INT 10203
 
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
@@ -517,6 +517,7 @@ struct PointMatcher
 		
 		T getPointUsedRatio() const;
 		T getWeightedPointUsedRatio() const;
+		ErrorElements getErrorElements() const; //TODO: ensure that is return a usable value
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
 		
@@ -524,14 +525,15 @@ struct PointMatcher
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
 		
 		
-	protected:
+	//protected:
 		// helper functions
-		static Matrix crossProduct(const Matrix& A, const Matrix& B);
+		static Matrix crossProduct(const Matrix& A, const Matrix& B);//TODO: this might go in pointmatcher_support namespace
 		ErrorElements& getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
 		
 	protected:
 		T pointUsedRatio; //!< the ratio of how many points were used for error minimization
 		T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+		//TODO: standardize the use of this variable
 		ErrorElements lastErrorElements; //!< memory of the last computed error
 	};
 	
@@ -645,16 +647,16 @@ struct PointMatcher
 		
 		void cleanup();
 		
-        virtual void loadAdditionalYAMLContent(YAML::Node& doc);
+        virtual void loadAdditionalYAMLContent(PointMatcherSupport::YAML::Node& doc);
 		
 		template<typename R>
-        const std::string& createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
+        const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
 		template<typename R>
-        const std::string& createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
+        const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
 		
 		/*template<typename R>
-		typename R::TargetType* createModuleFromRegistrar(const YAML::Node& module, const R& registrar);*/
+		typename R::TargetType* createModuleFromRegistrar(const PointMatcherSupport::YAML::Node& module, const R& registrar);*/
 	};
 	
 	//! ICP algorithm
@@ -673,13 +675,16 @@ struct PointMatcher
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
-	
+			const DataPoints& getReadingFiltered() const { return readingFiltered; }
+
 	protected:
 		TransformationParameters computeWithTransformedReference(
 			const DataPoints& readingIn, 
 			const DataPoints& reference, 
 			const TransformationParameters& T_refIn_refMean,
 			const TransformationParameters& initialTransformationParameters);
+
+		DataPoints readingFiltered;
 	};
 	
 	//! ICP alogrithm, taking a sequence of clouds and using a map

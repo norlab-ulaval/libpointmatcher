@@ -68,10 +68,9 @@ TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
 TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 {
 	// Max dist has been selected to not affect the points
-	params = map_list_of<string,string>
-		("dim","0")
-		("maxDist", toParam(6.0))
-	;
+	params = PM::Parameters();
+	params["dim"] = "0";
+	params["maxDist"] = toParam(6.0);
 	
 	// Filter on x axis
 	params["dim"] = "0";
@@ -111,10 +110,9 @@ TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 TEST_F(DataFilterTest, MinDistDataPointsFilter)
 {
 	// Min dist has been selected to not affect the points too much
-	params = map_list_of<string,string>
-		("dim","0")
-		("minDist", toParam(0.05))
-	;
+	params = PM::Parameters();
+	params["dim"] = "0";
+	params["minDist"] = toParam(0.05);
 	
 	// Filter on x axis
 	params["dim"] = "0";
@@ -151,10 +149,9 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 {
 	// Ratio has been selected to not affect the points too much
 	string ratio = "0.95";
-	params = map_list_of<string,string>
-		("dim","0")
-		("ratio", ratio)
-	;
+	params = PM::Parameters();
+	params["dim"] = "0";
+	params["ratio"] = ratio;
 	
 	// Filter on x axis
 	params["dim"] = "0";
@@ -183,15 +180,14 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 {
 	// This filter create descriptor, so parameters should'nt impact results
-	params = map_list_of
-		("knn", "5") 
-		("epsilon", "0.1") 
-		("keepNormals", "1")
-		("keepDensities", "1")
-		("keepEigenValues", "1")
-		("keepEigenVectors", "1" )
-		("keepMatchedIds" , "1" )
-	;
+	params = PM::Parameters();
+	params["knn"] =  "5"; 
+	params["epsilon"] =  "0.1"; 
+	params["keepNormals"] =  "1";
+	params["keepDensities"] =  "1";
+	params["keepEigenValues"] =  "1";
+	params["keepEigenVectors"] =  "1" ;
+	params["keepMatchedIds"] =  "1" ;
 	// FIXME: the parameter keepMatchedIds seems to do nothing...
 
 	addFilter("SurfaceNormalDataPointsFilter", params);
@@ -212,19 +208,20 @@ TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
  	for(unsigned i=0; i < ratio.size(); i++)
  	{
  		icp.readingDataPointsFilters.clear();
-		params = map_list_of
-			("knn", "5") 
-			("epsilon", "0.1") 
-			("keepNormals", "0")
-			("keepDensities", "1")
-			("keepEigenValues", "0")
-			("keepEigenVectors", "0" )
-			("keepMatchedIds" , "0" )
-		;
+		params = PM::Parameters();
+		params["knn"] = "5"; 
+		params["epsilon"] = "0.1"; 
+		params["keepNormals"] = "0";
+		params["keepDensities"] = "1";
+		params["keepEigenValues"] = "0";
+		params["keepEigenVectors"] = "0" ;
+		params["keepMatchedIds"] = "0" ;
 
 		addFilter("SurfaceNormalDataPointsFilter", params);
 
- 		params = map_list_of ("maxDensity", toParam(ratio[i]));
+ 		params = PM::Parameters();
+		params["maxDensity"] = toParam(ratio[i]);
+
  		addFilter("MaxDensityDataPointsFilter", params);
  		
 		// FIXME BUG: the density in 2D is not well computed
@@ -245,14 +242,13 @@ TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
 TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 {
 	// This filter create descriptor AND subsample
-	params = map_list_of
-		("knn", "5")
-		("averageExistingDescriptors", "1")
-		("keepNormals", "1")
-		("keepDensities", "1")
-		("keepEigenValues", "1")
-		("keepEigenVectors", "1")
-	;
+	params = PM::Parameters();
+	params["knn"] = "5";
+	params["averageExistingDescriptors"] = "1";
+	params["keepNormals"] = "1";
+	params["keepDensities"] = "1";
+	params["keepEigenValues"] = "1";
+	params["keepEigenVectors"] = "1";
 	
 	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
 	validate2dTransformation();
@@ -282,9 +278,9 @@ TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 	for(unsigned i=0; i<prob.size(); i++)
 	{
 		// Try to avoid to low value for the reduction to avoid under sampling
-		params = map_list_of
-			("prob", toParam(prob[i]))
-		;
+		params = PM::Parameters();
+		params["prob"] = toParam(prob[i]);
+
 		icp.readingDataPointsFilters.clear();
 		addFilter("RandomSamplingDataPointsFilter", params);
 		validate2dTransformation();
@@ -298,9 +294,9 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 	for(unsigned i=0; i<steps.size(); i++)
 	{
 		// Try to avoid too low value for the reduction to avoid under sampling
-		params = map_list_of
-			("startStep", toParam(steps[i]))
-		;
+		params = PM::Parameters();
+		params["startStep"] = toParam(steps[i]);
+
 		icp.readingDataPointsFilters.clear();
 		addFilter("FixStepSamplingDataPointsFilter", params);
 		validate2dTransformation();
@@ -316,13 +312,13 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 	{
 		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++) 
 		{
-			params = map_list_of<string,string>
-					("vSizeX","0.02")
-					("vSizeY","0.02")
-					("vSizeZ","0.02")
-					("useCentroid",toParam(true))
-					("averageExistingDescriptors",toParam(true))
-			;
+			params = PM::Parameters(); 
+			params["vSizeX"] = "0.02";
+			params["vSizeY"] = "0.02";
+			params["vSizeZ"] = "0.02";
+			params["useCentroid"] = toParam(true);
+			params["averageExistingDescriptors"] = toParam(true);
+			
 			icp.readingDataPointsFilters.clear();
 			addFilter("VoxelGridDataPointsFilter", params);
 			validate2dTransformation();
@@ -333,12 +329,13 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 	{
 		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++)
 		{
-			params = map_list_of<string,string>
-			("vSizeX","1")
-			("vSizeY","1")
-			("vSizeZ","1")
-			("useCentroid",toParam(true))
-			("averageExistingDescriptors",toParam(true));
+			params = PM::Parameters();
+			params["vSizeX"] = "1";
+			params["vSizeY"] = "1";
+			params["vSizeZ"] = "1";
+			params["useCentroid"] = toParam(true);
+			params["averageExistingDescriptors"] = toParam(true);
+			
 			icp.readingDataPointsFilters.clear();
 			addFilter("VoxelGridDataPointsFilter", params);
 			validate3dTransformation();
@@ -354,15 +351,15 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 	DP ref3Ddensities = ref3D;
 	// Adding descriptor "densities"
 	icp.readingDataPointsFilters.clear();
-	params = map_list_of
-		("knn", "5") 
-		("epsilon", "0.1") 
-		("keepNormals", "0")
-		("keepDensities", "1")
-		("keepEigenValues", "0")
-		("keepEigenVectors", "0" )
-		("keepMatchedIds" , "0" )
-	;
+	params = PM::Parameters();
+	params["knn"] = "5"; 
+	params["epsilon"] = "0.1"; 
+	params["keepNormals"] = "0";
+	params["keepDensities"] = "1";
+	params["keepEigenValues"] = "0";
+	params["keepEigenVectors"] = "0";
+	params["keepMatchedIds"] = "0";
+	
 
 	addFilter("SurfaceNormalDataPointsFilter", params);
 	icp.readingDataPointsFilters.apply(ref3Ddensities);
@@ -391,11 +388,11 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 			DP ref3DCopy = ref3Ddensities;
 
 			icp.readingDataPointsFilters.clear();
-			params = map_list_of
-				("descName", toParam("densities"))
-				("useLargerThan", toParam(useLargerThan))
-				("threshold", toParam(thresholds[i]))
-			;
+			params = PM::Parameters(); 
+			params["descName"] = toParam("densities");
+			params["useLargerThan"] = toParam(useLargerThan);
+			params["threshold"] = toParam(thresholds[i]);
+			
 
 			addFilter("CutAtDescriptorThresholdDataPointsFilter", params);
 			icp.readingDataPointsFilters.apply(ref3DCopy);
