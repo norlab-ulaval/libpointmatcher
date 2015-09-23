@@ -13,7 +13,8 @@ add_executable(utest
                 ui/Inspectors.cpp 
                 ui/Loggers.cpp)
 
-target_link_libraries(utest gtest pointmatcher)
+find_package (Threads)
+target_link_libraries(utest gtest pointmatcher ${CMAKE_THREAD_LIBS_INIT})
 
 add_test(utest ${CMAKE_CURRENT_BINARY_DIR}/utest --gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/test_results.xml --path "${CMAKE_SOURCE_DIR}/examples/data/")
 
