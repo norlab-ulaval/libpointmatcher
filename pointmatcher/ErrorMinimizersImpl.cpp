@@ -87,8 +87,10 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const Matrix m(mPts.reference.features.topRows(dimCount-1) * mPts.reading.features.topRows(dimCount-1).transpose());
 	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
 	Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
-	//It is possible to get a reflection instead of a rotation. in this case we
-	//take the second best solution, guaranteed to be a rotation
+	// It is possible to get a reflection instead of a rotation. In this case, we
+	// take the second best solution, guaranteed to be a rotation. For more details,
+	// read the tech report: "Least-Squares Rigid Motion Using SVD", Olga Sorkine
+	// http://igl.ethz.ch/projects/ARAP/svd_rot.pdf
 	if (rotMatrix.determinant() < 0.)
 	{
 		Matrix tmpV = svd.matrixV().transpose();
