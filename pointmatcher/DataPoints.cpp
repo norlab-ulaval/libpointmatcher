@@ -142,6 +142,17 @@ PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& fe
 	descriptorLabels(descriptorLabels)
 {}
 
+//! Construct a point cloud from existing features, descriptors and times
+template<typename T>
+PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels, const Int64Matrix& times, const Labels& timeLabels):
+  features(features),
+  featureLabels(featureLabels),
+  descriptors(descriptors),
+  descriptorLabels(descriptorLabels),
+  times(times),
+  timeLabels(timeLabels)
+{}
+
 //! Return the number of points contained in the point cloud
 template<typename T>
 unsigned PointMatcher<T>::DataPoints::getNbPoints() const
@@ -343,7 +354,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 	assertTimesConsistency();
 	if (times.cols() > 0)
 	{
-		output.times = Uint64Matrix(times.rows(), nbPoints);
+		output.times = Int64Matrix(times.rows(), nbPoints);
 		output.timeLabels = timeLabels;
 	}
 
@@ -369,7 +380,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::createSimilarE
 	assertTimesConsistency();
 	if (times.cols() > 0)
 	{
-		output.times = Uint64Matrix(times.rows(), pointCount);
+		output.times = Int64Matrix(times.rows(), pointCount);
 		output.timeLabels = timeLabels;
 	}
 

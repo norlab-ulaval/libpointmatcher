@@ -253,6 +253,7 @@ struct DataPointsFiltersImpl
 		static Vector computeNormal(const Vector eigenVa, const Matrix eigenVe);
 		static T computeDensity(const Matrix NN);
 		static Vector serializeEigVec(const Matrix eigenVe);
+		static Eigen::Matrix<T,3,1> sortEigenValues(const Vector eigenVa);
 	};
 
 	//! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
@@ -390,7 +391,7 @@ struct DataPointsFiltersImpl
 	};
 	
 	//! Maximum number of points
-	struct MaxPointCountDataPointsFilter: public RandomSamplingDataPointsFilter
+	struct MaxPointCountDataPointsFilter: public DataPointsFilter
 	{
 		inline static const std::string description()
 		{
@@ -399,13 +400,14 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T> )
-				( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<unsigned> )
+			( "seed", "srand seed", "1", "0", "2147483647", &P::Comp<unsigned> )
+			( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<unsigned> )
 			;
 		}
-		
+
 		const unsigned maxCount;
-		
+		unsigned seed;
+
 		MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~MaxPointCountDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
@@ -589,6 +591,52 @@ struct DataPointsFiltersImpl
 		virtual void inPlaceFilter(DataPoints& cloud);
 
 	};	
+	//! Subsampling Surfels (Elipsoids) filter. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
+	struct ElipsoidsDataPointsFilter: public DataPointsFilter
+	{
+	  inline static const std::string description()
+	  {
+	    return "Subsampling, Surfels (Elipsoids). This filter decomposes the point-cloud space in boxes, by recursively splitting the cloud through axis-aligned hyperplanes such as to maximize the evenness of the aspect ratio of the box. When the number of points in a box reaches a value knn or lower, the filter computes the center of mass of these points and its normal by taking the eigenvector corresponding to the smallest eigenvalue of all points in the box.";
+	  }
+	  inline static const ParametersDoc availableParameters()
+	  {
+	    return boost::assign::list_of<ParameterDoc>
+	    ( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> )
+	    ( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
+	    ( "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> )
+	    ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
+	    ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
+	    ( "maxTimeWindow", "maximum spread of times in a surfel", "inf" )
+	    ( "minPlanarity", "to what extend planarity of surfels needs to be enforced", "0")
+	    ( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
+	    ( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepWeights", "whether the original number of points should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepShapes", "whether the shape parameters of cylindricity (C), sphericality (S) and planarity (P) shall be calculated", "0" )
+	    ( "keepIndices", "whether the indices of points an ellipsoid is constructed of shall be kept", "0" )
+	    ;
+	  }
+
+	  const T ratio;
+	  const unsigned knn;
+	  const unsigned samplingMethod;
+	  const T maxBoxDim;
+	  const T maxTimeWindow;
+	  const T minPlanarity;
+	  const bool averageExistingDescriptors;
+	  const bool keepNormals;
+	  const bool keepDensities;
+	  const bool keepEigenValues;
+	  const bool keepEigenVectors;
+	  const bool keepCovariances;
+	  const bool keepWeights;
+	  const bool keepMeans;
+	  const bool keepShapes;
+	  const bool keepIndices;
+
 
    public:
     ElipsoidsDataPointsFilter(const Parameters& params = Parameters());
@@ -601,14 +649,14 @@ struct DataPointsFiltersImpl
     {
       typedef std::vector<int> Indices;
       typedef typename DataPoints::View View;
-      typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
-      typedef typename Eigen::Matrix<boost::uint64_t, 1, Eigen::Dynamic> Uint64Vector;
+      typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+      typedef typename Eigen::Matrix<boost::int64_t, 1, Eigen::Dynamic> Int64Vector;
 
       Indices indices;
       Indices indicesToKeep;
       Matrix& features;
       Matrix& descriptors;
-      Uint64Matrix& times;
+      Int64Matrix& times;
       boost::optional<View> normals;
       boost::optional<View> densities;
       boost::optional<View> eigenValues;
@@ -625,7 +673,7 @@ struct DataPointsFiltersImpl
       int outputInsertionPoint;
       int unfitPointsCount;
 
-      BuildData(Matrix& features, Matrix& descriptors, Uint64Matrix& times):
+      BuildData(Matrix& features, Matrix& descriptors, Int64Matrix& times):
         features(features),
         descriptors(descriptors),
         times(times),
@@ -715,14 +763,14 @@ struct DataPointsFiltersImpl
     {
       typedef std::vector<int> Indices;
       typedef typename DataPoints::View View;
-      typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
-      typedef typename Eigen::Matrix<boost::uint64_t, 1, Eigen::Dynamic> Uint64Vector;
+      typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+      typedef typename Eigen::Matrix<boost::int64_t, 1, Eigen::Dynamic> Int64Vector;
 
       Indices indices;
       Indices indicesToKeep;
       Matrix& features;
       Matrix& descriptors;
-      Uint64Matrix& times;
+      Int64Matrix& times;
       boost::optional<View> normals;
       boost::optional<View> means;
       boost::optional<View> eigenValues;
@@ -735,7 +783,7 @@ struct DataPointsFiltersImpl
       int outputInsertionPoint;
       int unfitPointsCount;
 
-      BuildData(Matrix& features, Matrix& descriptors, Uint64Matrix& times):
+      BuildData(Matrix& features, Matrix& descriptors, Int64Matrix& times):
         features(features),
         descriptors(descriptors),
         times(times),
@@ -764,256 +812,6 @@ struct DataPointsFiltersImpl
     void buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const;
     void fuseRange(BuildData& data, const int first, const int last) const;
     void fuseRanger(BuildData& data, DataPoints& input, const int first, const int last) const;
-
-  };
-
-  //! Reorientation of normals
-  struct OrientNormalsDataPointsFilter: public DataPointsFilter
-  {
-    inline static const std::string description()
-    {
-      return "Normals. Reorient normals so that they all point in the same direction, with respect to the observation points.";
-    }
-
-    inline static const ParametersDoc availableParameters()
-    {
-      return boost::assign::list_of<ParameterDoc>
-      ( "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the observation points).", "1", "0", "1", &P::Comp<bool> )
-      ;
-    }
-
-    OrientNormalsDataPointsFilter(const Parameters& params = Parameters());
-    virtual ~OrientNormalsDataPointsFilter() {};
-    virtual DataPoints filter(const DataPoints& input);
-    virtual void inPlaceFilter(DataPoints& cloud);
-
-    const bool towardCenter;
-  };
-
-  //! Random sampling
-  struct RandomSamplingDataPointsFilter: public DataPointsFilter
-  {
-    inline static const std::string description()
-    {
-      return "Subsampling. This filter reduces the size of the point cloud by randomly dropping points. Based on \\cite{Masuda1996Random}";
-    }
-    inline static const ParametersDoc availableParameters()
-    {
-      return boost::assign::list_of<ParameterDoc>
-      ( "prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T> )
-      ;
-    }
-
-    const double prob;
-
-    RandomSamplingDataPointsFilter(const Parameters& params = Parameters());
-    virtual ~RandomSamplingDataPointsFilter() {};
-    virtual DataPoints filter(const DataPoints& input);
-    virtual void inPlaceFilter(DataPoints& cloud);
-
-   protected:
-    RandomSamplingDataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
-
-  };
-
-  //! Maximum number of points
-  struct MaxPointCountDataPointsFilter: public RandomSamplingDataPointsFilter
-  {
-    inline static const std::string description()
-    {
-      return "Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above maxCount. Based on \\cite{Masuda1996Random}";
-    }
-    inline static const ParametersDoc availableParameters()
-    {
-      return boost::assign::list_of<ParameterDoc>
-      ( "prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T> )
-      ( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<unsigned> )
-      ;
-    }
-
-    const unsigned maxCount;
-
-    MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
-    virtual ~MaxPointCountDataPointsFilter() {};
-    virtual DataPoints filter(const DataPoints& input);
-    virtual void inPlaceFilter(DataPoints& cloud);
-  };
-
-  //! Systematic sampling, with variation over time
-  struct FixStepSamplingDataPointsFilter: public DataPointsFilter
-  {
-    inline static const std::string description()
-    {
-      return "Subsampling. This filter reduces the size of the point cloud by only keeping one point over step ones; with step varying in time from startStep to endStep, each iteration getting multiplied by stepMult. If use as prefilter (i.e. before the iterations), only startStep is used.";
-    }
-    inline static const ParametersDoc availableParameters()
-    {
-      return boost::assign::list_of<ParameterDoc>
-      ( "startStep", "initial number of point to skip (initial decimation factor)", "10", "1", "2147483647", &P::Comp<unsigned> )
-      ( "endStep", "maximal or minimal number of points to skip (final decimation factor)", "10", "1", "2147483647", &P::Comp<unsigned> )
-      ( "stepMult", "multiplication factor to compute the new decimation factor for each iteration", "1", "0.0000001", "inf", &P::Comp<double> )
-      ;
-    }
-
-    // number of steps to skip
-    const unsigned startStep;
-    const unsigned endStep;
-    const double stepMult;
-
-   protected:
-    double step;
-
-   public:
-    FixStepSamplingDataPointsFilter(const Parameters& params = Parameters());
-    virtual ~FixStepSamplingDataPointsFilter() {};
-    virtual void init();
-    virtual DataPoints filter(const DataPoints& input);
-    virtual void inPlaceFilter(DataPoints& cloud);
-  };
-
-  //! Shadow filter, remove ghost points appearing on edges
-  struct ShadowDataPointsFilter: public DataPointsFilter
-  {
-    inline static const std::string description()
-    {
-      return "Remove ghost points appearing on edge discontinuties. Assume that the origine of the point cloud is close to where the laser center was. Requires surface normal for every points";
-    }
-
-    inline static const ParametersDoc availableParameters()
-    {
-      return boost::assign::list_of<ParameterDoc>
-      ( "eps", "Small angle (in rad) around which a normal shoudn't be observable", "0.1", "0.0", "3.1416", &P::Comp<T> )
-      ;
-    }
-
-    const T eps;
-
-    //! Constructor, uses parameter interface
-    ShadowDataPointsFilter(const Parameters& params = Parameters());
-
-    virtual DataPoints filter(const DataPoints& input);
-    virtual void inPlaceFilter(DataPoints& cloud);
-  };
-
-  //! Sick LMS-xxx noise model
-  struct SimpleSensorNoiseDataPointsFilter: public DataPointsFilter
-  {
-    inline static const std::string description()
-    {
-      return "Add a 1D descriptor named <sensorNoise> that would represent the noise radius expressed in meter based on SICK LMS specifications \\cite{Pomerleau2012Noise}.";
-    }
-
-    inline static const ParametersDoc availableParameters()
-    {
-      return boost::assign::list_of<ParameterDoc>
-      ( "sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Hokuyo URG-04LX, 2=Hokuyo UTM-30LX, 3=Kinect/Xtion", "0", "0", "2147483647", &P::Comp<unsigned> )
-      ( "gain", "If the point cloud is coming from an untrusty source, you can use the gain to augment the uncertainty", "1", "1", "inf", &P::Comp<T> )
-      ;
-    }
-
-    const unsigned sensorType;
-    const T gain;
-
-    //! Constructor, uses parameter interface
-    SimpleSensorNoiseDataPointsFilter(const Parameters& params = Parameters());
-
-    virtual DataPoints filter(const DataPoints& input);
-    virtual void inPlaceFilter(DataPoints& cloud);
-
-   private:
-    /// @param minRadius in meter, noise level of depth measurements
-    /// @param beamAngle in rad, half of the total laser beam
-    /// @param beamConst in meter, minimum size of the laser beam
-    /// @param features points from the sensor
-    Matrix computeLaserNoise(const T minRadius, const T beamAngle, const T beamConst, const Matrix features);
-
-  };
-
-  //! Extract observation direction
-  struct ObservationDirectionDataPointsFilter: public DataPointsFilter
-  {
-    inline static const std::string description()
-    {
-      return "Observation direction. This filter extracts observation directions (vector from point to sensor), considering a sensor at position (x,y,z).";
-    }
-
-    inline static const ParametersDoc availableParameters()
-    {
-      return boost::assign::list_of<ParameterDoc>
-      ( "x", "x-coordinate of sensor", "0" )
-      ( "y", "y-coordinate of sensor", "0" )
-      ( "z", "z-coordinate of sensor", "0" )
-      ;
-    }
-
-    const T centerX;
-    const T centerY;
-    const T centerZ;
-
-    //! Constructor, uses parameter interface
-    ObservationDirectionDataPointsFilter(const Parameters& params = Parameters());
-    virtual DataPoints filter(const DataPoints& input);
-    virtual void inPlaceFilter(DataPoints& cloud);
-  };
-
-  struct VoxelGridDataPointsFilter : public DataPointsFilter
-  {
-    // Type definitions
-    typedef PointMatcher<T> PM;
-    typedef typename PM::DataPoints DataPoints;
-    typedef typename PM::DataPointsFilter DataPointsFilter;
-
-    typedef PointMatcherSupport::Parametrizable Parametrizable;
-    typedef PointMatcherSupport::Parametrizable P;
-    typedef Parametrizable::Parameters Parameters;
-    typedef Parametrizable::ParameterDoc ParameterDoc;
-    typedef Parametrizable::ParametersDoc ParametersDoc;
-    typedef Parametrizable::InvalidParameter InvalidParameter;
-
-    typedef typename PointMatcher<T>::Matrix Matrix;
-    typedef typename PointMatcher<T>::Vector Vector;
-    typedef typename Eigen::Matrix<T,2,1> Vector2;
-    typedef typename Eigen::Matrix<T,3,1> Vector3;
-    typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
-
-    // Destr
-    virtual ~VoxelGridDataPointsFilter() {};
-
-    inline static const std::string description()
-    {
-      return "Construct Voxel grid of the point cloud. Down-sample by taking centroid or center of grid cells./n";
-    }
-
-    inline static const ParametersDoc availableParameters()
-    {
-      return boost::assign::list_of<ParameterDoc>
-      ( "vSizeX", "Dimension of each voxel cell in x direction", "1.0", "-inf", "inf", &P::Comp<T> )
-      ( "vSizeY", "Dimension of each voxel cell in y direction", "1.0", "-inf", "inf", &P::Comp<T> )
-      ( "vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "-inf", "inf", &P::Comp<T> )
-      ( "summarizationMethod", "If 2, use random point in cell. If 1 , down-sample by using centroid of voxel cell.  If 0, use center of voxel cell.", "1", "0", "2", P::Comp<int> )
-      ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1", "0", "1", P::Comp<bool> )
-      ;
-    }
-
-    const T vSizeX;
-    const T vSizeY;
-    const T vSizeZ;
-    const int summarizationMethod;
-    const bool averageExistingDescriptors;
-
-    struct Voxel {
-      unsigned int    numPoints;
-      unsigned int    firstPoint;
-      Voxel() : numPoints(0), firstPoint(0) {}
-    };
-
-    //Constructor, uses parameter interface
-    VoxelGridDataPointsFilter(const Parameters& params = Parameters());
-
-    VoxelGridDataPointsFilter();
-
-    virtual DataPoints filter(const DataPoints& input);
-    virtual void inPlaceFilter(DataPoints& cloud);
 
   };
 

@@ -1027,7 +1027,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
   typedef typename DataPoints::View View;
   typedef typename DataPoints::Label Label;
   typedef typename DataPoints::Labels Labels;
-  typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
+  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
   typedef typename DataPoints::TimeView TimeView;
 
   const int pointsCount(cloud.features.cols());
@@ -1219,8 +1219,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::buildNew(BuildData& da
 template<typename T>
 void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
 {
-  typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
-  typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, 1> Uint64Vector;
+  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, 1> Int64Vector;
 
   const int colCount(last-first);
   const int featDim(data.features.rows());
@@ -1228,13 +1228,13 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
 
   // build nearest neighbors list
   Matrix d(featDim-1, colCount);
-  Uint64Matrix t(1, colCount);
+  Int64Matrix t(1, colCount);
   for (int i = 0; i < colCount; ++i) {
     d.col(i) = data.features.block(0,data.indices[first+i],featDim-1, 1);
     t.col(i) = data.times.col(data.indices[first + i]); //, 0);
   }
   const Vector box = d.rowwise().maxCoeff() - d.rowwise().minCoeff();
-  const boost::uint64_t timeBox = t.maxCoeff() - t.minCoeff();
+  const boost::int64_t timeBox = t.maxCoeff() - t.minCoeff();
 
   const T boxDim(box.maxCoeff());
   // drop box if it is too large or max timeframe is exceeded
@@ -1246,9 +1246,9 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   const Vector mean = d.rowwise().sum() / T(colCount);
   const Matrix NN = (d.colwise() - mean);
 
-  boost::uint64_t minTime = t.minCoeff();
-  boost::uint64_t maxTime = t.maxCoeff();
-  boost::uint64_t meanTime = t.sum() / T(colCount);
+  boost::int64_t minTime = t.minCoeff();
+  boost::int64_t maxTime = t.maxCoeff();
+  boost::int64_t meanTime = t.sum() / T(colCount);
 
   // compute covariance
   const Matrix C(NN * NN.transpose());
@@ -1475,7 +1475,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
   typedef typename DataPoints::View View;
   typedef typename DataPoints::Label Label;
   typedef typename DataPoints::Labels Labels;
-  typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
+  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
   typedef typename DataPoints::TimeView TimeView;
 
   const int pointsCount(cloud.features.cols());
@@ -1717,8 +1717,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
 template<typename T>
 void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& data, DataPoints& input, const int first, const int last) const
 {
-  typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, Eigen::Dynamic> Uint64Matrix;
-  typedef typename Eigen::Matrix<boost::uint64_t, Eigen::Dynamic, 1> Uint64Vector;
+  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, 1> Int64Vector;
   typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
   typedef typename PointMatcher<T>::Matches Matches;
 
@@ -1757,7 +1757,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
       continue;
     }
     Matrix d(featDim-1, colCount);
-    Uint64Matrix t(1, colCount);
+    Int64Matrix t(1, colCount);
 
     for (int j = 0; j < colCount; ++j) {
       d.col(j) = data.features.block(0,data.indices[goodIndices[j]],featDim-1, 1);
@@ -1769,9 +1769,9 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
 
     const Vector mean = d.rowwise().sum() / T(colCount);
     const Matrix NN = d.colwise() - mean;
-    boost::uint64_t minTime = t.minCoeff();
-    boost::uint64_t maxTime = t.maxCoeff();
-    boost::uint64_t meanTime = t.sum() / T(colCount);
+    boost::int64_t minTime = t.minCoeff();
+    boost::int64_t maxTime = t.maxCoeff();
+    boost::int64_t meanTime = t.sum() / T(colCount);
     // compute covariance
     const Matrix C(NN * NN.transpose());
     Vector eigenVa = Vector::Identity(featDim-1, 1);
