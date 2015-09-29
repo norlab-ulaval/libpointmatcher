@@ -218,5 +218,34 @@ In the following animation, you can observe the reading point cloud being transf
 |:------------|
 ![alt text](images/icp_tutorial_reading.gif "Animation of the reading cloud aligning with the reference")
 
+### Bonus Tip
+
+The executable `pmicp` can output the list of all the modules you can load in the yaml file along with their parameters and default values. You can see those using:
+```
+$ ./pmicp -l
+```
+
+If you are searching for the documentation of a particular module, you can do:
+```
+$ ./pmicp -l | awk '/<name>/' RS="\n\n" ORS="\n\n"
+```
+where you need to replace `<name>` by the module name. For example:
+```
+$ ./pmicp -l | awk '/VoxelGridDataPointsFilter/' RS="\n\n" ORS="\n\n"
+```
+Will output:
+```
+VoxelGridDataPointsFilter
+Construct Voxel grid of the point cloud. Down-sample by taking centroid or center of grid cells.
+- vSizeX (default: 1.0) - Dimension of each voxel cell in x direction - min: -inf - max: inf
+- vSizeY (default: 1.0) - Dimension of each voxel cell in y direction - min: -inf - max: inf
+- vSizeZ (default: 1.0) - Dimension of each voxel cell in z direction - min: -inf - max: inf
+- useCentroid (default: 1) - If 1 (true), down-sample by using centroid of voxel cell.  If false (0), use center of voxel cell. - min: 0 - max: 1
+- averageExistingDescriptors (default: 1) - whether the filter keep the existing point descriptors and average them or should it drop them - min: 0 - max: 1
+
+
+```
+
+
 ### Where to go from here
 To learn more on how to create configurations for libpointmatcher, move to the [next tutorial](Configuration.md).  Feel free to modify the configuration given above, adding and modifying filters and seeing how they impact the registration performance.
