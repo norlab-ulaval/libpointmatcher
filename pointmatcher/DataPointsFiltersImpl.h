@@ -555,7 +555,7 @@ struct DataPointsFiltersImpl
 
 		inline static const std::string description()
 		{
-			return "Construct Voxel grid of the point cloud. Down-sample by taking centroid or center of grid cells./n";
+			return "Construct Voxel grid of the point cloud. Down-sample by taking centroid or center of grid cells.";
 		}
 
 		inline static const ParametersDoc availableParameters()
