@@ -112,17 +112,18 @@ PointMatcher<T>::DataPoints::DataPoints(const Labels& featureLabels, const Label
 template<typename T>
 PointMatcher<T>::DataPoints::DataPoints(const Labels& featureLabels,
                                         const Labels& descriptorLabels,
-                                        const Labels& timeLabels,
-                                        const size_t pointCount):
-  featureLabels(featureLabels),
-  descriptorLabels(descriptorLabels),
-  timeLabels(timeLabels)
+										const Labels& timeLabels,
+										const size_t pointCount):
+	featureLabels(featureLabels),
+	descriptorLabels(descriptorLabels),
+	timeLabels(timeLabels)
 {
-  features.resize(featureLabels.totalDim(), pointCount);
-  if(descriptorLabels.totalDim())
-    descriptors.resize(descriptorLabels.totalDim(), pointCount);
-  if(timeLabels.totalDim())
-    times.resize(timeLabels.totalDim(), pointCount);
+	features.resize(featureLabels.totalDim(), pointCount);
+
+	if(descriptorLabels.totalDim())
+		descriptors.resize(descriptorLabels.totalDim(), pointCount);
+	if(timeLabels.totalDim())
+		times.resize(timeLabels.totalDim(), pointCount);
 }
 
 //! Construct a point cloud from existing features without any descriptor
@@ -611,7 +612,7 @@ void PointMatcher<T>::DataPoints::allocateTimes(const Labels& newLabels)
 
 //! Add a time by name, remove first if already exists
 template<typename T>
-void PointMatcher<T>::DataPoints::addTime(const std::string& name, const Uint64Matrix& newTime)
+void PointMatcher<T>::DataPoints::addTime(const std::string& name, const Int64Matrix& newTime)
 {
 	addField(name, newTime, timeLabels, times);
 }
@@ -625,9 +626,9 @@ void PointMatcher<T>::DataPoints::removeTime(const std::string& name)
 
 //! Get time by name, return a matrix containing a copy of the requested time 
 template<typename T>
-typename PointMatcher<T>::Uint64Matrix PointMatcher<T>::DataPoints::getTimeCopyByName(const std::string& name) const
+typename PointMatcher<T>::Int64Matrix PointMatcher<T>::DataPoints::getTimeCopyByName(const std::string& name) const
 {
-	return Uint64Matrix(getTimeViewByName(name));
+	return Int64Matrix(getTimeViewByName(name));
 }
 
 

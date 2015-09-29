@@ -23,7 +23,7 @@ __Note:__ we only support 64-bit systems because of some issues with Eigen. Othe
 
 The rest of this tutorial will guide you through the different requirements step by step.
 
-## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu)
+## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu) - Not recommended
 We recommand to compile from source to access the latest bug fixes, but for convenience a pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
 
 ```
@@ -180,13 +180,19 @@ sudo make install
 ```
 
 #Having problems?
-Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using.
+Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/ethz-asl/libpointmatcher/issues). You may need to ensure that the file is executable:
 
-Here are useful commands for the different version:
+```
+chmod +x ./utest/listVersionsUbuntu.sh 
+./utest/listVersionsUbuntu.sh 
+```
+
+
+Here are the list of useful commands used in the bash script:
 
 Ubuntu version:
 
-    lsb_release -a
+    lsb_release -r
 
 32-bit or 64-bit architecture:
 

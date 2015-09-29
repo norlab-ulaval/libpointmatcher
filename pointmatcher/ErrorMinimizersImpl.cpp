@@ -86,12 +86,22 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// Singular Value Decomposition
 	const Matrix m(mPts.reference.features.topRows(dimCount-1) * mPts.reading.features.topRows(dimCount-1).transpose());
 	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
-	const Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
+	Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
+	// It is possible to get a reflection instead of a rotation. In this case, we
+	// take the second best solution, guaranteed to be a rotation. For more details,
+	// read the tech report: "Least-Squares Rigid Motion Using SVD", Olga Sorkine
+	// http://igl.ethz.ch/projects/ARAP/svd_rot.pdf
+	if (rotMatrix.determinant() < 0.)
+	{
+		Matrix tmpV = svd.matrixV().transpose();
+		tmpV.row(dimCount-2) *= -1.;
+		rotMatrix = svd.matrixU() * tmpV;
+	}
 	const Vector trVector(meanReference.head(dimCount-1)- rotMatrix * meanReading.head(dimCount-1));
 	
 	Matrix result(Matrix::Identity(dimCount, dimCount));
-	result.corner(TopLeft, dimCount-1, dimCount-1) = rotMatrix;
-	result.corner(TopRight, dimCount-1, 1) = trVector;
+	result.topLeftCorner(dimCount-1, dimCount-1) = rotMatrix;
+	result.topRightCorner(dimCount-1, 1) = trVector;
 	
 	return result;
 }
@@ -187,12 +197,12 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	for(int i=0; i < cross.rows(); i++)
 	{
-		wF.row(i) = mPts.weights.cwise() * cross.row(i);
+		wF.row(i) = mPts.weights.array() * cross.row(i).array();
 		F.row(i) = cross.row(i);
 	}
 	for(int i=0; i < normalRef.rows(); i++)
 	{
-    	        wF.row(i + cross.rows()) = mPts.weights.cwise() * normalRef.row(i);
+    	        wF.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
 		F.row(i + cross.rows()) = normalRef.row(i);
 	}
 
@@ -211,7 +221,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	for(int i=0; i<normalRef.rows(); i++)
 	{
-		dotProd += (deltas.row(i).cwise() * normalRef.row(i));
+		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
 	}
 
 	// b = -(wF' * dot)
@@ -219,7 +229,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
 	// Cholesky decomposition
 	Vector x(A.rows());
-	A.llt().solve(b, &x);
+	x = A.llt().solve(b);
 	
 	// Transform parameters to matrix
 	Matrix mOut;
@@ -241,6 +251,14 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		std::cerr << "d angles" << x(0) - roll << ", " << x(1) - pitch << "," << x(2) - yaw << std::endl;*/
 		transform.translation() = x.segment(3, 3);
 		mOut = transform.matrix();
+
+		if (mOut != mOut) 
+		{
+			// Degenerate situation. This can happen when the source and reading clouds
+			// are identical, and then b and x above are 0, and the rotation matrix cannot
+			// be determined, it comes out full of NaNs. The correct rotation is the identity.
+			mOut.block(0, 0, dim-1, dim-1) = Matrix::Identity(dim-1, dim-1);
+		}	
 	}
 	else
 	{
@@ -251,8 +269,8 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		if(force2D)
 		{
 			mOut = Matrix::Identity(dim, dim);
-			mOut.corner(TopLeft, 2, 2) = transform.matrix().corner(TopLeft, 2, 2);
-			mOut.corner(TopRight, 2, 1) = transform.matrix().corner(TopRight, 2, 1);
+			mOut.topLeftCorner(2, 2) = transform.matrix().topLeftCorner(2, 2);
+			mOut.topRightCorner(2, 1) = transform.matrix().topRightCorner(2, 1);
 		}
 		else
 		{
@@ -344,8 +362,8 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const Vector trVector(meanReference.head(dimCount-1)- rotMatrix * meanReading.head(dimCount-1));
 	
 	Matrix result(Matrix::Identity(dimCount, dimCount));
-	result.corner(TopLeft, dimCount-1, dimCount-1) = rotMatrix;
-	result.corner(TopRight, dimCount-1, 1) = trVector;
+	result.topLeftCorner(dimCount-1, dimCount-1) = rotMatrix;
+	result.topRightCorner(dimCount-1, 1) = trVector;
 
 	this->covMatrix = this->estimateCovariance(filteredReading, filteredReference, matches, outlierWeights, result);
 
@@ -528,12 +546,12 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	for(int i=0; i < cross.rows(); i++)
 	{
-		wF.row(i) = mPts.weights.cwise() * cross.row(i);
+		wF.row(i) = mPts.weights.array() * cross.row(i).array();
 		F.row(i) = cross.row(i);
 	}
 	for(int i=0; i < normalRef.rows(); i++)
 	{
-       	        wF.row(i + cross.rows()) = mPts.weights.cwise() * normalRef.row(i);
+       	        wF.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
 		F.row(i + cross.rows()) = normalRef.row(i);
 	}
 
@@ -552,7 +570,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	for(int i=0; i<normalRef.rows(); i++)
 	{
-		dotProd += (deltas.row(i).cwise() * normalRef.row(i));
+		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
 	}
 
 	// b = -(wF' * dot)
@@ -560,7 +578,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
 	// Cholesky decomposition
 	Vector x(A.rows());
-	A.llt().solve(b, &x);
+	x = A.llt().solve(b);
 	
 	// Transform parameters to matrix
 	Matrix mOut;
@@ -591,8 +609,8 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		if(force2D)
 		{
 			mOut = Matrix::Identity(dim, dim);
-			mOut.corner(TopLeft, 2, 2) = transform.matrix().corner(TopLeft, 2, 2);
-			mOut.corner(TopRight, 2, 1) = transform.matrix().corner(TopRight, 2, 1);
+			mOut.topLeftCorner(2, 2) = transform.matrix().topLeftCorner(2, 2);
+			mOut.topRightCorner(2, 1) = transform.matrix().topRightCorner(2, 1);
 		}
 		else
 		{

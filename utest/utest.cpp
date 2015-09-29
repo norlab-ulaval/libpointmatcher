@@ -147,7 +147,26 @@ TEST(icpTest, icpTest)
 		EXPECT_LT(transErr, transTol) << "This error was caused by the test file:" <<  endl << "   " << config_file;
 	}
 }
+TEST(icpTest, icpIdentity)
+{
+	// Here we test point-to-plane ICP where we expect the output transform to be 
+	// the identity. This situation requires special treatment in the algorithm.
+	
+	DP pts0 = DP::load(dataPath + "cloud.00000.vtk");
+	DP pts1 = DP::load(dataPath + "cloud.00000.vtk");
 
+	PM::ICP icp;
+	std::string config_file = dataPath + "default-identity.yaml";
+	EXPECT_TRUE(boost::filesystem::exists(config_file));
+
+	std::ifstream ifs(config_file.c_str());
+	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
+
+	// Compute current ICP transform
+	PM::TransformationParameters curT = icp(pts0, pts1);
+    
+	EXPECT_EQ(curT, PM::Matrix::Identity(4,4)) << "Expecting identity transform." << endl;
+}
 
 TEST(icpTest, icpSequenceTest)
 {
@@ -191,9 +210,6 @@ TEST(icpTest, icpSequenceTest)
 	map = icpSequence.getInternalMap();
 	EXPECT_EQ(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), 0u);
-
-
-
 }
 
 // Utility classes

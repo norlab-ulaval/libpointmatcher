@@ -27,6 +27,157 @@ TEST(IOTest, loadYaml)
 	EXPECT_THROW(icp.loadFromYaml(ifs3), PointMatcherSupport::InvalidModuleType);
 }
 
+TEST(IOTest, loadCsv)
+{
+  typedef PointMatcherIO<float> IO;
+	std::istringstream is;
+  std::ostringstream os;
+  DP pts;
+
+  // too many elements on a line
+  os.clear();
+  os.str("");
+  os <<
+  "x, y\n"
+  "1, 2\n"
+  "1, 2, 3\n"
+  "1, 2\n"
+  ;
+
+  is.clear();
+  is.str(os.str());
+  EXPECT_THROW(IO::loadCSV(is), runtime_error);
+
+  // not enough elements on a line
+  os.clear();
+  os.str("");
+  os <<
+  "x, y\n"
+  "1, 2\n"
+  "1, \n"
+  "1, 2\n"
+  ;
+
+  is.clear();
+  is.str(os.str());
+  EXPECT_THROW(IO::loadCSV(is), runtime_error);
+  
+  // 2D data 
+  os.clear();
+  os.str("");
+  os <<
+  "x, y\n"
+  "1, 2\n"
+  "1, 2\n"
+  "8, 2\n"
+  "1, 2\n"
+  ;
+
+  is.clear();
+  is.str(os.str());
+  pts = IO::loadCSV(is);
+  EXPECT_EQ(4u, pts.getNbPoints());
+  EXPECT_EQ(2u, pts.getEuclideanDim());
+  EXPECT_EQ(0u, pts.getDescriptorDim());
+  EXPECT_EQ(0u, pts.getTimeDim());
+  EXPECT_EQ(8.0, pts.features(0,2));
+  
+  // 3D data 
+  os.clear();
+  os.str("");
+  os <<
+  "x, y, z\n"
+  "1, 2, 3\n"
+  "1, 2, 3\n"
+  "8, 2, 3\n"
+  "1, 2, 3\n"
+  ;
+
+  is.clear();
+  is.str(os.str());
+  pts = IO::loadCSV(is);
+  EXPECT_EQ(4u, pts.getNbPoints());
+  EXPECT_EQ(3u, pts.getEuclideanDim());
+  EXPECT_EQ(0u, pts.getDescriptorDim());
+  EXPECT_EQ(0u, pts.getTimeDim());
+  EXPECT_EQ(8.0, pts.features(0,2));
+
+  // 3D data with unknown descriptor
+  os.clear();
+  os.str("");
+  os <<
+  "x, y, z, dummy\n"
+  "1, 2, 3, 4\n"
+  "1, 2, 3, 4\n"
+  "8, 2, 3, 4\n"
+  "1, 2, 3, 4\n"
+  ;
+
+  is.clear();
+  is.str(os.str());
+  pts = IO::loadCSV(is);
+  EXPECT_EQ(4u, pts.getNbPoints());
+  EXPECT_EQ(3u, pts.getEuclideanDim());
+  EXPECT_EQ(1u, pts.getDescriptorDim());
+  EXPECT_EQ(0u, pts.getTimeDim());
+  EXPECT_TRUE(pts.descriptorExists("dummy"));
+
+  // 3D data with known descriptor
+  os.clear();
+  os.str("");
+  os <<
+  "x, y, z, nx, ny, nz\n"
+  "1, 2, 3, 4, 5, 6\n"
+  "1, 2, 3, 4, 5, 6\n"
+  "8, 2, 3, 4, 5, 6\n"
+  "1, 2, 3, 4, 5, 6\n"
+  ;
+
+  is.clear();
+  is.str(os.str());
+  pts = IO::loadCSV(is);
+  EXPECT_EQ(4u, pts.getNbPoints());
+  EXPECT_EQ(3u, pts.getEuclideanDim());
+  EXPECT_EQ(3u, pts.getDescriptorDim());
+  EXPECT_EQ(1u, pts.getNbGroupedDescriptors());
+  EXPECT_EQ(0u, pts.getTimeDim());
+  EXPECT_TRUE(pts.descriptorExists("normals"));
+  
+  // csv with time
+  int64_t time0 = 1410264593275569438;
+  int64_t time1 = 1410264593325569391;
+  int64_t time2 = 1410264593425569295;
+  int64_t time3 = 1410264593522569417;
+
+  os.clear();
+  os.str("");
+	os <<
+	"x, y, z, time\n"
+	"1, 1, 1, " << time0 << "\n"
+	"2, 1, 1, " << time1 << "\n"
+	"3, 1, 1, " << time2 << "\n"
+	"4, 1, 1, " << time3 << "\n"
+	;
+
+  is.clear();
+  is.str(os.str());
+
+  pts = IO::loadCSV(is);
+  EXPECT_EQ(4u, pts.getNbPoints());
+  EXPECT_EQ(3u, pts.getEuclideanDim());
+  EXPECT_EQ(0u, pts.getDescriptorDim());
+  EXPECT_EQ(1u, pts.getTimeDim());
+  EXPECT_EQ(time3, pts.times(0,3));
+
+  //cout << "dim: " << pts.getEuclideanDim() << endl;
+  //cout << "nb pts: " << pts.getNbPoints() << endl;
+  //cout << "desc dim: " << pts.getDescriptorDim() << endl;
+  //cout << "time dim: " << pts.getTimeDim() << endl;
+
+
+
+}
+
 TEST(IOTest, loadPLY)
 {
 	typedef PointMatcherIO<float> IO;
@@ -128,9 +279,29 @@ public:
 		ptCloud.addDescriptor(descriptorName, PM::Matrix::Random(rows, nbPts));
 	}
 
-	virtual void loadSaveTest(const string& testFileName, const int nbPts = 10)
+	virtual void loadSaveTest(const string& testFileName, bool plyFormat = false, const int nbPts = 10)
 	{
 		this->testFileName = testFileName;
+
+		if (plyFormat) {
+			// make sure randam values generated for colors are within ply format range
+			int pointCount(ptCloud.features.cols());
+			int descRows(ptCloud.descriptors.rows());
+			bool datawithColor = ptCloud.descriptorExists("color");
+			int colorStartingRow = ptCloud.getDescriptorStartingRow("color");
+			int colorEndRow = colorStartingRow + ptCloud.getDescriptorDimension("color");
+			for (int p = 0; p < pointCount; ++p)
+			{
+				for (int d = 0; d < descRows; ++d)
+				{
+					if (datawithColor && d >= colorStartingRow && d < colorEndRow) {
+						if (ptCloud.descriptors(d, p) < 0) { ptCloud.descriptors.coeffRef(d, p) = -(ptCloud.descriptors(d, p)); }
+						ptCloud.descriptors.coeffRef(d, p) = (static_cast<unsigned>(ptCloud.descriptors(d, p) * 255.0)) / 255.0;
+					}
+				}
+			}
+		}
+
 		ptCloud.save(testFileName);
 
 		ptCloudFromFile = DP::load(testFileName);
@@ -143,7 +314,11 @@ public:
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("eigVectors",9));
 		EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("eigVectors").isApprox(ptCloud.getDescriptorViewByName("eigVectors")));
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("color",4));
-		EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("color").isApprox(ptCloud.getDescriptorViewByName("color")));
+		if (plyFormat) {
+			EXPECT_TRUE(((ptCloudFromFile.getDescriptorViewByName("color") * 255.0)).isApprox((ptCloud.getDescriptorViewByName("color") * 255.0), 1.0));
+		} else {
+			EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("color").isApprox(ptCloud.getDescriptorViewByName("color")));
+		}
 
 		EXPECT_TRUE(ptCloudFromFile.features.isApprox(ptCloud.features));
 
@@ -169,7 +344,7 @@ TEST_F(IOLoadSaveTest, VTK)
 	ptCloud.addDescriptor("genericScalar", PM::Matrix::Random(1, nbPts));
 	ptCloud.addDescriptor("genericVector", PM::Matrix::Random(3, nbPts));
 
-	loadSaveTest("unit_test.vtk");
+	loadSaveTest(dataPath + "unit_test.vtk");
 
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericScalar",1));
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericVector",3));
@@ -178,15 +353,15 @@ TEST_F(IOLoadSaveTest, VTK)
 
 TEST_F(IOLoadSaveTest, PLY)
 {
-	loadSaveTest("unit_test.ply");
+	loadSaveTest(dataPath + "unit_test.ply", true);
 }
 
 TEST_F(IOLoadSaveTest, PCD)
 {
-	loadSaveTest("unit_test.pcd");
+	loadSaveTest(dataPath + "unit_test.pcd");
 }
 
 TEST_F(IOLoadSaveTest, CSV)
 {
-	loadSaveTest("unit_test.csv");
+	loadSaveTest(dataPath + "unit_test.csv");
 }

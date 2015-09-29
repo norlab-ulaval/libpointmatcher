@@ -63,7 +63,7 @@ template struct OutlierFiltersImpl<double>::NullOutlierFilter;
 template<typename T>
 OutlierFiltersImpl<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Parameters& params):
 	OutlierFilter("MaxDistOutlierFilter", MaxDistOutlierFilter::availableParameters(), params),
-	maxDist(Parametrizable::get<T>("maxDist"))
+	maxDist(pow(Parametrizable::get<T>("maxDist"),2)) // we use the square distance later
 {
 }
 
@@ -84,7 +84,7 @@ template struct OutlierFiltersImpl<double>::MaxDistOutlierFilter;
 template<typename T>
 OutlierFiltersImpl<T>::MinDistOutlierFilter::MinDistOutlierFilter(const Parameters& params):
 	OutlierFilter("MinDistOutlierFilter", MinDistOutlierFilter::availableParameters(), params),
-	minDist(Parametrizable::get<T>("minDist"))
+	minDist(pow(Parametrizable::get<T>("minDist"),2))// we use the square distance later
 {
 }
 

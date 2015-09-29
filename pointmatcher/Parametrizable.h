@@ -63,6 +63,14 @@ namespace PointMatcherSupport
 		else
 			return boost::lexical_cast<Target>(arg);
 	}
+
+	//! Overloaded function for convenience
+	template<typename Target>
+	inline Target lexical_cast_scalar_to_string(const char*& arg)
+	{
+		return lexical_cast_scalar_to_string<Target>(std::string(arg));
+	}
+
 	
 	//! General case of lexical cast, use boost
 	template<typename Target, typename Source>

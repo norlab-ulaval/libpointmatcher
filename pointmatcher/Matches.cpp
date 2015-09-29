@@ -70,7 +70,12 @@ T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 	if (values.size() == 0)
 		throw ConvergenceError("no outlier to filter");
 	
+	if (quantile < 0.0 || quantile > 1.0)
+		throw ConvergenceError("quantile must be between 0 and 1");
+
 	// get quantile
+	if (quantile == 1.0)
+		return *max_element(values.begin(), values.end());
 	nth_element(values.begin(), values.begin() + (values.size() * quantile), values.end());
 	return values[values.size() * quantile];
 }

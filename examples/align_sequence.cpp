@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
 	typedef PointMatcherIO<float> PMIO;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DP;
-	typedef Parametrizable::Parameter Parameter;
 	
 	const int maxMapPointCount = 200000;
 
@@ -105,7 +104,7 @@ int main(int argc, char *argv[])
 					PM::get().DataPointsFilterRegistrar.create(
 						"SurfaceNormalDataPointsFilter",
 						map_list_of
-							("binSize", "10")
+							("knn", "10")
 							("epsilon", "5") 
 							("keepNormals", "0")
 							("keepDensities", "1")
@@ -148,7 +147,7 @@ int main(int argc, char *argv[])
 			}
 
 			stringstream outputFileNameIter;
-			outputFileNameIter << outputFileName << "_" << i;
+			outputFileNameIter << outputFileName << "_" << i << ".vtk";
 			
 			cout << "outputFileName: " << outputFileNameIter.str() << endl;
 			mapPointCloud.save(outputFileNameIter.str());

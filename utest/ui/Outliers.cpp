@@ -39,7 +39,7 @@ public:
 TEST_F(OutlierFilterTest, MaxDistOutlierFilter2D)
 {
 	addFilter("MaxDistOutlierFilter", map_list_of
-		("maxDist", toParam(0.015))
+		("maxDist", toParam(0.10))
 	);
 	validate2dTransformation();
 }
@@ -47,7 +47,7 @@ TEST_F(OutlierFilterTest, MaxDistOutlierFilter2D)
 TEST_F(OutlierFilterTest, MaxDistOutlierFilter3D)
 {
 	addFilter("MaxDistOutlierFilter", map_list_of
-		("maxDist", toParam(0.1))
+		("maxDist", toParam(1.0))
 	);
 	validate3dTransformation();
 }
@@ -62,7 +62,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter2D)
 	extraOutlierFilter = 
 		PM::get().OutlierFilterRegistrar.create(
 			"MaxDistOutlierFilter", map_list_of 
-				("maxDist", toParam(0.015))
+				("maxDist", toParam(0.10))
 		)
 	;
 	icp.outlierFilters.push_back(extraOutlierFilter);
@@ -81,7 +81,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter3D)
 	extraOutlierFilter = 
 		PM::get().OutlierFilterRegistrar.create(
 			"MaxDistOutlierFilter", map_list_of 
-				("maxDist", toParam(0.1))
+				("maxDist", toParam(1.0))
 		)
 	;
 	icp.outlierFilters.push_back(extraOutlierFilter);

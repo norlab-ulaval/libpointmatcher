@@ -24,11 +24,6 @@ set(BUILD_SHARED_LIBS OFF)
 # --> Apple
 option(APPLE_UNIVERSAL_BIN "Apple: Build universal binary" OFF)
 
-# --> Microsoft Visual C++
-# see http://msdn.microsoft.com/en-us/library/aa278396(v=VS.60).aspx
-#     http://msdn.microsoft.com/en-us/library/2kzt1wy3(v=VS.71).aspx
-option(MSVC_SHARED_RT "MSVC: Build with shared runtime libs (/MD)" ON)
-option(MSVC_STHREADED_RT "MSVC: Build with single-threaded static runtime libs (/ML until VS .NET 2003)" OFF)
 
 ###
 ### Sources, headers, directories and libs
@@ -106,57 +101,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 		VERBATIM)
 endif()
 
-# Microsoft VisualC++ specialities
-if(MSVC)
-	### General stuff
-	# a) Change MSVC runtime library settings (/MD[d], /MT[d], /ML[d] (single-threaded until VS 2003))
-	#    plus set lib suffix for later use and project label accordingly
-	# see http://msdn.microsoft.com/en-us/library/aa278396(v=VS.60).aspx
-	#     http://msdn.microsoft.com/en-us/library/2kzt1wy3(v=VS.71).aspx
-	set(LIB_RT_SUFFIX "md")	# CMake defaults to /MD for MSVC
-	set(LIB_RT_OPTION "/MD")
-	#
-	if(NOT MSVC_SHARED_RT)	# User wants to have static runtime libraries (/MT, /ML)
-		if(MSVC_STHREADED_RT)	# User wants to have old single-threaded static runtime libraries
-			set(LIB_RT_SUFFIX "ml")
-			set(LIB_RT_OPTION "/ML")
-			if(NOT ${MSVC_VERSION} LESS 1400)
-				message(FATAL_ERROR "Single-threaded static runtime libraries (/ML) only available until VS .NET 2003 (7.1).")
-			endif()
-		else()
-			set(LIB_RT_SUFFIX "mt")
-			set(LIB_RT_OPTION "/MT")
-		endif()
-
-		# correct linker options
-		foreach(flag_var  CMAKE_C_FLAGS  CMAKE_CXX_FLAGS)
-			foreach(config_name  ""  DEBUG  RELEASE  MINSIZEREL  RELWITHDEBINFO)
-				set(var_name "${flag_var}")
-				if(NOT "${config_name}" STREQUAL "")
-					set(var_name "${var_name}_${config_name}")
-				endif()
-				string(REPLACE "/MD" "${LIB_RT_OPTION}" ${var_name} "${${var_name}}")
-			endforeach()
-		endforeach()
-	endif()
-	#
-	set(LABEL_SUFFIX "${LABEL_SUFFIX} ${LIB_RT_SUFFIX}")
-
-	# b) Change prefix for static libraries
-	set(CMAKE_STATIC_LIBRARY_PREFIX "lib")	# to distinguish static libraries from DLL import libs
-
-	# c) Correct suffixes for static libraries
-	if(NOT BUILD_SHARED_LIBS)
-		### General stuff
-		set(LIB_TARGET_SUFFIX "${LIB_SUFFIX}${LIB_RT_SUFFIX}")
-	endif()
-
-	### Project stuff
-	# /W3 = set warning level; see http://msdn.microsoft.com/en-us/library/thxezb7y.aspx
-	# /wd4127 = disable warning C4127 "conditional expression is constant"; see http://msdn.microsoft.com/en-us/library/6t66728h.aspx
-	# /wd4355 = disable warning C4355 "'this' : used in base member initializer list"; http://msdn.microsoft.com/en-us/library/3c594ae3.aspx
-	set(CMAKE_CXX_FLAGS "/W3 /wd4127 /wd4355 /D_SCL_SECURE_NO_WARNINGS ${CMAKE_CXX_FLAGS}")
-endif()
 
 ###
 ### Library
@@ -176,14 +120,3 @@ set_target_properties(yaml-cpp-pm PROPERTIES
 	PROJECT_LABEL "yaml-cpp ${LABEL_SUFFIX}"
 )
 
-if(MSVC)
-	if(NOT BUILD_SHARED_LIBS)
-		# correct library names
-		set_target_properties(yaml-cpp-pm PROPERTIES
-			DEBUG_POSTFIX "${LIB_TARGET_SUFFIX}d"
-			RELEASE_POSTFIX "${LIB_TARGET_SUFFIX}"
-			MINSIZEREL_POSTFIX "${LIB_TARGET_SUFFIX}"
-			RELWITHDEBINFO_POSTFIX "${LIB_TARGET_SUFFIX}"
-		)
-	endif()
-endif()

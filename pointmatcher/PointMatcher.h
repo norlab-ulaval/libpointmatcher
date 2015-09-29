@@ -3,7 +3,7 @@
 /*
 
 Copyright (c) 2010--2012,
-François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
+Francois Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
 You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
 
@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EIGEN_USE_NEW_STDVECTOR
 #define EIGEN_USE_NEW_STDVECTOR
 #endif // EIGEN_USE_NEW_STDVECTOR
-#define EIGEN2_SUPPORT
+//#define EIGEN2_SUPPORT
 #include "Eigen/StdVector"
 #include "Eigen/Core"
 #include "Eigen/Geometry"
@@ -58,9 +58,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Parametrizable.h"
 #include "Registrar.h"
-
-#if NABO_VERSION_INT < 10001
-	#error "You need libnabo version 1.0.1 or greater"
+ 
+#if NABO_VERSION_INT < 10006
+	#error "You need libnabo version 1.0.6 or greater"
 #endif
 
 /*! 
@@ -208,11 +208,11 @@ struct PointMatcher
 		//! A view on a feature or descriptor
 		typedef Eigen::Block<Matrix> View;
 		//! A view on a time
-		typedef Eigen::Block<Uint64Matrix> TimeView;
+		typedef Eigen::Block<Int64Matrix> TimeView;
 		//! A view on a const feature or const descriptor
 		typedef const Eigen::Block<const Matrix> ConstView;
 		//! a view on a const time
-		typedef const Eigen::Block<const Uint64Matrix> TimeConstView;
+		typedef const Eigen::Block<const Int64Matrix> TimeConstView;
 		//! An index to a row or a column
 		typedef typename Matrix::Index Index;
 		
@@ -240,11 +240,16 @@ struct PointMatcher
 			InvalidField(const std::string& reason);
 		};
 		
+		// Constructors from descriptions (reserve memory)
 		DataPoints();
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount);
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const Labels& timeLabels, const size_t pointCount);
+
+		// Copy constructors from partial data
 		DataPoints(const Matrix& features, const Labels& featureLabels);
 		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
+		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels, const Int64Matrix& times, const Labels& timeLabels);
+		
 		bool operator ==(const DataPoints& that) const;
 	
 		unsigned getNbPoints() const;
@@ -297,9 +302,9 @@ struct PointMatcher
 		// methods related to times
 		void allocateTime(const std::string& name, const unsigned dim);
 		void allocateTimes(const Labels& newLabels);
-		void addTime(const std::string& name, const Uint64Matrix& newTime);
+		void addTime(const std::string& name, const Int64Matrix& newTime);
 		void removeTime(const std::string& name);
-		Uint64Matrix getTimeCopyByName(const std::string& name) const;
+		Int64Matrix getTimeCopyByName(const std::string& name) const;
 		TimeConstView getTimeViewByName(const std::string& name) const;
 		TimeView getTimeViewByName(const std::string& name);
 		TimeConstView getTimeRowViewByName(const std::string& name, const unsigned row) const;
@@ -314,7 +319,7 @@ struct PointMatcher
 		Labels featureLabels; //!< labels of features
 		Matrix descriptors; //!< descriptors of points in the cloud, might be empty
 		Labels descriptorLabels; //!< labels of descriptors
-		Uint64Matrix times; //!< time associated to each points, might be empty
+		Int64Matrix times; //!< time associated to each points, might be empty
 		Labels timeLabels; //!< labels of times.
 	
 	private:
@@ -518,6 +523,7 @@ struct PointMatcher
 		
 		T getPointUsedRatio() const;
 		T getWeightedPointUsedRatio() const;
+		ErrorElements getErrorElements() const; //TODO: ensure that is return a usable value
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
 		
@@ -525,14 +531,15 @@ struct PointMatcher
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
 		
 		
-	protected:
+	//protected:
 		// helper functions
-		static Matrix crossProduct(const Matrix& A, const Matrix& B);
+		static Matrix crossProduct(const Matrix& A, const Matrix& B);//TODO: this might go in pointmatcher_support namespace
 		ErrorElements& getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
 		
 	protected:
 		T pointUsedRatio; //!< the ratio of how many points were used for error minimization
 		T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+		//TODO: standardize the use of this variable
 		ErrorElements lastErrorElements; //!< memory of the last computed error
 	};
 	
@@ -648,9 +655,11 @@ struct PointMatcher
 		
         virtual void loadAdditionalYAMLContent(PointMatcherSupport::YAML::Node& doc);
 		
+		//! Instantiate modules if their names are in the YAML file
 		template<typename R>
         const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
+		//! Instantiate a module if its name is in the YAML file
 		template<typename R>
         const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
 		
@@ -674,13 +683,18 @@ struct PointMatcher
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
-	
+
+		//! Return the filtered point cloud reading used in the ICP chain
+		const DataPoints& getReadingFiltered() const { return readingFiltered; }
+
 	protected:
 		TransformationParameters computeWithTransformedReference(
 			const DataPoints& readingIn, 
 			const DataPoints& reference, 
 			const TransformationParameters& T_refIn_refMean,
 			const TransformationParameters& initialTransformationParameters);
+
+		DataPoints readingFiltered; //!< reading point cloud after the filters were applied
 	};
 	
 	//! ICP alogrithm, taking a sequence of clouds and using a map

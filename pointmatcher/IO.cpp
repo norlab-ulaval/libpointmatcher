@@ -600,39 +600,36 @@ std::string PointMatcherIO<T>::getColLabel(const Label& label, const int row)
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is)
 {
-	//typedef typename DataPoints::Label Label;
-	//typedef typename DataPoints::Labels Labels;
-	
-	vector<T> xData;
-	vector<T> yData;
-	vector<T> zData;
-	vector<T> padData;
-	vector<string> header;
-	vector<int> descColsToKeep; // Record of which columns will be read into a descriptor
-
-	map<int,LabelAssociationPair> colToDescPair;
-	map<string,int> descLabelToNumRows;
-	map<string,int> descLabelToStartingRows;
-
-	vector<vector<T> > descCols;
-	int numDescCols = 0;
-	int dim(0);
-	bool firstLine(true);
+	vector<GenericInputHeader> csvHeader;
+	LabelGenerator featLabelGen, descLabelGen, timeLabelGen;
+	Matrix features;
+	Matrix descriptors;
+	Int64Matrix times;
+	unsigned int csvCol = 0;
+	unsigned int csvRow = 0;
 	bool hasHeader(false);
-	Labels featureLabels, descriptorLabels;
-	int xCol(-1);
-	int yCol(-1);
-	int zCol(-1);
+	bool firstLine(true);
+	
+
+	//count lines in the file
+	is.unsetf(std::ios_base::skipws);
+	unsigned int line_count = std::count(
+	        std::istream_iterator<char>(is),
+			std::istream_iterator<char>(), 
+			'\n');
+	//reset the stream
+	is.clear();
+	is.seekg(0, ios::beg);
 
 	char delimiters[] = " \t,;";
 	char *token;
 	while (!is.eof())
 	{
-		//char line[1024];
-      string line;
-      safeGetLine(is, line);
-		//is.getline(line, sizeof(line));
-		//line[sizeof(line)-1] = 0;
+		string line;
+		safeGetLine(is, line);
+		// Skip empty lines
+		if(line.empty())
+			break;
 	
 		// Look for text header
 		unsigned int len = strspn(line.c_str(), " ,+-.1234567890Ee");
@@ -649,210 +646,221 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		// Count dimension using first line
 		if(firstLine)
 		{
-         
-			char tmpLine[1024];
-         strcpy(tmpLine, line.c_str());
+			unsigned int dim = 0;
+			char tmpLine[1024]; //FIXME: might be problematic for large file
+			strcpy(tmpLine, line.c_str());
 			char *brkt = 0;
 			token = strtok_r(tmpLine, delimiters, &brkt);
+
+			//1- BUILD HEADER
 			while (token)
 			{
-				dim++;
-				
 				// Load text header
 				if(hasHeader)
 				{
-					header.push_back(string(token));
+					csvHeader.push_back(GenericInputHeader(string(token)));
 				}
-
+				dim++;
 				token = strtok_r(NULL, delimiters, &brkt);
 			}
-		
-				
-			if (hasHeader)
-			{
-				// Search for x, y and z tags
-				for(unsigned int i = 0; i < header.size(); i++)
-				{
-					std::string colLabel = header[i];
-					if(colLabel.compare("x") == 0)
-						xCol = i;
-				
-					if(colLabel.compare("y") == 0)
-						yCol = i;
-				
-					if(colLabel.compare("z") == 0)
-						zCol = i;
-
-					if(descSublabelRegistered(colLabel))
-					{
-						descColsToKeep.push_back(i);
-						LabelAssociationPair associationPair = getDescAssociationPair(colLabel);
-
-						colToDescPair[i] = associationPair;
-						descLabelToNumRows[associationPair.second]++;
-					}
-				}
-
-				// Do cumulative sum over number of descriptor rows per decriptor to get the starting
-				// index row of reach descriptor
-				int cumSum = 0;
-				for(map<string,int>::const_iterator it = descLabelToNumRows.begin(); it != descLabelToNumRows.end(); it++)
-				{
-					descLabelToStartingRows[it->first] = cumSum;
-					cumSum += it->second;
-				}
-
-				// allocate descriptor vectors
-				numDescCols = descColsToKeep.size(); // number of descriptor vectors
-				descCols.resize(numDescCols);
-
-				if(xCol == -1 || yCol == -1)
-				{
-					for(unsigned int i = 0; i < header.size(); i++)
-					{
-						cout << "(" << i << ") " << header[i] << endl;
-					}
-					cout << endl << "Enter ID for x: ";
-					cin >> xCol;
-					cout << "Enter ID for y: ";
-					cin >> yCol;
-					cout << "Enter ID for z (-1 if 2D data): ";
-					cin >> zCol;
-				}
-			}
-			else
+			
+			if (!hasHeader)
 			{
 				// Check if it is a simple file with only coordinates
 				if (!(dim == 2 || dim == 3))
 				{
+					int idX=0, idY=0, idZ=0;
+
 					cout << "WARNING: " << dim << " columns detected. Not obvious which columns to load for x, y or z." << endl;
 					cout << endl << "Enter column ID (starting from 0) for x: ";
-					cin >> xCol;
+					cin >> idX;
 					cout << "Enter column ID (starting from 0) for y: ";
-					cin >> yCol;
+					cin >> idY;
 					cout << "Enter column ID (starting from 0, -1 if 2D data) for z: ";
-					cin >> zCol;
+					cin >> idZ;
+
+					// Fill with unkown column names
+					for(unsigned int i=0; i<dim; i++)
+					{
+						std::ostringstream os;
+						os << "empty" << i;
+
+						csvHeader.push_back(GenericInputHeader(os.str()));
+					}
+					
+					// Overwrite with user inputs
+					csvHeader[idX] = GenericInputHeader("x");
+					csvHeader[idY] = GenericInputHeader("y");
+					if(idZ != -1)
+						csvHeader[idZ] = GenericInputHeader("z");
 				}
 				else
 				{
 					// Assume logical order...
-					xCol = 0;
-					yCol = 1;
+					csvHeader.push_back(GenericInputHeader("x"));
+					csvHeader.push_back(GenericInputHeader("y"));
 					if(dim == 3)
-						zCol = 2;
+						csvHeader.push_back(GenericInputHeader("z"));
 				}
 			}
 
-			if(zCol != -1)
-				dim = 3;
-			else
-				dim = 2;
-		}
+			//2- PROCESS HEADER
+			// Load known features, descriptors, and time
+			const SupportedLabels externalLabels = getSupportedExternalLabels();
 
-		// Load data!
-		char *brkt = 0;
-      char line_c[1024];
-      strcpy(line_c,line.c_str());
-		token = strtok_r(line_c, delimiters, &brkt);
-		int currentCol = 0;
-		int d = 0; // descriptor vector iterator
-		int nextDescCol = -1; // next descriptor column to be recorded
-		if (numDescCols > 0)
-			nextDescCol = descColsToKeep[0];
+			// Counters
+			int rowIdFeatures = 0;
+			int rowIdDescriptors = 0;
+			int rowIdTime = 0;
 
-		while (token)
-		{
-			// Load data only if no text is on the line
-			if(!hasHeader)
+			
+			// Loop through all known external names (ordered list)
+			for(size_t i=0; i<externalLabels.size(); i++)
 			{
-				if(currentCol == xCol)
-					xData.push_back(atof(token));
-				if(currentCol == yCol)
-					yData.push_back(atof(token));
-				if(currentCol == zCol)
-					zData.push_back(atof(token));
-				if(currentCol == nextDescCol)
+				const SupportedLabel supLabel = externalLabels[i];
+
+				for(size_t j=0; j < csvHeader.size(); j++)
 				{
-					LabelAssociationPair descPair = colToDescPair[nextDescCol];
-					int startingRow = descLabelToStartingRows[descPair.second];
-					descCols[startingRow + descPair.first].push_back(atof(token));
-					d++;
-					// check for next descriptor column, if there are no more than we will no longer check
-					if (d < numDescCols)
-						nextDescCol = descColsToKeep[d];
-					else
-						nextDescCol = -1;
+					if(supLabel.externalName == csvHeader[j].name)
+					{
+						csvHeader[j].isKnownName = true;
+						csvHeader[j].matrixType = supLabel.type;
+
+						switch (supLabel.type)
+						{
+							case FEATURE:
+								csvHeader[j].matrixRowId = rowIdFeatures;
+								featLabelGen.add(supLabel.internalName);
+								rowIdFeatures++;
+								break;
+							case DESCRIPTOR:
+								csvHeader[j].matrixRowId = rowIdDescriptors;
+								descLabelGen.add(supLabel.internalName);
+								rowIdDescriptors++;
+								break;
+							case TIME:
+								csvHeader[j].matrixRowId = rowIdTime;
+								timeLabelGen.add(supLabel.internalName);
+								rowIdTime++;
+								break;
+							default:
+								throw runtime_error(string("CSV parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
+								break;
+						}
+					}
 				}
 			}
 
-			token = strtok_r(NULL, delimiters, &brkt);
-			currentCol++;
-		}
-		
-		// Add one for uniform coordinates
-		padData.push_back(1);
-		
-		if (firstLine)
-		{
-			// create standard labels
-			for (int i=0; i < dim; i++)
+			// loop through the remaining UNSUPPORTED labels and assigned them to a descriptor row
+			for(unsigned int i=0; i<csvHeader.size(); i++)
 			{
-				string text;
-				text += char('x' + i);
-				featureLabels.push_back(Label(text, 1));
+				if(csvHeader[i].matrixType == UNSUPPORTED)
+				{
+					csvHeader[i].matrixRowId = rowIdDescriptors;
+					csvHeader[i].matrixType = DESCRIPTOR;
+					descLabelGen.add(csvHeader[i].name);
+					rowIdDescriptors++;
+				}
 			}
-			featureLabels.push_back(Label("pad", 1));
+		
 
-			for(map<string,int>::const_iterator d_it = descLabelToNumRows.begin(); d_it != descLabelToNumRows.end(); d_it++)
+			//3- RESERVE MEMORY
+			if(hasHeader && line_count > 0)
+				line_count--;
+
+			const unsigned int featDim = featLabelGen.getLabels().totalDim();
+			const unsigned int descDim = descLabelGen.getLabels().totalDim();
+			const unsigned int timeDim = timeLabelGen.getLabels().totalDim();
+			const unsigned int nbPoints = line_count;
+
+			features = Matrix(featDim, nbPoints);
+			descriptors = Matrix(descDim, nbPoints);
+			times = Int64Matrix(timeDim, nbPoints);
+		}
+
+
+		//4- LOAD DATA (this start again from the first line)
+		char* brkt = 0;
+		char line_c[1024];//FIXME: this might be a problem for large files
+		strcpy(line_c,line.c_str());
+		token = strtok_r(line_c, delimiters, &brkt);
+		
+		if(!(hasHeader && firstLine))
+		{
+			// Parse a line
+			csvCol = 0;
+			while (token)
 			{
-				descriptorLabels.push_back(Label(d_it->first,d_it->second));
+				if(csvCol > (csvHeader.size() - 1))
+				{
+					// Error check (too much data)
+					throw runtime_error(
+					(boost::format("CSV parse error: at line %1%, too many elements to parse compare to the header number of columns (col=%2%).") % csvRow % csvHeader.size()).str());
+				}
+				
+				// Alias
+				const int matrixRow = csvHeader[csvCol].matrixRowId;
+				const int matrixCol = csvRow;
+				
+				switch (csvHeader[csvCol].matrixType)
+				{
+					case FEATURE:
+						features(matrixRow, matrixCol) = lexical_cast_scalar_to_string<T>(string(token));
+						break;
+					case DESCRIPTOR:
+						descriptors(matrixRow, matrixCol) = lexical_cast_scalar_to_string<T>(token);
+						break;
+					case TIME:
+						times(matrixRow, matrixCol) = lexical_cast_scalar_to_string<boost::int64_t>(token);
+						break;
+					default:
+						throw runtime_error(string("CSV parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
+						break;
+
+				}
+
+				//fetch next element
+				token = strtok_r(NULL, delimiters, &brkt);
+				csvCol++;
 			}
+		
+		
+			// Error check (not enough data)
+			if(csvCol != (csvHeader.size()))
+			{
+				throw runtime_error(
+				(boost::format("CSV parse error: at line %1%, not enough elements to parse compare to the header number of columns (col=%2%).") % csvRow % csvHeader.size()).str());
+			}
+
+			csvRow++;
 		}
 
 		firstLine = false;
+		
 	}
 
-	assert(xData.size() == yData.size());
-	int nbPoints = xData.size();
+	// 5- ASSEMBLE FINAL DATAPOINTS
+	DataPoints loadedPoints(features, featLabelGen.getLabels());
 
-	// Transfer loaded points in specific structure (eigen matrix)
-	Matrix features(dim+1, nbPoints);
-	Matrix descriptors(numDescCols, nbPoints);
-
-	for(int i=0; i < nbPoints; i++)
+	if (descriptors.rows() > 0)
 	{
-		features(0,i) = xData[i];
-		features(1,i) = yData[i];
-		if(dim == 3)
-		{
-			features(2,i) = zData[i];
-			features(3,i) = 1;
-		}
-		else
-		{
-			features(2,i) = 1;
-		}
+		loadedPoints.descriptors = descriptors;
+		loadedPoints.descriptorLabels = descLabelGen.getLabels();
+	}
 
-		for (int d = 0; d < numDescCols; d++)
-		{
-			descriptors(d,i) = descCols[d][i];
-		}
-	}
-	
-	if (numDescCols > 0)
+	if(times.rows() > 0)
 	{
-		DataPoints dataPoints(features, featureLabels, descriptors, descriptorLabels);
-		return dataPoints;
+		loadedPoints.times = times;
+		loadedPoints.timeLabels = timeLabelGen.getLabels();	
 	}
-	else
-	{
-		DataPoints dataPoints(features, featureLabels);
-		return dataPoints;
-	}
-	//cout << "Loaded " << dataPoints.features.cols() << " points." << endl;
-	//cout << "Find " << dataPoints.features.rows() << " dimensions." << endl;
-	//cout << features << endl;
 
+	// Ensure homogeous coordinates
+	if(!loadedPoints.featureExists("pad"))
+	{
+		loadedPoints.addFeature("pad", Matrix::Ones(1,features.cols()));
+	}
+
+	return loadedPoints;
 }
 
 template
@@ -1261,8 +1269,7 @@ PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPLY(const string&
 template <typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& is)
 {
-	//typedef typename DataPoints::Label Label;
-	//typedef typename DataPoints::Labels Labels;
+	//TODO: adapt following loadCSV()
 	typedef vector<PLYElement*> Elements;
 
 	/*
@@ -1502,6 +1509,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 	Matrix features = Matrix(featDim, nbPoints);
 	Matrix descriptors = Matrix(descDim, nbPoints);
+	//TODO: add time
 
 
 
@@ -1524,6 +1532,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			const int row = vertex->properties[propID].pmRowID;
 			const PMPropTypes type = vertex->properties[propID].pmType;
 			
+			if (vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" || vertex->properties[propID].name == "alpha") {
+				value /= 255.0;
+			}
+
 			if(type == FEATURE)
 			{
 				features(row, col) = value;
@@ -1618,9 +1630,17 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 			if(!(f == featCount-2 && descRows == 0))
 				ofs << " ";
 		}
+
+		bool datawithColor = data.descriptorExists("color");
+		int colorStartingRow = data.getDescriptorStartingRow("color");
+		int colorEndRow = colorStartingRow + data.getDescriptorDimension("color");
 		for (int d = 0; d < descRows; ++d)
 		{
-			ofs << data.descriptors(d, p);
+			if (datawithColor && d >= colorStartingRow && d < colorEndRow) {
+				ofs << static_cast<unsigned>(data.descriptors(d, p) * 255.0);
+			} else {
+				ofs << data.descriptors(d, p);
+			}
 			if(d != descRows-1)
 				ofs << " ";
 		}
