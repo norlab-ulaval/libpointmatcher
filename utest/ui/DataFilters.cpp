@@ -242,14 +242,13 @@ TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
 TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 {
 	// This filter create descriptor AND subsample
-	params = map_list_of
-		("knn", "5")
-		("averageExistingDescriptors", "1")
-		("keepNormals", "1")
-		("keepDensities", "1")
-		("keepEigenValues", "1")
-		("keepEigenVectors", "1")
-	;
+	params = PM::Parameters();
+	params["knn"] = "5";
+	params["averageExistingDescriptors"] = "1";
+	params["keepNormals"] = "1";
+	params["keepDensities"] = "1";
+	params["keepEigenValues"] = "1";
+	params["keepEigenVectors"] = "1";
 	
 	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
 	validate2dTransformation();

@@ -254,7 +254,7 @@ __Impact on the number of points:__ reduces number of points
 |vSizeX     |Size of the voxel along the x-axis | 1.0 | -inf to inf|
 |vSizeY     |Size of the voxel along the y-axis | 1.0 | -inf to inf|
 |vSizeZ     |Size of the voxel along the z-axis | 1.0 | -inf to inf|
-|summarizationMethod|If 1, down-sample by using the centroid of each voxel.  If 0, use the voxel center | 1 | 2 or 1 or 0|
+|useCentroid|If 1, down-sample by using the centroid of each voxel.  If 0, use the voxel center | 1 | 1 or 0|
 |averageExistingDescriptors|If 1, descriptors are down-sampled by taking their average in the voxel.  If 0, we use the descriptors from the first point found in the voxel | 1 | 1 or 0|
 
 For more information on the implementation of this filter, refer to [this tutorial](DataPointsFilterDev.md).
@@ -264,7 +264,7 @@ In this example, we apply the voxel grid filter using centroid down-sampling to 
 
 |Figure:  Applying the voxel grid filter filter to the appartment point cloud. | Parameters used |
 |---|:---|  
-|![dir after](images/appt_voxel.png "Applying the voxel grid filter filter to a local point cloud") | vSizeX : 0.2 <br> vSizeY : 0.2 <br> vSizeZ : 0,2 <br> summarizationMethod : 1 |
+|![dir after](images/appt_voxel.png "Applying the voxel grid filter filter to a local point cloud") | vSizeX : 0.2 <br> vSizeY : 0.2 <br> vSizeZ : 0,2 <br> useCentroid : 1 |
 
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
 

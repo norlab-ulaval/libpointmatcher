@@ -145,12 +145,12 @@ PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& fe
 //! Construct a point cloud from existing features, descriptors and times
 template<typename T>
 PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels, const Int64Matrix& times, const Labels& timeLabels):
-  features(features),
-  featureLabels(featureLabels),
-  descriptors(descriptors),
-  descriptorLabels(descriptorLabels),
-  times(times),
-  timeLabels(timeLabels)
+	features(features),
+	featureLabels(featureLabels),
+	descriptors(descriptors),
+	descriptorLabels(descriptorLabels),
+	times(times),
+	timeLabels(timeLabels)
 {}
 
 //! Return the number of points contained in the point cloud
