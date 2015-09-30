@@ -120,7 +120,6 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	YAML::Parser parser(in);
 	YAML::Node doc;
 	parser.GetNextDocument(doc);
-	
 	typedef set<string> StringSet;
 	StringSet usedModuleTypes;
 	

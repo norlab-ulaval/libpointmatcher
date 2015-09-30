@@ -256,6 +256,50 @@ TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 
 }
 
+TEST_F(DataFilterTest, ElipsoidsDataPointsFilter)
+{
+	// This filter create descriptor AND subsample
+	params = PM::Parameters();
+	params["knn"] = "5";
+	params["averageExistingDescriptors"] = "1";
+	params["keepNormals"] = "1";
+	params["keepDensities"] = "1";
+	params["keepEigenValues"] = "1";
+	params["keepEigenVectors"] = "1";
+	params["maxBoxDim"] = "inf";
+	params["maxTimeWindow"] = "10";
+	params["minPlanarity"] = "0";
+	params["keepMeans"] = "1";
+	params["keepCovariances"] = "1";
+	params["keepWeights"] = "1";
+	params["keepShapes"] = "1";
+	params["keepIndices"] = "1";
+
+	addFilter("ElipsoidsDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+}
+
+TEST_F(DataFilterTest, GestaltDataPointsFilter)
+{
+	// This filter create descriptor AND subsample
+	params = PM::Parameters();
+	params["knn"] = "5";
+	params["averageExistingDescriptors"] = "1";
+	params["keepNormals"] = "1";
+	params["keepEigenValues"] = "1";
+	params["keepEigenVectors"] = "1";
+	params["maxBoxDim"] = "1";
+	params["keepMeans"] = "1";
+	params["keepCovariances"] = "1";
+	params["keepGestaltFeatures"] = "1";
+	params["radius"] = "1";
+	params["ratio"] = "0.5";
+
+	addFilter("GestaltDataPointsFilter", params);
+	validate3dTransformation();
+}
+
 TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 {
 	// Used to create normal for reading point cloud

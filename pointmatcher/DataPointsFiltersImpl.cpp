@@ -600,43 +600,12 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPoin
 }
 
 template<typename T>
-Eigen::Matrix<T,3,1> DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::sortEigenValues(const Vector eigenVa) {
-  Eigen::Matrix<T,3,1> eigenVaSort;
-  // sort the eigenvalues by size
-  if(eigenVa(0) >= eigenVa(1)) {
-    if(eigenVa(1) >= eigenVa(2)) {
-      eigenVaSort(0,0) = eigenVa(0);
-      eigenVaSort(1,0) = eigenVa(1);
-      eigenVaSort(2,0) = eigenVa(2);
-    } else {
-      if (eigenVa(0) >= eigenVa(2)) {
-        eigenVaSort(0,0) = eigenVa(0);
-        eigenVaSort(1,0) = eigenVa(2);
-        eigenVaSort(2,0) = eigenVa(1);
-      } else {
-        eigenVaSort(0,0) = eigenVa(2);
-        eigenVaSort(1,0) = eigenVa(0);
-        eigenVaSort(2,0) = eigenVa(1);
-      }
-    }
-  } else {
-    if(eigenVa(0) >= eigenVa(2)) {
-      eigenVaSort(0,0) = eigenVa(1);
-      eigenVaSort(1,0) = eigenVa(0);
-      eigenVaSort(2,0) = eigenVa(2);
-    } else {
-      if(eigenVa(1) >= eigenVa(2)) {
-        eigenVaSort(0,0) = eigenVa(1);
-        eigenVaSort(1,0) = eigenVa(2);
-        eigenVaSort(2,0) = eigenVa(0);
-      } else {
-        eigenVaSort(0,0) = eigenVa(2);
-        eigenVaSort(0,0) = eigenVa(1);
-        eigenVaSort(1,0) = eigenVa(0);
-      }
-    }
-  }
-  return eigenVaSort;
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::sortEigenValues(const Vector& eigenVa)
+{
+	// sort the eigenvalues in ascending order
+	Vector eigenVaSort = eigenVa;
+	std::sort(eigenVaSort.data(), eigenVaSort.data() + eigenVaSort.size());
+	return eigenVaSort;
 }
 
 template<typename T>
@@ -1723,8 +1692,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
   typedef typename PointMatcher<T>::Matches Matches;
 
   const int featDim(data.features.rows());
-  std::cout << "size of input cloud into gestatl filter " << input.features.cols() << std::endl;
-  std::cout << "total number of keypoints: " << data.indicesToKeep.size() << std::endl;
   std::vector<int> indicesToKeepStrict;
   for (int i = 0; i< data.indicesToKeep.size(); ++i) {
     Eigen::Matrix<T,3,1> keyPoint;
@@ -1753,7 +1720,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
     // if empty neighbourhood unfit the point
     if (colCount == 0) {
       data.unfitPointsCount++;
-      std::cout << "unfitting point" <<std::endl;
       continue;
     }
     Matrix d(featDim-1, colCount);
@@ -1787,7 +1753,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
       }
       else
       {
-        std::cout << "kill coeffs 2" << std::endl;
         data.unfitPointsCount += colCount;
         continue;
       }
@@ -1801,10 +1766,9 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
       normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
 
       if(keepGestaltFeatures) {
-        Eigen::Matrix<T,3,1> eigenVaSort;
-        eigenVaSort << SurfaceNormalDataPointsFilter::sortEigenValues(eigenVa);
-        planarity = 2 * (eigenVaSort(1) - eigenVaSort(2))/eigenVaSort.sum();
-        cylindricality = (eigenVaSort(0) - eigenVaSort(1))/eigenVaSort.sum();
+        Vector eigenVaSort = SurfaceNormalDataPointsFilter::sortEigenValues(eigenVa);
+        planarity = 2 * (eigenVaSort(1) - eigenVaSort(0))/eigenVaSort.sum();
+        cylindricality = (eigenVaSort(2) - eigenVaSort(1))/eigenVaSort.sum();
         // project normal on horizontal plane
         Eigen::Matrix<T,3,1> up, base;
         up << 0,0,1;
@@ -1820,14 +1784,11 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
 
         // discard keypoints with high planarity
         if(planarity > 0.9) {
-          std::cout << "unfit planarity: " <<planarity <<std::endl;
-          std::cout << "kill coeffs 3" << std::endl;
           data.unfitPointsCount += colCount;
           continue;
         }
         // discard keypoints with normal too close to vertical
         if(acos(normal.dot(up)) < abs(10 * M_PI/180)) {
-          std::cout << "kill coeffs 4" << std::endl;
           data.unfitPointsCount += colCount;
           continue;
         }
@@ -1934,7 +1895,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
     indicesToKeepStrict.push_back(data.indicesToKeep[i]);
   }
   data.indicesToKeep = indicesToKeepStrict;
-  std::cout << "size of indicesToKeepStrict " << data.indicesToKeep.size() <<std::endl;
 }
 
 template<typename T>
