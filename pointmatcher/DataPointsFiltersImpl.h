@@ -182,7 +182,7 @@ struct DataPointsFiltersImpl
 		{
 			return boost::assign::list_of<ParameterDoc>
 				( "dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2", &P::Comp<unsigned> )
-				( "ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "1.0", &P::Comp<T> )
+				( "ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> )
 			;
 		}
 		
@@ -253,6 +253,7 @@ struct DataPointsFiltersImpl
 		static Vector computeNormal(const Vector eigenVa, const Matrix eigenVe);
 		static T computeDensity(const Matrix NN);
 		static Vector serializeEigVec(const Matrix eigenVe);
+		static Vector sortEigenValues(const Vector& eigenVa);
 	};
 
 	//! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
@@ -399,14 +400,14 @@ struct DataPointsFiltersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
-				( "seed", "srand seed", "1", "0", "2147483647", &P::Comp<unsigned> )
-				( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<unsigned> )
+			( "seed", "srand seed", "1", "0", "2147483647", &P::Comp<unsigned> )
+			( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<unsigned> )
 			;
 		}
-		
+
 		const unsigned maxCount;
 		unsigned seed;
-		
+
 		MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~MaxPointCountDataPointsFilter() {};
 		virtual DataPoints filter(const DataPoints& input);
@@ -590,32 +591,254 @@ struct DataPointsFiltersImpl
 		virtual void inPlaceFilter(DataPoints& cloud);
 
 	};	
-
-	//! Subsampling. Cut points with value of a given descriptor above or below a given threshold.
-	struct CutAtDescriptorThresholdDataPointsFilter: public DataPointsFilter
+	//! Subsampling Surfels (Elipsoids) filter. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
+	struct ElipsoidsDataPointsFilter: public DataPointsFilter
 	{
-		inline static const std::string description()
-		{
-			return "Subsampling. Cut points with value of a given descriptor above or below a given threshold.";
-		}
-		inline static const ParametersDoc availableParameters()
-		{
-			return boost::assign::list_of<ParameterDoc>
-				( "descName", "Descriptor name used to cut points", "none")
-				( "useLargerThan", "If set to 1 (true), points with values above the 'threshold' will be cut.  If set to 0 (false), points with values below the 'threshold' will be cut.", "1", "0", "1", P::Comp<bool>)
-				( "threshold", "Value at which to cut.", "0", "-inf", "inf", &P::Comp<T>)
-			;
-		}
-		
-		const std::string descName; 
-		const bool useLargerThan;
-		const T threshold;
-		
-		//! Constructor, uses parameter interface
-		CutAtDescriptorThresholdDataPointsFilter(const Parameters& params = Parameters());
-		virtual DataPoints filter(const DataPoints& input);
-		virtual void inPlaceFilter(DataPoints& cloud);
-	};
+	  inline static const std::string description()
+	  {
+	    return "Subsampling, Surfels (Elipsoids). This filter decomposes the point-cloud space in boxes, by recursively splitting the cloud through axis-aligned hyperplanes such as to maximize the evenness of the aspect ratio of the box. When the number of points in a box reaches a value knn or lower, the filter computes the center of mass of these points and its normal by taking the eigenvector corresponding to the smallest eigenvalue of all points in the box.";
+	  }
+	  inline static const ParametersDoc availableParameters()
+	  {
+	    return boost::assign::list_of<ParameterDoc>
+	    ( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> )
+	    ( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
+	    ( "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> )
+	    ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
+	    ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
+	    ( "maxTimeWindow", "maximum spread of times in a surfel", "inf" )
+	    ( "minPlanarity", "to what extend planarity of surfels needs to be enforced", "0")
+	    ( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
+	    ( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepWeights", "whether the original number of points should be added as descriptors to the resulting cloud", "0" )
+	    ( "keepShapes", "whether the shape parameters of cylindricity (C), sphericality (S) and planarity (P) shall be calculated", "0" )
+	    ( "keepIndices", "whether the indices of points an ellipsoid is constructed of shall be kept", "0" )
+	    ;
+	  }
+
+	  const T ratio;
+	  const unsigned knn;
+	  const unsigned samplingMethod;
+	  const T maxBoxDim;
+	  const T maxTimeWindow;
+	  const T minPlanarity;
+	  const bool averageExistingDescriptors;
+	  const bool keepNormals;
+	  const bool keepDensities;
+	  const bool keepEigenValues;
+	  const bool keepEigenVectors;
+	  const bool keepCovariances;
+	  const bool keepWeights;
+	  const bool keepMeans;
+	  const bool keepShapes;
+	  const bool keepIndices;
+
+
+   public:
+    ElipsoidsDataPointsFilter(const Parameters& params = Parameters());
+    virtual ~ElipsoidsDataPointsFilter() {}
+    virtual DataPoints filter(const DataPoints& input);
+    virtual void inPlaceFilter(DataPoints& cloud);
+
+   protected:
+    struct BuildData
+    {
+      typedef std::vector<int> Indices;
+      typedef typename DataPoints::View View;
+      typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+      typedef typename Eigen::Matrix<boost::int64_t, 1, Eigen::Dynamic> Int64Vector;
+
+      Indices indices;
+      Indices indicesToKeep;
+      Matrix& features;
+      Matrix& descriptors;
+      Int64Matrix& times;
+      boost::optional<View> normals;
+      boost::optional<View> densities;
+      boost::optional<View> eigenValues;
+      boost::optional<View> eigenVectors;
+      boost::optional<View> weights;
+      boost::optional<View> covariance;
+      boost::optional<View> means;
+      boost::optional<View> shapes;
+      boost::optional<View> pointIds;
+      boost::optional<View> pointX;
+      boost::optional<View> pointY;
+      boost::optional<View> pointZ;
+      boost::optional<View> numOfNN;
+      int outputInsertionPoint;
+      int unfitPointsCount;
+
+      BuildData(Matrix& features, Matrix& descriptors, Int64Matrix& times):
+        features(features),
+        descriptors(descriptors),
+        times(times),
+        unfitPointsCount(0)
+      {
+        const int pointsCount(features.cols());
+        indices.reserve(pointsCount);
+        for (int i = 0; i < pointsCount; ++i)
+          indices.push_back(i);
+      }
+    };
+
+    struct CompareDim
+    {
+      const int dim;
+      const BuildData& buildData;
+      CompareDim(const int dim, const BuildData& buildData):dim(dim),buildData(buildData){}
+      bool operator() (const int& p0, const int& p1)
+      {
+        return buildData.features(dim, p0) <
+            buildData.features(dim, p1);
+      }
+    };
+
+   protected:
+    void buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const;
+    void fuseRange(BuildData& data, const int first, const int last) const;
+  };
+
+  //! Gestalt descriptors filter as described in Bosse & Zlot ICRA 2013
+  struct GestaltDataPointsFilter: public DataPointsFilter
+  {
+    inline static const std::string description()
+    {
+      return "Gestalt descriptors filter.";
+    }
+    inline static const ParametersDoc availableParameters()
+    {
+      return boost::assign::list_of<ParameterDoc>
+      ( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.1", "0.0000001", "0.9999999", &P::Comp<T> )
+      ( "radius", "is the radius of the gestalt descriptor, will be divided into 4 circular and 8 radial bins = 32 bins", "5", "0.1", "2147483647", &P::Comp<T> )
+      ( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
+      ( "vSizeX", "Dimension of each voxel cell in x direction", "1.0", "-inf", "inf", &P::Comp<T> )
+      ( "vSizeY", "Dimension of each voxel cell in y direction", "1.0", "-inf", "inf", &P::Comp<T> )
+      ( "vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "-inf", "inf", &P::Comp<T> )
+      ( "keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" )
+      ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
+      ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
+      ( "maxTimeWindow", "maximum spread of times in a surfel", "inf" )
+      ( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
+      ( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
+      ( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
+      ( "keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0" )
+      ( "keepGestaltFeatures", "whether the Gestalt features shall be added to the resulting cloud", "1" )
+      ;
+    }
+
+    const T ratio;
+    const T radius;
+    const unsigned knn;
+    const T vSizeX;
+    const T vSizeY;
+    const T vSizeZ;
+    const T maxBoxDim;
+    const T maxTimeWindow;
+    const bool keepMeans;
+    const bool averageExistingDescriptors;
+    const bool keepNormals;
+    const bool keepEigenValues;
+    const bool keepEigenVectors;
+    const bool keepCovariances;
+    const bool keepGestaltFeatures;
+
+
+   public:
+    GestaltDataPointsFilter(const Parameters& params = Parameters());
+    virtual ~GestaltDataPointsFilter() {}
+    virtual DataPoints filter(const DataPoints& input);
+    virtual void inPlaceFilter(DataPoints& cloud);
+    typename PointMatcher<T>::Vector serializeGestaltMatrix(const Matrix gestaltFeatures) const;
+    typename PointMatcher<T>::Vector calculateAngles(const Matrix points, const Eigen::Matrix<T,3,1>) const;
+    typename PointMatcher<T>::Vector calculateRadii(const Matrix points, const Eigen::Matrix<T,3,1>) const;
+
+
+   protected:
+    struct BuildData
+    {
+      typedef std::vector<int> Indices;
+      typedef typename DataPoints::View View;
+      typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+      typedef typename Eigen::Matrix<boost::int64_t, 1, Eigen::Dynamic> Int64Vector;
+
+      Indices indices;
+      Indices indicesToKeep;
+      Matrix& features;
+      Matrix& descriptors;
+      Int64Matrix& times;
+      boost::optional<View> normals;
+      boost::optional<View> means;
+      boost::optional<View> eigenValues;
+      boost::optional<View> eigenVectors;
+      boost::optional<View> covariance;
+      boost::optional<View> gestaltMeans;
+      boost::optional<View> gestaltVariances;
+      boost::optional<View> gestaltShapes;
+      boost::optional<View> warpedXYZ;
+      int outputInsertionPoint;
+      int unfitPointsCount;
+
+      BuildData(Matrix& features, Matrix& descriptors, Int64Matrix& times):
+        features(features),
+        descriptors(descriptors),
+        times(times),
+        unfitPointsCount(0)
+      {
+        const int pointsCount(features.cols());
+        indices.reserve(pointsCount);
+        for (int i = 0; i < pointsCount; ++i)
+          indices.push_back(i);
+      }
+    };
+
+    struct CompareDim
+    {
+      const int dim;
+      const BuildData& buildData;
+      CompareDim(const int dim, const BuildData& buildData):dim(dim),buildData(buildData){}
+      bool operator() (const int& p0, const int& p1)
+      {
+        return buildData.features(dim, p0) <
+            buildData.features(dim, p1);
+      }
+    };
+
+   protected:
+    void buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const;
+    void fuseRange(BuildData& data, DataPoints& input, const int first, const int last) const;
+
+  };
+
+  //! Subsampling. Cut points with value of a given descriptor above or below a given threshold.
+  struct CutAtDescriptorThresholdDataPointsFilter: public DataPointsFilter
+  {
+    inline static const std::string description()
+    {
+      return "Subsampling. Cut points with value of a given descriptor above or below a given threshold.";
+    }
+    inline static const ParametersDoc availableParameters()
+    {
+      return boost::assign::list_of<ParameterDoc>
+      ( "descName", "Descriptor name used to cut points", "none")
+      ( "useLargerThan", "If set to 1 (true), points with values above the 'threshold' will be cut.  If set to 0 (false), points with values below the 'threshold' will be cut.", "1", "0", "1", P::Comp<bool>)
+      ( "threshold", "Value at which to cut.", "0", "-inf", "inf", &P::Comp<T>)
+      ;
+    }
+
+    const std::string descName;
+    const bool useLargerThan;
+    const T threshold;
+
+    //! Constructor, uses parameter interface
+    CutAtDescriptorThresholdDataPointsFilter(const Parameters& params = Parameters());
+    virtual DataPoints filter(const DataPoints& input);
+    virtual void inPlaceFilter(DataPoints& cloud);
+  };
 
 }; // DataPointsFiltersImpl
 
