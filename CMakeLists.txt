@@ -377,8 +377,6 @@ install (
   DESTINATION "share/${PROJECT_NAME}/cmake/"
 )
 
-install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
-
 #Handle pkg-config file
 CONFIGURE_FILE(pointmatcher.pc.in pointmatcher.pc @ONLY)
 INSTALL(FILES ${CMAKE_BINARY_DIR}/pointmatcher.pc DESTINATION lib/pkgconfig)
