@@ -258,7 +258,7 @@ TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 
 TEST_F(DataFilterTest, ElipsoidsDataPointsFilter)
 {
-	// This filter create descriptor AND subsample
+	// This filter creates descriptor AND subsamples
 	params = PM::Parameters();
 	params["knn"] = "5";
 	params["averageExistingDescriptors"] = "1";
@@ -282,7 +282,7 @@ TEST_F(DataFilterTest, ElipsoidsDataPointsFilter)
 
 TEST_F(DataFilterTest, GestaltDataPointsFilter)
 {
-	// This filter create descriptor AND subsample
+	// This filter creates descriptor AND subsamples
 	params = PM::Parameters();
 	params["knn"] = "5";
 	params["averageExistingDescriptors"] = "1";

@@ -1251,7 +1251,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
     }
   }
 
-  // keep the indices of each ellipsoid?
+  // keep the indices of each ellipsoid
   Vector pointIds(1,colCount);
   Matrix points(3,colCount);
 
@@ -1266,9 +1266,9 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   if(keepNormals)
     normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
 
-  T densitie = 0;
+  T density = 0;
   if(keepDensities)
-    densitie = SurfaceNormalDataPointsFilter::computeDensity(NN);
+    density = SurfaceNormalDataPointsFilter::computeDensity(NN);
   Vector serialEigVector;
   if(keepEigenVectors)
     serialEigVector = SurfaceNormalDataPointsFilter::serializeEigVec(eigenVe);
@@ -1310,7 +1310,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
         if(keepNormals)
           data.normals->col(k) = normal;
         if(keepDensities)
-          (*data.densities)(0,k) = densitie;
+          (*data.densities)(0,k) = density;
         if(keepEigenValues)
           data.eigenValues->col(k) = eigenVa;
         if(keepEigenVectors)
@@ -1326,7 +1326,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
           Eigen::Matrix<T, 3, 1> vals;
           (vals << eigenVa(0),eigenVa(1),eigenVa(2));
           vals = vals/eigenVa.sum();
-          data.shapes->col(k) = shapeMat * vals;//eigenVa;
+          data.shapes->col(k) = shapeMat * vals;
 
         }
         if(keepWeights) {
@@ -1373,7 +1373,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
     if(keepNormals)
       data.normals->col(k) = normal;
     if(keepDensities)
-      (*data.densities)(0,k) = densitie;
+      (*data.densities)(0,k) = density;
     if(keepEigenValues)
       data.eigenValues->col(k) = eigenVa;
     if(keepEigenVectors)
@@ -1527,7 +1527,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
   );
 
   // buildData.indicesToKeep contains all the indices where we want Gestalt features at
-  fuseRanger(buildData, cloud, 0, pointsCount);
+  fuseRange(buildData, cloud, 0, pointsCount);
 
   // Bring the data we keep to the front of the arrays then
   // wipe the leftover unused space.
@@ -1594,7 +1594,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
   // vector to hold the first point in a voxel
   // this point will be ovewritten in the input cloud with
   // the output value
-
   std::vector<typename VoxelGridDataPointsFilter::Voxel>* voxels;
 
   // try allocating vector. If too big return error
@@ -1684,7 +1683,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
 }
 
 template<typename T>
-void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& data, DataPoints& input, const int first, const int last) const
+void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& data, DataPoints& input, const int first, const int last) const
 {
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, 1> Int64Vector;
@@ -1697,7 +1696,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
     Eigen::Matrix<T,3,1> keyPoint;
     keyPoint = input.features.col(data.indicesToKeep[i]);
 
-    // make a nearest neighbour hack around keyPoint with box:
+    // Define a search box around each keypoint to search for nearest neighbours.
     T minBoundX = keyPoint(0,0) - radius;
     T maxBoundX = keyPoint(0,0) + radius;
     T minBoundY = keyPoint(1,0) - radius;
@@ -1815,10 +1814,9 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRanger(BuildData& da
       gestaltMeans = Matrix::Zero(4, 8);
       gestaltVariances = Matrix::Zero(4, 8);
       numOfValues = Matrix::Zero(4, 8);
-      // sort the points into right bins
 
       for (int it=0; it < colCount; ++it) {
-        indices(0,it) = floor(radii(it)/radialBinWidth);//floor(angles(it)/angularBinWidth);
+        indices(0,it) = floor(radii(it)/radialBinWidth);
         // if value exceeds borders of bin -> put in outmost bin
         if(indices(0,it) > 3)
           // this case should never happen - just in case

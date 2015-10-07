@@ -810,8 +810,7 @@ struct DataPointsFiltersImpl
 
    protected:
     void buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const;
-    void fuseRange(BuildData& data, const int first, const int last) const;
-    void fuseRanger(BuildData& data, DataPoints& input, const int first, const int last) const;
+    void fuseRange(BuildData& data, DataPoints& input, const int first, const int last) const;
 
   };
 
