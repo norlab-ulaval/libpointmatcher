@@ -3,9 +3,9 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: pointmatcher
+Name: @CMAKE_PROJECT_NAME@
 Description: See https://github.com/ethz-asl/libpointmatcher
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -l@POINTMATCHER_LIB@;@EXTERNAL_LIBS@
+Libs: -L${libdir} @LIBRARY_CC_ARGS@
 Cflags: -I${includedir}/
 
