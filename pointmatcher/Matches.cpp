@@ -64,9 +64,15 @@ T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 	vector<T> values;
 	values.reserve(dists.rows() * dists.cols());
 	for (int x = 0; x < dists.cols(); ++x)
+	{
 		for (int y = 0; y < dists.rows(); ++y)
+		{
 			if (dists(y, x) != numeric_limits<T>::infinity())
+			{
 				values.push_back(dists(y, x));
+			}
+		}
+	}
 	if (values.size() == 0)
 		throw ConvergenceError("no outlier to filter");
 	
