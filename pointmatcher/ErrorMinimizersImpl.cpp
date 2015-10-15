@@ -76,15 +76,17 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const int ptsCount(mPts.reading.features.cols()); //But point cloud have now the same number of (matched) point
 
 	// Compute the mean of each point cloud
-	const Vector meanReading = mPts.reading.features.rowwise().sum() / ptsCount;
-	const Vector meanReference = mPts.reference.features.rowwise().sum() / ptsCount;
-	
+	//FIXME: unnecessary sum, division of last elements (?) -> homogenuous vals
+	OutlierWeights& w = mPts.weights;
+	const Vector meanReading = mPts.reading.features.cwiseProduct(w.replicate(dimCount, 1)).rowwise().sum() / w.sum();
+	const Vector meanReference = mPts.reference.features.cwiseProduct(w.replicate(dimCount, 1)).rowwise().sum() / w.sum();
+
 	// Remove the mean from the point clouds
 	mPts.reading.features.colwise() -= meanReading;
 	mPts.reference.features.colwise() -= meanReference;
 
 	// Singular Value Decomposition
-	const Matrix m(mPts.reference.features.topRows(dimCount-1) * mPts.reading.features.topRows(dimCount-1).transpose());
+	const Matrix m(mPts.reference.features.topRows(dimCount-1) * w.asDiagonal() * mPts.reading.features.topRows(dimCount-1).transpose());
 	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
 	Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
 	// It is possible to get a reflection instead of a rotation. In this case, we
