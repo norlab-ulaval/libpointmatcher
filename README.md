@@ -1,3 +1,7 @@
+![alt tag](doc/images/banner_light.jpeg)
+
+
+---
 
 
 Documentation and Tutorials
@@ -141,3 +145,9 @@ libpointmatcher is released under a permissive BSD license. Enjoy!
 [yaml-cpp]: http://code.google.com/p/yaml-cpp/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/
 [boost]: http://www.boost.org/
+
+
+---
+
+
+![alt tag](doc/images/banner_dark.jpeg)
