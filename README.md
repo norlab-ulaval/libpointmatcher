@@ -49,6 +49,15 @@ cd build
 utest/utest --path ../examples/data/
 ```
 
+### Linking to external projects.
+We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_Qt), which manually list all the dependencies in the file [`demo.pro`](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system.
+
+
+###Bug reporting
+
+Please use [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs.
+
+## File formats
 The library support different file formats for importing or exporting data:
   * csv (Comma Separated Values)
   * vtk (Visualization Toolkit Files)
@@ -56,11 +65,6 @@ The library support different file formats for importing or exporting data:
   * pcd (Point Cloud Library Format)
 
 Those functionnalities are available without increasing the list of dependencies at the expense of a limited functionality support. For more details, see the tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using those file formats from the command line can be found in `./example/` and are described [here](doc/ICPIntro.md) in more details 
-
-###Bug reporting
-
-Please use [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs.
-
 
 Citing
 ======
