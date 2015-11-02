@@ -19,7 +19,7 @@ Click on the image to play.
 - Application: 3D mapping and localization
 
 <a href="https://www.youtube.com/watch?v=ygIvzWVfPYk" target="_blank">
-<img src="images/youtubeCovers/ygIvzWVfPYk.jpg"
+<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/ygIvzWVfPYk.jpg"
  width="240" height="180" border="10" />
 </a>
 
@@ -29,7 +29,7 @@ Click on the image to play.
 - Application: 3D mapping and localization
 
 <a href="https://www.youtube.com/watch?v=lP5Mj-TGaiw" target="_blank">
-<img src="images/youtubeCovers/lP5Mj-TGaiw.jpg" 
+<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/lP5Mj-TGaiw.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -39,7 +39,7 @@ Click on the image to play.
 - Application: Navigation
 
 <a href="https://www.youtube.com/watch?v=UCCAUf64tD0" target="_blank">
-<img src="images/youtubeCovers/UCCAUf64tD0.jpg" 
+<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/UCCAUf64tD0.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -50,7 +50,7 @@ Click on the image to play.
 - Application: 3D mapping and localization
 
 <a href="https://www.youtube.com/watch?v=M5Y99o7um88" target="_blank">
-<img src="images/youtubeCovers/M5Y99o7um88.jpg" 
+<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/M5Y99o7um88.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -60,7 +60,7 @@ Click on the image to play.
 - Application: 3D mapping and localization
 
 <a href="https://www.youtube.com/watch?v=g8l-Xq4qYeE" target="_blank">
-<img src="images/youtubeCovers/g8l-Xq4qYeE.jpg" 
+<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/g8l-Xq4qYeE.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -71,7 +71,7 @@ Click on the image to play.
 - Application: 3D model reconstruction
  
 <a href="https://www.youtube.com/watch?v=rIZud3F5IJw" target="_blank">
-<img src="images/youtubeCovers/rIZud3F5IJw.jpg" 
+<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/rIZud3F5IJw.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -82,14 +82,14 @@ Click on the image to play.
 - Application: 3D mapping and localization
 
 <a href="https://www.youtube.com/watch?v=McxpJGOZTPs" target="_blank">
-<img src="images/youtubeCovers/McxpJGOZTPs.jpg" 
+<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/McxpJGOZTPs.jpg" 
  width="240" height="180" border="10" />
 </a>
 
 
 
 ## Publications using libpointmatcher
-1. F. Pomerleau, F. Colas and R. Siegwart (2015), "A Review of Point Cloud Registration Algorithms for Mobile Robotics", Foundations and Trends® in Robotics: Vol. 4: No. 1, pp 1-104. http://dx.doi.org/10.1561/2300000035
+1. F. Pomerleau, F. Colas and R. Siegwart (2015), "A Review of Point Cloud Registration Algorithms for Mobile Robotics", Foundations and Trends® in Robotics: Vol. 4: No. 1, pp 1-104. http://dx.doi.org/10.1561/2300000035 or [Research Gate link](https://www.researchgate.net/publication/277558596_A_Review_of_Point_Cloud_Registration_Algorithms_for_Mobile_Robotics)
 
 1. G. Hitz, F. Pomerleau, F. Colas, and R. Siegwart. "State Estimation for Shore Monitoring Using an Autonomous Surface Vessel." International Symposium on Experimental Robotics (ISER), 2014, 2014.
 
