@@ -2,7 +2,7 @@
 | ------------- |:-------------:| -----:|
 
 # Linking Projects to libpointmatcher
-######Latest update January 23, 2014 by Samuel Charreyron
+
 Once you have followed the [compilation instructions](Compilation.md) and installed libpointmatcher to your system, you can use libpointmatcher in your project.
 
 ## Option 1: Using CMake (Recommended)
