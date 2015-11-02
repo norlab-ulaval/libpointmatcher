@@ -2,4 +2,4 @@ site_name: libpointmatcher
 repo_url: https://github.com/ethz-asl/libpointmatcher
 site_description: An "Iterative Closest Point" library for 2-D/3-D mapping in robotic
 pages:
-- Home: 'Tutorials.md'
+- Home: 'index.md'
