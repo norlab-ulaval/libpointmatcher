@@ -51,8 +51,6 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
-	typedef typename PointMatcher<T>::Matrix Matrix;
-	
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
