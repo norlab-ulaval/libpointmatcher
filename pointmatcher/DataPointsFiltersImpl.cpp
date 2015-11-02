@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "DataPointsFiltersImpl.h"
 #include "PointMatcherPrivate.h"
+#include "IO.h"
 #include "MatchersImpl.h"
 #include "Functions.h"
 
@@ -595,7 +596,16 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPoin
 		}
 	}
 
-	return eigenVe.col(smallestId);
+  return eigenVe.col(smallestId);
+}
+
+template<typename T>
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::sortEigenValues(const Vector& eigenVa)
+{
+	// sort the eigenvalues in ascending order
+	Vector eigenVaSort = eigenVa;
+	std::sort(eigenVaSort.data(), eigenVaSort.data() + eigenVaSort.size());
+	return eigenVaSort;
 }
 
 template<typename T>
@@ -939,6 +949,980 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 
 template struct DataPointsFiltersImpl<float>::SamplingSurfaceNormalDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SamplingSurfaceNormalDataPointsFilter;
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+// ElipsoidsDataPointsFilter
+
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::ElipsoidsDataPointsFilter(const Parameters& params):
+DataPointsFilter("ElipsoidsDataPointsFilter", ElipsoidsDataPointsFilter::availableParameters(), params),
+ratio(Parametrizable::get<T>("ratio")),
+knn(Parametrizable::get<int>("knn")),
+samplingMethod(Parametrizable::get<int>("samplingMethod")),
+maxBoxDim(Parametrizable::get<T>("maxBoxDim")),
+maxTimeWindow(Parametrizable::get<T>("maxTimeWindow")),
+minPlanarity(Parametrizable::get<T>("minPlanarity")),
+averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
+keepNormals(Parametrizable::get<bool>("keepNormals")),
+keepDensities(Parametrizable::get<bool>("keepDensities")),
+keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
+keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors")),
+keepCovariances(Parametrizable::get<bool>("keepCovariances")),
+keepWeights(Parametrizable::get<bool>("keepWeights")),
+keepMeans(Parametrizable::get<bool>("keepMeans")),
+keepShapes(Parametrizable::get<bool>("keepShapes")),
+keepIndices(Parametrizable::get<bool>("keepIndices"))
+{
+}
+
+// Compute
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::filter(
+    const DataPoints& input)
+{
+  DataPoints output(input);
+  inPlaceFilter(output);
+  return output;
+}
+
+// In-place filter
+template<typename T>
+void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
+    DataPoints& cloud)
+{
+  typedef typename DataPoints::View View;
+  typedef typename DataPoints::Label Label;
+  typedef typename DataPoints::Labels Labels;
+  typedef typename DataPoints::TimeView TimeView;
+
+  const int pointsCount(cloud.features.cols());
+  const int featDim(cloud.features.rows());
+  const int descDim(cloud.descriptors.rows());
+
+  int insertDim(0);
+  if (averageExistingDescriptors)
+  {
+    // TODO: this should be in the form of an assert
+    // Validate descriptors and labels
+    for(unsigned int i = 0; i < cloud.descriptorLabels.size(); i++)
+      insertDim += cloud.descriptorLabels[i].span;
+    if (insertDim != descDim)
+      throw InvalidField("ElipsoidsDataPointsFilter: Error, descriptor labels do not match descriptor data");
+  }
+
+  // Compute space requirement for new descriptors
+  const int dimNormals(featDim-1);
+  const int dimDensities(1);
+  const int dimEigValues(featDim-1);
+  const int dimEigVectors((featDim-1)*(featDim-1));
+  const int dimWeights(1);
+  const int dimMeans(featDim-1);
+  const int dimCovariances((featDim-1)*(featDim-1));
+  const int dimShapes(featDim-1);
+  const int dimPointIds(knn);
+
+  // Allocate space for new descriptors
+  Labels cloudLabels, timeLabels;
+  if (keepIndices) {
+    cloudLabels.push_back(Label("pointIds", dimPointIds));
+    cloudLabels.push_back(Label("pointX", dimPointIds));
+    cloudLabels.push_back(Label("pointY", dimPointIds));
+    cloudLabels.push_back(Label("pointZ", dimPointIds));
+    cloudLabels.push_back(Label("numOfNN", 1));
+  }
+  if (keepNormals)
+    cloudLabels.push_back(Label("normals", dimNormals));
+  if (keepDensities)
+    cloudLabels.push_back(Label("densities", dimDensities));
+  if (keepEigenValues)
+    cloudLabels.push_back(Label("eigValues", dimEigValues));
+  if (keepEigenVectors)
+    cloudLabels.push_back(Label("eigVectors", dimEigVectors));
+  if (keepCovariances)
+    cloudLabels.push_back(Label("covariance", dimCovariances));
+  if (keepWeights)
+    cloudLabels.push_back(Label("weights", dimWeights));
+  if (keepMeans)
+    cloudLabels.push_back(Label("means", dimMeans));
+  if (keepShapes) {
+    assert(featDim == 3);
+    cloudLabels.push_back(Label("shapes", dimShapes)); // Planarity, Cylindricality, Sphericality
+  }
+  timeLabels.push_back(Label("time", 2));
+
+  cloud.allocateDescriptors(cloudLabels);
+  cloud.allocateTimes(timeLabels);
+
+  // we keep build data on stack for reentrant behaviour
+  View cloudExistingDescriptors(cloud.descriptors.block(0,0,cloud.descriptors.rows(),cloud.descriptors.cols()));
+  TimeView cloudExistingTimes(cloud.times.block(0,0,cloud.times.rows(),cloud.times.cols()));
+  BuildData buildData(cloud.features, cloud.descriptors, cloud.times);
+
+  // get views
+  if (keepIndices) {
+    buildData.pointIds = cloud.getDescriptorViewByName("pointIds");
+    buildData.pointX = cloud.getDescriptorViewByName("pointX");
+    buildData.pointY = cloud.getDescriptorViewByName("pointY");
+    buildData.pointZ = cloud.getDescriptorViewByName("pointZ");
+    buildData.numOfNN = cloud.getDescriptorViewByName("numOfNN");
+  }
+  if (keepNormals)
+    buildData.normals = cloud.getDescriptorViewByName("normals");
+  if (keepDensities)
+    buildData.densities = cloud.getDescriptorViewByName("densities");
+  if (keepEigenValues)
+    buildData.eigenValues = cloud.getDescriptorViewByName("eigValues");
+  if (keepEigenVectors)
+    buildData.eigenVectors = cloud.getDescriptorViewByName("eigVectors");
+  if (keepCovariances)
+    buildData.covariance = cloud.getDescriptorViewByName("covariance");
+  if (keepWeights)
+    buildData.weights = cloud.getDescriptorViewByName("weights");
+  if (keepMeans)
+    buildData.means = cloud.getDescriptorViewByName("means");
+  if (keepShapes)
+    buildData.shapes = cloud.getDescriptorViewByName("shapes");
+
+  // build the new point cloud
+  buildNew(
+      buildData,
+      0,
+      pointsCount,
+      cloud.features.rowwise().minCoeff(),
+      cloud.features.rowwise().maxCoeff()
+  );
+
+  // Bring the data we keep to the front of the arrays then
+  // wipe the leftover unused space.
+  std::sort(buildData.indicesToKeep.begin(), buildData.indicesToKeep.end());
+  int ptsOut = buildData.indicesToKeep.size();
+  for (int i = 0; i < ptsOut; i++){
+    int k = buildData.indicesToKeep[i];
+    assert(i <= k);
+    cloud.features.col(i) = cloud.features.col(k);
+    cloud.times.col(i) = cloud.times.col(k);
+    if (cloud.descriptors.rows() != 0)
+      cloud.descriptors.col(i) = cloud.descriptors.col(k);
+    if(keepIndices) {
+      buildData.pointIds->col(i) = buildData.pointIds->col(k);
+      buildData.pointX->col(i) = buildData.pointX->col(k);
+      buildData.pointY->col(i) = buildData.pointY->col(k);
+      buildData.pointZ->col(i) = buildData.pointZ->col(k);
+      buildData.numOfNN->col(i) = buildData.numOfNN->col(k);
+    }
+    if(keepNormals)
+      buildData.normals->col(i) = buildData.normals->col(k);
+    if(keepDensities)
+      (*buildData.densities)(0,i) = (*buildData.densities)(0,k);
+    if(keepEigenValues)
+      buildData.eigenValues->col(i) = buildData.eigenValues->col(k);
+    if(keepEigenVectors)
+      buildData.eigenVectors->col(i) = buildData.eigenVectors->col(k);
+    if(keepWeights)
+      buildData.weights->col(i) = buildData.weights->col(k);
+    if(keepCovariances)
+      buildData.covariance->col(i) = buildData.covariance->col(k);
+    if(keepMeans)
+      buildData.means->col(i) = buildData.means->col(k);
+    if(keepShapes)
+      buildData.shapes->col(i) = buildData.shapes->col(k);
+  }
+  cloud.features.conservativeResize(Eigen::NoChange, ptsOut);
+  cloud.descriptors.conservativeResize(Eigen::NoChange, ptsOut);
+  cloud.times.conservativeResize(Eigen::NoChange, ptsOut);
+
+  // warning if some points were dropped
+  if(buildData.unfitPointsCount != 0)
+    LOG_INFO_STREAM("  ElipsoidsDataPointsFilter - Could not compute normal for " << buildData.unfitPointsCount << " pts.");
+}
+
+template<typename T>
+void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
+{
+  const int count(last - first);
+  if (count <= int(knn))
+  {
+    // compute for this range
+    fuseRange(data, first, last);
+    // typically by stopping recursion after the median of the bounding cuboid
+    // is below a threshold, or that the number of points falls under a threshold
+    return;
+  }
+  // find the largest dimension of the box
+  const int cutDim = argMax<T>(maxValues - minValues);
+
+  // compute number of elements
+  const int rightCount(count/2);
+  const int leftCount(count - rightCount);
+  assert(last - rightCount == first + leftCount);
+
+  // sort, hack std::nth_element
+  std::nth_element(
+      data.indices.begin() + first,
+      data.indices.begin() + first + leftCount,
+      data.indices.begin() + last,
+      CompareDim(cutDim, data)
+  );
+
+  // get value
+  const int cutIndex(data.indices[first+leftCount]);
+  const T cutVal(data.features(cutDim, cutIndex));
+
+  // update bounds for left
+  Vector leftMaxValues(maxValues);
+  leftMaxValues[cutDim] = cutVal;
+  // update bounds for right
+  Vector rightMinValues(minValues);
+  rightMinValues[cutDim] = cutVal;
+
+  // recurse
+  buildNew(data, first, first + leftCount, minValues, leftMaxValues);
+  buildNew(data, first + leftCount, last, rightMinValues, maxValues);
+}
+
+template<typename T>
+void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
+{
+  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+
+  const int colCount(last-first);
+  const int featDim(data.features.rows());
+
+  // build nearest neighbors list
+  Matrix d(featDim-1, colCount);
+  Int64Matrix t(1, colCount);
+  for (int i = 0; i < colCount; ++i) {
+    d.col(i) = data.features.block(0,data.indices[first+i],featDim-1, 1);
+    t.col(i) = data.times.col(data.indices[first + i]); //, 0);
+  }
+  const Vector box = d.rowwise().maxCoeff() - d.rowwise().minCoeff();
+  const boost::int64_t timeBox = t.maxCoeff() - t.minCoeff();
+
+  const T boxDim(box.maxCoeff());
+  // drop box if it is too large or max timeframe is exceeded
+  if (boxDim > maxBoxDim || timeBox > maxTimeWindow)
+  {
+    data.unfitPointsCount += colCount;
+    return;
+  }
+  const Vector mean = d.rowwise().sum() / T(colCount);
+  const Matrix NN = (d.colwise() - mean);
+
+  boost::int64_t minTime = t.minCoeff();
+  boost::int64_t maxTime = t.maxCoeff();
+  boost::int64_t meanTime = t.sum() / T(colCount);
+
+  // compute covariance
+  const Matrix C(NN * NN.transpose());
+  Vector eigenVa = Vector::Identity(featDim-1, 1);
+  Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
+  // Ensure that the matrix is suited for eigenvalues calculation
+  if(keepNormals || keepEigenValues || keepEigenVectors || keepCovariances || keepShapes || minPlanarity > 0)
+  {
+    if(C.fullPivHouseholderQr().rank()+1 >= featDim-1)
+    {
+      const Eigen::EigenSolver<Matrix> solver(C);
+      eigenVa = solver.eigenvalues().real();
+      eigenVe = solver.eigenvectors().real();
+    }
+    else
+    {
+      data.unfitPointsCount += colCount;
+      return;
+    }
+    if(minPlanarity > 0 ) {
+      Eigen::Matrix<T, 3, 1> vals;
+      (vals << eigenVa(0),eigenVa(1),eigenVa(2));
+      vals = vals/eigenVa.sum();
+      T planarity = 2 * vals(1)-2*vals(2);
+      // throw out surfel if it does not meet planarity criteria
+      if (planarity < minPlanarity)
+      {
+        data.unfitPointsCount += colCount;
+        return;
+      }
+    }
+  }
+
+  // keep the indices of each ellipsoid
+  Vector pointIds(1,colCount);
+  Matrix points(3,colCount);
+
+  if(keepIndices) {
+    for (int i = 0; i < colCount; ++i) {
+      pointIds(i) = data.indices[first+i];
+      points.col(i) = data.features.block(0,data.indices[first+i],2, 1);
+    }
+  }
+
+  Vector normal;
+  if(keepNormals)
+    normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
+
+  T density = 0;
+  if(keepDensities)
+    density = SurfaceNormalDataPointsFilter::computeDensity(NN);
+  Vector serialEigVector;
+  if(keepEigenVectors)
+    serialEigVector = SurfaceNormalDataPointsFilter::serializeEigVec(eigenVe);
+  Vector serialCovVector;
+  if(keepCovariances)
+    serialCovVector = SurfaceNormalDataPointsFilter::serializeEigVec(C);
+
+  // some safety check
+  if(data.descriptors.rows() != 0)
+    assert(data.descriptors.cols() != 0);
+
+  // Filter points randomly
+  if(samplingMethod == 0)
+  {
+
+    for(int i=0; i<colCount; i++)
+    {
+      const float r = (float)std::rand()/(float)RAND_MAX;
+      if(r < ratio)
+      {
+        // Keep points with their descriptors
+        int k = data.indices[first+i];
+        // Mark the indices which will be part of the final data
+        data.indicesToKeep.push_back(k);
+
+        // write the updated times: min, max, mean
+        data.times(0, k) = minTime;
+        data.times(1, k) = maxTime;
+        data.times(2, k) = meanTime;
+
+        // Build new descriptors
+        if(keepIndices) {
+          data.pointIds->col(k) = pointIds;
+          data.pointX->col(k) = points.row(0);
+          data.pointY->col(k) = points.row(1);
+          data.pointZ->col(k) = points.row(2);
+          (*data.numOfNN)(0,k) = NN.cols();
+        }
+        if(keepNormals)
+          data.normals->col(k) = normal;
+        if(keepDensities)
+          (*data.densities)(0,k) = density;
+        if(keepEigenValues)
+          data.eigenValues->col(k) = eigenVa;
+        if(keepEigenVectors)
+          data.eigenVectors->col(k) = serialEigVector;
+        if(keepCovariances)
+          data.covariance->col(k) = serialCovVector;
+        if(keepMeans)
+          data.means->col(k) = mean;
+        // a 3d vecetor of shape parameters: planarity (P), cylindricality (C), sphericality (S)
+        if(keepShapes) {
+          Eigen::Matrix<T, 3, 3> shapeMat;
+          (shapeMat << 0, 2, -2, 1, -1, 0, 0, 0, 3);
+          Eigen::Matrix<T, 3, 1> vals;
+          (vals << eigenVa(0),eigenVa(1),eigenVa(2));
+          vals = vals/eigenVa.sum();
+          data.shapes->col(k) = shapeMat * vals;
+
+        }
+        if(keepWeights) {
+          (*data.weights)(0,k) = colCount;
+        }
+      }
+    }
+  }
+  else
+  {
+
+    int k = data.indices[first];
+    // Mark the indices which will be part of the final data
+    data.indicesToKeep.push_back(k);
+    data.features.col(k).topRows(featDim-1) = mean;
+    // write the updated times: min, max, mean
+    data.times(0, k) = minTime;
+    data.times(1, k) = maxTime;
+    data.times(2, k) = meanTime;
+
+    data.features(featDim-1, k) = 1;
+
+    if(data.descriptors.rows() != 0)
+    {
+      // average the existing descriptors
+      if (averageExistingDescriptors)
+      {
+        Vector mergedDesc(Vector::Zero(data.descriptors.rows()));
+        for (int i = 0; i < colCount; ++i)
+          mergedDesc += data.descriptors.col(data.indices[first+i]);
+        mergedDesc /= T(colCount);
+        data.descriptors.col(k) = mergedDesc;
+      }
+      // else just keep the first one
+    }
+
+    // Build new descriptors
+    if(keepIndices) {
+      data.pointIds->col(k) = pointIds;
+      data.pointX->col(k) = points.row(0);
+      data.pointY->col(k) = points.row(1);
+      data.pointZ->col(k) = points.row(2);
+    }
+    if(keepNormals)
+      data.normals->col(k) = normal;
+    if(keepDensities)
+      (*data.densities)(0,k) = density;
+    if(keepEigenValues)
+      data.eigenValues->col(k) = eigenVa;
+    if(keepEigenVectors)
+      data.eigenVectors->col(k) = serialEigVector;
+    if(keepCovariances)
+      data.covariance->col(k) = serialCovVector;
+    if(keepMeans)
+      data.means->col(k) = mean;
+    if(keepShapes) {
+      Eigen::Matrix<T, 3, 3> shapeMat;
+      (shapeMat << 0, 2, -2, 1, -1, 0, 0, 0, 3);
+      Eigen::Matrix<T, 3, 1> vals;
+      (vals << eigenVa(0),eigenVa(1),eigenVa(2));
+      vals = vals/eigenVa.sum();
+      data.shapes->col(k) = shapeMat * vals; //eigenVa;
+    }
+    if(keepWeights)
+      (*data.weights)(0,k) = colCount;
+  }
+
+}
+
+template struct DataPointsFiltersImpl<float>::ElipsoidsDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::ElipsoidsDataPointsFilter;
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+// GestaltDataPointsFilter
+
+// Constructor
+template<typename T>
+DataPointsFiltersImpl<T>::GestaltDataPointsFilter::GestaltDataPointsFilter(const Parameters& params):
+DataPointsFilter("GestaltDataPointsFilter", GestaltDataPointsFilter::availableParameters(), params),
+ratio(Parametrizable::get<T>("ratio")),
+radius(Parametrizable::get<T>("radius")),
+knn(Parametrizable::get<int>("knn")),
+vSizeX(Parametrizable::get<T>("vSizeX")),
+vSizeY(Parametrizable::get<T>("vSizeY")),
+vSizeZ(Parametrizable::get<T>("vSizeZ")),
+maxBoxDim(Parametrizable::get<T>("maxBoxDim")),
+maxTimeWindow(Parametrizable::get<T>("maxTimeWindow")),
+keepMeans(Parametrizable::get<bool>("keepMeans")),
+averageExistingDescriptors(Parametrizable::get<bool>("averageExistingDescriptors")),
+keepNormals(Parametrizable::get<bool>("keepNormals")),
+keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
+keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors")),
+keepCovariances(Parametrizable::get<bool>("keepCovariances")),
+keepGestaltFeatures(Parametrizable::get<bool>("keepGestaltFeatures"))
+{
+}
+
+// Compute
+template<typename T>
+typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::GestaltDataPointsFilter::filter(
+    const DataPoints& input)
+{
+  DataPoints output(input);
+  inPlaceFilter(output);
+  return output;
+}
+
+// In-place filter
+template<typename T>
+void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
+    DataPoints& cloud)
+{
+  typedef typename DataPoints::View View;
+  typedef typename DataPoints::Label Label;
+  typedef typename DataPoints::Labels Labels;
+  typedef typename DataPoints::TimeView TimeView;
+
+  const int pointsCount(cloud.features.cols());
+  const int featDim(cloud.features.rows());
+  const int descDim(cloud.descriptors.rows());
+
+  int insertDim(0);
+  if (averageExistingDescriptors)
+  {
+    // TODO: this should be in the form of an assert
+    // Validate descriptors and labels
+    for(unsigned int i = 0; i < cloud.descriptorLabels.size(); i++)
+      insertDim += cloud.descriptorLabels[i].span;
+    if (insertDim != descDim)
+      throw InvalidField("GestaltDataPointsFilter: Error, descriptor labels do not match descriptor data");
+  }
+
+  // Compute space requirement for new descriptors
+  const int dimNormals(featDim-1);
+  const int dimMeans(featDim-1);
+  const int dimEigValues(featDim-1);
+  const int dimEigVectors((featDim-1)*(featDim-1));
+  const int dimCovariances((featDim-1)*(featDim-1));
+  const int dimGestalt = 32;
+
+  // Allocate space for new descriptors
+  Labels cloudLabels, timeLabels;
+
+  if (keepNormals)
+    cloudLabels.push_back(Label("normals", dimNormals));
+  if (keepMeans)
+    cloudLabels.push_back(Label("means", dimMeans));
+  if (keepEigenValues)
+    cloudLabels.push_back(Label("eigValues", dimEigValues));
+  if (keepEigenVectors)
+    cloudLabels.push_back(Label("eigVectors", dimEigVectors));
+  if (keepCovariances)
+    cloudLabels.push_back(Label("covariance", dimCovariances));
+  if (keepGestaltFeatures) {
+    cloudLabels.push_back(Label("gestaltMeans", dimGestalt));
+    cloudLabels.push_back(Label("gestaltVariances", dimGestalt));
+    cloudLabels.push_back(Label("warpedXYZ", 3));
+    cloudLabels.push_back(Label("gestaltShapes", 2));
+  }
+  timeLabels.push_back(Label("time", 3));
+
+  cloud.allocateDescriptors(cloudLabels);
+  cloud.allocateTimes(timeLabels);
+
+  // we keep build data on stack for reentrant behaviour
+  View cloudExistingDescriptors(cloud.descriptors.block(0,0,cloud.descriptors.rows(),cloud.descriptors.cols()));
+  TimeView cloudExistingTimes(cloud.times.block(0,0,cloud.times.rows(),cloud.times.cols()));
+  BuildData buildData(cloud.features, cloud.descriptors, cloud.times);
+
+  // get views
+  if (keepNormals)
+    buildData.normals = cloud.getDescriptorViewByName("normals");
+  if(keepMeans)
+    buildData.means = cloud.getDescriptorViewByName("means");
+  if (keepEigenValues)
+    buildData.eigenValues = cloud.getDescriptorViewByName("eigValues");
+  if (keepEigenVectors)
+    buildData.eigenVectors = cloud.getDescriptorViewByName("eigVectors");
+  if (keepCovariances)
+    buildData.covariance = cloud.getDescriptorViewByName("covariance");
+  if (keepGestaltFeatures) {
+    buildData.gestaltMeans = cloud.getDescriptorViewByName("gestaltMeans");
+    buildData.gestaltVariances = cloud.getDescriptorViewByName("gestaltVariances");
+    buildData.warpedXYZ = cloud.getDescriptorViewByName("warpedXYZ");
+    buildData.gestaltShapes = cloud.getDescriptorViewByName("gestaltShapes");
+  }
+  // build the new point cloud
+  buildNew(
+      buildData,
+      0,
+      pointsCount,
+      cloud.features.rowwise().minCoeff(),
+      cloud.features.rowwise().maxCoeff()
+  );
+
+  // buildData.indicesToKeep contains all the indices where we want Gestalt features at
+  fuseRange(buildData, cloud, 0, pointsCount);
+
+  // Bring the data we keep to the front of the arrays then
+  // wipe the leftover unused space.
+  std::sort(buildData.indicesToKeep.begin(), buildData.indicesToKeep.end());
+  int ptsOut = buildData.indicesToKeep.size();
+  for (int i = 0; i < ptsOut; i++){
+    int k = buildData.indicesToKeep[i];
+    assert(i <= k);
+    cloud.features.col(i) = cloud.features.col(k);
+    cloud.times.col(i) = cloud.times.col(k);
+    if (cloud.descriptors.rows() != 0)
+      cloud.descriptors.col(i) = cloud.descriptors.col(k);
+    if(keepNormals)
+      buildData.normals->col(i) = buildData.normals->col(k);
+    if(keepMeans)
+      buildData.means->col(i) = buildData.means->col(k);
+    if(keepEigenValues)
+      buildData.eigenValues->col(i) = buildData.eigenValues->col(k);
+    if(keepEigenVectors)
+      buildData.eigenVectors->col(i) = buildData.eigenVectors->col(k);
+    if(keepCovariances)
+      buildData.covariance->col(i) = buildData.covariance->col(k);
+    if(keepGestaltFeatures) {
+      buildData.gestaltMeans->col(i) = buildData.gestaltMeans->col(k);
+      buildData.gestaltVariances->col(i) = buildData.gestaltVariances->col(k);
+      buildData.warpedXYZ->col(i) = buildData.warpedXYZ->col(k);
+      buildData.gestaltShapes->col(i) = buildData.gestaltShapes->col(k);
+    }
+  }
+  cloud.features.conservativeResize(Eigen::NoChange, ptsOut);
+  cloud.descriptors.conservativeResize(Eigen::NoChange, ptsOut);
+  cloud.times.conservativeResize(Eigen::NoChange, ptsOut);
+  // warning if some points were dropped
+  if(buildData.unfitPointsCount != 0)
+    LOG_INFO_STREAM("  GestaltDataPointsFilter - Could not compute normal for " << buildData.unfitPointsCount << " pts.");
+}
+
+template<typename T>
+void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
+{
+
+  T minBoundX = minValues.x() / vSizeX;
+  T maxBoundX = maxValues.x() / vSizeX;
+  T minBoundY = minValues.y() / vSizeY;
+  T maxBoundY = maxValues.y() / vSizeY;
+  T minBoundZ = minValues.z() / vSizeZ;
+  T maxBoundZ = maxValues.z() / vSizeZ;
+
+  // number of divisions is total size / voxel size voxels of equal length + 1
+  // with remaining space
+  unsigned int numDivX = 1 + maxBoundX - minBoundX;
+  unsigned int numDivY = 1 + maxBoundY - minBoundY;;
+  unsigned int numDivZ = 1 + maxBoundZ - minBoundZ;
+  unsigned int numVox = numDivX * numDivY * numDivZ;
+
+  // Assume point cloud is randomly ordered
+  // compute a linear index of the following type
+  // i, j, k are the component indices
+  // nx, ny number of divisions in x and y components
+  // idx = i + j * nx + k * nx * ny
+  int numPoints = last - first;
+  std::vector<unsigned int> indices(numPoints);
+
+  // vector to hold the first point in a voxel
+  // this point will be ovewritten in the input cloud with
+  // the output value
+  std::vector<typename VoxelGridDataPointsFilter::Voxel>* voxels;
+
+  // try allocating vector. If too big return error
+  try {
+    voxels = new std::vector<typename VoxelGridDataPointsFilter::Voxel>(numVox);
+  } catch (std::bad_alloc&) {
+    throw InvalidParameter((boost::format("GestaltDataPointsFilter: Memory allocation error with %1% voxels.  Try increasing the voxel dimensions.") % numVox).str());
+  }
+
+  const int featDim(data.features.rows());
+
+  for (int p = 0; p < numPoints; p++ )
+  {
+    unsigned int i = floor(data.features(0,p)/vSizeX - minBoundX);
+    unsigned int j = floor(data.features(1,p)/vSizeY- minBoundY);
+    unsigned int k = 0;
+    unsigned int idx;
+    if ( featDim == 4 )
+    {
+      k = floor(data.features(2,p)/vSizeZ - minBoundZ);
+      idx = i + j * numDivX + k * numDivX * numDivY;
+    }
+    else
+    {
+      idx = i + j * numDivX;
+    }
+
+    unsigned int pointsInVox = (*voxels)[idx].numPoints + 1;
+
+    if (pointsInVox == 1)
+    {
+      (*voxels)[idx].firstPoint = p;
+    }
+
+    (*voxels)[idx].numPoints = pointsInVox;
+
+    indices[p] = idx;
+
+  }
+
+  // store which points contain voxel position
+  std::vector<unsigned int> pointsToKeep;
+
+  // take centers of voxels for now
+  // Todo revert to random point selection within cell
+  for (int p = 0; p < numPoints ; p++)
+  {
+    unsigned int idx = indices[p];
+    unsigned int firstPoint = (*voxels)[idx].firstPoint;
+
+    // Choose random point in voxel
+    int randomIndex = std::rand() % numPoints;
+    for (int f = 0; f < (featDim - 1); f++ )
+    {
+      data.features(f,firstPoint) = data.features(f,randomIndex);
+    }
+  }
+
+  for (int idx = 0; idx < numVox; idx++)
+  {
+    unsigned int numPoints = (*voxels)[idx].numPoints;
+    unsigned int firstPoint = (*voxels)[idx].firstPoint;
+
+    if (numPoints > 0)
+    {
+      // get back voxel indices in grid format
+      // If we are in the last division, the voxel is smaller in size
+      // We adjust the center as from the end of the last voxel to the bounding area
+
+      pointsToKeep.push_back(firstPoint);
+    }
+  }
+
+  // now the keypoints are in pointsToKeep
+  // downsample with ratio
+  for(int i=0; i<pointsToKeep.size(); i++)
+  {
+    const float r = (float)std::rand()/(float)RAND_MAX;
+    if(r < ratio)
+    {
+      // Keep points with their descriptors
+      int k = pointsToKeep[i];
+      // Mark the indices which will be part of the final data
+      data.indicesToKeep.push_back(k);
+    }
+  }
+}
+
+template<typename T>
+void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& data, DataPoints& input, const int first, const int last) const
+{
+  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+
+  const int featDim(data.features.rows());
+  std::vector<int> indicesToKeepStrict;
+  for (int i = 0; i< data.indicesToKeep.size(); ++i) {
+    Eigen::Matrix<T,3,1> keyPoint;
+    keyPoint = input.features.col(data.indicesToKeep[i]);
+
+    // Define a search box around each keypoint to search for nearest neighbours.
+    T minBoundX = keyPoint(0,0) - radius;
+    T maxBoundX = keyPoint(0,0) + radius;
+    T minBoundY = keyPoint(1,0) - radius;
+    T maxBoundY = keyPoint(1,0) + radius;
+    T minBoundZ = keyPoint(2,0) - radius;
+    T maxBoundZ = keyPoint(2,0) + radius;
+    // iterate over data and find in- / outliers
+    Eigen::Matrix<T,3,1> feature;
+    std::vector<int> goodIndices;
+    for (int j = 0; j < input.features.cols(); ++j) {
+      feature = input.features.col(j);
+      if(feature(0,0) <= maxBoundX && feature(0,0) >= minBoundX &&
+          feature(1,0) <= maxBoundY && feature(1,0) >= minBoundY &&
+          feature(2,0) <= maxBoundZ && feature(2,0) >= minBoundZ &&
+          keyPoint != feature) {
+        goodIndices.push_back(j);
+      }
+    }
+    int colCount = goodIndices.size();
+    // if empty neighbourhood unfit the point
+    if (colCount == 0) {
+      data.unfitPointsCount++;
+      continue;
+    }
+    Matrix d(featDim-1, colCount);
+    Int64Matrix t(1, colCount);
+
+    for (int j = 0; j < colCount; ++j) {
+      d.col(j) = data.features.block(0,data.indices[goodIndices[j]],featDim-1, 1);
+      t.col(j) = data.times.col(data.indices[goodIndices[j]]);
+    }
+
+    const int featDim(data.features.rows());
+
+    const Vector mean = d.rowwise().sum() / T(colCount);
+    const Matrix NN = d.colwise() - mean;
+    boost::int64_t minTime = t.minCoeff();
+    boost::int64_t maxTime = t.maxCoeff();
+    boost::int64_t meanTime = t.sum() / T(colCount);
+    // compute covariance
+    const Matrix C(NN * NN.transpose());
+    Vector eigenVa = Vector::Identity(featDim-1, 1);
+    Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
+    // Ensure that the matrix is suited for eigenvalues calculation
+    if(keepNormals || keepEigenValues || keepEigenVectors || keepCovariances || keepGestaltFeatures)
+    {
+      if(C.fullPivHouseholderQr().rank()+1 >= featDim-1)
+      {
+        const Eigen::EigenSolver<Matrix> solver(C);
+        eigenVa = solver.eigenvalues().real();
+        eigenVe = solver.eigenvectors().real();
+      }
+      else
+      {
+        data.unfitPointsCount += colCount;
+        continue;
+      }
+    }
+    Eigen::Matrix<T,3,1> normal, newX, newY;
+    Eigen::Matrix<T,3,3> newBasis;
+    double planarity, cylindricality;
+
+    if(keepNormals || keepGestaltFeatures) {
+      // calculate orientation of NN
+      normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
+
+      if(keepGestaltFeatures) {
+        Vector eigenVaSort = SurfaceNormalDataPointsFilter::sortEigenValues(eigenVa);
+        planarity = 2 * (eigenVaSort(1) - eigenVaSort(0))/eigenVaSort.sum();
+        cylindricality = (eigenVaSort(2) - eigenVaSort(1))/eigenVaSort.sum();
+        // project normal on horizontal plane
+        Eigen::Matrix<T,3,1> up, base;
+        up << 0,0,1;
+        base << 1,0,0;
+        newX << normal(0), normal(1), 0;
+        newX.normalize();
+        newY = up.cross(newX);
+        newY = newY / newY.norm();
+        // form a new basis with world z-axis and projected x & y-axis
+        newBasis << newX(0), newY(0), up(0),
+            newX(1), newY(1), up(1),
+            newX(2), newY(2), up(2);
+
+        // discard keypoints with high planarity
+        if(planarity > 0.9) {
+          data.unfitPointsCount += colCount;
+          continue;
+        }
+        // discard keypoints with normal too close to vertical
+        if(acos(normal.dot(up)) < abs(10 * M_PI/180)) {
+          data.unfitPointsCount += colCount;
+          continue;
+        }
+
+        // define features in new basis that is oriented with the covariance
+        for (int j = 0; j < colCount; ++j) {
+          data.warpedXYZ->col(j) = ((data.features.block(0,j,3,1) - keyPoint).transpose() * newBasis).transpose();
+        }
+      }
+    }
+    Vector angles(colCount), radii(colCount), heights(colCount);
+    Matrix gestaltMeans(4, 8), gestaltVariances(4, 8), numOfValues(4, 8);
+    if(keepGestaltFeatures) {
+
+      // calculate the polar coordinates of points
+      angles = GestaltDataPointsFilter::calculateAngles(*data.warpedXYZ, keyPoint);
+      radii = GestaltDataPointsFilter::calculateRadii(*data.warpedXYZ, keyPoint);
+      heights = data.warpedXYZ->row(2);
+
+      // sort points into Gestalt bins
+      T angularBinWidth = M_PI/4;
+      T radialBinWidth = radius/4;
+      Matrix indices(2, colCount);
+      gestaltMeans = Matrix::Zero(4, 8);
+      gestaltVariances = Matrix::Zero(4, 8);
+      numOfValues = Matrix::Zero(4, 8);
+
+      for (int it=0; it < colCount; ++it) {
+        indices(0,it) = floor(radii(it)/radialBinWidth);
+        // if value exceeds borders of bin -> put in outmost bin
+        if(indices(0,it) > 3)
+          // this case should never happen - just in case
+          indices(0,it) = 3;
+        indices(1,it) = floor(angles(it)/angularBinWidth);
+        if(indices(1,it) > 7)
+          indices(1,it) = 7;
+        gestaltMeans(indices(0,it), indices(1,it)) += heights(it);
+        numOfValues(indices(0,it), indices(1,it))++;
+      }
+
+      for (int radial=0; radial < 4; ++radial) {
+        for (int angular = 0; angular < 8; ++angular) {
+          if (numOfValues(radial, angular) > 0) {
+            gestaltMeans(radial, angular) = gestaltMeans(radial, angular)/numOfValues(radial, angular);
+          }
+        }
+      }
+      for (int it=0; it < colCount; ++it) {
+        gestaltVariances(indices(0,it), indices(1,it)) += (heights(it)-gestaltMeans(indices(0,it), indices(1,it))) * (heights(it)-gestaltMeans(indices(0,it), indices(1,it)));
+      }
+      for (int radial=0; radial < 4; ++radial) {
+        for (int angular = 0; angular < 8; ++angular) {
+          // if bins are == 0 -> propagate with value in bin closer to keypoint
+          if (gestaltMeans(radial,angular) == 0 && radial > 0) {
+            gestaltMeans(radial, angular) = gestaltMeans(radial-1, angular);
+            gestaltVariances(radial, angular) = gestaltVariances(radial-1, angular);
+          } else if (numOfValues(radial, angular) > 0) {
+            gestaltVariances(radial, angular) = gestaltVariances(radial, angular)/numOfValues(radial, angular);
+          }
+        }
+      }
+    }
+    Vector serialEigVector;
+    if(keepEigenVectors)
+      serialEigVector = SurfaceNormalDataPointsFilter::serializeEigVec(eigenVe);
+    Vector serialCovVector;
+    if(keepCovariances)
+      serialCovVector = SurfaceNormalDataPointsFilter::serializeEigVec(C);
+    Vector serialGestaltMeans;
+    Vector serialGestaltVariances;
+    if(keepGestaltFeatures) {
+      serialGestaltMeans = GestaltDataPointsFilter::serializeGestaltMatrix(gestaltMeans);
+      serialGestaltVariances = GestaltDataPointsFilter::serializeGestaltMatrix(gestaltVariances);
+    }
+    // some safety check
+    if(data.descriptors.rows() != 0)
+      assert(data.descriptors.cols() != 0);
+
+    // write the updated times: min, max, mean
+    data.times(0, data.indicesToKeep[i]) = minTime;
+    data.times(1, data.indicesToKeep[i]) = maxTime;
+    data.times(2, data.indicesToKeep[i]) = meanTime;
+
+    // Build new descriptors
+    if(keepNormals)
+      data.normals->col(data.indicesToKeep[i]) = normal;
+    if(keepMeans)
+      data.means->col(data.indicesToKeep[i]) = mean;
+    if(keepEigenValues)
+      data.eigenValues->col(data.indicesToKeep[i]) = eigenVa;
+    if(keepEigenVectors)
+      data.eigenVectors->col(data.indicesToKeep[i]) = serialEigVector;
+    if(keepCovariances)
+      data.covariance->col(data.indicesToKeep[i]) = serialCovVector;
+    if(keepGestaltFeatures) {
+      // preserve gestalt features
+      data.gestaltMeans->col(data.indicesToKeep[i]) = serialGestaltMeans;
+      data.gestaltVariances->col(data.indicesToKeep[i]) = serialGestaltVariances;
+      (*data.gestaltShapes)(0,data.indicesToKeep[i]) = planarity;
+      (*data.gestaltShapes)(1,data.indicesToKeep[i]) = cylindricality;
+    }
+    // all went well so far - so keep this keypoint
+    indicesToKeepStrict.push_back(data.indicesToKeep[i]);
+  }
+  data.indicesToKeep = indicesToKeepStrict;
+}
+
+template<typename T>
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::serializeGestaltMatrix(const Matrix gestaltFeatures) const
+{
+  // serialize the gestalt descriptors
+  const int dim = gestaltFeatures.rows() * gestaltFeatures.cols();
+  Vector output(dim);
+  for(int k=0; k < gestaltFeatures.rows(); k++)
+  {
+    output.segment(k*gestaltFeatures.cols(), gestaltFeatures.cols()) =
+        gestaltFeatures.row(k).transpose();
+  }
+  return output;
+}
+
+template<typename T>
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateAngles(const Matrix points, const Eigen::Matrix<T,3,1> keyPoint) const
+{
+  Vector angles(points.cols());
+  for (size_t i = 0; i<points.cols(); ++i) {
+    angles(i) = atan2(points(0,i), points(1,i));
+    if (angles(i) < 0)
+      angles(i) += (2 * M_PI);
+  }
+  return angles;
+}
+
+template<typename T>
+typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateRadii(const Matrix points, const Eigen::Matrix<T,3,1> keyPoint) const
+{
+  Vector radii(points.cols());
+  for (size_t i = 0; i<points.cols(); ++i) {
+    radii(i) = sqrt((points(0,i)) * (points(0,i)) + (points(1,i)) * (points(1,i)));
+  }
+  return radii;
+}
+
+template struct DataPointsFiltersImpl<float>::GestaltDataPointsFilter;
+template struct DataPointsFiltersImpl<double>::GestaltDataPointsFilter;
+
+/////////////////////////////////////////////////////////////////////////////////////
 
 // OrientNormalsDataPointsFilter
 // Constructor

@@ -142,7 +142,7 @@ PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& fe
 	descriptorLabels(descriptorLabels)
 {}
 
-//! Construct a point cloud from existing features and descriptors
+//! Construct a point cloud from existing features, descriptors and times
 template<typename T>
 PointMatcher<T>::DataPoints::DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels, const Int64Matrix& times, const Labels& timeLabels):
 	features(features),

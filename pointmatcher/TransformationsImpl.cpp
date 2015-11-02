@@ -51,8 +51,6 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
-	typedef typename PointMatcher<T>::Matrix Matrix;
-	
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
@@ -64,7 +62,7 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	if(this->checkParameters(parameters) == false)	
 		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
 	
-	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
+	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.timeLabels, input.features.cols());
 	
 	// Apply the transformation to features
 	transformedCloud.features = parameters * input.features;

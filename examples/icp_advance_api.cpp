@@ -11,14 +11,14 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the <organization> nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+	* Redistributions of source code must retain the above copyright
+	  notice, this list of conditions and the following disclaimer.
+	* Redistributions in binary form must reproduce the above copyright
+	  notice, this list of conditions and the following disclaimer in the
+	  documentation and/or other materials provided with the distribution.
+	* Neither the name of the <organization> nor the
+	  names of its contributors may be used to endorse or promote products
+	  derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
@@ -137,11 +138,90 @@ int main(int argc, const char *argv[])
 
 	// Compute the transformation to express data in ref
 	PM::TransformationParameters T = icp(initializedData, ref);
-	cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
+	float matchRatio = icp.errorMinimizer->getWeightedPointUsedRatio();
+	cout << "match ratio: " <<  matchRatio << endl;
+
+	
 
 	// Transform data to express it in ref
 	DP data_out(initializedData);
 	icp.transformations.apply(data_out, T);
+
+	cout << endl << "------------------" << endl;
+	
+	// START demo 1
+	// Test for retrieving Haussdorff distance (with outliers). We generate new matching module 
+	// specifically for this purpose. 
+	//
+	// INPUTS:
+	// ref: point cloud used as reference
+	// data_out: aligned point cloud (using the transformation outputted by icp)
+	// icp: icp object used to aligned the point clouds
+
+	
+	// Structure to hold future match results
+	PM::Matches matches;
+
+	Parametrizable::Parameters params;
+	params["knn"] =  toParam(1); // for Hausdorff distance, we only need the first closest point
+	params["epsilon"] =  toParam(0);
+
+	PM::Matcher* matcherHausdorff = PM::get().MatcherRegistrar.create("KDTreeMatcher", params);
+	
+	// max. distance from reading to reference
+	matcherHausdorff->init(ref);
+	matches = matcherHausdorff->findClosests(data_out);
+	float maxDist1 = matches.getDistsQuantile(1.0);
+	float maxDistRobust1 = matches.getDistsQuantile(0.85);
+
+	// max. distance from reference to reading
+	matcherHausdorff->init(data_out);
+	matches = matcherHausdorff->findClosests(ref);
+	float maxDist2 = matches.getDistsQuantile(1.0);
+	float maxDistRobust2 = matches.getDistsQuantile(0.85);
+
+	float haussdorffDist = std::max(maxDist1, maxDist2);
+	float haussdorffQuantileDist = std::max(maxDistRobust1, maxDistRobust2);
+
+	cout << "Haussdorff distance: " << std::sqrt(haussdorffDist) << " m" << endl;
+	cout << "Haussdorff quantile distance: " << std::sqrt(haussdorffQuantileDist) <<  " m" << endl;
+
+	// START demo 2
+	// Test for retrieving paired point mean distance without outliers. We reuse the same module used for 
+	// the icp object.
+	//
+	// INPUTS:
+	// ref: point cloud used as reference
+	// data_out: aligned point cloud (using the transformation outputted by icp)
+	// icp: icp object used to aligned the point clouds
+	
+	// initiate the matching with unfiltered point cloud
+	icp.matcher->init(ref);
+
+	// extract closest points
+	matches = icp.matcher->findClosests(data_out);
+
+	// weight paired points
+	const PM::OutlierWeights outlierWeights = icp.outlierFilters.compute(data_out, ref, matches);
+	
+	// generate tuples of matched points and remove pairs with zero weight
+	const PM::ErrorMinimizer::ErrorElements matchedPoints = icp.errorMinimizer->getMatchedPoints( data_out, ref, matches, outlierWeights);
+
+	// extract relevant information for convenience
+	const int dim = matchedPoints.reading.getEuclideanDim();
+	const int nbMatchedPoints = matchedPoints.reading.getNbPoints(); 
+	const PM::Matrix matchedRead = matchedPoints.reading.features.topRows(dim);
+	const PM::Matrix matchedRef = matchedPoints.reference.features.topRows(dim);
+	
+	// compute mean distance
+	const PM::Matrix dist = (matchedRead - matchedRef).colwise().norm(); // replace that by squaredNorm() to save computation time
+	const float meanDist = dist.sum()/nbMatchedPoints;
+	cout << "Robust mean distance: " << meanDist << " m" << endl;
+
+	// END demo
+
+	cout << "------------------" << endl << endl;
+
 
 	// Safe files to see the results
 	ref.save(outputBaseFile + "_ref.vtk");

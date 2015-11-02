@@ -377,6 +377,28 @@ install (
   DESTINATION "share/${PROJECT_NAME}/cmake/"
 )
 
+#Handle pkg-config file
+set(LIBRARY_CC_ARGS "")
+foreach(_LIB IN LISTS POINTMATCHER_LIB EXTERNAL_LIBS)
+  get_filename_component(_FILE_NAME ${_LIB} NAME)
+  if(${_FILE_NAME} STREQUAL ${_LIB}) # not an absolute path 
+    set(LIBRARY_CC_ARGS "${LIBRARY_CC_ARGS} -l${_LIB}") 
+  else()
+    set(LIBRARY_CC_ARGS "${LIBRARY_CC_ARGS} ${_LIB}")
+  endif()
+endforeach()
+unset(_LIB)
+unset(_FILE_NAME)
+
+configure_file(pointmatcher.pc.in libpointmatcher.pc @ONLY)
+configure_file(pointmatcher.pc.in pointmatcher.pc @ONLY) # for backward compatibility
+install(FILES 
+  ${CMAKE_BINARY_DIR}/libpointmatcher.pc 
+  ${CMAKE_BINARY_DIR}/pointmatcher.pc # for backward compatibility
+  DESTINATION lib/pkgconfig
+)
+unset(LIBRARY_CC_ARGS)
+
 #====================== uninstall target ===============================
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
