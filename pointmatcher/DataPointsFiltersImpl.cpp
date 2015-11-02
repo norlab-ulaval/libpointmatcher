@@ -992,17 +992,14 @@ template<typename T>
 void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
     DataPoints& cloud)
 {
-  typedef Matrix Features;
   typedef typename DataPoints::View View;
   typedef typename DataPoints::Label Label;
   typedef typename DataPoints::Labels Labels;
-  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
   typedef typename DataPoints::TimeView TimeView;
 
   const int pointsCount(cloud.features.cols());
   const int featDim(cloud.features.rows());
   const int descDim(cloud.descriptors.rows());
-  const int timesDim(cloud.times.rows());
 
   int insertDim(0);
   if (averageExistingDescriptors)
@@ -1189,11 +1186,9 @@ template<typename T>
 void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
 {
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
-  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, 1> Int64Vector;
 
   const int colCount(last-first);
   const int featDim(data.features.rows());
-  const int timesDim(data.times.rows());
 
   // build nearest neighbors list
   Matrix d(featDim-1, colCount);
@@ -1440,17 +1435,14 @@ template<typename T>
 void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
     DataPoints& cloud)
 {
-  typedef Matrix Features;
   typedef typename DataPoints::View View;
   typedef typename DataPoints::Label Label;
   typedef typename DataPoints::Labels Labels;
-  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
   typedef typename DataPoints::TimeView TimeView;
 
   const int pointsCount(cloud.features.cols());
   const int featDim(cloud.features.rows());
   const int descDim(cloud.descriptors.rows());
-  const int timesDim(cloud.times.rows());
 
   int insertDim(0);
   if (averageExistingDescriptors)
@@ -1580,7 +1572,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
   // with remaining space
   unsigned int numDivX = 1 + maxBoundX - minBoundX;
   unsigned int numDivY = 1 + maxBoundY - minBoundY;;
-  unsigned int numDivZ = numDivZ = 1 + maxBoundZ - minBoundZ;
+  unsigned int numDivZ = 1 + maxBoundZ - minBoundZ;
   unsigned int numVox = numDivX * numDivY * numDivZ;
 
   // Assume point cloud is randomly ordered
@@ -1686,9 +1678,6 @@ template<typename T>
 void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& data, DataPoints& input, const int first, const int last) const
 {
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
-  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, 1> Int64Vector;
-  typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
-  typedef typename PointMatcher<T>::Matches Matches;
 
   const int featDim(data.features.rows());
   std::vector<int> indicesToKeepStrict;
@@ -1730,7 +1719,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
     }
 
     const int featDim(data.features.rows());
-    const int timesDim(data.times.rows());
 
     const Vector mean = d.rowwise().sum() / T(colCount);
     const Matrix NN = d.colwise() - mean;
