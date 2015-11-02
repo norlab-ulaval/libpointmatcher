@@ -11,7 +11,7 @@ Click on the image to play.
 
 
 <a href="https://www.youtube.com/watch?v=cMgLyLpnsoU" target="_blank">
- <img src="https://github.com/ethz-asl/libpointmatcher/tree/master/doc//images/youtubeCovers/cMgLyLpnsoU.jpg" width="240" height="180"/>
+ <img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/cMgLyLpnsoU.jpg" width="240" height="180"/>
 </a>
 
 #### NIFTi: railyard mapping
