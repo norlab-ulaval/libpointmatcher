@@ -2,7 +2,6 @@
 | ------------- |:-------------:| -----:|
 
 # Applying Transformations to Point Clouds
-######Latest update January 24, 2014 by Samuel Charreyron
 
 The outcome of a point cloud registration is some rigid transformation which, when applied to the reading point cloud, best aligns it with the reference point cloud.  This transformation can be represented algebraically with a square matrix of the dimensions of the homogeneous point coordinates. A point cloud is transformed by left-multiplying it by the transformation matrix.
 

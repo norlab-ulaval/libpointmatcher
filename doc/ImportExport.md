@@ -1,7 +1,6 @@
 | [Tutorials Home](Tutorials.md)    | [Previous](Configuration.md) | [Next](LinkingProjects.md) |
 | ------------- |:-------------:| -----:|
 # Importing and Exporting Point Clouds
-######Latest update April 2, 2014 by Samuel Charreyron
 
 ## Overview
 There exists a myriad of [graphics file formats](http://en.wikipedia.org/wiki/Category:Graphics_file_formats) which can be used to represent point clouds.  Nevertheless most contain superfluous functionality which isn't necessary for ICP.  Consequently, libpointmatcher only supports a small number of file formats which are detailed in the following sections.

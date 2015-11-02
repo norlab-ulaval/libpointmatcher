@@ -2,7 +2,6 @@
 | ------------- |:-------------:| -----:|
 
 # Default Configuration of the ICP Chain
-######Latest update May 1, 2014 by Samuel Charreyron
 
 The following details the default configuration for ICP in libpointmatcher.
 

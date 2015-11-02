@@ -2,7 +2,6 @@
 | ------------- |:-------------:| -----:|
 
 # An Introduction to ICP Registration
-######Latest update May 1, 2014 by Samuel Charreyron
 
 In the following tutorial, we will performing ICP registration on an example dataset.  Throughout this tutorial, we will be making use of the `pmicp` executable, which can be found in the `examples` directory of your libpointmatcher build directory (ie `build/examples/pmicp`).
 

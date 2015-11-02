@@ -2,7 +2,6 @@
 | ------------- |:-------------:| -----:|
 
 # Writing a program which performs ICP
-######Latest update May 1, 2014 by Samuel Charreyron
 
 ## Overview
 

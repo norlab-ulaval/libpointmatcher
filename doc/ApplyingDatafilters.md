@@ -2,7 +2,6 @@
 | ------------- |:-------------:| -----:|
 
 # Applying Data Point Filters
-######Latest update May 1, 2014 by Samuel Charreyron
 
 ## Overview
 The following will go through the steps needed to write a simple program which configures a chain of data filters and applies this chain to a point cloud.  For information on data filters, refer to the [data point filters tutorial](Datafilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/convert.cpp](../examples/convert.cpp).

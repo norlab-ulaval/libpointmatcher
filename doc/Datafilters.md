@@ -2,7 +2,6 @@
 | ------------- |:-------------:| -----:|
 
 # Datapoint Filters
-######Latest update January 16, 2014 by Samuel Charreyron
 
 In this section, the various filters which can be applied to the reading and reference point clouds before performing the ICP process.
 
