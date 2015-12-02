@@ -4,7 +4,7 @@
 # Applying Data Point Filters
 
 ## Overview
-The following will go through the steps needed to write a simple program which configures a chain of data filters and applies this chain to a point cloud.  For information on data filters, refer to the [data point filters tutorial](Datafilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/convert.cpp](../examples/convert.cpp).
+The following will go through the steps needed to write a simple program which configures a chain of data filters and applies this chain to a point cloud.  For information on data filters, refer to the [data point filters tutorial](Datafilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/demo_cmake/convert.cpp](../examples/demo_cmake/convert.cpp).
 
 ***IMPORTANT:*** This tutorial makes use of YAML configuration files.  If you did not install yaml-cpp before installing libpointmatcher, you must do so before following these instructions.  Information on installing yaml-cpp can be found in the installation instructions for [Ubuntu](Compilation.md), [Mac OS X](CompilationMac.md), and [Windows](CompilationWindows.md).
 
