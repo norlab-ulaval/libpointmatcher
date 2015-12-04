@@ -1007,6 +1007,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	// parse points and descriptors
 	string fieldName;
 	string name;
+	int dim = 0;
 	int pointCount = 0;
 	string type;
 	while (is.good())
@@ -1143,15 +1144,31 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 			for (int f = 0; f < fieldDataCount; f++)
 			{
 				//getline(is, line);
-				string fieldDataArrayName, fieldDataArrayType;
-				int numComponents, numTuples;
-				is >> fieldDataArrayName >> numComponents >> numTuples >> fieldDataArrayType;
+				int numTuples;
+				is >> name >> dim >> numTuples >> type;
 
-				int t_val;
-				for (int t = 0; t < numComponents * numTuples; t++ )
+				if(type == "vtkIdType") // skip that type
 				{
-					is >> t_val;
+					int t_val;
+					for (int t = 0; t < dim * numTuples; t++ )
+					{
+						is >> t_val;
+					}
 				}
+				else if(!(type == "float" || type == "double"))
+						throw runtime_error(string("Field " + fieldName + " is " + type + " but can only be of type double or float"));
+						 
+
+				Matrix descriptor(dim, pointCount);
+				for (int p = 0; p < pointCount; ++p)
+				{
+					for(int d = 0; d < dim; d++)
+					{
+						is >> descriptor(d, p);
+					}
+				}
+				cerr << name << endl;
+				loadedPoints.addDescriptor(name, descriptor);
 			}
 		}
 		else // Load descriptors
@@ -1159,7 +1176,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 			// descriptor name
 			is >> name;
 
-			int dim = 0;
 			bool skipLookupTable = false;
 			if(fieldName == "SCALARS")
 			{
@@ -1210,6 +1226,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 					is >> descriptor(d, p);
 				}
 			}
+			cerr << name << endl;
 			loadedPoints.addDescriptor(name, descriptor);
 		}
 			 
