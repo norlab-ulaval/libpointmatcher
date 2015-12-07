@@ -1167,7 +1167,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 						is >> descriptor(d, p);
 					}
 				}
-				cerr << name << endl;
 				loadedPoints.addDescriptor(name, descriptor);
 			}
 		}
@@ -1226,7 +1225,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 					is >> descriptor(d, p);
 				}
 			}
-			cerr << name << endl;
 			loadedPoints.addDescriptor(name, descriptor);
 		}
 			 
@@ -1966,21 +1964,28 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			map<int, LabelAssociationPair> colToDescPair_ = colToDescPair;
 			colToDescPair.clear();
 
+
 			vector<int>::const_iterator nextFieldToKeepIt = descFieldsToKeep.begin();
+
 			for (size_t i = 1; i < tokens.size(); i++)
 			{
 				int count = boost::lexical_cast<int>(tokens[i]);
-
-				if ((int)i == *nextFieldToKeepIt)
+				
+				if(descFieldsToKeep.size() != 0)
 				{
-					string descLabel = colToDescPair_[i].second;
-					descLabelToNumRows[descLabel] = count;
+					if ((int)i == *nextFieldToKeepIt)
+					{
+						assert(colToDescPair_.find(i) != colToDescPair_.end());
 
-					for (int p = 0; p < count; p++)
-						colToDescPair[numDataFields + p] = LabelAssociationPair(p, descLabel);
+						string descLabel = colToDescPair_[i].second;
+						descLabelToNumRows[descLabel] = count;
 
-					if (nextFieldToKeepIt != descFieldsToKeep.end())
-						nextFieldToKeepIt++;
+						for (int p = 0; p < count; p++)
+							colToDescPair[numDataFields + p] = LabelAssociationPair(p, descLabel);
+
+						if (nextFieldToKeepIt != descFieldsToKeep.end())
+							nextFieldToKeepIt++;
+					}
 				}
 
 				numDataFields += count;
@@ -2065,6 +2070,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	// allocate descriptor vectors
 	size_t numDescCols = cumSum; // number of descriptor vectors
 	Matrix descriptors(numDescCols,numPoints);
+
 
 	// Now read in the data
 	size_t p = 0; // point count

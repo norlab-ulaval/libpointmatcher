@@ -27,7 +27,7 @@ TEST(IOTest, loadYaml)
 	EXPECT_THROW(icp.loadFromYaml(ifs3), PointMatcherSupport::InvalidModuleType);
 }
 
-TEST(IOTest, loadCsv)
+TEST(IOTest, loadCSV)
 {
   typedef PointMatcherIO<float> IO;
 	std::istringstream is;
@@ -248,6 +248,96 @@ TEST(IOTest, loadPLY)
 	EXPECT_TRUE(pointCloud.features(2, 2) == 3);
 	EXPECT_TRUE(pointCloud.descriptors(1, 1) == 22);
 	EXPECT_TRUE(pointCloud.descriptors(2, 4) == 33);
+
+}
+
+
+TEST(IOTest, loadPCD)
+{
+	typedef PointMatcherIO<float> IO;
+	std::istringstream is;
+
+	// Empty file
+	is.str(
+	""
+	);
+
+	//TODO: not implemented, is that required?
+	//EXPECT_THROW(IO::loadPCD(is), runtime_error);
+
+	// Partial header
+	is.clear();
+	is.str(
+	"# .PCD v.7 - Point Cloud Data file format\n"
+	"VERSION .7\n"
+	);
+
+	//TODO: not implemented, is that required?
+	//EXPECT_THROW(IO::loadPCD(is), runtime_error);
+	
+	// Missing data
+	is.clear();
+	is.str(
+	"# .PCD v.7 - Point Cloud Data file format\n"
+	"VERSION .7\n"
+	"FIELDS x y z\n"
+	"SIZE 4 4 4\n"
+	"TYPE F F F\n"
+	"COUNT 1 1 1\n"
+	"WIDTH 18\n"
+	"HEIGHT 1\n"
+	"VIEWPOINT 0 0 0 1 0 0 0\n"
+	"POINTS 18\n"
+	"DATA ascii\n"
+	);
+	
+	EXPECT_THROW(IO::loadPCD(is), runtime_error);
+
+
+	is.clear();
+	is.str(
+	"# .PCD v.7 - Point Cloud Data file format\n"
+	"VERSION .7\n"
+	"FIELDS x y z\n"
+	"SIZE 4 4 4\n"
+	"TYPE F F F\n"
+	"COUNT 1 1 1\n"
+	"WIDTH 18\n"
+	"HEIGHT 1\n"
+	"VIEWPOINT 0 0 0 1 0 0 0\n"
+	"POINTS 18\n"
+	"DATA ascii\n"
+	"0.44912094 0.49084857 1.153\n"
+	"0.34907714 0.48914573 1.149\n"
+	"0.33813429 0.48914573 1.149\n"
+	"0.32833049 0.49084857 1.153\n"
+	"0.24395333 0.42856666 0.98900002\n"
+	"0.20816095 0.42856666 0.98900002\n"
+	"0.1987419 0.42291525 0.98900002\n"
+	"0.18178761 0.42291525 0.98900002\n"
+	"0.17990381 0.42291525 0.98900002\n"
+	"-0.035590474 0.42997143 1.01\n"
+	"-0.035907622 0.43962574 1.0190001\n"
+	"-0.043542858 0.43639618 1.016\n"
+	"-0.15246001 0.36058003 0.84700006\n"
+	"0.21956001 0.44007048 0.99800003\n"
+	"-0.16635144 0.3699457 0.86900002\n"
+	"-0.33879143 0.36143145 0.84900004\n"
+	"-0.35055432 0.36853144 0.85800004\n"
+	"-0.39932001 0.38058859 0.89400005\n"
+	);
+	
+	DP pointCloud = IO::loadPCD(is);
+	
+	// Confirm sizes and dimensions
+	EXPECT_TRUE(pointCloud.features.cols() == 18);
+	EXPECT_TRUE(pointCloud.features.rows() == 4);
+	EXPECT_TRUE(pointCloud.descriptors.cols() == 0);
+	EXPECT_TRUE(pointCloud.descriptors.rows() == 0);
+	
+	// Random value check
+	EXPECT_NEAR(pointCloud.features(0, 0), 0.449121, 0.0000001);
+	EXPECT_NEAR(pointCloud.features(2, 2), 1.149, 0.0000001);
 
 }
 
