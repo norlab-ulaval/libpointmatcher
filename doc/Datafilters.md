@@ -148,7 +148,8 @@ __Impact on the number of points:__ reduces number of points
 
 ## Maximum Point Count Filter <a name="maxpointcounthead"></a>
 ### Description
-The size of the point cloud is reduced by randomly rejecting points if the total number of points exceeds a threshold.
+Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above `maxCount`. The resulting point cloud while have `maxCount` number of point. the Based on:  Registration and integration of multiple range images for 3-D model construction. Masuda, T. and Sakaue, K. and Yokoya, N. In Pattern Recognition, 1996., Proceedings of the 13th International Conference on. 879--883. 1996.
+
 
 __Required descriptors:__ none   
 __Output descriptor:__ none  
@@ -157,15 +158,11 @@ __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
-|prob        | Probability of keeping a point, 1/decimation factor | 0.75 | min: 0 max: 1 |
+|seed        | srand seed | 0 | min: 0 max: 2147483647 |
 |maxCount |number of points beyond which subsampling occurs | 1000 | min: 0, max: 2147483647|
 
 ### Example
-For the following example we apply a maximum count of 1000, noting that there are over 400,000 points in the input point cloud and a sampling probability of 0.1.  We observe in the output point cloud a point set representing approximately 10% the original number of points selected evenly from the input cloud. 
-
-|Figure: After applying maximum point count filter with a maximum count of 1000 and a sampling probability of 0.1.  Input point cloud contains 404,395 points, filtered point cloud contains 40,200 points.   | Parameters used |
-|---|:---|
-|![max count after](images/max_num.png "After applying maximum point count filter with a maximum count of 1000 and a sampling probability of 0.1") | maxCount : 1000 <br> prob : 0.1|
+No example available.
 
 
 ## Maximum Quantile on Axis Filter <a name="maxquantilehead"></a>
