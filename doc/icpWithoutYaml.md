@@ -119,4 +119,6 @@ icp.transformationCheckers.push_back(maxIter);
 icp.transformationCheckers.push_back(diff);
 	
 icp.inspector.reset(nullInspect);
+
+icp.transformations.push_back(rigidTrans);
 ```
