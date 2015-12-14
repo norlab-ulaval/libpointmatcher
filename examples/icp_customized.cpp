@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 		PM::get().DataPointsFilterRegistrar.create(name, params);
 	params.clear();
 
-	// Prepare matchinf function
+	// Prepare matching function
 	name = "KDTreeMatcher";
 	params["knn"] = "1";
 	params["epsilon"] = "3.16";
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 	PM::ErrorMinimizer* pointToPoint =   
 		PM::get().ErrorMinimizerRegistrar.create(name);
 
-	// Prepare outlier filters
+	// Prepare transformation checker filters
 	name = "CounterTransformationChecker";
 	params["maxIterationCount"] = "150";
 	PM::TransformationChecker* maxIter = 
@@ -137,9 +137,9 @@ int main(int argc, char *argv[])
 		PM::get().InspectorRegistrar.create("NullInspector");
 
 	name = "VTKFileInspector";
-    params["dumpDataLinks"] = "1"; 
-    params["dumpReading"] = "1"; 
-    params["dumpReference"] = "1"; 
+    	params["dumpDataLinks"] = "1"; 
+    	params["dumpReading"] = "1"; 
+    	params["dumpReference"] = "1"; 
 
 	PM::Inspector* vtkInspect =
 		PM::get().InspectorRegistrar.create(name, params);
