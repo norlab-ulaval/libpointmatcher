@@ -198,7 +198,7 @@ struct PointMatcherIO
 	static DataPoints loadVTK(const std::string& fileName);
 	static DataPoints loadVTK(std::istream& is);
 
-	static void saveVTK(const DataPoints& data, const std::string& fileName);
+	static void saveVTK(const DataPoints& data, const std::string& fileName, bool binary = false);
 
 	// PLY
 	static DataPoints loadPLY(const std::string& fileName);

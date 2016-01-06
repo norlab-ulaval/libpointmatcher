@@ -36,13 +36,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "InspectorsImpl.h"
 
 #include "PointMatcherPrivate.h"
+#include "IOFunctions.h"
 
 #include <cassert>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
+#include <boost/type_traits/is_same.hpp>
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 template<typename T>
 InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
@@ -137,11 +141,20 @@ InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string&
 	bDumpIterationInfo(Parametrizable::get<bool>("dumpIterationInfo")),
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
-	bDumpReference(Parametrizable::get<bool>("dumpReference"))
+	bDumpReference(Parametrizable::get<bool>("dumpReference")),
+	bWriteBinary(Parametrizable::get<bool>("writeBinary"))
 {
 }
 
-	
+template<typename T>
+std::string getTypeName() {
+	if (boost::is_same<double, T>::value) {
+		return "double";
+	} else {
+		return "float";
+	}
+}
+
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& data, std::ostream& stream)
 {
@@ -150,21 +163,33 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	
 	stream << "# vtk DataFile Version 3.0\n";
 	stream << "File created by libpointmatcher\n";
-	stream << "ASCII\n";
+	stream << (bWriteBinary ? "BINARY":"ASCII") << "\n";
 	stream << "DATASET POLYDATA\n";
-	stream << "POINTS " << features.cols() << " float\n";
+
+	stream << "POINTS " << features.cols() << " " << getTypeName<T>() << "\n";
+
 	if(features.rows() == 4)
 	{
-		stream << features.topLeftCorner(3, features.cols()).transpose() << "\n";
+		writeVtkData(bWriteBinary, features.topLeftCorner(3, features.cols()).transpose(), stream) << "\n";
 	}
 	else
 	{
-		stream << features.transpose() << "\n";
+		writeVtkData(bWriteBinary, features.transpose(), stream)  << "\n";
 	}
 	
 	stream << "VERTICES "  << features.cols() << " "<< features.cols() * 2 << "\n";
-	for (int i = 0; i < features.cols(); ++i)
-		stream << "1 " << i << "\n";
+	for (int i = 0; i < features.cols(); ++i){
+		if(bWriteBinary){
+			stream.write(reinterpret_cast<const char*>(&oneBigEndian), sizeof(int));
+			ConverterToAndFromBytes<int> converter(i);
+			if(!isBigEndian){
+				converter.swapBytes();
+			}
+			stream.write(converter.bytes, sizeof(int));
+		}else {
+			stream << "1 " << i << "\n";
+		}
+	}
 	
 
 	// Save points
@@ -433,15 +458,26 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::o
 		if(attribute.compare("COLOR_SCALARS") == 0)
 		{
 			stream << attribute << " " << nameTag << " " << forcedDim << "\n";
-			stream << padWithOnes(desc, forcedDim, desc.cols()).transpose();
+			if(bWriteBinary){
+				std::vector<unsigned char> buffer(forcedDim, 0);
+				for (int i = 0; i < desc.cols(); ++i){
+					for(int r=0; r < desc.rows(); ++r){
+						buffer[r] = static_cast<unsigned int>(desc(r, i) * static_cast<T>(255) + static_cast<T>(0.5)); // this is how libvtk implements it ( vtkScalarsToColors::ColorToUChar )
+					}
+					stream.write(reinterpret_cast<char *>(&buffer.front()), forcedDim);
+				}
+			}
+			else {
+				stream << padWithOnes(desc, forcedDim, desc.cols()).transpose();
+			}
 		}
 		else
 		{
-			stream << attribute << " " << nameTag << " float\n";
+			stream << attribute << " " << nameTag << " " << getTypeName<T>() << "\n";
 			if(attribute.compare("SCALARS") == 0)
 				stream << "LOOKUP_TABLE default\n";
 
-			stream << padWithZeros(desc, forcedDim, desc.cols()).transpose();
+			writeVtkData(bWriteBinary, padWithZeros(desc, forcedDim, desc.cols()).transpose(), stream);
 		}
 		stream << "\n";
 	}
@@ -548,7 +584,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildVectorStream(std::ostream& st
 
 	if(descRef.rows() != 0 && descRead.rows() != 0)
 	{
-		stream << "VECTORS " << name << " float\n";
+		stream << "VECTORS " << name << " " << getTypeName<T>() << "\n";
 
 		stream << padWithZeros(
 				descRef, 3, ref.descriptors.cols()).transpose();

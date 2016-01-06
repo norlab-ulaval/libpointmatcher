@@ -263,7 +263,7 @@ struct PointMatcher
 		unsigned getDescriptorDim() const;
 		unsigned getTimeDim() const;
 
-		void save(const std::string& fileName) const;
+		void save(const std::string& fileName, bool binary = false) const;
 		static DataPoints load(const std::string& fileName);
 		
 		void concatenate(const DataPoints& dp);

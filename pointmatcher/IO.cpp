@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "IO.h"
+#include "IOFunctions.h"
 #include "InspectorsImpl.h"
 
 // For logging
@@ -53,6 +54,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef WIN32
 #define strtok_r strtok_s
 #endif // WIN32
+
+namespace PointMatcherSupport {
+	namespace {
+		const int one = 1;
+	}
+	const bool isBigEndian = *reinterpret_cast<const unsigned char*>(&one) == static_cast<unsigned char>(0);
+	const int oneBigEndian = isBigEndian ? 1 : 1 << 8 * (sizeof(int) - 1);
+}
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -872,12 +881,12 @@ PointMatcher<double>::DataPoints PointMatcherIO<double>::loadCSV(const std::stri
 
 //! Save a point cloud to a file, determine format from extension
 template<typename T>
-void PointMatcher<T>::DataPoints::save(const std::string& fileName) const
+void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary) const
 {
 	const boost::filesystem::path path(fileName);
 	const string& ext(boost::filesystem::extension(path));
 	if (boost::iequals(ext, ".vtk"))
-		return PointMatcherIO<T>::saveVTK(*this, fileName);
+		return PointMatcherIO<T>::saveVTK(*this, fileName, binary);
 	else if (boost::iequals(ext, ".csv"))
 		return PointMatcherIO<T>::saveCSV(*this, fileName);
 	else if (boost::iequals(ext, ".ply"))
@@ -889,9 +898,9 @@ void PointMatcher<T>::DataPoints::save(const std::string& fileName) const
 }
 
 template
-void PointMatcher<float>::DataPoints::save(const std::string& fileName) const;
+void PointMatcher<float>::DataPoints::save(const std::string& fileName, bool binary) const;
 template
-void PointMatcher<double>::DataPoints::save(const std::string& fileName) const;
+void PointMatcher<double>::DataPoints::save(const std::string& fileName, bool binary) const;
 
 //! Save point cloud to a file as CSV
 template<typename T>
@@ -1243,21 +1252,22 @@ PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadVTK(const std::st
 
 //! Save point cloud to a file as VTK
 template<typename T>
-void PointMatcherIO<T>::saveVTK(const DataPoints& data, const std::string& fileName)
+void PointMatcherIO<T>::saveVTK(const DataPoints& data, const std::string& fileName, bool binary)
 {
 	typedef typename InspectorsImpl<T>::VTKFileInspector VTKInspector;
 	
 	Parametrizable::Parameters param;
 	boost::assign::insert(param) ("baseFileName", "");
+	boost::assign::insert(param) ("writeBinary", toParam(binary));
 	VTKInspector vtkInspector(param);
 	vtkInspector.dumpDataPoints(data, fileName);
 }
 
 
 template
-void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName, bool binary);
 template
-void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName);
+void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName, bool binary);
 
 //! @brief Load polygon file format (ply) file
 //! @param fileName a string containing the path and the file name
