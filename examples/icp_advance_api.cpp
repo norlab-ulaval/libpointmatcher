@@ -49,7 +49,6 @@ using namespace PointMatcherSupport;
 typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
 typedef PM::Parameters Parameters;
-typedef PointMatcherSupport::CurrentBibliography Currentbibliography;
 
 void listModules();
 int validateArgs(const int argc, const char *argv[],
@@ -267,7 +266,7 @@ int main(int argc, const char *argv[])
 // The following code allows to dump all existing modules
 template<typename R>
 void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name,
-				   Currentbibliography& bib)
+				   CurrentBibliography& bib)
 {
 	cout << "* " << name << " *\n" << endl;
 	for (BOOST_AUTO(it, registrar.begin()); it != registrar.end(); ++it)
@@ -284,7 +283,7 @@ void dumpRegistrar(const PM& pm, const R& registrar, const std::string& name,
 
 void listModules()
 {
-	Currentbibliography bib;
+	CurrentBibliography bib;
 
 	DUMP_REGISTRAR_CONTENT(PM::get(), Transformation, bib)
 			DUMP_REGISTRAR_CONTENT(PM::get(), DataPointsFilter, bib)
