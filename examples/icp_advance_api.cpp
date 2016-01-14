@@ -49,7 +49,6 @@ using namespace PointMatcherSupport;
 typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
 typedef PM::Parameters Parameters;
-typedef PointMatcherSupport::CurrentBibliography CurrentBibliography;
 
 void listModules();
 int validateArgs(const int argc, const char *argv[],
