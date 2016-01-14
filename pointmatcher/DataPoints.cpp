@@ -645,7 +645,7 @@ typename PointMatcher<T>::Int64Matrix PointMatcher<T>::DataPoints::getTimeCopyBy
 
 //! Get a const view on a time by name, throw an exception if it does not exist
 template<typename T>
-typename PointMatcher<T>::DataPoints::TimeConstView PointMatcher<T>::DataPoints::getTimeViewByName(const std::string& name) const
+const typename PointMatcher<T>::DataPoints::TimeConstView PointMatcher<T>::DataPoints::getTimeViewByName(const std::string& name) const
 {
 	return getConstViewByName(name, timeLabels, times);
 }
