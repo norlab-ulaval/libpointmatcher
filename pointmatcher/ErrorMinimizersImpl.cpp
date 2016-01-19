@@ -73,18 +73,23 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
-	const int ptsCount(mPts.reading.features.cols()); //But point cloud have now the same number of (matched) point
+	const int ptsCount(mPts.reading.features.cols()); //Both point clouds have now the same number of (matched) point
 
-	// Compute the mean of each point cloud
-	const Vector meanReading = mPts.reading.features.rowwise().sum() / ptsCount;
-	const Vector meanReference = mPts.reference.features.rowwise().sum() / ptsCount;
-	
+	// Compute the (weighted) mean of each point cloud
+	const Vector& w = mPts.weights;
+	const T w_sum_inv = T(1.)/w.sum();
+	const Vector meanReading =
+		(mPts.reading.features.topRows(dimCount-1).array().rowwise() * w.array().transpose()).rowwise().sum() * w_sum_inv;
+	const Vector meanReference =
+		(mPts.reference.features.topRows(dimCount-1).array().rowwise() * w.array().transpose()).rowwise().sum() * w_sum_inv;
+
 	// Remove the mean from the point clouds
-	mPts.reading.features.colwise() -= meanReading;
-	mPts.reference.features.colwise() -= meanReference;
+	mPts.reading.features.topRows(dimCount-1).colwise() -= meanReading;
+	mPts.reference.features.topRows(dimCount-1).colwise() -= meanReference;
 
 	// Singular Value Decomposition
-	const Matrix m(mPts.reference.features.topRows(dimCount-1) * mPts.reading.features.topRows(dimCount-1).transpose());
+	const Matrix m(mPts.reference.features.topRows(dimCount-1) * w.asDiagonal()
+			* mPts.reading.features.topRows(dimCount-1).transpose());
 	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
 	Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
 	// It is possible to get a reflection instead of a rotation. In this case, we
@@ -97,7 +102,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		tmpV.row(dimCount-2) *= -1.;
 		rotMatrix = svd.matrixU() * tmpV;
 	}
-	const Vector trVector(meanReference.head(dimCount-1)- rotMatrix * meanReading.head(dimCount-1));
+	const Vector trVector(meanReference - rotMatrix * meanReading);
 	
 	Matrix result(Matrix::Identity(dimCount, dimCount));
 	result.topLeftCorner(dimCount-1, dimCount-1) = rotMatrix;
