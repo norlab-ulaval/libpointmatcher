@@ -164,6 +164,25 @@ namespace PointMatcherSupport
 				( "doi", "" )
 				( "fulltext", "")
 			))
+			( "Umeyama1991", makeMap(map_list_of
+				( "type", "article" )
+				( "author", "Umeyama, Shinji" )
+				( "title", "Least-Squares Estimation of Transformation Parameters Between Two Point Patterns" )
+				( "journal", "IEEE Trans. Pattern Anal. Mach. Intell." )
+				( "issue_date", "April 1991" )
+				( "volume", "13" )
+				( "number", "4" )
+				( "month", "apr" )
+				( "year", "1991" )
+				( "issn", "0162-8828" )
+				( "pages", "376--380" )
+				( "numpages", "5" )
+				( "url", "http://dx.doi.org/10.1109/34.88573" )
+				( "doi", "10.1109/34.88573" )
+				( "acmid", "105525" )
+				( "publisher", "IEEE Computer Society" )
+				( "address", "Washington, DC, USA" )
+			))
 		;
 	}
 	

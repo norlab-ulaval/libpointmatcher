@@ -69,7 +69,7 @@ struct ErrorMinimizersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Point-to-point error. Based on SVD decomposition. Based on \\cite{Besl1992Point2Point}.";
+			return "Point-to-point error. Based on SVD decomposition. Based on \\cite{Umeyama1991}.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
