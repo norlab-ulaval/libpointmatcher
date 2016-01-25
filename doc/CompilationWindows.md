@@ -169,9 +169,14 @@ grep --version
 
 ## Reporting Issues
 
+
+
 Currently, we don't have a developer fully supporting compilation on Windows. If you can help refreshing this documentation, your help is more than welcome.
 
-Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side.
+Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side. Here are some of them:
+
+- Your directory structure need to be well organized as mention in [Issue #136](https://github.com/ethz-asl/libpointmatcher/issues/136).
+- There might be some problems related to libnabo as mention in [Issue #128](https://github.com/ethz-asl/libpointmatcher/issues/118).
 
 ## Special Thanks
 
