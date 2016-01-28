@@ -260,8 +260,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	// Create intermediate frame at the center of mass of reference pts cloud
 	//  this help to solve for rotations
-	const int nbPtsReference = referenceIn.features.cols();
-	const Vector meanReference = referenceIn.features.rowwise().sum() / nbPtsReference;
+	const int nbPtsReference = reference.features.cols();
+	const Vector meanReference = reference.features.rowwise().sum() / nbPtsReference;
 	TransformationParameters T_refIn_refMean(Matrix::Identity(dim, dim));
 	T_refIn_refMean.block(0,dim-1, dim-1, 1) = meanReference.head(dim-1);
 	
