@@ -100,7 +100,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	mPts.reading.features.topRows(dimCount-1).colwise() -= meanReading;
 	mPts.reference.features.topRows(dimCount-1).colwise() -= meanReference;
 
-	const T sigma = mPts.reading.features.topRows(dimCount-1).colwise().squaredNorm().cwiseProduct(w).sum();
+	const T sigma = mPts.reading.features.topRows(dimCount-1).colwise().squaredNorm().cwiseProduct(w.transpose()).sum();
 
 	// Singular Value Decomposition
 	const Matrix m(mPts.reference.features.topRows(dimCount-1) * w.asDiagonal()
