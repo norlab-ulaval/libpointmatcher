@@ -78,6 +78,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// Compute the (weighted) mean of each point cloud
 	const Vector& w = mPts.weights;
 	const T w_sum_inv = T(1.)/w.sum();
+	// FIXME: this doesn't compile with Eigen 3.0.X
 	const Vector meanReading =
 		(mPts.reading.features.topRows(dimCount-1).array().rowwise() * w.array().transpose()).rowwise().sum() * w_sum_inv;
 	const Vector meanReference =

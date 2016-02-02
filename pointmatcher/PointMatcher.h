@@ -40,6 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EIGEN_USE_NEW_STDVECTOR
 #endif // EIGEN_USE_NEW_STDVECTOR
 //#define EIGEN2_SUPPORT
+
+//TODO: investigate if that is a viable solution
+//#define EIGEN_NO_DEBUG
+
 #include "Eigen/StdVector"
 #include "Eigen/Core"
 #include "Eigen/Geometry"
