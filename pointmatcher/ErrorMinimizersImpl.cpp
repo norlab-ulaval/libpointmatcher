@@ -73,16 +73,22 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
-	const int ptsCount(mPts.reading.features.cols()); //Both point clouds have now the same number of (matched) point
+	//const int ptsCount(mPts.reading.features.cols()); //Both point clouds have now the same number of (matched) point
 
 	// Compute the (weighted) mean of each point cloud
 	const Vector& w = mPts.weights;
 	const T w_sum_inv = T(1.)/w.sum();
-	// FIXME: this doesn't compile with Eigen 3.0.X
+	
+// FIXME: remove those statements onces the multiplication with rowwise() is more spread on OS
+#if EIGEN_MAJOR_VERSION > 0 
 	const Vector meanReading =
 		(mPts.reading.features.topRows(dimCount-1).array().rowwise() * w.array().transpose()).rowwise().sum() * w_sum_inv;
 	const Vector meanReference =
 		(mPts.reference.features.topRows(dimCount-1).array().rowwise() * w.array().transpose()).rowwise().sum() * w_sum_inv;
+#else
+	const Vector meanReading = mPts.reading.features.topRows(dimCount-1).cwiseProduct(w.replicate(dimCount-1, 1)).rowwise().sum() * w_sum_inv;
+	const Vector meanReference = mPts.reference.features.topRows(dimCount-1).cwiseProduct(w.replicate(dimCount-1, 1)).rowwise().sum() * w_sum_inv;
+#endif
 
 	// Remove the mean from the point clouds
 	mPts.reading.features.topRows(dimCount-1).colwise() -= meanReading;
@@ -351,7 +357,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
-	const int ptsCount(mPts.reading.features.cols()); //But point cloud have now the same number of (matched) point
+	const int ptsCount(mPts.reading.features.cols()); //Both point cloud have now the same number of (matched) point
 
 	// Compute the mean of each point cloud
 	const Vector meanReading = mPts.reading.features.rowwise().sum() / ptsCount;
