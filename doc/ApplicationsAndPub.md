@@ -5,6 +5,14 @@ Here some applications and scientific publications using libpointmatcher.
 Click on the image to play.
 
 
+#### Mapping A Campus
+- Sensor: Velodyne HDL-64E
+- Application: Indoor and outdoor 3D mapping and localization
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=jlAArM_6N-I
+" target="_blank"><img src="http://img.youtube.com/vi/jlAArM_6N-I/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
+
 #### ARTOR: Long-term 3D map maintenance in dynamic environments
 - Sensor: Velodyne HDL-32E
 - Application: 3D mapping and localization
