@@ -180,10 +180,15 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorM
 	OutlierWeights keptWeights(1, pointsCount);
 
 	int j = 0;
-	weightedPointUsedRatio = 0;
-	for(int k = 0; k < knn; k++) // knn
+	int rejectedMatchCount = 0;
+	int rejectedPointCount = 0;
+	bool matchExist = false;
+	this->weightedPointUsedRatio = 0;
+	
+	for (int i = 0; i < requestedPts.features.cols(); ++i) //nb pts
 	{
-		for (int i = 0; i < requestedPts.features.cols(); ++i) //nb pts
+		matchExist = false;
+		for(int k = 0; k < knn; k++) // knn
 		{
 			if (outlierWeights(k,i) != 0.0)
 			{
@@ -195,8 +200,18 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorM
 				keptMatches.dists(0, j) = matches.dists(k, i);
 				keptWeights(0,j) = outlierWeights(k,i);
 				++j;
-				weightedPointUsedRatio += outlierWeights(k,i);
+				this->weightedPointUsedRatio += outlierWeights(k,i);
+				matchExist = true;
 			}
+			else
+			{
+				rejectedMatchCount++;
+			}
+		}
+
+		if(matchExist == false)
+		{
+			rejectedPointCount++;
 		}
 	}
 
@@ -223,21 +238,24 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorM
 			associatedDesc.col(i) = sourcePts.descriptors.block(0, refIndex, dimSourDesc, 1);
 	}
 
-	lastErrorElements.reading = DataPoints(
+	this->lastErrorElements.reading = DataPoints(
 		keptFeat, 
 		requestedPts.featureLabels,
 		keptDesc,
 		requestedPts.descriptorLabels
 	);
-	lastErrorElements.reference = DataPoints(
+	this->lastErrorElements.reference = DataPoints(
 		associatedFeat,
 		sourcePts.featureLabels,
 		associatedDesc,
 		sourcePts.descriptorLabels
 	);
-	lastErrorElements.weights = keptWeights;
-	lastErrorElements.matches = keptMatches;
-	return lastErrorElements;
+	this->lastErrorElements.weights = keptWeights;
+	this->lastErrorElements.matches = keptMatches;
+	this->lastErrorElements.nbRejectedMatches = rejectedMatchCount;
+	this->lastErrorElements.nbRejectedPoints = rejectedPointCount;
+
+	return this->lastErrorElements;
 }
 
 template struct PointMatcher<float>::ErrorMinimizer;

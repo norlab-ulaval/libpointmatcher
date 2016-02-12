@@ -517,6 +517,8 @@ struct PointMatcher
 			DataPoints reference; //!< reference point cloud
 			OutlierWeights weights; //!< weights for every association
 			Matches matches; //!< associations
+			int nbRejectedMatches; //!< number of matches with zero weights
+			int nbRejectedPoints; //!< number of points with all matches set to zero weights
 
 			ErrorElements(const DataPoints& reading=DataPoints(), const DataPoints reference = DataPoints(), const OutlierWeights weights = OutlierWeights(), const Matches matches = Matches());
 		};

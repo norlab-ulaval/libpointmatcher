@@ -295,42 +295,100 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 template<typename T>
 T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 {
+
+	// Gather some information on what kind of point cloud we have
+	const bool hasReadingNoise = this->lastErrorElements.reading.descriptorExists("simpleSensorNoise");
+	const bool hasReferenceNoise = this->lastErrorElements.reference.descriptorExists("simpleSensorNoise");
+	const bool hasReferenceDensity = this->lastErrorElements.reference.descriptorExists("densities");
+
 	const int nbPoints = this->lastErrorElements.reading.features.cols();
 	const int dim = this->lastErrorElements.reading.features.rows();
+
+	// basix safety check
 	if(nbPoints == 0)
 	{
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
 	}
 	
-	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise") ||
-		!this->lastErrorElements.reading.descriptorExists("normals"))
+	Eigen::Array<T, 1, Eigen::Dynamic>  uncertainties(nbPoints);
+
+	// optimal case
+	if (hasReadingNoise && hasReferenceNoise && hasReferenceDensity)
 	{
-		LOG_INFO_STREAM("PointToPlaneErrorMinimizer - warning, no sensor noise or normals found. Using best estimate given outlier rejection instead.");
+		// find median density
+		
+		Matrix densities = this->lastErrorElements.reference.getDescriptorViewByName("densities");
+		vector<T> values(densities.data(), densities.data() + densities.size());
+
+		// sort up to half the values
+		nth_element(values.begin(), values.begin() + (values.size() * 0.5), values.end());
+
+		// extract median value
+		const T medianDensity = values[values.size() * 0.5];
+		const T medianRadius = 1.0/pow(medianDensity, 1/3.0);
+
+		uncertainties = (medianRadius +
+						this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise").array() +
+						this->lastErrorElements.reference.getDescriptorViewByName("simpleSensorNoise").array());
+	}
+	else if(hasReadingNoise && hasReferenceNoise)
+	{
+		uncertainties = this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise") +
+						this->lastErrorElements.reference.getDescriptorViewByName("simpleSensorNoise");
+	}
+	else if(hasReadingNoise)
+	{
+		uncertainties = this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise");
+	}
+	else if(hasReferenceNoise)
+	{
+		uncertainties = this->lastErrorElements.reference.getDescriptorViewByName("simpleSensorNoise");
+	}
+	else
+	{
+		LOG_INFO_STREAM("PointToPlaneErrorMinimizer - warning, no sensor noise and density. Using best estimate given outlier rejection instead.");
 		return this->weightedPointUsedRatio;
 	}
 
-	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
-	const BOOST_AUTO(normals, this->lastErrorElements.reading.getDescriptorViewByName("normals"));
-	
 
-	const Matrix delta = (this->lastErrorElements.reading.features.topRows(dim-1) - this->lastErrorElements.reference.features.topRows(dim-1));
-	const T mean = delta.colwise().norm().sum()/nbPoints;
-	cerr << "mean:" << mean << endl;
+	const Vector dists = (this->lastErrorElements.reading.features.topRows(dim-1) - this->lastErrorElements.reference.features.topRows(dim-1)).colwise().norm();
 
+
+	// here we can only loop through a list of links, but we are interested in whether or not
+	// a point has at least one valid match.
 	int count = 0;
+	int nbUniquePoint = 1;
+	Vector lastValidPoint = this->lastErrorElements.reading.features.col(0) * 2.;
 	for(int i=0; i < nbPoints; i++)
 	{
-		const Vector n = normals.col(i);
-		const T projectionDist = delta.col(i).dot(n.normalized());
-		if(anyabs(projectionDist) < (mean + noises(0,i)))
+		const Vector point = this->lastErrorElements.reading.features.col(i);
+
+		if(lastValidPoint != point)
 		{
-			count++;
+			// NOTE: we tried with the projected distance over the normal vector before:
+			// projectionDist = delta dotProduct n.normalized()
+			// but this doesn't make sense 
+
+
+			if(anyabs(dists(i, 0)) < (uncertainties(0,i)))
+			{
+				lastValidPoint = point;
+				count++;
+			}
 		}
+		
+		// Count unique points
+		if(i > 0)
+		{
+			if(point != this->lastErrorElements.reading.features.col(i-1))
+				nbUniquePoint++;
+		}
+
 	}
+	//cout << "count: " << count << ", nbUniquePoint: " << nbUniquePoint << ", this->lastErrorElements.nbRejectedPoints: " << this->lastErrorElements.nbRejectedPoints << endl;
 
-	return (T)count/(T)nbPoints;
+	return (T)count/(T)(nbUniquePoint + this->lastErrorElements.nbRejectedPoints);
 }
-
 template struct ErrorMinimizersImpl<float>::PointToPlaneErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::PointToPlaneErrorMinimizer;
 
