@@ -126,8 +126,8 @@ struct PointMatcherIO
 	//! 1D descriptor name to a better one.
 	static const SupportedLabels & getSupportedExternalLabels()
 	{
-		//Can be read:
-		// (internalName, externalName, type)
+		// This table can be read as:
+		//   (internalName, externalName, type)
 		const static SupportedLabels labels = boost::assign::list_of<SupportedLabel>
 			("x", "x", FEATURE)
 			("y", "y", FEATURE)

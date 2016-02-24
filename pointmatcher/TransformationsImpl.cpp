@@ -62,7 +62,8 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	if(this->checkParameters(parameters) == false)	
 		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
 	
-	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.timeLabels, input.features.cols());
+	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.timeLabels, input.features.cols());
+	DataPoints transformedCloud = input;
 	
 	// Apply the transformation to features
 	transformedCloud.features = parameters * input.features;
@@ -78,10 +79,11 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 		BOOST_AUTO(outputDesc, transformedCloud.descriptors.block(row, 0, span, descCols));
 		if (name == "normals" || name == "observationDirections")
 			outputDesc = R * inputDesc;
-		else
-			outputDesc = inputDesc;
+		
 		row += span;
 	}
+
+
 	
 	return transformedCloud;
 }
@@ -153,7 +155,8 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::PureTranslation::co
 	if(this->checkParameters(parameters) == false)
 		throw PointMatcherSupport::TransformationError("PureTranslation: Error, left part  not identity.");
 
-	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
+	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
+	DataPoints transformedCloud = input;
 
 	// Apply the transformation to features
 	transformedCloud.features = parameters * input.features;

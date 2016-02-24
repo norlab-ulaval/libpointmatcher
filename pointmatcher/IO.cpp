@@ -417,6 +417,7 @@ PointMatcherIO<T>::SupportedLabel::SupportedLabel(const std::string& internalNam
 template<typename T>
 typename PointMatcherIO<T>::SublabelAssociationMap PointMatcherIO<T>::getFeatAssocationMap()
 {
+	// FIXME: this should be depreciated and replace by SupportedLabel
 	const SublabelAssociationMap assoc_map = boost::assign::map_list_of
 			("x", LabelAssociationPair(0,"x"))
 			("y", LabelAssociationPair(1,"y"))
@@ -428,6 +429,7 @@ typename PointMatcherIO<T>::SublabelAssociationMap PointMatcherIO<T>::getFeatAss
 template<typename T>
 typename PointMatcherIO<T>::SublabelAssociationMap PointMatcherIO<T>::getDescAssocationMap()
 {
+	// FIXME: this should be depreciated and replace by SupportedLabel
 	const SublabelAssociationMap assoc_map = boost::assign::map_list_of
 			("nx", LabelAssociationPair(0,"normals"))
 			("ny", LabelAssociationPair(1,"normals"))

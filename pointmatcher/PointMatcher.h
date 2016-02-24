@@ -175,7 +175,7 @@ struct PointMatcher
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
-	//! A dense unsigned 64-bits matrix
+	//! A dense signed 64-bits matrix
 	typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	
 	//! A matrix holding the parameters a transformation.
