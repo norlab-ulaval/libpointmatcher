@@ -887,14 +887,18 @@ void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary)
 	const string& ext(boost::filesystem::extension(path));
 	if (boost::iequals(ext, ".vtk"))
 		return PointMatcherIO<T>::saveVTK(*this, fileName, binary);
-	else if (boost::iequals(ext, ".csv"))
+
+	if (binary)
+		throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\".");
+
+	if (boost::iequals(ext, ".csv"))
 		return PointMatcherIO<T>::saveCSV(*this, fileName);
 	else if (boost::iequals(ext, ".ply"))
 		return PointMatcherIO<T>::savePLY(*this, fileName);
 	else if (boost::iequals(ext, ".pcd"))
 		return PointMatcherIO<T>::savePCD(*this, fileName);
 	else
-		throw runtime_error("saveAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
+		throw runtime_error("save(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
 }
 
 template
