@@ -986,6 +986,28 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(const std::strin
 	return loadVTK(ifs);
 }
 
+void skipBlock(bool binary, int binarySize, std::istream & is, bool hasSeparateSizeParameter = true){
+	int n;
+	int size;
+	is >> n;
+	if(hasSeparateSizeParameter) {
+		is >> size;
+	} else {
+		size = n;
+	}
+
+	std::string line;
+	getline(is, line); // remove line end after parameters;
+	if(binary){
+		is.seekg(size * binarySize, std::ios_base::cur);
+	} else {
+		for (int p = 0; p < n; p++)
+		{
+			getline(is, line);
+		}
+	}
+}
+
 //! Load point cloud from a stream as VTK
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is)
@@ -1002,8 +1024,13 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 		throw runtime_error(string("Wrong magic header, found ") + line);
 	getline(is, line);
 	getline(is, line);
-	if (line != "ASCII")
-		throw runtime_error(string("Wrong file type, expecting ASCII, found ") + line);
+
+	const bool isBinary = (line == "BINARY");
+	if (line != "ASCII"){
+		if(!isBinary){
+			throw runtime_error(string("Wrong file type, expecting ASCII or BINARY, found ") + line);
+		}
+	}
 	getline(is, line);
 
 	SupportedVTKDataTypes dataType;
@@ -1030,16 +1057,15 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 		{
 			is >> pointCount;
 			is >> type;
-			
+			getline(is, line); // remove line end after parameters!
+
 			if(!(type == "float" || type == "double"))
 					throw runtime_error(string("Field POINTS can only be of type double or float"));
 
 			Matrix features(4, pointCount);
 			for (int p = 0; p < pointCount; ++p)
 			{
-				is >> features(0, p);
-				is >> features(1, p);
-				is >> features(2, p);
+				readVtkData(type, isBinary, features.template block<3, 1>(0, p), is);
 				features(3, p) = 1.0;
 			}
 			loadedPoints.addFeature("x", features.row(0));
@@ -1053,86 +1079,32 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 		// POLYDATA
 		else if(dataType == POLYDATA && fieldName == "VERTICES")
 		{
-			int size;
-			int verticeSize;
-			is >> size >> verticeSize;
-			// Skip vertice definition
-			for (int p = 0; p < size; p++)
-			{
-				getline(is, line); 
-				if(line == "")
-					p--;
-			}
+			skipBlock(isBinary, 4, is);
 		}
 
 		else if(dataType == POLYDATA && fieldName == "LINES")
 		{
-			int size;
-			int lineSize;
-			is >> size >> lineSize;
-			// Skip line definition
-			for (int p = 0; p < size; p++)
-			{
-				getline(is, line);
-				if(line == "")
-					p--;
-			}
+			skipBlock(isBinary, 4, is);
 		}
 
 		else if(dataType == POLYDATA && fieldName == "POLYGONS")
 		{
-			int size;
-			int polySize;
-			is >> size >> polySize;
-			// Skip line definition
-			for (int p = 0; p < size; p++)
-			{
-				getline(is, line);
-				if(line == "")
-					p--;
-			}
+			skipBlock(isBinary, 4, is);
 		}
 
 		else if(dataType == POLYDATA && fieldName == "TRIANGLE_STRIPS")
 		{
-			int size;
-			int stripSize;
-			is >> size >> stripSize;
-			// Skip line definition
-			for (int p = 0; p < size; p++)
-			{
-				getline(is, line);
-				if(line == "")
-					p--;
-			}
+			skipBlock(isBinary, 4, is);
 		}
 
 		// Unstructure Grid
 		else if(dataType == UNSTRUCTURED_GRID && fieldName == "CELLS")
 		{
-			int size;
-			int cellSize;
-			is >> size >> cellSize;
-			// Skip line definition
-			for (int p = 0; p < size; p++)
-			{
-				getline(is, line);
-				if(line == "")
-					p--;
-			}
+			skipBlock(isBinary, 4, is);
 		}
 		else if(dataType == UNSTRUCTURED_GRID && fieldName == "CELL_TYPES")
 		{
-			int size;
-			int cellSize;
-			is >> size >> cellSize;
-			// Skip line definition
-			for (int p = 0; p < size; p++)
-			{
-				getline(is, line);
-				if(line == "")
-					p--;
-			}
+			skipBlock(isBinary, 4, is, false); // according to http://www.vtk.org/VTK/img/file-formats.pdf CELL_TYPES only has one parameter (n)
 		}
 
 		//////////////////////////////////////////////////////////
@@ -1160,10 +1132,14 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 
 				if(type == "vtkIdType") // skip that type
 				{
-					int t_val;
-					for (int t = 0; t < dim * numTuples; t++ )
-					{
-						is >> t_val;
+					if(isBinary){
+						is.seekg(dim * numTuples * 4, std::ios_base::cur);
+					} else {
+						int t_val;
+						for (int t = 0; t < dim * numTuples; t++ )
+						{
+							is >> t_val;
+						}
 					}
 				}
 				else if(!(type == "float" || type == "double"))
@@ -1171,13 +1147,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 						 
 
 				Matrix descriptor(dim, pointCount);
-				for (int p = 0; p < pointCount; ++p)
-				{
-					for(int d = 0; d < dim; d++)
-					{
-						is >> descriptor(d, p);
-					}
-				}
+				readVtkData(type, isBinary, descriptor.transpose(), is);
 				loadedPoints.addDescriptor(name, descriptor);
 			}
 		}
@@ -1187,6 +1157,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 			is >> name;
 
 			bool skipLookupTable = false;
+			bool isColorScalars = false;
 			if(fieldName == "SCALARS")
 			{
 				dim = 1;
@@ -1212,33 +1183,36 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 			{
 				is >> dim;
 				type = "float";
+				isColorScalars = true;
 			}
 			else
 				throw runtime_error(string("Unknown field name " + fieldName + ", expecting SCALARS, VECTORS, TENSORS, NORMALS or COLOR_SCALARS."));
 
 			
-			if(!(type == "float" || type == "double"))
-					throw runtime_error(string("Field " + fieldName + " is " + type + " but can only be of type double or float"));
-					 
-			// Skip LOOKUP_TABLE line
-			if(skipLookupTable)
-			{
-				//FIXME: FP - why the first line is aways empty?
-				getline(is, line); 
-				getline(is, line); 
-			}
+			getline(is, line); // remove rest of the parameter line including its line end;
 
 			Matrix descriptor(dim, pointCount);
-			for (int p = 0; p < pointCount; ++p)
-			{
-				for(int d = 0; d < dim; d++)
-				{
-					is >> descriptor(d, p);
+			if(isColorScalars && isBinary) {
+				std::vector<unsigned char> buffer(dim);
+				for (int i = 0; i < pointCount; ++i){
+					is.read(reinterpret_cast<char *>(&buffer.front()), dim);
+					for(int r=0; r < dim; ++r){
+						descriptor(r, i) = buffer[r] / static_cast<T>(255.0);
+					}
 				}
+			} else {
+				if(!(type == "float" || type == "double"))
+						throw runtime_error(string("Field " + fieldName + " is " + type + " but can only be of type double or float"));
+
+				// Skip LOOKUP_TABLE line
+				if(skipLookupTable)
+				{
+					getline(is, line);
+				}
+				readVtkData(type, isBinary, descriptor.transpose(), is);
 			}
 			loadedPoints.addDescriptor(name, descriptor);
 		}
-			 
 	}
 	
 	return loadedPoints;
