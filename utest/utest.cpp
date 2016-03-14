@@ -126,7 +126,7 @@ TEST(icpTest, icpTest)
 		//std::cout << "curT:\n" << curT << std::endl;
 
 		// Tolerance for change in rotation and translation
-		double rotTol = 0.1, transTol = 0.1;
+		double rotTol = 0.1, transTol = 0.15;
 
 		// Find how much the reference rotation and translation
 		// differ from the current values.
