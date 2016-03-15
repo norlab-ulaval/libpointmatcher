@@ -61,12 +61,6 @@ template struct ErrorMinimizersImpl<double>::IdentityErrorMinimizer;
 
 // Point To POINT ErrorMinimizer
 template<typename T>
-ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::PointToPointErrorMinimizer(const Parameters& params):
-	ErrorMinimizer("PointToPointErrorMinimizer", PointToPointErrorMinimizer::availableParameters(), params),
-	scalingFactor(Parametrizable::get<T>("scalingFactor"))
-{
-}
-template<typename T>
 typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::compute(
 	const DataPoints& filteredReading,
 	const DataPoints& filteredReference,
@@ -122,7 +116,6 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	}
 	T scale = singularValues.sum() / sigma;
 	if (sigma < 0.0001) scale = T(1);
-	scale = scale - (scale-1.)*(1.-scalingFactor);
 	const Vector trVector(meanReference - scale * rotMatrix * meanReading);
 	
 	Matrix result(Matrix::Identity(dimCount, dimCount));

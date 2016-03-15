@@ -71,18 +71,9 @@ struct ErrorMinimizersImpl
 		{
 			return "Point-to-point error. Based on SVD decomposition. Based on \\cite{Umeyama1991}.";
 		}
-		inline static const ParametersDoc availableParameters()
-		{
-			return boost::assign::list_of<ParameterDoc>
-				( "scalingFactor", "How much of the scaling should be applied (1=full scaling=Similarity Transformation, 0=scaling disabled=Rigid Transformation).", "1", "0", "1", &P::Comp<T>)
-			;
-		}
 		
-		PointToPointErrorMinimizer(const Parameters& params = Parameters());
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 		virtual T getOverlap() const;
-
-		const T scalingFactor;
 	};
 
 	struct PointToPlaneErrorMinimizer: public ErrorMinimizer
