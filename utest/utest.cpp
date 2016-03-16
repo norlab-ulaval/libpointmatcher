@@ -112,6 +112,10 @@ TEST(icpTest, icpTest)
 		PM::TransformationParameters refT = 0*curT;
 		//std::cout << "Reading: " << ref_file << std::endl;
 		std::ifstream itfs(ref_file.c_str());
+		EXPECT_TRUE(itfs.good()) << "Could not find " << ref_file
+					 << ". If this is the first time this test is run, "
+					 << "create it as a copy of " << cur_file; 
+		
 		for (int row = 0; row < refT.cols(); row++)
 		{
 			for (int col = 0; col < refT.cols(); col++)
@@ -166,6 +170,29 @@ TEST(icpTest, icpIdentity)
 	PM::TransformationParameters curT = icp(pts0, pts1);
     
 	EXPECT_EQ(curT, PM::Matrix::Identity(4,4)) << "Expecting identity transform." << endl;
+}
+
+TEST(icpTest, similarityTransform)
+{
+	// Here we test similarity point-to-point ICP.
+	
+	DP pts0 = DP::load(dataPath + "car_cloud400.csv");
+	DP pts1 = DP::load(dataPath + "car_cloud400_scaled.csv");
+
+	PM::ICP icp;
+	std::string config_file = dataPath + "icp_data/defaultSimilarityPointToPointMinDistDataPointsFilter.yaml";
+	EXPECT_TRUE(boost::filesystem::exists(config_file));
+
+	std::ifstream ifs(config_file.c_str());
+	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
+
+	// Compute current ICP transform
+	PM::TransformationParameters curT = icp(pts0, pts1);
+
+	// We know the scale we're looking for is 1.04.
+	double scale = pow(curT.determinant(), 1.0/3.0);
+	EXPECT_LT( std::abs(scale - 1.04), 0.001)
+	  << "Expecting the similarity transform scale to be 1.04.";
 }
 
 TEST(icpTest, icpSequenceTest)
