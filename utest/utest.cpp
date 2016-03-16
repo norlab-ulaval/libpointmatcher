@@ -154,8 +154,8 @@ TEST(icpTest, icpTest)
 		// Find the relative error
 		double rel_err = median_diff/median_data;
 
-		// A relative error of 5% is probably acceptable. 
-		EXPECT_LT(rel_err, 0.05) << "This error was caused by the test file:" << endl << "   " << config_file;
+		// A relative error of 3% is probably acceptable. 
+		EXPECT_LT(rel_err, 0.03) << "This error was caused by the test file:" << endl << "   " << config_file;
 	}
 }
 TEST(icpTest, icpIdentity)
