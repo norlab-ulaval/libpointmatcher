@@ -167,6 +167,52 @@ ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::PointToPlaneErrorMinimizer(c
 }
 
 
+template<typename T, typename MatrixA, typename Vector>
+void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b, Vector & x) {
+	assert(A.cols() == A.rows());
+	assert(b.cols() == 1);
+	assert(b.rows() == A.rows());
+	assert(x.cols() == 1);
+	assert(x.rows() == A.cols());
+
+	typedef typename PointMatcher<T>::Matrix Matrix;
+
+	BOOST_AUTO(Aqr, A.fullPivHouseholderQr());
+	if (!Aqr.isInvertible())
+	{
+		// Solve reduced problem R1 x = Q1^T b instead of QR x = b, where Q = [Q1 Q2] and R = [ R1 ; R2 ] such that ||R2|| is small (or zero) and therefore A = QR ~= Q1 * R1
+		const int rank = Aqr.rank();
+		const int rows = A.rows();
+		const Matrix Q1t = Aqr.matrixQ().transpose().block(0, 0, rank, rows);
+
+		const bool findMinimalNormSolution = true; // TODO is that what we want?
+
+		// The under-determined system R1 x = Q1^T b is made unique ..
+		if(findMinimalNormSolution){
+			// by getting the solution of smallest norm (x = R1^T * (R1 * R1^T)^-1 Q1^T b.
+			const Matrix R1 = (Q1t * A * Aqr.colsPermutation()).block(0, 0, rank, rows);
+
+			x = R1.template triangularView<Eigen::Upper>().transpose() * (R1 * R1.transpose()).llt().solve(Q1t * b);
+		} else {
+			// by solving the simplest problem that yields fewest nonzero components in x
+			const Matrix R1 = (Q1t * A * Aqr.colsPermutation()).block(0, 0, rank, rank);
+
+			x.block(0, 0, rank, 1) = R1.template triangularView<Eigen::Upper>().solve(Q1t * b);
+			x.block(rank, 0, rows - rank, 1).setZero();
+		}
+
+		x = Aqr.colsPermutation() * x;
+
+		if(!b.isApprox(A * x)){
+			throw typename PointMatcher<T>::ConvergenceError("encountered singular while minimizing point to plane distance and the current workaround wasn't successful");
+		}
+	}
+	else {
+		// Cholesky decomposition
+		x = A.llt().solve(b);
+	}
+}
+
 template<typename T>
 typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::compute(
 	const DataPoints& filteredReading,
@@ -220,17 +266,12 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
 	// Unadjust covariance A = wF * F'
 	const Matrix A = wF * F.transpose();
-	if (A.fullPivHouseholderQr().rank() != A.rows())
-	{
-		// TODO: handle that properly
-		//throw ConvergenceError("encountered singular while minimizing point to plane distance");
-	}
 
 	const Matrix deltas = mPts.reading.features - mPts.reference.features;
 
 	// dot product of dot = dot(deltas, normals)
 	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
-	
+
 	for(int i=0; i<normalRef.rows(); i++)
 	{
 		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
@@ -239,10 +280,10 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// b = -(wF' * dot)
 	const Vector b = -(wF * dotProd.transpose());
 
-	// Cholesky decomposition
 	Vector x(A.rows());
-	x = A.llt().solve(b);
-	
+
+	solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
+
 	// Transform parameters to matrix
 	Matrix mOut;
 	if(dim == 4 && !force2D)
@@ -573,7 +614,6 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::PointToPlaneWithCovEr
 {
 }
 
-
 template<typename T>
 typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::compute(
 	const DataPoints& filteredReading,
@@ -627,11 +667,6 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
 	// Unadjust covariance A = wF * F'
 	const Matrix A = wF * F.transpose();
-	if (A.fullPivHouseholderQr().rank() != A.rows())
-	{
-		// TODO: handle that properly
-		//throw ConvergenceError("encountered singular while minimizing point to plane distance");
-	}
 
 	const Matrix deltas = mPts.reading.features - mPts.reference.features;
 
@@ -646,10 +681,10 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// b = -(wF' * dot)
 	const Vector b = -(wF * dotProd.transpose());
 
-	// Cholesky decomposition
 	Vector x(A.rows());
-	x = A.llt().solve(b);
 	
+	solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
+
 	// Transform parameters to matrix
 	Matrix mOut;
 	if(dim == 4 && !force2D)
