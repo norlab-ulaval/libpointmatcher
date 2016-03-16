@@ -72,6 +72,13 @@ PM::TransformationParameters validT3d;
 // time they will succeed.
 //---------------------------
 
+// Find the median coefficient of a matrix
+double median_coeff(Eigen::MatrixXf& A){
+  Eigen::Map<Eigen::VectorXf> v(A.data(),A.size());
+  std::sort(v.data(), v.data() + v.size());
+  return v[v.size()/2];
+}
+
 TEST(icpTest, icpTest)
 {
 	DP ref  = DP::load(dataPath + "cloud.00000.vtk");
@@ -129,26 +136,26 @@ TEST(icpTest, icpTest)
 		//std::cout << "refT:\n" << refT << std::endl;
 		//std::cout << "curT:\n" << curT << std::endl;
 
-		// Tolerance for change in rotation and translation
-		double rotTol = 0.1, transTol = 0.15;
+		// We need to compare the stored icp transform vs the computed one.
+		// Since the icp solution is not unique, they may differ a lot.
+		// Yet, the point of icp is
+		// curT*data = ref, and refT*data = ref
+		// so no matter what, the difference curT*data - refT*data
+		// must be small, which is what we will test for.
 
-		// Find how much the reference rotation and translation
-		// differ from the current values.
-		PM::TransformationParameters refRot   = refT.block(0, 0, 3, 3);
-		PM::TransformationParameters refTrans = refT.block(0, 3, 3, 1);
-		PM::TransformationParameters curRot   = curT.block(0, 0, 3, 3);
-		PM::TransformationParameters curTrans = curT.block(0, 3, 3, 1);
-		PM::TransformationParameters rotErrMat = refRot*(curRot.transpose())
-		  - PM::TransformationParameters::Identity(3, 3);
-		PM::TransformationParameters transErrMat = refTrans - curTrans;
-		double rotErr = rotErrMat.array().abs().sum();
-		double transErr = transErrMat.array().abs().sum();
+		// Find the median absolute difference between curT*data and refT*data
+		Eigen::MatrixXf AbsDiff = (curT*data.features - refT*data.features).array().abs();
+		double median_diff = median_coeff(AbsDiff);
 
-		//std::cout << "Rotation error:    " << rotErr   << std::endl;
-		//std::cout << "Translation error: " << transErr << std::endl;
-		
-		EXPECT_LT(rotErr,   rotTol) << "This error was caused by the test file:" << endl << "   " << config_file;
-		EXPECT_LT(transErr, transTol) << "This error was caused by the test file:" <<  endl << "   " << config_file;
+		// Find the median absolute value of curT*data
+		Eigen::MatrixXf Data = (curT*data.features).array().abs();
+		double median_data = median_coeff(Data);
+
+		// Find the relative error
+		double rel_err = median_diff/median_data;
+
+		// A relative error of 2% is probably acceptable. 
+		EXPECT_LT(rel_err, 0.02) << "This error was caused by the test file:" << endl << "   " << config_file;
 	}
 }
 TEST(icpTest, icpIdentity)
