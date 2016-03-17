@@ -136,10 +136,16 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	usedModuleTypes.insert(createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters));
 	usedModuleTypes.insert(createModulesFromRegistrar("referenceDataPointsFilters", doc, pm.REG(DataPointsFilter), referenceDataPointsFilters));
 	//usedModuleTypes.insert(createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations));
-	this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
 	usedModuleTypes.insert(createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher));
 	usedModuleTypes.insert(createModulesFromRegistrar("outlierFilters", doc, pm.REG(OutlierFilter), outlierFilters));
 	usedModuleTypes.insert(createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer));
+
+	// See if to use a rigid transformation
+	if (nodeVal("errorMinimizer", doc) != "PointToPointSimilarityErrorMinimizer")
+		this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
+	else
+		this->transformations.push_back(new typename TransformationsImpl<T>::SimilarityTransformation());
+	
 	usedModuleTypes.insert(createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers));
 	usedModuleTypes.insert(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector));
 	
@@ -205,6 +211,20 @@ const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(cons
 	else
 		module.reset();
 	return regName;
+}
+
+template<typename T>
+std::string PointMatcher<T>::ICPChainBase::nodeVal(const std::string& regName, const PointMatcherSupport::YAML::Node& doc)
+{
+	const YAML::Node *reg = doc.FindValue(regName);
+	if (reg)
+	{
+		std::string name;
+		Parametrizable::Parameters params;
+		PointMatcherSupport::getNameParamsFromYAML(*reg, name, params);
+		return name;
+	}
+	return "";
 }
 
 template struct PointMatcher<float>::ICPChainBase;

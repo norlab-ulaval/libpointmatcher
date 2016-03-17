@@ -63,6 +63,18 @@ struct TransformationsImpl
 		virtual TransformationParameters correctParameters(const TransformationParameters& parameters) const;
 	};
 
+	struct SimilarityTransformation: public Transformation
+	{
+		inline static const std::string description()
+		{
+			return "Similarity transformation (rotation + translation + scale).";
+		}
+		
+		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const;
+		virtual bool checkParameters(const TransformationParameters& parameters) const;
+		virtual TransformationParameters correctParameters(const TransformationParameters& parameters) const;
+	};
+
 	struct PureTranslation : public Transformation
 	{
 		inline static const std::string description()

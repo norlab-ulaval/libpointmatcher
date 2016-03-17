@@ -83,8 +83,6 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 		row += span;
 	}
 
-
-	
 	return transformedCloud;
 }
 
@@ -145,6 +143,65 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 
 template struct TransformationsImpl<float>::RigidTransformation;
 template struct TransformationsImpl<double>::RigidTransformation;
+
+//! SimilarityTransformation
+template<typename T>
+typename PointMatcher<T>::DataPoints TransformationsImpl<T>::SimilarityTransformation::compute(
+	const DataPoints& input,
+	const TransformationParameters& parameters) const
+{
+	assert(input.features.rows() == parameters.rows());
+	assert(parameters.rows() == parameters.cols());
+
+	const unsigned int nbRows = parameters.rows()-1;
+	const unsigned int nbCols = parameters.cols()-1;
+
+	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
+
+	if(this->checkParameters(parameters) == false)
+		throw TransformationError("SimilarityTransformation: Error, invalid similarity transform.");
+	
+	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.timeLabels, input.features.cols());
+	DataPoints transformedCloud = input;
+	
+	// Apply the transformation to features
+	transformedCloud.features = parameters * input.features;
+	
+	// Apply the transformation to descriptors
+	int row(0);
+	const int descCols(input.descriptors.cols());
+	for (size_t i = 0; i < input.descriptorLabels.size(); ++i)
+	{
+		const int span(input.descriptorLabels[i].span);
+		const std::string& name(input.descriptorLabels[i].text);
+		const BOOST_AUTO(inputDesc, input.descriptors.block(row, 0, span, descCols));
+		BOOST_AUTO(outputDesc, transformedCloud.descriptors.block(row, 0, span, descCols));
+		if (name == "normals" || name == "observationDirections")
+			outputDesc = R * inputDesc;
+		
+		row += span;
+	}
+
+	return transformedCloud;
+}
+
+//! Nothing to check for a similarity transform
+template<typename T>
+bool TransformationsImpl<T>::SimilarityTransformation::checkParameters(const TransformationParameters& parameters) const
+{
+	//FIXME: FP - should we put that as function argument?
+	return true;
+}
+
+//! Nothing to correct for a similarity transform
+template<typename T>
+typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::SimilarityTransformation::correctParameters(const TransformationParameters& parameters) const
+{
+	return parameters;
+}
+
+template struct TransformationsImpl<float>::SimilarityTransformation;
+template struct TransformationsImpl<double>::SimilarityTransformation;
 
 template<typename T>
 typename PointMatcher<T>::DataPoints TransformationsImpl<T>::PureTranslation::compute(const DataPoints& input,
