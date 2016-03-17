@@ -2,9 +2,9 @@
 
 libpointmatcher is a library that implements the Iterative Closest
 Point (ICP) algorithm for alignment of point clouds. It supports both
-point-to-point and point-to-plane ICP. With the former, it is also
-able to solve not only for a rigid transform, but also for a scale
-change between the clouds (that is, a similarity transform).
+point-to-point and point-to-plane ICP. With the former, it is able to
+solve not only for a rigid transform, but also for a scale change
+between the clouds (that is, a similarity transform).
 
 More precisely, given two point clouds, R (the reference) and S (the
 source), ICP tries to find the best rigid (or similarity) transform T
