@@ -224,7 +224,7 @@ struct PointMatcherIO
 		TransformationParameters groundTruthTransformation; //!< matrix of the ground-truth transform
 		Vector3 gravity; //!< gravity vector
 
-		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& grativity=Vector3::Zero());
+		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& gravity=Vector3::Zero());
 	};
 
 	//! A vector of file info, to be used in batch processing
