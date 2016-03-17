@@ -164,7 +164,7 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 
 //! Constructor, leave fields blank if unused
 template<typename T>
-PointMatcherIO<T>::FileInfo::FileInfo(const std::string& readingFileName, const std::string& referenceFileName, const std::string& configFileName, const TransformationParameters& initialTransformation, const TransformationParameters& groundTruthTransformation, const Vector& grativity):
+PointMatcherIO<T>::FileInfo::FileInfo(const std::string& readingFileName, const std::string& referenceFileName, const std::string& configFileName, const TransformationParameters& initialTransformation, const TransformationParameters& groundTruthTransformation, const Vector& gravity):
 	readingFileName(readingFileName),
 	referenceFileName(referenceFileName),
 	configFileName(configFileName),
