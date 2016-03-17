@@ -369,11 +369,11 @@ public:
 		ptCloud.addDescriptor(descriptorName, PM::Matrix::Random(rows, nbPts));
 	}
 
-	virtual void loadSaveTest(const string& testFileName, bool plyFormat = false, const int nbPts = 10)
+	virtual void loadSaveTest(const string& testFileName, bool plyFormat = false, const int nbPts = 10, bool binary = false)
 	{
 		this->testFileName = testFileName;
 
-		if (plyFormat) {
+		if (plyFormat || binary) {
 			// make sure randam values generated for colors are within ply format range
 			int pointCount(ptCloud.features.cols());
 			int descRows(ptCloud.descriptors.rows());
@@ -392,7 +392,7 @@ public:
 			}
 		}
 
-		ptCloud.save(testFileName);
+		ptCloud.save(testFileName, binary);
 
 		ptCloudFromFile = DP::load(testFileName);
 
@@ -404,7 +404,7 @@ public:
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("eigVectors",9));
 		EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("eigVectors").isApprox(ptCloud.getDescriptorViewByName("eigVectors")));
 		EXPECT_TRUE(ptCloudFromFile.descriptorExists("color",4));
-		if (plyFormat) {
+		if (plyFormat || binary) {
 			EXPECT_TRUE(((ptCloudFromFile.getDescriptorViewByName("color") * 255.0)).isApprox((ptCloud.getDescriptorViewByName("color") * 255.0), 1.0));
 		} else {
 			EXPECT_TRUE(ptCloudFromFile.getDescriptorViewByName("color").isApprox(ptCloud.getDescriptorViewByName("color")));
@@ -438,7 +438,17 @@ TEST_F(IOLoadSaveTest, VTK)
 
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericScalar",1));
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericVector",3));
+}
 
+TEST_F(IOLoadSaveTest, VTKBinary)
+{
+	ptCloud.addDescriptor("genericScalar", PM::Matrix::Random(1, nbPts));
+	ptCloud.addDescriptor("genericVector", PM::Matrix::Random(3, nbPts));
+
+	loadSaveTest(dataPath + "unit_test.bin.vtk", false, 10, true);
+
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericScalar",1));
+	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericVector",3));
 }
 
 TEST_F(IOLoadSaveTest, PLY)
