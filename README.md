@@ -6,7 +6,7 @@
 
 Documentation and Tutorials
 ===========================
-libpointmatcher is a modular ICP library, useful for robotics and computer vision.
+libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
 
 **Quick link for the tutorial pages: [Tutorials](doc/index.md ) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
 
