@@ -6,16 +6,17 @@ point-to-point and point-to-plane ICP. With the former, it is also
 able to solve not only for a rigid transform, but also for a scale
 change between the clouds (that is, a similarity transform).
 
-More precisely, given two point clouds, R and S, ICP tries to find the
-best rigid (or similarity) transform T so that T * S = R. 
+More precisely, given two point clouds, R (the reference) and S (the
+source), ICP tries to find the best rigid (or similarity) transform T
+so that T * S = R.
 
-The Wikipedia article on ICP has more information: 
-https://en.wikipedia.org/wiki/Iterative_closest_point
+The [Wikipedia article on ICP](https://en.wikipedia.org/wiki/Iterative_closest_point) has more
+information.
 
 libpointmatcher implements a [set of filters](Datafilters.md) to help
 denoise and subsample the input point clouds. It supports a [variety
 of file types](ImportExport.md) and it can be configured via both
-[YAML files](Configuration.md) and with an [in-memory API](icpWithoutYaml.md).
+[YAML files](Configuration.md) and an [in-memory API](icpWithoutYaml.md).
 
 libpointmatcher is written in C++.
 
