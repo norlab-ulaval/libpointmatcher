@@ -158,6 +158,47 @@ TEST(icpTest, icpTest)
 		EXPECT_LT(rel_err, 0.03) << "This error was caused by the test file:" << endl << "   " << config_file;
 	}
 }
+
+TEST(icpTest, icpSingular)
+{
+	// Here we test point-to-plane ICP where the point clouds underdetermine transformation
+	// This situation requires special treatment in the algorithm.
+
+	// create a x-y- planar grid point cloud in points
+	const size_t nX = 10, nY = nX;
+	Eigen::MatrixXf points(4, nX * nY);
+	const float d = 0.1;
+	const float oX = -(nX * d / 2), oY = -(nY * d / 2);
+
+	for(size_t x = 0; x < nX; x++){
+		for(size_t y = 0; y < nY; y++){
+			points.col( x * nY + y) << d * x + oX, d * y + oY;
+		}
+	}
+	points.row(2).setZero();
+	points.row(3).setOnes();
+
+	DP pts0;
+	pts0.features = points;
+	DP pts1;
+	points.row(2).setOnes();
+	pts1.features = points; // pts1 is pts0 shifted by one in z-direction
+
+	PM::ICP icp;
+	std::string config_file = dataPath + "default-identity.yaml";
+	EXPECT_TRUE(boost::filesystem::exists(config_file));
+
+	std::ifstream ifs(config_file.c_str());
+	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
+
+	// Compute ICP transform
+	PM::TransformationParameters curT = icp(pts0, pts1);
+
+	PM::Matrix expectedT = PM::Matrix::Identity(4,4);
+	expectedT(2,3) = 1;
+	EXPECT_TRUE(expectedT.isApprox(curT)) << "Expecting pure translation in z-direction of unit distance." << endl;
+}
+
 TEST(icpTest, icpIdentity)
 {
 	// Here we test point-to-plane ICP where we expect the output transform to be 
