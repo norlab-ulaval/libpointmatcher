@@ -73,6 +73,7 @@ struct ErrorMinimizersImpl
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 		virtual T getOverlap() const;
 	};
 
@@ -84,6 +85,7 @@ struct ErrorMinimizersImpl
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 		virtual T getOverlap() const;
 	};
 
@@ -105,6 +107,7 @@ struct ErrorMinimizersImpl
 		
 		PointToPlaneErrorMinimizer(const Parameters& params = Parameters());
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 		virtual T getOverlap() const;
 	};
 
@@ -127,6 +130,7 @@ struct ErrorMinimizersImpl
 
 		PointToPointWithCovErrorMinimizer(const Parameters& params = Parameters());
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
 		Matrix estimateCovariance(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationParameters& transformation);
@@ -153,6 +157,7 @@ struct ErrorMinimizersImpl
 		
 		PointToPlaneWithCovErrorMinimizer(const Parameters& params = Parameters());
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
 		Matrix estimateCovariance(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationParameters& transformation);

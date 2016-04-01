@@ -44,6 +44,62 @@ using namespace Eigen;
 using namespace std;
 using namespace PointMatcherSupport;
 
+namespace {
+
+template<typename T>
+T getPointToPlaneResidualError(typename PointMatcher<T>::ErrorMinimizer::ErrorElements &mPts, bool force2D)
+{
+	typedef typename PointMatcher<T>::Matrix Matrix;
+
+	const int dim = mPts.reading.features.rows();
+	const int nbPts = mPts.reading.features.cols();
+
+	// Adjust if the user forces 2D minimization on XY-plane
+	int forcedDim = dim - 1;
+	if(force2D && dim == 4)
+	{
+		mPts.reading.features.conservativeResize(3, Eigen::NoChange);
+		mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
+		mPts.reference.features.conservativeResize(3, Eigen::NoChange);
+		mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
+		forcedDim = dim - 2;
+	}
+
+	// Fetch normal vectors of the reference point cloud (with adjustment if needed)
+	const BOOST_AUTO(normalRef, mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
+
+	// Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
+	assert(normalRef.rows() > 0);
+
+	const Matrix deltas = mPts.reading.features - mPts.reference.features;
+
+	// dot product of dot = dot(deltas, normals)
+	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
+
+	for(int i=0; i<normalRef.rows(); i++)
+	{
+		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
+	}
+
+	// return sum of the norm of each dot product
+	Matrix dotProdNorm = dotProd.colwise().norm();
+	return dotProdNorm.sum();
+}
+
+template<typename T>
+T getPointToPointResidualError(typename PointMatcher<T>::ErrorMinimizer::ErrorElements &mPts)
+{
+	typedef typename PointMatcher<T>::Matrix Matrix;
+
+	const Matrix deltas = mPts.reading.features - mPts.reference.features;
+
+	// return sum of the norm of each delta
+	Matrix deltaNorms = deltas.colwise().norm();
+	return deltaNorms.sum();
+}
+
+}
+
 // Identity Error Minimizer
 template<typename T>
 typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::IdentityErrorMinimizer::compute(
@@ -116,6 +172,22 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	result.topRightCorner(dimCount-1, 1) = trVector;
 	
 	return result;
+}
+
+template<typename T>
+T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getResidualError(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const OutlierWeights& outlierWeights,
+	const Matches& matches) const
+{
+	assert(matches.ids.rows() > 0);
+
+	// Fetch paired points
+	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
+	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+
+	return getPointToPointResidualError<T>(mPts);
 }
 
 template<typename T>
@@ -221,6 +293,22 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	result.topRightCorner(dimCount-1, 1) = trVector;
 	
 	return result;
+}
+
+template<typename T>
+T ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer::getResidualError(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const OutlierWeights& outlierWeights,
+	const Matches& matches) const
+{
+	assert(matches.ids.rows() > 0);
+
+	// Fetch paired points
+	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
+	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+
+	return getPointToPointResidualError<T>(mPts);
 }
 
 template<typename T>
@@ -438,6 +526,22 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 }
 
 template<typename T>
+T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getResidualError(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const OutlierWeights& outlierWeights,
+	const Matches& matches) const
+{
+	assert(matches.ids.rows() > 0);
+
+	// Fetch paired points
+	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
+	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+
+	return getPointToPlaneResidualError<T>(mPts,force2D);
+}
+
+template<typename T>
 T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 {
 
@@ -583,6 +687,22 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	this->covMatrix = this->estimateCovariance(filteredReading, filteredReference, matches, outlierWeights, result);
 
 	return result;
+}
+
+template<typename T>
+T ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::getResidualError(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const OutlierWeights& outlierWeights,
+	const Matches& matches) const
+{
+	assert(matches.ids.rows() > 0);
+
+	// Fetch paired points
+	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
+	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+
+	return getPointToPointResidualError<T>(mPts);
 }
 
 template<typename T>
@@ -830,6 +950,22 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	this->covMatrix = this->estimateCovariance(filteredReading, filteredReference, matches, outlierWeights, mOut);
 
 	return mOut; 
+}
+
+template<typename T>
+T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getResidualError(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const OutlierWeights& outlierWeights,
+	const Matches& matches) const
+{
+	assert(matches.ids.rows() > 0);
+
+	// Fetch paired points
+	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
+	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+
+	return getPointToPlaneResidualError<T>(mPts,force2D);
 }
 
 template<typename T>
