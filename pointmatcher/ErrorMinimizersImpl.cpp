@@ -288,27 +288,40 @@ void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b
 		const int rank = Aqr.rank();
 		const int rows = A.rows();
 		const Matrix Q1t = Aqr.matrixQ().transpose().block(0, 0, rank, rows);
+		const Matrix R1 = (Q1t * A * Aqr.colsPermutation()).block(0, 0, rank, rows);
 
 		const bool findMinimalNormSolution = true; // TODO is that what we want?
 
 		// The under-determined system R1 x = Q1^T b is made unique ..
 		if(findMinimalNormSolution){
 			// by getting the solution of smallest norm (x = R1^T * (R1 * R1^T)^-1 Q1^T b.
-			const Matrix R1 = (Q1t * A * Aqr.colsPermutation()).block(0, 0, rank, rows);
-
 			x = R1.template triangularView<Eigen::Upper>().transpose() * (R1 * R1.transpose()).llt().solve(Q1t * b);
 		} else {
 			// by solving the simplest problem that yields fewest nonzero components in x
-			const Matrix R1 = (Q1t * A * Aqr.colsPermutation()).block(0, 0, rank, rank);
-
-			x.block(0, 0, rank, 1) = R1.template triangularView<Eigen::Upper>().solve(Q1t * b);
+			x.block(0, 0, rank, 1) = R1.block(0, 0, rank, rank).template triangularView<Eigen::Upper>().solve(Q1t * b);
 			x.block(rank, 0, rows - rank, 1).setZero();
 		}
 
 		x = Aqr.colsPermutation() * x;
 
-		if(!b.isApprox(A * x)){
-			throw typename PointMatcher<T>::ConvergenceError("encountered singular while minimizing point to plane distance and the current workaround wasn't successful");
+		BOOST_AUTO(ax , (A * x).eval());
+		if (!b.isApprox(ax, 1e-5)) {
+			LOG_INFO_STREAM("PointMatcher::icp - encountered almost singular matrix while minimizing point to plane distance. Trying more accurate approach using double precision SVD.");
+			x = A.template cast<double>().jacobiSvd(ComputeThinU | ComputeThinV).solve(b.template cast<double>()).template cast<T>();
+			ax = A * x;
+			if(!b.isApprox(ax, 1e-5)){
+				std::stringstream strS;
+
+				strS << "PointMatcher::icp - encountered numerically singular matrix while minimizing point to plane distance and the current workaround wasn't very successful : "
+						<< " b=" << b.transpose()
+						<< " !~ A * x=" << (ax).transpose().eval()
+						<< ": ||b- ax||=" << (b - ax).norm()
+						<< ", ||b||=" << b.norm()
+						<< ", ||ax||=" << ax.norm();
+
+				LOG_WARNING_STREAM(strS.str());
+				throw typename PointMatcher<T>::ConvergenceError(strS.str());
+			}
 		}
 	}
 	else {
