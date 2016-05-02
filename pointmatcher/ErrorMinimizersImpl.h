@@ -100,7 +100,6 @@ struct ErrorMinimizersImpl
 		virtual T getOverlap() const;
 	};
 
-
 	struct PointToPointWithCovErrorMinimizer: ErrorMinimizer
 	{
 		inline static const std::string description()
@@ -127,7 +126,32 @@ struct ErrorMinimizersImpl
 		Matrix estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation);
 	};
 
-}; // ErrorMinimizersImpl
+	struct PointToPlaneWithCovErrorMinimizer: public ErrorMinimizer
+	{
+		inline static const std::string description()
+		{
+			return "Point-to-plane error (or point-to-line in 2D). Based on \\cite{Chen1991Point2Plane}. Covariance estimation based on \\cite{Censi2007ICPCovariance}.";
+		}
 
+		inline static const ParametersDoc availableParameters()
+		{
+			return boost::assign::list_of<ParameterDoc>
+				( "force2D", "If set to true(1), the minimization will be force to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>)
+				( "sensorStdDev", "sensor standard deviation", "0.01", "0.", "inf", &P::Comp<T>)
+			;
+		}
+
+		const bool force2D;
+		const T sensorStdDev;
+		Matrix covMatrix;
+
+		PointToPlaneWithCovErrorMinimizer(const Parameters& params = Parameters());
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getOverlap() const;
+		virtual Matrix getCovariance() const;
+		Matrix estimateCovariance(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationParameters& transformation);
+		Matrix estimateCovariance2D(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationParameters& transformation);
+	};
+}; // ErrorMinimizersImpl
 
 #endif // __POINTMATCHER_ERRORMINIMIZER_H
