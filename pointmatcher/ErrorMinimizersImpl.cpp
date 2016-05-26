@@ -613,7 +613,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
     if (force2D)
     {
         this->covMatrix = this->estimateCovariance2D(filteredReading, filteredReference, matches, outlierWeights, mOut);
-        std::cout << this->covMatrix << std::endl;
+        //std::cout << this->covMatrix << std::endl;
     }
     else
     {
@@ -753,65 +753,69 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance2D(
     {
         if (outlierWeights(0,i) > 0.0)
         {
-
-
             reading_point = reading.features.block(0,i,2,1);
-            int reference_idx = matches.ids(0,i);
-            reference_point = reference.features.block(0,reference_idx,2,1);
-            normal = normals.block(0,reference_idx,2,1);
-
             T reading_range = reading_point.norm();
-            reading_direction = reading_point / reading_range;
-            T reference_range = reference_point.norm();
-            reference_direction = reference_point / reference_range;
+
+            if (reading_range > 0) // skip the case when reading_range is 0. TODO: check why this happens
+            {
+                int reference_idx = matches.ids(0,i);
+                reference_point = reference.features.block(0,reference_idx,2,1);
+                normal = normals.block(0,reference_idx,2,1);
+
+
+                reading_direction = reading_point / reading_range;
+                T reference_range = reference_point.norm();
+                reference_direction = reference_point / reference_range;
 
 
 
-            T d2jx2 = 2*normal(0)*normal(0);
-            T d2jxy = 2*normal(0)*normal(1);
-            T d2jy2 = 2*normal(1)*normal(1);
+                T d2jx2 = 2*normal(0)*normal(0);
+                T d2jxy = 2*normal(0)*normal(1);
+                T d2jy2 = 2*normal(1)*normal(1);
 
-            T d2jxt = -2*normal(0)*(  normal(0)*(reading_range *reading_direction(1) *cos_t + reading_range * reading_direction(0) *sin_t )
-                                    - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t));
-            T d2jyt = -2*normal(1)*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
-                                    - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t));
+                T d2jxt = -2*normal(0)*(  normal(0)*(reading_range *reading_direction(1) *cos_t + reading_range * reading_direction(0) *sin_t )
+                                        - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t));
+                T d2jyt = -2*normal(1)*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
+                                        - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t));
 
-            T d2jt2 = 2*pow(normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t) -
-                         normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t),2) -
-                      2*(normal(0)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t) +
-                         normal(1)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t))
-                       *(  normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t)
-                         + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t));
+                T d2jt2 = 2*pow(normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t) -
+                             normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t),2) -
+                          2*(normal(0)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t) +
+                             normal(1)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t))
+                           *(  normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t)
+                             + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t));
 
-            //f = (normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t) + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t))^2
 
-            d2jX2 += (Matrix(3,3) << d2jx2, d2jxy, d2jxt,
-                                     d2jxy, d2jy2, d2jyt,
-                                     d2jxt, d2jyt, d2jt2).finished();
+                //f = (normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t) + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t))^2
 
-            T d2jpx = -2*normal(0)*(normal(0)*reference_direction(0) + normal(1)*reference_direction(1));
-            T d2jpy = -2*normal(1)*(normal(0)*reference_direction(0) + normal(1)*reference_direction(1));
-            T d2jpt = 2*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
-                         - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t))
-                       *(  normal(0)*reference_direction(0)
-                         + normal(1)*reference_direction(1));
+                d2jX2 += (Matrix(3,3) << d2jx2, d2jxy, d2jxt,
+                                         d2jxy, d2jy2, d2jyt,
+                                         d2jxt, d2jyt, d2jt2).finished();
 
-            T d2jqx = 2*normal(0)*(  normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t)
-                                   + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t));
-            T d2jqy = 2*normal(1)*(  normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t)
-                                   + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t));
+                T d2jpx = -2*normal(0)*(normal(0)*reference_direction(0) + normal(1)*reference_direction(1));
+                T d2jpy = -2*normal(1)*(normal(0)*reference_direction(0) + normal(1)*reference_direction(1));
+                T d2jpt = 2*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
+                             - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t))
+                           *(  normal(0)*reference_direction(0)
+                             + normal(1)*reference_direction(1));
 
-            T d2jqt = - 2*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
-                           - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t))
-                         *(normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t) + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t))
-                      - 2*(normal(0)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t) - normal(1)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t))
-                         *(  normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t)
-                           + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t));
+                T d2jqx = 2*normal(0)*(  normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t)
+                                       + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t));
+                T d2jqy = 2*normal(1)*(  normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t)
+                                       + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t));
 
-            d2jpX.block(0,valid_points_count,3,1 ) = (Vector(3) << d2jpx,d2jpy,d2jpt ).finished();
-            d2jqX.block(0,valid_points_count,3,1 ) = (Vector(3) << d2jqx,d2jqy,d2jqt ).finished();
+                T d2jqt = - 2*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
+                               - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t))
+                             *(normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t) + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t))
+                          - 2*(normal(0)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t) - normal(1)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t))
+                             *(  normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t)
+                               + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t));
 
-            valid_points_count++;
+                d2jpX.block(0,valid_points_count,3,1 ) = (Vector(3) << d2jpx,d2jpy,d2jpt ).finished();
+                d2jqX.block(0,valid_points_count,3,1 ) = (Vector(3) << d2jqx,d2jqy,d2jqt ).finished();
+
+                valid_points_count++;
+            } // if (reading_range>0)
         } // if (outlierWeights(0,i) > 0.0)
     }
 
@@ -829,12 +833,12 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance2D(
     covariance = d2jX2_inv * covariance * d2jX2_inv;
 
 // DEBUG POSE COVARIANCE
-    {
-      // Since projection_covariance is symmetric, and thus self adjoint, we can use a simpler solver.
-      Eigen::SelfAdjointEigenSolver<Matrix> eigensolver;
-      eigensolver.compute( covariance );
-      std::cout << "dp: " << sqrt( 9.210 * eigensolver.eigenvalues()( 0 ) ) << "  " << sqrt( 9.210 * eigensolver.eigenvalues()( 1 ) ) << " " << sqrt( 9.210 * eigensolver.eigenvalues()( 2 ) ) << std::endl;
-    }
+//    {
+//      // Since projection_covariance is symmetric, and thus self adjoint, we can use a simpler solver.
+//      Eigen::SelfAdjointEigenSolver<Matrix> eigensolver;
+//      eigensolver.compute( covariance );
+//      std::cout << "dp: " << sqrt( 9.210 * eigensolver.eigenvalues()( 0 ) ) << "  " << sqrt( 9.210 * eigensolver.eigenvalues()( 1 ) ) << " " << sqrt( 9.210 * eigensolver.eigenvalues()( 2 ) ) << std::endl;
+//    }
 
     return  covariance;
 }
