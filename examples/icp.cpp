@@ -116,6 +116,8 @@ int main(int argc, const char *argv[])
 		exit(1);
 	}
 
+	PointMatcherSupport::setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
+
 	PM::TransformationParameters translation =
 			parseTranslation(initTranslation, cloudDimension);
 	PM::TransformationParameters rotation =
