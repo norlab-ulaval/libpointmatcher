@@ -306,21 +306,17 @@ void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b
 
 		BOOST_AUTO(ax , (A * x).eval());
 		if (!b.isApprox(ax, 1e-5)) {
-			LOG_INFO_STREAM("PointMatcher::icp - encountered almost singular matrix while minimizing point to plane distance. Trying more accurate approach using double precision SVD.");
+			LOG_INFO_STREAM("PointMatcher::icp - encountered almost singular matrix while minimizing point to plane distance. QR solution was too inaccurate. Trying more accurate approach using double precision SVD.");
 			x = A.template cast<double>().jacobiSvd(ComputeThinU | ComputeThinV).solve(b.template cast<double>()).template cast<T>();
 			ax = A * x;
-			if(!b.isApprox(ax, 1e-5)){
-				std::stringstream strS;
 
-				strS << "PointMatcher::icp - encountered numerically singular matrix while minimizing point to plane distance and the current workaround wasn't very successful : "
+			if((b - ax).norm() > 1e-5 * std::max(A.norm() * x.norm(), b.norm())){
+				LOG_WARNING_STREAM("PointMatcher::icp - encountered numerically singular matrix while minimizing point to plane distance and the current workaround remained inaccurate."
 						<< " b=" << b.transpose()
 						<< " !~ A * x=" << (ax).transpose().eval()
 						<< ": ||b- ax||=" << (b - ax).norm()
 						<< ", ||b||=" << b.norm()
-						<< ", ||ax||=" << ax.norm();
-
-				LOG_WARNING_STREAM(strS.str());
-				throw typename PointMatcher<T>::ConvergenceError(strS.str());
+						<< ", ||ax||=" << ax.norm());
 			}
 		}
 	}
