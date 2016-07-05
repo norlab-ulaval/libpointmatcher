@@ -172,11 +172,9 @@ TEST(icpTest, icpSingular)
 
 	for(size_t x = 0; x < nX; x++){
 		for(size_t y = 0; y < nY; y++){
-			points.col( x * nY + y) << d * x + oX, d * y + oY;
+			points.col( x * nY + y) << d * x + oX, d * y + oY, 0, 1;
 		}
 	}
-	points.row(2).setZero();
-	points.row(3).setOnes();
 
 	DP pts0;
 	pts0.features = points;
