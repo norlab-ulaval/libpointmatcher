@@ -218,6 +218,27 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
+	struct RobustWelschOutlierFilter: public OutlierFilter
+	{
+		inline static const std::string description()
+		{
+			return "Robust weight function part of the M-Estimator familly. The Welsch weight uses an exponential decay reducing the influence of matched point farther away \\cite{RobustWeightFunctions}.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return boost::assign::list_of<ParameterDoc>
+				( "sigma", "Standard deviation used limit the influence. This is the unit of the distance used, typically meters.", "5.0", "0.0000001", "inf", &P::Comp<T>)
+				( "approximation", "Threshold under which values will be forced to zero. This can save computation as zero values are not minimized.", "inf", "0.0000001", "inf", &P::Comp<T>)
+				;
+		}
+		
+		const T sigma;
+		const T approximation;
+		
+		RobustWelschOutlierFilter(const Parameters& params = Parameters());
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+	};
+
 }; // OutlierFiltersImpl
 
 #endif // __POINTMATCHER_OUTLIERFILTERS_H

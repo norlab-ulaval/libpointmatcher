@@ -164,6 +164,17 @@ namespace PointMatcherSupport
 				( "doi", "" )
 				( "fulltext", "")
 			))
+			( "RobustWeightFunctions", makeMap(map_list_of
+				( "type", "article" )
+				( "title", "Robust regression using iteratively reweighted least-squares" )
+				( "author", "Paul W Holland and Roy E Welsch" )
+				( "booktitle", "Communications in Statistics - Theory and Methods" )
+				( "year", "1977" )
+				( "pages", "813-827" )
+				( "publisher", "" )
+				( "doi", "10.1080/03610927708827533" )
+				( "fulltext", "")
+			))
 		;
 	}
 	

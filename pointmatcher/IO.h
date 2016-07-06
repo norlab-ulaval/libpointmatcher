@@ -133,6 +133,7 @@ struct PointMatcherIO
 			("y", "y", FEATURE)
 			("z", "z", FEATURE)
 			("pad", "pad", FEATURE)
+			//("internalName", "externalName", FEATURE)
 			("normals", "nx", DESCRIPTOR)
 			("normals", "ny", DESCRIPTOR)
 			("normals", "nz", DESCRIPTOR)
@@ -155,9 +156,9 @@ struct PointMatcherIO
 			("eigVectors", "eigVectors2X", DESCRIPTOR)
 			("eigVectors", "eigVectors2Y", DESCRIPTOR)
 			("eigVectors", "eigVectors2Z", DESCRIPTOR)
-			//("", "", DESCRIPTOR)
+			//("internalName", "externalName", DESCRIPTOR)
 			("time", "time", TIME)
-			//("", "", TIME)
+			//("internalName", "externalName", TIME)
 			;
 
 			return labels;
