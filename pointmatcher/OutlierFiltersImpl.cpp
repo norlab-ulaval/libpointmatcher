@@ -377,10 +377,9 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::RobustWelschOutl
 	const DataPoints& filteredReference,
 	const Matches& input)
 {
-	// TODO: finish that... FP
 	OutlierWeights w = exp(- input.dists.array()/squaredScale);
 
-	if(squaredApproximation != 0.0)
+	if(squaredApproximation != std::numeric_limits<T>::infinity())
 	{
 		//Note from Eigen documentation: (if statement).select(then matrix, else matrix)
 		w = (input.dists.array() >= squaredApproximation).select(0.0, w);

@@ -222,13 +222,13 @@ struct OutlierFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Robust weight function part of the M-Estimator familly. The Welsch weight uses an exponential decay reducing the influence of matched point farther away \\cite{RobustWeightFunctions}. More explicitly, the function is w = exp[- (match distance)^2/scale^2].";
+			return "Robust weight function part of the M-Estimator familly. The Welsch weight uses an exponential decay reducing the influence of matched point farther away \\cite{RobustWeightFunctions}. More explicitly, the function is w = exp[- (matched distance)^2/scale^2].";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
 				( "scale", "Tuning parameter used to limit the influence of outliers. It could be interpreted as a standard deviation. The unit of this parameter is the same as the distance used, typically meters.", "5.0", "0.0000001", "inf", &P::Comp<T>)
-				( "approximation", "Threshold under which values will be forced to zero. This can save computation as zero values are not minimized. If set to zero (default value), no approximation is done. The unit of this parameter is the same as the distance used, typically meters.", "0.0", "0.0", "inf", &P::Comp<T>)
+				( "approximation", "If the matched distance is larger than this threshold, its weight will be forced to zero. This can save computation as zero values are not minimized. If set to inf (default value), no approximation is done. The unit of this parameter is the same as the distance used, typically meters.", "inf", "0.0", "inf", &P::Comp<T>)
 				;
 		}
 		
