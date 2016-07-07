@@ -6,7 +6,7 @@
 
 Documentation and Tutorials
 ===========================
-libpointmatcher is a modular ICP library, useful for robotics and computer vision.
+libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
 
 **Quick link for the tutorial pages: [Tutorials](doc/index.md ) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
 
@@ -59,7 +59,7 @@ We mainly develop for __cmake projects__ and we provide example files under [`ex
 
 ###Bug reporting
 
-Please use [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs.
+Please use our [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs. If you are running the library on Ubuntu, copy-paste the output of the script [listVersionsUbuntu.sh](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/listVersionsUbuntu.sh) to simplify the search of an answer.
 
 ## File formats
 The library support different file formats for importing or exporting data:

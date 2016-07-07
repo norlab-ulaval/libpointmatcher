@@ -263,7 +263,7 @@ struct PointMatcher
 		unsigned getDescriptorDim() const;
 		unsigned getTimeDim() const;
 
-		void save(const std::string& fileName) const;
+		void save(const std::string& fileName, bool binary = false) const;
 		static DataPoints load(const std::string& fileName);
 		
 		void concatenate(const DataPoints& dp);
@@ -669,8 +669,8 @@ struct PointMatcher
 		template<typename R>
         const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
 		
-		/*template<typename R>
-		typename R::TargetType* createModuleFromRegistrar(const PointMatcherSupport::YAML::Node& module, const R& registrar);*/
+		//! Get the value of a field in a node
+        std::string nodeVal(const std::string& regName, const PointMatcherSupport::YAML::Node& doc);
 	};
 	
 	//! ICP algorithm

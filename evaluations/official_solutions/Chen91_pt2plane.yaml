@@ -14,8 +14,8 @@ referenceDataPointsFilters:
   - MinDistDataPointsFilter:
       minDist: 1.0
   - SamplingSurfaceNormalDataPointsFilter:
-      binSize: 7
-      samplingMethode: 1
+      knn: 7
+      samplingMethod: 1
       ratio: 0.1
 
 matcher:

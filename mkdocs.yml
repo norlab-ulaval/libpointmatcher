@@ -5,6 +5,7 @@ google_analytics: ['UA-70950258-1', 'libpointmatcher.readthedocs.org']
 pages:
 - Home: 'index.md'
 - Introduction:
+    - 'What is libpointmatcher about?': 'Introduction.md'
     - 'What can I do with libpointmatcher': 'ApplicationsAndPub.md'
     - 'What the different data filters do?': 'Datafilters.md'
     - 'Example: applying a chain of data filters': 'ApplyingDatafilters.md'

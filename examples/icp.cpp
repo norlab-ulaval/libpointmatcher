@@ -52,6 +52,7 @@ typedef PointMatcherSupport::CurrentBibliography CurrentBibliography;
 
 void listModules();
 int validateArgs(const int argc, const char *argv[],
+				 bool& isVerbose,
 				 bool& isTransfoSaved,
 				 string& configFile,
 				 string& outputBaseFile,
@@ -72,11 +73,12 @@ void usage(const char *argv[]);
 int main(int argc, const char *argv[])
 {
 	bool isTransfoSaved = false;
+	bool isVerbose = false;
 	string configFile;
 	string outputBaseFile("test");
 	string initTranslation("0,0,0");
 	string initRotation("1,0,0;0,1,0;0,0,1");
-	const int ret = validateArgs(argc, argv, isTransfoSaved, configFile,
+	const int ret = validateArgs(argc, argv, isVerbose, isTransfoSaved, configFile,
 								 outputBaseFile, initTranslation, initRotation);
 	if (ret != 0)
 	{
@@ -114,6 +116,15 @@ int main(int argc, const char *argv[])
 	{
 		cerr << "Invalid input point clouds dimension" << endl;
 		exit(1);
+	}
+
+	{
+		using namespace PointMatcherSupport;
+		Parametrizable::Parameters params;
+		if(!isVerbose){
+			params["infoFileName"] = toParam("/dev/null");
+		}
+		setLogger(PM::get().LoggerRegistrar.create("FileLogger", params));
 	}
 
 	PM::TransformationParameters translation =
@@ -221,6 +232,7 @@ void listModules()
 
 // Make sure that the command arguments make sense
 int validateArgs(const int argc, const char *argv[],
+				 bool& isVerbose,
 				 bool& isTransfoSaved,
 				 string& configFile,
 				 string& outputBaseFile,
@@ -251,6 +263,11 @@ int validateArgs(const int argc, const char *argv[],
 	for (int i = 1; i < endOpt; i += 2)
 	{
 		const string opt(argv[i]);
+		if (opt == "--verbose" || opt == "-v") {
+			isVerbose = true;
+			i --;
+			continue;
+		}
 		if (i + 1 > endOpt)
 		{
 			cerr << "Missing value for option " << opt << ", usage:"; usage(argv); exit(1);
@@ -375,6 +392,7 @@ void usage(const char *argv[])
 	cerr << "  " << argv[0] << " [OPTIONS] reference.csv reading.csv" << endl;
 	cerr << endl;
 	cerr << "OPTIONS can be a combination of:" << endl;
+	cerr << "-v,--verbose               Be more verbose (info logging to stdout)" << endl;
 	cerr << "--config YAML_CONFIG_FILE  Load the config from a YAML file (default: default parameters)" << endl;
 	cerr << "--output BASEFILENAME      Name of output files (default: test)" << endl;
 	cerr << "--initTranslation [x,y,z]  Add an initial 3D translation before applying ICP (default: 0,0,0)" << endl;

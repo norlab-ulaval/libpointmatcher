@@ -69,7 +69,18 @@ struct ErrorMinimizersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Point-to-point error. Based on SVD decomposition. Based on \\cite{Besl1992Point2Point}.";
+			return "Point-to-point error. Based on SVD decomposition. Per \\cite{Besl1992Point2Point}.";
+		}
+		
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual T getOverlap() const;
+	};
+
+  	struct PointToPointSimilarityErrorMinimizer: ErrorMinimizer
+	{
+		inline static const std::string description()
+		{
+			return "Point-to-point similarity error (rotation + translation + scale). The scale is the same for all coordinates. Based on SVD decomposition. Per \\cite{Umeyama1991}.";
 		}
 		
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
@@ -80,7 +91,7 @@ struct ErrorMinimizersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Point-to-plane error (or point-to-line in 2D). Based on \\cite{Chen1991Point2Plane}";
+			return "Point-to-plane error (or point-to-line in 2D). Per \\cite{Chen1991Point2Plane}.";
 		}
 		
 		inline static const ParametersDoc availableParameters()
