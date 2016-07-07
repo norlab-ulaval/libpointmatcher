@@ -766,6 +766,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::inPlaceFil
 template<typename T>
 size_t argMax(const typename PointMatcher<T>::Vector& v)
 {
+	//FIXME: Change that to use the new API. the new Eigen API (3.2.8) allows this with the call maxCoeff. See the section Visitors in https://eigen.tuxfamily.org/dox/group__TutorialReductionsVisitorsBroadcasting.html
 	T maxVal(0);
 	size_t maxIdx(0);
 	for (int i = 0; i < v.size(); ++i)
