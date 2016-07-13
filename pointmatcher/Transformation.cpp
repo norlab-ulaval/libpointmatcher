@@ -75,7 +75,7 @@ void PointMatcher<T>::Transformations::apply(DataPoints& cloud, const Transforma
 		num_iter++;
 	}
 	if (num_iter != 1)
-		throw "Transformations: Error, the transform should have been applied just once.";
+		throw std::runtime_error("Transformations: Error, the transform should have been applied just once.");
 }
 
 template struct PointMatcher<float>::Transformations;
