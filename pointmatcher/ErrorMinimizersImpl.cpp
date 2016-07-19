@@ -44,88 +44,36 @@ using namespace Eigen;
 using namespace std;
 using namespace PointMatcherSupport;
 
-namespace {
 
-template<typename T>
-T getPointToPlaneResidualError(typename PointMatcher<T>::ErrorMinimizer::ErrorElements &mPts, bool force2D)
-{
-	typedef typename PointMatcher<T>::Matrix Matrix;
 
-	const int dim = mPts.reading.features.rows();
-	const int nbPts = mPts.reading.features.cols();
 
-	// Adjust if the user forces 2D minimization on XY-plane
-	int forcedDim = dim - 1;
-	if(force2D && dim == 4)
-	{
-		mPts.reading.features.conservativeResize(3, Eigen::NoChange);
-		mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
-		mPts.reference.features.conservativeResize(3, Eigen::NoChange);
-		mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
-		forcedDim = dim - 2;
-	}
 
-	// Fetch normal vectors of the reference point cloud (with adjustment if needed)
-	const BOOST_AUTO(normalRef, mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
 
-	// Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
-	assert(normalRef.rows() > 0);
 
-	const Matrix deltas = mPts.reading.features - mPts.reference.features;
 
-	// dot product of dot = dot(deltas, normals)
-	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
-
-	for(int i=0; i<normalRef.rows(); i++)
-	{
-		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
-	}
-
-	// return sum of the norm of each dot product
-	Matrix dotProdNorm = dotProd.colwise().norm();
-	return dotProdNorm.sum();
-}
-
-template<typename T>
-T getPointToPointResidualError(typename PointMatcher<T>::ErrorMinimizer::ErrorElements &mPts)
-{
-	typedef typename PointMatcher<T>::Matrix Matrix;
-
-	const Matrix deltas = mPts.reading.features - mPts.reference.features;
-
-	// return sum of the norm of each delta
-	Matrix deltaNorms = deltas.colwise().norm();
-	return deltaNorms.sum();
-}
-
-}
-
+///////////////////////////////////////////////////////////////////////
 // Identity Error Minimizer
+///////////////////////////////////////////////////////////////////////
 template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::IdentityErrorMinimizer::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches)
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::IdentityErrorMinimizer::compute(const ErrorElements& mPts)
 {
-	return TransformationParameters::Identity(filteredReading.features.rows(), filteredReading.features.rows());
+	const int dim = mPts.reading.getHomogeneousDim();
+	return TransformationParameters::Identity(dim, dim);
 }
 
 template struct ErrorMinimizersImpl<float>::IdentityErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::IdentityErrorMinimizer;
 
 
+///////////////////////////////////////////////////////////////////////
 // Point To POINT ErrorMinimizer
+///////////////////////////////////////////////////////////////////////
 template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches)
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::compute(const ErrorElements& mPts_const)
 {	
-	assert(matches.ids.rows() > 0);
-
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
+	// Copy error element to use as storage later
+	// TODO: check that, might worth it to only copy useful parts
+	ErrorElements mPts = mPts_const;
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
@@ -186,7 +134,7 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getResidualError(
 	// Fetch paired points
 	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
-	return getPointToPointResidualError<T>(mPts);
+	return PointToPointErrorMinimizer::computeResidualError(mPts);
 }
 
 template<typename T>
@@ -205,7 +153,7 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise"))
 	{
 		LOG_INFO_STREAM("PointToPointErrorMinimizer - warning, no sensor noise found. Using best estimate given outlier rejection instead.");
-		return this->weightedPointUsedRatio;
+		return this->getWeightedPointUsedRatio();
 	}
 
 	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
@@ -225,20 +173,31 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getOverlap() const
 	return (T)count/(T)nbPoints;
 }
 
+template<typename T>
+T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::computeResidualError(const ErrorElements& mPts)
+{
+	//typedef typename PointMatcher<T>::Matrix Matrix;
+
+	const Matrix deltas = mPts.reading.features - mPts.reference.features;
+
+	// return sum of the norm of each delta
+	Matrix deltaNorms = deltas.colwise().norm();
+	return deltaNorms.sum();
+}
+
 template struct ErrorMinimizersImpl<float>::PointToPointErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::PointToPointErrorMinimizer;
 
+///////////////////////////////////////////////////////////////////////
 // Point To POINT ErrorMinimizer with similarity, solve for rotation + translation + scale
+///////////////////////////////////////////////////////////////////////
 template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches)
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer::compute(const ErrorElements& mPts_const)
 {	
-	assert(matches.ids.rows() > 0);
 
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
+	// Copy error element to use as storage later
+	// TODO: check that, might worth it to only copy useful parts
+	ErrorElements mPts = mPts_const;
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
@@ -306,7 +265,7 @@ T ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer::getResidualError
 	// Fetch paired points
 	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
-	return getPointToPointResidualError<T>(mPts);
+	return PointToPointErrorMinimizer::computeResidualError(mPts);
 }
 
 template<typename T>
@@ -325,7 +284,7 @@ T ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer::getOverlap() con
 	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise"))
 	{
 		LOG_INFO_STREAM("PointToPointSimilarityErrorMinimizer - warning, no sensor noise found. Using best estimate given outlier rejection instead.");
-		return this->weightedPointUsedRatio;
+		return this->getWeightedPointUsedRatio();
 	}
 
 	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
@@ -348,7 +307,9 @@ T ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer::getOverlap() con
 template struct ErrorMinimizersImpl<float>::PointToPointSimilarityErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::PointToPointSimilarityErrorMinimizer;
 
+///////////////////////////////////////////////////////////////////////
 // Point To PLANE ErrorMinimizer
+///////////////////////////////////////////////////////////////////////
 template<typename T>
 ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::PointToPlaneErrorMinimizer(const Parameters& params):
 	ErrorMinimizer("PointToPlaneErrorMinimizer", PointToPlaneErrorMinimizer::availableParameters(), params),
@@ -412,17 +373,13 @@ void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b
 	}
 }
 
-template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches)
-{
-	assert(matches.ids.rows() > 0);
 
-	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
+template<typename T>
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::compute(const ErrorElements& mPts_const)
+{
+	// Copy error element to use as storage later
+	// TODO: check that, might worth it to only copy useful parts
+	ErrorElements mPts = mPts_const;
 
 	const int dim = mPts.reading.features.rows();
 	const int nbPts = mPts.reading.features.cols();
@@ -532,6 +489,46 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	return mOut; 
 }
 
+
+template<typename T>
+T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::computeResidualError(ErrorElements mPts, const bool& force2D)
+{
+	const int dim = mPts.reading.features.rows();
+	const int nbPts = mPts.reading.features.cols();
+
+	// Adjust if the user forces 2D minimization on XY-plane
+	int forcedDim = dim - 1;
+	if(force2D && dim == 4)
+	{
+		mPts.reading.features.conservativeResize(3, Eigen::NoChange);
+		mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
+		mPts.reference.features.conservativeResize(3, Eigen::NoChange);
+		mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
+		forcedDim = dim - 2;
+	}
+
+	// Fetch normal vectors of the reference point cloud (with adjustment if needed)
+	const BOOST_AUTO(normalRef, mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
+
+	// Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
+	assert(normalRef.rows() > 0);
+
+	const Matrix deltas = mPts.reading.features - mPts.reference.features;
+
+	// dot product of dot = dot(deltas, normals)
+	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
+
+	for(int i=0; i<normalRef.rows(); i++)
+	{
+		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
+	}
+
+	// return sum of the norm of each dot product
+	Matrix dotProdNorm = dotProd.colwise().norm();
+	return dotProdNorm.sum();
+}
+
+
 template<typename T>
 T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getResidualError(
 	const DataPoints& filteredReading,
@@ -544,7 +541,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getResidualError(
 	// Fetch paired points
 	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
-	return getPointToPlaneResidualError<T>(mPts,force2D);
+	return PointToPlaneErrorMinimizer::computeResidualError(mPts, force2D);
 }
 
 template<typename T>
@@ -602,7 +599,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
 	else
 	{
 		LOG_INFO_STREAM("PointToPlaneErrorMinimizer - warning, no sensor noise and density. Using best estimate given outlier rejection instead.");
-		return this->weightedPointUsedRatio;
+		return this->getWeightedPointUsedRatio();
 	}
 
 
@@ -649,7 +646,9 @@ template struct ErrorMinimizersImpl<double>::PointToPlaneErrorMinimizer;
 
 
 
+///////////////////////////////////////////////////////////////////////
 // Point To POINT WITH COV ErrorMinimizer
+///////////////////////////////////////////////////////////////////////
 template<typename T>
 ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::PointToPointWithCovErrorMinimizer(const Parameters& params):
 	ErrorMinimizer("PointToPointWithCovErrorMinimizer", PointToPointWithCovErrorMinimizer::availableParameters(), params),
@@ -658,17 +657,13 @@ ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::PointToPointWithCovEr
 }
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches)
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::compute(const ErrorElements& mPts_const)
 {	
-	assert(matches.ids.rows() > 0);
+	// Copy error element to use as storage later
+	// TODO: check that, might worth it to only copy useful parts
+	ErrorElements mPts = mPts_const;
 
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
-	
-	// now minimize on kept points
+	// minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
 	const int ptsCount(mPts.reading.features.cols()); //Both point cloud have now the same number of (matched) point
 
@@ -690,7 +685,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	result.topLeftCorner(dimCount-1, dimCount-1) = rotMatrix;
 	result.topRightCorner(dimCount-1, 1) = trVector;
 
-	this->covMatrix = this->estimateCovariance(filteredReading, filteredReference, matches, outlierWeights, result);
+	this->covMatrix = this->estimateCovariance(mPts, result);
 
 	return result;
 }
@@ -707,14 +702,15 @@ T ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::getResidualError(
 	// Fetch paired points
 	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
-	return getPointToPointResidualError<T>(mPts);
+	return PointToPointErrorMinimizer::computeResidualError(mPts);
 }
 
+//TODO: rewrite this using ErrorElements struct
 template<typename T>
 typename ErrorMinimizersImpl<T>::Matrix
-ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::estimateCovariance(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationParameters& transformation)
+ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation)
 {
-	int max_nbr_point = outlierWeights.cols();
+	const int max_nbr_point = mPts.reading.getNbPoints();
 
 	Matrix covariance(Matrix::Zero(6,6));
 	Matrix J_hessian(Matrix::Zero(6,6));
@@ -740,13 +736,14 @@ ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::estimateCovariance(co
 
 	int valid_points_count = 0;
 
+	//TODO: add missing const
 	for(int i = 0; i < max_nbr_point; ++i)
 	{
-		if (outlierWeights(0,i) > 0.0)
+		//if (outlierWeights(0,i) > 0.0)
 		{
-			reading_point = reading.features.block(0,i,3,1);
-			int reference_idx = matches.ids(0,i);
-			reference_point = reference.features.block(0,reference_idx,3,1);
+			reading_point = mPts.reading.features.block(0,i,3,1);
+			//int reference_idx = matches.ids(0,i);
+			reference_point = mPts.reference.features.block(0,i,3,1);
 
 			T reading_range = reading_point.norm();
 			reading_direction = reading_point / reading_range;
@@ -799,7 +796,7 @@ ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::estimateCovariance(co
 template<typename T>
 T ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::getOverlap() const
 {
-	const int nbPoints = this->lastErrorElements.reading.features.cols();
+	const int nbPoints = this->lastErrorElements.reading.getNbPoints();
 	if(nbPoints == 0)
 	{
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
@@ -808,7 +805,7 @@ T ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::getOverlap() const
 	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise"))
 	{
 		LOG_INFO_STREAM("PointToPointWithCovErrorMinimizer - warning, no sensor noise found. Using best estimate given outlier rejection instead.");
-		return this->weightedPointUsedRatio;
+		return this->getWeightedPointUsedRatio();
 	}
 
 	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
@@ -834,7 +831,9 @@ template struct ErrorMinimizersImpl<float>::PointToPointWithCovErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::PointToPointWithCovErrorMinimizer;
 
 
+///////////////////////////////////////////////////////////////////////
 // Point To PLANE WITH COV ErrorMinimizer
+///////////////////////////////////////////////////////////////////////
 template<typename T>
 ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::PointToPlaneWithCovErrorMinimizer(const Parameters& params):
 	ErrorMinimizer("PointToPlaneWithCovErrorMinimizer", PointToPlaneWithCovErrorMinimizer::availableParameters(), params),
@@ -844,16 +843,11 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::PointToPlaneWithCovEr
 }
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::compute(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches)
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::compute(const ErrorElements& mPts_const)
 {
-	assert(matches.ids.rows() > 0);
-
-	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
+	// Copy error element to use as storage later
+	// TODO: check that, might worth it to only copy useful parts
+	ErrorElements mPts = mPts_const;
 
 	const int dim = mPts.reading.features.rows();
 	const int nbPts = mPts.reading.features.cols();
@@ -952,7 +946,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		}
 	}
 
-	this->covMatrix = this->estimateCovariance(filteredReading, filteredReference, matches, outlierWeights, mOut);
+	this->covMatrix = this->estimateCovariance(mPts, mOut);
 
 	return mOut; 
 }
@@ -969,14 +963,14 @@ T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getResidualError(
 	// Fetch paired points
 	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
-	return getPointToPlaneResidualError<T>(mPts,force2D);
+	return PointToPlaneErrorMinimizer::computeResidualError(mPts, force2D);
 }
 
 template<typename T>
 typename ErrorMinimizersImpl<T>::Matrix
-ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationParameters& transformation)
+ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation)
 {
-	int max_nbr_point = outlierWeights.cols();
+	const int max_nbr_point = mPts.reading.getNbPoints();
 
 	Matrix covariance(Matrix::Zero(6,6));
 	Matrix J_hessian(Matrix::Zero(6,6));
@@ -989,7 +983,8 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(co
 	Vector reading_direction(Vector::Zero(3));
 	Vector reference_direction(Vector::Zero(3));
 
-	Matrix normals = reference.getDescriptorViewByName("normals");
+	//TODO: should be constView
+	Matrix normals = mPts.reference.getDescriptorViewByName("normals");
 
 	if (normals.rows() < 3)    // Make sure there are normals in DataPoints
 		return std::numeric_limits<T>::max() * Matrix::Identity(6,6);
@@ -1005,15 +1000,16 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(co
 
 	int valid_points_count = 0;
 
+	//TODO: add missing const
 	for(int i = 0; i < max_nbr_point; ++i)
 	{
-		if (outlierWeights(0,i) > 0.0)
+		//if (outlierWeights(0,i) > 0.0)
 		{
-			reading_point = reading.features.block(0,i,3,1);
-			int reference_idx = matches.ids(0,i);
-			reference_point = reference.features.block(0,reference_idx,3,1);
+			reading_point = mPts.reading.features.block(0,i,3,1);
+			//int reference_idx = matches.ids(0,i);
+			reference_point = mPts.reference.features.block(0,i,3,1);
 
-			normal = normals.block(0,reference_idx,3,1);
+			normal = normals.block(0,i,3,1);
 
 			T reading_range = reading_point.norm();
 			reading_direction = reading_point / reading_range;
@@ -1079,7 +1075,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getOverlap() const
 		!this->lastErrorElements.reading.descriptorExists("normals"))
 	{
 		LOG_INFO_STREAM("PointToPlaneErrorMinimizer - warning, no sensor noise or normals found. Using best estimate given outlier rejection instead.");
-		return this->weightedPointUsedRatio;
+		return this->getWeightedPointUsedRatio();
 	}
 
 	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));

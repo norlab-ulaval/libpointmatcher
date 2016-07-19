@@ -36,23 +36,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 #include "PointMatcherPrivate.h"
 
-//! Construct without parameter
-template<typename T>
-PointMatcher<T>::ErrorMinimizer::ErrorMinimizer():
-	pointUsedRatio(-1.),
-	weightedPointUsedRatio(-1.)
-{}
-
-//! Construct with parameters
-template<typename T>
-PointMatcher<T>::ErrorMinimizer::ErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
-	Parametrizable(className,paramsDoc,params)
-{}
-
-//! virtual destructor
-template<typename T>
-PointMatcher<T>::ErrorMinimizer::~ErrorMinimizer()
-{}
+///////////////////////////////////////
+// ErrorElements
+///////////////////////////////////////
 
 //! Constructor without data
 template<typename T>
@@ -62,7 +48,9 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements():
 	weights(OutlierWeights()),
 	matches(Matches()),
 	nbRejectedMatches(-1),
-	nbRejectedPoints(-1)
+	nbRejectedPoints(-1),
+	pointUsedRatio(-1.0),
+	weightedPointUsedRatio(-1.0)
 {
 }
 
@@ -134,8 +122,8 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& 
 
 	assert(j == pointsCount);
 
-	this->pointUsedRatio = double(j)/double(knn*requestedPts.features.cols());
-	this->weightedPointUsedRatio /= double(knn*requestedPts.features.cols());
+	this->pointUsedRatio = T(j)/T(knn*requestedPts.features.cols());
+	this->weightedPointUsedRatio /= T(knn*requestedPts.features.cols());
 	
 	assert(dimFeat == sourcePts.features.rows());
 	const int dimSourDesc = sourcePts.descriptors.rows();
@@ -174,11 +162,49 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& 
 }
 
 
+///////////////////////////////////////
+// ErrorMinimizer
+///////////////////////////////////////
+
+//! Construct without parameter
+template<typename T>
+PointMatcher<T>::ErrorMinimizer::ErrorMinimizer()
+{}
+
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::ErrorMinimizer::ErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params)
+{}
+
+//! virtual destructor
+template<typename T>
+PointMatcher<T>::ErrorMinimizer::~ErrorMinimizer()
+{}
+
+//! Find the transformation that minimizes the error
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ErrorMinimizer::compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches)
+{
+	
+	// generates pairs of matching points
+	typename ErrorMinimizer::ErrorElements matchedPoints(filteredReading, filteredReference, outlierWeights, matches);
+	
+	// calls specific instantiation for a given ErrorMinimizer
+	TransformationParameters transform = this->compute(matchedPoints);
+	
+	// saves paired points for future introspection
+	this->lastErrorElements = matchedPoints;
+	
+	// returns transforme parameters
+	return transform;
+}
+
 //! Return the ratio of how many points were used for error minimization
 template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getPointUsedRatio() const
 {
-	return pointUsedRatio;
+	return lastErrorElements.pointUsedRatio;
 }
 
 //! Return the last the ErrorElements structure that was used for error minimization.
@@ -193,7 +219,7 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMi
 template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getWeightedPointUsedRatio() const
 {
-	return weightedPointUsedRatio;
+	return lastErrorElements.weightedPointUsedRatio;
 }
 
 //! If not redefined by child class, return the ratio of how many points were used (with weight) for error minimization
@@ -201,7 +227,7 @@ template<typename T>
 T PointMatcher<T>::ErrorMinimizer::getOverlap() const
 {
 	LOG_WARNING_STREAM("ErrorMinimizer - warning, no specific method to compute overlap was provided for the ErrorMinimizer used.");
-	return weightedPointUsedRatio;
+	return lastErrorElements.weightedPointUsedRatio;
 }
 
 //! If not redefined by child class, return zero matrix
