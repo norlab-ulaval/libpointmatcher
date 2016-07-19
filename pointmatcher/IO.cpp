@@ -102,15 +102,19 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 
 	bool firstLine(true);
 	unsigned lineCount=0;
-	while (!is.eof())
+	string line;
+	//while (!is.eof())
+	while (std::getline(is, line))
 	{
-		char line[1024];
-		is.getline(line, sizeof(line));
-		line[sizeof(line)-1] = 0;
+		//char line[1024];
+		//is.getline(line, sizeof(line));
+		//line[sizeof(line)-1] = 0;
+
+
 
 		if(firstLine)
 		{
-			std::vector<string> header = csvLineToVector(line);
+			std::vector<string> header = csvLineToVector(line.c_str());
 				
 			elementCount = header.size();
 			for(unsigned int i = 0; i < elementCount; i++)
@@ -122,7 +126,7 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 		}
 		else // load the rest of the file
 		{
-			std::vector<string> parsedLine = csvLineToVector(line);
+			std::vector<string> parsedLine = csvLineToVector(line.c_str());
 			if(parsedLine.size() != elementCount && parsedLine.size() !=0)
 			{
 				stringstream errorMsg;
@@ -358,7 +362,7 @@ void PointMatcherSupport::validateFile(const std::string& fileName)
 	boost::filesystem::path fullPath(fileName);
 
 	ifstream ifs(fileName.c_str());
-	if (!ifs.good())
+	if (!ifs.good() || !boost::filesystem::is_regular_file(fullPath))
 	#if BOOST_FILESYSTEM_VERSION >= 3
 		#if BOOST_VERSION >= 105000
 				throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).generic_string());
