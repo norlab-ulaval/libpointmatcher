@@ -136,13 +136,13 @@ int main(int argc, char *argv[])
 	PM::Inspector* nullInspect =
 		PM::get().InspectorRegistrar.create("NullInspector");
 
-	name = "VTKFileInspector";
-    	params["dumpDataLinks"] = "1"; 
-    	params["dumpReading"] = "1"; 
-    	params["dumpReference"] = "1"; 
+	//name = "VTKFileInspector";
+    //	params["dumpDataLinks"] = "1"; 
+    //	params["dumpReading"] = "1"; 
+    //	params["dumpReference"] = "1"; 
 
-	PM::Inspector* vtkInspect =
-		PM::get().InspectorRegistrar.create(name, params);
+	//PM::Inspector* vtkInspect =
+	//	PM::get().InspectorRegistrar.create(name, params);
 	params.clear();
 	
 	// Prepare transformation

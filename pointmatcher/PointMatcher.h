@@ -519,8 +519,11 @@ struct PointMatcher
 			Matches matches; //!< associations
 			int nbRejectedMatches; //!< number of matches with zero weights
 			int nbRejectedPoints; //!< number of points with all matches set to zero weights
+			T pointUsedRatio;  //!< the ratio of how many points were used for error minimization
+			T weightedPointUsedRatio;//!< the ratio of how many points were used (with weight) for error minimization
 
-			ErrorElements(const DataPoints& reading=DataPoints(), const DataPoints reference = DataPoints(), const OutlierWeights weights = OutlierWeights(), const Matches matches = Matches());
+			ErrorElements();
+			ErrorElements(const DataPoints& requestedPts, const DataPoints sourcePts, const OutlierWeights outlierWeights, const Matches matches);
 		};
 		
 		ErrorMinimizer();
@@ -532,19 +535,19 @@ struct PointMatcher
 		ErrorElements getErrorElements() const; //TODO: ensure that is return a usable value
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 		
 		//! Find the transformation that minimizes the error
-		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		//! Find the transformation that minimizes the error given matched pair of points. This function most be defined for all new instances of ErrorMinimizer.
+		virtual TransformationParameters compute(const ErrorElements& matchedPoints) = 0;
 		
-		
-	//protected:
 		// helper functions
 		static Matrix crossProduct(const Matrix& A, const Matrix& B);//TODO: this might go in pointmatcher_support namespace
-		ErrorElements& getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
 		
 	protected:
-		T pointUsedRatio; //!< the ratio of how many points were used for error minimization
-		T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+		//T pointUsedRatio; //!< the ratio of how many points were used for error minimization
+		//T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
 		//TODO: standardize the use of this variable
 		ErrorElements lastErrorElements; //!< memory of the last computed error
 	};

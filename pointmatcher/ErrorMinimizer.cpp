@@ -36,122 +36,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 #include "PointMatcherPrivate.h"
 
-//! Construct without parameter
-template<typename T>
-PointMatcher<T>::ErrorMinimizer::ErrorMinimizer():
-	pointUsedRatio(-1.),
-	weightedPointUsedRatio(-1.)
-{}
+///////////////////////////////////////
+// ErrorElements
+///////////////////////////////////////
 
-//! Construct with parameters
+//! Constructor without data
 template<typename T>
-PointMatcher<T>::ErrorMinimizer::ErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
-	Parametrizable(className,paramsDoc,params)
-{}
-
-//! virtual destructor
-template<typename T>
-PointMatcher<T>::ErrorMinimizer::~ErrorMinimizer()
-{}
-
-//! Constructor from existing data
-template<typename T>
-PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& reading, const DataPoints reference, const OutlierWeights weights, const Matches matches):
-	reading(reading),
-	reference(reference),
-	weights(weights),
-	matches(matches)
+PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements():
+	reading(DataPoints()),
+	reference(DataPoints()),
+	weights(OutlierWeights()),
+	matches(Matches()),
+	nbRejectedMatches(-1),
+	nbRejectedPoints(-1),
+	pointUsedRatio(-1.0),
+	weightedPointUsedRatio(-1.0)
 {
-	assert(reading.features.cols() == reference.features.cols());
-	assert(reading.features.cols() == weights.cols());
-	assert(reading.features.cols() == matches.dists.cols());
-	// May have no descriptors... size 0
 }
 
-//! Return the ratio of how many points were used for error minimization
+//! Constructor from existing data. This will align the data.
 template<typename T>
-T PointMatcher<T>::ErrorMinimizer::getPointUsedRatio() const
-{
-	return pointUsedRatio;
-}
-
-//! Return the last the ErrorElements structure that was used for error minimization.
-template<typename T>
-typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMinimizer::getErrorElements() const
-{
-	//Warning: the use of the variable lastErrorElements is not standardized yet.
-	return lastErrorElements;
-}
-
-//! Return the ratio of how many points were used (with weight) for error minimization
-template<typename T>
-T PointMatcher<T>::ErrorMinimizer::getWeightedPointUsedRatio() const
-{
-	return weightedPointUsedRatio;
-}
-
-//! If not redefined by child class, return the ratio of how many points were used (with weight) for error minimization
-template<typename T>
-T PointMatcher<T>::ErrorMinimizer::getOverlap() const
-{
-	LOG_INFO_STREAM("ErrorMinimizer - warning, no specific method to compute overlap was provided for the ErrorMinimizer used.");
-	return weightedPointUsedRatio;
-}
-
-//! If not redefined by child class, return zero matrix
-template<typename T>
-typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::getCovariance() const
-{
-  LOG_INFO_STREAM("ErrorMinimizer - warning, no specific method to compute covariance was provided for the ErrorMinimizer used.");
-  return Matrix::Zero(6,6);
-}
-
-//! Helper funtion doing the cross product in 3D and a pseudo cross product in 2D
-template<typename T>
-typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(const Matrix& A, const Matrix& B)
-{
-	//Note: A = [x, y, z, 1] and B = [x, y, z] for convenience
-
-	// Expecting matched points
-	assert(A.cols() == B.cols());
-
-	// Expecting homogenous coord X eucl. coord
-	assert(A.rows() -1 == B.rows());
-
-	// Expecting homogenous coordinates
-	assert(A.rows() == 4 || A.rows() == 3);
-	
-	const unsigned int x = 0;
-	const unsigned int y = 1;
-	const unsigned int z = 2;
-
-	Matrix cross;
-	if(A.rows() == 4)
-	{
-		cross = Matrix(B.rows(), B.cols());
-				
-		cross.row(x) = A.row(y).array() * B.row(z).array() - A.row(z).array() * B.row(y).array();
-		cross.row(y) = A.row(z).array() * B.row(x).array() - A.row(x).array() * B.row(z).array();
-		cross.row(z) = A.row(x).array() * B.row(y).array() - A.row(y).array() * B.row(x).array();
-	}
-	else
-	{
-		//pseudo-cross product for 2D vectors
-		cross = Vector(B.cols());
-		cross = A.row(x).array() * B.row(y).array() - A.row(y).array() * B.row(x).array();
-	}
-	return cross;
-}
-
-
-//! Helper function outputting pair of points from the reference and 
-//! the reading based on the matching matrix
-template<typename T>
-typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorMinimizer::getMatchedPoints(
-		const DataPoints& requestedPts,
-		const DataPoints& sourcePts,
-		const Matches& matches, 
-		const OutlierWeights& outlierWeights)
+PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& requestedPts, const DataPoints sourcePts, const OutlierWeights outlierWeights, const Matches matches)
 {
 	typedef typename Matches::Ids Ids;
 	typedef typename Matches::Dists Dists;
@@ -217,8 +122,8 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorM
 
 	assert(j == pointsCount);
 
-	this->pointUsedRatio = double(j)/double(knn*requestedPts.features.cols());
-	this->weightedPointUsedRatio /= double(knn*requestedPts.features.cols());
+	this->pointUsedRatio = T(j)/T(knn*requestedPts.features.cols());
+	this->weightedPointUsedRatio /= T(knn*requestedPts.features.cols());
 	
 	assert(dimFeat == sourcePts.features.rows());
 	const int dimSourDesc = sourcePts.descriptors.rows();
@@ -238,25 +143,148 @@ typename PointMatcher<T>::ErrorMinimizer::ErrorElements& PointMatcher<T>::ErrorM
 			associatedDesc.col(i) = sourcePts.descriptors.block(0, refIndex, dimSourDesc, 1);
 	}
 
-	this->lastErrorElements.reading = DataPoints(
+	this->reading = DataPoints(
 		keptFeat, 
 		requestedPts.featureLabels,
 		keptDesc,
 		requestedPts.descriptorLabels
 	);
-	this->lastErrorElements.reference = DataPoints(
+	this->reference = DataPoints(
 		associatedFeat,
 		sourcePts.featureLabels,
 		associatedDesc,
 		sourcePts.descriptorLabels
 	);
-	this->lastErrorElements.weights = keptWeights;
-	this->lastErrorElements.matches = keptMatches;
-	this->lastErrorElements.nbRejectedMatches = rejectedMatchCount;
-	this->lastErrorElements.nbRejectedPoints = rejectedPointCount;
-
-	return this->lastErrorElements;
+	this->weights = keptWeights;
+	this->matches = keptMatches;
+	this->nbRejectedMatches = rejectedMatchCount;
+	this->nbRejectedPoints = rejectedPointCount;
 }
+
+
+///////////////////////////////////////
+// ErrorMinimizer
+///////////////////////////////////////
+
+//! Construct without parameter
+template<typename T>
+PointMatcher<T>::ErrorMinimizer::ErrorMinimizer()
+{}
+
+//! Construct with parameters
+template<typename T>
+PointMatcher<T>::ErrorMinimizer::ErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	Parametrizable(className,paramsDoc,params)
+{}
+
+//! virtual destructor
+template<typename T>
+PointMatcher<T>::ErrorMinimizer::~ErrorMinimizer()
+{}
+
+//! Find the transformation that minimizes the error
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ErrorMinimizer::compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches)
+{
+	
+	// generates pairs of matching points
+	typename ErrorMinimizer::ErrorElements matchedPoints(filteredReading, filteredReference, outlierWeights, matches);
+	
+	// calls specific instantiation for a given ErrorMinimizer
+	TransformationParameters transform = this->compute(matchedPoints);
+	
+	// saves paired points for future introspection
+	this->lastErrorElements = matchedPoints;
+	
+	// returns transforme parameters
+	return transform;
+}
+
+//! Return the ratio of how many points were used for error minimization
+template<typename T>
+T PointMatcher<T>::ErrorMinimizer::getPointUsedRatio() const
+{
+	return lastErrorElements.pointUsedRatio;
+}
+
+//! Return the last the ErrorElements structure that was used for error minimization.
+template<typename T>
+typename PointMatcher<T>::ErrorMinimizer::ErrorElements PointMatcher<T>::ErrorMinimizer::getErrorElements() const
+{
+	//Warning: the use of the variable lastErrorElements is not standardized yet.
+	return lastErrorElements;
+}
+
+//! Return the ratio of how many points were used (with weight) for error minimization
+template<typename T>
+T PointMatcher<T>::ErrorMinimizer::getWeightedPointUsedRatio() const
+{
+	return lastErrorElements.weightedPointUsedRatio;
+}
+
+//! If not redefined by child class, return the ratio of how many points were used (with weight) for error minimization
+template<typename T>
+T PointMatcher<T>::ErrorMinimizer::getOverlap() const
+{
+	LOG_WARNING_STREAM("ErrorMinimizer - warning, no specific method to compute overlap was provided for the ErrorMinimizer used.");
+	return lastErrorElements.weightedPointUsedRatio;
+}
+
+//! If not redefined by child class, return zero matrix
+template<typename T>
+typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::getCovariance() const
+{
+	LOG_WARNING_STREAM("ErrorMinimizer - warning, no specific method to compute covariance was provided for the ErrorMinimizer used.");
+	return Matrix::Zero(6,6);
+}
+
+//! If not redefined by child class, return max value for T
+template<typename T>
+T PointMatcher<T>::ErrorMinimizer::getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const
+{
+	LOG_WARNING_STREAM("ErrorMinimizer - warning, no specific method to compute residual was provided for the ErrorMinimizer used.");
+	return std::numeric_limits<T>::max();
+}
+
+//! Helper funtion doing the cross product in 3D and a pseudo cross product in 2D
+template<typename T>
+typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::crossProduct(const Matrix& A, const Matrix& B)
+{
+	//Note: A = [x, y, z, 1] and B = [x, y, z] for convenience
+
+	// Expecting matched points
+	assert(A.cols() == B.cols());
+
+	// Expecting homogenous coord X eucl. coord
+	assert(A.rows() -1 == B.rows());
+
+	// Expecting homogenous coordinates
+	assert(A.rows() == 4 || A.rows() == 3);
+	
+	const unsigned int x = 0;
+	const unsigned int y = 1;
+	const unsigned int z = 2;
+
+	Matrix cross;
+	if(A.rows() == 4)
+	{
+		cross = Matrix(B.rows(), B.cols());
+				
+		cross.row(x) = A.row(y).array() * B.row(z).array() - A.row(z).array() * B.row(y).array();
+		cross.row(y) = A.row(z).array() * B.row(x).array() - A.row(x).array() * B.row(z).array();
+		cross.row(z) = A.row(x).array() * B.row(y).array() - A.row(y).array() * B.row(x).array();
+	}
+	else
+	{
+		//pseudo-cross product for 2D vectors
+		cross = Vector(B.cols());
+		cross = A.row(x).array() * B.row(y).array() - A.row(y).array() * B.row(x).array();
+	}
+	return cross;
+}
+
+
+
 
 template struct PointMatcher<float>::ErrorMinimizer;
 template struct PointMatcher<double>::ErrorMinimizer;
