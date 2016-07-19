@@ -519,8 +519,11 @@ struct PointMatcher
 			Matches matches; //!< associations
 			int nbRejectedMatches; //!< number of matches with zero weights
 			int nbRejectedPoints; //!< number of points with all matches set to zero weights
+			int pointUsedRatio;  //!< the ratio of how many points were used for error minimization
+			int weightedPointUsedRatio;//!< the ratio of how many points were used (with weight) for error minimization
 
-			ErrorElements(const DataPoints& reading=DataPoints(), const DataPoints reference = DataPoints(), const OutlierWeights weights = OutlierWeights(), const Matches matches = Matches());
+			ErrorElements();
+			ErrorElements(const DataPoints& requestedPts, const DataPoints sourcePts, const OutlierWeights outlierWeights, const Matches matches);
 		};
 		
 		ErrorMinimizer();
@@ -537,12 +540,8 @@ struct PointMatcher
 		//! Find the transformation that minimizes the error
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
 		
-		
-	//protected:
 		// helper functions
 		static Matrix crossProduct(const Matrix& A, const Matrix& B);//TODO: this might go in pointmatcher_support namespace
-		ErrorElements& getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
-		ErrorElements  getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights) const;
 		
 	protected:
 		T pointUsedRatio; //!< the ratio of how many points were used for error minimization

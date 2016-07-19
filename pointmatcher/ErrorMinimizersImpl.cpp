@@ -125,7 +125,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 {	
 	assert(matches.ids.rows() > 0);
 
-	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
@@ -184,8 +184,7 @@ T ErrorMinimizersImpl<T>::PointToPointErrorMinimizer::getResidualError(
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
-	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	return getPointToPointResidualError<T>(mPts);
 }
@@ -239,7 +238,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 {	
 	assert(matches.ids.rows() > 0);
 
-	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
@@ -305,8 +304,7 @@ T ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer::getResidualError
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
-	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	return getPointToPointResidualError<T>(mPts);
 }
@@ -424,7 +422,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	const int dim = mPts.reading.features.rows();
 	const int nbPts = mPts.reading.features.cols();
@@ -544,8 +542,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getResidualError(
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
-	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	return getPointToPlaneResidualError<T>(mPts,force2D);
 }
@@ -669,7 +666,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 {	
 	assert(matches.ids.rows() > 0);
 
-	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 	
 	// now minimize on kept points
 	const int dimCount(mPts.reading.features.rows());
@@ -708,8 +705,7 @@ T ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer::getResidualError(
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
-	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	return getPointToPointResidualError<T>(mPts);
 }
@@ -857,7 +853,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	const int dim = mPts.reading.features.rows();
 	const int nbPts = mPts.reading.features.cols();
@@ -971,8 +967,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getResidualError(
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	// NOTE: getResidualError is a const method, so we're in fact calling the const version of getMatchedPoints
-	typename ErrorMinimizer::ErrorElements mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	return getPointToPlaneResidualError<T>(mPts,force2D);
 }

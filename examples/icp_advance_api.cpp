@@ -204,7 +204,7 @@ int main(int argc, const char *argv[])
 	const PM::OutlierWeights outlierWeights = icp.outlierFilters.compute(data_out, ref, matches);
 	
 	// generate tuples of matched points and remove pairs with zero weight
-	const PM::ErrorMinimizer::ErrorElements matchedPoints = icp.errorMinimizer->getMatchedPoints( data_out, ref, matches, outlierWeights);
+	const PM::ErrorMinimizer::ErrorElements matchedPoints( data_out, ref, outlierWeights, matches);
 
 	// extract relevant information for convenience
 	const int dim = matchedPoints.reading.getEuclideanDim();
