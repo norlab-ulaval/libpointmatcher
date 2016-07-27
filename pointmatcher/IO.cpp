@@ -1279,7 +1279,15 @@ template <typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& is)
 {
 	//TODO: adapt following loadCSV()
-	typedef vector<PLYElement*> Elements;
+	class Elements : public vector<PLYElement*>{
+	 public:
+		~Elements(){
+			for (typename vector<PLYElement*>::const_iterator it = this->begin(); it != this->end(); it++ )
+			{
+				delete *it;
+			}
+		}
+	};
 
 	/*
 	Steps:
@@ -1385,6 +1393,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 				for (typename Elements::const_iterator it = elements.begin(); it != elements.end(); it++ )
 				{
 					if (**it == *elem) {
+						delete elem;
 						throw runtime_error(string("PLY parse error: element: ") + elem_name + string( "is already defined"));
 					}
 				}
