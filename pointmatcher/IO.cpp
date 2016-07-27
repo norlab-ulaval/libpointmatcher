@@ -998,8 +998,15 @@ void skipBlock(bool binary, int binarySize, std::istream & is, bool hasSeparateS
 	int n;
 	int size;
 	is >> n;
+	if(!is.good()){
+		throw std::runtime_error("File violates the VTK format : parameter 'n' is missing after a field name.");
+	}
+
 	if(hasSeparateSizeParameter) {
 		is >> size;
+		if(!is.good()){
+			throw std::runtime_error("File violates the VTK format : parameter 'size' is missing after a field name.");
+		}
 	} else {
 		size = n;
 	}
@@ -1059,7 +1066,10 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	while (is.good())
 	{
 		is >> fieldName;
-		
+		if(is.eof()) {
+			break;
+		}
+
 		// load features
 		if(fieldName == "POINTS")
 		{
