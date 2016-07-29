@@ -227,22 +227,12 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		}
 	}
 	
-	//buildScalarStream(stream, "densities", data);
-	//buildScalarStream(stream, "obstacles", data);
-	//buildScalarStream(stream, "inclination", data);
-	//buildScalarStream(stream, "maxSearchDist", data);
-	//buildScalarStream(stream, "inliers", data);
-	//buildScalarStream(stream, "groupId", data);
-	//buildScalarStream(stream, "simpleSensorNoise", data);
-	
-	//buildNormalStream(stream, "normals", data);
-	
-	//buildVectorStream(stream, "observationDirections", data);
-	//buildVectorStream(stream, "eigValues", data);
-	
-	//buildTensorStream(stream, "eigVectors", data);
-	
-	//buildColorStream(stream, "color", data);
+	// Loop through all time fields, split in sec and nsec and export as two scalar
+	for(BOOST_AUTO(it, data.timeLabels.begin()); it != data.timeLabels.end(); it++)
+	{
+		//buildScalarStream(stream, it->text, data);
+
+	}
 
 }
 
@@ -617,6 +607,44 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildTensorStream(std::ostream& st
 				descRead, 9, reading.descriptors.cols()).transpose();
 		stream << "\n";
 	}
+}
+
+template<typename T>
+void InspectorsImpl<T>::AbstractVTKInspector::buildTimeStream(std::ostream& stream, const std::string& name, const DataPoints& cloud)
+{
+	//TODO: this check is a reminder of the old implementation. Check
+	// if we still need that. FP
+	if (!cloud.timeExists(name))
+		return;
+		
+	const BOOST_AUTO(time, cloud.getTimeViewByName(name));
+	assert(time.rows() == 1);
+
+	// Loop through the array to split the lower and higher part of int64_t
+	// TODO: if an Eigen matrix operator can do it without loop, change that
+
+	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> sec(time.cols());
+	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> nsec(time.cols());
+
+	for(int i=0; i<time.cols(); i++)
+	{
+		nsec(0, i) = (uint32_t)time(0, i);
+		sec(0, i) = (uint32_t)(time(0, i) >> 32);
+	}
+	
+	stream << "SCALAR" << " " << name << "_splitTime_sec" << " " << "unsigned_int" << "\n";
+	stream << "LOOKUP_TABLE default\n";
+
+	writeVtkData(bWriteBinary, sec.transpose(), stream);
+
+	stream << "\n";
+
+	stream << "SCALAR" << " " << name << "_splitTime_nsec" << " " << "unsigned_int" << "\n";
+	stream << "LOOKUP_TABLE default\n";
+
+	writeVtkData(bWriteBinary, nsec.transpose(), stream);
+
+	stream << "\n";
 }
 
 template<typename T>
