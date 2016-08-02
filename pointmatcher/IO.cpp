@@ -998,8 +998,15 @@ void skipBlock(bool binary, int binarySize, std::istream & is, bool hasSeparateS
 	int n;
 	int size;
 	is >> n;
+	if(!is.good()){
+		throw std::runtime_error("File violates the VTK format : parameter 'n' is missing after a field name.");
+	}
+
 	if(hasSeparateSizeParameter) {
 		is >> size;
+		if(!is.good()){
+			throw std::runtime_error("File violates the VTK format : parameter 'size' is missing after a field name.");
+		}
 	} else {
 		size = n;
 	}
@@ -1059,7 +1066,10 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	while (is.good())
 	{
 		is >> fieldName;
-		
+		if(is.eof()) {
+			break;
+		}
+
 		// load features
 		if(fieldName == "POINTS")
 		{
@@ -1279,7 +1289,15 @@ template <typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& is)
 {
 	//TODO: adapt following loadCSV()
-	typedef vector<PLYElement*> Elements;
+	class Elements : public vector<PLYElement*>{
+	 public:
+		~Elements(){
+			for (typename vector<PLYElement*>::const_iterator it = this->begin(); it != this->end(); it++ )
+			{
+				delete *it;
+			}
+		}
+	};
 
 	/*
 	Steps:
@@ -1385,6 +1403,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 				for (typename Elements::const_iterator it = elements.begin(); it != elements.end(); it++ )
 				{
 					if (**it == *elem) {
+						delete elem;
 						throw runtime_error(string("PLY parse error: element: ") + elem_name + string( "is already defined"));
 					}
 				}
