@@ -1,4 +1,4 @@
-// kate: replace-tabs off; indent-width 4; indent-mode normal
+// kate: replace-tabs off; indent-width 4; indent-mode 
 // vim: ts=4:sw=4:noexpandtab
 /*
 
@@ -230,8 +230,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	// Loop through all time fields, split in sec and nsec and export as two scalar
 	for(BOOST_AUTO(it, data.timeLabels.begin()); it != data.timeLabels.end(); it++)
 	{
-		//buildScalarStream(stream, it->text, data);
-
+		buildTimeStream(stream, it->text, data);
 	}
 
 }
@@ -632,14 +631,14 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildTimeStream(std::ostream& stre
 		sec(0, i) = (uint32_t)(time(0, i) >> 32);
 	}
 	
-	stream << "SCALAR" << " " << name << "_splitTime_sec" << " " << "unsigned_int" << "\n";
+	stream << "SCALARS" << " " << name << "_splitTime_sec" << " " << "unsigned_int" << "\n";
 	stream << "LOOKUP_TABLE default\n";
 
 	writeVtkData(bWriteBinary, sec.transpose(), stream);
 
 	stream << "\n";
 
-	stream << "SCALAR" << " " << name << "_splitTime_nsec" << " " << "unsigned_int" << "\n";
+	stream << "SCALARS" << " " << name << "_splitTime_nsec" << " " << "unsigned_int" << "\n";
 	stream << "LOOKUP_TABLE default\n";
 
 	writeVtkData(bWriteBinary, nsec.transpose(), stream);
@@ -715,7 +714,8 @@ void InspectorsImpl<T>::VTKFileInspector::init()
  
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
-	std::cerr << "writing to " << oss.str() << std::endl;
+	//std::cerr << "writing to " << oss.str() << std::endl;
+	LOG_INFO_STREAM("writing to " << oss.str());
 
 	this->streamIter = new ofstream(oss.str().c_str());
 	if (this->streamIter->fail())
@@ -743,7 +743,8 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 	else
 		oss << filteredStr << ".vtk";
 
-	std::cerr << "writing to " << oss.str() << std::endl;
+	//std::cerr << "writing to " << oss.str() << std::endl;
+	LOG_INFO_STREAM("writing to " << oss.str());
 	ofstream* file = new ofstream(oss.str().c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
