@@ -45,45 +45,58 @@ extern const bool isBigEndian; //!< true if platform is big endian
 extern const int oneBigEndian; //!< is always a big endian independent of the platforms endianness
 
 template <typename T>
-struct ConverterToAndFromBytes {
-	union {
+struct ConverterToAndFromBytes 
+{
+	union 
+	{
 		T v;
 		char bytes[sizeof(T)];
 	};
 
 	ConverterToAndFromBytes(T v = static_cast<T>(0)) : v(v) {}
 
-	void swapBytes(){
+	void swapBytes()
+	{
 		ConverterToAndFromBytes tmp(this->v);
 		std::reverse_copy(tmp.bytes, tmp.bytes + sizeof(T), bytes);
 	}
 
-	friend std::ostream & operator << (std::ostream & out, const ConverterToAndFromBytes & c){
+	friend std::ostream & operator << (std::ostream & out, const ConverterToAndFromBytes & c)
+	{
 		out.write(c.bytes, sizeof(T));
 		return out;
 	}
-	friend std::istream & operator >> (std::istream & in, ConverterToAndFromBytes & c){
+	friend std::istream & operator >> (std::istream & in, ConverterToAndFromBytes & c)
+	{
 		in.read(c.bytes, sizeof(T));
 		return in;
 	}
 };
 
 template<typename Matrix>
-std::ostream & writeVtkData(bool writeBinary,const Matrix & data, std::ostream & out){
-	if(writeBinary){
+std::ostream & writeVtkData(bool writeBinary,const Matrix & data, std::ostream & out)
+{
+	if(writeBinary)
+	{
 		typedef typename Matrix::Scalar TargetDataType;
-		for(int r = 0; r < data.rows(); r++){
-			for(int c = 0; c < data.cols(); c++){
+		for(int r = 0; r < data.rows(); r++)
+		{
+			for(int c = 0; c < data.cols(); c++)
+			{
 				ConverterToAndFromBytes<TargetDataType> converter(static_cast<TargetDataType>(data(r, c)));
-				if(!isBigEndian){
+				if(!isBigEndian)
+				{
 					converter.swapBytes();
 				}
 				out << converter;
 			}
 		}
-	}else {
+	}
+	else 
+	{
 		out << data;
 	}
+
 	return out;
 }
 
@@ -117,7 +130,8 @@ std::istream & readVtkData(bool readBinary, MatrixRef into, std::istream & in)
 }
 
 template<typename MatrixRef>
-std::istream & readVtkData(std::string dataType, bool readBinary, MatrixRef into, std::istream & in){
+std::istream & readVtkData(std::string dataType, bool readBinary, MatrixRef into, std::istream & in)
+{
 	if(dataType == "float")
 	{
 		return readVtkData<float>(readBinary, into, in);

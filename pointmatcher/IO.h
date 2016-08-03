@@ -199,8 +199,14 @@ struct PointMatcherIO
 	//! Storage for time loaded separatly
 	struct SplitTime
 	{
+		bool isSecFound;
+		bool isNsecFound;
 		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> sec;
 		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> nsec;
+
+		//! Constructor
+		SplitTime(): isSecFound(false), isNsecFound(false){};
+
 	};
 
 	static DataPoints loadVTK(const std::string& fileName);

@@ -1245,15 +1245,17 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 				// Load seconds
 				if(isTimeSec)
 				{
-					assert(labelledSplitTime[name].sec.cols() == 0);
+					assert(labelledSplitTime[name].isSecFound == false);
 					readVtkData(type, isBinary, labelledSplitTime[name].sec.transpose(), is);
+					labelledSplitTime[name].isSecFound = true;
 				}
 				
 				// Load nano seconds
 				if(isTimeNsec)
 				{
-					assert(labelledSplitTime[name].nsec.cols() == 0);
+					assert(labelledSplitTime[name].isNsecFound == false);
 					readVtkData(type, isBinary, labelledSplitTime[name].nsec.transpose(), is);
+					labelledSplitTime[name].isNsecFound = true;
 				}
 			}
 			else
@@ -1290,12 +1292,12 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	for(it=labelledSplitTime.begin(); it!=labelledSplitTime.end(); it++)
 	{
 		// Confirm that both parts were loaded
-		if(it->second.sec.cols() == 0)
+		if(it->second.isSecFound == false)
 		{
 			throw runtime_error(string("Missing time field representing seconds. Expecting SCALARS with name " + it->first + "_splitTime_sec in the VTK file."));
 		}
 		
-		if(it->second.nsec.cols() == 0)
+		if(it->second.isNsecFound == false)
 		{
 			throw runtime_error(string("Missing time field representing nano seconds. Expecting SCALARS with name " + it->first + "_splitTime_nsec in the VTK file."));
 		}
