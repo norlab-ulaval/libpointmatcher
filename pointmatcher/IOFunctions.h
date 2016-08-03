@@ -88,33 +88,50 @@ std::ostream & writeVtkData(bool writeBinary,const Matrix & data, std::ostream &
 }
 
 template<typename DataType, typename MatrixRef>
-std::istream & readVtkData(bool readBinary, MatrixRef into, std::istream & in){
+std::istream & readVtkData(bool readBinary, MatrixRef into, std::istream & in)
+{
 	typedef typename MatrixRef::Scalar TargetDataType;
-	for(int r = 0; r < into.rows(); r++){
-		for(int c = 0; c < into.cols(); c++){
+	
+	for(int r = 0; r < into.rows(); r++)
+	{
+		for(int c = 0; c < into.cols(); c++)
+		{
 			TargetDataType & dest = into(r, c);
-			if(readBinary){
+			if(readBinary)
+			{
 				ConverterToAndFromBytes<DataType> converter;
 				in >> converter;
 				if(!isBigEndian){
 					converter.swapBytes();
 				}
 				dest = converter.v;
-			}else {
+			}
+			else 
+			{
 				in >> dest;
 			}
 		}
 	}
+
 	return in;
 }
 
 template<typename MatrixRef>
 std::istream & readVtkData(std::string dataType, bool readBinary, MatrixRef into, std::istream & in){
-	if(dataType == "float"){
+	if(dataType == "float")
+	{
 		return readVtkData<float>(readBinary, into, in);
-	} else if (dataType == "double") {
+	} 
+	else if (dataType == "double") 
+	{
 		return readVtkData<double>(readBinary, into, in);
-	} else {
+	} 
+	else if (dataType == "unsigned_int") 
+	{
+		return readVtkData<unsigned int>(readBinary, into, in);
+	}
+	else 
+	{
 		throw std::runtime_error(std::string("Unsupported data type : " + dataType + "! Expected 'float' or 'double'."));
 	}
 }

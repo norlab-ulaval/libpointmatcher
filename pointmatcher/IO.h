@@ -196,6 +196,13 @@ struct PointMatcherIO
 		UNSTRUCTURED_GRID
 	};
 
+	//! Storage for time loaded separatly
+	struct SplitTime
+	{
+		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> sec;
+		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> nsec;
+	};
+
 	static DataPoints loadVTK(const std::string& fileName);
 	static DataPoints loadVTK(std::istream& is);
 
