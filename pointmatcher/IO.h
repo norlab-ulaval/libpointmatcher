@@ -199,13 +199,15 @@ struct PointMatcherIO
 	//! Storage for time loaded separatly
 	struct SplitTime
 	{
-		bool isSecFound;
-		bool isNsecFound;
-		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> sec;
-		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> nsec;
+		bool isHigh32Found;//!< was the high 32bits found in the file
+		bool isLow32Found;//!< was the low 32bits found in the file
+		//! Matrix containing file data representing the high 32 bits
+		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> high32;
+		//! Matrix containing file data representing the low 32 bits
+		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> low32;
 
 		//! Constructor
-		SplitTime(): isSecFound(false), isNsecFound(false){};
+		SplitTime(): isHigh32Found(false), isLow32Found(false){};
 
 	};
 

@@ -198,7 +198,6 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	// Loop through all descriptor and dispatch appropriate VTK tags
 	for(BOOST_AUTO(it, data.descriptorLabels.begin()); it != data.descriptorLabels.end(); it++)
 	{
-
 		// handle specific cases
 		if(it->text == "normals")
 		{
@@ -227,7 +226,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		}
 	}
 	
-	// Loop through all time fields, split in sec and nsec and export as two scalar
+	// Loop through all time fields, split in high 32 bits and low 32 bits and export as two scalar
 	for(BOOST_AUTO(it, data.timeLabels.begin()); it != data.timeLabels.end(); it++)
 	{
 		buildTimeStream(stream, it->text, data);
@@ -622,26 +621,26 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildTimeStream(std::ostream& stre
 	// Loop through the array to split the lower and higher part of int64_t
 	// TODO: if an Eigen matrix operator can do it without loop, change that
 
-	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> sec(time.cols());
-	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> nsec(time.cols());
+	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> high32(time.cols());
+	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> low32(time.cols());
 
 	for(int i=0; i<time.cols(); i++)
 	{
-		nsec(0, i) = (uint32_t)time(0, i);
-		sec(0, i) = (uint32_t)(time(0, i) >> 32);
+		high32(0, i) = (uint32_t)(time(0, i) >> 32);
+		low32(0, i) = (uint32_t)time(0, i);
 	}
 	
-	stream << "SCALARS" << " " << name << "_splitTime_sec" << " " << "unsigned_int" << "\n";
+	stream << "SCALARS" << " " << name << "_splitTime_high32" << " " << "unsigned_int" << "\n";
 	stream << "LOOKUP_TABLE default\n";
 
-	writeVtkData(bWriteBinary, sec.transpose(), stream);
+	writeVtkData(bWriteBinary, high32.transpose(), stream);
 
 	stream << "\n";
 
-	stream << "SCALARS" << " " << name << "_splitTime_nsec" << " " << "unsigned_int" << "\n";
+	stream << "SCALARS" << " " << name << "_splitTime_low32" << " " << "unsigned_int" << "\n";
 	stream << "LOOKUP_TABLE default\n";
 
-	writeVtkData(bWriteBinary, nsec.transpose(), stream);
+	writeVtkData(bWriteBinary, low32.transpose(), stream);
 
 	stream << "\n";
 }

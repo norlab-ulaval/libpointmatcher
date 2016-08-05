@@ -1059,9 +1059,9 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	int dim = 0;
 	int pointCount = 0;
 	string type;
-	while (is.good())
+	
+	while (is >> fieldName)
 	{
-		is >> fieldName;
 		
 		// load features
 		if(fieldName == "POINTS")
@@ -1164,22 +1164,24 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 		}
 		else // Load descriptors or time
 		{
+
 			// label name
 			is >> name;
 			
 			bool isTimeSec = false;
 			bool isTimeNsec = false;
 
-			if(boost::algorithm::ends_with(name, "_splitTime_sec"))
+
+			if(boost::algorithm::ends_with(name, "_splitTime_high32"))
 			{
 				isTimeSec = true;
-				boost::algorithm::erase_last(name, "_splitTime_sec");
+				boost::algorithm::erase_last(name, "_splitTime_high32");
 			}
 			
-			if(boost::algorithm::ends_with(name, "_splitTime_nsec"))
+			if(boost::algorithm::ends_with(name, "_splitTime_low32"))
 			{
 				isTimeNsec = true;
-				boost::algorithm::erase_last(name, "_splitTime_nsec");
+				boost::algorithm::erase_last(name, "_splitTime_low32");
 			}
 
 			
@@ -1218,8 +1220,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 			
 			getline(is, line); // remove rest of the parameter line including its line end;
 
-			Matrix descriptorData(dim, pointCount);
-
 			
 			// Load time data
 			if(isTimeSec || isTimeNsec)
@@ -1237,29 +1237,32 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 				if(it == labelledSplitTime.end())
 				{
 					SplitTime t;
-					t.sec = Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> (dim, pointCount);
-					t.nsec = t.sec;
+					t.high32 = Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> (dim, pointCount);
+					t.low32 = t.high32;
 					labelledSplitTime[name] = t;
 				}
 
 				// Load seconds
 				if(isTimeSec)
 				{
-					assert(labelledSplitTime[name].isSecFound == false);
-					readVtkData(type, isBinary, labelledSplitTime[name].sec.transpose(), is);
-					labelledSplitTime[name].isSecFound = true;
+					assert(labelledSplitTime[name].isHigh32Found == false);
+					readVtkData(type, isBinary, labelledSplitTime[name].high32.transpose(), is);
+					labelledSplitTime[name].isHigh32Found = true;
 				}
 				
 				// Load nano seconds
 				if(isTimeNsec)
 				{
-					assert(labelledSplitTime[name].isNsecFound == false);
-					readVtkData(type, isBinary, labelledSplitTime[name].nsec.transpose(), is);
-					labelledSplitTime[name].isNsecFound = true;
+					assert(labelledSplitTime[name].isLow32Found == false);
+					readVtkData(type, isBinary, labelledSplitTime[name].low32.transpose(), is);
+					labelledSplitTime[name].isLow32Found = true;
 				}
 			}
 			else
 			{
+				
+				Matrix descriptorData(dim, pointCount);
+				
 				if(isColorScalars && isBinary) 
 				{
 					std::vector<unsigned char> buffer(dim);
@@ -1272,8 +1275,8 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 				} 
 				else 
 				{
-					if(!(type == "float" || type == "double" || type == "unsigned_int"))
-						throw runtime_error(string("Field " + fieldName + " is " + type + " but can only be of type double, float or unsigned_int."));
+					if(!(type == "float" || type == "double"))
+						throw runtime_error(string("Field " + fieldName + " is " + type + " but can only be of type double or float."));
 
 					// Skip LOOKUP_TABLE line
 					if(skipLookupTable)
@@ -1292,22 +1295,22 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	for(it=labelledSplitTime.begin(); it!=labelledSplitTime.end(); it++)
 	{
 		// Confirm that both parts were loaded
-		if(it->second.isSecFound == false)
+		if(it->second.isHigh32Found == false)
 		{
-			throw runtime_error(string("Missing time field representing seconds. Expecting SCALARS with name " + it->first + "_splitTime_sec in the VTK file."));
+			throw runtime_error(string("Missing time field representing the higher 32 bits. Expecting SCALARS with name " + it->first + "_splitTime_high32 in the VTK file."));
 		}
 		
-		if(it->second.isNsecFound == false)
+		if(it->second.isLow32Found == false)
 		{
-			throw runtime_error(string("Missing time field representing nano seconds. Expecting SCALARS with name " + it->first + "_splitTime_nsec in the VTK file."));
+			throw runtime_error(string("Missing time field representing the lower 32 bits. Expecting SCALARS with name " + it->first + "_splitTime_low32 in the VTK file."));
 		}
 
 		// Loop through points
 		Int64Matrix timeData(1,pointCount);
-		for(int i=0; i<it->second.sec.cols(); i++)
+		for(int i=0; i<it->second.high32.cols(); i++)
 		{
 		
-			timeData(0,i) = (((boost::int64_t) it->second.sec(0,i)) << 32) | ((boost::int64_t) it->second.nsec(0,i));
+			timeData(0,i) = (((boost::int64_t) it->second.high32(0,i)) << 32) | ((boost::int64_t) it->second.low32(0,i));
 		}
 
 		loadedPoints.addTime(it->first, timeData);
