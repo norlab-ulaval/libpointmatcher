@@ -196,6 +196,21 @@ struct PointMatcherIO
 		UNSTRUCTURED_GRID
 	};
 
+	//! Storage for time loaded separatly
+	struct SplitTime
+	{
+		bool isHigh32Found;//!< was the high 32bits found in the file
+		bool isLow32Found;//!< was the low 32bits found in the file
+		//! Matrix containing file data representing the high 32 bits
+		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> high32;
+		//! Matrix containing file data representing the low 32 bits
+		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> low32;
+
+		//! Constructor
+		SplitTime(): isHigh32Found(false), isLow32Found(false){};
+
+	};
+
 	static DataPoints loadVTK(const std::string& fileName);
 	static DataPoints loadVTK(std::istream& is);
 

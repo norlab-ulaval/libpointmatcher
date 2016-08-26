@@ -1,4 +1,4 @@
-// kate: replace-tabs off; indent-width 4; indent-mode normal
+// kate: replace-tabs off; indent-width 4; indent-mode 
 // vim: ts=4:sw=4:noexpandtab
 /*
 
@@ -198,7 +198,6 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	// Loop through all descriptor and dispatch appropriate VTK tags
 	for(BOOST_AUTO(it, data.descriptorLabels.begin()); it != data.descriptorLabels.end(); it++)
 	{
-
 		// handle specific cases
 		if(it->text == "normals")
 		{
@@ -227,22 +226,11 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		}
 	}
 	
-	//buildScalarStream(stream, "densities", data);
-	//buildScalarStream(stream, "obstacles", data);
-	//buildScalarStream(stream, "inclination", data);
-	//buildScalarStream(stream, "maxSearchDist", data);
-	//buildScalarStream(stream, "inliers", data);
-	//buildScalarStream(stream, "groupId", data);
-	//buildScalarStream(stream, "simpleSensorNoise", data);
-	
-	//buildNormalStream(stream, "normals", data);
-	
-	//buildVectorStream(stream, "observationDirections", data);
-	//buildVectorStream(stream, "eigValues", data);
-	
-	//buildTensorStream(stream, "eigVectors", data);
-	
-	//buildColorStream(stream, "color", data);
+	// Loop through all time fields, split in high 32 bits and low 32 bits and export as two scalar
+	for(BOOST_AUTO(it, data.timeLabels.begin()); it != data.timeLabels.end(); it++)
+	{
+		buildTimeStream(stream, it->text, data);
+	}
 
 }
 
@@ -620,6 +608,44 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildTensorStream(std::ostream& st
 }
 
 template<typename T>
+void InspectorsImpl<T>::AbstractVTKInspector::buildTimeStream(std::ostream& stream, const std::string& name, const DataPoints& cloud)
+{
+	//TODO: this check is a reminder of the old implementation. Check
+	// if we still need that. FP
+	if (!cloud.timeExists(name))
+		return;
+		
+	const BOOST_AUTO(time, cloud.getTimeViewByName(name));
+	assert(time.rows() == 1);
+
+	// Loop through the array to split the lower and higher part of int64_t
+	// TODO: if an Eigen matrix operator can do it without loop, change that
+
+	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> high32(time.cols());
+	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> low32(time.cols());
+
+	for(int i=0; i<time.cols(); i++)
+	{
+		high32(0, i) = (uint32_t)(time(0, i) >> 32);
+		low32(0, i) = (uint32_t)time(0, i);
+	}
+	
+	stream << "SCALARS" << " " << name << "_splitTime_high32" << " " << "unsigned_int" << "\n";
+	stream << "LOOKUP_TABLE default\n";
+
+	writeVtkData(bWriteBinary, high32.transpose(), stream);
+
+	stream << "\n";
+
+	stream << "SCALARS" << " " << name << "_splitTime_low32" << " " << "unsigned_int" << "\n";
+	stream << "LOOKUP_TABLE default\n";
+
+	writeVtkData(bWriteBinary, low32.transpose(), stream);
+
+	stream << "\n";
+}
+
+template<typename T>
 typename PointMatcher<T>::Matrix InspectorsImpl<T>::AbstractVTKInspector::padWithZeros(
 	const Matrix m,
 	const int expectedRow,
@@ -687,7 +713,8 @@ void InspectorsImpl<T>::VTKFileInspector::init()
  
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
-	std::cerr << "writing to " << oss.str() << std::endl;
+	//std::cerr << "writing to " << oss.str() << std::endl;
+	LOG_INFO_STREAM("writing to " << oss.str());
 
 	this->streamIter = new ofstream(oss.str().c_str());
 	if (this->streamIter->fail())
@@ -715,7 +742,8 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 	else
 		oss << filteredStr << ".vtk";
 
-	std::cerr << "writing to " << oss.str() << std::endl;
+	//std::cerr << "writing to " << oss.str() << std::endl;
+	LOG_INFO_STREAM("writing to " << oss.str());
 	ofstream* file = new ofstream(oss.str().c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");

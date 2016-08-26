@@ -433,22 +433,27 @@ TEST_F(IOLoadSaveTest, VTK)
 {
 	ptCloud.addDescriptor("genericScalar", PM::Matrix::Random(1, nbPts));
 	ptCloud.addDescriptor("genericVector", PM::Matrix::Random(3, nbPts));
+	ptCloud.addTime("genericTime", PM::Int64Matrix::Random(1, nbPts));
 
 	loadSaveTest(dataPath + "unit_test.vtk");
 
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericScalar",1));
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericVector",3));
+	EXPECT_TRUE(ptCloudFromFile.timeExists("genericTime",1));
+
 }
 
 TEST_F(IOLoadSaveTest, VTKBinary)
 {
 	ptCloud.addDescriptor("genericScalar", PM::Matrix::Random(1, nbPts));
 	ptCloud.addDescriptor("genericVector", PM::Matrix::Random(3, nbPts));
+	ptCloud.addTime("genericTime", PM::Int64Matrix::Random(1, nbPts));
 
 	loadSaveTest(dataPath + "unit_test.bin.vtk", false, 10, true);
 
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericScalar",1));
 	EXPECT_TRUE(ptCloudFromFile.descriptorExists("genericVector",3));
+	EXPECT_TRUE(ptCloudFromFile.timeExists("genericTime",1));
 }
 
 TEST_F(IOLoadSaveTest, PLY)
