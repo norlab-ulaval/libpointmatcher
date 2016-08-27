@@ -1660,6 +1660,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
     }
   }
 
+  delete voxels;
+
   // now the keypoints are in pointsToKeep
   // downsample with ratio
   for(int i=0; i<pointsToKeep.size(); i++)

@@ -114,4 +114,5 @@ TEST(Transformation, RigidTransformation)
 		EXPECT_TRUE(rigidTrans->checkParameters(T_2D));
 	}
 
+	delete rigidTrans;
 }

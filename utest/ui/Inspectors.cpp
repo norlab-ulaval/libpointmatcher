@@ -19,6 +19,8 @@ TEST(Inspectors, PerformanceInspector)
   performances->init();
 
 	//TODO: we only test constructor here, check other things...
+
+  delete performances;
 }
 
 TEST(Inspectors, VTKFileInspector)
@@ -33,4 +35,6 @@ TEST(Inspectors, VTKFileInspector)
 	//TODO: we only test constructor here, check other things...
 
   vtkFile->init();
+
+  delete vtkFile;
 }
