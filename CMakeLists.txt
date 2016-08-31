@@ -290,6 +290,7 @@ install(FILES
 	pointmatcher/Parametrizable.h
 	pointmatcher/Registrar.h
 	pointmatcher/Timer.h
+	pointmatcher/Functions.h
 	pointmatcher/IO.h
 	DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
 )
