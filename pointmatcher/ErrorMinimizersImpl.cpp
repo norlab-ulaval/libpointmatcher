@@ -826,19 +826,12 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance2D(
     Matrix d2jX2_inv = d2jX2.inverse();
 
     Matrix covZ(Matrix::Identity(2*valid_points_count,2*valid_points_count));
-    covZ *= 0.1; //sensorStdDev;
+    covZ *= (sensorStdDev * sensorStdDev);
+            //sensorStdDev;//
 
 
     covariance = d2jZX * covZ * d2jZX.transpose();
     covariance = d2jX2_inv * covariance * d2jX2_inv;
-
-// DEBUG POSE COVARIANCE
-//    {
-//      // Since projection_covariance is symmetric, and thus self adjoint, we can use a simpler solver.
-//      Eigen::SelfAdjointEigenSolver<Matrix> eigensolver;
-//      eigensolver.compute( covariance );
-//      std::cout << "dp: " << sqrt( 9.210 * eigensolver.eigenvalues()( 0 ) ) << "  " << sqrt( 9.210 * eigensolver.eigenvalues()( 1 ) ) << " " << sqrt( 9.210 * eigensolver.eigenvalues()( 2 ) ) << std::endl;
-//    }
 
     return  covariance;
 }
