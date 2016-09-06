@@ -6,18 +6,18 @@
 ## In short...
 If you are used to development projects, here is what you need:
 
-|Name           |Version  <br> (Tested Feb. 20, 2015)          |
-|---------------|-----------------------|
-|Ubuntu         | 12.04.5 LTS (64 bit)  |
-|gcc            | 4.6.3                 |
-|git            | 1.7.9.5               |
-|cmake          | 2.8.11.2              |
-|doxygen (opt.) | 1.7.6.1              |
-|||
+|Name           |Version  <br> (Tested Feb. 20, 2015) |Version  <br> (Tested Sept. 6, 2016) |
+|---------------|-----------------------|-----------------------|
+|Ubuntu         | 12.04.5 LTS (64 bit)  | 14.04.5 LTS (64 bit)  |
+|gcc            | 4.6.3                 | 4.8.4                 |
+|git            | 1.7.9.5               | git version 1.9.1     |
+|cmake          | 2.8.11.2              | 2.8.12.2              |
+|doxygen (opt.) | 1.7.6.1               | 1.8.6-2               |
+||||
 | _Dependency:_| |
-|boost          | 1.48.0.2             |
-|eigen          | 3.0.5                |
-|libnabo        | [from source](https://github.com/ethz-asl/libnabo)       |
+|boost          | 1.48.0.2             | 1.54.0                 |
+|eigen          | 3.0.5                | 3.2.0-8                |
+|libnabo        | [from source](https://github.com/ethz-asl/libnabo)| from source|
 
 __Note:__ we only support 64-bit systems because of some issues with Eigen. Other versions will most probably work but you'll have to try yourself to know for sure.
 
