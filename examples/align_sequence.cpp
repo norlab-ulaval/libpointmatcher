@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 			outputFileNameIter << outputFileName << "_" << i << ".vtk";
 			
 			cout << "outputFileName: " << outputFileNameIter.str() << endl;
-			mapPointCloud.save(outputFileNameIter.str());
+		 	mapPointCloud.save(outputFileNameIter.str());
 		}
 	}
 

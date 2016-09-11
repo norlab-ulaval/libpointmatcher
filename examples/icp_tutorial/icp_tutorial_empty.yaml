@@ -1,0 +1,26 @@
+readingDataPointsFilters:
+   - IdentityDataPointsFilter
+
+referenceDataPointsFilters:
+   - IdentityDataPointsFilter
+
+matcher:
+  KDTreeMatcher:
+    knn: 1
+    epsilon: 0 
+
+outlierFilters:
+   - NullOutlierFilter
+
+errorMinimizer:
+   IdentityErrorMinimizer
+
+transformationCheckers:
+   - CounterTransformationChecker:
+      maxIterationCount: 40
+
+inspector:
+   VTKFileInspector
+
+logger:
+   FileLogger
