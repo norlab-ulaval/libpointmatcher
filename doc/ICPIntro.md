@@ -13,7 +13,7 @@ To visualize the pointclouds and what happens to them during the different steps
 |:------------|
 |![alt text](images/floor_plan.png "Floor plan of the apartment")|
 
-The data for this tutorial is taken from the apartment dataset available for [download](http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:apartment:home) from the ASL at ETH Zurich.  The dataset is useful for testing registration robustness in dynamic environments.  Dynamic environments, ie where objects move during the scan, hinder registration as they produce many outlier points which cannot be matched between different scans.
+The data for this tutorial is taken from the apartment dataset available for [download](http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:apartment:home) from the ASL at ETH Zurich.  The dataset is useful for testing registration robustness in dynamic environments.  Dynamic environments (i.e., where objects move during the scan) hinder registration as they produce many outlier points which cannot be matched between different scans.
 
 A top-down view of the point cloud is depicted below, with the colors showing vertical elevation.  The ceiling has been removed from the point cloud such that the floor (in blue) and the walls (in red) are clearly visible.  Note that the coordinate origin is placed in the kitchen at the starting point of data capture, which is in the top-left of the top-down view and floor plan.
 
