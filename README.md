@@ -40,7 +40,7 @@ For beginner users who are not familiar with compiling and installing a library 
 
 ```
 mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+cmake ..
 make
 sudo make install
 ```
@@ -119,7 +119,7 @@ You can download the files in CSV or VTK formats, which are directly supported b
 Projects and Partners
 =====================
 
-If you are using libpointmatcher in your project and you would like to have it listed here, please contact [François Pomerleau](mailto:f.pomerleau@gmail.com) or [Stéphane Magnenat](http://stephane.magnenat.net).
+If you are using libpointmatcher in your project and you would like to have it listed here, please contact [François Pomerleau](mailto:f.pomerleau@gmail.com).
 
  * European Project [NIFTi](http://www.nifti.eu/) (FP7 ICT-247870): Search and rescue project in dynamic environments. Results: [video of multi-floor reconstruction](http://www.youtube.com/watch?v=lP5Mj-TGaiw) and [video of railyard reconstruction](http://www.youtube.com/watch?v=ygIvzWVfPYk). All results with real-time computation.
  * NASA Ames [Stereo Pipeline](http://ti.arc.nasa.gov/tech/asr/intelligent-robotics/ngt/stereo/): Planetary reconstruction from satellite observations. Results: used for Mars, Moon and Earth point clouds.
