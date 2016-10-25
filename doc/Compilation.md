@@ -123,7 +123,7 @@ sudo apt-get install libyaml-cpp-dev
 The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is so far only compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
 -->
 
-### 4. Compiling the Documentation
+### 4. Compiling the Documentation (optional)
 Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
 
 ```
@@ -131,6 +131,12 @@ sudo apt-get install doxygen
 ```
 
 Once you have compiled libpointmatcher in step 6, you can simply open `/usr/local/share/doc/libpointmatcher/api/html/index.html` in a browser to view the API documentation.
+
+You will also need Latex for the rendering of equations:
+
+```
+sudo apt-get install texlive-full
+```
 
 ### 5. Installing libpointmatcher
 Clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
@@ -145,8 +151,14 @@ Now, libpointmatcher is compiled into a `/build` directory.
 SRC_DIR=`pwd`
 BUILD_DIR=${SRC_DIR}/build
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
+cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
 make
+```
+
+If you have doxygen and latex installed, you can enable the documentation using the CMake variable `GENERATE_API_DOC` to `true`. This can be achived through CMake GUI or by the command line:
+
+```
+cmake <otherflags> -D GENERATE_API_DOC=true ${SRC_DIR}
 ```
 
 You can optionally verify that the version of libpointmatcher you have compiled is stable by running the unit tests.
