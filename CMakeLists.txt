@@ -285,9 +285,11 @@ set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVER
 
 #========================= Documentation ===========================
 
-set(MAKE_DOCUMENTATION false CACHE BOOL "Set to true to build the documentation using Doxygen")
+set(GENERATE_API_DOC false CACHE BOOL "Set to true to build the documentation using Doxygen")
 
-if(MAKE_DOCUMENTATION)
+if(GENERATE_API_DOC)
+
+	message("-- API Documentation (doxygen): enabled")
 
 	# Note: there seems to be equations in the documentation leading to the
 	# use of Latex anyway. This cause problems for user without latex...
@@ -313,7 +315,11 @@ if(MAKE_DOCUMENTATION)
 		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
 	endif (DOXYGEN_FOUND)
 
-endif(MAKE_DOCUMENTATION)
+else(GENERATE_API_DOC)
+
+	message("-- API Documentation (doxygen): disabled")
+
+endif(GENERATE_API_DOC)
 
 
 #=============== trigger other makefile ======================
