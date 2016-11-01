@@ -282,6 +282,18 @@ if(EXTRA_DEPS)
 endif(EXTRA_DEPS)
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
+#========================= Install header ===========================
+
+install(FILES
+	pointmatcher/PointMatcher.h
+	pointmatcher/PointMatcherPrivate.h
+	pointmatcher/Parametrizable.h
+	pointmatcher/Registrar.h
+	pointmatcher/Timer.h
+	pointmatcher/Functions.h
+	pointmatcher/IO.h
+	DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
+)
 
 #========================= Documentation ===========================
 
@@ -300,16 +312,7 @@ if(GENERATE_API_DOC)
 	set(DOC_INSTALL_TARGET "share/doc/${PROJECT_NAME}/api" CACHE STRING "Target where to install doxygen documentation")
 
 	add_dependencies(pointmatcher doc)
-	install(FILES
-		pointmatcher/PointMatcher.h
-		pointmatcher/PointMatcherPrivate.h
-		pointmatcher/Parametrizable.h
-		pointmatcher/Registrar.h
-		pointmatcher/Timer.h
-		pointmatcher/Functions.h
-		pointmatcher/IO.h
-		DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
-	)
+
 	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
 	if (DOXYGEN_FOUND)
 		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
