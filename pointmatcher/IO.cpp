@@ -1577,6 +1577,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	int rowIdDescriptors = 0;
 	
 	LabelGenerator featLabelGen, descLabelGen;
+
+	
 	
 	// Loop through all known external names (ordered list)
 	for(size_t i=0; i<externalLabels.size(); i++)
@@ -1586,6 +1588,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		//Search if that feature exist
 		for(it_PLYProp it=vertex->properties.begin(); it!=vertex->properties.end(); ++it)
 		{
+
 			if(supLabel.externalName == it->name)
 			{
 				// Assign rowId in that order
@@ -1600,6 +1603,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 				}
 				else if (supLabel.type == DESCRIPTOR)
 				{
+
 					it->pmRowID = rowIdDescriptors;
 
 					// Prepare descriptor labels
@@ -1611,6 +1615,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 				{
 					throw runtime_error(string("PLY parse error: encounter a type different from FEATURE and DESCRIPTOR. Implementation not supported. See the definition of 'enum PMPropTypes'"));
 				}
+
 				break;
 			}
 		}
@@ -1777,11 +1782,10 @@ void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& 
 //! @(brief) Regular PLY property constructor
 template<typename T>
 PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& type,
-		const std::string& name, const unsigned pos, const bool is_feature) :
+		const std::string& name, const unsigned pos) :
 		name(name), 
 		type(type), 
-		pos(pos), 
-		is_feature(is_feature)  
+		pos(pos) 
 {
 	if (plyPropTypeValid(type))
 	{
@@ -1803,12 +1807,11 @@ PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& type,
 //! @(brief) PLY property list constructor
 template<typename T>
 PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& idx_type,
-		const std::string& type, const std::string& name, const unsigned pos, const bool is_feature) :
+		const std::string& type, const std::string& name, const unsigned pos) :
 		name(name), 
 		type(type), 
 		idx_type(idx_type), 
-		pos(pos), 
-		is_feature(is_feature)
+		pos(pos)
 {
 	if (plyPropTypeValid(idx_type) && plyPropTypeValid(type)) 
 	{

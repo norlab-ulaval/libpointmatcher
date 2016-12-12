@@ -59,6 +59,7 @@ struct PointMatcherIO
 	typedef std::map<std::string, LabelAssociationPair > SublabelAssociationMap;
 
 	// General
+	// TODO: those functions need to be replace by the use of the 
 	static SublabelAssociationMap getFeatAssocationMap(); //!< map to store association between common 1d feature labels and their PM label and span dimension
 	static SublabelAssociationMap getDescAssocationMap(); //!< map to store association between common 1d descriptor labels and their PM label and span dimension
 	static bool featSublabelRegistered(const std::string& externalName); //!< returns true if a particular feature dim label is registered (ie x, y...)
@@ -156,6 +157,7 @@ struct PointMatcherIO
 			("eigVectors", "eigVectors2X", DESCRIPTOR)
 			("eigVectors", "eigVectors2Y", DESCRIPTOR)
 			("eigVectors", "eigVectors2Z", DESCRIPTOR)
+			("intensity", "intensity", DESCRIPTOR)
 			//("internalName", "externalName", DESCRIPTOR)
 			("time", "time", TIME)
 			//("internalName", "externalName", TIME)
@@ -279,16 +281,13 @@ struct PointMatcherIO
 		PMPropTypes pmType; //!< type of information in PointMatcher
 		int pmRowID; //!< row id used in a DataPoints 
 
-		//TODO: remove that (now pmType):
-		bool is_feature; //!<member is true if is a PM feature, if not, it is a descriptor
-
 		PLYProperty() { } //!< Default constructor. If used member values must be filled later.
 
 		// regular property
-		PLYProperty(const std::string& type, const std::string& name, const unsigned pos, const bool is_feature = false);
+		PLYProperty(const std::string& type, const std::string& name, const unsigned pos);
 
 		// list property
-		PLYProperty(const std::string& idx_type, const std::string& type, const std::string& name, const unsigned pos, const bool is_feature = false); //! list prop ctor
+		PLYProperty(const std::string& idx_type, const std::string& type, const std::string& name, const unsigned pos); //! list prop ctor
 
 		bool operator==(const PLYProperty& other) const; //! compare with other property
 	};
