@@ -51,6 +51,7 @@ void validateArgs(int argc, char *argv[]);
 /**
   * Code example for ICP taking a sequence of point clouds relatively close 
   * and computing the transformation between them.
+  * FIXME: this code is depreciated and uses old API. It needs to be refreshed.
   */
 int main(int argc, char *argv[])
 {
