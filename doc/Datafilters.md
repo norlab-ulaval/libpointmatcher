@@ -352,7 +352,7 @@ The same input section is used as for extracting the surface normals in the prev
 ## Sampling Surface Normal Filter <a name="samplingnormhead"></a>
 
 ### Description
-The above samples extract surface normals at every point in the point cloud.  In point clouds representing planar surfaces however, a significant of redundant information is contained in adjacent normal vectors.  This filter attempts to both reduce the number of points within a point cloud and the number of different normal vectors.  The first is achieved by performing either random sub-sampling as seen previously, or by using one point per box (bin sub-sampling).  The latter is achieved by recursively decomposing the point-cloud space into boxes until each box contains at most knn points.  A single normal vector is computed from the knn points in each box.
+The above filters extract surface normals at every point in the point cloud.  In point clouds representing planar surfaces however, a significant redundant information is contained in adjacent normal vectors.  This filter attempts to both reduce the number of points within a point cloud and the number of different normal vectors.  The first is achieved by performing either random sub-sampling as seen previously, or by using one point per box (bin sub-sampling).  The latter is achieved by recursively decomposing the point-cloud space into boxes until each box contains at most knn points.  A single normal vector is computed from the knn points in each box.
 
 __Required descriptors:__  none  
 __Output descriptor:__ 
@@ -377,7 +377,7 @@ __Impact on the number of points:__ reduces number of points
 |keepMatchedIds   | Add identifiers of matched points to descriptors (see)    | 0 | 1: true, 0: false |
 
 ### Example
-We reuse the same apartment section to illustrate the sampling of normal vectors.  The decimation rate used is 0.5 such that half of the points from the original point cloud are discarded randomly.  We use a knn value of 100 such that each box contains at most 100 points.  In the following two figures we extract sample points based on the normals and display the normal vectors at these sample points. We first do so for a ceiling section, followed by a ground section.  Because the ceiling is essentially a large plane, the sampling is low and the normal vector arrows are dispersed relatively equally as shown in the first figure.  On the other hand, the ground section has a more complex structure with adjacent normal vectors pointing in different direction.  This results in a dense sampling of points which is seen in the second figure.
+We reuse the same apartment section to illustrate the sampling of normal vectors.  The decimation rate used is 0.5 such that half of the points from the original point cloud are discarded randomly.  We use a knn value of 100 such that each box contains at most 100 points.  In the following two figures, we extract sample points based on the normals and display the normal vectors at these sample points. We first do so for a ceiling section, followed by a ground section.  Because the ceiling is essentially a large plane, the sampling is low and the normal vector arrows are dispersed relatively equally as shown in the first figure.  On the other hand, the ground section has a higher density of points.  This results in a denser sampling of points which is seen in the second figure.
 
   The box centers are shown in red on the following picture.  It is clear that as opposed to previous filters, adjacent points within a box have the same normal vector.
 
