@@ -5,9 +5,7 @@ referenceDataPointsFilters:
    - IdentityDataPointsFilter
 
 matcher:
-  KDTreeMatcher:
-    knn: 1
-    epsilon: 0 
+  KDTreeMatcher
 
 outlierFilters:
    - NullOutlierFilter
@@ -16,11 +14,10 @@ errorMinimizer:
    IdentityErrorMinimizer
 
 transformationCheckers:
-   - CounterTransformationChecker:
-      maxIterationCount: 40
+   - CounterTransformationChecker
 
 inspector:
-   VTKFileInspector
+   NullInspector
 
 logger:
    FileLogger
