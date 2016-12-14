@@ -61,6 +61,7 @@ PM::TransformationParameters parseTranslation(string& translation,
 											  const int cloudDimension);
 PM::TransformationParameters parseRotation(string& rotation,
 										   const int cloudDimension);
+// Helper functions
 void usage(const char *argv[]);
 
 /**
@@ -94,6 +95,7 @@ int main(int argc, const char *argv[])
 	// Create the default ICP algorithm
 	PM::ICP icp;
 
+
 	if (configFile.empty())
 	{
 		// See the implementation of setDefault() to create a custom ICP algorithm
@@ -109,7 +111,8 @@ int main(int argc, const char *argv[])
 		}
 		icp.loadFromYaml(ifs);
 	}
-
+	
+	
 	int cloudDimension = ref.getEuclideanDim();
 	
 	if (!(cloudDimension == 2 || cloudDimension == 3)) 
@@ -118,14 +121,7 @@ int main(int argc, const char *argv[])
 		exit(1);
 	}
 
-	{
-		using namespace PointMatcherSupport;
-		Parametrizable::Parameters params;
-		if(!isVerbose){
-			params["infoFileName"] = toParam("/dev/null");
-		}
-		setLogger(PM::get().LoggerRegistrar.create("FileLogger", params));
-	}
+	
 
 	PM::TransformationParameters translation =
 			parseTranslation(initTranslation, cloudDimension);
@@ -148,7 +144,8 @@ int main(int argc, const char *argv[])
 
 	// Compute the transformation to express data in ref
 	PM::TransformationParameters T = icp(initializedData, ref);
-	cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
+	if(isVerbose)
+		cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 
 	// Transform data to express it in ref
 	DP data_out(initializedData);
@@ -169,7 +166,7 @@ int main(int argc, const char *argv[])
 			transfoFile << initTransfo << endl;
 			transfoFile.close();
 		} else {
-			cout << "Unable to write the initial transformation file\n" << endl;
+			cerr << "Unable to write the initial transformation file\n" << endl;
 		}
 
 		transfoFile.open(icpFileName.c_str());
@@ -177,7 +174,7 @@ int main(int argc, const char *argv[])
 			transfoFile << T << endl;
 			transfoFile.close();
 		} else {
-			cout << "Unable to write the ICP transformation file\n" << endl;
+			cerr << "Unable to write the ICP transformation file\n" << endl;
 		}
 
 		transfoFile.open(completeFileName.c_str());
@@ -185,11 +182,13 @@ int main(int argc, const char *argv[])
 			transfoFile << T*initTransfo << endl;
 			transfoFile.close();
 		} else {
-			cout << "Unable to write the complete transformation file\n" << endl;
+			cerr << "Unable to write the complete transformation file\n" << endl;
 		}
 	}
-	else {
-		cout << "ICP transformation:" << endl << T << endl;
+	else 
+	{
+		if(isVerbose)
+			cout << "ICP transformation:" << endl << T << endl;
 	}
 
 	return 0;
@@ -415,3 +414,6 @@ void usage(const char *argv[])
 	cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
 	cerr << endl;
 }
+
+
+
