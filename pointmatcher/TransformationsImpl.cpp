@@ -111,14 +111,17 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 	TransformationParameters ortho = parameters;
 	if(ortho.cols() == 4)
 	{
-		const Eigen::Matrix<T, 3, 1> col0 = parameters.block(0, 0, 3, 1).normalized();
+		//const Eigen::Matrix<T, 3, 1> col0 = parameters.block(0, 0, 3, 1).normalized();
 		const Eigen::Matrix<T, 3, 1> col1 = parameters.block(0, 1, 3, 1).normalized();
 		const Eigen::Matrix<T, 3, 1> col2 = parameters.block(0, 2, 3, 1).normalized();
 
+		const Eigen::Matrix<T, 3, 1> newCol0 = col1.cross(col2);
+		const Eigen::Matrix<T, 3, 1> newCol1 = col2.cross(newCol0);
+		const Eigen::Matrix<T, 3, 1> newCol2 = col2;
 
-		ortho.block(0, 0, 3, 1) = col1.cross(col2);
-		ortho.block(0, 1, 3, 1) = col2.cross(col0);
-		ortho.block(0, 2, 3, 1) = col2;
+		ortho.block(0, 0, 3, 1) = newCol0;
+		ortho.block(0, 1, 3, 1) = newCol1;
+		ortho.block(0, 2, 3, 1) = newCol2;
 	}
 	else if(ortho.cols() == 3)
 	{
