@@ -96,7 +96,6 @@ struct PointMatcherIO
 	struct GenericInputHeader
 	{
 		std::string name; //!< name found in the file
-		bool isKnownName; //!< is the name exist in the list of known elements
 		unsigned int matrixRowId; //!< on which row the information will be loaded
 		PMPropTypes matrixType; //!< in which matrix the information will be loaded
 
@@ -116,7 +115,6 @@ struct PointMatcherIO
 		void init(std::string name)
 		{
 			this->name = name;
-			this->isKnownName = false;
 			this->matrixRowId = 0;
 			this->matrixType = UNSUPPORTED;
 		};

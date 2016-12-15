@@ -239,9 +239,9 @@ TEST(IOTest, loadPLY)
 	
 	// Confirm sizes and dimensions
 	EXPECT_TRUE(pointCloud.features.cols() == 5);
-	EXPECT_TRUE(pointCloud.features.rows() == 4);
+	EXPECT_TRUE(pointCloud.features.rows() == 4); //x, y, z, pad
 	EXPECT_TRUE(pointCloud.descriptors.cols() == 5);
-	EXPECT_TRUE(pointCloud.descriptors.rows() == 3);
+	EXPECT_TRUE(pointCloud.descriptors.rows() == 4);//nx, ny, nz, grrrr
 	
 	// Random value check
 	EXPECT_TRUE(pointCloud.features(0, 0) == 1);

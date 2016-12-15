@@ -738,7 +738,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 				{
 					if(supLabel.externalName == csvHeader[j].name)
 					{
-						csvHeader[j].isKnownName = true;
 						csvHeader[j].matrixType = supLabel.type;
 
 						switch (supLabel.type)
@@ -762,6 +761,9 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 								throw runtime_error(string("CSV parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
 								break;
 						}
+						
+						// we stop searching once we have a match
+						break;
 					}
 				}
 			}
@@ -771,9 +773,9 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 			{
 				if(csvHeader[i].matrixType == UNSUPPORTED)
 				{
+					csvHeader[i].matrixType = DESCRIPTOR; // force descriptor
 					csvHeader[i].matrixRowId = rowIdDescriptors;
-					csvHeader[i].matrixType = DESCRIPTOR;
-					descLabelGen.add(csvHeader[i].name);
+					descLabelGen.add(csvHeader[i].name); // keep original name
 					rowIdDescriptors++;
 				}
 			}
@@ -1529,7 +1531,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 				PLYProperty list_prop(prop_idx_type, prop_type, prop_name, current_element->total_props);
 
-				current_element->addProperty(list_prop);
+				//current_element->addProperty(list_prop);
+				current_element->properties.push_back(list_prop);
 			}
 			// PLY regular property
 			else
@@ -1538,7 +1541,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 				stringstream >> prop_name;
 				PLYProperty prop(prop_type, prop_name, current_element->total_props);
 
-				current_element->addProperty(prop);
+				//current_element->addProperty(prop);
+				current_element->properties.push_back(prop);
 			}
 
 			current_element->total_props++;
@@ -1575,10 +1579,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	
 	int rowIdFeatures = 0;
 	int rowIdDescriptors = 0;
+	int rowIdTime= 0;
 	
-	LabelGenerator featLabelGen, descLabelGen;
+	LabelGenerator featLabelGen, descLabelGen, timeLabelGen;
 
-	
 	
 	// Loop through all known external names (ordered list)
 	for(size_t i=0; i<externalLabels.size(); i++)
@@ -1591,49 +1595,59 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 			if(supLabel.externalName == it->name)
 			{
+				it->pmType = supLabel.type;
+
 				// Assign rowId in that order
-				if(supLabel.type == FEATURE)
+				switch (supLabel.type)
 				{
-					it->pmRowID = rowIdFeatures;
-
-					// Prepare feature labels
-					featLabelGen.add(supLabel.internalName);
-
-					rowIdFeatures++;
-				}
-				else if (supLabel.type == DESCRIPTOR)
-				{
-
-					it->pmRowID = rowIdDescriptors;
-
-					// Prepare descriptor labels
-					descLabelGen.add(supLabel.internalName);
-
-					rowIdDescriptors++;
-				}
-				else
-				{
-					throw runtime_error(string("PLY parse error: encounter a type different from FEATURE and DESCRIPTOR. Implementation not supported. See the definition of 'enum PMPropTypes'"));
+					case FEATURE:
+						it->pmRowID = rowIdFeatures;
+						featLabelGen.add(supLabel.internalName);
+						rowIdFeatures++;
+						break;
+					case DESCRIPTOR:
+						it->pmRowID = rowIdDescriptors;
+						descLabelGen.add(supLabel.internalName);
+						rowIdDescriptors++;
+						break;
+					case TIME:
+						it->pmRowID = rowIdTime;
+						timeLabelGen.add(supLabel.internalName);
+						rowIdTime++;
+					default:
+						throw runtime_error(string("PLY parse error: encounter a type different from FEATURE and DESCRIPTOR. Implementation not supported. See the definition of 'enum PMPropTypes'"));
+						break;
 				}
 
+				// we stop searching once we have a match
 				break;
 			}
 		}
-
-		//TODO: Handle random descriptor names
+	}
+	
+	// loop through the remaining UNSUPPORTED labels and assigned them to a single descriptor row
+	for(it_PLYProp it=vertex->properties.begin(); it!=vertex->properties.end(); ++it)
+	{
+		if(it->pmType == UNSUPPORTED)
+		{
+			it->pmType = DESCRIPTOR; // force descriptor
+			it->pmRowID = rowIdDescriptors;
+			descLabelGen.add(it->name); // keep original name
+			rowIdDescriptors++;
+		}
 	}
 
 	///////////////////////////
 	// 3- RESERVE DATAPOINTS MEMORY
 
-	const int featDim = featLabelGen.getLabels().totalDim();
-	const int descDim = descLabelGen.getLabels().totalDim();
-	const int nbPoints = vertex->num;
+	const unsigned int featDim = featLabelGen.getLabels().totalDim();
+	const unsigned int descDim = descLabelGen.getLabels().totalDim();
+	const unsigned int timeDim = timeLabelGen.getLabels().totalDim();
+	const unsigned int nbPoints = vertex->num;
 
 	Matrix features = Matrix(featDim, nbPoints);
 	Matrix descriptors = Matrix(descDim, nbPoints);
-	//TODO: add time
-
+	Int64Matrix times = Int64Matrix(timeDim, nbPoints);
 
 
 	///////////////////////////
@@ -1655,17 +1669,24 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			const int row = vertex->properties[propID].pmRowID;
 			const PMPropTypes type = vertex->properties[propID].pmType;
 			
+			// rescale color from [0,254] to [0, 1[
+			// FIXME: do we need that?
 			if (vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" || vertex->properties[propID].name == "alpha") {
 				value /= 255.0;
 			}
 
-			if(type == FEATURE)
+			switch (type)
 			{
-				features(row, col) = value;
-			}
-			else if(type == DESCRIPTOR)
-			{
-				descriptors(row, col) = value;
+
+				case FEATURE:
+					features(row, col) = value;
+					break;
+				case DESCRIPTOR:
+					descriptors(row, col) = value;
+					break;
+				case TIME:
+					times(row, col) = value;
+					break;
 			}
 
 			++propID;
@@ -1799,7 +1820,7 @@ PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& type,
 						+ std::string(" is invalid"));
 	}
 
-	pmType = getPMType(name);
+	pmType = UNSUPPORTED;
 	pmRowID = -1;
 
 }
@@ -1826,7 +1847,7 @@ PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& idx_type,
 						+ std::string(" is invalid"));
 	}
 
-	pmType = getPMType(name);
+	pmType = UNSUPPORTED;
 	pmRowID = -1;
 }
 
@@ -1840,21 +1861,21 @@ class PointMatcherIO<float>::PLYProperty;
 template
 class PointMatcherIO<double>::PLYProperty;
 
-template <typename T>
-void PointMatcherIO<T>::PLYElement::addProperty(
-		PLYProperty& prop) 
-{
-	if (prop.pmType == FEATURE)
-	{
-		nbFeatures++;
-	}
-	else if (prop.pmType == DESCRIPTOR)
-	{
-		nbDescriptors++;
-	}
-		
-	properties.push_back(prop);
-}
+//template <typename T>
+//void PointMatcherIO<T>::PLYElement::addProperty(
+//		PLYProperty& prop) 
+//{
+//	if (prop.pmType == FEATURE)
+//	{
+//		nbFeatures++;
+//	}
+//	else if (prop.pmType == DESCRIPTOR)
+//	{
+//		nbDescriptors++;
+//	}
+//		
+//	properties.push_back(prop);
+//}
 
 
 template <typename T>
