@@ -37,6 +37,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_IOFUNCTIONS_H
 
 #include <iosfwd>
+#include <iostream>
+#include <algorithm>
+#include <stdexcept>
+#include <stdio.h>
 
 namespace PointMatcherSupport
 {
@@ -149,6 +153,9 @@ std::istream & readVtkData(std::string dataType, bool readBinary, MatrixRef into
 		throw std::runtime_error(std::string("Unsupported data type : " + dataType + "! Expected 'float' or 'double'."));
 	}
 }
+
+//! Replaces getline for handling windows style CR/LF line endings
+std::istream & safeGetLine( std::istream& is, std::string & t);
 
 
 } // PointMatcherSupport

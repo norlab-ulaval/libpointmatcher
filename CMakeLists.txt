@@ -229,6 +229,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/TransformationChecker.cpp
 	pointmatcher/Inspector.cpp
 	pointmatcher/IO.cpp
+	pointmatcher/IOFunctions.cpp
 	pointmatcher/Bibliography.cpp
 	pointmatcher/Timer.cpp
 	pointmatcher/Histogram.cpp
