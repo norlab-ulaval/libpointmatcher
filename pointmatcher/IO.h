@@ -57,16 +57,7 @@ struct PointMatcherIO
 	//! Map to associate common descriptor sublabels to PM descriptor matrix row and labels
 	//! ex: nx, ny, nz are associated with (0,normals) (1,normals) (2,normals) respectively
 	typedef std::map<std::string, LabelAssociationPair > SublabelAssociationMap;
-
-	// General
-	// TODO: those functions need to be replace by the use of the 
-	//static SublabelAssociationMap getFeatAssocationMap(); //!< map to store association between common 1d feature labels and their PM label and span dimension
-	//static SublabelAssociationMap getDescAssocationMap(); //!< map to store association between common 1d descriptor labels and their PM label and span dimension
-	//static bool featSublabelRegistered(const std::string& externalName); //!< returns true if a particular feature dim label is registered (ie x, y...)
-	//static bool descSublabelRegistered(const std::string& externalName); //!< returns true if a particular descriptor dim label is registered (ie nx, red...)
-	//static LabelAssociationPair getFeatAssociationPair(const std::string& externalName); //!< get PM feature label associated with sublabel
-	//static LabelAssociationPair getDescAssociationPair(const std::string& externalName); //!< get PM descriptor label associated with sublabel
-
+	
 	static std::string getColLabel(const Label& label, const int row); //!< convert a descriptor label to an appropriate sub-label
 	
 	//! Type of information in a DataPoints. Each type is stored in its own dense matrix.
@@ -409,11 +400,8 @@ struct PointMatcherIO
 			viewPoint = Eigen::Matrix<T, 7, 1>::Zero();
 			nbPoints = 0;
 			dataType = "-";
-		
 		};
 	};
-   
-      
 };
 
 

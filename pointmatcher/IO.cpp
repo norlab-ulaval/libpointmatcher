@@ -422,89 +422,6 @@ PointMatcherIO<T>::SupportedLabel::SupportedLabel(const std::string& internalNam
 {
 }
 
-//template<typename T>
-//typename PointMatcherIO<T>::SublabelAssociationMap PointMatcherIO<T>::getFeatAssocationMap()
-//{
-//	// FIXME: this should be depreciated and replace by SupportedLabel
-//	const SublabelAssociationMap assoc_map = boost::assign::map_list_of
-//			("x", LabelAssociationPair(0,"x"))
-//			("y", LabelAssociationPair(1,"y"))
-//			("z", LabelAssociationPair(2,"z"))
-//			("pad", LabelAssociationPair(3,"pad"));
-//	return assoc_map;
-//}
-
-//template<typename T>
-//typename PointMatcherIO<T>::SublabelAssociationMap PointMatcherIO<T>::getDescAssocationMap()
-//{
-//	// FIXME: this should be depreciated and replace by SupportedLabel
-//	const SublabelAssociationMap assoc_map = boost::assign::map_list_of
-//			("nx", LabelAssociationPair(0,"normals"))
-//			("ny", LabelAssociationPair(1,"normals"))
-//			("nz", LabelAssociationPair(2,"normals"))
-//			("normal_x", LabelAssociationPair(0,"normals"))
-//			("normal_y", LabelAssociationPair(1,"normals"))
-//			("normal_z", LabelAssociationPair(2,"normals"))
-//			("densities", LabelAssociationPair(0,"densities"))
-//			("intensity", LabelAssociationPair(0,"intensity"))
-//			("red", LabelAssociationPair(0,"color"))
-//			("green", LabelAssociationPair(1,"color"))
-//			("blue", LabelAssociationPair(2,"color"))
-//			("alpha", LabelAssociationPair(3,"color"))
-//			("eigValues0", LabelAssociationPair(0,"eigValues"))
-//			("eigValues1", LabelAssociationPair(1,"eigValues"))
-//			("eigValues2", LabelAssociationPair(2,"eigValues"))
-//			("eigVectors0X", LabelAssociationPair(0,"eigVectors"))
-//			("eigVectors0Y", LabelAssociationPair(1,"eigVectors"))
-//			("eigVectors0Z",LabelAssociationPair(2,"eigVectors"))
-//			("eigVectors1X", LabelAssociationPair(3,"eigVectors"))
-//			("eigVectors1Y", LabelAssociationPair(4,"eigVectors"))
-//			("eigVectors1Z",LabelAssociationPair(5,"eigVectors"))
-//			("eigVectors2X", LabelAssociationPair(6,"eigVectors"))
-//			("eigVectors2Y", LabelAssociationPair(7,"eigVectors"))
-//			("eigVectors2Z",LabelAssociationPair(8,"eigVectors"))
-//			("normals", LabelAssociationPair(0,"normals"))
-//			("eigValues", LabelAssociationPair(0,"eigValues"))
-//			("eigVectors", LabelAssociationPair(0,"eigVectors"))
-//			("color", LabelAssociationPair(0,"color"));
-//	return assoc_map;
-//}
-
-//template <typename T>
-//bool PointMatcherIO<T>::featSublabelRegistered(const std::string& externalName)
-//{
-//	return getFeatAssocationMap().count(externalName) > 0;
-//}
-//
-//template <typename T>
-//bool PointMatcherIO<T>::descSublabelRegistered(const std::string& externalName)
-//{
-//	return getDescAssocationMap().count(externalName) > 0;
-//}
-//
-//template <typename T>
-//typename PointMatcherIO<T>::LabelAssociationPair PointMatcherIO<T>::getFeatAssociationPair(const std::string& externalName)
-//{
-//	return getFeatAssocationMap().find(externalName)->second;
-//}
-//
-//template <typename T>
-//typename PointMatcherIO<T>::LabelAssociationPair PointMatcherIO<T>::getDescAssociationPair(const std::string& externalName)
-//{
-//	return getDescAssocationMap().find(externalName)->second;
-//}
-
-//template<typename T>
-//typename PointMatcherIO<T>::PMPropTypes PointMatcherIO<T>::getPMType(const std::string& externalName)
-//{
-//	if (featSublabelRegistered(externalName))
-//		return FEATURE;
-//	else if (descSublabelRegistered(externalName))
-//		return DESCRIPTOR;
-//	else
-//		return UNSUPPORTED;
-//	//TODO: add time here
-//}
 
 // Class LabelGenerator
 template<typename T>
@@ -1031,10 +948,6 @@ void skipBlock(bool binary, int binarySize, std::istream & is, bool hasSeparateS
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is)
 {
-	//typedef typename DataPoints::Label Label;
-	//typedef typename DataPoints::Labels Labels;
-	
-	
 	std::map<std::string, SplitTime> labelledSplitTime;
 	
 	DataPoints loadedPoints;
@@ -1148,7 +1061,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 
 			for (int f = 0; f < fieldDataCount; f++)
 			{
-				//getline(is, line);
 				int numTuples;
 				is >> name >> dim >> numTuples >> type;
 
@@ -1382,7 +1294,6 @@ PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPLY(const string&
 template <typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& is)
 {
-	//TODO: adapt following loadCSV()
 	class Elements : public vector<PLYElement*>{
 	 public:
 		~Elements(){
@@ -1866,15 +1777,6 @@ template
 class PointMatcherIO<double>::PLYProperty;
 
 
-
-//template <typename T>
-//bool PointMatcherIO<T>::PLYElement::supportsProperty(const PLYProperty& prop) const
-//{
-//	return getPMType(prop.name) != UNSUPPORTED;
-//}
-
-
-
 template <typename T>
 typename PointMatcherIO<T>::PLYElementF::ElementTypes PointMatcherIO<T>::PLYElementF::getElementType(const std::string& elem_name)
 {
@@ -1890,11 +1792,13 @@ typename PointMatcherIO<T>::PLYElementF::ElementTypes PointMatcherIO<T>::PLYElem
 	}
 }
 
+
 template <typename T>
 bool PointMatcherIO<T>::PLYElementF::elementSupported(const std::string& elem_name)
 {
 	return getElementType(elem_name) != UNSUPPORTED;
 }
+
 
 template<typename T>
 typename PointMatcherIO<T>::PLYElement* PointMatcherIO<T>::PLYElementF::createElement(
@@ -1906,12 +1810,14 @@ typename PointMatcherIO<T>::PLYElement* PointMatcherIO<T>::PLYElementF::createEl
 		return NULL;
 }
 
+
 template<typename T>
 bool PointMatcherIO<T>::plyPropTypeValid(const std::string& type) {
 	return (type == "char" || type == "uchar" || type == "short"
 			|| type == "ushort" || type == "int" || type == "uint"
 			|| type == "float" || type == "double");
 }
+
 
 template <typename T>
 bool PointMatcherIO<T>::PLYElement::operator==(const PLYElement& rhs) const
@@ -1926,6 +1832,7 @@ bool PointMatcherIO<T>::PLYProperty::operator==(const PLYProperty& rhs) const
 	return name == rhs.name && type == rhs.type;
 }
 
+
 //! @brief Load Point Cloud Library (pcd) file
 //! @param fileName a string containing the path and the file name
 template<typename T>
@@ -1936,23 +1843,18 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(const string& 
 	return loadPCD(ifs);
 }
 
+
 template
 PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadPCD(const string& fileName);
 template
 PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPCD(const string& fileName);
 
-//template
-//PointMatcherIO<float>::DataPoints PointMatcherIO<float>::loadPCD(istream& is);
-//template
-//PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadPCD(istream& is);
 
 //! @brief Load PCD file
 //! @see loadPCD()
 template<typename T>
 typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& is) {
 
-	//typedef typename DataPoints::Label Label;
-	//typedef typename DataPoints::Labels Labels;
 
 	/*
 	Steps:
@@ -2093,7 +1995,6 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 		
 		}
 
-		// ignore viewpoint for now
 		else if (tokens[0] == "VIEWPOINT")
 		{
 			if((tokens.size() - 1) != 7 )
