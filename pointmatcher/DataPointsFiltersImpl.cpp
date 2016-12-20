@@ -1634,21 +1634,21 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
   // Todo revert to random point selection within cell
   for (int p = 0; p < numPoints ; p++)
   {
-    unsigned int idx = indices[p];
-    unsigned int firstPoint = (*voxels)[idx].firstPoint;
+    const unsigned int idx = indices[p];
+    const unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
     // Choose random point in voxel
-    int randomIndex = std::rand() % numPoints;
+    const int randomIndex = std::rand() % numPoints;
     for (int f = 0; f < (featDim - 1); f++ )
     {
       data.features(f,firstPoint) = data.features(f,randomIndex);
     }
   }
 
-  for (int idx = 0; idx < numVox; idx++)
+  for (unsigned int idx = 0; idx < numVox; idx++)
   {
-    unsigned int numPoints = (*voxels)[idx].numPoints;
-    unsigned int firstPoint = (*voxels)[idx].firstPoint;
+    const unsigned int numPoints = (*voxels)[idx].numPoints;
+    const unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
     if (numPoints > 0)
     {
@@ -1664,7 +1664,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
 
   // now the keypoints are in pointsToKeep
   // downsample with ratio
-  for(int i=0; i<pointsToKeep.size(); i++)
+  for(unsigned int i=0; i<pointsToKeep.size(); i++)
   {
     const float r = (float)std::rand()/(float)RAND_MAX;
     if(r < ratio)
@@ -1684,7 +1684,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
 
   const int featDim(data.features.rows());
   std::vector<int> indicesToKeepStrict;
-  for (int i = 0; i< data.indicesToKeep.size(); ++i) {
+  for (unsigned int i = 0; i< data.indicesToKeep.size(); ++i) {
     Eigen::Matrix<T,3,1> keyPoint;
     keyPoint = input.features.col(data.indicesToKeep[i]);
 
@@ -1749,7 +1749,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
     }
     Eigen::Matrix<T,3,1> normal, newX, newY;
     Eigen::Matrix<T,3,3> newBasis;
-    double planarity, cylindricality;
+    double planarity = 0.;
+	double cylindricality = 0.;
 
     if(keepNormals || keepGestaltFeatures) {
       // calculate orientation of NN
@@ -1904,11 +1905,14 @@ template<typename T>
 typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateAngles(const Matrix points, const Eigen::Matrix<T,3,1> keyPoint) const
 {
   Vector angles(points.cols());
-  for (size_t i = 0; i<points.cols(); ++i) {
+  
+  for (unsigned int i = 0; i<points.cols(); ++i) 
+  {
     angles(i) = atan2(points(0,i), points(1,i));
     if (angles(i) < 0)
       angles(i) += (2 * M_PI);
   }
+
   return angles;
 }
 
@@ -1916,7 +1920,9 @@ template<typename T>
 typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateRadii(const Matrix points, const Eigen::Matrix<T,3,1> keyPoint) const
 {
   Vector radii(points.cols());
-  for (size_t i = 0; i<points.cols(); ++i) {
+
+  for (unsigned int i = 0; i<points.cols(); ++i) 
+  {
     radii(i) = sqrt((points(0,i)) * (points(0,i)) + (points(1,i)) * (points(1,i)));
   }
   return radii;

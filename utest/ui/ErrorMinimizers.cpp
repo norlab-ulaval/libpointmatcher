@@ -48,10 +48,10 @@ TEST_F(ErrorMinimizerTest, PointToPlaneErrorMinimizer)
 
 TEST_F(ErrorMinimizerTest, ErrorElements)
 {
-	const int nbPoints = 100;
-	const int dimFeatures = 4;
-	const int dimDescriptors = 3;
-	const int dimTime = 2;
+	const unsigned int nbPoints = 100;
+	const unsigned int dimFeatures = 4;
+	const unsigned int dimDescriptors = 3;
+	const unsigned int dimTime = 2;
 
 	// Fake DataPoints
 	PM::Matrix randFeat = PM::Matrix::Random(dimFeatures, nbPoints);
@@ -80,7 +80,7 @@ TEST_F(ErrorMinimizerTest, ErrorElements)
 	PM::Matches::Ids ids(1, nbPoints);
 	PM::Matches::Dists dists(1, nbPoints);
 
-	for(int i=0; i<nbPoints; i++)
+	for(unsigned int i=0; i<nbPoints; i++)
 	{
 		ids(0,i) = i;
 		dists(0,i) = 1.0;
