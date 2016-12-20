@@ -20,9 +20,7 @@ If you are used to development project, here is what you need:
 | CMake | <http://www.cmake.org/cmake/resources/software.html> | cmake-2.8.11.2-win32-x86.exe|
 | Eigen 3 | <http://eigen.tuxfamily.org/index.php?title=Main_Page#Download>  |v3.2.0 |
 | Boost | <http://www.boost.org/users/download/> | v1.54.0 |
-| yaml-cpp | <https://code.google.com/p/yaml-cpp/downloads/list>| v0.3.0, **not working with v0.5.0**|
 | grep tool | <http://gnuwin32.sourceforge.net/packages/grep.htm>| v2.5.4 |
-| gtest | <https://code.google.com/p/googletest/> | v1.7.0 |
 
 The rest of this tutorial will guide you through the different requirements step by step.
 
@@ -82,55 +80,6 @@ grep --version
     (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
 
 
-### Building yaml-cpp
-1. Start **CMake GUI**, follow the same steps to configure the source and build folders for _yaml-cpp_, then click the Configure button.
-
-1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
-
-1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
-
-	![alt text](images/win_cmake_yaml_cpp.png "CMake yaml-cpp")
-
-
-1. In Visual Studio, build the solution: BUILD -> Build Solution
-
-    Alternatively, you can build the solution from the command line. In _(your yaml-cpp folder)_/build:
-    
-    ```
-    $ msbuild /m:2 YAML_CPP.sln
-    ```
-    
-    (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
-
-
-### Building gtest
-1. Open the file CMakeLists.txt and add at the end:
-
-    ```
-    if( MSVC ) # VS2012 does not support tuples correctly yet
-    	   add_definitions( /D _VARIADIC_MAX=10 )
-    endif()
-    ```
-
-1. Start **CMake GUI**, follow the same steps to configure the source and build folders for _gtest_, then click the Configure button.
-
-1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
-
-1. Change the variable **gtest_force_shared_crt** to `TRUE`
-
-1. Click on the button Configure, then on Generate
-
-1. In Visual Studio, build the solution: BUILD -> Build Solution
-
-    Alternatively, you can build the solution from the command line. In _(your gtest folder)_/build:
-    
-    ```
-    $ msbuild /m:2 gtest.sln
-    ```
-    
-    (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
-
-
 ### Build libpointmatcher
 1. Start **CMake GUI**, follow the same steps to configure the source and build folders for _libpointmatcher_, then click the Configure button.
 
@@ -168,8 +117,6 @@ grep --version
 
 
 ## Reporting Issues
-
-
 
 Currently, we don't have a developer fully supporting compilation on Windows. If you can help refreshing this documentation, your help is more than welcome.
 
