@@ -239,9 +239,9 @@ TEST(IOTest, loadPLY)
 	
 	// Confirm sizes and dimensions
 	EXPECT_TRUE(pointCloud.features.cols() == 5);
-	EXPECT_TRUE(pointCloud.features.rows() == 4);
+	EXPECT_TRUE(pointCloud.features.rows() == 4); //x, y, z, pad
 	EXPECT_TRUE(pointCloud.descriptors.cols() == 5);
-	EXPECT_TRUE(pointCloud.descriptors.rows() == 3);
+	EXPECT_TRUE(pointCloud.descriptors.rows() == 4);//nx, ny, nz, grrrr
 	
 	// Random value check
 	EXPECT_TRUE(pointCloud.features(0, 0) == 1);
@@ -262,8 +262,7 @@ TEST(IOTest, loadPCD)
 	""
 	);
 
-	//TODO: not implemented, is that required?
-	//EXPECT_THROW(IO::loadPCD(is), runtime_error);
+	EXPECT_THROW(IO::loadPCD(is), runtime_error);
 
 	// Partial header
 	is.clear();
@@ -272,8 +271,7 @@ TEST(IOTest, loadPCD)
 	"VERSION .7\n"
 	);
 
-	//TODO: not implemented, is that required?
-	//EXPECT_THROW(IO::loadPCD(is), runtime_error);
+	EXPECT_THROW(IO::loadPCD(is), runtime_error);
 	
 	// Missing data
 	is.clear();
@@ -290,7 +288,7 @@ TEST(IOTest, loadPCD)
 	"POINTS 18\n"
 	"DATA ascii\n"
 	);
-	
+
 	EXPECT_THROW(IO::loadPCD(is), runtime_error);
 
 
@@ -298,33 +296,33 @@ TEST(IOTest, loadPCD)
 	is.str(
 	"# .PCD v.7 - Point Cloud Data file format\n"
 	"VERSION .7\n"
-	"FIELDS x y z\n"
-	"SIZE 4 4 4\n"
-	"TYPE F F F\n"
-	"COUNT 1 1 1\n"
+	"FIELDS x y z grrr\n"
+	"SIZE 4 4 4 4\n"
+	"TYPE F F F F\n"
+	"COUNT 1 1 1 1\n"
 	"WIDTH 18\n"
 	"HEIGHT 1\n"
 	"VIEWPOINT 0 0 0 1 0 0 0\n"
 	"POINTS 18\n"
 	"DATA ascii\n"
-	"0.44912094 0.49084857 1.153\n"
-	"0.34907714 0.48914573 1.149\n"
-	"0.33813429 0.48914573 1.149\n"
-	"0.32833049 0.49084857 1.153\n"
-	"0.24395333 0.42856666 0.98900002\n"
-	"0.20816095 0.42856666 0.98900002\n"
-	"0.1987419 0.42291525 0.98900002\n"
-	"0.18178761 0.42291525 0.98900002\n"
-	"0.17990381 0.42291525 0.98900002\n"
-	"-0.035590474 0.42997143 1.01\n"
-	"-0.035907622 0.43962574 1.0190001\n"
-	"-0.043542858 0.43639618 1.016\n"
-	"-0.15246001 0.36058003 0.84700006\n"
-	"0.21956001 0.44007048 0.99800003\n"
-	"-0.16635144 0.3699457 0.86900002\n"
-	"-0.33879143 0.36143145 0.84900004\n"
-	"-0.35055432 0.36853144 0.85800004\n"
-	"-0.39932001 0.38058859 0.89400005\n"
+	"0.44912094 0.49084857 1.153 22\n"
+	"0.34907714 0.48914573 1.149 22\n"
+	"0.33813429 0.48914573 1.149 22\n"
+	"0.32833049 0.49084857 1.153 22\n"
+	"0.24395333 0.42856666 0.98900002 22\n"
+	"0.20816095 0.42856666 0.98900002 22\n"
+	"0.1987419 0.42291525 0.98900002 22\n"
+	"0.18178761 0.42291525 0.98900002 22\n"
+	"0.17990381 0.42291525 0.98900002 22\n"
+	"-0.035590474 0.42997143 1.01 22\n"
+	"-0.035907622 0.43962574 1.0190001 22\n"
+	"-0.043542858 0.43639618 1.016 22\n"
+	"-0.15246001 0.36058003 0.84700006 22\n"
+	"0.21956001 0.44007048 0.99800003 22\n"
+	"-0.16635144 0.3699457 0.86900002 22\n"
+	"-0.33879143 0.36143145 0.84900004 22\n"
+	"-0.35055432 0.36853144 0.85800004 22\n"
+	"-0.39932001 0.38058859 0.89400005 22\n"
 	);
 	
 	DP pointCloud = IO::loadPCD(is);
@@ -332,12 +330,13 @@ TEST(IOTest, loadPCD)
 	// Confirm sizes and dimensions
 	EXPECT_TRUE(pointCloud.features.cols() == 18);
 	EXPECT_TRUE(pointCloud.features.rows() == 4);
-	EXPECT_TRUE(pointCloud.descriptors.cols() == 0);
-	EXPECT_TRUE(pointCloud.descriptors.rows() == 0);
+	EXPECT_TRUE(pointCloud.descriptors.cols() == 18);
+	EXPECT_TRUE(pointCloud.descriptors.rows() == 1);
 	
 	// Random value check
 	EXPECT_NEAR(pointCloud.features(0, 0), 0.449121, 0.0000001);
 	EXPECT_NEAR(pointCloud.features(2, 2), 1.149, 0.0000001);
+	EXPECT_NEAR(pointCloud.descriptors(0, 10), 22, 0.0000001);
 
 }
 
@@ -374,7 +373,7 @@ public:
 		this->testFileName = testFileName;
 
 		if (plyFormat || binary) {
-			// make sure randam values generated for colors are within ply format range
+			// make sure random values generated for colors are within ply format range
 			int pointCount(ptCloud.features.cols());
 			int descRows(ptCloud.descriptors.rows());
 			bool datawithColor = ptCloud.descriptorExists("color");
