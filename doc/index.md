@@ -30,8 +30,9 @@ Advanced<a name="advanced"></a>
 - [Example: Writing a program which performs ICP](BasicRegistration.md)
 - [How to move a point cloud using a rigid transformation?](Transformations.md)
 - [Example: Configure an ICP solution without yaml](icpWithoutYaml.md)
-- Measuring Hausdorff distance, Haussdorff quantile and mean residual error: See [Issue #125](https://github.com/ethz-asl/libpointmatcher/issues/125) for code examples.
-- How to I build a global map from a sequence of scans: see the example [align_sequence.cpp ](../examples/align_sequence.cpp ).
+- Measuring Hausdorff distance, Haussdorff quantile and mean residual error? [See this discussion for code examples.](https://github.com/ethz-asl/libpointmatcher/issues/125)
+- How to I build a global map from a sequence of scans? [See the example align_sequence.cpp](../examples/align_sequence.cpp ).
+- How to minimize the error with translation, rotation and scale? [See this example.](https://github.com/ethz-asl/libpointmatcher/issues/188#issuecomment-270960696)
 
 Developer<a name="developer"></a>
 ---------
