@@ -222,28 +222,40 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Normals. This filter extracts the normal to each point by taking the eigenvector corresponding to the smallest eigenvalue of its nearest neighbors.";
+			return "This filter extracts the surface normal vector and other statistics to each point by taking the eigenvector corresponding to the smallest eigenvalue of its nearest neighbors.\n\n"
+			       "Required descriptors: none.\n"
+			       "Produced descritors:  normals(optional), densities(optional), eigValues(optional), eigVectors(optional), matchedIds (optional), meanDists(optional).\n"
+				   "Altered descriptors:  none.\n"
+				   "Altered features:     none.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return boost::assign::list_of<ParameterDoc>
 				( "knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned> )
+				( "maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T> )
 				( "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> )
 				( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
 				( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" )
 				( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
 				( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
-				( "keepMatchedIds" , "whethen the identifiers of matches points should be added as descriptors to the resulting cloud", "0" )
+				( "keepMatchedIds" , "whether the identifiers of matches points should be added as descriptors to the resulting cloud", "0" )
+				( "keepMeanDist" , "whether the distance to the nearest neighbor mean should be added as descriptors to the resulting cloud", "0" )
+				( "sortEigen" , "whether the eigenvalues and eigenvectors should be sorted (ascending) based on the eigenvalues", "0" )
+				( "smoothNormals", "whether the normal vector should be average with the nearest neighbors", "0" )
 			;
 		}
 		
 		const unsigned knn;
-		const double epsilon;
+		const T maxDist;
+		const T epsilon;
 		const bool keepNormals;
 		const bool keepDensities;
 		const bool keepEigenValues;
 		const bool keepEigenVectors;
 		const bool keepMatchedIds;
+		const bool keepMeanDist;
+		const bool sortEigen;
+		const bool smoothNormals;
 
 		SurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
 		virtual ~SurfaceNormalDataPointsFilter() {};
@@ -254,6 +266,17 @@ struct DataPointsFiltersImpl
 		static T computeDensity(const Matrix NN);
 		static Vector serializeEigVec(const Matrix eigenVe);
 		static Vector sortEigenValues(const Vector& eigenVa);
+		static std::vector<size_t> sortIndexes(const Vector& v);
+
+	};
+
+	struct IdxCompare
+	{
+		const typename PointMatcher<T>::Vector& target;
+
+		IdxCompare(const typename PointMatcher<T>::Vector& target): target(target) {}
+
+		bool operator()(size_t a, size_t b) const { return target(a,0) < target(b,0); }
 	};
 
 	//! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
@@ -362,6 +385,33 @@ struct DataPointsFiltersImpl
 		virtual void inPlaceFilter(DataPoints& cloud);
 
 		const bool towardCenter;
+	};
+
+	//! Incidence angle, compute the incidence angle of a surface normal with the observation direction
+	struct IncidenceAngleDataPointsFilter: public DataPointsFilter
+	{
+		inline static const std::string description()
+		{
+			return "Compute the incidence angle using the dot product of the viewing direction and the surface normal.\n\n"
+				   "Required descriptors: normals, observationDirections.\n"
+			       "Produced descritors:  incidenceAngles.\n"
+				   "Altered descriptors:  none.\n"
+				   "Altered features:     none.";
+		}
+		
+		//inline static const ParametersDoc availableParameters()
+		//{
+		//	return ParametersDoc({
+		//		( "param1", "Description of the parameter", "defaultValue", "minValue", "maxValue", type of the parameter )
+		//		) "param2", "Description of the parameter", "defaultValue", "minValue", "maxValue", type of the parameter )
+		//	;
+		//}
+
+		//! Constructor, uses parameter interface
+		//IncidenceAngleDataPointsFilter(const Parameters& params = Parameters());
+		
+		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 
 	//! Random sampling
@@ -509,7 +559,11 @@ struct DataPointsFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Observation direction. This filter extracts observation directions (vector from point to sensor), considering a sensor at position (x,y,z).";
+			return "This filter extracts observation directions (vector from point to sensor), considering a sensor at position (x,y,z).\n\n"
+				   "Required descriptors: none.\n"
+			       "Produced descritors:  observationDirections.\n"
+				   "Altered descriptors:  none.\n"
+				   "Altered features:     none.";
 		}
 		
 		inline static const ParametersDoc availableParameters()
