@@ -81,13 +81,11 @@ In the following example, a box filter of the following dimensions was applied t
 
 Note that only points **outside** the bounding box are removed by the filter by setting the property *removeInside* to 0.  Because the point cloud center is located in the kitchen in the top-left, a square region of 2m x 2m is selected by this filter.  In the following image, the output of the filter is overlaid in white.
 
-|Figure: Top down view of the appartment point cloud with a box filter applied.  The<br> 
-input is shown in color and the output of the filter is overlaid in white   |Parameters used   |
+|Figure: Top down view of the appartment point cloud with a box filter applied.  The <br>input is shown in color and the output of the filter is overlaid in white   |Parameters used   |
 |---|:---|
 |![box filter output](images/box_filt_outside.png "Top down view of the appartment point cloud with a box filter applied.  The input is shown in color and the output of the filter is overlaid in white") |xMin : -1.0 <br> xMax : 1.0 <br>  yMin : -1.0 <br> yMax : 1.0 <br> zMin : -1.0 <br> zMax : 2.0 <br> removeInside : 0 |
 
-|Figure: Top down view of the appartment point cloud with a box filter applied.  The <br>
-input is shown in color and the output of the filter is overlaid in white   |Parameters used   |
+|Figure: Top down view of the appartment point cloud with a box filter applied.  The <br>input is shown in color and the output of the filter is overlaid in white   |Parameters used   |
 |---|:---|
 |![box filter output](images/box_filt_inside.png "Top down view of the appartment point cloud with a box filter applied and ignore inside applied.  The input is shown in color and the output of the filter is overlaid in white") | xMin : -1.0 <br> xMax : 1.0 <br>  yMin : -1.0 <br> yMax : 1.0 <br> zMin : -1.0 <br> zMax : 2.0 <br> removeInside : 1 |
 
@@ -109,9 +107,7 @@ __Impact on the number of points:__ reduces number of points
 ### Example
 In the following example we observe the effect of the maximum density filter on the apartment point cloud.  Sub-sampling occurs mostly in high density regions, which colored in red in the image below.  The result is an image with lower density overall with the low density regions in blue being preserved.
 
-|Figure: Max density filter applied to subsection of the apartment dataset.  On the <br>
-original data, low density regions are blue and high density regions are red.  The <br>
-sampled points are overlaid in white.   | Parameters used |
+|Figure: Max density filter applied to subsection of the apartment dataset.  On the <br>original data, low density regions are blue and high density regions are red.  The <br>sampled points are overlaid in white.   | Parameters used |
 |---|:---| 
 |![max density before](images/appt_0_maxdens.png "Max density filter applied to subsection of the apartment dataset.  On the original data, low density regions are blue and high density regions are red.  The sampled points are overlaid in white.") | maxDensity: 50000 |
 
@@ -132,9 +128,7 @@ __Impact on the number of points:__ reduces number of points
 ### Example
 In the following example, a maximum distance threshold of 1m is applied radially by setting the dimension parameter to -1.  As shown on the image below, points which lie within a sphere of radius 1m centered at the origin are selected by the filter and are displayed in white.  All other points are rejected by the filter.  Were a maximum distance filter to be replaced by an equivalent minimum distance filter, only points outside the sphere would be selected. 
 
-|Figure: Max density filter applied to subsection of the apartment dataset.  On the <br>
-original data, low density regions are blue and high density regions are red.  The <br>
-sampled points are overlaid in white.   | Parameters used |
+|Figure: Max density filter applied to subsection of the apartment dataset.  On the <br>original data, low density regions are blue and high density regions are red.  The <br>sampled points are overlaid in white.   | Parameters used |
 |---|:---|
 |![max distance after](images/max_dis.png "After applying maximum distance filter with a distance threshold of 1m and the dimension parameter set to radial") | maxDist : 1.0 <br> dim : -1 |
 
@@ -188,8 +182,7 @@ __Impact on the number of points:__ reduces number of points
 ### Example
 In the following example, maximum quantile filtering is performed over the x-axis with a quantile threshold of 0.5.  Therefore, points which have an x-value which exceeds the 50% quantile are rejected.  The output of the filter is displayed in white and overlaid with the input point cloud in the image below.  A sampling region centered at the origin and extending in both directions of the x-axis is clearly visible.
 
-|Figure: Maximum quantile on axis filter in the x-direction with a maximum quantile <br>
-of 0.5.   | Parameters used |
+|Figure: Maximum quantile on axis filter in the x-direction with a maximum quantile <br>of 0.5.   | Parameters used |
 |---|:---|  
 |![max quant after](images/max_quant.png "After applying maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5") | dim : 0 <br> ratio : 0.5 |
 
@@ -210,8 +203,7 @@ __Impact on the number of points:__ reduces number of points
 ### Example
 In the following sample, points are kept with a probability of 0.1.  Therefore the total number of points in the output point cloud is approximately 10 times less than the number of points in the input point cloud and the density is decreased overall.
 
-|Figure:  After applying the random sampling filter with a probability of 0.1. <br> 
-The original data is shown in black and the sampled points in white.   | Parameters used |
+|Figure:  After applying the random sampling filter with a probability of 0.1. <br> The original data is shown in black and the sampled points in white.   | Parameters used |
 |---|:---|  
 |![rand after](images/appt_0_rand.png "After applying the random sampling filter with a probability of 0.1") | prob : 0.1 |
 
@@ -291,8 +283,7 @@ __Impact on the number of points:__ none
 ### Example
 **Remark:** The following example uses a local point cloud 10 from the apartment dataset.  The filter is used to extract direction informations and a small subset of these directions is shown in the following image.  The arrows point towards the position of the sensor.  The input point cloud is color coded according to the z-elevation of the points (red represents the ceiling and blue the floor).
 
-|Figure:  Applying the observation direction filter to a local point cloud.  A small <br>
-subset of point observation directions are displayed   | Parameters used |
+|Figure:  Applying the observation direction filter to a local point cloud.  A small <br>subset of point observation directions are displayed   | Parameters used |
 |---|:---|  
 |![dir after](images/appt_obs_dir.png "Applying the observation direction filter to a local point cloud") | x : 0 <br> y : 0 <br> z : 0 |
 
@@ -327,8 +318,7 @@ __Impact on the number of points:__ none
 ### Example
 In this example, we again use a local point cloud of the apartment. You may recognize the input point cloud as a small portion of the local cloud used in the observation direction filter.  The surface normals are extracted using 20 neighboring points and epsilon=0.  In this example, for clarity, we only view a wall section of one of the apartment dataset.  A random set of normal vectors is shown in the figure with arrows.  When looking at the arrow directions on the wall, one may see normal vectors either pointing downwards into the apartment or outside the apartment.
 
-|Figure:  Applying the observation direction filter to a local point cloud.  A small <br>
-subset of point observation directions are displayed   | Parameters used |
+|Figure:  Applying the observation direction filter to a local point cloud.  A small <br>subset of point observation directions are displayed   | Parameters used |
 |---|:---|  
 |![norm after](images/appt_norm.png "Extracting surface normals of a portion of the apartment point cloud") | knn : 20 <br> epsilon : 0 <br> keepNormals : 1 <br> keepDensities : 1|
 
@@ -419,8 +409,7 @@ For this example we use another point cloud dataset from the ASL collection call
 
 In the following image we show a side view of local point cloud 3 in the dataset.  The laser is located at the bottom left corner and one can see the long arched corridor structures.  As we move right in the image point are located further away from the sensor, are therefore less numerous and more uncertain.  The points are colored by the estimation uncertainty obtained with this filter.  More certain points are black, medium certain points are red and less curtain points are white.  Naturally the colour shifts from black to white as we move further away from the laser down the corridor.
 
-|Figure:  Side view of a view 3 from the HG dataset augmented with sensor noise <br>
-estimations   |Parameters used   |
+|Figure:  Side view of a view 3 from the HG dataset augmented with sensor noise <br>estimations   |Parameters used   |
 |---|:---|
 |![samp norm after](images/hg_noise.png " Side view of a view 3 from the HG dataset") | sensorType : 1 |
 
