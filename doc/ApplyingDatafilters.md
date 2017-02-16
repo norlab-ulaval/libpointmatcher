@@ -78,9 +78,9 @@ return 0;
 ## Configuring the Data Filters Chain
 An example configuration file can be found at [examples/data/default-convert.yaml](../examples/data/default-convert.yaml).  A diagram of this chain is shown in Figure 1.  
 
-|**Figure 1**: Default chain of data filters in default-convert.yaml|
+|**Figure 1**: Default chain of data filters in `default-convert.yaml`|
 |---|
-|![Default Configuration Chain](images/DefaultConvertChain.png)|
+| ![Default Configuration Chain](images/DefaultConvertChain.png) |
 
 
 ### Bounding Box Filter
