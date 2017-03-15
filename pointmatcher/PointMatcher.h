@@ -236,6 +236,17 @@ struct PointMatcher
 			Labels(const Label& label);
 			bool contains(const std::string& text) const;
 			size_t totalDim() const;
+			friend std::ostream& operator<< (std::ostream& stream, const Labels& labels)
+			{
+				for(size_t i=0; i<labels.size(); i++)
+				{
+					stream << labels[i].text;
+					if(i != (labels.size() -1))
+						stream << ", ";
+				}
+
+				return stream;
+			};
 		};
 		
 		//! An exception thrown when one tries to access features or descriptors unexisting or of wrong dimensions

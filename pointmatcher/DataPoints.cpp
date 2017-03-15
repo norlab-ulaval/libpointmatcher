@@ -714,28 +714,34 @@ void PointMatcher<T>::DataPoints::assertConsistency(const std::string& dataName,
 	if (dataRows == 0)
 	{
 		if (dataCols != 0)
-			throw std::runtime_error(
+			throw InvalidField(
 				(boost::format("Point cloud has degenerate %2% dimensions of rows=0, cols=%1%") % dataCols % dataName).str()
 			);
 		if (labels.size() > 0)
-			throw std::runtime_error(
+			throw InvalidField(
 				(boost::format("Point cloud has no %2% data but %1% descriptor labels") % labels.size() % dataName).str()
 			);
 	}
 	else
 	{
 		if (dataCols != features.cols())
-			throw std::runtime_error(
+		{
+			throw InvalidField(
 				(boost::format("Point cloud has %1% points in features but %2% points in %3%") % features.cols() % dataCols % dataName).str()
 			);
+		}
+
 		int descDim(0);
 		for (BOOST_AUTO(it, labels.begin()); it != labels.end(); ++it)
 			descDim += it->span;
+		
 		if (dataRows != descDim)
-			throw std::runtime_error(
+			throw InvalidField(
 				(boost::format("Labels from %3% return %1% total dimensions but there are %2% in the %3% matrix") % descDim % dataRows % dataName).str()
 			);
+	
 	}
+
 }
 
 //! Make sure a field of a given name exists, if present, check its dimensions

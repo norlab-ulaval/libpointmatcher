@@ -2564,6 +2564,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     const unsigned int numPoints(cloud.features.cols());
 	const int featDim(cloud.features.rows());
 	const int descDim(cloud.descriptors.rows());
+	const int timeDim(cloud.times.rows());
 
 	assert (featDim == 3 || featDim == 4);
 
@@ -2576,6 +2577,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 			insertDim += cloud.descriptorLabels[i].span;
 		if (insertDim != descDim)
 			throw InvalidField("VoxelGridDataPointsFilter: Error, descriptor labels do not match descriptor data");
+		//TODO: timeDim too?
 	}
 
 	// TODO: Check that the voxel size is not too small, given the size of the data
@@ -2689,6 +2691,10 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
             		{
             			cloud.descriptors(d,firstPoint) += cloud.descriptors(d,p);
             		}
+					for (int d = 0; d < timeDim; d++)
+            		{
+            			cloud.times(d,firstPoint) += cloud.times(d,p);
+            		}
             	}
             }
         }
@@ -2708,6 +2714,9 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
                 if (averageExistingDescriptors) {
                 	for ( int d = 0; d < descDim; d++ )
                 		cloud.descriptors(d,firstPoint) /= numPoints;
+					for ( int d = 0; d < timeDim; d++ )
+                		cloud.times(d,firstPoint) /= numPoints;
+
                 }
 
                 pointsToKeep.push_back(firstPoint);
@@ -2732,6 +2741,10 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     				for (int d = 0; d < descDim; d++ )
     				{
     					cloud.descriptors(d,firstPoint) += cloud.descriptors(d,p);
+    				}
+					for (int d = 0; d < timeDim; d++ )
+    				{
+    					cloud.times(d,firstPoint) += cloud.times(d,p);
     				}
     			}
     		}
@@ -2775,6 +2788,9 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
                 if (averageExistingDescriptors) {
                 	for ( int d = 0; d < descDim; d++ )
                 		cloud.descriptors(d,firstPoint) /= numPoints;
+					for ( int d = 0; d < timeDim; d++ )
+                		cloud.times(d,firstPoint) /= numPoints;
+
                 }
 
                 pointsToKeep.push_back(firstPoint);
@@ -2797,11 +2813,19 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 		cloud.features.col(i) = cloud.features.col(k);
 		if (cloud.descriptors.rows() != 0)
 			cloud.descriptors.col(i) = cloud.descriptors.col(k);
+		if (cloud.times.rows() != 0)
+			cloud.times.col(i) = cloud.times.col(k);
+
 	}
-	cloud.features.conservativeResize(Eigen::NoChange, numPtsOut);
 	
-	if (cloud.descriptors.rows() != 0)
-		cloud.descriptors.conservativeResize(Eigen::NoChange, numPtsOut);
+	cloud.conservativeResize(numPtsOut);
+	
+	//cloud.features.conservativeResize(Eigen::NoChange, numPtsOut);
+	//
+	//if (cloud.descriptors.rows() != 0)
+	//	cloud.descriptors.conservativeResize(Eigen::NoChange, numPtsOut);
+	//if (cloud.times.rows() != 0)
+	//	cloud.times.conservativeResize(Eigen::NoChange, numPtsOut)
 }
 
 template struct DataPointsFiltersImpl<float>::VoxelGridDataPointsFilter;
