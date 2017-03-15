@@ -78,9 +78,10 @@ return 0;
 ## Configuring the Data Filters Chain
 An example configuration file can be found at [examples/data/default-convert.yaml](../examples/data/default-convert.yaml).  A diagram of this chain is shown in Figure 1.  
 
-|**Figure 1**: Default chain of data filters in default-convert.yaml|
-|:-------|
-|![Default Configuration Chain](images/DefaultConvertChain.png)|
+|**Figure 1**: Default chain of data filters in `default-convert.yaml`|
+|---|
+| ![Default Configuration Chain](images/DefaultConvertChain.png) |
+
 
 ### Bounding Box Filter
 The first element is a [bounding box filter](Datafilters.md#boundingboxhead). It is configured to reject points inside a 8m x 8m x 8m cube centered at the origin. 
