@@ -240,7 +240,7 @@ There are two options as to how to represent the distribution of points in a vox
 
 This filter also provides two methods for sub-sampling descriptors.  In the first, all descriptors within a voxel are averaged while in the second, only the first descriptor from a voxel is kept.
 
-__Required descriptors:__  none
+__Required descriptors:__  none  
 __Output descriptor:__ outputs average or single descriptor per voxel if the input cloud contains descriptors  
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ reduces number of points  
