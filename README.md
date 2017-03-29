@@ -34,7 +34,7 @@ and was compiled on:
   * Mac OS X ([see how](/doc/CompilationMac.md))
   * Windows ([see how](/doc/CompilationWindows.md) - partially supported)
 
-###Compilation & Installation 
+### Compilation & Installation 
 
 For beginner users who are not familiar with compiling and installing a library in Linux, go [here](doc/Compilation.md) for detailed instructions on how to compile libpointmatcher from the source code.  If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
 
