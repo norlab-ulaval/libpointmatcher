@@ -217,7 +217,7 @@ __Output descriptor:__ none
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ reduces number of points  
 
-##Shadow Point Filter <a name="shadowpointhead"></a>
+## Shadow Point Filter <a name="shadowpointhead"></a>
 
 ### Description
 
