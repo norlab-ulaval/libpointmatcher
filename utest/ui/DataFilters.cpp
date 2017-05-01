@@ -40,6 +40,35 @@ public:
 		
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
+
+	DP generateRandomDataPoints()
+	{
+
+		const int nbPoints = 100;
+		const int dimFeatures = 4;
+		const int dimDescriptors = 3;
+		const int dimTime = 2;
+
+		PM::Matrix randFeat = PM::Matrix::Random(dimFeatures, nbPoints);
+		DP::Labels featLabels;
+		featLabels.push_back(DP::Label("x", 1));
+		featLabels.push_back(DP::Label("y", 1));
+		featLabels.push_back(DP::Label("z", 1));
+		featLabels.push_back(DP::Label("pad", 1));
+
+		PM::Matrix randDesc = PM::Matrix::Random(dimDescriptors, nbPoints);
+		DP::Labels descLabels;
+		descLabels.push_back(DP::Label("dummyDesc", 3));
+
+		PM::Int64Matrix randTimes = PM::Int64Matrix::Random(dimTime, nbPoints);
+		DP::Labels timeLabels;
+		timeLabels.push_back(DP::Label("dummyTime", 2));
+
+		// Construct the point cloud from the generated matrices
+		DP pointCloud = DP(randFeat, featLabels, randDesc, descLabels, randTimes, timeLabels);
+
+		return pointCloud;
+	}
 };
 
 
@@ -353,6 +382,26 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 
 TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 {
+	// Test with point cloud
+	DP cloud = generateRandomDataPoints();
+
+	params = PM::Parameters(); 
+	params["vSizeX"] = "0.5";
+	params["vSizeY"] = "0.5";
+	params["vSizeZ"] = "0.5";
+	params["useCentroid"] = toParam(true);
+	params["averageExistingDescriptors"] = toParam(true);
+
+	PM::DataPointsFilter* voxelFilter = 
+			PM::get().DataPointsFilterRegistrar.create("VoxelGridDataPointsFilter", params);
+
+	DP filteredCloud = voxelFilter->filter(cloud);
+
+	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+	// Test with ICP
 	vector<bool> useCentroid = list_of(false)(true);
 	vector<bool> averageExistingDescriptors = list_of(false)(true);
 	for (unsigned i = 0 ; i < useCentroid.size() ; i++) 
