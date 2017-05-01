@@ -191,7 +191,7 @@ make
 sudo make install
 ```
 
-#Having problems?
+# Having problems?
 Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/ethz-asl/libpointmatcher/issues). You may need to ensure that the file is executable:
 
 ```

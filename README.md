@@ -34,7 +34,7 @@ and was compiled on:
   * Mac OS X ([see how](/doc/CompilationMac.md))
   * Windows ([see how](/doc/CompilationWindows.md) - partially supported)
 
-###Compilation & Installation 
+### Compilation & Installation 
 
 For beginner users who are not familiar with compiling and installing a library in Linux, go [here](doc/Compilation.md) for detailed instructions on how to compile libpointmatcher from the source code.  If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
 
@@ -45,7 +45,7 @@ make
 sudo make install
 ```
 
-###Testing
+### Testing
 
 Libpointmatcher ships with a version of the Google testing framework [GTest](https://code.google.com/p/googletest/).  Unit tests are located in utest/ and are compiled with libpointmatcher.  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
 ```
@@ -57,7 +57,7 @@ utest/utest --path ../examples/data/
 We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_Qt), which manually list all the dependencies in the file [`demo.pro`](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system.
 
 
-###Bug reporting
+### Bug reporting
 
 Please use our [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs. If you are running the library on Ubuntu, copy-paste the output of the script [listVersionsUbuntu.sh](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/listVersionsUbuntu.sh) to simplify the search of an answer.
 

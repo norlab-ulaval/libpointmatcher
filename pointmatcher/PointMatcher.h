@@ -48,7 +48,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Eigen/Core"
 #include "Eigen/Geometry"
 
-#include "nabo/nabo.h"
 
 #include <boost/thread/mutex.hpp>
 
@@ -63,10 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parametrizable.h"
 #include "Registrar.h"
  
-#if NABO_VERSION_INT < 10006
-	#error "You need libnabo version 1.0.6 or greater"
-#endif
-
 /*! 
 	\file PointMatcher.h
 	\brief public interface
