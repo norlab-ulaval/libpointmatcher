@@ -60,6 +60,19 @@ InvalidModuleType::InvalidModuleType(const std::string& reason):
 	runtime_error(reason)
 {}
 
+template<typename T>
+PointMatcher<T>::ICPChainBase::MaxNumIterationsError::MaxNumIterationsError(const std::string& reason, const TransformationParameters& Tlast):
+ConvergenceError(reason),
+lastTransformation(Tlast)
+{}
+
+template<typename T>
+PointMatcher<T>::ICPChainBase::MaxNumIterationsError::~MaxNumIterationsError() throw ()
+{}
+
+template struct PointMatcher<float>::ICPChainBase::MaxNumIterationsError;
+template struct PointMatcher<double>::ICPChainBase::MaxNumIterationsError;
+
 //! Protected contstructor, to prevent the creation of this object
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
@@ -337,6 +350,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	TransformationParameters T_iter = Matrix::Identity(dim, dim);
 	
 	bool iterate(true);
+	bool max_iterations_reached(false);
 	this->transformationCheckers.init(T_iter, iterate);
 
 	size_t iterationCount(0);
@@ -398,8 +412,15 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		//	stepReading, reference, outlierWeights, matches);
 		
 		// in test
-		
-		this->transformationCheckers.check(T_iter, iterate);
+		try
+		{
+			this->transformationCheckers.check(T_iter, iterate);	
+		}
+		catch(const typename TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached & e)
+		{
+			iterate = false;
+			max_iterations_reached = true;
+		}
 	
 		++iterationCount;
 	}
@@ -420,6 +441,12 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_refMean_dataIn
 	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_iter(0)_dataIn
 	// T_refIn_refMean remove the temperary frame added during initialization
+	if(max_iterations_reached)
+	{
+		// return the transformation inside the exception and let the user decide what to to with it.
+		throw MaxNumIterationsError("reached the maximum number of allowed iterations", T_refIn_refMean * T_iter * T_refMean_dataIn);
+	}
+
 	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
 }
 

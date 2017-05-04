@@ -149,6 +149,7 @@ struct PointMatcher
 	struct ConvergenceError: std::runtime_error
 	{
 		ConvergenceError(const std::string& reason);
+		virtual ~ConvergenceError() throw ();
 	};
 
 
@@ -642,6 +643,16 @@ struct PointMatcher
 	struct ICPChainBase
 	{
 	public:
+		//! ICP reached max number of iterations
+		struct MaxNumIterationsError : ConvergenceError
+		{
+			MaxNumIterationsError(const std::string& reason, const TransformationParameters& Tlast);
+			virtual ~MaxNumIterationsError() throw ();
+
+			TransformationParameters lastTransformation;
+		};
+
+
 		DataPointsFilters readingDataPointsFilters; //!< filters for reading, applied once
 		DataPointsFilters readingStepDataPointsFilters; //!< filters for reading, applied at each step
 		DataPointsFilters referenceDataPointsFilters; //!< filters for reference
@@ -685,6 +696,8 @@ struct PointMatcher
 	//! ICP algorithm
 	struct ICP: ICPChainBase
 	{
+		typedef typename ICPChainBase::MaxNumIterationsError MaxNumIterationsError;
+
 		TransformationParameters operator()(
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn);
@@ -716,6 +729,8 @@ struct PointMatcher
 	//! Warning: used with caution, you need to set the map manually.
 	struct ICPSequence: public ICP
 	{
+		typedef typename ICPChainBase::MaxNumIterationsError MaxNumIterationsError;
+
 		TransformationParameters operator()(
 			const DataPoints& cloudIn);
 		TransformationParameters operator()(

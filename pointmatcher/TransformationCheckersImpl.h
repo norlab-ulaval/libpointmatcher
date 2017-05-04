@@ -57,6 +57,12 @@ struct TransformationCheckersImpl
 	
 	struct CounterTransformationChecker: public TransformationChecker
 	{
+		//! ICP reached max number of iterations
+		struct MaxNumIterationsReached: std::runtime_error
+		{
+			MaxNumIterationsReached();
+		};
+
 		inline static const std::string description()
 		{
 			return "This checker stops the ICP loop after a certain number of iterations.";

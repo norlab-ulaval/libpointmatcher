@@ -43,6 +43,14 @@ using namespace PointMatcherSupport;
 //--------------------------------------
 // max iteration counter
 template<typename T>
+TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached::MaxNumIterationsReached():
+runtime_error("")
+{}
+
+template struct TransformationCheckersImpl<float>::CounterTransformationChecker::MaxNumIterationsReached;
+template struct TransformationCheckersImpl<double>::CounterTransformationChecker::MaxNumIterationsReached;
+
+template<typename T>
 TransformationCheckersImpl<T>::CounterTransformationChecker::CounterTransformationChecker(const Parameters& params):
 	TransformationChecker("CounterTransformationChecker", CounterTransformationChecker::availableParameters(), params),
 	maxIterationCount(Parametrizable::get<unsigned>("maxIterationCount"))
@@ -69,7 +77,10 @@ void TransformationCheckersImpl<T>::CounterTransformationChecker::check(const Tr
 	//cerr << parameters << endl;
 	
 	if (this->conditionVariables(0) >= this->limits(0))
+	{
 		iterate = false;
+		throw MaxNumIterationsReached();
+	}
 }
 
 template struct TransformationCheckersImpl<float>::CounterTransformationChecker;
