@@ -6,6 +6,6 @@ includedir=${prefix}/include
 Name: @CMAKE_PROJECT_NAME@
 Description: See https://github.com/ethz-asl/libpointmatcher
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} @LIBRARY_CC_ARGS@
+Libs: -L${libdir} -lpointmatcher
 Cflags: -I${includedir}/
 
