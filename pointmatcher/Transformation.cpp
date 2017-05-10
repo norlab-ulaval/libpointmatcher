@@ -60,12 +60,22 @@ template struct PointMatcher<double>::Transformation;
 template<typename T>
 void PointMatcher<T>::Transformations::apply(DataPoints& cloud, const TransformationParameters& parameters) const
 {
+	// There is no chain per se, the current API is very confusing. Normally,
+	// if this object is initialized correctly, there is one single iteration
+	// to be done, just the type of the transform changes. 
+	// TODO: This API must be re-written to not even have the concept
+	// of chain for this classs. 
+	int num_iter = 0;
+
 	DataPoints transformedCloud;
 	for (TransformationsConstIt it = this->begin(); it != this->end(); ++it)
 	{
 		transformedCloud = (*it)->compute(cloud, parameters);
 		swapDataPoints(cloud, transformedCloud);
+		num_iter++;
 	}
+	if (num_iter != 1)
+		throw std::runtime_error("Transformations: Error, the transform should have been applied just once.");
 }
 
 template struct PointMatcher<float>::Transformations;

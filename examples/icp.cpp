@@ -11,14 +11,14 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
-	* Redistributions of source code must retain the above copyright
-	  notice, this list of conditions and the following disclaimer.
-	* Redistributions in binary form must reproduce the above copyright
-	  notice, this list of conditions and the following disclaimer in the
-	  documentation and/or other materials provided with the distribution.
-	* Neither the name of the <organization> nor the
-	  names of its contributors may be used to endorse or promote products
-	  derived from this software without specific prior written permission.
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the <organization> nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -52,6 +52,7 @@ typedef PointMatcherSupport::CurrentBibliography CurrentBibliography;
 
 void listModules();
 int validateArgs(const int argc, const char *argv[],
+				 bool& isVerbose,
 				 bool& isTransfoSaved,
 				 string& configFile,
 				 string& outputBaseFile,
@@ -60,6 +61,7 @@ PM::TransformationParameters parseTranslation(string& translation,
 											  const int cloudDimension);
 PM::TransformationParameters parseRotation(string& rotation,
 										   const int cloudDimension);
+// Helper functions
 void usage(const char *argv[]);
 
 /**
@@ -72,11 +74,12 @@ void usage(const char *argv[]);
 int main(int argc, const char *argv[])
 {
 	bool isTransfoSaved = false;
+	bool isVerbose = false;
 	string configFile;
 	string outputBaseFile("test");
 	string initTranslation("0,0,0");
 	string initRotation("1,0,0;0,1,0;0,0,1");
-	const int ret = validateArgs(argc, argv, isTransfoSaved, configFile,
+	const int ret = validateArgs(argc, argv, isVerbose, isTransfoSaved, configFile,
 								 outputBaseFile, initTranslation, initRotation);
 	if (ret != 0)
 	{
@@ -91,6 +94,7 @@ int main(int argc, const char *argv[])
 
 	// Create the default ICP algorithm
 	PM::ICP icp;
+
 
 	if (configFile.empty())
 	{
@@ -107,7 +111,8 @@ int main(int argc, const char *argv[])
 		}
 		icp.loadFromYaml(ifs);
 	}
-
+	
+	
 	int cloudDimension = ref.getEuclideanDim();
 	
 	if (!(cloudDimension == 2 || cloudDimension == 3)) 
@@ -115,6 +120,8 @@ int main(int argc, const char *argv[])
 		cerr << "Invalid input point clouds dimension" << endl;
 		exit(1);
 	}
+
+	
 
 	PM::TransformationParameters translation =
 			parseTranslation(initTranslation, cloudDimension);
@@ -137,7 +144,8 @@ int main(int argc, const char *argv[])
 
 	// Compute the transformation to express data in ref
 	PM::TransformationParameters T = icp(initializedData, ref);
-	cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
+	if(isVerbose)
+		cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
 
 	// Transform data to express it in ref
 	DP data_out(initializedData);
@@ -158,7 +166,7 @@ int main(int argc, const char *argv[])
 			transfoFile << initTransfo << endl;
 			transfoFile.close();
 		} else {
-			cout << "Unable to write the initial transformation file\n" << endl;
+			cerr << "Unable to write the initial transformation file\n" << endl;
 		}
 
 		transfoFile.open(icpFileName.c_str());
@@ -166,7 +174,7 @@ int main(int argc, const char *argv[])
 			transfoFile << T << endl;
 			transfoFile.close();
 		} else {
-			cout << "Unable to write the ICP transformation file\n" << endl;
+			cerr << "Unable to write the ICP transformation file\n" << endl;
 		}
 
 		transfoFile.open(completeFileName.c_str());
@@ -174,11 +182,13 @@ int main(int argc, const char *argv[])
 			transfoFile << T*initTransfo << endl;
 			transfoFile.close();
 		} else {
-			cout << "Unable to write the complete transformation file\n" << endl;
+			cerr << "Unable to write the complete transformation file\n" << endl;
 		}
 	}
-	else {
-		cout << "ICP transformation:" << endl << T << endl;
+	else 
+	{
+		if(isVerbose)
+			cout << "ICP transformation:" << endl << T << endl;
 	}
 
 	return 0;
@@ -221,6 +231,7 @@ void listModules()
 
 // Make sure that the command arguments make sense
 int validateArgs(const int argc, const char *argv[],
+				 bool& isVerbose,
 				 bool& isTransfoSaved,
 				 string& configFile,
 				 string& outputBaseFile,
@@ -251,6 +262,11 @@ int validateArgs(const int argc, const char *argv[],
 	for (int i = 1; i < endOpt; i += 2)
 	{
 		const string opt(argv[i]);
+		if (opt == "--verbose" || opt == "-v") {
+			isVerbose = true;
+			i --;
+			continue;
+		}
 		if (i + 1 > endOpt)
 		{
 			cerr << "Missing value for option " << opt << ", usage:"; usage(argv); exit(1);
@@ -375,6 +391,7 @@ void usage(const char *argv[])
 	cerr << "  " << argv[0] << " [OPTIONS] reference.csv reading.csv" << endl;
 	cerr << endl;
 	cerr << "OPTIONS can be a combination of:" << endl;
+	cerr << "-v,--verbose               Be more verbose (info logging to stdout)" << endl;
 	cerr << "--config YAML_CONFIG_FILE  Load the config from a YAML file (default: default parameters)" << endl;
 	cerr << "--output BASEFILENAME      Name of output files (default: test)" << endl;
 	cerr << "--initTranslation [x,y,z]  Add an initial 3D translation before applying ICP (default: 0,0,0)" << endl;
@@ -397,3 +414,6 @@ void usage(const char *argv[])
 	cerr << "  " << argv[0] << " ../examples/data/car_cloud400.csv ../examples/data/car_cloud401.csv" << endl;
 	cerr << endl;
 }
+
+
+

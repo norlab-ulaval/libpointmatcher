@@ -44,6 +44,7 @@ struct PointMatcherIO
 {
 	typedef typename PointMatcher<T>::Vector Vector; //!< alias
 	typedef typename PointMatcher<T>::Matrix Matrix; //!< alias
+	typedef typename PointMatcher<T>::Int64Matrix Int64Matrix; //!< alias
 	typedef typename PointMatcher<T>::DataPoints DataPoints; //!< alias
 	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters; //!< alias
 	typedef typename PointMatcher<T>::Matrix Parameters; //!< alias
@@ -56,15 +57,7 @@ struct PointMatcherIO
 	//! Map to associate common descriptor sublabels to PM descriptor matrix row and labels
 	//! ex: nx, ny, nz are associated with (0,normals) (1,normals) (2,normals) respectively
 	typedef std::map<std::string, LabelAssociationPair > SublabelAssociationMap;
-
-	// General
-	static SublabelAssociationMap getFeatAssocationMap(); //!< map to store association between common 1d feature labels and their PM label and span dimension
-	static SublabelAssociationMap getDescAssocationMap(); //!< map to store association between common 1d descriptor labels and their PM label and span dimension
-	static bool featSublabelRegistered(const std::string& externalName); //!< returns true if a particular feature dim label is registered (ie x, y...)
-	static bool descSublabelRegistered(const std::string& externalName); //!< returns true if a particular descriptor dim label is registered (ie nx, red...)
-	static LabelAssociationPair getFeatAssociationPair(const std::string& externalName); //!< get PM feature label associated with sublabel
-	static LabelAssociationPair getDescAssociationPair(const std::string& externalName); //!< get PM descriptor label associated with sublabel
-
+	
 	static std::string getColLabel(const Label& label, const int row); //!< convert a descriptor label to an appropriate sub-label
 	
 	//! Type of information in a DataPoints. Each type is stored in its own dense matrix.
@@ -72,8 +65,9 @@ struct PointMatcherIO
 		{
 			FEATURE,
 			DESCRIPTOR,
+			TIME,
 			UNSUPPORTED
-		};//TODO: add time here too
+		};
 
 	//! Structure containing all information required to map external information to PointMatcher internal representation
 	struct SupportedLabel
@@ -89,18 +83,47 @@ struct PointMatcherIO
 	//! Vector of supported labels in PointMatcher and their external names
 	typedef std::vector<SupportedLabel> SupportedLabels;
 
+	//! Helper structure designed to parse file headers
+	struct GenericInputHeader
+	{
+		std::string name; //!< name found in the file
+		unsigned int matrixRowId; //!< on which row the information will be loaded
+		PMPropTypes matrixType; //!< in which matrix the information will be loaded
+
+		//! Constructor
+		//TODO: move that to .cpp
+		GenericInputHeader(const std::string name)
+		{
+			init(name);
+		};
+
+		GenericInputHeader()
+		{
+			init("");
+		};
+
+		private:
+		void init(std::string name)
+		{
+			this->name = name;
+			this->matrixRowId = 0;
+			this->matrixType = UNSUPPORTED;
+		};
+	};
+
 	//! Vector containing the mapping of all external names to PointMatcher representation.
 	//! The order is important (i.e., nx before ny). This can also be used to remap 
 	//! 1D descriptor name to a better one.
 	static const SupportedLabels & getSupportedExternalLabels()
 	{
-		//Can be read:
-		// (internalName, externalName, type)
+		// This table can be read as:
+		//   (internalName, externalName, type)
 		const static SupportedLabels labels = boost::assign::list_of<SupportedLabel>
 			("x", "x", FEATURE)
 			("y", "y", FEATURE)
 			("z", "z", FEATURE)
 			("pad", "pad", FEATURE)
+			//("internalName", "externalName", FEATURE)
 			("normals", "nx", DESCRIPTOR)
 			("normals", "ny", DESCRIPTOR)
 			("normals", "nz", DESCRIPTOR)
@@ -123,7 +146,10 @@ struct PointMatcherIO
 			("eigVectors", "eigVectors2X", DESCRIPTOR)
 			("eigVectors", "eigVectors2Y", DESCRIPTOR)
 			("eigVectors", "eigVectors2Z", DESCRIPTOR)
-			//("", "", DESCRIPTOR)
+			("intensity", "intensity", DESCRIPTOR)
+			//("internalName", "externalName", DESCRIPTOR)
+			("time", "time", TIME)
+			//("internalName", "externalName", TIME)
 			;
 
 			return labels;
@@ -136,7 +162,11 @@ struct PointMatcherIO
 
 	public:
 		//! add a name to the vector of labels. If already there, will increament the dimension.
-		void add(std::string internalName);
+		void add(const std::string internalName);
+
+		//! add a name to the vector of labels with its dimension.
+		void add(const std::string internalName, const unsigned int dim);
+
 
 		//! Return the vector of labels used to build a DataPoints
 		Labels getLabels() const;
@@ -144,7 +174,7 @@ struct PointMatcherIO
 
 
 	//! Associate an external name to a DataPoints type of information
-	static PMPropTypes getPMType(const std::string& externalName); //! Return the type of information specific to a DataPoints based on a sulabel name
+	//static PMPropTypes getPMType(const std::string& externalName); //! Return the type of information specific to a DataPoints based on a sulabel name
 
 	// CSV
 	static DataPoints loadCSV(const std::string& fileName);
@@ -161,10 +191,25 @@ struct PointMatcherIO
 		UNSTRUCTURED_GRID
 	};
 
+	//! Storage for time loaded separatly
+	struct SplitTime
+	{
+		bool isHigh32Found;//!< was the high 32bits found in the file
+		bool isLow32Found;//!< was the low 32bits found in the file
+		//! Matrix containing file data representing the high 32 bits
+		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> high32;
+		//! Matrix containing file data representing the low 32 bits
+		Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> low32;
+
+		//! Constructor
+		SplitTime(): isHigh32Found(false), isLow32Found(false){};
+
+	};
+
 	static DataPoints loadVTK(const std::string& fileName);
 	static DataPoints loadVTK(std::istream& is);
 
-	static void saveVTK(const DataPoints& data, const std::string& fileName);
+	static void saveVTK(const DataPoints& data, const std::string& fileName, bool binary = false);
 
 	// PLY
 	static DataPoints loadPLY(const std::string& fileName);
@@ -190,7 +235,7 @@ struct PointMatcherIO
 		TransformationParameters groundTruthTransformation; //!< matrix of the ground-truth transform
 		Vector3 gravity; //!< gravity vector
 
-		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& grativity=Vector3::Zero());
+		FileInfo(const std::string& readingPath="", const std::string& referencePath="", const std::string& configFileName="", const TransformationParameters& initialTransformation=TransformationParameters(), const TransformationParameters& groundTruthTransformation=TransformationParameters(),  const Vector& gravity=Vector3::Zero());
 	};
 
 	//! A vector of file info, to be used in batch processing
@@ -229,16 +274,13 @@ struct PointMatcherIO
 		PMPropTypes pmType; //!< type of information in PointMatcher
 		int pmRowID; //!< row id used in a DataPoints 
 
-		//TODO: remove that (now pmType):
-		bool is_feature; //!<member is true if is a PM feature, if not, it is a descriptor
-
 		PLYProperty() { } //!< Default constructor. If used member values must be filled later.
 
 		// regular property
-		PLYProperty(const std::string& type, const std::string& name, const unsigned pos, const bool is_feature = false);
+		PLYProperty(const std::string& type, const std::string& name, const unsigned pos);
 
 		// list property
-		PLYProperty(const std::string& idx_type, const std::string& type, const std::string& name, const unsigned pos, const bool is_feature = false); //! list prop ctor
+		PLYProperty(const std::string& idx_type, const std::string& type, const std::string& name, const unsigned pos); //! list prop ctor
 
 		bool operator==(const PLYProperty& other) const; //! compare with other property
 	};
@@ -278,9 +320,7 @@ struct PointMatcherIO
 		PLYElement(const std::string& name, const unsigned num, const unsigned offset) :
 			name(name), num(num), total_props(0), offset(offset), nbFeatures(0), nbDescriptors(0) {}
 
-		bool supportsProperty(const PLYProperty& prop) const; //!< Returns true if property pro is supported by element
-
-		void addProperty(PLYProperty& prop); //!< add a property to vector of properties
+		//bool supportsProperty(const PLYProperty& prop) const; //!< Returns true if property pro is supported by element
 
 		bool operator==(const PLYElement& other) const; //!< comparison operator for elements
 
@@ -316,10 +356,52 @@ struct PointMatcherIO
 		bool elementSupported(const std::string& elem_name); //!< returns true if element named elem_name is supported by this parser
 		static PLYElement* createElement(const std::string& elem_name, const int elem_num, const unsigned offset); //!< factory function, build element defined by name with elem_num elements
 	};
-   
-   //! Replaces getline for handling windows style CR/LF line endings
-   static std::istream & safeGetLine( std::istream& os, std::string & line);
-   
+
+	//! Information for a PCD property
+	struct PCDproperty
+	{
+		std::string field; //!< Name of the property
+		unsigned int size; //!< Size of the property in bytes
+		char type; //!< Type: I: signed, U: unsigned, F: float
+		unsigned int count; //!< number of dimension
+		
+		//PointMatcher information:
+		PMPropTypes pmType; //!< type of information in PointMatcher
+		int pmRowID; //!< row id used in a DataPoints
+
+		//! Empty constructor
+		PCDproperty()
+		{
+			field = "";
+			size = 0;
+			type = '-';
+			count = 1;
+			pmType = UNSUPPORTED;
+			pmRowID = -1;
+		};
+	};
+
+	//! All information contained in the header of a PCD file
+	struct PCDheader
+	{
+		std::string version; //!< Version of the PCD file used
+		std::vector<PCDproperty> properties; //!< vector of properties
+		unsigned int width; //!< width of sensor matrix
+		unsigned int height; //!< height of sensor matrix
+		Eigen::Matrix<T, 7, 1> viewPoint;  //!< not used
+		unsigned int nbPoints; //!< number of points, same as width*height
+		std::string dataType; //!< ascii or binary
+
+		PCDheader()
+		{
+			version = "-";
+			width = 0;
+			height = 0;
+			viewPoint = Eigen::Matrix<T, 7, 1>::Zero();
+			nbPoints = 0;
+			dataType = "-";
+		};
+	};
 };
 
 

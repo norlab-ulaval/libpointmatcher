@@ -3,7 +3,7 @@
 /*
 
 Copyright (c) 2010--2012,
-François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
+Francois Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
 You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
 
@@ -39,12 +39,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EIGEN_USE_NEW_STDVECTOR
 #define EIGEN_USE_NEW_STDVECTOR
 #endif // EIGEN_USE_NEW_STDVECTOR
-#define EIGEN2_SUPPORT
+//#define EIGEN2_SUPPORT
+
+//TODO: investigate if that causes more problems down the road
+#define EIGEN_NO_DEBUG
+
 #include "Eigen/StdVector"
 #include "Eigen/Core"
 #include "Eigen/Geometry"
 
-#include "nabo/nabo.h"
 
 #include <boost/thread/mutex.hpp>
 
@@ -53,14 +56,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <ostream>
 #include <memory>
+//#include <cstdint>
+#include <boost/cstdint.hpp>
 
 #include "Parametrizable.h"
 #include "Registrar.h"
-
-#if NABO_VERSION_INT < 10001
-	#error "You need libnabo version 1.0.1 or greater"
-#endif
-
+ 
 /*! 
 	\file PointMatcher.h
 	\brief public interface
@@ -68,9 +69,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //! version of the Pointmatcher library as string
-#define POINTMATCHER_VERSION "1.2.1"
+#define POINTMATCHER_VERSION "1.2.3"
 //! version of the Pointmatcher library as an int
-#define POINTMATCHER_VERSION_INT 10201
+#define POINTMATCHER_VERSION_INT 10203
 
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
@@ -169,6 +170,8 @@ struct PointMatcher
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Matrix;
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
+	//! A dense signed 64-bits matrix
+	typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	
 	//! A matrix holding the parameters a transformation.
 	/**
@@ -203,8 +206,12 @@ struct PointMatcher
 	{
 		//! A view on a feature or descriptor
 		typedef Eigen::Block<Matrix> View;
+		//! A view on a time
+		typedef Eigen::Block<Int64Matrix> TimeView;
 		//! A view on a const feature or const descriptor
 		typedef const Eigen::Block<const Matrix> ConstView;
+		//! a view on a const time
+		typedef const Eigen::Block<const Int64Matrix> TimeConstView;
 		//! An index to a row or a column
 		typedef typename Matrix::Index Index;
 		
@@ -224,6 +231,17 @@ struct PointMatcher
 			Labels(const Label& label);
 			bool contains(const std::string& text) const;
 			size_t totalDim() const;
+			friend std::ostream& operator<< (std::ostream& stream, const Labels& labels)
+			{
+				for(size_t i=0; i<labels.size(); i++)
+				{
+					stream << labels[i].text;
+					if(i != (labels.size() -1))
+						stream << ", ";
+				}
+
+				return stream;
+			};
 		};
 		
 		//! An exception thrown when one tries to access features or descriptors unexisting or of wrong dimensions
@@ -232,10 +250,16 @@ struct PointMatcher
 			InvalidField(const std::string& reason);
 		};
 		
+		// Constructors from descriptions (reserve memory)
 		DataPoints();
 		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const size_t pointCount);
+		DataPoints(const Labels& featureLabels, const Labels& descriptorLabels, const Labels& timeLabels, const size_t pointCount);
+
+		// Copy constructors from partial data
 		DataPoints(const Matrix& features, const Labels& featureLabels);
 		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels);
+		DataPoints(const Matrix& features, const Labels& featureLabels, const Matrix& descriptors, const Labels& descriptorLabels, const Int64Matrix& times, const Labels& timeLabels);
+		
 		bool operator ==(const DataPoints& that) const;
 	
 		unsigned getNbPoints() const;
@@ -243,8 +267,9 @@ struct PointMatcher
 		unsigned getHomogeneousDim() const;
 		unsigned getNbGroupedDescriptors() const;
 		unsigned getDescriptorDim() const;
+		unsigned getTimeDim() const;
 
-		void save(const std::string& fileName) const;
+		void save(const std::string& fileName, bool binary = false) const;
 		static DataPoints load(const std::string& fileName);
 		
 		void concatenate(const DataPoints& dp);
@@ -253,6 +278,7 @@ struct PointMatcher
 		DataPoints createSimilarEmpty(Index pointCount) const;
 		void setColFrom(Index thisCol, const DataPoints& that, Index thatCol);
 		
+		// methods related to features
 		void allocateFeature(const std::string& name, const unsigned dim);
 		void allocateFeatures(const Labels& newLabels);
 		void addFeature(const std::string& name, const Matrix& newFeature);
@@ -267,6 +293,7 @@ struct PointMatcher
 		unsigned getFeatureDimension(const std::string& name) const;
 		unsigned getFeatureStartingRow(const std::string& name) const;
 		
+		// methods related to descriptors
 		void allocateDescriptor(const std::string& name, const unsigned dim);
 		void allocateDescriptors(const Labels& newLabels);
 		void addDescriptor(const std::string& name, const Matrix& newDescriptor);
@@ -282,21 +309,49 @@ struct PointMatcher
 		unsigned getDescriptorStartingRow(const std::string& name) const;
 		void assertDescriptorConsistency() const;
 		
+		// methods related to times
+		void allocateTime(const std::string& name, const unsigned dim);
+		void allocateTimes(const Labels& newLabels);
+		void addTime(const std::string& name, const Int64Matrix& newTime);
+		void removeTime(const std::string& name);
+		Int64Matrix getTimeCopyByName(const std::string& name) const;
+		TimeConstView getTimeViewByName(const std::string& name) const;
+		TimeView getTimeViewByName(const std::string& name);
+		TimeConstView getTimeRowViewByName(const std::string& name, const unsigned row) const;
+		TimeView getTimeRowViewByName(const std::string& name, const unsigned row);
+		bool timeExists(const std::string& name) const;
+		bool timeExists(const std::string& name, const unsigned dim) const;
+		unsigned getTimeDimension(const std::string& name) const;
+		unsigned getTimeStartingRow(const std::string& name) const;
+		void assertTimesConsistency() const;
+
 		Matrix features; //!< features of points in the cloud
 		Labels featureLabels; //!< labels of features
 		Matrix descriptors; //!< descriptors of points in the cloud, might be empty
 		Labels descriptorLabels; //!< labels of descriptors
+		Int64Matrix times; //!< time associated to each points, might be empty
+		Labels timeLabels; //!< labels of times.
 	
 	private:
-		void allocateFields(const Labels& newLabels, Labels& labels, Matrix& data) const;
-		void allocateField(const std::string& name, const unsigned dim, Labels& labels, Matrix& data) const;
-		void addField(const std::string& name, const Matrix& newField, Labels& labels, Matrix& data) const;
-		void removeField(const std::string& name, Labels& labels, Matrix& data) const;
-		ConstView getConstViewByName(const std::string& name, const Labels& labels, const Matrix& data, const int viewRow = -1) const;
-		View getViewByName(const std::string& name, const Labels& labels, Matrix& data, const int viewRow = -1) const;
+		void assertConsistency(const std::string& dataName, const int dataRows, const int dataCols, const Labels& labels) const;
+		template<typename MatrixType> 
+		void allocateFields(const Labels& newLabels, Labels& labels, MatrixType& data) const;
+		template<typename MatrixType> 
+		void allocateField(const std::string& name, const unsigned dim, Labels& labels, MatrixType& data) const;
+		template<typename MatrixType> 
+		void addField(const std::string& name, const MatrixType& newField, Labels& labels, MatrixType& data) const;
+		template<typename MatrixType>
+		void removeField(const std::string& name, Labels& labels, MatrixType& data) const;
+		template<typename MatrixType>
+		const Eigen::Block<const MatrixType> getConstViewByName(const std::string& name, const Labels& labels, const MatrixType& data, const int viewRow = -1) const;
+		template<typename MatrixType>
+		Eigen::Block<MatrixType> getViewByName(const std::string& name, const Labels& labels, MatrixType& data, const int viewRow = -1) const;
 		bool fieldExists(const std::string& name, const unsigned dim, const Labels& labels) const;
 		unsigned getFieldDimension(const std::string& name, const Labels& labels) const;
 		unsigned getFieldStartingRow(const std::string& name, const Labels& labels) const;
+
+		template<typename MatrixType>
+		void concatenateLabelledMatrix(Labels* labels, MatrixType* data, const Labels extraLabels, const MatrixType extraData);
 	};
 	
 	static void swapDataPoints(DataPoints& a, DataPoints& b);
@@ -468,8 +523,13 @@ struct PointMatcher
 			DataPoints reference; //!< reference point cloud
 			OutlierWeights weights; //!< weights for every association
 			Matches matches; //!< associations
+			int nbRejectedMatches; //!< number of matches with zero weights
+			int nbRejectedPoints; //!< number of points with all matches set to zero weights
+			T pointUsedRatio;  //!< the ratio of how many points were used for error minimization
+			T weightedPointUsedRatio;//!< the ratio of how many points were used (with weight) for error minimization
 
-			ErrorElements(const DataPoints& reading=DataPoints(), const DataPoints reference = DataPoints(), const OutlierWeights weights = OutlierWeights(), const Matches matches = Matches());
+			ErrorElements();
+			ErrorElements(const DataPoints& requestedPts, const DataPoints sourcePts, const OutlierWeights outlierWeights, const Matches matches);
 		};
 		
 		ErrorMinimizer();
@@ -478,21 +538,23 @@ struct PointMatcher
 		
 		T getPointUsedRatio() const;
 		T getWeightedPointUsedRatio() const;
+		ErrorElements getErrorElements() const; //TODO: ensure that is return a usable value
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 		
 		//! Find the transformation that minimizes the error
-		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) = 0;
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		//! Find the transformation that minimizes the error given matched pair of points. This function most be defined for all new instances of ErrorMinimizer.
+		virtual TransformationParameters compute(const ErrorElements& matchedPoints) = 0;
 		
-		
-	protected:
 		// helper functions
-		static Matrix crossProduct(const Matrix& A, const Matrix& B);
-		ErrorElements& getMatchedPoints(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights);
+		static Matrix crossProduct(const Matrix& A, const Matrix& B);//TODO: this might go in pointmatcher_support namespace
 		
 	protected:
-		T pointUsedRatio; //!< the ratio of how many points were used for error minimization
-		T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+		//T pointUsedRatio; //!< the ratio of how many points were used for error minimization
+		//T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+		//TODO: standardize the use of this variable
 		ErrorElements lastErrorElements; //!< memory of the last computed error
 	};
 	
@@ -608,14 +670,16 @@ struct PointMatcher
 		
         virtual void loadAdditionalYAMLContent(PointMatcherSupport::YAML::Node& doc);
 		
+		//! Instantiate modules if their names are in the YAML file
 		template<typename R>
         const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
 		
+		//! Instantiate a module if its name is in the YAML file
 		template<typename R>
         const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
 		
-		/*template<typename R>
-		typename R::TargetType* createModuleFromRegistrar(const PointMatcherSupport::YAML::Node& module, const R& registrar);*/
+		//! Get the value of a field in a node
+        std::string nodeVal(const std::string& regName, const PointMatcherSupport::YAML::Node& doc);
 	};
 	
 	//! ICP algorithm
@@ -634,13 +698,18 @@ struct PointMatcher
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
-	
+
+		//! Return the filtered point cloud reading used in the ICP chain
+		const DataPoints& getReadingFiltered() const { return readingFiltered; }
+
 	protected:
 		TransformationParameters computeWithTransformedReference(
 			const DataPoints& readingIn, 
 			const DataPoints& reference, 
 			const TransformationParameters& T_refIn_refMean,
 			const TransformationParameters& initialTransformationParameters);
+
+		DataPoints readingFiltered; //!< reading point cloud after the filters were applied
 	};
 	
 	//! ICP alogrithm, taking a sequence of clouds and using a map

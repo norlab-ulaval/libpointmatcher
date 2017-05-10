@@ -46,9 +46,12 @@ typedef PM::DataPoints DP;
 
 void usage(char *argv[])
 {
-	cerr << "Usage " << argv[0] << " [CONFIG.yaml] INPUT.csv/.vtk OUTPUT.csv/.vtk" << endl;
+	cerr << "Usage " << argv[0] << " [CONFIG.yaml] INPUT.csv/.vtk/.ply OUTPUT.csv/.vtk/.ply" << endl;
 	cerr << endl << "Example:" << endl;
 	cerr << argv[0] << " ../examples/data/default-convert.yaml ../examples/data/cloud.00000.vtk /tmp/output.vtk" << endl << endl;
+	cerr << " or " << endl;
+	cerr << argv[0] << "../examples/data/cloud.00000.vtk /tmp/output.csv" << endl << endl;
+
 }
 
 int main(int argc, char *argv[])

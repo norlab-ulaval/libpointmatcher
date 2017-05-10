@@ -112,12 +112,12 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 	cloud.assertDescriptorConsistency();
 	const int nbPointsBeforeFilters(cloud.features.cols());
 	LOG_INFO_STREAM("Applying " << this->size() << " DataPoints filters - " << nbPointsBeforeFilters << " points in");
-
 	for (DataPointsFiltersIt it = this->begin(); it != this->end(); ++it)
 	{
 		const int nbPointsIn(cloud.features.cols());
-		if (nbPointsIn == 0)
+		if (nbPointsIn == 0) {
 			throw ConvergenceError("no points to filter");
+		}
 
 		(*it)->inPlaceFilter(cloud);
 		cloud.assertDescriptorConsistency();

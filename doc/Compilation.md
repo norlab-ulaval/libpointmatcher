@@ -6,24 +6,24 @@
 ## In short...
 If you are used to development projects, here is what you need:
 
-|Name           |Version  <br> (Tested Feb. 20, 2015)          |
-|---------------|-----------------------|
-|Ubuntu         | 12.04.5 LTS (64 bit)  |
-|gcc            | 4.6.3                 |
-|git            | 1.7.9.5               |
-|cmake          | 2.8.11.2              |
-|doxygen (opt.) | 1.7.6.1              |
-|||
+|Name           |Version  <br> (Tested Feb. 20, 2015) |Version  <br> (Tested Sept. 6, 2016) |
+|---------------|-----------------------|-----------------------|
+|Ubuntu         | 12.04.5 LTS (64 bit)  | 14.04.5 LTS (64 bit)  |
+|gcc            | 4.6.3                 | 4.8.4                 |
+|git            | 1.7.9.5               | git version 1.9.1     |
+|cmake          | 2.8.11.2              | 2.8.12.2              |
+|doxygen (opt.) | 1.7.6.1               | 1.8.6-2               |
+||||
 | _Dependency:_| |
-|boost          | 1.48.0.2             |
-|eigen          | 3.0.5                |
-|libnabo        | [from source](https://github.com/ethz-asl/libnabo)       |
+|boost          | 1.48.0.2             | 1.54.0                 |
+|eigen          | 3.0.5                | 3.2.0-8                |
+|libnabo        | [from source](https://github.com/ethz-asl/libnabo)| from source|
 
 __Note:__ we only support 64-bit systems because of some issues with Eigen. Other versions will most probably work but you'll have to try yourself to know for sure.
 
 The rest of this tutorial will guide you through the different requirements step by step.
 
-## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu)
+## Option 1: Installing libpointmatcher from Pre-built Binaries (Ubuntu) - Not recommended
 We recommand to compile from source to access the latest bug fixes, but for convenience a pre-built version of the library is available on the [following](https://launchpad.net/~stephane.magnenat) Personal Package Archive (PPA). Instructions on how to add a PPA to Ubuntu can be found [here](https://launchpad.net/+help-soyuz/ppa-sources-list.html).  Once the PPA has been added to your system, simply run:
 
 ```
@@ -123,7 +123,7 @@ sudo apt-get install libyaml-cpp-dev
 The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is so far only compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
 -->
 
-### 4. Compiling the Documentation
+### 4. Compiling the Documentation (optional)
 Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
 
 ```
@@ -131,6 +131,12 @@ sudo apt-get install doxygen
 ```
 
 Once you have compiled libpointmatcher in step 6, you can simply open `/usr/local/share/doc/libpointmatcher/api/html/index.html` in a browser to view the API documentation.
+
+You will also need Latex for the rendering of equations:
+
+```
+sudo apt-get install texlive-full
+```
 
 ### 5. Installing libpointmatcher
 Clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
@@ -145,8 +151,14 @@ Now, libpointmatcher is compiled into a `/build` directory.
 SRC_DIR=`pwd`
 BUILD_DIR=${SRC_DIR}/build
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
+cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
 make
+```
+
+If you have doxygen and latex installed, you can enable the documentation using the CMake variable `GENERATE_API_DOC` to `true`. This can be achived through CMake GUI or by the command line:
+
+```
+cmake <otherflags> -D GENERATE_API_DOC=true ${SRC_DIR}
 ```
 
 You can optionally verify that the version of libpointmatcher you have compiled is stable by running the unit tests.
@@ -179,14 +191,20 @@ make
 sudo make install
 ```
 
-#Having problems?
-Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using.
+# Having problems?
+Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/ethz-asl/libpointmatcher/issues). You may need to ensure that the file is executable:
 
-Here are useful commands for the different version:
+```
+chmod +x ./utest/listVersionsUbuntu.sh 
+./utest/listVersionsUbuntu.sh 
+```
+
+
+Here are the list of useful commands used in the bash script:
 
 Ubuntu version:
 
-    lsb_release -a
+    lsb_release -r
 
 32-bit or 64-bit architecture:
 

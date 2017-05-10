@@ -382,7 +382,7 @@ cloud.descriptors.conservativeResize(Eigen::NoChange, numPtsOut);
 We first sort the points voxel points by index and place them in order, at the beginning of the point cloud.  The unwanted points are removed from the point cloud by using Eigen's `conservativeResize` function.
 
 ## Registering the Filter as a Libpointmatcher Module
-Now that we have completed the implementation of our voxel filter, we can add it to libpointmatcher as a usable DataPointsFilter.  We do so by adding the following macro function in [pointmatcher/registrar.cpp](/pointmatcher/registrar.cpp)
+Now that we have completed the implementation of our voxel filter, we can add it to libpointmatcher as a usable DataPointsFilter.  We do so by adding the following macro function in [pointmatcher/Registry.cpp](/pointmatcher/Registry.cpp)
 
 ```cpp
 ADD_TO_REGISTRAR(DataPointsFilter, VoxelGridDataPointsFilter, typename DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter)

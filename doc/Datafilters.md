@@ -2,7 +2,6 @@
 | ------------- |:-------------:| -----:|
 
 # Datapoint Filters
-######Latest update January 16, 2014 by Samuel Charreyron
 
 In this section, the various filters which can be applied to the reading and reference point clouds before performing the ICP process.
 
@@ -82,11 +81,11 @@ In the following example, a box filter of the following dimensions was applied t
 
 Note that only points **outside** the bounding box are removed by the filter by setting the property *removeInside* to 0.  Because the point cloud center is located in the kitchen in the top-left, a square region of 2m x 2m is selected by this filter.  In the following image, the output of the filter is overlaid in white.
 
-|Figure: Top down view of the appartment point cloud with a box filter applied.  The input is shown in color and the output of the filter is overlaid in white   |Parameters used   |
+|Figure: Top down view of the appartment point cloud with a box filter applied.  The <br>input is shown in color and the output of the filter is overlaid in white   |Parameters used   |
 |---|:---|
 |![box filter output](images/box_filt_outside.png "Top down view of the appartment point cloud with a box filter applied.  The input is shown in color and the output of the filter is overlaid in white") |xMin : -1.0 <br> xMax : 1.0 <br>  yMin : -1.0 <br> yMax : 1.0 <br> zMin : -1.0 <br> zMax : 2.0 <br> removeInside : 0 |
 
-|Figure: Top down view of the appartment point cloud with a box filter applied.  The input is shown in color and the output of the filter is overlaid in white   |Parameters used   |
+|Figure: Top down view of the appartment point cloud with a box filter applied.  The <br>input is shown in color and the output of the filter is overlaid in white   |Parameters used   |
 |---|:---|
 |![box filter output](images/box_filt_inside.png "Top down view of the appartment point cloud with a box filter applied and ignore inside applied.  The input is shown in color and the output of the filter is overlaid in white") | xMin : -1.0 <br> xMax : 1.0 <br>  yMin : -1.0 <br> yMax : 1.0 <br> zMin : -1.0 <br> zMax : 2.0 <br> removeInside : 1 |
 
@@ -108,7 +107,7 @@ __Impact on the number of points:__ reduces number of points
 ### Example
 In the following example we observe the effect of the maximum density filter on the apartment point cloud.  Sub-sampling occurs mostly in high density regions, which colored in red in the image below.  The result is an image with lower density overall with the low density regions in blue being preserved.
 
-|Figure: Max density filter applied to subsection of the apartment dataset.  On the original data, low density regions are blue and high density regions are red.  The sampled points are overlaid in white.   | Parameters used |
+|Figure: Max density filter applied to subsection of the apartment dataset.  On the <br>original data, low density regions are blue and high density regions are red.  The <br>sampled points are overlaid in white.   | Parameters used |
 |---|:---| 
 |![max density before](images/appt_0_maxdens.png "Max density filter applied to subsection of the apartment dataset.  On the original data, low density regions are blue and high density regions are red.  The sampled points are overlaid in white.") | maxDensity: 50000 |
 
@@ -129,7 +128,7 @@ __Impact on the number of points:__ reduces number of points
 ### Example
 In the following example, a maximum distance threshold of 1m is applied radially by setting the dimension parameter to -1.  As shown on the image below, points which lie within a sphere of radius 1m centered at the origin are selected by the filter and are displayed in white.  All other points are rejected by the filter.  Were a maximum distance filter to be replaced by an equivalent minimum distance filter, only points outside the sphere would be selected. 
 
-|Figure: Max density filter applied to subsection of the apartment dataset.  On the original data, low density regions are blue and high density regions are red.  The sampled points are overlaid in white.   | Parameters used |
+|Figure: Max density filter applied to subsection of the apartment dataset.  On the <br>original data, low density regions are blue and high density regions are red.  The <br>sampled points are overlaid in white.   | Parameters used |
 |---|:---|
 |![max distance after](images/max_dis.png "After applying maximum distance filter with a distance threshold of 1m and the dimension parameter set to radial") | maxDist : 1.0 <br> dim : -1 |
 
@@ -149,7 +148,8 @@ __Impact on the number of points:__ reduces number of points
 
 ## Maximum Point Count Filter <a name="maxpointcounthead"></a>
 ### Description
-The size of the point cloud is reduced by randomly rejecting points if the total number of points exceeds a threshold.
+Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above `maxCount`. The resulting point cloud while have `maxCount` number of point. the Based on:  Registration and integration of multiple range images for 3-D model construction. Masuda, T. and Sakaue, K. and Yokoya, N. In Pattern Recognition, 1996., Proceedings of the 13th International Conference on. 879--883. 1996.
+
 
 __Required descriptors:__ none   
 __Output descriptor:__ none  
@@ -158,15 +158,11 @@ __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
-|prob        | Probability of keeping a point, 1/decimation factor | 0.75 | min: 0 max: 1 |
+|seed        | srand seed | 0 | min: 0 max: 2147483647 |
 |maxCount |number of points beyond which subsampling occurs | 1000 | min: 0, max: 2147483647|
 
 ### Example
-For the following example we apply a maximum count of 1000, noting that there are over 400,000 points in the input point cloud and a sampling probability of 0.1.  We observe in the output point cloud a point set representing approximately 10% the original number of points selected evenly from the input cloud. 
-
-|Figure: After applying maximum point count filter with a maximum count of 1000 and a sampling probability of 0.1.  Input point cloud contains 404,395 points, filtered point cloud contains 40,200 points.   | Parameters used |
-|---|:---|
-|![max count after](images/max_num.png "After applying maximum point count filter with a maximum count of 1000 and a sampling probability of 0.1") | maxCount : 1000 <br> prob : 0.1|
+No example available.
 
 
 ## Maximum Quantile on Axis Filter <a name="maxquantilehead"></a>
@@ -186,7 +182,7 @@ __Impact on the number of points:__ reduces number of points
 ### Example
 In the following example, maximum quantile filtering is performed over the x-axis with a quantile threshold of 0.5.  Therefore, points which have an x-value which exceeds the 50% quantile are rejected.  The output of the filter is displayed in white and overlaid with the input point cloud in the image below.  A sampling region centered at the origin and extending in both directions of the x-axis is clearly visible.
 
-|Figure: Maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5.   | Parameters used |
+|Figure: Maximum quantile on axis filter in the x-direction with a maximum quantile <br>of 0.5.   | Parameters used |
 |---|:---|  
 |![max quant after](images/max_quant.png "After applying maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5") | dim : 0 <br> ratio : 0.5 |
 
@@ -207,7 +203,7 @@ __Impact on the number of points:__ reduces number of points
 ### Example
 In the following sample, points are kept with a probability of 0.1.  Therefore the total number of points in the output point cloud is approximately 10 times less than the number of points in the input point cloud and the density is decreased overall.
 
-|Figure:  After applying the random sampling filter with a probability of 0.1.  The original data is shown in black and the sampled points in white.   | Parameters used |
+|Figure:  After applying the random sampling filter with a probability of 0.1. <br> The original data is shown in black and the sampled points in white.   | Parameters used |
 |---|:---|  
 |![rand after](images/appt_0_rand.png "After applying the random sampling filter with a probability of 0.1") | prob : 0.1 |
 
@@ -221,7 +217,7 @@ __Output descriptor:__ none
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ reduces number of points  
 
-##Shadow Point Filter <a name="shadowpointhead"></a>
+## Shadow Point Filter <a name="shadowpointhead"></a>
 
 ### Description
 
@@ -244,7 +240,7 @@ There are two options as to how to represent the distribution of points in a vox
 
 This filter also provides two methods for sub-sampling descriptors.  In the first, all descriptors within a voxel are averaged while in the second, only the first descriptor from a voxel is kept.
 
-__Required descriptors:__  none
+__Required descriptors:__  none  
 __Output descriptor:__ outputs average or single descriptor per voxel if the input cloud contains descriptors  
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ reduces number of points  
@@ -287,7 +283,7 @@ __Impact on the number of points:__ none
 ### Example
 **Remark:** The following example uses a local point cloud 10 from the apartment dataset.  The filter is used to extract direction informations and a small subset of these directions is shown in the following image.  The arrows point towards the position of the sensor.  The input point cloud is color coded according to the z-elevation of the points (red represents the ceiling and blue the floor).
 
-|Figure:  Applying the observation direction filter to a local point cloud.  A small subset of point observation directions are displayed   | Parameters used |
+|Figure:  Applying the observation direction filter to a local point cloud.  A small <br>subset of point observation directions are displayed   | Parameters used |
 |---|:---|  
 |![dir after](images/appt_obs_dir.png "Applying the observation direction filter to a local point cloud") | x : 0 <br> y : 0 <br> z : 0 |
 
@@ -322,7 +318,7 @@ __Impact on the number of points:__ none
 ### Example
 In this example, we again use a local point cloud of the apartment. You may recognize the input point cloud as a small portion of the local cloud used in the observation direction filter.  The surface normals are extracted using 20 neighboring points and epsilon=0.  In this example, for clarity, we only view a wall section of one of the apartment dataset.  A random set of normal vectors is shown in the figure with arrows.  When looking at the arrow directions on the wall, one may see normal vectors either pointing downwards into the apartment or outside the apartment.
 
-|Figure:  Applying the observation direction filter to a local point cloud.  A small subset of point observation directions are displayed   | Parameters used |
+|Figure:  Applying the observation direction filter to a local point cloud.  A small <br>subset of point observation directions are displayed   | Parameters used |
 |---|:---|  
 |![norm after](images/appt_norm.png "Extracting surface normals of a portion of the apartment point cloud") | knn : 20 <br> epsilon : 0 <br> keepNormals : 1 <br> keepDensities : 1|
 
@@ -356,7 +352,7 @@ The same input section is used as for extracting the surface normals in the prev
 ## Sampling Surface Normal Filter <a name="samplingnormhead"></a>
 
 ### Description
-The above samples extract surface normals at every point in the point cloud.  In point clouds representing planar surfaces however, a significant of redundant information is contained in adjacent normal vectors.  This filter attempts to both reduce the number of points within a point cloud and the number of different normal vectors.  The first is achieved by performing either random sub-sampling as seen previously, or by using one point per box (bin sub-sampling).  The latter is achieved by recursively decomposing the point-cloud space into boxes until each box contains at most knn points.  A single normal vector is computed from the knn points in each box.
+The above filters extract surface normals at every point in the point cloud.  In point clouds representing planar surfaces however, a significant redundant information is contained in adjacent normal vectors.  This filter attempts to both reduce the number of points within a point cloud and the number of different normal vectors.  The first is achieved by performing either random sub-sampling as seen previously, or by using one point per box (bin sub-sampling).  The latter is achieved by recursively decomposing the point-cloud space into boxes until each box contains at most knn points.  A single normal vector is computed from the knn points in each box.
 
 __Required descriptors:__  none  
 __Output descriptor:__ 
@@ -381,7 +377,7 @@ __Impact on the number of points:__ reduces number of points
 |keepMatchedIds   | Add identifiers of matched points to descriptors (see)    | 0 | 1: true, 0: false |
 
 ### Example
-We reuse the same apartment section to illustrate the sampling of normal vectors.  The decimation rate used is 0.5 such that half of the points from the original point cloud are discarded randomly.  We use a knn value of 100 such that each box contains at most 100 points.  In the following two figures we extract sample points based on the normals and display the normal vectors at these sample points. We first do so for a ceiling section, followed by a ground section.  Because the ceiling is essentially a large plane, the sampling is low and the normal vector arrows are dispersed relatively equally as shown in the first figure.  On the other hand, the ground section has a more complex structure with adjacent normal vectors pointing in different direction.  This results in a dense sampling of points which is seen in the second figure.
+We reuse the same apartment section to illustrate the sampling of normal vectors.  The decimation rate used is 0.5 such that half of the points from the original point cloud are discarded randomly.  We use a knn value of 100 such that each box contains at most 100 points.  In the following two figures, we extract sample points based on the normals and display the normal vectors at these sample points. We first do so for a ceiling section, followed by a ground section.  Because the ceiling is essentially a large plane, the sampling is low and the normal vector arrows are dispersed relatively equally as shown in the first figure.  On the other hand, the ground section has a higher density of points.  This results in a denser sampling of points which is seen in the second figure.
 
   The box centers are shown in red on the following picture.  It is clear that as opposed to previous filters, adjacent points within a box have the same normal vector.
 
@@ -413,7 +409,7 @@ For this example we use another point cloud dataset from the ASL collection call
 
 In the following image we show a side view of local point cloud 3 in the dataset.  The laser is located at the bottom left corner and one can see the long arched corridor structures.  As we move right in the image point are located further away from the sensor, are therefore less numerous and more uncertain.  The points are colored by the estimation uncertainty obtained with this filter.  More certain points are black, medium certain points are red and less curtain points are white.  Naturally the colour shifts from black to white as we move further away from the laser down the corridor.
 
-|Figure:  Side view of a view 3 from the HG dataset augmented with sensor noise estimations   |Parameters used   |
+|Figure:  Side view of a view 3 from the HG dataset augmented with sensor noise <br>estimations   |Parameters used   |
 |---|:---|
 |![samp norm after](images/hg_noise.png " Side view of a view 3 from the HG dataset") | sensorType : 1 |
 

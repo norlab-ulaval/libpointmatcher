@@ -1,4 +1,4 @@
-// kate: replace-tabs off; indent-width 4; indent-mode normal
+// kate: replace-tabs off; indent-width 4; indent-mode 
 // vim: ts=4:sw=4:noexpandtab
 /*
 
@@ -36,13 +36,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "InspectorsImpl.h"
 
 #include "PointMatcherPrivate.h"
+#include "IOFunctions.h"
 
 #include <cassert>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
+#include <boost/type_traits/is_same.hpp>
 
 using namespace std;
+using namespace PointMatcherSupport;
 
 template<typename T>
 InspectorsImpl<T>::PerformanceInspector::PerformanceInspector(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
@@ -68,12 +72,10 @@ void InspectorsImpl<T>::PerformanceInspector::addStat(const std::string& name, d
 	if (!bDumpStats) return;
 	
 	HistogramMap::iterator it(stats.find(name));
-	if (it == stats.end())
-		it = stats.insert(
-			HistogramMap::value_type(name, 
-				Histogram(16, name, baseFileName, bDumpPerfOnExit)
-			)
-		).first;
+	if (it == stats.end()) {
+		LOG_INFO_STREAM("Adding new stat: " << name);
+		it = stats.insert(HistogramMap::value_type(name, Histogram(16, name, baseFileName, bDumpPerfOnExit))).first;
+	}
 	it->second.push_back(data);
 }
 
@@ -139,11 +141,20 @@ InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string&
 	bDumpIterationInfo(Parametrizable::get<bool>("dumpIterationInfo")),
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
-	bDumpReference(Parametrizable::get<bool>("dumpReference"))
+	bDumpReference(Parametrizable::get<bool>("dumpReference")),
+	bWriteBinary(Parametrizable::get<bool>("writeBinary"))
 {
 }
 
-	
+template<typename T>
+std::string getTypeName() {
+	if (boost::is_same<double, T>::value) {
+		return "double";
+	} else {
+		return "float";
+	}
+}
+
 template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& data, std::ostream& stream)
 {
@@ -152,21 +163,33 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	
 	stream << "# vtk DataFile Version 3.0\n";
 	stream << "File created by libpointmatcher\n";
-	stream << "ASCII\n";
+	stream << (bWriteBinary ? "BINARY":"ASCII") << "\n";
 	stream << "DATASET POLYDATA\n";
-	stream << "POINTS " << features.cols() << " float\n";
+
+	stream << "POINTS " << features.cols() << " " << getTypeName<T>() << "\n";
+
 	if(features.rows() == 4)
 	{
-		stream << features.topLeftCorner(3, features.cols()).transpose() << "\n";
+		writeVtkData(bWriteBinary, features.topLeftCorner(3, features.cols()).transpose(), stream) << "\n";
 	}
 	else
 	{
-		stream << features.transpose() << "\n";
+		writeVtkData(bWriteBinary, features.transpose(), stream)  << "\n";
 	}
 	
 	stream << "VERTICES "  << features.cols() << " "<< features.cols() * 2 << "\n";
-	for (int i = 0; i < features.cols(); ++i)
-		stream << "1 " << i << "\n";
+	for (int i = 0; i < features.cols(); ++i){
+		if(bWriteBinary){
+			stream.write(reinterpret_cast<const char*>(&oneBigEndian), sizeof(int));
+			ConverterToAndFromBytes<int> converter(i);
+			if(!isBigEndian){
+				converter.swapBytes();
+			}
+			stream.write(converter.bytes, sizeof(int));
+		}else {
+			stream << "1 " << i << "\n";
+		}
+	}
 	
 
 	// Save points
@@ -175,7 +198,6 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 	// Loop through all descriptor and dispatch appropriate VTK tags
 	for(BOOST_AUTO(it, data.descriptorLabels.begin()); it != data.descriptorLabels.end(); it++)
 	{
-
 		// handle specific cases
 		if(it->text == "normals")
 		{
@@ -204,22 +226,11 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		}
 	}
 	
-	//buildScalarStream(stream, "densities", data);
-	//buildScalarStream(stream, "obstacles", data);
-	//buildScalarStream(stream, "inclination", data);
-	//buildScalarStream(stream, "maxSearchDist", data);
-	//buildScalarStream(stream, "inliers", data);
-	//buildScalarStream(stream, "groupId", data);
-	//buildScalarStream(stream, "simpleSensorNoise", data);
-	
-	//buildNormalStream(stream, "normals", data);
-	
-	//buildVectorStream(stream, "observationDirections", data);
-	//buildVectorStream(stream, "eigValues", data);
-	
-	//buildTensorStream(stream, "eigVectors", data);
-	
-	//buildColorStream(stream, "color", data);
+	// Loop through all time fields, split in high 32 bits and low 32 bits and export as two scalar
+	for(BOOST_AUTO(it, data.timeLabels.begin()); it != data.timeLabels.end(); it++)
+	{
+		buildTimeStream(stream, it->text, data);
+	}
 
 }
 
@@ -435,15 +446,26 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildGenericAttributeStream(std::o
 		if(attribute.compare("COLOR_SCALARS") == 0)
 		{
 			stream << attribute << " " << nameTag << " " << forcedDim << "\n";
-			stream << padWithOnes(desc, forcedDim, desc.cols()).transpose();
+			if(bWriteBinary){
+				std::vector<unsigned char> buffer(forcedDim, 0);
+				for (int i = 0; i < desc.cols(); ++i){
+					for(int r=0; r < desc.rows(); ++r){
+						buffer[r] = static_cast<unsigned int>(desc(r, i) * static_cast<T>(255) + static_cast<T>(0.5)); // this is how libvtk implements it ( vtkScalarsToColors::ColorToUChar )
+					}
+					stream.write(reinterpret_cast<char *>(&buffer.front()), forcedDim);
+				}
+			}
+			else {
+				stream << padWithOnes(desc, forcedDim, desc.cols()).transpose();
+			}
 		}
 		else
 		{
-			stream << attribute << " " << nameTag << " float\n";
+			stream << attribute << " " << nameTag << " " << getTypeName<T>() << "\n";
 			if(attribute.compare("SCALARS") == 0)
 				stream << "LOOKUP_TABLE default\n";
 
-			stream << padWithZeros(desc, forcedDim, desc.cols()).transpose();
+			writeVtkData(bWriteBinary, padWithZeros(desc, forcedDim, desc.cols()).transpose(), stream);
 		}
 		stream << "\n";
 	}
@@ -550,7 +572,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildVectorStream(std::ostream& st
 
 	if(descRef.rows() != 0 && descRead.rows() != 0)
 	{
-		stream << "VECTORS " << name << " float\n";
+		stream << "VECTORS " << name << " " << getTypeName<T>() << "\n";
 
 		stream << padWithZeros(
 				descRef, 3, ref.descriptors.cols()).transpose();
@@ -583,6 +605,44 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildTensorStream(std::ostream& st
 				descRead, 9, reading.descriptors.cols()).transpose();
 		stream << "\n";
 	}
+}
+
+template<typename T>
+void InspectorsImpl<T>::AbstractVTKInspector::buildTimeStream(std::ostream& stream, const std::string& name, const DataPoints& cloud)
+{
+	//TODO: this check is a reminder of the old implementation. Check
+	// if we still need that. FP
+	if (!cloud.timeExists(name))
+		return;
+		
+	const BOOST_AUTO(time, cloud.getTimeViewByName(name));
+	assert(time.rows() == 1);
+
+	// Loop through the array to split the lower and higher part of int64_t
+	// TODO: if an Eigen matrix operator can do it without loop, change that
+
+	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> high32(time.cols());
+	Eigen::Matrix<uint32_t, 1, Eigen::Dynamic> low32(time.cols());
+
+	for(int i=0; i<time.cols(); i++)
+	{
+		high32(0, i) = (uint32_t)(time(0, i) >> 32);
+		low32(0, i) = (uint32_t)time(0, i);
+	}
+	
+	stream << "SCALARS" << " " << name << "_splitTime_high32" << " " << "unsigned_int" << "\n";
+	stream << "LOOKUP_TABLE default\n";
+
+	writeVtkData(bWriteBinary, high32.transpose(), stream);
+
+	stream << "\n";
+
+	stream << "SCALARS" << " " << name << "_splitTime_low32" << " " << "unsigned_int" << "\n";
+	stream << "LOOKUP_TABLE default\n";
+
+	writeVtkData(bWriteBinary, low32.transpose(), stream);
+
+	stream << "\n";
 }
 
 template<typename T>
@@ -653,7 +713,8 @@ void InspectorsImpl<T>::VTKFileInspector::init()
  
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
-	std::cerr << "writing to " << oss.str() << std::endl;
+	//std::cerr << "writing to " << oss.str() << std::endl;
+	LOG_INFO_STREAM("writing to " << oss.str());
 
 	this->streamIter = new ofstream(oss.str().c_str());
 	if (this->streamIter->fail())
@@ -681,7 +742,8 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 	else
 		oss << filteredStr << ".vtk";
 
-	std::cerr << "writing to " << oss.str() << std::endl;
+	//std::cerr << "writing to " << oss.str() << std::endl;
+	LOG_INFO_STREAM("writing to " << oss.str());
 	ofstream* file = new ofstream(oss.str().c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");

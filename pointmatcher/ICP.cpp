@@ -120,7 +120,6 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	YAML::Parser parser(in);
 	YAML::Node doc;
 	parser.GetNextDocument(doc);
-	
 	typedef set<string> StringSet;
 	StringSet usedModuleTypes;
 	
@@ -137,10 +136,16 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 	usedModuleTypes.insert(createModulesFromRegistrar("readingStepDataPointsFilters", doc, pm.REG(DataPointsFilter), readingStepDataPointsFilters));
 	usedModuleTypes.insert(createModulesFromRegistrar("referenceDataPointsFilters", doc, pm.REG(DataPointsFilter), referenceDataPointsFilters));
 	//usedModuleTypes.insert(createModulesFromRegistrar("transformations", doc, pm.REG(Transformation), transformations));
-	this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
 	usedModuleTypes.insert(createModuleFromRegistrar("matcher", doc, pm.REG(Matcher), matcher));
 	usedModuleTypes.insert(createModulesFromRegistrar("outlierFilters", doc, pm.REG(OutlierFilter), outlierFilters));
 	usedModuleTypes.insert(createModuleFromRegistrar("errorMinimizer", doc, pm.REG(ErrorMinimizer), errorMinimizer));
+
+	// See if to use a rigid transformation
+	if (nodeVal("errorMinimizer", doc) != "PointToPointSimilarityErrorMinimizer")
+		this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
+	else
+		this->transformations.push_back(new typename TransformationsImpl<T>::SimilarityTransformation());
+	
 	usedModuleTypes.insert(createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers));
 	usedModuleTypes.insert(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector));
 	
@@ -208,6 +213,20 @@ const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(cons
 	return regName;
 }
 
+template<typename T>
+std::string PointMatcher<T>::ICPChainBase::nodeVal(const std::string& regName, const PointMatcherSupport::YAML::Node& doc)
+{
+	const YAML::Node *reg = doc.FindValue(regName);
+	if (reg)
+	{
+		std::string name;
+		Parametrizable::Parameters params;
+		PointMatcherSupport::getNameParamsFromYAML(*reg, name, params);
+		return name;
+	}
+	return "";
+}
+
 template struct PointMatcher<float>::ICPChainBase;
 template struct PointMatcher<double>::ICPChainBase;
 
@@ -261,8 +280,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	// Create intermediate frame at the center of mass of reference pts cloud
 	//  this help to solve for rotations
-	const int nbPtsReference = referenceIn.features.cols();
-	const Vector meanReference = referenceIn.features.rowwise().sum() / nbPtsReference;
+	const int nbPtsReference = reference.features.cols();
+	const Vector meanReference = reference.features.rowwise().sum() / nbPtsReference;
 	TransformationParameters T_refIn_refMean(Matrix::Identity(dim, dim));
 	T_refIn_refMean.block(0,dim-1, dim-1, 1) = meanReference.head(dim-1);
 	
@@ -301,6 +320,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	//const int nbPtsReading = reading.features.cols();
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
+	readingFiltered = reading;
 	
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>

@@ -63,7 +63,7 @@ template struct OutlierFiltersImpl<double>::NullOutlierFilter;
 template<typename T>
 OutlierFiltersImpl<T>::MaxDistOutlierFilter::MaxDistOutlierFilter(const Parameters& params):
 	OutlierFilter("MaxDistOutlierFilter", MaxDistOutlierFilter::availableParameters(), params),
-	maxDist(Parametrizable::get<T>("maxDist"))
+	maxDist(pow(Parametrizable::get<T>("maxDist"),2)) // we use the square distance later
 {
 }
 
@@ -84,7 +84,7 @@ template struct OutlierFiltersImpl<double>::MaxDistOutlierFilter;
 template<typename T>
 OutlierFiltersImpl<T>::MinDistOutlierFilter::MinDistOutlierFilter(const Parameters& params):
 	OutlierFilter("MinDistOutlierFilter", MinDistOutlierFilter::availableParameters(), params),
-	minDist(Parametrizable::get<T>("minDist"))
+	minDist(pow(Parametrizable::get<T>("minDist"),2))// Note: we use the square distance later
 {
 }
 
@@ -225,7 +225,7 @@ OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter::SurfaceNormalOutlierFilter(co
 	eps(cos(Parametrizable::get<T>("maxAngle"))),
 	warningPrinted(false)
 {
-	//waring: eps is change to cos(maxAngle)!
+	//warning: eps is change to cos(maxAngle)!
 }
 
 template<typename T>
@@ -361,5 +361,34 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 
 template struct OutlierFiltersImpl<float>::GenericDescriptorOutlierFilter;
 template struct OutlierFiltersImpl<double>::GenericDescriptorOutlierFilter;
+
+// RobustWelschOutlierFilter
+template<typename T>
+OutlierFiltersImpl<T>::RobustWelschOutlierFilter::RobustWelschOutlierFilter(const Parameters& params):
+	OutlierFilter("RobustWelschOutlierFilter", RobustWelschOutlierFilter::availableParameters(), params),
+	squaredScale(pow(Parametrizable::get<T>("scale"),2)), //Note: we use squared distance later on
+	squaredApproximation(pow(Parametrizable::get<T>("approximation"),2))
+{
+}
+
+template<typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::RobustWelschOutlierFilter::compute(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const Matches& input)
+{
+	OutlierWeights w = exp(- input.dists.array()/squaredScale);
+
+	if(squaredApproximation != std::numeric_limits<T>::infinity())
+	{
+		//Note from Eigen documentation: (if statement).select(then matrix, else matrix)
+		w = (input.dists.array() >= squaredApproximation).select(0.0, w);
+	}
+
+	return w;
+}
+
+template struct OutlierFiltersImpl<float>::RobustWelschOutlierFilter;
+template struct OutlierFiltersImpl<double>::RobustWelschOutlierFilter;
 
 

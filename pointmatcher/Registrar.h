@@ -99,13 +99,15 @@ namespace PointMatcherSupport
 			{
 				C* instance(new C(params));
 				
-				// check that there was no unsed parameter
+				// check that all parameters were set
 				for (BOOST_AUTO(it, params.begin()); it != params.end() ;++it)
 				{
-					if (instance->parametersUsed.find(it->first) == instance->parametersUsed.end())
+					if (instance->parametersUsed.find(it->first) == instance->parametersUsed.end()){
+						delete instance;
 						throw Parametrizable::InvalidParameter(
 							(boost::format("Parameter %1% for module %2% was set but is not used") % it->first % className).str()
 						);
+					}
 				}
 				
 				return instance;

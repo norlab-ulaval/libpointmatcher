@@ -20,9 +20,7 @@ If you are used to development project, here is what you need:
 | CMake | <http://www.cmake.org/cmake/resources/software.html> | cmake-2.8.11.2-win32-x86.exe|
 | Eigen 3 | <http://eigen.tuxfamily.org/index.php?title=Main_Page#Download>  |v3.2.0 |
 | Boost | <http://www.boost.org/users/download/> | v1.54.0 |
-| yaml-cpp | <https://code.google.com/p/yaml-cpp/downloads/list>| v0.3.0, **not working with v0.5.0**|
 | grep tool | <http://gnuwin32.sourceforge.net/packages/grep.htm>| v2.5.4 |
-| gtest | <https://code.google.com/p/googletest/> | v1.7.0 |
 
 The rest of this tutorial will guide you through the different requirements step by step.
 
@@ -34,7 +32,7 @@ grep --version
 ```
 
 ### Building Boost
-1. Open a console that knows the path to the MSVC compiler command (cl). We suggest to use **Windows PowerShell**. An alternative is from the Start menu in the Visual Studio section; for instance for VS 2012, it is called Developer Command Prompt for VS2012.
+1. Open a console that knows the path to the MSVC compiler command (cl). We suggest using **Windows PowerShell**. An alternative is **Developer Command Prompt**, which can be located in the Start menu in the Visual Studio section.
 1. Go to your Boost source directory, and do:
 
     ```
@@ -42,17 +40,19 @@ grep --version
     $ b2 install --prefix=build address-model=64
     ```
 
-1. It may take awhile to finish.
+1. It may take a while to finish.
 
 
-### Build libnabo 
-1. Start **CMake Gui**
+### Build libnabo
+1. Start **CMake GUI**
 
-1. Add the path of your libnabo sources in the field _Where is the source code_.
+1. Add the path of your libnabo source folder in the field _Where is the source code_.
 1. Add a folder named build in the field _Where to build the binary_. This will allow you to do out-of-source compilation.
 1. Click on the button Configure
     1. Select the generator for the project (Visual Studio 11 Win 64)
-    1. Error will be reported, because CMake does not know yet where to find the libraries. The next steps will tell it where to find them.
+    1. Typically you will select "Use default native compilers" for the generator
+    1. Click "Finish"
+    1. An error will be reported, because CMake does not know yet where to find the libraries. The next steps will tell it where to find them.
 
 1. Locate _your eigen folder_ in the field **EIGEN_INCLUDE_DIR**
 
@@ -62,105 +62,74 @@ grep --version
 
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
 
-1. Click on the button Configure again, then on Generate
+1. Click on the button Configure again, then on Generate. Here is an example of what your CMake should look like:
+ 
+	![alt text](images/win_cmake_libnabo.png "CMake libnabo")
 
-1. Locate the Microsoft Visual Studio Solution file in the your build folder (libnabo.sln) and open it. Visual Studio should open.
+
+1. Locate the Microsoft Visual Studio Solution file (libnabo.sln) in the your build folder and open it. Visual Studio should open.
 
 1. Build the solution: BUILD -> Build Solution
 
-    Command line alternative for building: in _(your libnabo folder)_/build:
+    Alternatively, you can build the solution from the command line. In _(your libnabo folder)_/build:
     
     ```
     $ msbuild /m:2 libnabo.sln
     ```
     
-    Note that the flag /m:X defines the number of core to use.
-    
+    (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
 
-### Building yaml-cpp
-1. Start CMake Gui, follow the same building step
 
-1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
-
-1. Click on the button Configure, then on Generate
-
-1. In visual Studio, build the solution: BUILD -> Build Solution
-
-    Command line alternative: in _(your yaml-cpp folder)_/build:
-    
-    ```
-    $ msbuild /m:2 YAML_CPP.sln
-    ```
-    
-    Note that the flag /m:X defines the number of core to use.
-    
-
-### Building gtest
-1. Open the file CMakeList.txt and add at the end:
-
-    ```
-    if( MSVC ) # VS2012 does not support tuples correctly yet
-    	   add_definitions( /D _VARIADIC_MAX=10 )
-    endif()
-    ```
-    
-1. Start CMake-Gui to generate a MSVC solution
-
-1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
-
-1. Change the variable **gtest_force_shared_crt** to `TRUE`
-
-1. Click on the button Configure, then on Generate
-
-1. In visual Studio, build the solution: BUILD -> Build Solution
-
-    Command line alternative: in _(your gtest folder)_/build:
-    
-    ```
-    $ msbuild /m:2 gtest.sln
-    ```
-    
-    Note that the flag /m:X defines the number of core to use.
-    
 ### Build libpointmatcher
-1. Start CMake Gui
-
-1. Follow the same building steps
+1. Start **CMake GUI**, follow the same steps to configure the source and build folders for _libpointmatcher_, then click the Configure button.
 
 1. Add the following boolean variable and set it to true: Boost_USE_STATIC_LIBS
 
-1. Add the following PATH variable and set it to [boost folder]/build: BOOST_ROOT
+1. Add the following PATH variable and set it to _(your Boost folder)_/build: BOOST_ROOT
 
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
 
-1. You will need to fill manually the following variables:
-    
-    1. **EIGEN_INCLUDE_DIR** to _(your eigen folder)_
-    1. **NABO_INCLUDE_DIR** to _(your nabo folder)_
-    1. **NABO_LIBRARY** to _(your nabo folder)_/build/RelWithDebInfo/nabo.lib
-    1. **yaml-cpp_INCLUDE_DIRS**
-    1. **yaml-cpp_LIBRARIES**
-    1. **GTEST_INCLUDE_DIR**
-    1. **GTEST_LIBRARY**
-    1. **GTEST_MAIN_LIBRARY**
-    
-1. In visual Studio, build the solution: BUILD -> Build Solution
+1. You will need to manually add and set the following variables:
 
-    Command line alternative: in _(your libpointmatcher folder)_/build:
+    - **EIGEN_INCLUDE_DIR** (PATH type) to _(your eigen source folder)_
+    - **NABO_INCLUDE_DIR** (PATH type) to _(your libnabo source folder)_
+    - **NABO_LIBRARY** (FILEPATH type) to _(your libnabo source folder)_/build/RelWithDebInfo/nabo.lib
+    - **libnabo_DIR** will automatically be set to your libnabo build folder
+    - **yaml-cpp_INCLUDE_DIRS** (PATH type) to _(your yaml-cpp source folder)_
+    - **yaml-cpp_LIBRARIES** (FILEPATH type) to _(your yaml-cpp source folder)_/build/RelWithDebInfo/libyaml-cppmd.lib
+    - **GTEST_INCLUDE_DIR** (PATH type) to _(your gtest source folder)_
+    - **GTEST_LIBRARY** (FILEPATH type) to _(your gtest source folder)_/build/RelWithDebInfo/gtest.lib
+    - **GTEST_MAIN_LIBRARY** (FILEPATH type) to _(your gtest source folder)_/build/RelWithDebInfo/gtest_main.lib
+
+1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
+
+	![alt text](images/win_cmake_libpointmatcher.png "CMake libpointmatcher")
+	
+1. In Visual Studio, build the solution: BUILD -> Build Solution
+
+    Alternatively, you can build the solution from the command line. In _(your libpointmatcher folder)_/build:
     
     ```
     $ msbuild /m:2 libpointmatcher.sln
     ```
     
-    Note that the flag /m:X defines the number of core to use.
+    (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
+
 
 ## Reporting Issues
 
 Currently, we don't have a developer fully supporting compilation on Windows. If you can help refreshing this documentation, your help is more than welcome.
 
-Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side.
+Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side. Here are some of them:
 
-## Limited version of libpointmatcher in `C#`
+- Your directory structure need to be well organized as mention in [Issue #136](https://github.com/ethz-asl/libpointmatcher/issues/136).
+- There might be some problems related to libnabo as mention in [Issue #128](https://github.com/ethz-asl/libpointmatcher/issues/118).
 
-The user braddodson ported a version of libpointmacher with a limited set of features here: https://github.com/braddodson/pointmatcher.net
+## Special Thanks
+
+Special thanks to the following users in helping us with the Windows support:
+
+- [kwill](https://github.com/kwill) for keeping the documentation up-to-date and investing time to make libpointmatcher compiling on Windows.
+- [braddodson](https://github.com/braddodson) for porting a version of libpointmacher in `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
+
 

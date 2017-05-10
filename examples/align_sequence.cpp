@@ -50,7 +50,9 @@ void validateArgs(int argc, char *argv[]);
 
 /**
   * Code example for ICP taking a sequence of point clouds relatively close 
-  * and computing the transformation between them.
+  * and build a map with them.
+  * It assumes that: 3D point clouds are used, they were recorded in sequence
+  * and they are express in sensor frame.
   */
 int main(int argc, char *argv[])
 {
@@ -60,12 +62,32 @@ int main(int argc, char *argv[])
 	typedef PointMatcherIO<float> PMIO;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DP;
-	typedef Parametrizable::Parameter Parameter;
 	
-	const int maxMapPointCount = 200000;
-
 	string outputFileName(argv[0]);
 	
+	// Rigid transformation
+	PM::Transformation* rigidTrans;
+	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
+
+	// Create filters manually to clean the global map
+	PM::DataPointsFilter* densityFilter(
+					PM::get().DataPointsFilterRegistrar.create(
+						"SurfaceNormalDataPointsFilter",
+						map_list_of
+						("knn", "10")
+						("epsilon", "5") 
+						("keepNormals", "0")
+						("keepDensities", "1")
+						)
+					);
+
+	PM::DataPointsFilter* maxDensitySubsample(
+					PM::get().DataPointsFilterRegistrar.create(
+						"MaxDensityDataPointsFilter",
+						map_list_of
+						("maxDensity", toParam(30))
+						)
+					);
 	// Main algorithm definition
 	PM::ICP icp;
 
@@ -77,82 +99,58 @@ int main(int argc, char *argv[])
 	PMIO::FileInfoVector list(argv[2]);
 
 	PM::DataPoints mapPointCloud, newCloud;
-	TP tp;
+	TP T_to_map_from_new = TP::Identity(4,4); // assumes 3D
 
 	for(unsigned i=0; i < list.size(); i++)
 	{
 		cout << "---------------------\nLoading: " << list[i].readingFileName << endl; 
+
+		// It is assume that the point cloud is express in sensor frame
 		newCloud = DP::load(list[i].readingFileName);
 		
-		if(mapPointCloud.features.rows() == 0)
+		if(mapPointCloud.getNbPoints()  == 0)
 		{
 			mapPointCloud = newCloud;
+			continue;
 		}
-		else
+
+		// call ICP
+		try 
 		{
+			// We use the last transformation as a prior
+			// this assumes that the point clouds were recorded in 
+			// sequence. 
+			const TP prior = T_to_map_from_new;
 
-			// call ICP
-			try 
-			{
-				tp = icp(mapPointCloud, newCloud);
-				//tp = icp.getDeltaTransform();
-				//cout << "Transformation: "<< tp << endl;
-				cout << "match ratio: " << icp.errorMinimizer->getWeightedPointUsedRatio() << endl;
-				
-				newCloud.features = tp.inverse()*newCloud.features;
-			
-				PM::DataPointsFilter* densityFilter(
-					PM::get().DataPointsFilterRegistrar.create(
-						"SurfaceNormalDataPointsFilter",
-						map_list_of
-							("binSize", "10")
-							("epsilon", "5") 
-							("keepNormals", "0")
-							("keepDensities", "1")
-					)
-				);
-
-				PM::DataPointsFilter* maxDensitySubsample(
-					PM::get().DataPointsFilterRegistrar.create(
-						"MaxDensityDataPointsFilter",
-						map_list_of
-							("maxDensity", toParam(30))
-					)
-				);
-				
-				// Merge point clouds to map
-				mapPointCloud.concatenate(newCloud);
-				mapPointCloud = densityFilter->filter(mapPointCloud);
-				mapPointCloud = maxDensitySubsample->filter(mapPointCloud);
-
-				// Controle the size of the point cloud
-				const double probToKeep = maxMapPointCount/(double)mapPointCloud.features.cols();
-				if(probToKeep < 1.0)
-				{
-					PM::DataPointsFilter* randSubsample(
-						PM::get().DataPointsFilterRegistrar.create(
-							"RandomSamplingDataPointsFilter",
-							map_list_of
-								("prob", toParam(probToKeep))
-						)
-					);
-					mapPointCloud = randSubsample->filter(mapPointCloud);
-				}
-			}
-			catch (PM::ConvergenceError& error)
-			{
-				cout << "ERROR PM::ICP failed to converge: " << endl;
-				cout << "   " << error.what() << endl;
-				//cout << "Reseting tracking" << endl;
-				//icp.resetTracking(newCloud);
-			}
-
-			stringstream outputFileNameIter;
-			outputFileNameIter << outputFileName << "_" << i;
-			
-			cout << "outputFileName: " << outputFileNameIter.str() << endl;
-			mapPointCloud.save(outputFileNameIter.str());
+			T_to_map_from_new = icp(newCloud, mapPointCloud, prior);
 		}
+		catch (PM::ConvergenceError& error)
+		{
+			cout << "ERROR PM::ICP failed to converge: " << endl;
+			cout << "   " << error.what() << endl;
+			continue;
+		}
+
+		// This is not necessary in this example, but could be
+		// useful if the same matrix is composed in the loop.
+		T_to_map_from_new = rigidTrans->correctParameters(T_to_map_from_new);
+
+		// Move the new point cloud in the map reference
+		newCloud = rigidTrans->compute(newCloud, T_to_map_from_new);
+
+		// Merge point clouds to map
+		mapPointCloud.concatenate(newCloud);
+
+		// Clean the map
+		mapPointCloud = densityFilter->filter(mapPointCloud);
+		mapPointCloud = maxDensitySubsample->filter(mapPointCloud);
+
+		// Save the map at each iteration
+		stringstream outputFileNameIter;
+		outputFileNameIter << outputFileName << "_" << i << ".vtk";
+
+		cout << "outputFileName: " << outputFileNameIter.str() << endl;
+		mapPointCloud.save(outputFileNameIter.str());
 	}
 
 	return 0;
@@ -164,7 +162,9 @@ void validateArgs(int argc, char *argv[])
 	{
 		cerr << "Error in command line, usage " << argv[0] << " icpConfiguration.yaml listOfFiles.csv" << endl;
 		cerr << endl << "Example:" << endl;
-		cerr << argv[0] << " ../examples/data/default.yaml ../examples/data/carCloudList.csv" << endl << endl;
+		cerr << argv[0] << " ../examples/data/default.yaml ../examples/data/carCloudList.csv" << endl;
+		cerr << endl << " - or - " << endl << endl;
+		cerr << argv[0] << " ../examples/data/default.yaml ../examples/data/cloudList.csv" << endl << endl;
 
 		abort();
 	}

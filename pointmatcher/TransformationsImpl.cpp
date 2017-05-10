@@ -51,17 +51,19 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
-	//typedef typename PointMatcher<T>::Matrix Matrix;
-	
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
-	const TransformationParameters R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
+	const unsigned int nbRows = parameters.rows()-1;
+	const unsigned int nbCols = parameters.cols()-1;
+
+	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
 
 	if(this->checkParameters(parameters) == false)	
 		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
 	
-	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
+	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.timeLabels, input.features.cols());
+	DataPoints transformedCloud = input;
 	
 	// Apply the transformation to features
 	transformedCloud.features = parameters * input.features;
@@ -77,11 +79,10 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 		BOOST_AUTO(outputDesc, transformedCloud.descriptors.block(row, 0, span, descCols));
 		if (name == "normals" || name == "observationDirections")
 			outputDesc = R * inputDesc;
-		else
-			outputDesc = inputDesc;
+		
 		row += span;
 	}
-	
+
 	return transformedCloud;
 }
 
@@ -91,13 +92,16 @@ bool TransformationsImpl<T>::RigidTransformation::checkParameters(const Transfor
 {
 	//FIXME: FP - should we put that as function argument?
 	const T epsilon = 0.001;
+	const unsigned int nbRows = parameters.rows()-1;
+	const unsigned int nbCols = parameters.cols()-1;
 
-	const TransformationParameters R(parameters.topLeftCorner(parameters.rows()-1, parameters.cols()-1));
+	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
 	
 	if(anyabs(1 - R.determinant()) > epsilon)
 		return false;
 	else
 		return true;
+
 }
 
 //! Force orthogonality of the rotation matrix
@@ -107,14 +111,17 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 	TransformationParameters ortho = parameters;
 	if(ortho.cols() == 4)
 	{
-		const Eigen::Matrix<T, 3, 1> col0 = parameters.block(0, 0, 3, 1).normalized();
+		//const Eigen::Matrix<T, 3, 1> col0 = parameters.block(0, 0, 3, 1).normalized();
 		const Eigen::Matrix<T, 3, 1> col1 = parameters.block(0, 1, 3, 1).normalized();
 		const Eigen::Matrix<T, 3, 1> col2 = parameters.block(0, 2, 3, 1).normalized();
 
+		const Eigen::Matrix<T, 3, 1> newCol0 = col1.cross(col2);
+		const Eigen::Matrix<T, 3, 1> newCol1 = col2.cross(newCol0);
+		const Eigen::Matrix<T, 3, 1> newCol2 = col2;
 
-		ortho.block(0, 0, 3, 1) = col1.cross(col2);
-		ortho.block(0, 1, 3, 1) = col2.cross(col0);
-		ortho.block(0, 2, 3, 1) = col2;
+		ortho.block(0, 0, 3, 1) = newCol0;
+		ortho.block(0, 1, 3, 1) = newCol1;
+		ortho.block(0, 2, 3, 1) = newCol2;
 	}
 	else if(ortho.cols() == 3)
 	{
@@ -140,6 +147,65 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 template struct TransformationsImpl<float>::RigidTransformation;
 template struct TransformationsImpl<double>::RigidTransformation;
 
+//! SimilarityTransformation
+template<typename T>
+typename PointMatcher<T>::DataPoints TransformationsImpl<T>::SimilarityTransformation::compute(
+	const DataPoints& input,
+	const TransformationParameters& parameters) const
+{
+	assert(input.features.rows() == parameters.rows());
+	assert(parameters.rows() == parameters.cols());
+
+	const unsigned int nbRows = parameters.rows()-1;
+	const unsigned int nbCols = parameters.cols()-1;
+
+	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
+
+	if(this->checkParameters(parameters) == false)
+		throw TransformationError("SimilarityTransformation: Error, invalid similarity transform.");
+	
+	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.timeLabels, input.features.cols());
+	DataPoints transformedCloud = input;
+	
+	// Apply the transformation to features
+	transformedCloud.features = parameters * input.features;
+	
+	// Apply the transformation to descriptors
+	int row(0);
+	const int descCols(input.descriptors.cols());
+	for (size_t i = 0; i < input.descriptorLabels.size(); ++i)
+	{
+		const int span(input.descriptorLabels[i].span);
+		const std::string& name(input.descriptorLabels[i].text);
+		const BOOST_AUTO(inputDesc, input.descriptors.block(row, 0, span, descCols));
+		BOOST_AUTO(outputDesc, transformedCloud.descriptors.block(row, 0, span, descCols));
+		if (name == "normals" || name == "observationDirections")
+			outputDesc = R * inputDesc;
+		
+		row += span;
+	}
+
+	return transformedCloud;
+}
+
+//! Nothing to check for a similarity transform
+template<typename T>
+bool TransformationsImpl<T>::SimilarityTransformation::checkParameters(const TransformationParameters& parameters) const
+{
+	//FIXME: FP - should we put that as function argument?
+	return true;
+}
+
+//! Nothing to correct for a similarity transform
+template<typename T>
+typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::SimilarityTransformation::correctParameters(const TransformationParameters& parameters) const
+{
+	return parameters;
+}
+
+template struct TransformationsImpl<float>::SimilarityTransformation;
+template struct TransformationsImpl<double>::SimilarityTransformation;
+
 template<typename T>
 typename PointMatcher<T>::DataPoints TransformationsImpl<T>::PureTranslation::compute(const DataPoints& input,
 		const TransformationParameters& parameters) const {
@@ -149,7 +215,8 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::PureTranslation::co
 	if(this->checkParameters(parameters) == false)
 		throw PointMatcherSupport::TransformationError("PureTranslation: Error, left part  not identity.");
 
-	DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
+	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
+	DataPoints transformedCloud = input;
 
 	// Apply the transformation to features
 	transformedCloud.features = parameters * input.features;

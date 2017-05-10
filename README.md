@@ -1,86 +1,74 @@
+![alt tag](doc/images/banner_light.jpeg)
+
+
+---
 
 
 Documentation and Tutorials
 ===========================
-libpointmatcher is a modular ICP library, useful for robotics and computer vision.
+libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
 
-**Quick link for the tutorial pages: [Tutorials](doc/Tutorials.md ).**
+**Quick link for the tutorial pages: [Tutorials](doc/index.md ) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
 
 Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
 
-Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`.  
-
-
-libpointmatcher depends on:
-
- * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
- * [libnabo] version 1.0.1, a fast K Nearest Neighbour library for low-dimensional spaces.
- * [Doxygen], a documentation-generation tool (optional)
- 
-and was compiled on:
-  * [Ubuntu](/doc/Compilation.md)
-  * [Mac OS X](/doc/CompilationMac.md)
-  * [Windows](/doc/CompilationWindows.md) (partially supported)
+Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`. 
 
 libpointmatcher is being developed by [François Pomerleau](mailto:f.pomerleau@gmail.com) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
 You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 
-Pre-built binaries
+Quick Start
 ==================
 
-Ubuntu
-------
+Although we suggest to use the [tutorials](doc/Tutorials.md ), here is a quick version of it:
 
-It's better to compile from the sources, but binaries for Ubuntu Linux are available on our PPA:
+The library has a light dependency list:
 
- * [Lucid](https://launchpad.net/~stephane.magnenat/+archive/lucid)
- * [Precise](https://launchpad.net/~stephane.magnenat/+archive/precise)
- * [Quantal](https://launchpad.net/~stephane.magnenat/+archive/quantal)
- * [Raring](https://launchpad.net/~stephane.magnenat/+archive/raring)
+ * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
+ * [boost] version 1.48 and up, portable C++ source libraries,
+ * [libnabo] version 1.0.6, a fast K Nearest Neighbour library for low-dimensional spaces,
  
-Once you have added the PPA to your system, you can install libpointmatcher using
+and was compiled on:
+  * Ubuntu ([see how](/doc/Compilation.md))
+  * Mac OS X ([see how](/doc/CompilationMac.md))
+  * Windows ([see how](/doc/CompilationWindows.md) - partially supported)
 
-```
-sudo apt-get install libpointmatcher-dev
-```
+### Compilation & Installation 
 
-Other
------
-
-If you have built binaries for other systems, please tell us.
-
-Prerequisites
--------------
-If your operating system does not provide it, you must get [Eigen].
-It only needs to be downloaded and extracted.
-[libnabo] must be downloaded and installed, please follow the [libnabo]'s documentation to do so.
-
-
-Compilation & Installation 
-==========================
 For beginner users who are not familiar with compiling and installing a library in Linux, go [here](doc/Compilation.md) for detailed instructions on how to compile libpointmatcher from the source code.  If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
 
 ```
 mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+cmake ..
 make
 sudo make install
 ```
 
-Testing
-=======
+### Testing
+
 Libpointmatcher ships with a version of the Google testing framework [GTest](https://code.google.com/p/googletest/).  Unit tests are located in utest/ and are compiled with libpointmatcher.  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
 ```
 cd build
 utest/utest --path ../examples/data/
 ```
 
-Bug reporting
-=============
+### Linking to external projects.
+We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_Qt), which manually list all the dependencies in the file [`demo.pro`](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system.
 
-Please use [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs.
 
+### Bug reporting
+
+Please use our [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs. If you are running the library on Ubuntu, copy-paste the output of the script [listVersionsUbuntu.sh](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/listVersionsUbuntu.sh) to simplify the search of an answer.
+
+## File formats
+The library support different file formats for importing or exporting data:
+  * csv (Comma Separated Values)
+  * vtk (Visualization Toolkit Files)
+  * ply (Polygon File Format)
+  * pcd (Point Cloud Library Format)
+
+Those functionnalities are available without increasing the list of dependencies at the expense of a limited functionality support. For more details, see the tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using those file formats from the command line can be found in `./example/` and are described [here](doc/ICPIntro.md) in more details 
 
 Citing
 ======
@@ -109,11 +97,29 @@ and/or
 		year = {2011}
 	}
 
+Extra Reading
+=============
+If you are interested in learning more about different registration algorithms, we recently put together a literature review surveying multiple solutions. The review is organized in the same way as the library and many examples are provided based on real deployments.
+
+F. Pomerleau, F. Colas and R. Siegwart (2015), "_A Review of Point Cloud Registration Algorithms for Mobile Robotics_", __Foundations and Trends® in Robotics__: Vol. 4: No. 1, pp 1-104.  http://dx.doi.org/10.1561/2300000035 
+
+If you don't have access to the journal, you can download it from [here](https://www.researchgate.net/publication/277558596_A_Review_of_Point_Cloud_Registration_Algorithms_for_Mobile_Robotics).
+
+More Point Clouds
+=================
+We also produced those freely available data sets to test different registration solutions:
+
+[_Challenging data sets for point cloud registration algorithms_](http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:laserregistration)
+
+![alt tag](http://projects.asl.ethz.ch/datasets/lib/exe/fetch.php?cache=&media=laserregistration:asldataset_weblarge.jpg)
+
+You can download the files in CSV or VTK formats, which are directly supported by the library I/O module. 
+
 
 Projects and Partners
 =====================
 
-If you are using libpointmatcher in your project and you would like to have it listed here, please contact [François Pomerleau](mailto:f.pomerleau@gmail.com) or [Stéphane Magnenat](http://stephane.magnenat.net).
+If you are using libpointmatcher in your project and you would like to have it listed here, please contact [François Pomerleau](mailto:f.pomerleau@gmail.com).
 
  * European Project [NIFTi](http://www.nifti.eu/) (FP7 ICT-247870): Search and rescue project in dynamic environments. Results: [video of multi-floor reconstruction](http://www.youtube.com/watch?v=lP5Mj-TGaiw) and [video of railyard reconstruction](http://www.youtube.com/watch?v=ygIvzWVfPYk). All results with real-time computation.
  * NASA Ames [Stereo Pipeline](http://ti.arc.nasa.gov/tech/asr/intelligent-robotics/ngt/stereo/): Planetary reconstruction from satellite observations. Results: used for Mars, Moon and Earth point clouds.
@@ -126,7 +132,7 @@ For a larger list of work realized with libpointmatcher, please see the page [Ap
 License
 =======
 
-libpointmatcher is released under a permissive BSD license.
+libpointmatcher is released under a permissive BSD license. Enjoy!
 
 [Ubuntu]: http://www.ubuntu.com
 [CMake]: http://www.cmake.org
@@ -138,3 +144,10 @@ libpointmatcher is released under a permissive BSD license.
 [Paraview]: http://www.paraview.org/
 [yaml-cpp]: http://code.google.com/p/yaml-cpp/
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/
+[boost]: http://www.boost.org/
+
+
+---
+
+
+![alt tag](doc/images/banner_dark.jpeg)

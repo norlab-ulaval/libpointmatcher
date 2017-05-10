@@ -88,9 +88,8 @@ install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
 
 #===========================================================================
 
-# Documentation
-set(DOXYFILE_LATEX false)
-include(UseDoxygen)
+
+#======================== External Dependencies ===============================
 
 # initially
 set(EXTERNAL_LIBS "")
@@ -208,6 +207,47 @@ if (POSIX_TIMERS AND NOT APPLE)
 	set(EXTERNAL_LIBS ${EXTERNAL_LIBS} rt)
 endif (POSIX_TIMERS AND NOT APPLE)
 
+#============================= end dependencies =================================
+
+
+#========================== libpointmatcher itself ==============================
+
+# Check the compiler version as we need full C++11 support.
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	# using Clang
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.3")
+		message(WARNING, "Your clang compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 3.3 or later is supported")
+	endif ()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+	# using AppleClang
+	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
+		message(WARNING "Your XCode environment has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 5.1 or later is supported")
+	endif()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	# using GCC
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.2")
+		message(WARNING, "Your g++ compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 4.8.2 or later is supported")
+	endif ()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	# using MSVC
+	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "19.0.23506")
+		message(WARNING "Your Microsoft Visual C++ compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version MSVC 2015 Update 1+ or later is supported")
+	endif()
+endif ()
+
+# enable C++11 support.
+if (CMAKE_VERSION VERSION_LESS "3.1")
+	if (MSVC)
+		message(FATAL_ERROR, "CMake version 3.1 or later is required to compiler ${PROJECT_NAME} with Microsoft Visual C++")
+	endif ()
+	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		set (CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+	else ()
+		set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+	endif ()
+else ()
+	set (CMAKE_CXX_STANDARD 11)
+endif ()
 
 # SOURCE
 
@@ -228,6 +268,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/TransformationChecker.cpp
 	pointmatcher/Inspector.cpp
 	pointmatcher/IO.cpp
+	pointmatcher/IOFunctions.cpp
 	pointmatcher/Bibliography.cpp
 	pointmatcher/Timer.cpp
 	pointmatcher/Histogram.cpp
@@ -259,7 +300,11 @@ else(APPLE)
 
 	if (SHARED_LIBS)
 		add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
-		install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+		install(TARGETS pointmatcher
+						ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+						LIBRARY DESTINATION ${INSTALL_LIB_DIR}
+						RUNTIME DESTINATION ${INSTALL_BIN_DIR})
+		#install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 	else(SHARED_LIBS)
 		add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 		install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
@@ -277,22 +322,47 @@ if(EXTRA_DEPS)
 endif(EXTRA_DEPS)
 set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
-# create doc before installing
-set(DOC_INSTALL_TARGET "share/doc/${PROJECT_NAME}/api" CACHE STRING "Target where to install doxygen documentation")
-add_dependencies(pointmatcher doc)
+#========================= Install header ===========================
+
 install(FILES
 	pointmatcher/PointMatcher.h
 	pointmatcher/PointMatcherPrivate.h
 	pointmatcher/Parametrizable.h
 	pointmatcher/Registrar.h
 	pointmatcher/Timer.h
+	pointmatcher/Functions.h
 	pointmatcher/IO.h
 	DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
 )
-install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
-if (DOXYGEN_FOUND)
-	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
-endif (DOXYGEN_FOUND)
+
+#========================= Documentation ===========================
+
+set(GENERATE_API_DOC false CACHE BOOL "Set to true to build the documentation using Doxygen")
+
+if(GENERATE_API_DOC)
+
+	message("-- API Documentation (doxygen): enabled")
+
+	# Note: there seems to be equations in the documentation leading to the
+	# use of Latex anyway. This cause problems for user without latex...
+
+	set(DOXYFILE_LATEX "NO")
+	include(UseDoxygen)
+
+	set(DOC_INSTALL_TARGET "share/doc/${PROJECT_NAME}/api" CACHE STRING "Target where to install doxygen documentation")
+
+	add_dependencies(pointmatcher doc)
+
+	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
+	if (DOXYGEN_FOUND)
+		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
+	endif (DOXYGEN_FOUND)
+
+else(GENERATE_API_DOC)
+
+	message("-- API Documentation (doxygen): disabled")
+
+endif(GENERATE_API_DOC)
 
 
 #=============== trigger other makefile ======================
@@ -319,10 +389,6 @@ add_subdirectory(utest)
 # Register the local build in case one doesn't use "make install"
 export(PACKAGE libpointmatcher)
 
-file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
-file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
-   "${INSTALL_INCLUDE_DIR}")
-
 # Create variable for the local build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
@@ -343,6 +409,10 @@ set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 # because we added an include for the local yaml-cpp-pm we should also remove it
 list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
 
+if(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
+  list(REMOVE_ITEM EXTERNAL_LIBS ${yaml-cpp-pm_LIB})
+endif(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
+
 # Change the library location for an install location
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
 set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
@@ -357,14 +427,43 @@ configure_file(libpointmatcherConfigVersion.cmake.in
  
 
 # Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
-install(FILES
-   "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
-	 "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
-		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+install(
+  FILES
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
+    "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
+  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev
+)
 
 # useful for TRADR european project. TODO: check to use the other install
-install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
+# required for ros deployment, too
+install (
+  FILES 
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" 
+    "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" 
+  DESTINATION "share/${PROJECT_NAME}/cmake/"
+)
 
+#Handle pkg-config file
+set(LIBRARY_CC_ARGS "")
+foreach(_LIB IN LISTS POINTMATCHER_LIB EXTERNAL_LIBS)
+  get_filename_component(_FILE_NAME ${_LIB} NAME)
+  if(${_FILE_NAME} STREQUAL ${_LIB}) # not an absolute path 
+    set(LIBRARY_CC_ARGS "${LIBRARY_CC_ARGS} -l${_LIB}") 
+  else()
+    set(LIBRARY_CC_ARGS "${LIBRARY_CC_ARGS} ${_LIB}")
+  endif()
+endforeach()
+unset(_LIB)
+unset(_FILE_NAME)
+
+configure_file(pointmatcher.pc.in libpointmatcher.pc @ONLY)
+configure_file(pointmatcher.pc.in pointmatcher.pc @ONLY) # for backward compatibility
+install(FILES 
+  ${CMAKE_BINARY_DIR}/libpointmatcher.pc 
+  ${CMAKE_BINARY_DIR}/pointmatcher.pc # for backward compatibility
+  DESTINATION lib/pkgconfig
+)
+unset(LIBRARY_CC_ARGS)
 
 #====================== uninstall target ===============================
 configure_file(

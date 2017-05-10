@@ -4,6 +4,7 @@ Release Notes
 Wish list for next release
 --------------------------
 
+ * Change the API to allow only on kind of transformation, not a list of transformations. See issue [#164](https://github.com/ethz-asl/libpointmatcher/issues/164).
  * Migrate ffrom yaml-cpp 0.3 to 0.5
  * Fix portability problem with FileLogger on Windows
  * Support for OpenMP parallel computing
@@ -11,6 +12,9 @@ Wish list for next release
 
 Already implemented in the current master:
 
+ * add a new OutlierFilter: RobustWelschOutlierFilter (for robust cost function using Welsch weighting).
+ * Add a new ErrorMinimizer: PointToPointSimilarityErrorMinimizer (rotation + translation + scale)
+ * Add a new Transformation: SimilarityTransformation.
  * Add a new data filter: [VoxelGrid](https://github.com/ethz-asl/libpointmatcher/blob/master/doc/Datafilters.md#voxel-grid-filter-) (April 2014, thanks to Samuel Charreyron) 
  * Add support for PCL ([Point Cloud Library](http://pointclouds.org/)) data format: PCD (April 2014, thanks to Samuel Charreyron) 
  * Improve *.vtk legacy format to handle UNSTRUCTURED_GRID format (April 2014, thanks to Samuel Charreyron)

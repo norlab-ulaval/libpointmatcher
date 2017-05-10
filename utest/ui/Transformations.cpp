@@ -83,8 +83,12 @@ TEST(Transformation, RigidTransformation)
 	//-------------------------------------
 	// Construct a 3D non-orthogonal matrix
 	PM::Matrix T_3D = PM::Matrix::Identity(4,4);
-	T_3D(0,0) = 2.3;
-	T_3D(0,1) = 0.03;
+	//T_3D(0,0) = 2.3;
+	//T_3D(0,1) = 0.03;
+	T_3D << 0.99935116,  0.13669771,  0.03436585,  1.71138524,
+	       -0.02633967,  0.99326295, -0.04907545, -0.10860933,
+				 -0.03615132,  0.04400287,  0.99820427, -0.04454497,
+				  0.        ,  0.        ,  0.        ,  1.;
 
 	EXPECT_FALSE(rigidTrans->checkParameters(T_3D));
 
@@ -94,7 +98,7 @@ TEST(Transformation, RigidTransformation)
 	for(int i = 0; i < 10; i++)
 	{
 		T_3D = rigidTrans->correctParameters(T_3D);
-		EXPECT_TRUE(rigidTrans->checkParameters(T_3D));
+		ASSERT_TRUE(rigidTrans->checkParameters(T_3D));
 	}
 
 	//-------------------------------------
@@ -114,4 +118,5 @@ TEST(Transformation, RigidTransformation)
 		EXPECT_TRUE(rigidTrans->checkParameters(T_2D));
 	}
 
+	delete rigidTrans;
 }

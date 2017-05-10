@@ -2,7 +2,6 @@
 | ------------- |:-------------:| -----:|
 
 # Creating Custom Configurations with YAML
-######Latest update January 23, 2014 by Samuel Charreyron
 
 ***IMPORTANT:*** This tutorial makes use of YAML configuration files.  If you did not install yaml-cpp before installing libpointmatcher, you must do so before following these instructions.  Information on installing yaml-cpp can be found in the [installation instructions](Compilation.md).
 

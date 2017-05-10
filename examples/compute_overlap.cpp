@@ -75,30 +75,20 @@ int main(int argc, char *argv[])
 		setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 
 	// Prepare transformation chain for maps
-	PM::Transformation* transformPoints;
-	transformPoints = PM::get().TransformationRegistrar.create("TransformFeatures");
-	
-	PM::Transformation* transformNormals;
-	transformNormals = PM::get().TransformationRegistrar.create("TransformNormals");
+	PM::Transformation* rigidTransform;
+	rigidTransform = PM::get().TransformationRegistrar.create("RigidTransformation");
 	
 	PM::Transformations transformations;
-	transformations.push_back(transformPoints);
-	transformations.push_back(transformNormals);
+	transformations.push_back(rigidTransform);
 
 	DP reading, reference;
 	TP Tread = TP::Identity(4,4);
 	DP mapCloud;
 	TP Tref = TP::Identity(4,4);
 
-	//TODO: loop through all point clouds
-	//int i = 0; // reading
-	//int j = 0; // reference
-
 	unsigned startingI = 0;
-	//unsigned listSizeI = list.size();
-	//unsigned listSizeJ = list.size();
-	unsigned listSizeI = 3;
-	unsigned listSizeJ = 3;
+	unsigned listSizeI = list.size();
+	unsigned listSizeJ = list.size();
 	if(debugMode)
 	{
 		startingI = boost::lexical_cast<unsigned>(argv[2]);
@@ -131,7 +121,7 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				cout << "ERROR: fields gTXX (ground truth) is required" << endl;
+				cout << "ERROR: fields gTXX (i.e., ground truth matrix) is required" << endl;
 				abort();
 			}
 
@@ -286,8 +276,14 @@ void validateArgs(int argc, char *argv[])
 {
 	if (!(argc == 2 || argc == 4))
 	{
-		cerr << "\nError in command line, usage " << argv[0] << " listOfFiles.csv <i j>" << endl;
-		cerr << "\ni and j are optional arguments. If used, only compute the overlap for those 2 point cloud ids and dump VTK files for visual inspection." << endl;
+		cerr << endl;
+		cerr << " ERROR in command line" << endl << endl; 
+		cerr << " Usage: " << argv[0] << " listOfFiles.csv <i j>" << endl;
+		cerr << " Note: 'i' and 'j' are optional arguments. If used, only compute the overlap for those 2 point cloud ids and dump VTK files for visual inspection." << endl;
+		cerr << endl;
+		cerr << " Example: " << endl;
+		cerr << "    $ " << argv[0] << " ../example/data/carCloudList.csv" << endl;
+		cerr << endl;
 		abort();
 	}
 }

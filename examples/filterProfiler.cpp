@@ -23,22 +23,22 @@ int main(int argc, char *argv[])
 {
 
 	if (argc < 2 || argc > 3)
-		{
-	        std::cerr << "USAGE: filterProfiler <path_to_input_cloud> <useCentroids (optional) 1 or 0>" << std::endl;
-	        return -1;
-		}
+			{
+			std::cerr << "USAGE: filterProfiler <path_to_input_cloud> <summarizationMethod (optional) 2 or 1 or 0>" << std::endl;
+			return -1;
+			}
 
 	char* useCentroid;
 	if (argc == 3) {
-		if (strcmp(argv[2],"1") != 0 && strcmp(argv[2],"0")) {
-			cerr << "param useCentroid must be 1 or 0" << endl;
-			return -1;
-		} else
-		{
-			useCentroid = argv[2];
-		}
+			if (strcmp(argv[2],"1") != 0 && strcmp(argv[2],"0")) {
+					cerr << "param useCentroid must be 1 or 0" << endl;
+					return -1;
+			} else
+			{
+					useCentroid = argv[2];
+			}
 	} else {
-		useCentroid = "1";
+			useCentroid = "1";
 	}
 
 		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));

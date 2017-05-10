@@ -2,7 +2,7 @@
 | ------------- |:-------------:| -----:|
 
 # Linking Projects to libpointmatcher
-######Latest update January 23, 2014 by Samuel Charreyron
+
 Once you have followed the [compilation instructions](Compilation.md) and installed libpointmatcher to your system, you can use libpointmatcher in your project.
 
 ## Option 1: Using CMake (Recommended)
@@ -14,13 +14,14 @@ In this following example, we build a very simple CMake project containing one e
 cmake_minimum_required (VERSION 2.6)
 project (myProject)
 
-find_package(pointmatcher 1.1.0 REQUIRED)
-include_directories("${POINTMATCHER_INCLUDE_DIRS}")
-message(STATUS "Using libpointmatcher version ${pointmatcher_VERSION}")
+find_package(libpointmatcher 1.1.0 REQUIRED)
+include_directories("${libpointmatcher_INCLUDE_DIRS}")
+message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 
 add_executable(myProgram myProgram.cpp)
-target_link_libraries(myProgram ${POINTMATCHER_LIBRARIES})
+target_link_libraries(myProgram ${libpointmatcher_LIBRARIES})
 ```
+A working example of how to link to an external project can be found in [./examples/demo_cmake](../examples/demo_cmake).
 
 ## Option 2: Using Eclipse
 ### Using the Native Eclipse Builder
@@ -53,7 +54,39 @@ int main(int argc, char *argv[]) {
 ```
 The program will create an ICP chain, configure it to the default settings and exit subsequently.  Click on `Project > Build Project` and check that the project compiles successfully.  Finally run the program by clicking `Run > Run`. The message "ICP configured to default." should be displayed in the console.       
 
-## Option 3: Using Compiler Flags
+## Option 3: Using Eclipse
+You will need to generate a `.pro` file containing your project information. This file would look like this:
+
+```
+QT       	+= core gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+TARGET    	 = LAUPointMatcher
+TEMPLATE  	 = app
+SOURCES  	+= main.cpp
+
+INCLUDEPATH += 	/Users/francoispomerleau/Research/Code/libpointmatcher/pointmatcher \
+                /Users/francoispomerleau/Research/Code/libnabo/ \
+                /usr/local/Cellar/eigen/3.2.4/include/eigen3 \
+		/usr/local/include/
+
+CONFIG          += c++11
+#QMAKE_CXXFLAGS += -mmacosx-version-min=10.7
+#QMAKE_LFLAGS   += -mmacosx-version-min=10.7
+
+LIBS     	+= 	/usr/local/lib/libboost_thread-mt.dylib \
+                	/usr/local/lib/libboost_filesystem-mt.dylib \
+                        /usr/local/lib/libboost_system-mt.dylib \
+                        /usr/local/lib/libboost_program_options-mt.dylib \
+                        /usr/local/lib/libboost_date_time-mt.dylib \
+                        /usr/local/lib/libboost_chrono-mt.dylib \
+                        /Users/francoispomerleau/Research/Code/libpointmatcher/build/libpointmatcher.a \
+                        /Users/francoispomerleau/Research/Code/libnabo/build/libnabo.a \
+                        /Users/francoispomerleau/Research/Code/libpointmatcher/build/contrib/yaml-cpp-pm/libyaml-cpp-pm.a
+```
+
+A working example of how to link to an external project can be found in [./examples/demo_Qt](../examples/demo_Qt).
+
+## Option 4: Using Compiler Flags
 If you are compiling a very simple program without the use of a builder, simply include the libpointmatcher header files by setting the include flag in your compiler.  Example:
 ```
 g++ -I/usr/local/include/pointmatcher -o myProgram.o -c myProgram.cpp
