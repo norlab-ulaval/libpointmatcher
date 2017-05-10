@@ -95,30 +95,6 @@ struct ErrorMinimizersImpl
 		virtual T getOverlap() const;
 	};
 
-	struct PointToPlaneErrorMinimizer: public ErrorMinimizer
-	{
-		inline static const std::string description()
-		{
-			return "Point-to-plane error (or point-to-line in 2D). Per \\cite{Chen1991Point2Plane}.";
-		}
-		
-		inline static const ParametersDoc availableParameters()
-		{
-			return boost::assign::list_of<ParameterDoc>
-				( "force2D", "If set to true(1), the minimization will be force to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>)
-			;
-		}
-
-		const bool force2D;
-		
-		PointToPlaneErrorMinimizer(const Parameters& params = Parameters());
-		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
-		virtual TransformationParameters compute(const ErrorElements& mPts);
-		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
-		virtual T getOverlap() const;
-		
-		static T computeResidualError(ErrorElements mPts, const bool& force2D);
-	};
 
 	struct PointToPointWithCovErrorMinimizer: ErrorMinimizer
 	{

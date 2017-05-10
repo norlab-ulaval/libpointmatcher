@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MatchersImpl.h"
 #include "OutlierFiltersImpl.h"
 #include "ErrorMinimizersImpl.h"
+#include "PointToPlaneErrorMinimizer.h"
 #include "PointToPlaneWithCovErrorMinimizer.h"
 #include "TransformationCheckersImpl.h"
 #include "InspectorsImpl.h"
@@ -103,7 +104,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, IdentityErrorMinimizer, typename ErrorMinimizersImpl<T>::IdentityErrorMinimizer)
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointErrorMinimizer)
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointSimilarityErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer)
-	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPlaneErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer)
+	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPlaneErrorMinimizer, PointToPlaneErrorMinimizer<T>)
 	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPointWithCovErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer)
 	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPlaneWithCovErrorMinimizer, PointToPlaneWithCovErrorMinimizer<T>)
 	

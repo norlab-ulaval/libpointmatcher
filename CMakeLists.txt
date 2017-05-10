@@ -281,6 +281,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/TransformationsImpl.cpp
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp
+	pointmatcher/PointToPlaneErrorMinimizer.cpp
   pointmatcher/PointToPlaneWithCovErrorMinimizer.cpp
 )
 

@@ -6,8 +6,8 @@
 #include "ErrorMinimizersImpl.h"
 #include "PointMatcherPrivate.h"
 #include "Functions.h"
+#include "PointToPlaneErrorMinimizer.h"
 #include "PointToPlaneWithCovErrorMinimizer.h"
-
 
 using namespace Eigen;
 using namespace std;
@@ -136,61 +136,6 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithCovErrorMinim
 	return mOut; 
 }
 
-template<typename T, typename MatrixA, typename Vector>
-void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b, Vector & x) {
-	assert(A.cols() == A.rows());
-	assert(b.cols() == 1);
-	assert(b.rows() == A.rows());
-	assert(x.cols() == 1);
-	assert(x.rows() == A.cols());
-
-	typedef typename PointMatcher<T>::Matrix Matrix;
-
-	BOOST_AUTO(Aqr, A.fullPivHouseholderQr());
-	if (!Aqr.isInvertible())
-	{
-		// Solve reduced problem R1 x = Q1^T b instead of QR x = b, where Q = [Q1 Q2] and R = [ R1 ; R2 ] such that ||R2|| is small (or zero) and therefore A = QR ~= Q1 * R1
-		const int rank = Aqr.rank();
-		const int rows = A.rows();
-		const Matrix Q1t = Aqr.matrixQ().transpose().block(0, 0, rank, rows);
-		const Matrix R1 = (Q1t * A * Aqr.colsPermutation()).block(0, 0, rank, rows);
-
-		const bool findMinimalNormSolution = true; // TODO is that what we want?
-
-		// The under-determined system R1 x = Q1^T b is made unique ..
-		if(findMinimalNormSolution){
-			// by getting the solution of smallest norm (x = R1^T * (R1 * R1^T)^-1 Q1^T b.
-			x = R1.template triangularView<Eigen::Upper>().transpose() * (R1 * R1.transpose()).llt().solve(Q1t * b);
-		} else {
-			// by solving the simplest problem that yields fewest nonzero components in x
-			x.block(0, 0, rank, 1) = R1.block(0, 0, rank, rank).template triangularView<Eigen::Upper>().solve(Q1t * b);
-			x.block(rank, 0, rows - rank, 1).setZero();
-		}
-
-		x = Aqr.colsPermutation() * x;
-
-		BOOST_AUTO(ax , (A * x).eval());
-		if (!b.isApprox(ax, 1e-5)) {
-			LOG_INFO_STREAM("PointMatcher::icp - encountered almost singular matrix while minimizing point to plane distance. QR solution was too inaccurate. Trying more accurate approach using double precision SVD.");
-			x = A.template cast<double>().jacobiSvd(ComputeThinU | ComputeThinV).solve(b.template cast<double>()).template cast<T>();
-			ax = A * x;
-
-			if((b - ax).norm() > 1e-5 * std::max(A.norm() * x.norm(), b.norm())){
-				LOG_WARNING_STREAM("PointMatcher::icp - encountered numerically singular matrix while minimizing point to plane distance and the current workaround remained inaccurate."
-						<< " b=" << b.transpose()
-						<< " !~ A * x=" << (ax).transpose().eval()
-						<< ": ||b- ax||=" << (b - ax).norm()
-						<< ", ||b||=" << b.norm()
-						<< ", ||ax||=" << ax.norm());
-			}
-		}
-	}
-	else {
-		// Cholesky decomposition
-		x = A.llt().solve(b);
-	}
-}
-
 template<typename T>
 T PointToPlaneWithCovErrorMinimizer<T>::getResidualError(
 	const DataPoints& filteredReading,
@@ -203,7 +148,7 @@ T PointToPlaneWithCovErrorMinimizer<T>::getResidualError(
 	// Fetch paired points
 	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
-	return ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::computeResidualError(mPts, force2D);
+	return PointToPlaneErrorMinimizer<T>::computeResidualError(mPts, force2D);
 }
 
 template<typename T>
