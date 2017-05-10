@@ -34,14 +34,29 @@ public:
 
 TEST_F(ErrorMinimizerTest, PointToPointErrorMinimizer)
 {
-	setError("PointToPointErrorMinimizer");	
+	setError("PointToPointErrorMinimizer");
 	validate2dTransformation();
 	validate3dTransformation();
 }
 
 TEST_F(ErrorMinimizerTest, PointToPlaneErrorMinimizer)
 {
-	setError("PointToPlaneErrorMinimizer");	
+	setError("PointToPlaneErrorMinimizer");
+	validate2dTransformation();
+	validate3dTransformation();
+}
+
+TEST_F(ErrorMinimizerTest, PointToPointWithCovErrorMinimizer)
+{
+	setError("PointToPointWithCovErrorMinimizer");
+	validate2dTransformation();
+	validate3dTransformation();
+}
+
+
+TEST_F(ErrorMinimizerTest, PointToPlaneWithCovErrorMinimizer)
+{
+	setError("PointToPlaneWithCovErrorMinimizer");
 	validate2dTransformation();
 	validate3dTransformation();
 }
