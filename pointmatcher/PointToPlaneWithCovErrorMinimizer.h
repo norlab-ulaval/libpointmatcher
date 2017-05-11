@@ -45,8 +45,6 @@ struct PointToPlaneWithCovErrorMinimizer: public PointToPlaneErrorMinimizer<T>
 
     PointToPlaneWithCovErrorMinimizer(const Parameters& params = Parameters());
     virtual TransformationParameters compute(const ErrorElements& mPts);
-    virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
-    virtual T getOverlap() const;
     virtual Matrix getCovariance() const;
     Matrix estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation);
 };

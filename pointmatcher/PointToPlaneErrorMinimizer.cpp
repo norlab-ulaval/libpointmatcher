@@ -279,14 +279,14 @@ T PointToPlaneErrorMinimizer<T>::getOverlap() const
 	{
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
 	}
-	
+
 	Eigen::Array<T, 1, Eigen::Dynamic>  uncertainties(nbPoints);
 
 	// optimal case
 	if (hasReadingNoise && hasReferenceNoise && hasReferenceDensity)
 	{
 		// find median density
-		
+
 		Matrix densities = this->lastErrorElements.reference.getDescriptorViewByName("densities");
 		vector<T> values(densities.data(), densities.data() + densities.size());
 
@@ -346,7 +346,7 @@ T PointToPlaneErrorMinimizer<T>::getOverlap() const
 				count++;
 			}
 		}
-		
+
 		// Count unique points
 		if(i > 0)
 		{

@@ -38,21 +38,6 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithCovErrorMinim
 }
 
 template<typename T>
-T PointToPlaneWithCovErrorMinimizer<T>::getResidualError(
-    const DataPoints& filteredReading,
-    const DataPoints& filteredReference,
-    const OutlierWeights& outlierWeights,
-    const Matches& matches) const
-{
-    assert(matches.ids.rows() > 0);
-
-    // Fetch paired points
-    typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
-
-    return PointToPlaneErrorMinimizer<T>::computeResidualError(mPts, PointToPlaneErrorMinimizer<T>::force2D);
-}
-
-template<typename T>
 typename PointMatcher<T>::Matrix
 PointToPlaneWithCovErrorMinimizer<T>::estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation)
 {
@@ -145,42 +130,6 @@ PointToPlaneWithCovErrorMinimizer<T>::estimateCovariance(const ErrorElements& mP
     return (sensorStdDev * sensorStdDev) * covariance;
 }
 
-
-
-template<typename T>
-T PointToPlaneWithCovErrorMinimizer<T>::getOverlap() const
-{
-    const int nbPoints = this->lastErrorElements.reading.features.cols();
-    const int dim = this->lastErrorElements.reading.features.rows();
-    if(nbPoints == 0)
-    {
-        throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
-    }
-
-    if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise") ||
-        !this->lastErrorElements.reading.descriptorExists("normals"))
-    {
-        LOG_INFO_STREAM("PointToPlaneErrorMinimizer - warning, no sensor noise or normals found. Using best estimate given outlier rejection instead.");
-        return this->getWeightedPointUsedRatio();
-    }
-
-    const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
-    const BOOST_AUTO(normals, this->lastErrorElements.reading.getDescriptorViewByName("normals"));
-    int count = 0;
-    for(int i=0; i < nbPoints; i++)
-    {
-        if(this->lastErrorElements.matches.dists(0, i) != numeric_limits<T>::infinity())
-        {
-            const Vector d = this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i);
-            const Vector n = normals.col(i);
-            const T projectionDist = d.head(dim-1).dot(n.normalized());
-            if(anyabs(projectionDist) < noises(0,i))
-                count++;
-        }
-    }
-
-    return (T)count/(T)nbPoints;
-}
 
 template<typename T>
 typename PointMatcher<T>::Matrix PointToPlaneWithCovErrorMinimizer<T>::getCovariance() const
