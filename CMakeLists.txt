@@ -282,7 +282,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp
 	pointmatcher/PointToPlaneErrorMinimizer.cpp
-  pointmatcher/PointToPlaneWithCovErrorMinimizer.cpp
+	pointmatcher/PointToPlaneWithCovErrorMinimizer.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
