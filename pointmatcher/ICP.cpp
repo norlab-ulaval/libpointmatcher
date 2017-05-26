@@ -470,6 +470,10 @@ bool PointMatcher<T>::ICPSequence::setMap(const DataPoints& inputCloud)
 	// from here reference is express in frame <refMean>
 	// Shortcut to do T_refIn_refMean.inverse() * reference
 	mapPointCloud.features.topRows(dim-1).colwise() -= meanMap.head(dim-1);
+
+  // Apply reference filters
+  this->referenceDataPointsFilters.init();
+  this->referenceDataPointsFilters.apply(mapPointCloud);
 	
 	this->matcher->init(mapPointCloud);
 	
@@ -542,15 +546,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	this->inspector->init();
 	
-	// Apply reference filters
-	// reference is express in frame <refIn>
-	DataPoints reference(mapPointCloud);
-	this->referenceDataPointsFilters.init();
-	this->referenceDataPointsFilters.apply(reference);
-	
-	this->matcher->init(reference);
-	
-	return this->computeWithTransformedReference(cloudIn, reference, T_refIn_refMean, T_refIn_dataIn);
+	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn);
 }
 
 template struct PointMatcher<float>::ICPSequence;
