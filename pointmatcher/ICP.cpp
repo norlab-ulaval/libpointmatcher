@@ -471,9 +471,9 @@ bool PointMatcher<T>::ICPSequence::setMap(const DataPoints& inputCloud)
 	// Shortcut to do T_refIn_refMean.inverse() * reference
 	mapPointCloud.features.topRows(dim-1).colwise() -= meanMap.head(dim-1);
 
-  // Apply reference filters
-  this->referenceDataPointsFilters.init();
-  this->referenceDataPointsFilters.apply(mapPointCloud);
+	// Apply reference filters
+	this->referenceDataPointsFilters.init();
+	this->referenceDataPointsFilters.apply(mapPointCloud);
 	
 	this->matcher->init(mapPointCloud);
 	
@@ -493,7 +493,7 @@ void PointMatcher<T>::ICPSequence::clearMap()
 
 //! Return the map, in global coordinates (slow)
 template<typename T>
-const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getMap() const
+const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getPrefilteredMap() const
 {
 	DataPoints globalMap(mapPointCloud);
 	if(this->hasMap())
@@ -508,7 +508,7 @@ const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getMap(
 
 //! Return the map, in internal coordinates (fast)
 template<typename T>
-const typename PointMatcher<T>::DataPoints& PointMatcher<T>::ICPSequence::getInternalMap() const
+const typename PointMatcher<T>::DataPoints& PointMatcher<T>::ICPSequence::getPrefilteredInternalMap() const
 {
 	return mapPointCloud;
 }
