@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_ERRORMINIMIZERS_H
 
 #include "PointMatcher.h"
+#include "PointToPlaneWithCovErrorMinimizer.h"
 
 template<typename T>
 struct ErrorMinimizersImpl
@@ -46,7 +47,7 @@ struct ErrorMinimizersImpl
 	typedef Parametrizable::Parameters Parameters;
 	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
-	
+
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::Matches Matches;
 	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
@@ -55,14 +56,17 @@ struct ErrorMinimizersImpl
 	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::Matrix Matrix;
-	
+
+    typedef ::PointToPlaneErrorMinimizer<T> PointToPlaneErrorMinimizer;
+    typedef ::PointToPlaneWithCovErrorMinimizer<T> PointToPlaneWithCovErrorMinimizer;
+
 	struct IdentityErrorMinimizer: ErrorMinimizer
 	{
 		inline static const std::string description()
 		{
 			return "Does nothing.";
 		}
-		
+
 		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 		virtual TransformationParameters compute(const ErrorElements& mPts);
 	};
@@ -73,7 +77,7 @@ struct ErrorMinimizersImpl
 		{
 			return "Point-to-point error. Based on SVD decomposition. Per \\cite{Besl1992Point2Point}.";
 		}
-		
+
 		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 		virtual TransformationParameters compute(const ErrorElements& mPts);
 		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
@@ -88,7 +92,7 @@ struct ErrorMinimizersImpl
 		{
 			return "Point-to-point similarity error (rotation + translation + scale). The scale is the same for all coordinates. Based on SVD decomposition. Per \\cite{Umeyama1991}.";
 		}
-		
+
 		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 		virtual TransformationParameters compute(const ErrorElements& mPts);
 		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
