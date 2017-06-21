@@ -1,11 +1,11 @@
-#ifndef POINT_TO_PLANE_ERROR_MINIMIZER_H
-#define POINT_TO_PLANE_ERROR_MINIMIZER_H
+#ifndef POINT_TO_PLANE_WITH_COV_ERROR_MINIMIZER_H
+#define POINT_TO_PLANE_WITH_COV_ERROR_MINIMIZER_H
 
 #include "PointMatcher.h"
-
+#include "ErrorMinimizers/PointToPlane.h"
 
 template<typename T>
-struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
+struct PointToPlaneWithCovErrorMinimizer: public PointToPlaneErrorMinimizer<T>
 {
     typedef PointMatcherSupport::Parametrizable Parametrizable;
     typedef PointMatcherSupport::Parametrizable P;
@@ -22,37 +22,31 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     typedef typename PointMatcher<T>::Vector Vector;
     typedef typename PointMatcher<T>::Matrix Matrix;
 
-	virtual inline const std::string name()
-	{
-		return "PointToPlaneErrorMinimizer";
-	}
+    virtual inline const std::string name()
+    {
+        return "PointToPlaneWithCovErrorMinimizer";
+    }
 
     inline static const std::string description()
     {
-        return "Point-to-plane error (or point-to-line in 2D). Per \\cite{Chen1991Point2Plane}.";
+        return "Point-to-plane error (or point-to-line in 2D). Based on \\cite{Chen1991Point2Plane}. Covariance estimation based on \\cite{Censi2007ICPCovariance}.";
     }
 
-    inline static const ParametersDoc availableParameters()
+    static inline const ParametersDoc availableParameters()
     {
         return boost::assign::list_of<ParameterDoc>
             ( "force2D", "If set to true(1), the minimization will be force to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>)
+            ( "sensorStdDev", "sensor standard deviation", "0.01", "0.", "inf", &P::Comp<T>)
             ;
     }
 
-    const bool force2D;
+    const T sensorStdDev;
+    Matrix covMatrix;
 
-    PointToPlaneErrorMinimizer(const Parameters& params = Parameters());
-    PointToPlaneErrorMinimizer(const ParametersDoc paramsDoc, const Parameters& params);
-    //virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+    PointToPlaneWithCovErrorMinimizer(const Parameters& params = Parameters());
     virtual TransformationParameters compute(const ErrorElements& mPts);
-	TransformationParameters compute_in_place(ErrorElements& mPts);
-    virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
-    virtual T getOverlap() const;
-
-    static T computeResidualError(ErrorElements mPts, const bool& force2D);
+    virtual Matrix getCovariance() const;
+    Matrix estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation);
 };
-
-template<typename T, typename MatrixA, typename Vector>
-void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b, Vector & x);
 
 #endif

@@ -41,8 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MatchersImpl.h"
 #include "OutlierFiltersImpl.h"
 #include "ErrorMinimizersImpl.h"
-#include "PointToPlaneErrorMinimizer.h"
-#include "PointToPlaneWithCovErrorMinimizer.h"
+#include "ErrorMinimizers/PointToPlane.h"
+#include "ErrorMinimizers/PointToPlaneWithCov.h"
 #include "TransformationCheckersImpl.h"
 #include "InspectorsImpl.h"
 

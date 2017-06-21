@@ -6,7 +6,6 @@
 #include "ErrorMinimizersImpl.h"
 #include "PointMatcherPrivate.h"
 #include "Functions.h"
-#include "PointToPlaneErrorMinimizer.h"
 
 using namespace Eigen;
 using namespace std;

@@ -37,7 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_ERRORMINIMIZERS_H
 
 #include "PointMatcher.h"
-#include "PointToPlaneWithCovErrorMinimizer.h"
+#include "ErrorMinimizers/PointToPlane.h"
+#include "ErrorMinimizers/PointToPlaneWithCov.h"
 
 template<typename T>
 struct ErrorMinimizersImpl
@@ -57,8 +58,8 @@ struct ErrorMinimizersImpl
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::Matrix Matrix;
 
-    typedef ::PointToPlaneErrorMinimizer<T> PointToPlaneErrorMinimizer;
-    typedef ::PointToPlaneWithCovErrorMinimizer<T> PointToPlaneWithCovErrorMinimizer;
+	typedef ::PointToPlaneErrorMinimizer<T> PointToPlaneErrorMinimizer;
+	typedef ::PointToPlaneWithCovErrorMinimizer<T> PointToPlaneWithCovErrorMinimizer;
 
 	struct IdentityErrorMinimizer: ErrorMinimizer
 	{
@@ -86,7 +87,7 @@ struct ErrorMinimizersImpl
 		static T computeResidualError(const ErrorElements& mPts);
 	};
 
-  	struct PointToPointSimilarityErrorMinimizer: ErrorMinimizer
+	struct PointToPointSimilarityErrorMinimizer: ErrorMinimizer
 	{
 		inline static const std::string description()
 		{
@@ -114,7 +115,7 @@ struct ErrorMinimizersImpl
 			;
 		}
 
-	    const T sensorStdDev;
+		const T sensorStdDev;
 		Matrix covMatrix;
 
 		PointToPointWithCovErrorMinimizer(const Parameters& params = Parameters());
@@ -127,5 +128,6 @@ struct ErrorMinimizersImpl
 	};
 
 }; // ErrorMinimizersImpl
+
 
 #endif // __POINTMATCHER_ERRORMINIMIZER_H

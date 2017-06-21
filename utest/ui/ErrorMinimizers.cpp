@@ -46,21 +46,6 @@ TEST_F(ErrorMinimizerTest, PointToPlaneErrorMinimizer)
 	validate3dTransformation();
 }
 
-TEST_F(ErrorMinimizerTest, PointToPointWithCovErrorMinimizer)
-{
-	setError("PointToPointWithCovErrorMinimizer");
-	validate2dTransformation();
-	validate3dTransformation();
-}
-
-
-TEST_F(ErrorMinimizerTest, PointToPlaneWithCovErrorMinimizer)
-{
-	setError("PointToPlaneWithCovErrorMinimizer");
-	validate2dTransformation();
-	validate3dTransformation();
-}
-
 TEST_F(ErrorMinimizerTest, ErrorElements)
 {
 	const unsigned int nbPoints = 100;

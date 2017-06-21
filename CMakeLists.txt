@@ -281,14 +281,15 @@ set(POINTMATCHER_SRC
 	pointmatcher/TransformationsImpl.cpp
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp
-	pointmatcher/PointToPlaneErrorMinimizer.cpp
-	pointmatcher/PointToPlaneWithCovErrorMinimizer.cpp
+	pointmatcher/ErrorMinimizers/PointToPlane.cpp
+	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/pointmatcher)
 
 
-file(GLOB POINTMATCHER_HEADERS "pointmatcher/*.h")
+file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 
 # MacOS deals with shared/dynamic library differently. For
 # simplicity, we only authorize static library in that case.
