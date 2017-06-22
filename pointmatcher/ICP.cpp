@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MatchersImpl.h"
 #include "OutlierFiltersImpl.h"
 #include "ErrorMinimizersImpl.h"
+#include "ErrorMinimizers/PointToPlane.h"
 #include "TransformationCheckersImpl.h"
 #include "InspectorsImpl.h"
 
@@ -105,7 +106,7 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->referenceDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter());
 	this->outlierFilters.push_back(new typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter());
 	this->matcher.reset(new typename MatchersImpl<T>::KDTreeMatcher());
-	this->errorMinimizer.reset(new typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer());
+	this->errorMinimizer.reset(new PointToPlaneErrorMinimizer<T>());
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::CounterTransformationChecker());
 	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::DifferentialTransformationChecker());
 	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
