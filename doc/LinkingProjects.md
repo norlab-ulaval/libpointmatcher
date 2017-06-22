@@ -1,4 +1,4 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](Configuration.md) | [Next](Pointclouds.md) |
+| [Tutorials Home](index.md)    | [Previous](Configuration.md) | [Next](Pointclouds.md) |
 | ------------- |:-------------:| -----:|
 
 # Linking Projects to libpointmatcher

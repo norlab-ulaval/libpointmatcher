@@ -2612,6 +2612,11 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     unsigned int numVox = numDivX * numDivY;
     if ( featDim == 4)
         numVox *= numDivZ;
+	
+	if(numVox == 0)
+	{
+		throw InvalidParameter("VoxelGridDataPointsFilter: The number of voxel couldn't be computed. There might be NaNs in the feature matrix. Use the fileter RemoveNaNDataPointsFilter before this one if it's the case.");
+	}
 
     // Assume point cloud is randomly ordered
     // compute a linear index of the following type
@@ -2633,9 +2638,8 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     	throw InvalidParameter((boost::format("VoxelGridDataPointsFilter: Memory allocation error with %1% voxels.  Try increasing the voxel dimensions.") % numVox).str());
     }
 
-
     for (unsigned int p = 0; p < numPoints; p++ )
-    {
+    {	
         unsigned int i = floor(cloud.features(0,p)/vSizeX - minBoundX);
         unsigned int j = floor(cloud.features(1,p)/vSizeY- minBoundY);
         unsigned int k = 0;
@@ -2662,6 +2666,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
         indices[p] = idx;
 
     }
+
 
     // store which points contain voxel position
     std::vector<unsigned int> pointsToKeep;
@@ -2722,6 +2727,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
                 pointsToKeep.push_back(firstPoint);
             }
         }
+
     }
     else
     {

@@ -1,9 +1,7 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](BasicRegistration.md) | [Next](ImportExport.md) |
+| [Tutorials Home](index.md)    | [Previous](BasicRegistration.md) | [Next](ImportExport.md) |
 | ------------- |:-------------:| -----:|
 
 # Creating Custom Configurations with YAML
-
-***IMPORTANT:*** This tutorial makes use of YAML configuration files.  If you did not install yaml-cpp before installing libpointmatcher, you must do so before following these instructions.  Information on installing yaml-cpp can be found in the [installation instructions](Compilation.md).
 
 ## Overview
 The implementation of the ICP algorithm in libpointmatcher is modular and can be tailored to the user's needs by writing custom configurations.  Configurations in libpointmatcher are defined in YAML files.  Very briefly, [YAML](http://www.yaml.org/) is a document format which allows data to be written in a way which is both readable by a program and by a human.  For a more detailed treatment of the language, refer to the [project's specification page](http://www.yaml.org/spec/1.2/spec.html).
