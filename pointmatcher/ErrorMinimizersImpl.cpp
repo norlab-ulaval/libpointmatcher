@@ -38,13 +38,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Functions.h"
 
 #include "Eigen/SVD"
-#include <Eigen/Eigenvalues>
-
 #include <iostream>
 
 using namespace Eigen;
 using namespace std;
 using namespace PointMatcherSupport;
+
+
+
+
+
+
+
 
 ///////////////////////////////////////////////////////////////////////
 // Identity Error Minimizer
@@ -58,6 +63,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Ident
 
 template struct ErrorMinimizersImpl<float>::IdentityErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::IdentityErrorMinimizer;
+
 
 ///////////////////////////////////////////////////////////////////////
 // Point To POINT ErrorMinimizer
@@ -540,7 +546,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// F  = [cross, normals]
 	Matrix wF(normalRef.rows()+ cross.rows(), normalRef.cols());
 	Matrix F(normalRef.rows()+ cross.rows(), normalRef.cols());
-	
+
 	for(int i=0; i < cross.rows(); i++)
 	{
 		wF.row(i) = mPts.weights.array() * cross.row(i).array();
@@ -548,7 +554,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	}
 	for(int i=0; i < normalRef.rows(); i++)
 	{
-       	        wF.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
+		wF.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
 		F.row(i + cross.rows()) = normalRef.row(i);
 	}
 
@@ -559,7 +565,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
 	// dot product of dot = dot(deltas, normals)
 	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
-	
+
 	for(int i=0; i<normalRef.rows(); i++)
 	{
 		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
@@ -569,7 +575,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const Vector b = -(wF * dotProd.transpose());
 
 	Vector x(A.rows());
-	
+
 	solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
 
 	// Transform parameters to matrix
@@ -612,17 +618,15 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
     if (force2D)
     {
-        this->covMatrix = this->estimateCovariance2D(filteredReading, filteredReference, matches, outlierWeights, mOut);
-        //std::cout << this->covMatrix << std::endl;
+			this->covMatrix = this->estimateCovariance2D(filteredReading, filteredReference, matches, outlierWeights, mOut);
+			//std::cout << this->covMatrix << std::endl;
     }
     else
     {
-        this->covMatrix = this->estimateCovariance(filteredReading, filteredReference, matches, outlierWeights, mOut);
+			this->covMatrix = this->estimateCovariance(filteredReading, filteredReference, matches, outlierWeights, mOut);
     }
 
-
-
-	return mOut; 
+	return mOut;
 }
 
 template<typename T>
@@ -767,8 +771,6 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance2D(
                 T reference_range = reference_point.norm();
                 reference_direction = reference_point / reference_range;
 
-
-
                 T d2jx2 = 2*normal(0)*normal(0);
                 T d2jxy = 2*normal(0)*normal(1);
                 T d2jy2 = 2*normal(1)*normal(1);
@@ -784,7 +786,6 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance2D(
                              normal(1)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t))
                            *(  normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t)
                              + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t));
-
 
                 //f = (normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t) + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t))^2
 
@@ -845,7 +846,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getOverlap() const
 	{
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
 	}
-	
+
 	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise") ||
 		!this->lastErrorElements.reading.descriptorExists("normals"))
 	{
