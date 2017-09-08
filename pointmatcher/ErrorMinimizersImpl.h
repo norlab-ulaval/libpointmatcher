@@ -59,7 +59,6 @@ struct ErrorMinimizersImpl
 	typedef typename PointMatcher<T>::Matrix Matrix;
 
 	typedef ::PointToPlaneErrorMinimizer<T> PointToPlaneErrorMinimizer;
-	typedef ::PointToPlaneWithCovErrorMinimizer<T> PointToPlaneWithCovErrorMinimizer;
 
 	struct IdentityErrorMinimizer: ErrorMinimizer
 	{
@@ -126,7 +125,7 @@ struct ErrorMinimizersImpl
 		Matrix estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation);
 	};
 
-	struct PointToPlaneWithCovErrorMinimizer: public ErrorMinimizer
+	struct PointToPlaneWithCovErrorMinimizer: ErrorMinimizer
 	{
 		inline static const std::string description()
 		{

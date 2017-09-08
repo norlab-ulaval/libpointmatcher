@@ -511,7 +511,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements& mPts = this->getMatchedPoints(filteredReading, filteredReference, matches, outlierWeights);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	const int dim = mPts.reading.features.rows();
 	const int nbPts = mPts.reading.features.cols();
@@ -850,7 +850,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getOverlap() const
 		!this->lastErrorElements.reading.descriptorExists("normals"))
 	{
 		LOG_INFO_STREAM("PointToPlaneErrorMinimizer - warning, no sensor noise or normals found. Using best estimate given outlier rejection instead.");
-		return this->weightedPointUsedRatio;
+		return this->getWeightedPointUsedRatio();
 	}
 
 	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
