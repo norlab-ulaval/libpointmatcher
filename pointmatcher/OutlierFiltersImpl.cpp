@@ -251,7 +251,10 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 			{
 				const int idRef = input.ids(y, x);
 
-				if(idRef == MatchersImpl<T>::NNS::InvalidIndex) continue;
+				if(idRef == MatchersImpl<T>::NNS::InvalidIndex) {
+					w(y, x) = 0;
+					continue;
+				}
 
 				const Vector normalRef = normalsReference.col(idRef).normalized();
 
