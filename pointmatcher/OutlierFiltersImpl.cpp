@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OutlierFiltersImpl.h"
 #include "PointMatcherPrivate.h"
 #include "Functions.h"
+#include "MatchersImpl.h"
 
 #include <algorithm>
 #include <vector>
@@ -249,6 +250,8 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 			for (int y = 0; y < w.rows(); ++y) // knn 
 			{
 				const int idRef = input.ids(y, x);
+
+				if(idRef == MatchersImpl<T>::NNS::InvalidIndex) continue;
 
 				const Vector normalRef = normalsReference.col(idRef).normalized();
 
