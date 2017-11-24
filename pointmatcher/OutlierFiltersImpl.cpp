@@ -251,7 +251,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 			{
 				const int idRef = input.ids(y, x);
 
-				if(idRef == MatchersImpl<T>::NNS::InvalidIndex) {
+				if (idRef == MatchersImpl<T>::NNS::InvalidIndex) {
 					w(y, x) = 0;
 					continue;
 				}
@@ -334,7 +334,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 		for(int i=0; i < readPtsCount; i++)
 		{
 			const int idRead = input.ids(k, i);
-			if(idRead == MatchersImpl<T>::NNS::InvalidIndex){
+			if (idRead == MatchersImpl<T>::NNS::InvalidIndex){
 				w(k,i) = 0;
 				continue;
 			}
@@ -342,14 +342,14 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 			{
 				if(useLargerThan == true)
 				{
-					if(desc(0, idRead) > threshold)
+					if (desc(0, idRead) > threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
 				}
 				else
 				{
-					if(desc(0, idRead) < threshold)
+					if (desc(0, idRead) < threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
