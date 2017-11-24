@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 				{
 					for(int k = 0; k < knnAll; k++)
 					{
-						if (targetMatches.dists(k, i) != numeric_limits<float>::infinity())
+						if (targetMatches.dists(k, i) != Matches::InvalidDist)
 						{
 							inlierSelf(0,i) = 1.0;
 							inlierTarget(0,targetMatches.ids(k, i)) = 1.0;

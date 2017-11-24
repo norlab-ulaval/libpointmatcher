@@ -664,10 +664,10 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(co
 
 	for(int i = 0; i < max_nbr_point; ++i)
 	{
-		if (outlierWeights(0,i) > 0.0)
+		const int reference_idx = matches.ids(0,i);
+		if (reference_idx != Matches::InvalidId && outlierWeights(0,i) > 0.0)
 		{
 			reading_point = reading.features.block(0,i,3,1);
-			int reference_idx = matches.ids(0,i);
 			reference_point = reference.features.block(0,reference_idx,3,1);
 
 			normal = normals.block(0,reference_idx,3,1);
@@ -755,14 +755,14 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance2D(
 
     for(int i = 0; i < max_nbr_point; ++i)
     {
-        if (outlierWeights(0,i) > 0.0)
+        const int reference_idx = matches.ids(0,i);
+        if (reference_idx != Matches::InvalidId && outlierWeights(0,i) > 0.0)
         {
             reading_point = reading.features.block(0,i,2,1);
             T reading_range = reading_point.norm();
 
             if (reading_range > 0) // skip the case when reading_range is 0. TODO: check why this happens
             {
-                int reference_idx = matches.ids(0,i);
                 reference_point = reference.features.block(0,reference_idx,2,1);
                 normal = normals.block(0,reference_idx,2,1);
 
