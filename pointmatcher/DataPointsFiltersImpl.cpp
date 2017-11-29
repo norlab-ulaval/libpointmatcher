@@ -556,7 +556,7 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 
 		for(int j = 0; j < int(knn); j++)
 		{
-			if(matches.dists(j,i) != numeric_limits<float>::infinity())
+			if (matches.dists(j,i) != Matches::InvalidDist)
 			{
 				const int refIndex(matches.ids(j,i));
 				d.col(realKnn) = cloud.features.block(0, refIndex, featDim-1, 1);
@@ -647,7 +647,7 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 			int n=0;
 			for(int j = 0; j < int(knn); j++)
 			{
-				if(matches.dists(j,i) != numeric_limits<float>::infinity())
+				if (matches.dists(j,i) != Matches::InvalidDist)
 				{
 					const int refIndex(matches.ids(j,i));
 					const Vector normal = normals->col(refIndex);
