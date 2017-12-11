@@ -533,7 +533,7 @@ struct PointMatcher
 			T weightedPointUsedRatio;//!< the ratio of how many points were used (with weight) for error minimization
 
 			ErrorElements();
-			ErrorElements(const DataPoints& requestedPts, const DataPoints sourcePts, const OutlierWeights outlierWeights, const Matches matches);
+			ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches);
 		};
 		
 		ErrorMinimizer();
