@@ -56,7 +56,7 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements():
 
 //! Constructor from existing data. This will align the data.
 template<typename T>
-PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& requestedPts, const DataPoints sourcePts, const OutlierWeights outlierWeights, const Matches matches)
+PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches)
 {
 	typedef typename Matches::Ids Ids;
 	typedef typename Matches::Dists Dists;
