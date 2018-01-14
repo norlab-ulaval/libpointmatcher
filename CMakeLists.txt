@@ -1,27 +1,38 @@
 cmake_minimum_required(VERSION 2.6)
 
-include (CheckSymbolExists)
+include(CheckSymbolExists)
 
-project(libpointmatcher)
+#========================
+# Project details / setup
+#========================
 
-# Extract version from header
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-execute_process(
-	COMMAND grep "POINTMATCHER_VERSION " pointmatcher/PointMatcher.h
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	RESULT_VARIABLE GREP_VERSION_RESULT
-	OUTPUT_VARIABLE PROJECT_VERSION
-	OUTPUT_STRIP_TRAILING_WHITESPACE
+# Extract version from header, done first to satisfy CMP0048,
+# see `cmake --help-policy CMP0048` for more information.
+file(
+	STRINGS                               # Read in a file to memory.
+	pointmatcher/PointMatcher.h           # File to parse for version number.
+	POINTMATCHER_PROJECT_VERSION          # Where to store the results (should just be one line)
+	REGEX "#define POINTMATCHER_VERSION " # The space after is important to ignore 'POINTMATCHER_VERSION_INT'
 )
-if (NOT GREP_VERSION_RESULT EQUAL 0)
-	message(SEND_ERROR "Cannot grep version number: ${GREP_VERSION_RESULT}")
-endif (NOT GREP_VERSION_RESULT EQUAL 0)
-string(REGEX REPLACE ".*\"(.*)\".*" "\\1" PROJECT_VERSION "${PROJECT_VERSION}" )
+# If no matches found, something is wrong with nabo.h
+if (NOT POINTMATCHER_PROJECT_VERSION)
+	message(SEND_ERROR "Cannot find version number in '${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/PointMatcher.h'.")
+endif (NOT POINTMATCHER_PROJECT_VERSION)
+# Transform '#define POINTMATCHER_VERSION "X.Y.Z"' into 'X.Y.Z'
+string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTMATCHER_PROJECT_VERSION}")
+
+# In 3.0+, project(...) should specify VERSION to satisfy CMP0048
+if (CMAKE_VERSION VERSION_LESS 3.0.0)
+	project(libpointmatcher)
+else (CMAKE_VERSION VERSION_LESS 3.0.0)
+	cmake_policy(SET CMP0048 NEW)
+	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
+endif (CMAKE_VERSION VERSION_LESS 3.0.0)
 
 # Check if 32 bit platform
-# By default, libpointmatcher is not compatible with and will not build on a 
+# By default, libpointmatcher is not compatible with and will not build on a
 # 32 bit system
-if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 ) 
+if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
     MESSAGE(SEND_ERROR "32 bits compiler detected. Libpointmatcher is only supported in 64 bits." )
     SET( EX_PLATFORM 32 )
     SET( EX_PLATFORM_NAME "x86" )
@@ -118,7 +129,7 @@ find_path(EIGEN_INCLUDE_DIR Eigen/Core
 	/usr/include/eigen3
 )
 include_directories(${EIGEN_INCLUDE_DIR})
-#note: no library to add, eigen rely only on headers 
+#note: no library to add, eigen rely only on headers
 
 #TODO: this should be a more standard way
 #find_package(Eigen3 REQUIRED)
@@ -181,11 +192,11 @@ if(USE_SYSTEM_YAML_CPP)
     endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 else(USE_SYSTEM_YAML_CPP)
         include_directories(contrib/yaml-cpp-pm/include)
-        
+
 #note: this is not working....
         #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
         #include_directories(${yaml-cpp-pm_INCLUDE})
-        
+
         get_property(yaml-cpp-pm_LIB TARGET yaml-cpp-pm PROPERTY LOCATION)
         set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp-pm_LIB} )
         set (EXTRA_DEPS ${EXTRA_DEPS} yaml-cpp-pm)
@@ -322,7 +333,7 @@ target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
 if(EXTRA_DEPS)
 	add_dependencies(pointmatcher ${EXTRA_DEPS})
 endif(EXTRA_DEPS)
-set_target_properties(pointmatcher PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
+set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VERSION}" SOVERSION 1)
 
 #========================= Install header ===========================
 
@@ -378,11 +389,11 @@ add_subdirectory(utest)
 
 
 #=================== allow find_package() =========================
-# 
+#
 # the following case be used in an external project requiring libnabo:
 #  ...
-#  find_package(libpointmatcher) 
-#  include_directories(${libpointmatcher_INCLUDE_DIRS}) 
+#  find_package(libpointmatcher)
+#  include_directories(${libpointmatcher_INCLUDE_DIRS})
 #  target_link_libraries(executableName ${libpointmatcher_LIBRARIES})
 #  ...
 
@@ -426,7 +437,7 @@ configure_file(libpointmatcherConfig.cmake.in
 # The same versioning file can be used for both cases
 configure_file(libpointmatcherConfigVersion.cmake.in
   "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" @ONLY)
- 
+
 
 # Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
 install(
@@ -439,9 +450,9 @@ install(
 # useful for TRADR european project. TODO: check to use the other install
 # required for ros deployment, too
 install (
-  FILES 
-    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" 
-    "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" 
+  FILES
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
+    "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
   DESTINATION "share/${PROJECT_NAME}/cmake/"
 )
 
@@ -449,8 +460,8 @@ install (
 set(LIBRARY_CC_ARGS "")
 foreach(_LIB IN LISTS POINTMATCHER_LIB EXTERNAL_LIBS)
   get_filename_component(_FILE_NAME ${_LIB} NAME)
-  if(${_FILE_NAME} STREQUAL ${_LIB}) # not an absolute path 
-    set(LIBRARY_CC_ARGS "${LIBRARY_CC_ARGS} -l${_LIB}") 
+  if(${_FILE_NAME} STREQUAL ${_LIB}) # not an absolute path
+    set(LIBRARY_CC_ARGS "${LIBRARY_CC_ARGS} -l${_LIB}")
   else()
     set(LIBRARY_CC_ARGS "${LIBRARY_CC_ARGS} ${_LIB}")
   endif()
@@ -460,8 +471,8 @@ unset(_FILE_NAME)
 
 configure_file(pointmatcher.pc.in libpointmatcher.pc @ONLY)
 configure_file(pointmatcher.pc.in pointmatcher.pc @ONLY) # for backward compatibility
-install(FILES 
-  ${CMAKE_BINARY_DIR}/libpointmatcher.pc 
+install(FILES
+  ${CMAKE_BINARY_DIR}/libpointmatcher.pc
   ${CMAKE_BINARY_DIR}/pointmatcher.pc # for backward compatibility
   DESTINATION lib/pkgconfig
 )
