@@ -8,7 +8,7 @@ In this section, the various filters which can be applied to the reading and ref
 As a reminder, *datapoint filters* can have several purposes:
 
 * Removing noisy points which render the alignment of point clouds difficult.
-* Removing redundant points so as to speed up alignment 
+* Removing redundant points so as to speed up alignment
 * Adding descriptive information to the points such as a surface normal vector, or the direction from the point to the sensor.
 
 Note that *datapoint filters* differ from *outlier filters* which appear further down the ICP chain and have a different purpose.
@@ -37,7 +37,7 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 10. [Voxel Grid Filter](#voxelgridhead)
 
-### Descriptor Augmenting 
+### Descriptor Augmenting
 1. [Observation Direction Filter](#obsdirectionhead)
 
 2. [Surface Normal Filter](#surfacenormalhead)
@@ -58,12 +58,12 @@ The following examples are drawn from the apartment dataset available for [downl
 
 ## Bounding Box Filter <a name="boundingboxhead"></a>
 ### Description
-Points can be excluded from a rectangular bounding region by using this filter.  The box dimensions are specified by defining the maximum and minimum coordinate values in the x,y,z directions. 
+Points can be excluded from a rectangular bounding region by using this filter.  The box dimensions are specified by defining the maximum and minimum coordinate values in the x,y,z directions.
 
-__Required descriptors:__ none   
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__ none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
 
 |Parameter  |Description  |Default value    |Allowable range|
@@ -93,32 +93,32 @@ Note that only points **outside** the bounding box are removed by the filter by 
 ### Description
 A number of filters are used to reduce the number of points in a cloud by randomly sub-sampling or randomly rejecting a set of points.  Points in regions of high density often contain redundant information, and the ICP algorithm could be performed more efficiently with a smaller number of points.  This filter is thus used to homogenize the density of a point cloud by rejecting a sub-sample of points in high-density regions.
 
-Points are only considered for rejection if they exceed a density threshold, otherwise they are preserved.  The single parameter of this filter sets the maximum density that should be obtained in the output point cloud.  Points are randomly rejected such that this maximum density is obtained as closely as possible.  
+Points are only considered for rejection if they exceed a density threshold, otherwise they are preserved.  The single parameter of this filter sets the maximum density that should be obtained in the output point cloud.  Points are randomly rejected such that this maximum density is obtained as closely as possible.
 
-__Required descriptors:__ `densities` (see SurfaceNormalDataPointsFilter and SamplingSurfaceNormalDataPointsFilter)   
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__ `densities` (see SurfaceNormalDataPointsFilter and SamplingSurfaceNormalDataPointsFilter)
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
-|maxDensity |The desired maximum density of points in *points/m^3 (for 3D), points/m^2 (for 2D)* | 10 | min: 0.0000001, max: inf|   
+|maxDensity |The desired maximum density of points in *points/m^3 (for 3D), points/m^2 (for 2D)* | 10 | min: 0.0000001, max: inf|
 
 ### Example
 In the following example we observe the effect of the maximum density filter on the apartment point cloud.  Sub-sampling occurs mostly in high density regions, which colored in red in the image below.  The result is an image with lower density overall with the low density regions in blue being preserved.
 
 |Figure: Max density filter applied to subsection of the apartment dataset.  On the <br>original data, low density regions are blue and high density regions are red.  The <br>sampled points are overlaid in white.   | Parameters used |
-|---|:---| 
+|---|:---|
 |![max density before](images/appt_0_maxdens.png "Max density filter applied to subsection of the apartment dataset.  On the original data, low density regions are blue and high density regions are red.  The sampled points are overlaid in white.") | maxDensity: 50000 |
 
 ## Maximum Distance Filter <a name="maxdistancehead"></a>
 ### Description
 These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center **greater than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
 
-__Required descriptors:__ none   
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__ none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -126,7 +126,7 @@ __Impact on the number of points:__ reduces number of points
 |maxDist |Distance threshold (in m) beyond which points are rejected | 1.0 | min: -inf, max: inf|
 
 ### Example
-In the following example, a maximum distance threshold of 1m is applied radially by setting the dimension parameter to -1.  As shown on the image below, points which lie within a sphere of radius 1m centered at the origin are selected by the filter and are displayed in white.  All other points are rejected by the filter.  Were a maximum distance filter to be replaced by an equivalent minimum distance filter, only points outside the sphere would be selected. 
+In the following example, a maximum distance threshold of 1m is applied radially by setting the dimension parameter to -1.  As shown on the image below, points which lie within a sphere of radius 1m centered at the origin are selected by the filter and are displayed in white.  All other points are rejected by the filter.  Were a maximum distance filter to be replaced by an equivalent minimum distance filter, only points outside the sphere would be selected.
 
 |Figure: Max density filter applied to subsection of the apartment dataset.  On the <br>original data, low density regions are blue and high density regions are red.  The <br>sampled points are overlaid in white.   | Parameters used |
 |---|:---|
@@ -136,10 +136,10 @@ In the following example, a maximum distance threshold of 1m is applied radially
 ### Description
 These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center **smaller than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
 
-__Required descriptors:__ none   
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__ none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -151,10 +151,10 @@ __Impact on the number of points:__ reduces number of points
 Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above `maxCount`. The resulting point cloud while have `maxCount` number of point. the Based on:  Registration and integration of multiple range images for 3-D model construction. Masuda, T. and Sakaue, K. and Yokoya, N. In Pattern Recognition, 1996., Proceedings of the 13th International Conference on. 879--883. 1996.
 
 
-__Required descriptors:__ none   
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__ none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -169,21 +169,21 @@ No example available.
 ### Description
 Points are filtered according to where they lie on a distribution of their positions along a given axis.  The entire distance range is divided into quantiles which lie between 0 and 1.  One can specify the distance quantile above which points are rejected by the filter.
 
-__Required descriptors:__ none   
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__ none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
 |dim        | Dimension over which the distance (from the center) is thresholded | 0 | x:0 y:1 z:2 |
-|ratio |Quantile threshold.  Points whose distance exceed this threshold are rejected by the filter | 0.5 | min: 0.0000001, max: 0.9999999 | 
+|ratio |Quantile threshold.  Points whose distance exceed this threshold are rejected by the filter | 0.5 | min: 0.0000001, max: 0.9999999 |
 
 ### Example
 In the following example, maximum quantile filtering is performed over the x-axis with a quantile threshold of 0.5.  Therefore, points which have an x-value which exceeds the 50% quantile are rejected.  The output of the filter is displayed in white and overlaid with the input point cloud in the image below.  A sampling region centered at the origin and extending in both directions of the x-axis is clearly visible.
 
 |Figure: Maximum quantile on axis filter in the x-direction with a maximum quantile <br>of 0.5.   | Parameters used |
-|---|:---|  
+|---|:---|
 |![max quant after](images/max_quant.png "After applying maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5") | dim : 0 <br> ratio : 0.5 |
 
 ## Random Sampling Filter <a name="randomsamplinghead"></a>
@@ -191,10 +191,10 @@ In the following example, maximum quantile filtering is performed over the x-axi
 ### Description
 This filter behaves similarly to the [Maximum Point Count Filter](#maxpointcounthead) but does not enforce a maximum point constraint.  Instead points are kept by the filter with a fixed probability.
 
-__Required descriptors:__ none   
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__ none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -204,7 +204,7 @@ __Impact on the number of points:__ reduces number of points
 In the following sample, points are kept with a probability of 0.1.  Therefore the total number of points in the output point cloud is approximately 10 times less than the number of points in the input point cloud and the density is decreased overall.
 
 |Figure:  After applying the random sampling filter with a probability of 0.1. <br> The original data is shown in black and the sampled points in white.   | Parameters used |
-|---|:---|  
+|---|:---|
 |![rand after](images/appt_0_rand.png "After applying the random sampling filter with a probability of 0.1") | prob : 0.1 |
 
 ## Remove NaN Filter <a name="removenanhead"></a>
@@ -212,10 +212,12 @@ In the following sample, points are kept with a probability of 0.1.  Therefore t
 ### Description
 Due to errors in the capture process point clouds may contain points with invalid coordinates.  This filter can be applied to remove points which contain a NaN coordinate, thus producing a "clean" dataset.
 
-__Required descriptors:__ none   
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__ none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
+
+Note: when there are descriptors present, both the features (input cloud positions) and the descriptors are checked.  For example, if you have a `"normals"` descriptor, for index `i` both the position and the normal must be non-NaN to make it past this filter.  If the position was not NaN, but the normal had a NaN, both the position and the normal are filtered out.  The same is true for more generally for all descriptors.
 
 ## Shadow Point Filter <a name="shadowpointhead"></a>
 
@@ -224,11 +226,11 @@ __Impact on the number of points:__ reduces number of points
 Shadow points are noisy points usually located at point cloud edge discontinuities.
 
 __Required descriptors:__  `normals`  (see SurfaceNormalDataPointsFilter)
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
-*IMPORTANT:* The surface normal descriptors are required in the input point cloud. 
+*IMPORTANT:* The surface normal descriptors are required in the input point cloud.
 
 ## Voxel Grid Filter <a name="voxelgridhead"></a>
 ### Description
@@ -240,10 +242,10 @@ There are two options as to how to represent the distribution of points in a vox
 
 This filter also provides two methods for sub-sampling descriptors.  In the first, all descriptors within a voxel are averaged while in the second, only the first descriptor from a voxel is kept.
 
-__Required descriptors:__  none  
-__Output descriptor:__ outputs average or single descriptor per voxel if the input cloud contains descriptors  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ reduces number of points  
+__Required descriptors:__  none
+__Output descriptor:__ outputs average or single descriptor per voxel if the input cloud contains descriptors
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -259,7 +261,7 @@ For more information on the implementation of this filter, refer to [this tutori
 In this example, we apply the voxel grid filter using centroid down-sampling to the appartment point cloud.  The output points are shown in yellow.  You can observe a regular grid distribution of points corresponding to each voxel.  A finer degree of sub-sampling can be obtained by using smaller voxels.  This comes naturally with an increased computational cost and a larger output point cloud.
 
 |Figure:  Applying the voxel grid filter filter to the appartment point cloud. | Parameters used |
-|---|:---|  
+|---|:---|
 |![dir after](images/appt_voxel.png "Applying the voxel grid filter filter to a local point cloud") | vSizeX : 0.2 <br> vSizeY : 0.2 <br> vSizeZ : 0,2 <br> useCentroid : 1 |
 
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
@@ -269,10 +271,10 @@ As opposed to the previous filters, the following does not yield a sub-sample of
 
 The returned direction vector is a vector connecting the point and the sensor, whose positions can be specified in the filter parameters.
 
-__Required descriptors:__   none  
-__Output descriptor:__ `observationDirections`  
-__Sensor assumed to be at the origin:__ yes    
-__Impact on the number of points:__ none  
+__Required descriptors:__   none
+__Output descriptor:__ `observationDirections`
+__Sensor assumed to be at the origin:__ yes
+__Impact on the number of points:__ none
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -284,7 +286,7 @@ __Impact on the number of points:__ none
 **Remark:** The following example uses a local point cloud 10 from the apartment dataset.  The filter is used to extract direction informations and a small subset of these directions is shown in the following image.  The arrows point towards the position of the sensor.  The input point cloud is color coded according to the z-elevation of the points (red represents the ceiling and blue the floor).
 
 |Figure:  Applying the observation direction filter to a local point cloud.  A small <br>subset of point observation directions are displayed   | Parameters used |
-|---|:---|  
+|---|:---|
 |![dir after](images/appt_obs_dir.png "Applying the observation direction filter to a local point cloud") | x : 0 <br> y : 0 <br> z : 0 |
 
 ## Surface Normal Filter <a name="surfacenormalhead"></a>
@@ -294,14 +296,14 @@ The surface normal to each point is estimated by finding a number of neighboring
 
 Remark that that given a surface, the normal vector can point in two possible directions.  Following the apartment example used herein throughout, the normal vector of a wall can point inside towards the room, or outside the apartment.  To align all normal vectors in the same direction, the [orient normals filter](#orientnormalshead) can be used.
 
-__Required descriptors:__ none   
-__Output descriptor:__   
-`normals`  
-`densities`  
-`eigValues`  
-`eigVectors`  
-__Sensor assumed to be at the origin:__ no  
-__Impact on the number of points:__ none  
+__Required descriptors:__ none
+__Output descriptor:__
+`normals`
+`densities`
+`eigValues`
+`eigVectors`
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ none
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -319,7 +321,7 @@ __Impact on the number of points:__ none
 In this example, we again use a local point cloud of the apartment. You may recognize the input point cloud as a small portion of the local cloud used in the observation direction filter.  The surface normals are extracted using 20 neighboring points and epsilon=0.  In this example, for clarity, we only view a wall section of one of the apartment dataset.  A random set of normal vectors is shown in the figure with arrows.  When looking at the arrow directions on the wall, one may see normal vectors either pointing downwards into the apartment or outside the apartment.
 
 |Figure:  Applying the observation direction filter to a local point cloud.  A small <br>subset of point observation directions are displayed   | Parameters used |
-|---|:---|  
+|---|:---|
 |![norm after](images/appt_norm.png "Extracting surface normals of a portion of the apartment point cloud") | knn : 20 <br> epsilon : 0 <br> keepNormals : 1 <br> keepDensities : 1|
 
 ## Orient Normals Filter <a name="orientnormalshead"></a>
@@ -327,12 +329,12 @@ In this example, we again use a local point cloud of the apartment. You may reco
 ### Description
 As explained previously, neighboring surface normal vectors obtained from the surface normals filter, do not have the same orientation.  This filter enforces this constraint and reorients vectors from the same surface in a consistent direction.  Vectors are reoriented to either point towards the center (inwards), or away from the center (outwards).
 
-__Required descriptors:__  
-  `observationDirections` (see ObservationDirectionDataPointsFilter)   
-  `normals` (see SurfaceNormalDataPointsFilter, SamplingSurfaceNormalDataPointsFilter)      
-__Output descriptor:__ none  
-__Sensor assumed to be at the origin:__ yes  
-__Impact on the number of points:__ none 
+__Required descriptors:__
+  `observationDirections` (see ObservationDirectionDataPointsFilter)
+  `normals` (see SurfaceNormalDataPointsFilter, SamplingSurfaceNormalDataPointsFilter)
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ yes
+__Impact on the number of points:__ none
 
 
 |Parameter  |Description  |Default value    |Allowable range|
@@ -354,13 +356,13 @@ The same input section is used as for extracting the surface normals in the prev
 ### Description
 The above filters extract surface normals at every point in the point cloud.  In point clouds representing planar surfaces however, a significant redundant information is contained in adjacent normal vectors.  This filter attempts to both reduce the number of points within a point cloud and the number of different normal vectors.  The first is achieved by performing either random sub-sampling as seen previously, or by using one point per box (bin sub-sampling).  The latter is achieved by recursively decomposing the point-cloud space into boxes until each box contains at most knn points.  A single normal vector is computed from the knn points in each box.
 
-__Required descriptors:__  none  
-__Output descriptor:__ 
-`normals`   
-`densities`  
-`eigValues`   
-`eigVectors`  
-__Sensor assumed to be at the origin:__ yes   
+__Required descriptors:__  none
+__Output descriptor:__
+`normals`
+`densities`
+`eigValues`
+`eigVectors`
+__Sensor assumed to be at the origin:__ yes
 __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
@@ -394,9 +396,9 @@ We reuse the same apartment section to illustrate the sampling of normal vectors
 ### Description
 This filter is used to augment points with an estimation of position uncertainty based on sensor specifications.  So far the [SICK LMS](http://www.sick.com/group/EN/home/products/product_news/laser_measurement_systems/Pages/lms100.aspx), [Hokuyo](http://www.hokuyo-aut.jp/02sensor/index.html#scanner) URG-04LX and UTM-30LX, as well as the Microsoft [Kinect](http://www.microsoft.com/en-us/kinectforwindows/) and Asus [Xtion](http://www.asus.com/Multimedia/Xtion_PRO_LIVE/) sensors are supported.  The uncertainty or noise radius is represented in meters, and can be adjusted by varying a gain parameter which amplifies predefined uncertainty levels.
 
-__Required descriptors:__  none  
-__Output descriptor:__ `simpleSensorNoise`  
-__Sensor assumed to be at the origin:__ yes  
+__Required descriptors:__  none
+__Output descriptor:__ `simpleSensorNoise`
+__Sensor assumed to be at the origin:__ yes
 __Impact on the number of points:__ none
 
 |Parameter  |Description  |Default value    |Allowable range|
@@ -417,5 +419,5 @@ In the following image we show a side view of local point cloud 3 in the dataset
 The number of points in a point cloud can be reduced by taking random point subsamples.  The filter is parametrized so that a fixed number of points - selected uniformly at random - are 'rejected' in the filtering process.
 
 ## Where To Go From Here
-This concludes the overview of data point filters.  For a tutorial on writing a simple application for applying data point filters to an input point cloud, go [here](ApplyingDatafilters.md).  To learn more about the general configuration of the ICP chain go [here](DefaultICPConfig.md).  
+This concludes the overview of data point filters.  For a tutorial on writing a simple application for applying data point filters to an input point cloud, go [here](ApplyingDatafilters.md).  To learn more about the general configuration of the ICP chain go [here](DefaultICPConfig.md).
 

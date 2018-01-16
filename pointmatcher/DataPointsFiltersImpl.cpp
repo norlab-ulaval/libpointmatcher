@@ -90,9 +90,13 @@ void DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter::inPlaceFilter(
 	int j = 0;
 	for (int i = 0; i < nbPointsIn; ++i)
 	{
-		const BOOST_AUTO(colArray, cloud.features.col(i).array());
-		const BOOST_AUTO(hasNaN, !(colArray == colArray).all());
-		if (!hasNaN)
+		// check the features matrix for NaN
+		const BOOST_AUTO(featuresColArray, cloud.features.col(i).array());
+		const BOOST_AUTO(hasFeatureNaN, !(featuresColArray == featuresColArray).all());
+		// check the descriptors matrix for NaN
+		const BOOST_AUTO(descriptorsColArray, cloud.descriptors.col(i).array());
+		const BOOST_AUTO(hasDescriptorsNan, !(descriptorsColArray == descriptorsColArray).all());
+		if (!hasFeatureNaN && !hasDescriptorsNan)
 		{
 			cloud.setColFrom(j, cloud, i);
 			j++;
@@ -538,7 +542,7 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 	boost::assign::insert(param) ( "knn", toParam(knn) );
 	boost::assign::insert(param) ( "epsilon", toParam(epsilon) );
 	boost::assign::insert(param) ( "maxDist", toParam(maxDist) );
-	
+
 	KDTreeMatcher matcher(param);
 	matcher.init(cloud);
 
@@ -600,7 +604,7 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 			}
 		}
 
-		
+
 
 		if(keepNormals)
 		{
@@ -630,7 +634,7 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 				(*meanDists)(0, i) = (point - mean).norm();
 			}
 		}
-		
+
 	}
 
 	if(keepMatchedIds)
@@ -725,7 +729,7 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPoin
 	Vector output(eigenVeDim*eigenVeDim);
 	for(int k=0; k < eigenVe.cols(); k++)
 	{
-		output.segment(k*eigenVeDim, eigenVeDim) = 
+		output.segment(k*eigenVeDim, eigenVeDim) =
 			eigenVe.row(k).transpose();
 	}
 
@@ -2014,8 +2018,8 @@ template<typename T>
 typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateAngles(const Matrix points, const Eigen::Matrix<T,3,1> keyPoint) const
 {
   Vector angles(points.cols());
-  
-  for (unsigned int i = 0; i<points.cols(); ++i) 
+
+  for (unsigned int i = 0; i<points.cols(); ++i)
   {
     angles(i) = atan2(points(0,i), points(1,i));
     if (angles(i) < 0)
@@ -2030,7 +2034,7 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilt
 {
   Vector radii(points.cols());
 
-  for (unsigned int i = 0; i<points.cols(); ++i) 
+  for (unsigned int i = 0; i<points.cols(); ++i)
   {
     radii(i) = sqrt((points(0,i)) * (points(0,i)) + (points(1,i)) * (points(1,i)));
   }
@@ -2612,7 +2616,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     unsigned int numVox = numDivX * numDivY;
     if ( featDim == 4)
         numVox *= numDivZ;
-	
+
 	if(numVox == 0)
 	{
 		throw InvalidParameter("VoxelGridDataPointsFilter: The number of voxel couldn't be computed. There might be NaNs in the feature matrix. Use the fileter RemoveNaNDataPointsFilter before this one if it's the case.");
@@ -2639,7 +2643,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     }
 
     for (unsigned int p = 0; p < numPoints; p++ )
-    {	
+    {
         unsigned int i = floor(cloud.features(0,p)/vSizeX - minBoundX);
         unsigned int j = floor(cloud.features(1,p)/vSizeY- minBoundY);
         unsigned int k = 0;
@@ -2823,9 +2827,9 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 			cloud.times.col(i) = cloud.times.col(k);
 
 	}
-	
+
 	cloud.conservativeResize(numPtsOut);
-	
+
 	//cloud.features.conservativeResize(Eigen::NoChange, numPtsOut);
 	//
 	//if (cloud.descriptors.rows() != 0)

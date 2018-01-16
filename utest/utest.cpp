@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "utest.h"
+#include <limits> // std::numeric_limits<float>::quiet_NaN()
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -112,7 +113,7 @@ TEST(icpTest, icpTest)
 		otfs.precision(16);
 		otfs << curT;
 		otfs.close();
-                
+
 		// Load reference transform
 		fs::path ref_file = d->path();
 		ref_file.replace_extension(".ref_trans");
@@ -121,8 +122,8 @@ TEST(icpTest, icpTest)
 		std::ifstream itfs(ref_file.c_str());
 		EXPECT_TRUE(itfs.good()) << "Could not find " << ref_file
 					 << ". If this is the first time this test is run, "
-					 << "create it as a copy of " << cur_file; 
-		
+					 << "create it as a copy of " << cur_file;
+
 		for (int row = 0; row < refT.cols(); row++)
 		{
 			for (int col = 0; col < refT.cols(); col++)
@@ -154,7 +155,7 @@ TEST(icpTest, icpTest)
 		// Find the relative error
 		double rel_err = median_diff/median_data;
 
-		// A relative error of 3% is probably acceptable. 
+		// A relative error of 3% is probably acceptable.
 		EXPECT_LT(rel_err, 0.03) << "This error was caused by the test file:" << endl << "   " << config_file;
 	}
 }
@@ -199,9 +200,9 @@ TEST(icpTest, icpSingular)
 
 TEST(icpTest, icpIdentity)
 {
-	// Here we test point-to-plane ICP where we expect the output transform to be 
+	// Here we test point-to-plane ICP where we expect the output transform to be
 	// the identity. This situation requires special treatment in the algorithm.
-	
+
 	DP pts0 = DP::load(dataPath + "cloud.00000.vtk");
 	DP pts1 = DP::load(dataPath + "cloud.00000.vtk");
 
@@ -214,14 +215,14 @@ TEST(icpTest, icpIdentity)
 
 	// Compute current ICP transform
 	PM::TransformationParameters curT = icp(pts0, pts1);
-    
+
 	EXPECT_EQ(curT, PM::Matrix::Identity(4,4)) << "Expecting identity transform." << endl;
 }
 
 TEST(icpTest, similarityTransform)
 {
 	// Here we test similarity point-to-point ICP.
-	
+
 	DP pts0 = DP::load(dataPath + "car_cloud400.csv");
 	DP pts1 = DP::load(dataPath + "car_cloud400_scaled.csv");
 
@@ -246,7 +247,7 @@ TEST(icpTest, icpSequenceTest)
 	DP pts0 = DP::load(dataPath + "cloud.00000.vtk");
 	DP pts1 = DP::load(dataPath + "cloud.00001.vtk");
 	DP pts2 = DP::load(dataPath + "cloud.00002.vtk");
-	
+
 	PM::TransformationParameters Ticp   = PM::Matrix::Identity(4,4);
 
 	PM::ICPSequence icpSequence;
@@ -259,7 +260,7 @@ TEST(icpTest, icpSequenceTest)
 	DP map = icpSequence.getInternalMap();
 	EXPECT_EQ(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), 0u);
-	
+
 	map = icpSequence.getMap();
 	EXPECT_EQ(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), 0u);
@@ -273,7 +274,7 @@ TEST(icpTest, icpSequenceTest)
 	map = icpSequence.getMap();
 	EXPECT_EQ(map.getNbPoints(), pts0.getNbPoints());
 	EXPECT_EQ(map.getHomogeneousDim(), pts0.getHomogeneousDim());
-	
+
 	Ticp = icpSequence(pts2);
 	map = icpSequence.getMap();
 	EXPECT_EQ(map.getNbPoints(), pts0.getNbPoints());
@@ -283,6 +284,116 @@ TEST(icpTest, icpSequenceTest)
 	map = icpSequence.getInternalMap();
 	EXPECT_EQ(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), 0u);
+}
+
+TEST(icpTest, NaNTest)
+{
+	// create a x-y- planar grid point cloud in points with NaN on the border
+	// both tests:
+	//     - points_zero: no NaN
+	//     - normals_zero: no NaN
+	//
+	// test 1:
+	//     - points_one: has NaN
+	//     - normals_one: no NaN
+	//     - test: make sure both get resized
+	//
+	// test 2:
+	//     - points_two: no NaN
+	//     - normals_two: has NaN
+	//     - test: make sure both get resized
+	const size_t nX = 10, nY = nX;
+	Eigen::MatrixXf points_zero(4, nX * nY);
+	Eigen::MatrixXf normals_zero(3, nX * nY);
+	Eigen::MatrixXf points_one(4, nX * nY);
+	Eigen::MatrixXf normals_one(3, nX * nY);
+	Eigen::MatrixXf points_two(4, nX * nY);
+	Eigen::MatrixXf normals_two(3, nX * nY);
+	const float d = 0.1;
+	const float oX = -(nX * d / 2), oY = -(nY * d / 2);
+	static constexpr float qNan = std::numeric_limits<float>::quiet_NaN();
+
+	size_t num_nan = 0;
+
+	for (size_t x = 0; x < nX; x++){
+		for (size_t y = 0; y < nY; y++) {
+			size_t col_idx = x * nY + y;
+			if (x == 0 || x == nX - 1 || y == 0 || y == nY - 1) {
+				points_one.col(col_idx)  << qNan, qNan, qNan, qNan;
+				normals_two.col(col_idx) << qNan, qNan, qNan;
+				++num_nan;
+			}
+			else {
+				points_one.col(col_idx) << d * x + oX, d * y + oY, 0, 1;
+				normals_two.col(col_idx) << 0.0f, 1.0f, 0.0f;
+			}
+
+			points_zero.col(col_idx)  << d * x + oX, d * y + oY, 0, 1;
+			normals_zero.col(col_idx) << 0.0f, 1.0f, 0.0f;
+			points_two.col(col_idx)   << d * x + oX, d * y + oY, 0, 1;
+			normals_one.col(col_idx)  << 0.0f, 1.0f, 0.0f;
+		}
+	}
+
+	size_t total_points = nX * nY;
+	size_t num_valid_points = total_points - num_nan;
+
+	// the reference for both tests
+	DP pts0;
+	pts0.features = points_zero;
+	pts0.allocateDescriptor("normals", 3);
+	pts0.addDescriptor("normals", normals_zero);
+
+	// add one and restore the NaN's on the border
+	DP pts1;
+	points_one.row(2).setOnes();
+	points_one(2, 0) = qNan;
+	points_one(2, nX * nY - 1) = qNan;
+	pts1.features = points_one; // pts1 is pts0 shifted by one in z-direction
+	pts1.allocateDescriptor("normals", 3);
+	pts1.addDescriptor("normals", normals_one);
+
+	PM::ICP icp;
+	std::string config_file = dataPath + "default-identity.yaml";
+	EXPECT_TRUE(boost::filesystem::exists(config_file));
+
+	std::ifstream ifs(config_file.c_str());
+	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
+
+	// add a NaN data filter
+	PointMatcherSupport::Parametrizable::Parameters params;
+	PM::DataPointsFilter *nanFilter = PM::get().DataPointsFilterRegistrar.create(
+		"RemoveNaNDataPointsFilter", params
+	);
+	// we're only filtering the reading cloud because that's the only one that
+	// API exposes post-filtering
+	icp.readingDataPointsFilters.push_back(nanFilter);
+
+	// Compute ICP transform
+	PM::TransformationParameters curT = icp(pts1, pts0);
+
+	PM::Matrix expectedT = PM::Matrix::Identity(4,4);
+	expectedT(2,3) = -1.0f;
+	EXPECT_TRUE(expectedT.isApprox(curT)) << "Expecting pure translation in z-direction of unit distance." << endl;
+
+	// check that NaN's got removed from both (test 1, test positions with NaN resizes normals)
+	const DP &filtered_reading_t1 = icp.getReadingFiltered();
+	EXPECT_EQ(filtered_reading_t1.getNbPoints(), num_valid_points);
+	EXPECT_EQ(filtered_reading_t1.getDescriptorViewByName("normals").cols(), num_valid_points);
+
+	// Compute ICP transform
+	DP pts2;
+	points_two.row(2).setOnes();
+	pts2.features = points_two; // pts2 is pts0 shifted by one in z-direction
+	pts2.allocateDescriptor("normals", 3);
+	pts2.addDescriptor("normals", normals_two);// has NaN on borders
+	PM::TransformationParameters curT_2 = icp(pts2, pts0);
+
+	EXPECT_TRUE(expectedT.isApprox(curT_2)) << "Expecting pure translation in z-direction of unit distance." << endl;
+
+	const DP &filtered_reading_t2 = icp.getReadingFiltered();
+	EXPECT_EQ(filtered_reading_t2.getNbPoints(), num_valid_points);
+	EXPECT_EQ(filtered_reading_t2.getDescriptorViewByName("normals").cols(), num_valid_points);
 }
 
 // Utility classes
@@ -301,7 +412,7 @@ public:
 
 	// Will be called for every tests
 	virtual void TearDown()
-	{	
+	{
 	}
 };
 
