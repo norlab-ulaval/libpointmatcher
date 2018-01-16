@@ -64,26 +64,28 @@ static constexpr unsigned Width = 640u;
 /// Simulated range image height.
 static constexpr unsigned Height = 480u;
 
+/// Defining Pi to make sure it is available on all platforms (i.e., Windows).
+static constexpr float Pi = 3.141592653589793238462643383279502884197169399375105820974f;
+
 /**
- * \brief Generates a Width * Height 'sin-cos' point cloud.
+ * \brief Generates a Width * Height point cloud.
  *
  * It is worth acknowledging that this method does not simulate an actual range
- * image, the X and Y positions will range from 0.0 to 2 pi.  This is done for
- * simplicity / clarity of generating the data, but the real goal of this
- * tutorial is to demonstrate how you can supply externally managed data to
- * libpointmatcher.
+ * image, the X and Y positions will range from pi/2 to 3pi/2, and the z
+ * will be cos(x) * sin(y).
  *
- * That is, the important aspect is generating Width * Height data points, not
- * what the actual 3D positions generated are.
+ * The important aspect is generating Width * Height data points, not what the
+ * actual 3D positions generated are.  If you change this method, be aware that
+ * there are many forms of data that ICP will not converge well for -- the
+ * generated data is selected to ensure convergence.
  *
  * \param positions
  *     The already-allocated array of positions to generate data for.
  */
 void generatePointCloud(float4 *positions) {
-	static constexpr float TwoPi = 6.283185307179586476925286766559005768394338798750211641949f;
-	// simple 'linspace' range from 0 to 2pi spread across each dimension
-	static constexpr float start = 0.0;
-	static constexpr float stop  = TwoPi;
+	// simple 'linspace' range from pi/2 to 3pi/2 spread across each dimension
+	static constexpr float start = 0.5f * Pi;
+	static constexpr float stop  = 1.5f * Pi;
 	static constexpr float dx = (stop - start) / static_cast<float>(Width  - 1);
 	static constexpr float dy = (stop - start) / static_cast<float>(Height - 1);
 
@@ -94,16 +96,14 @@ void generatePointCloud(float4 *positions) {
 
 		float x = static_cast<float>(col) * dx;
 		float y = static_cast<float>(row) * dy;
+		float z = std::cos(x) * std::sin(y);
 
 		/* the last coordinate 'w' is the homogeneous coordinate.  in this
 		 * scenario we should make sure to set it to 1.0f so that if / when
 		 * homogenization occurs, the positions will not change.
 		 *
-		 * adding 10.0f to 'z' to make the "view point" of (0, 0, 0) valid, as
-		 * well as typically range data will not have negative measurements. */
-		positions[idx] = make_float4(
-			x, y, std::cos(x) * std::sin(y) + 10.0f, 1.0f
-		);
+		 * adding 10.0f to 'z' to make the "view point" of (0, 0, 0) valid. */
+		positions[idx] = make_float4(x, y, z + 10.0f, 1.0f);
 	}
 }
 
@@ -149,23 +149,22 @@ void computeNormals(const float4 *positions, float4 *normals) {
 		// valid indices
 		unsigned north_idx = (y - 1) * Width + (x + 0);
 		unsigned south_idx = (y + 1) * Width + (x + 0);
-		unsigned west_idx  = (y + 0) * Width + (x - 1);
 		unsigned east_idx  = (y + 0) * Width + (x + 1);
+		unsigned west_idx  = (y + 0) * Width + (x - 1);
 
 		// read in the positions
 		const float4 &north_4 = positions[north_idx];
 		const float4 &south_4 = positions[south_idx];
-		const float4 &west_4  = positions[west_idx];
 		const float4 &east_4  = positions[east_idx];
+		const float4 &west_4  = positions[west_idx];
 
 		// using Eigen::Vector3f for convenience of vector operations
-		Eigen::Vector3f west(west_4.x, west_4.y, west_4.z);
 		Eigen::Vector3f north(north_4.x, north_4.y, north_4.z);
 		Eigen::Vector3f south(south_4.x, south_4.y, south_4.z);
 		Eigen::Vector3f east(east_4.x, east_4.y, east_4.z);
+		Eigen::Vector3f west(west_4.x, west_4.y, west_4.z);
 
-		/* compute the normal, the cross product is setup this way because we
-		 * have a "view point" at (0, 0, 0):
+		/* compute the normal:
 		 *
 		 *                 N
 		 *                 ^
@@ -173,16 +172,22 @@ void computeNormals(const float4 *positions, float4 *normals) {
 		 *             W --+--> E
 		 *                 |
 		 *                 S
+		 *
+		 * note: the problem setup (adding 10 to the positions z coordinate),
+		 *       as well as the order of the cross product below, guarantee that
+		 *       the normal is oriented toward the assumed viewpoint (0, 0, 0).
+		 *       otherwise, you would want to verify this and orient the normal
+		 *       toward the viewpoint.
 		 */
-		Eigen::Vector3f v1 = east  - west;
-		Eigen::Vector3f v2 = north - south;
-		Eigen::Vector3f normal = v1.cross(v2).normalized();
+		Eigen::Vector3f v1 = west  - east;
+		Eigen::Vector3f v2 = south - north;
+		Eigen::Vector3f n  = v1.cross(v2).normalized();
 
 		/* assign the computed normal, we ignore the 'w' component later on so
 		 * setting it to 0.0f here does not have any real meaning.  some normal
 		 * estimation methods you may find (e.g. in the point cloud library)
 		 * may treat 'w' as 'curvature' which can have meaning. */
-		normals[idx] = make_float4(normal.x(), normal.y(), normal.z(), 0.0f);
+		normals[idx] = make_float4(n.x(), n.y(), n.z(), 0.0f);
 	}
 }
 
@@ -212,9 +217,6 @@ void transformReference(const float4 *referencePositions, float4 *readingPositio
 	}
 }
 
-/**
-  *
-  */
 int main(void)
 {
 	/* allocate memory for the positions and normals, in this tutorial we are
@@ -243,12 +245,14 @@ int main(void)
 	 * 4. Compute the reading frame normals. */
 	generatePointCloud(reference_positions);
 	computeNormals(reference_positions, reference_normals);
-	// there is nothing meaningful about this specific transformation, it is
-	// just to get a different frame to run ICP with
+	/* this transform is tailored to the generated problem positions;
+	 * convergence is sensitive, but that is due to the nature of the generated
+	 * data.  real-world applications for ICP do not typically suffer such
+	 * sensitivity unless there are not enough features (like this cloud). */
 	Eigen::Affine3f xform = Eigen::Affine3f::Identity();
-	xform.translation() = Eigen::Vector3f::Constant(10.0f);
+	xform.translation() = Eigen::Vector3f(0.0f, 0.0f, 10.0f);
 	xform.linear() = Eigen::AngleAxisf(
-		0.5f * M_PI, Eigen::Vector3f::UnitZ()
+		-0.25f * Pi, Eigen::Vector3f::UnitY()
 	).toRotationMatrix();
 	transformReference(reference_positions, reading_positions, xform);
 	computeNormals(reading_positions, reading_normals);
@@ -278,7 +282,9 @@ int main(void)
 	 *     +-                  -+
 	 *     | x_0  y_0  z_0  w_0 |
 	 *     |  .    .    .    .  |
+	 *     |  .    .    .    .  |
 	 *     | x_i  y_i  z_i  w_i |
+	 *     |  .    .    .    .  |
 	 *     |  .    .    .    .  |
 	 *     | x_n  y_n  z_n  w_n |
 	 *     +-                  -+
@@ -286,7 +292,9 @@ int main(void)
 	 * So our data should be thought of as row major storage.  As it turns out,
 	 * though, this is perfectly acceptable *ONLY* because when we do a map with
 	 * Eigen, Eigen by default assumes column major storage.  So when we map
-	 * using 4 rows and N columns, this all works out in the end.
+	 * using 4 rows and N columns, this all works out in the end.  For example,
+	 * column 0 of our "array of structs" is the desired row 0.  When we map our
+	 * data using Eigen::Map, since Eigen will treat this now as row 0.
 	 *
 	 * Similarly, with the normals, we employ the same mapping scheme.  In this
 	 * example code, we are also using `float4` for the normals for
@@ -297,8 +305,7 @@ int main(void)
 	 * as far as libpointmatcher is concerned.  This is why we use `topRows(3)`:
 	 * libpointmatcher expects "normals" to be laid out as <nx, ny, nz>.  Since
 	 * our mapped type will have row 0 as x, row 1 as y, row 2 as z, and row 3
-	 * as w, we simply want the top three rows.
-	 */
+	 * as w, we simply want the top three rows. */
 	using PM = PointMatcher<float>;
 	using DP = typename PM::DataPoints;
 	using Matrix = typename PM::Matrix;
@@ -311,13 +318,7 @@ int main(void)
 	reference.features = Eigen::Map<Matrix>(
 		reinterpret_cast<float *>(reference_positions), 4, Width * Height
 	);
-	reference.featureLabels.push_back({"X", 1});
-	reference.featureLabels.push_back({"Y", 1});
-	reference.featureLabels.push_back({"Z", 1});
-	reference.featureLabels.push_back({"W", 1});
-
 	// assign the normals descriptor
-	reference.allocateDescriptor("normals", 3);
 	Matrix reference_normals_mat = Eigen::Map<Matrix>(
 		reinterpret_cast<float *>(reference_normals), 4, Width * Height
 	);
@@ -331,13 +332,7 @@ int main(void)
 	reading.features = Eigen::Map<Matrix>(
 		reinterpret_cast<float *>(reading_positions), 4, Width * Height
 	);
-	reading.featureLabels.push_back({"X", 1});
-	reading.featureLabels.push_back({"Y", 1});
-	reading.featureLabels.push_back({"Z", 1});
-	reading.featureLabels.push_back({"W", 1});
-
 	// assign the normals descriptor
-	reading.allocateDescriptor("normals", 3);
 	Matrix reading_normals_mat = Eigen::Map<Matrix>(
 		reinterpret_cast<float *>(reading_normals), 4, Width * Height
 	);
@@ -350,36 +345,48 @@ int main(void)
 	icp.setDefault();// see icp_customized for custom matcher / error minimizer
 
 	// add a NaN data filter
-	PointMatcherSupport::Parametrizable::Parameters params; // reused below
-	PM::DataPointsFilter *nanFilter = PM::get().DataPointsFilterRegistrar.create(
+	PointMatcherSupport::Parametrizable::Parameters params;
+	PM::DataPointsFilter *nan_filter_reference = PM::get().DataPointsFilterRegistrar.create(
 		"RemoveNaNDataPointsFilter", params
 	);
 	params.clear();
-	icp.readingDataPointsFilters.push_back(nanFilter);
-	icp.referenceDataPointsFilters.push_back(nanFilter);
+	icp.referenceDataPointsFilters.push_back(nan_filter_reference);
+	// note: you *MUST* create another filter, you cannot re-use the same filter
+	// for both reading and reference
+	PM::DataPointsFilter *nan_filter_reading = PM::get().DataPointsFilterRegistrar.create(
+		"RemoveNaNDataPointsFilter", params
+	);
+	icp.readingDataPointsFilters.push_back(nan_filter_reading);
 
 	// compute the transformation to express reading in reference
+	std::cout << "Performing iterative closest point ... " << std::flush;
 	PM::TransformationParameters T = icp(reading, reference);
+	std::cout << "done." << std::endl;
 
 	// transform data to express it in reference
 	DP data_out(reading);
 	icp.transformations.apply(data_out, T);
 
 	// save files to see the results
+	std::cout << "Saving test data files:" << std::endl;
+	std::cout << "  - Reference frame: test_ref.vtk ... " << std::flush;
 	reference.save("test_ref.vtk");
+	std::cout << "done." << std::endl;
+	std::cout << "  - Reading frame: test_data_in.vtk ... " << std::flush;
 	reading.save("test_data_in.vtk");
+	std::cout << "done." << std::endl;
+	std::cout << "  - Reading transformed to reference: test_data_out.vtk ... " << std::flush;
 	data_out.save("test_data_out.vtk");
+	std::cout << "done." << std::endl;
 
-	std::cout << "Transform Computed: " << std::endl << T << std::endl;
+	std::cout << std::endl << "Transform Computed: " << std::endl << T << std::endl;
+	std::cout << std::endl << "Original Transform: " << std::endl << xform.matrix().inverse() << std::endl;
 
-	std::cout << "freeing frame data" << std::endl;
-    // free the externally managed data
-    _mm_free(reference_positions);
-    _mm_free(reference_normals);
-    _mm_free(reading_positions);
-    _mm_free(reading_normals);
-    std::cout << "done freeing data" << std::endl;
-    // segfault after this ...
+	// free the externally managed data
+	_mm_free(reference_positions);
+	_mm_free(reference_normals);
+	_mm_free(reading_positions);
+	_mm_free(reading_normals);
 
     return 0;
 }
