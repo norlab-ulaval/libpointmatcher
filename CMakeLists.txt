@@ -14,7 +14,7 @@ file(
 	POINTMATCHER_PROJECT_VERSION          # Where to store the results (should just be one line)
 	REGEX "#define POINTMATCHER_VERSION " # The space after is important to ignore 'POINTMATCHER_VERSION_INT'
 )
-# If no matches found, something is wrong with nabo.h
+# If no matches found, something is wrong with PointMatcher.h
 if (NOT POINTMATCHER_PROJECT_VERSION)
 	message(SEND_ERROR "Cannot find version number in '${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/PointMatcher.h'.")
 endif (NOT POINTMATCHER_PROJECT_VERSION)
@@ -390,7 +390,7 @@ add_subdirectory(utest)
 
 #=================== allow find_package() =========================
 #
-# the following case be used in an external project requiring libnabo:
+# the following case be used in an external project requiring libpointmatcher:
 #  ...
 #  find_package(libpointmatcher)
 #  include_directories(${libpointmatcher_INCLUDE_DIRS})
