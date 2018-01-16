@@ -60,13 +60,10 @@ The following examples are drawn from the apartment dataset available for [downl
 ### Description
 Points can be excluded from a rectangular bounding region by using this filter.  The box dimensions are specified by defining the maximum and minimum coordinate values in the x,y,z directions.
 
-__Required descriptors:__ none
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__ none
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 
 |Parameter  |Description  |Default value    |Allowable range|
@@ -98,15 +95,11 @@ A number of filters are used to reduce the number of points in a cloud by random
 
 Points are only considered for rejection if they exceed a density threshold, otherwise they are preserved.  The single parameter of this filter sets the maximum density that should be obtained in the output point cloud.  Points are randomly rejected such that this maximum density is obtained as closely as possible.
 
-__Required descriptors:__
-
-- `densities` (see SurfaceNormalDataPointsFilter and SamplingSurfaceNormalDataPointsFilter)
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__
+    - `densities` (see SurfaceNormalDataPointsFilter and SamplingSurfaceNormalDataPointsFilter)
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -123,13 +116,10 @@ In the following example we observe the effect of the maximum density filter on 
 ### Description
 These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center **greater than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
 
-__Required descriptors:__ none
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__ none
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -147,13 +137,10 @@ In the following example, a maximum distance threshold of 1m is applied radially
 ### Description
 These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center **smaller than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
 
-__Required descriptors:__ none
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__ none
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -165,13 +152,10 @@ __Impact on the number of points:__ reduces number of points
 Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above `maxCount`. The resulting point cloud while have `maxCount` number of point. the Based on:  Registration and integration of multiple range images for 3-D model construction. Masuda, T. and Sakaue, K. and Yokoya, N. In Pattern Recognition, 1996., Proceedings of the 13th International Conference on. 879--883. 1996.
 
 
-__Required descriptors:__ none
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__ none
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -186,13 +170,10 @@ No example available.
 ### Description
 Points are filtered according to where they lie on a distribution of their positions along a given axis.  The entire distance range is divided into quantiles which lie between 0 and 1.  One can specify the distance quantile above which points are rejected by the filter.
 
-__Required descriptors:__ none
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__ none
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -211,13 +192,10 @@ In the following example, maximum quantile filtering is performed over the x-axi
 ### Description
 This filter behaves similarly to the [Maximum Point Count Filter](#maxpointcounthead) but does not enforce a maximum point constraint.  Instead points are kept by the filter with a fixed probability.
 
-__Required descriptors:__ none
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__ none
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -235,13 +213,10 @@ In the following sample, points are kept with a probability of 0.1.  Therefore t
 ### Description
 Due to errors in the capture process point clouds may contain points with invalid coordinates.  This filter can be applied to remove points which contain a NaN coordinate, thus producing a "clean" dataset.
 
-__Required descriptors:__ none
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__ none
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 Note: when there are descriptors present, both the features (input cloud positions) and the descriptors are checked.  For example, if you have a `"normals"` descriptor, for index `i` both the position and the normal must be non-NaN to make it past this filter.  If the position was not NaN, but the normal had a NaN, both the position and the normal are filtered out.  The same is true for more generally for all descriptors.
 
@@ -251,15 +226,11 @@ Note: when there are descriptors present, both the features (input cloud positio
 
 Shadow points are noisy points usually located at point cloud edge discontinuities.
 
-__Required descriptors:__
-
-- `normals`  (see SurfaceNormalDataPointsFilter)
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__
+    - `normals`  (see SurfaceNormalDataPointsFilter)
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 *IMPORTANT:* The surface normal descriptors are required in the input point cloud.
 
@@ -273,15 +244,11 @@ There are two options as to how to represent the distribution of points in a vox
 
 This filter also provides two methods for sub-sampling descriptors.  In the first, all descriptors within a voxel are averaged while in the second, only the first descriptor from a voxel is kept.
 
-__Required descriptors:__  none
-
-__Output descriptor:__
-
-- outputs average or single descriptor per voxel if the input cloud contains descriptors
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__  none
+- __Output descriptor:__
+    - outputs average or single descriptor per voxel if the input cloud contains descriptors
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -307,15 +274,11 @@ As opposed to the previous filters, the following does not yield a sub-sample of
 
 The returned direction vector is a vector connecting the point and the sensor, whose positions can be specified in the filter parameters.
 
-__Required descriptors:__   none
-
-__Output descriptor:__
-
-- `observationDirections`
-
-__Sensor assumed to be at the origin:__ yes
-
-__Impact on the number of points:__ none
+- __Required descriptors:__   none
+- __Output descriptor:__
+    - `observationDirections`
+- __Sensor assumed to be at the origin:__ yes
+- __Impact on the number of points:__ none
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -337,18 +300,14 @@ The surface normal to each point is estimated by finding a number of neighboring
 
 Remark that that given a surface, the normal vector can point in two possible directions.  Following the apartment example used herein throughout, the normal vector of a wall can point inside towards the room, or outside the apartment.  To align all normal vectors in the same direction, the [orient normals filter](#orientnormalshead) can be used.
 
-__Required descriptors:__ none
-
-__Output descriptor:__
-
-- `normals`
-- `densities`
-- `eigValues`
-- `eigVectors`
-
-__Sensor assumed to be at the origin:__ no
-
-__Impact on the number of points:__ none
+- __Required descriptors:__ none
+- __Output descriptor:__
+    - `normals`
+    - `densities`
+    - `eigValues`
+    - `eigVectors`
+- __Sensor assumed to be at the origin:__ no
+- __Impact on the number of points:__ none
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -374,16 +333,12 @@ In this example, we again use a local point cloud of the apartment. You may reco
 ### Description
 As explained previously, neighboring surface normal vectors obtained from the surface normals filter, do not have the same orientation.  This filter enforces this constraint and reorients vectors from the same surface in a consistent direction.  Vectors are reoriented to either point towards the center (inwards), or away from the center (outwards).
 
-__Required descriptors:__
-
-- `observationDirections` (see ObservationDirectionDataPointsFilter)
-- `normals` (see SurfaceNormalDataPointsFilter, SamplingSurfaceNormalDataPointsFilter)
-
-__Output descriptor:__ none
-
-__Sensor assumed to be at the origin:__ yes
-
-__Impact on the number of points:__ none
+- __Required descriptors:__
+    - `observationDirections` (see ObservationDirectionDataPointsFilter)
+    - `normals` (see SurfaceNormalDataPointsFilter, SamplingSurfaceNormalDataPointsFilter)
+- __Output descriptor:__ none
+- __Sensor assumed to be at the origin:__ yes
+- __Impact on the number of points:__ none
 
 
 |Parameter  |Description  |Default value    |Allowable range|
@@ -405,18 +360,14 @@ The same input section is used as for extracting the surface normals in the prev
 ### Description
 The above filters extract surface normals at every point in the point cloud.  In point clouds representing planar surfaces however, a significant redundant information is contained in adjacent normal vectors.  This filter attempts to both reduce the number of points within a point cloud and the number of different normal vectors.  The first is achieved by performing either random sub-sampling as seen previously, or by using one point per box (bin sub-sampling).  The latter is achieved by recursively decomposing the point-cloud space into boxes until each box contains at most knn points.  A single normal vector is computed from the knn points in each box.
 
-__Required descriptors:__  none
-
-__Output descriptor:__
-
-- `normals`
-- `densities`
-- `eigValues`
-- `eigVectors`
-
-__Sensor assumed to be at the origin:__ yes
-
-__Impact on the number of points:__ reduces number of points
+- __Required descriptors:__  none
+- __Output descriptor:__
+    - `normals`
+    - `densities`
+    - `eigValues`
+    - `eigVectors`
+- __Sensor assumed to be at the origin:__ yes
+- __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -449,15 +400,11 @@ We reuse the same apartment section to illustrate the sampling of normal vectors
 ### Description
 This filter is used to augment points with an estimation of position uncertainty based on sensor specifications.  So far the [SICK LMS](http://www.sick.com/group/EN/home/products/product_news/laser_measurement_systems/Pages/lms100.aspx), [Hokuyo](http://www.hokuyo-aut.jp/02sensor/index.html#scanner) URG-04LX and UTM-30LX, as well as the Microsoft [Kinect](http://www.microsoft.com/en-us/kinectforwindows/) and Asus [Xtion](http://www.asus.com/Multimedia/Xtion_PRO_LIVE/) sensors are supported.  The uncertainty or noise radius is represented in meters, and can be adjusted by varying a gain parameter which amplifies predefined uncertainty levels.
 
-__Required descriptors:__  none
-
-__Output descriptor:__
-
-- `simpleSensorNoise`
-
-__Sensor assumed to be at the origin:__ yes
-
-__Impact on the number of points:__ none
+- __Required descriptors:__  none
+- __Output descriptor:__
+    - `simpleSensorNoise`
+- __Sensor assumed to be at the origin:__ yes
+- __Impact on the number of points:__ none
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
