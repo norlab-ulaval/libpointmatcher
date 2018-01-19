@@ -36,6 +36,7 @@ Advanced<a name="advanced"></a>
 - How to minimize the error with translation, rotation and scale? [See this example.](https://github.com/ethz-asl/libpointmatcher/issues/188#issuecomment-270960696)
 - How to do a nearest neighbor search between two point clouds without an ICP object? [See the comments here.](https://github.com/ethz-asl/libpointmatcher/issues/193#issuecomment-276093785)
 - How do I build I specify data descriptors (e.g., `"normals"`) manually? [See the example manual_data_and_descriptors.cpp](../examples/manual_data_and_descriptors.cpp ).
+- How to construct a `DataPoints` from my own point cloud? [See the unit test on `Datapoints` here.](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/ui/DataFilters.cpp#L52)
 
 Developer<a name="developer"></a>
 ---------
