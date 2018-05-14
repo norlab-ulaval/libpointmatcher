@@ -247,9 +247,9 @@ __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
-|vSizeX     |Size of the voxel along the x-axis | 1.0 | 0 to +inf|
-|vSizeY     |Size of the voxel along the y-axis | 1.0 | 0 to +inf|
-|vSizeZ     |Size of the voxel along the z-axis | 1.0 | 0 to +inf|
+|vSizeX     |Size of the voxel along the x-axis | 1.0 | ]0 ; +inf[|
+|vSizeY     |Size of the voxel along the y-axis | 1.0 | ]0 ; +inf[|
+|vSizeZ     |Size of the voxel along the z-axis | 1.0 | ]0 ; +inf[|
 |useCentroid|If 1, down-sample by using the centroid of each voxel.  If 0, use the voxel center | 1 | 1 or 0|
 |averageExistingDescriptors|If 1, descriptors are down-sampled by taking their average in the voxel.  If 0, we use the descriptors from the first point found in the voxel | 1 | 1 or 0|
 
