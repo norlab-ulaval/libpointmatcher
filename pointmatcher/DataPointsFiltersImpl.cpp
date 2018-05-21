@@ -178,6 +178,7 @@ template struct DataPointsFiltersImpl<double>::MaxDistDataPointsFilter;
 
 #endif	
 
+#if 0
 // MinDistDataPointsFilter
 // Constructor
 template<typename T>
@@ -241,6 +242,7 @@ void DataPointsFiltersImpl<T>::MinDistDataPointsFilter::inPlaceFilter(
 template struct DataPointsFiltersImpl<float>::MinDistDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::MinDistDataPointsFilter;
 
+#endif
 
 // BoundingBoxDataPointsFilter
 // Constructor

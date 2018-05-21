@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/Identity.h"
 #include "DataPointsFilters/RemoveNaN.h"
 #include "DataPointsFilters/MaxDist.h"
+#include "DataPointsFilters/MinDist.h"
 
 
 
@@ -63,6 +64,9 @@ struct DataPointsFiltersImpl
 	typedef ::IdentityDataPointsFilter<T> IdentityDataPointsFilter;
 	typedef ::RemoveNaNDataPointsFilter<T> RemoveNaNDataPointsFilter;
 	typedef ::MaxDistDataPointsFilter<T> MaxDistDataPointsFilter;
+	typedef ::MinDistDataPointsFilter<T> MinDistDataPointsFilter;
+	
+	
 #if 0	
 	//! Identity, does nothing
 	struct IdentityDataPointsFilter: public DataPointsFilter
@@ -128,6 +132,7 @@ struct DataPointsFiltersImpl
 
 #endif	
 
+#if 0
 	//! Subsampling. Filter points before a minimum distance measured on a specific axis
 	struct MinDistDataPointsFilter: public DataPointsFilter
 	{
@@ -151,6 +156,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 	
 	//! Subsampling. Remove point laying in a bounding box
 	struct BoundingBoxDataPointsFilter: public DataPointsFilter

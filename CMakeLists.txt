@@ -298,6 +298,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
+	pointmatcher/DataPointsFilters/MinDist.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
