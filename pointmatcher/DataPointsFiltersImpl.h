@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "DataPointsFilters/Identity.h"
 #include "DataPointsFilters/RemoveNaN.h"
+#include "DataPointsFilters/MaxDist.h"
+
 
 
 template<typename T>
@@ -60,6 +62,7 @@ struct DataPointsFiltersImpl
 
 	typedef ::IdentityDataPointsFilter<T> IdentityDataPointsFilter;
 	typedef ::RemoveNaNDataPointsFilter<T> RemoveNaNDataPointsFilter;
+	typedef ::MaxDistDataPointsFilter<T> MaxDistDataPointsFilter;
 #if 0	
 	//! Identity, does nothing
 	struct IdentityDataPointsFilter: public DataPointsFilter
@@ -97,7 +100,8 @@ struct DataPointsFiltersImpl
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 #endif
-	
+
+#if 0	
 	//! Subsampling. Filter points beyond a maximum distance measured on a specific axis
 	struct MaxDistDataPointsFilter: public DataPointsFilter
 	{
@@ -121,6 +125,8 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+
+#endif	
 
 	//! Subsampling. Filter points before a minimum distance measured on a specific axis
 	struct MinDistDataPointsFilter: public DataPointsFilter
