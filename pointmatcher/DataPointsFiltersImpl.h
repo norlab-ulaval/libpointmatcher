@@ -39,6 +39,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 
 #include "DataPointsFilters/Identity.h"
+#include "DataPointsFilters/RemoveNaN.h"
+
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -57,7 +59,7 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
 
 	typedef ::IdentityDataPointsFilter<T> IdentityDataPointsFilter;
-	
+	typedef ::RemoveNaNDataPointsFilter<T> RemoveNaNDataPointsFilter;
 #if 0	
 	//! Identity, does nothing
 	struct IdentityDataPointsFilter: public DataPointsFilter
@@ -81,7 +83,8 @@ struct DataPointsFiltersImpl
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 #endif	
-	
+
+#if 0	
 	//! Remove points having NaN as coordinate
 	struct RemoveNaNDataPointsFilter: public DataPointsFilter
 	{
@@ -93,6 +96,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 	
 	//! Subsampling. Filter points beyond a maximum distance measured on a specific axis
 	struct MaxDistDataPointsFilter: public DataPointsFilter

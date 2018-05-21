@@ -296,6 +296,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
 #DataPointsFilters
 	pointmatcher/DataPointsFilters/Identity.cpp
+	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
