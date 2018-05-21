@@ -478,7 +478,7 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 	const int pointsCount(cloud.features.cols());
 	const int featDim(cloud.features.rows());
 	const int descDim(cloud.descriptors.rows());
-	const int labelDim(cloud.descriptorLabels.size());
+	const unsigned int labelDim(cloud.descriptorLabels.size());
 
 	// Validate descriptors and labels
 	int insertDim(0);
@@ -1858,6 +1858,9 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       ++(data.unfitPointsCount);
       continue;
     }
+    
+    const int featDim(data.features.rows());
+    
     Matrix d(featDim-1, colCount);
     Int64Matrix t(1, colCount);
 
@@ -1866,8 +1869,6 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       d.col(j) = data.features.block(0,data.indices[goodIndices[j]],featDim-1, 1);
       t.col(j) = data.times.col(data.indices[goodIndices[j]]);
     }
-
-    const int featDim(data.features.rows());
 
     const Vector mean = d.rowwise().sum() / T(colCount);
     const Matrix NN = d.colwise() - mean;
@@ -2821,7 +2822,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     				{
     					cloud.descriptors(d,firstPoint) += cloud.descriptors(d,p);
     				}
-					for (int d = 0; d < timeDim; ++df)
+					for (int d = 0; d < timeDim; ++d)
     				{
     					cloud.times(d,firstPoint) += cloud.times(d,p);
     				}
