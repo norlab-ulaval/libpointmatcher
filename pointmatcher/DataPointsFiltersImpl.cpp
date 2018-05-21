@@ -49,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
+#if 0
 // IdentityDataPointsFilter
 template<typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::IdentityDataPointsFilter::filter(
@@ -69,6 +70,7 @@ void DataPointsFiltersImpl<T>::IdentityDataPointsFilter::inPlaceFilter(
 template struct DataPointsFiltersImpl<float>::IdentityDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::IdentityDataPointsFilter;
 
+#endif
 
 // RemoveNaNDataPointsFilter
 template<typename T>

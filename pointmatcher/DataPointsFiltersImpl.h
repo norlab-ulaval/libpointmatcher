@@ -38,6 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
+#include "DataPointsFilters/Identity.h"
+
 template<typename T>
 struct DataPointsFiltersImpl
 {
@@ -53,7 +55,10 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPointsFilter DataPointsFilter;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
+
+	typedef ::IdentityDataPointsFilter<T> IdentityDataPointsFilter;
 	
+#if 0	
 	//! Identity, does nothing
 	struct IdentityDataPointsFilter: public DataPointsFilter
 	{
@@ -75,7 +80,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
-	
+#endif	
 	
 	//! Remove points having NaN as coordinate
 	struct RemoveNaNDataPointsFilter: public DataPointsFilter

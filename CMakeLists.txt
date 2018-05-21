@@ -291,12 +291,16 @@ set(POINTMATCHER_SRC
 	pointmatcher/TransformationsImpl.cpp
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp
+#ErrorMinimizers
 	pointmatcher/ErrorMinimizers/PointToPlane.cpp
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
+#DataPointsFilters
+	pointmatcher/DataPointsFilters/Identity.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/pointmatcher)
+include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
 
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
