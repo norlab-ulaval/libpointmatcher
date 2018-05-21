@@ -772,6 +772,7 @@ template struct DataPointsFiltersImpl<float>::SurfaceNormalDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SurfaceNormalDataPointsFilter;
 #endif
 
+#if 0
 // SamplingSurfaceNormalDataPointsFilter
 
 // Constructor
@@ -1083,6 +1084,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 template struct DataPointsFiltersImpl<float>::SamplingSurfaceNormalDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SamplingSurfaceNormalDataPointsFilter;
 
+#endif
 //////////////////////////////////////////////////////////////////////////////////////
 
 // ElipsoidsDataPointsFilter
@@ -1280,6 +1282,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
 template<typename T>
 void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
 {
+  using namespace utils;
+  
   const int count(last - first);
   if (count <= int(knn))
   {

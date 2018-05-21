@@ -303,6 +303,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/MaxQuantileOnAxis.cpp
 	pointmatcher/DataPointsFilters/MaxDensity.cpp
 	pointmatcher/DataPointsFilters/SurfaceNormal.cpp
+	pointmatcher/DataPointsFilters/SamplingSurfaceNormal.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

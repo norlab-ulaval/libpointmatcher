@@ -1,0 +1,102 @@
+#pragma once
+
+#include "PointMatcher.h"
+
+//! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
+template<typename T>
+struct SamplingSurfaceNormalDataPointsFilter: public PointMatcher<T>::DataPointsFilter
+{
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParameterDoc ParameterDoc;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
+	typedef Parametrizable::InvalidParameter InvalidParameter;
+	
+	typedef typename PointMatcher<T>::Vector Vector;
+	typedef typename PointMatcher<T>::Matrix Matrix;	
+	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
+	
+	
+	inline static const std::string description()
+	{
+		return "Subsampling, Normals. This filter decomposes the point-cloud space in boxes, by recursively splitting the cloud through axis-aligned hyperplanes such as to maximize the evenness of the aspect ratio of the box. When the number of points in a box reaches a value knn or lower, the filter computes the center of mass of these points and its normal by taking the eigenvector corresponding to the smallest eigenvalue of all points in the box.";
+	}
+	inline static const ParametersDoc availableParameters()
+	{
+		return boost::assign::list_of<ParameterDoc>
+			( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "1.0", &P::Comp<T> )
+			( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
+			( "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> )
+			( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
+			( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
+			( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
+			( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" )
+			( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
+			( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
+		;
+	}
+	
+	const T ratio;
+	const unsigned knn;
+	const unsigned samplingMethod; 
+	const T maxBoxDim;
+	const bool averageExistingDescriptors;
+	const bool keepNormals;
+	const bool keepDensities;
+	const bool keepEigenValues;
+	const bool keepEigenVectors;
+	
+public:
+	SamplingSurfaceNormalDataPointsFilter(const Parameters& params = Parameters());
+	virtual ~SamplingSurfaceNormalDataPointsFilter() {}
+	virtual DataPoints filter(const DataPoints& input);
+	virtual void inPlaceFilter(DataPoints& cloud);
+
+protected:
+	struct BuildData
+	{
+		typedef std::vector<int> Indices;
+		typedef typename DataPoints::View View;
+		
+		Indices indices;
+		Indices indicesToKeep;
+		Matrix& features;
+		Matrix& descriptors;
+		boost::optional<View> normals;
+		boost::optional<View> densities;
+		boost::optional<View> eigenValues;
+		boost::optional<View> eigenVectors;
+		int outputInsertionPoint;
+		int unfitPointsCount;
+
+		BuildData(Matrix& features, Matrix& descriptors):
+			features(features),
+			descriptors(descriptors),
+			unfitPointsCount(0)
+		{
+			const int pointsCount(features.cols());
+			indices.reserve(pointsCount);
+			for (int i = 0; i < pointsCount; ++i)
+				indices.push_back(i);
+		}
+	};
+	
+	struct CompareDim
+	{
+		const int dim;
+		const BuildData& buildData;
+		CompareDim(const int dim, const BuildData& buildData):dim(dim),buildData(buildData){}
+		bool operator() (const int& p0, const int& p1)
+		{
+			return buildData.features(dim, p0) <
+					buildData.features(dim, p1);
+		}
+	};
+	
+protected:
+	void buildNew(BuildData& data, const int first, const int last, Vector&& minValues, Vector&& maxValues) const;
+	void fuseRange(BuildData& data, const int first, const int last) const;
+};
+

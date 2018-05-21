@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/MaxQuantileOnAxis.h"
 #include "DataPointsFilters/MaxDensity.h"
 #include "DataPointsFilters/SurfaceNormal.h"
+#include "DataPointsFilters/SamplingSurfaceNormal.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -72,6 +73,7 @@ struct DataPointsFiltersImpl
 	typedef ::MaxQuantileOnAxisDataPointsFilter<T> MaxQuantileOnAxisDataPointsFilter;
 	typedef ::MaxDensityDataPointsFilter<T> MaxDensityDataPointsFilter;
 	typedef ::SurfaceNormalDataPointsFilter<T> SurfaceNormalDataPointsFilter;
+	typedef ::SamplingSurfaceNormalDataPointsFilter<T> SamplingSurfaceNormalDataPointsFilter;
 	
 	
 #if 0	
@@ -317,6 +319,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
 	struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
@@ -401,6 +404,8 @@ struct DataPointsFiltersImpl
 		void buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const;
 		void fuseRange(BuildData& data, const int first, const int last) const;
 	};
+
+#endif
 
 	//! Reorientation of normals
 	struct OrientNormalsDataPointsFilter: public DataPointsFilter
