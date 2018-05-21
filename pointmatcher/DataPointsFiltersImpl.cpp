@@ -38,6 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IO.h"
 #include "MatchersImpl.h"
 #include "Functions.h"
+#include "utils.h"
 
 #include <algorithm>
 #include <boost/format.hpp>
@@ -448,6 +449,7 @@ template struct DataPointsFiltersImpl<float>::MaxDensityDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::MaxDensityDataPointsFilter;
 #endif
 
+#if 0
 // SurfaceNormalDataPointsFilter
 // Constructor
 template<typename T>
@@ -768,7 +770,7 @@ T DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::computeDensity(const 
 
 template struct DataPointsFiltersImpl<float>::SurfaceNormalDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SurfaceNormalDataPointsFilter;
-
+#endif
 
 // SamplingSurfaceNormalDataPointsFilter
 
@@ -958,6 +960,8 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::buildNew(B
 template<typename T>
 void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
 {
+	using namespace utils;
+	
 	const int colCount(last-first);
 	const int featDim(data.features.rows());
 
@@ -998,17 +1002,17 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 
 	Vector normal;
 	if(keepNormals)
-		normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
+		normal = computeNormal<T>(eigenVa, eigenVe);
 
 	T densitie = 0;
 	if(keepDensities)
-		densitie = SurfaceNormalDataPointsFilter::computeDensity(NN);
+		densitie = computeDensity<T>(NN);
 
 	//if(keepEigenValues) nothing to do
 
 	Vector serialEigVector;
 	if(keepEigenVectors)
-		serialEigVector = SurfaceNormalDataPointsFilter::serializeEigVec(eigenVe);
+		serialEigVector = serializeEigVec<T>(eigenVe);
 
 	// some safety check
 	if(data.descriptors.rows() != 0)
@@ -1320,6 +1324,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::buildNew(BuildData& da
 template<typename T>
 void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& data, const int first, const int last) const
 {
+  using namespace utils;
+  
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 
   const int colCount(last-first);
@@ -1398,17 +1404,17 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
 
   Vector normal;
   if(keepNormals)
-    normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
+    normal = computeNormal<T>(eigenVa, eigenVe);
 
   T density = 0;
   if(keepDensities)
-    density = SurfaceNormalDataPointsFilter::computeDensity(NN);
+    density = computeDensity<T>(NN);
   Vector serialEigVector;
   if(keepEigenVectors)
-    serialEigVector = SurfaceNormalDataPointsFilter::serializeEigVec(eigenVe);
+    serialEigVector = serializeEigVec<T>(eigenVe);
   Vector serialCovVector;
   if(keepCovariances)
-    serialCovVector = SurfaceNormalDataPointsFilter::serializeEigVec(C);
+    serialCovVector = serializeEigVec<T>(C);
 
   // some safety check
   if(data.descriptors.rows() != 0)
@@ -1417,7 +1423,6 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   // Filter points randomly
   if(samplingMethod == 0)
   {
-
     for(int i=0; i<colCount; ++i)
     {
       const float r = (float)std::rand()/(float)RAND_MAX;
@@ -1474,7 +1479,6 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   }
   else
   {
-
     const int k = data.indices[first];
     // Mark the indices which will be part of the final data
     data.indicesToKeep.push_back(k);
@@ -1832,6 +1836,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
 template<typename T>
 void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& data, DataPoints& input, const int first, const int last) const
 {
+  using namespace utils;
+  
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 
   const unsigned int nbIdxToKeep(data.indicesToKeep.size());
@@ -1915,11 +1921,11 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
     if(keepNormals || keepGestaltFeatures) 
     {
       // calculate orientation of NN
-      normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
+      normal = computeNormal<T>(eigenVa, eigenVe);
 
       if(keepGestaltFeatures) 
       {
-        Vector eigenVaSort = SurfaceNormalDataPointsFilter::sortEigenValues(eigenVa);
+        Vector eigenVaSort = sortEigenValues<T>(eigenVa);
         planarity = 2 * (eigenVaSort(1) - eigenVaSort(0))/eigenVaSort.sum();
         cylindricality = (eigenVaSort(2) - eigenVaSort(1))/eigenVaSort.sum();
         // project normal on horizontal plane
@@ -2020,10 +2026,10 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
     }
     Vector serialEigVector;
     if(keepEigenVectors)
-      serialEigVector = SurfaceNormalDataPointsFilter::serializeEigVec(eigenVe);
+      serialEigVector = serializeEigVec<T>(eigenVe);
     Vector serialCovVector;
     if(keepCovariances)
-      serialCovVector = SurfaceNormalDataPointsFilter::serializeEigVec(C);
+      serialCovVector = serializeEigVec<T>(C);
     Vector serialGestaltMeans;
     Vector serialGestaltVariances;
     if(keepGestaltFeatures) 

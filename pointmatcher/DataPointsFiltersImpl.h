@@ -45,9 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/BoundingBox.h"
 #include "DataPointsFilters/MaxQuantileOnAxis.h"
 #include "DataPointsFilters/MaxDensity.h"
-
-
-
+#include "DataPointsFilters/SurfaceNormal.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -73,6 +71,7 @@ struct DataPointsFiltersImpl
 	typedef ::BoundingBoxDataPointsFilter<T> BoundingBoxDataPointsFilter;
 	typedef ::MaxQuantileOnAxisDataPointsFilter<T> MaxQuantileOnAxisDataPointsFilter;
 	typedef ::MaxDensityDataPointsFilter<T> MaxDensityDataPointsFilter;
+	typedef ::SurfaceNormalDataPointsFilter<T> SurfaceNormalDataPointsFilter;
 	
 	
 #if 0	
@@ -252,6 +251,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
 	struct SurfaceNormalDataPointsFilter: public DataPointsFilter
 	{
@@ -304,7 +304,9 @@ struct DataPointsFiltersImpl
 		static std::vector<size_t> sortIndexes(const Vector& v);
 
 	};
+#endif 
 
+#if 0
 	struct IdxCompare
 	{
 		const typename PointMatcher<T>::Vector& target;
@@ -313,6 +315,7 @@ struct DataPointsFiltersImpl
 
 		bool operator()(size_t a, size_t b) const { return target(a,0) < target(b,0); }
 	};
+#endif
 
 	//! Sampling surface normals. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
 	struct SamplingSurfaceNormalDataPointsFilter: public DataPointsFilter
