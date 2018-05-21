@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/MinDist.h"
 #include "DataPointsFilters/BoundingBox.h"
 #include "DataPointsFilters/MaxQuantileOnAxis.h"
+#include "DataPointsFilters/MaxDensity.h"
 
 
 
@@ -71,6 +72,7 @@ struct DataPointsFiltersImpl
 	typedef ::MinDistDataPointsFilter<T>	MinDistDataPointsFilter;
 	typedef ::BoundingBoxDataPointsFilter<T> BoundingBoxDataPointsFilter;
 	typedef ::MaxQuantileOnAxisDataPointsFilter<T> MaxQuantileOnAxisDataPointsFilter;
+	typedef ::MaxDensityDataPointsFilter<T> MaxDensityDataPointsFilter;
 	
 	
 #if 0	
@@ -226,6 +228,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Subsampling. Reduce the points number by randomly removing points with a dentsity higher than a treshold.
 	struct MaxDensityDataPointsFilter: public DataPointsFilter
 	{
@@ -247,6 +250,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 
 	//! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
 	struct SurfaceNormalDataPointsFilter: public DataPointsFilter

@@ -374,6 +374,7 @@ template struct DataPointsFiltersImpl<double>::MaxQuantileOnAxisDataPointsFilter
 
 #endif
 
+#if 0
 // MaxDensityDataPointsFilter
 // Constructor
 template<typename T>
@@ -445,7 +446,7 @@ void DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::inPlaceFilter(
 
 template struct DataPointsFiltersImpl<float>::MaxDensityDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::MaxDensityDataPointsFilter;
-
+#endif
 
 // SurfaceNormalDataPointsFilter
 // Constructor
