@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/RemoveNaN.h"
 #include "DataPointsFilters/MaxDist.h"
 #include "DataPointsFilters/MinDist.h"
+#include "DataPointsFilters/BoundingBox.h"
 
 
 
@@ -61,10 +62,11 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::DataPointsFilter DataPointsFilter;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
 
-	typedef ::IdentityDataPointsFilter<T> IdentityDataPointsFilter;
-	typedef ::RemoveNaNDataPointsFilter<T> RemoveNaNDataPointsFilter;
-	typedef ::MaxDistDataPointsFilter<T> MaxDistDataPointsFilter;
-	typedef ::MinDistDataPointsFilter<T> MinDistDataPointsFilter;
+	typedef ::IdentityDataPointsFilter<T>   IdentityDataPointsFilter;
+	typedef ::RemoveNaNDataPointsFilter<T>  RemoveNaNDataPointsFilter;
+	typedef ::MaxDistDataPointsFilter<T>	MaxDistDataPointsFilter;
+	typedef ::MinDistDataPointsFilter<T>	MinDistDataPointsFilter;
+	typedef ::BoundingBoxDataPointsFilter<T> BoundingBoxDataPointsFilter;
 	
 	
 #if 0	
@@ -157,7 +159,8 @@ struct DataPointsFiltersImpl
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
 #endif
-	
+
+#if 0	
 	//! Subsampling. Remove point laying in a bounding box
 	struct BoundingBoxDataPointsFilter: public DataPointsFilter
 	{
@@ -191,6 +194,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 
 	//! Subsampling. Filter points beyond a maximum quantile measured on a specific axis
 	struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
