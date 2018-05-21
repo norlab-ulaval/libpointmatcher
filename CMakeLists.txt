@@ -300,6 +300,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/MaxDist.cpp
 	pointmatcher/DataPointsFilters/MinDist.cpp
 	pointmatcher/DataPointsFilters/BoundingBox.cpp
+	pointmatcher/DataPointsFilters/MaxQuantileOnAxis.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

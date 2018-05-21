@@ -43,6 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/MaxDist.h"
 #include "DataPointsFilters/MinDist.h"
 #include "DataPointsFilters/BoundingBox.h"
+#include "DataPointsFilters/MaxQuantileOnAxis.h"
+
 
 
 
@@ -62,11 +64,13 @@ struct DataPointsFiltersImpl
 	typedef typename PointMatcher<T>::DataPointsFilter DataPointsFilter;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
 
+
 	typedef ::IdentityDataPointsFilter<T>   IdentityDataPointsFilter;
 	typedef ::RemoveNaNDataPointsFilter<T>  RemoveNaNDataPointsFilter;
 	typedef ::MaxDistDataPointsFilter<T>	MaxDistDataPointsFilter;
 	typedef ::MinDistDataPointsFilter<T>	MinDistDataPointsFilter;
 	typedef ::BoundingBoxDataPointsFilter<T> BoundingBoxDataPointsFilter;
+	typedef ::MaxQuantileOnAxisDataPointsFilter<T> MaxQuantileOnAxisDataPointsFilter;
 	
 	
 #if 0	
@@ -196,6 +200,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Subsampling. Filter points beyond a maximum quantile measured on a specific axis
 	struct MaxQuantileOnAxisDataPointsFilter: public DataPointsFilter
 	{
@@ -219,6 +224,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 
 	//! Subsampling. Reduce the points number by randomly removing points with a dentsity higher than a treshold.
 	struct MaxDensityDataPointsFilter: public DataPointsFilter
