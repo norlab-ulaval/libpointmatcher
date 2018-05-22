@@ -284,7 +284,6 @@ set(POINTMATCHER_SRC
 	pointmatcher/Histogram.cpp
 	pointmatcher/Parametrizable.cpp
 	pointmatcher/LoggerImpl.cpp
-	pointmatcher/DataPointsFiltersImpl.cpp
 	pointmatcher/MatchersImpl.cpp
 	pointmatcher/OutlierFiltersImpl.cpp
 	pointmatcher/ErrorMinimizersImpl.cpp
