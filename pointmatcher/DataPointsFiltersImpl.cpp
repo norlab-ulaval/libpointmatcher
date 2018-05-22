@@ -1548,6 +1548,7 @@ template struct DataPointsFiltersImpl<float>::ElipsoidsDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::ElipsoidsDataPointsFilter;
 #endif
 
+#if 0
 //////////////////////////////////////////////////////////////////////////////////////
 
 // GestaltDataPointsFilter
@@ -2122,6 +2123,8 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilt
 
 template struct DataPointsFiltersImpl<float>::GestaltDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::GestaltDataPointsFilter;
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////////////
 #if 0

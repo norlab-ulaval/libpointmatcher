@@ -7,7 +7,6 @@
 #include "Eigen/Eigenvalues"
 
 #include "PointMatcherPrivate.h"
-#include "IO.h"
 
 #include <utility>
 #include <algorithm>

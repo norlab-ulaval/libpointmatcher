@@ -315,6 +315,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/VoxelGrid.cpp
 	pointmatcher/DataPointsFilters/CutAtDescriptorThreshold.cpp
 	pointmatcher/DataPointsFilters/Elipsoids.cpp
+	pointmatcher/DataPointsFilters/Gestalt.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

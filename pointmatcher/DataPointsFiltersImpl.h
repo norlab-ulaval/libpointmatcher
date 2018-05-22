@@ -58,6 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/VoxelGrid.h"
 #include "DataPointsFilters/CutAtDescriptorThreshold.h"
 #include "DataPointsFilters/Elipsoids.h"
+#include "DataPointsFilters/Gestalt.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -96,6 +97,7 @@ struct DataPointsFiltersImpl
 	typedef ::VoxelGridDataPointsFilter<T> VoxelGridDataPointsFilter;
 	typedef ::CutAtDescriptorThresholdDataPointsFilter<T> CutAtDescriptorThresholdDataPointsFilter;
 	typedef ::ElipsoidsDataPointsFilter<T> ElipsoidsDataPointsFilter;
+	typedef ::GestaltDataPointsFilter<T> GestaltDataPointsFilter;
 	
 	
 #if 0	
@@ -843,6 +845,7 @@ struct DataPointsFiltersImpl
   };
 #endif
 
+#if 0
   //! Gestalt descriptors filter as described in Bosse & Zlot ICRA 2013
   struct GestaltDataPointsFilter: public DataPointsFilter
   {
@@ -953,6 +956,7 @@ struct DataPointsFiltersImpl
     void fuseRange(BuildData& data, DataPoints& input, const int first, const int last) const;
 
   };
+#endif
 
 #if 0
   //! Subsampling. Cut points with value of a given descriptor above or below a given threshold.
