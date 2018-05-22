@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/RandomSampling.h"
 #include "DataPointsFilters/MaxPointCount.h"
 #include "DataPointsFilters/FixStepSampling.h"
+#include "DataPointsFilters/Shadow.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -84,6 +85,7 @@ struct DataPointsFiltersImpl
 	typedef ::RandomSamplingDataPointsFilter<T> RandomSamplingDataPointsFilter;
 	typedef ::MaxPointCountDataPointsFilter<T> MaxPointCountDataPointsFilter;
 	typedef ::FixStepSamplingDataPointsFilter<T> FixStepSamplingDataPointsFilter;
+	typedef ::ShadowDataPointsFilter<T> ShadowDataPointsFilter;
 	
 	
 #if 0	
@@ -559,6 +561,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Shadow filter, remove ghost points appearing on edges
 	struct ShadowDataPointsFilter: public DataPointsFilter
 	{
@@ -582,6 +585,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 
 	//! Sick LMS-xxx noise model
 	struct SimpleSensorNoiseDataPointsFilter: public DataPointsFilter

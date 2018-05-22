@@ -309,6 +309,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/RandomSampling.cpp
 	pointmatcher/DataPointsFilters/MaxPointCount.cpp
 	pointmatcher/DataPointsFilters/FixStepSampling.cpp
+	pointmatcher/DataPointsFilters/Shadow.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

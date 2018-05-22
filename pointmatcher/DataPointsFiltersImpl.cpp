@@ -2417,6 +2417,7 @@ template struct DataPointsFiltersImpl<double>::FixStepSamplingDataPointsFilter;
 
 #endif
 
+#if 0
 // ShadowDataPointsFilter
 // Constructor
 template<typename T>
@@ -2476,6 +2477,7 @@ void DataPointsFiltersImpl<T>::ShadowDataPointsFilter::inPlaceFilter(
 template struct DataPointsFiltersImpl<float>::ShadowDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::ShadowDataPointsFilter;
 
+#endif
 
 // SimpleSensorNoiseDataPointsFilter
 // Constructor
