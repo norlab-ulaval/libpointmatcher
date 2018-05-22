@@ -1087,6 +1087,7 @@ template struct DataPointsFiltersImpl<double>::SamplingSurfaceNormalDataPointsFi
 #endif
 //////////////////////////////////////////////////////////////////////////////////////
 
+#if 0
 // ElipsoidsDataPointsFilter
 
 // Constructor
@@ -1545,6 +1546,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
 
 template struct DataPointsFiltersImpl<float>::ElipsoidsDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::ElipsoidsDataPointsFilter;
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////
 

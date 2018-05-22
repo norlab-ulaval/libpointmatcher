@@ -57,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/ObservationDirection.h"
 #include "DataPointsFilters/VoxelGrid.h"
 #include "DataPointsFilters/CutAtDescriptorThreshold.h"
+#include "DataPointsFilters/Elipsoids.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -94,6 +95,7 @@ struct DataPointsFiltersImpl
 	typedef ::ObservationDirectionDataPointsFilter<T> ObservationDirectionDataPointsFilter;
 	typedef ::VoxelGridDataPointsFilter<T> VoxelGridDataPointsFilter;
 	typedef ::CutAtDescriptorThresholdDataPointsFilter<T> CutAtDescriptorThresholdDataPointsFilter;
+	typedef ::ElipsoidsDataPointsFilter<T> ElipsoidsDataPointsFilter;
 	
 	
 #if 0	
@@ -726,7 +728,8 @@ struct DataPointsFiltersImpl
 
 	};	
 #endif
-	
+
+#if 0	
 	//! Subsampling Surfels (Elipsoids) filter. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
 	struct ElipsoidsDataPointsFilter: public DataPointsFilter
 	{
@@ -838,6 +841,7 @@ struct DataPointsFiltersImpl
     void buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const;
     void fuseRange(BuildData& data, const int first, const int last) const;
   };
+#endif
 
   //! Gestalt descriptors filter as described in Bosse & Zlot ICRA 2013
   struct GestaltDataPointsFilter: public DataPointsFilter
