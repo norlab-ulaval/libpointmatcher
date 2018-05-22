@@ -49,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/SamplingSurfaceNormal.h"
 #include "DataPointsFilters/OrientNormals.h"
 #include "DataPointsFilters/IncidenceAngle.h"
+#include "DataPointsFilters/RandomSampling.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -78,6 +79,7 @@ struct DataPointsFiltersImpl
 	typedef ::SamplingSurfaceNormalDataPointsFilter<T> SamplingSurfaceNormalDataPointsFilter;
 	typedef ::OrientNormalsDataPointsFilter<T>  OrientNormalsDataPointsFilter;
 	typedef ::IncidenceAngleDataPointsFilter<T> IncidenceAngleDataPointsFilter;
+	typedef ::RandomSamplingDataPointsFilter<T> RandomSamplingDataPointsFilter;
 	
 	
 #if 0	
@@ -465,6 +467,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Random sampling
 	struct RandomSamplingDataPointsFilter: public DataPointsFilter
 	{
@@ -490,6 +493,7 @@ struct DataPointsFiltersImpl
 		RandomSamplingDataPointsFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 
 	};
+#endif
 	
 	//! Maximum number of points
 	struct MaxPointCountDataPointsFilter: public DataPointsFilter
