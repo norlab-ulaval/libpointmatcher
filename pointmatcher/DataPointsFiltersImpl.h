@@ -48,6 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/SurfaceNormal.h"
 #include "DataPointsFilters/SamplingSurfaceNormal.h"
 #include "DataPointsFilters/OrientNormals.h"
+#include "DataPointsFilters/IncidenceAngle.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -76,6 +77,7 @@ struct DataPointsFiltersImpl
 	typedef ::SurfaceNormalDataPointsFilter<T> SurfaceNormalDataPointsFilter;
 	typedef ::SamplingSurfaceNormalDataPointsFilter<T> SamplingSurfaceNormalDataPointsFilter;
 	typedef ::OrientNormalsDataPointsFilter<T>  OrientNormalsDataPointsFilter;
+	typedef ::IncidenceAngleDataPointsFilter<T> IncidenceAngleDataPointsFilter;
 	
 	
 #if 0	
@@ -434,6 +436,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Incidence angle, compute the incidence angle of a surface normal with the observation direction
 	struct IncidenceAngleDataPointsFilter: public DataPointsFilter
 	{
@@ -460,6 +463,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 
 	//! Random sampling
 	struct RandomSamplingDataPointsFilter: public DataPointsFilter

@@ -2184,6 +2184,7 @@ template struct DataPointsFiltersImpl<double>::OrientNormalsDataPointsFilter;
 
 #endif
 
+#if 0
 // IncidenceAngleDataPointsFilter
 // Compute
 template<typename T>
@@ -2227,6 +2228,7 @@ void DataPointsFiltersImpl<T>::IncidenceAngleDataPointsFilter::inPlaceFilter(
 template struct DataPointsFiltersImpl<float>::IncidenceAngleDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::IncidenceAngleDataPointsFilter;
 
+#endif
 
 // RandomSamplingDataPointsFilter
 // Constructor
