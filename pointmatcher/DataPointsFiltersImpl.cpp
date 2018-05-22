@@ -2122,7 +2122,7 @@ template struct DataPointsFiltersImpl<float>::GestaltDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::GestaltDataPointsFilter;
 
 /////////////////////////////////////////////////////////////////////////////////////
-
+#if 0
 // OrientNormalsDataPointsFilter
 // Constructor
 template<typename T>
@@ -2181,6 +2181,8 @@ void DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::inPlaceFilter(
 
 template struct DataPointsFiltersImpl<float>::OrientNormalsDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::OrientNormalsDataPointsFilter;
+
+#endif
 
 // IncidenceAngleDataPointsFilter
 // Compute

@@ -14,7 +14,7 @@ file(
 	POINTMATCHER_PROJECT_VERSION          # Where to store the results (should just be one line)
 	REGEX "#define POINTMATCHER_VERSION " # The space after is important to ignore 'POINTMATCHER_VERSION_INT'
 )
-# If no matches found, something is wrong with nabo.h
+# If no matches found, something is wrong with PointMatcher.h
 if (NOT POINTMATCHER_PROJECT_VERSION)
 	message(SEND_ERROR "Cannot find version number in '${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/PointMatcher.h'.")
 endif (NOT POINTMATCHER_PROJECT_VERSION)
@@ -304,6 +304,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/MaxDensity.cpp
 	pointmatcher/DataPointsFilters/SurfaceNormal.cpp
 	pointmatcher/DataPointsFilters/SamplingSurfaceNormal.cpp
+	pointmatcher/DataPointsFilters/OrientNormals.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/MaxDensity.h"
 #include "DataPointsFilters/SurfaceNormal.h"
 #include "DataPointsFilters/SamplingSurfaceNormal.h"
+#include "DataPointsFilters/OrientNormals.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -74,6 +75,7 @@ struct DataPointsFiltersImpl
 	typedef ::MaxDensityDataPointsFilter<T> MaxDensityDataPointsFilter;
 	typedef ::SurfaceNormalDataPointsFilter<T> SurfaceNormalDataPointsFilter;
 	typedef ::SamplingSurfaceNormalDataPointsFilter<T> SamplingSurfaceNormalDataPointsFilter;
+	typedef ::OrientNormalsDataPointsFilter<T>  OrientNormalsDataPointsFilter;
 	
 	
 #if 0	
@@ -407,6 +409,7 @@ struct DataPointsFiltersImpl
 
 #endif
 
+#if 0
 	//! Reorientation of normals
 	struct OrientNormalsDataPointsFilter: public DataPointsFilter
 	{
@@ -429,6 +432,7 @@ struct DataPointsFiltersImpl
 
 		const bool towardCenter;
 	};
+#endif
 
 	//! Incidence angle, compute the incidence angle of a surface normal with the observation direction
 	struct IncidenceAngleDataPointsFilter: public DataPointsFilter
