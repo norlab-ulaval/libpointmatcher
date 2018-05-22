@@ -2575,7 +2575,7 @@ template struct DataPointsFiltersImpl<double>::SimpleSensorNoiseDataPointsFilter
 
 #endif 
 
-
+#if 0
 // ObservationDirectionDataPointsFilter
 // Constructor
 template<typename T>
@@ -2631,6 +2631,7 @@ void DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter::inPlaceFilt
 
 template struct DataPointsFiltersImpl<float>::ObservationDirectionDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::ObservationDirectionDataPointsFilter;
+#endif
 
 // VoxelGridDataPointsFilter
 template <typename T>

@@ -311,6 +311,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/FixStepSampling.cpp
 	pointmatcher/DataPointsFilters/Shadow.cpp
 	pointmatcher/DataPointsFilters/SimpleSensorNoise.cpp
+	pointmatcher/DataPointsFilters/ObservationDirection.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

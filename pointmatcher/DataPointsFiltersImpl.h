@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/FixStepSampling.h"
 #include "DataPointsFilters/Shadow.h"
 #include "DataPointsFilters/SimpleSensorNoise.h"
+#include "DataPointsFilters/ObservationDirection.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -88,6 +89,7 @@ struct DataPointsFiltersImpl
 	typedef ::FixStepSamplingDataPointsFilter<T> FixStepSamplingDataPointsFilter;
 	typedef ::ShadowDataPointsFilter<T> ShadowDataPointsFilter;
 	typedef ::SimpleSensorNoiseDataPointsFilter<T> SimpleSensorNoiseDataPointsFilter;
+	typedef ::ObservationDirectionDataPointsFilter<T> ObservationDirectionDataPointsFilter;
 	
 	
 #if 0	
@@ -624,7 +626,8 @@ struct DataPointsFiltersImpl
 
 	};
 #endif
-	
+
+#if 0	
 	//! Extract observation direction
 	struct ObservationDirectionDataPointsFilter: public DataPointsFilter
 	{
@@ -655,6 +658,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 
 	struct VoxelGridDataPointsFilter : public DataPointsFilter
 	{
