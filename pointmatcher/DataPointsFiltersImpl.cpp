@@ -2953,6 +2953,7 @@ template struct DataPointsFiltersImpl<double>::VoxelGridDataPointsFilter;
 
 #endif
 
+#if 0
 // CutAtDescriptorThresholdDataPointsFilter
 // Constructor
 template<typename T>
@@ -3019,4 +3020,4 @@ void DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter::inPlace
 
 template struct DataPointsFiltersImpl<float>::CutAtDescriptorThresholdDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::CutAtDescriptorThresholdDataPointsFilter;
-
+#endif

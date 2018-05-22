@@ -313,6 +313,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/SimpleSensorNoise.cpp
 	pointmatcher/DataPointsFilters/ObservationDirection.cpp
 	pointmatcher/DataPointsFilters/VoxelGrid.cpp
+	pointmatcher/DataPointsFilters/CutAtDescriptorThreshold.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

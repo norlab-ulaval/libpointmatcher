@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/SimpleSensorNoise.h"
 #include "DataPointsFilters/ObservationDirection.h"
 #include "DataPointsFilters/VoxelGrid.h"
+#include "DataPointsFilters/CutAtDescriptorThreshold.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -92,6 +93,7 @@ struct DataPointsFiltersImpl
 	typedef ::SimpleSensorNoiseDataPointsFilter<T> SimpleSensorNoiseDataPointsFilter;
 	typedef ::ObservationDirectionDataPointsFilter<T> ObservationDirectionDataPointsFilter;
 	typedef ::VoxelGridDataPointsFilter<T> VoxelGridDataPointsFilter;
+	typedef ::CutAtDescriptorThresholdDataPointsFilter<T> CutAtDescriptorThresholdDataPointsFilter;
 	
 	
 #if 0	
@@ -948,6 +950,7 @@ struct DataPointsFiltersImpl
 
   };
 
+#if 0
   //! Subsampling. Cut points with value of a given descriptor above or below a given threshold.
   struct CutAtDescriptorThresholdDataPointsFilter: public DataPointsFilter
   {
@@ -973,6 +976,7 @@ struct DataPointsFiltersImpl
     virtual DataPoints filter(const DataPoints& input);
     virtual void inPlaceFilter(DataPoints& cloud);
   };
+#endif
 
 }; // DataPointsFiltersImpl
 
