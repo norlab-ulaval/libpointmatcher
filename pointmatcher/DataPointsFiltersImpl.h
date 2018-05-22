@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/MaxPointCount.h"
 #include "DataPointsFilters/FixStepSampling.h"
 #include "DataPointsFilters/Shadow.h"
+#include "DataPointsFilters/SimpleSensorNoise.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -86,6 +87,7 @@ struct DataPointsFiltersImpl
 	typedef ::MaxPointCountDataPointsFilter<T> MaxPointCountDataPointsFilter;
 	typedef ::FixStepSamplingDataPointsFilter<T> FixStepSamplingDataPointsFilter;
 	typedef ::ShadowDataPointsFilter<T> ShadowDataPointsFilter;
+	typedef ::SimpleSensorNoiseDataPointsFilter<T> SimpleSensorNoiseDataPointsFilter;
 	
 	
 #if 0	
@@ -587,6 +589,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Sick LMS-xxx noise model
 	struct SimpleSensorNoiseDataPointsFilter: public DataPointsFilter
 	{
@@ -617,9 +620,10 @@ struct DataPointsFiltersImpl
 		/// @param beamAngle in rad, half of the total laser beam
 		/// @param beamConst in meter, minimum size of the laser beam
 		/// @param features points from the sensor
-		Matrix computeLaserNoise(const T minRadius, const T beamAngle, const T beamConst, const Matrix features);
+		Matrix computeLaserNoise(const T minRadius, const T beamAngle, const T beamConst, const Matrix& features);
 
 	};
+#endif
 	
 	//! Extract observation direction
 	struct ObservationDirectionDataPointsFilter: public DataPointsFilter

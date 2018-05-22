@@ -310,6 +310,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/MaxPointCount.cpp
 	pointmatcher/DataPointsFilters/FixStepSampling.cpp
 	pointmatcher/DataPointsFilters/Shadow.cpp
+	pointmatcher/DataPointsFilters/SimpleSensorNoise.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

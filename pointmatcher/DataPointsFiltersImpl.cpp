@@ -2479,6 +2479,7 @@ template struct DataPointsFiltersImpl<double>::ShadowDataPointsFilter;
 
 #endif
 
+#if 0
 // SimpleSensorNoiseDataPointsFilter
 // Constructor
 template<typename T>
@@ -2496,7 +2497,6 @@ DataPointsFiltersImpl<T>::SimpleSensorNoiseDataPointsFilter::SimpleSensorNoiseDa
 
 	LOG_INFO_STREAM("SimpleSensorNoiseDataPointsFilter - using sensor noise model: " << sensorNames[sensorType]);
 }
-
 
 // SimpleSensorNoiseDataPointsFilter
 // Compute
@@ -2572,6 +2572,8 @@ typename PointMatcher<T>::Matrix DataPointsFiltersImpl<T>::SimpleSensorNoiseData
 
 template struct DataPointsFiltersImpl<float>::SimpleSensorNoiseDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::SimpleSensorNoiseDataPointsFilter;
+
+#endif 
 
 
 // ObservationDirectionDataPointsFilter
