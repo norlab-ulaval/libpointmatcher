@@ -312,6 +312,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Shadow.cpp
 	pointmatcher/DataPointsFilters/SimpleSensorNoise.cpp
 	pointmatcher/DataPointsFilters/ObservationDirection.cpp
+	pointmatcher/DataPointsFilters/VoxelGrid.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/Shadow.h"
 #include "DataPointsFilters/SimpleSensorNoise.h"
 #include "DataPointsFilters/ObservationDirection.h"
+#include "DataPointsFilters/VoxelGrid.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -90,6 +91,7 @@ struct DataPointsFiltersImpl
 	typedef ::ShadowDataPointsFilter<T> ShadowDataPointsFilter;
 	typedef ::SimpleSensorNoiseDataPointsFilter<T> SimpleSensorNoiseDataPointsFilter;
 	typedef ::ObservationDirectionDataPointsFilter<T> ObservationDirectionDataPointsFilter;
+	typedef ::VoxelGridDataPointsFilter<T> VoxelGridDataPointsFilter;
 	
 	
 #if 0	
@@ -660,6 +662,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	struct VoxelGridDataPointsFilter : public DataPointsFilter
 	{
     	// Type definitions
@@ -720,6 +723,8 @@ struct DataPointsFiltersImpl
 		virtual void inPlaceFilter(DataPoints& cloud);
 
 	};	
+#endif
+	
 	//! Subsampling Surfels (Elipsoids) filter. First decimate the space until there is at most knn points, then find the center of mass and use the points to estimate nromal using eigen-decomposition
 	struct ElipsoidsDataPointsFilter: public DataPointsFilter
 	{

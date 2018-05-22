@@ -2633,6 +2633,7 @@ template struct DataPointsFiltersImpl<float>::ObservationDirectionDataPointsFilt
 template struct DataPointsFiltersImpl<double>::ObservationDirectionDataPointsFilter;
 #endif
 
+#if 0
 // VoxelGridDataPointsFilter
 template <typename T>
 DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::VoxelGridDataPointsFilter() :
@@ -2950,6 +2951,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 template struct DataPointsFiltersImpl<float>::VoxelGridDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::VoxelGridDataPointsFilter;
 
+#endif
 
 // CutAtDescriptorThresholdDataPointsFilter
 // Constructor
