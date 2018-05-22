@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/IncidenceAngle.h"
 #include "DataPointsFilters/RandomSampling.h"
 #include "DataPointsFilters/MaxPointCount.h"
+#include "DataPointsFilters/FixStepSampling.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -82,6 +83,7 @@ struct DataPointsFiltersImpl
 	typedef ::IncidenceAngleDataPointsFilter<T> IncidenceAngleDataPointsFilter;
 	typedef ::RandomSamplingDataPointsFilter<T> RandomSamplingDataPointsFilter;
 	typedef ::MaxPointCountDataPointsFilter<T> MaxPointCountDataPointsFilter;
+	typedef ::FixStepSamplingDataPointsFilter<T> FixStepSamplingDataPointsFilter;
 	
 	
 #if 0	
@@ -523,6 +525,7 @@ struct DataPointsFiltersImpl
 	};
 #endif
 
+#if 0
 	//! Systematic sampling, with variation over time
 	struct FixStepSamplingDataPointsFilter: public DataPointsFilter
 	{
@@ -554,6 +557,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 
 	//! Shadow filter, remove ghost points appearing on edges
 	struct ShadowDataPointsFilter: public DataPointsFilter
