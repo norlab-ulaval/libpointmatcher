@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/OrientNormals.h"
 #include "DataPointsFilters/IncidenceAngle.h"
 #include "DataPointsFilters/RandomSampling.h"
+#include "DataPointsFilters/MaxPointCount.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -80,6 +81,7 @@ struct DataPointsFiltersImpl
 	typedef ::OrientNormalsDataPointsFilter<T>  OrientNormalsDataPointsFilter;
 	typedef ::IncidenceAngleDataPointsFilter<T> IncidenceAngleDataPointsFilter;
 	typedef ::RandomSamplingDataPointsFilter<T> RandomSamplingDataPointsFilter;
+	typedef ::MaxPointCountDataPointsFilter<T> MaxPointCountDataPointsFilter;
 	
 	
 #if 0	
@@ -494,7 +496,8 @@ struct DataPointsFiltersImpl
 
 	};
 #endif
-	
+
+#if 0	
 	//! Maximum number of points
 	struct MaxPointCountDataPointsFilter: public DataPointsFilter
 	{
@@ -518,6 +521,7 @@ struct DataPointsFiltersImpl
 		virtual DataPoints filter(const DataPoints& input);
 		virtual void inPlaceFilter(DataPoints& cloud);
 	};
+#endif
 
 	//! Systematic sampling, with variation over time
 	struct FixStepSamplingDataPointsFilter: public DataPointsFilter

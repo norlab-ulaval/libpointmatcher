@@ -307,6 +307,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/OrientNormals.cpp
 	pointmatcher/DataPointsFilters/IncidenceAngle.cpp
 	pointmatcher/DataPointsFilters/RandomSampling.cpp
+	pointmatcher/DataPointsFilters/MaxPointCount.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

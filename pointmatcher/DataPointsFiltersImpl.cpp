@@ -2284,6 +2284,7 @@ template struct DataPointsFiltersImpl<double>::RandomSamplingDataPointsFilter;
 
 #endif
 
+#if 0
 // MaxPointCountDataPointsFilter
 // Constructor
 template<typename T>
@@ -2351,7 +2352,7 @@ void DataPointsFiltersImpl<T>::MaxPointCountDataPointsFilter::inPlaceFilter(
 
 template struct DataPointsFiltersImpl<float>::MaxPointCountDataPointsFilter;
 template struct DataPointsFiltersImpl<double>::MaxPointCountDataPointsFilter;
-
+#endif
 
 // FixStepSamplingDataPointsFilter
 // Constructor
