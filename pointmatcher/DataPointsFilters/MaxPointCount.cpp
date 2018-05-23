@@ -66,36 +66,37 @@ MaxPointCountDataPointsFilter<T>::filter(const DataPoints& input)
 template<typename T>
 void MaxPointCountDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	const size_t N = static_cast<size_t> (cloud.features.cols() - 1) ;
+	const size_t N = static_cast<size_t> (cloud.features.cols() - 1);
 	
-	if (maxCount < N) 
+	if (maxCount <= N) 
 	{
+		//Re-init seed at each call, to ensure same results
 		std::srand(seed);
 		
-		for(size_t j=0; j<=maxCount; ++j)
+		for(size_t j=0; j<maxCount; ++j)
 		{
 			//Get a random index in [j; N]
 			const size_t idx = j + static_cast<size_t>((N-j)*(static_cast<float>(std::rand()/static_cast<float>(RAND_MAX))));
 			
 			//Switch columns j and idx
-			auto feat = cloud.features.col(j);
+			const auto feat = cloud.features.col(j);
 			cloud.features.col(j) = cloud.features.col(idx);
 			cloud.features.col(idx) = feat;
 			
 			if (cloud.descriptors.cols() > 0)
 			{
-				auto desc = cloud.descriptors.col(j);
+				const auto desc = cloud.descriptors.col(j);
 				cloud.descriptors.col(j) = cloud.descriptors.col(idx);
 				cloud.descriptors.col(idx) = desc;
 			}
 			if (cloud.times.cols() > 0)
 			{
-				auto time = cloud.times.col(j);
+				const auto time = cloud.times.col(j);
 				cloud.times.col(j) = cloud.times.col(idx);
 				cloud.times.col(idx) = time;
 			}	
 		}
-		
+		//Resize the cloud
 		cloud.conservativeResize(maxCount);
 	}
 }
