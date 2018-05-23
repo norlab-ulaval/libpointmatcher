@@ -95,7 +95,7 @@ void DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter::inPlaceFilter(
 		if (!hasNaN)
 		{
 			cloud.setColFrom(j, cloud, i);
-			j++;
+			++j;
 		}
 	}
 
@@ -143,24 +143,24 @@ void DataPointsFiltersImpl<T>::MaxDistDataPointsFilter::inPlaceFilter(
 	int j = 0;
 	if(dim == -1) // Euclidean distance
 	{
-		for (int i = 0; i < nbPointsIn; i++)
+		const T absMaxDist = anyabs(maxDist);
+		for (int i = 0; i < nbPointsIn; ++i)
 		{
-			const T absMaxDist = anyabs(maxDist);
 			if (cloud.features.col(i).head(nbRows-1).norm() < absMaxDist)
 			{
 				cloud.setColFrom(j, cloud, i);
-				j++;
+				++j;
 			}
 		}
 	}
 	else // Single-axis distance
 	{
-		for (int i = 0; i < nbPointsIn; i++)
+		for (int i = 0; i < nbPointsIn; ++i)
 		{
 			if ((cloud.features(dim, i)) < maxDist)
 			{
 				cloud.setColFrom(j, cloud, i);
-				j++;
+				++j;
 			}
 		}
 	}
@@ -207,23 +207,23 @@ void DataPointsFiltersImpl<T>::MinDistDataPointsFilter::inPlaceFilter(
 	if(dim == -1) // Euclidean distance
 	{
 		const T absMinDist = anyabs(minDist);
-		for (int i = 0; i < nbPointsIn; i++)
+		for (int i = 0; i < nbPointsIn; ++i)
 		{
 			if (cloud.features.col(i).head(nbRows-1).norm() > absMinDist)
 			{
 				cloud.setColFrom(j, cloud, i);
-				j++;
+				++j;
 			}
 		}
 	}
 	else // Single axis distance
 	{
-		for (int i = 0; i < nbPointsIn; i++)
+		for (int i = 0; i < nbPointsIn; ++i)
 		{
 			if ((cloud.features(dim, i)) > minDist)
 			{
 				cloud.setColFrom(j, cloud, i);
-				j++;
+				++j;
 			}
 		}
 	}
@@ -270,7 +270,7 @@ void DataPointsFiltersImpl<T>::BoundingBoxDataPointsFilter::inPlaceFilter(
 	const int nbRows = cloud.features.rows();
 
 	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
+	for (int i = 0; i < nbPointsIn; ++i)
 	{
 		bool keepPt = false;
 		const Vector point = cloud.features.col(i);
@@ -289,7 +289,7 @@ void DataPointsFiltersImpl<T>::BoundingBoxDataPointsFilter::inPlaceFilter(
 		if(keepPt)
 		{
 			cloud.setColFrom(j, cloud, i);
-			j++;
+			++j;
 		}
 	}
 
@@ -333,8 +333,8 @@ void DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter::inPlaceFilter(
 
 	// build array
 	vector<T> values;
-	values.reserve(cloud.features.cols());
-	for (int x = 0; x < cloud.features.cols(); ++x)
+	values.reserve(nbPointsIn);
+	for (int x = 0; x < nbPointsIn; ++x)
 		values.push_back(cloud.features(dim, x));
 
 	// get quartiles value
@@ -343,13 +343,13 @@ void DataPointsFiltersImpl<T>::MaxQuantileOnAxisDataPointsFilter::inPlaceFilter(
 
 	// copy towards beginning the elements we keep
 	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
+	for (int i = 0; i < nbPointsIn; ++i)
 	{
 		if (cloud.features(dim, i) < limit)
 		{
 			assert(j <= i);
 			cloud.setColFrom(j, cloud, i);
-			j++;
+			++j;
 		}
 	}
 	assert(j <= nbPointsOut);
@@ -401,7 +401,7 @@ void DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::inPlaceFilter(
 
 	// fill cloud values
 	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
+	for (int i = 0; i < nbPointsIn; ++i)
 	{
 		const T density(densities(0,i));
 		if (density > maxDensity)
@@ -418,13 +418,13 @@ void DataPointsFiltersImpl<T>::MaxDensityDataPointsFilter::inPlaceFilter(
 			if (r < acceptRatio)
 			{
 				cloud.setColFrom(j, cloud, i);
-				j++;
+				++j;
 			}
 		}
 		else
 		{
 			cloud.setColFrom(j, cloud, i);
-			j++;
+			++j;
 		}
 	}
 
@@ -478,10 +478,11 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 	const int pointsCount(cloud.features.cols());
 	const int featDim(cloud.features.rows());
 	const int descDim(cloud.descriptors.rows());
+	const unsigned int labelDim(cloud.descriptorLabels.size());
 
 	// Validate descriptors and labels
 	int insertDim(0);
-	for(unsigned int i = 0; i < cloud.descriptorLabels.size(); i++)
+	for(unsigned int i = 0; i < labelDim ; ++i)
 		insertDim += cloud.descriptorLabels[i].span;
 	if (insertDim != descDim)
 		throw InvalidField("SurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
@@ -554,13 +555,13 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 		Matrix d(featDim-1, knn);
 		int realKnn = 0;
 
-		for(int j = 0; j < int(knn); j++)
+		for(int j = 0; j < int(knn); ++j)
 		{
 			if (matches.dists(j,i) != Matches::InvalidDist)
 			{
 				const int refIndex(matches.ids(j,i));
 				d.col(realKnn) = cloud.features.block(0, refIndex, featDim-1, 1);
-				realKnn++;
+				++realKnn;
 			}
 		}
 		d.conservativeResize(Eigen::NoChange, realKnn);
@@ -582,10 +583,11 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 
 				if(sortEigen)
 				{
-					std::vector<size_t> idx = sortIndexes(eigenVa);
+					const std::vector<size_t> idx = sortIndexes(eigenVa);
+					const size_t idxSize = idx.size();
 					Vector tmp_eigenVa = eigenVa;
 					Matrix tmp_eigenVe = eigenVe;
-					for(size_t i=0; i<idx.size(); i++)
+					for(size_t i=0; i<idxSize; ++i)
 					{
 						eigenVa(i,0) = tmp_eigenVa(idx[i], 0);
 						eigenVe.col(i) = tmp_eigenVe.col(idx[i]);
@@ -645,7 +647,7 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 			const Vector currentNormal = normals->col(i);
 			Vector mean = Vector::Zero(featDim-1);
 			int n=0;
-			for(int j = 0; j < int(knn); j++)
+			for(int j = 0; j < int(knn); ++j)
 			{
 				if (matches.dists(j,i) != Matches::InvalidDist)
 				{
@@ -656,7 +658,7 @@ void DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::inPlaceFilter(
 					else // flip normal vector
 						mean -= normal;
 
-					n++;
+					++n;
 				}
 			}
 
@@ -675,9 +677,10 @@ template<typename T>
 typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::computeNormal(const Vector eigenVa, const Matrix eigenVe)
 {
 	// Keep the smallest eigenvector as surface normal
+	const int nbEigenCol = eigenVe.cols();
 	int smallestId(0);
 	T smallestValue(numeric_limits<T>::max());
-	for(int j = 0; j < eigenVe.cols(); j++)
+	for(int j = 0; j < nbEigenCol ; ++j)
 	{
 		if (eigenVa(j) < smallestValue)
 		{
@@ -696,8 +699,9 @@ typename std::vector<size_t> DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFi
 {
 
 	// initialize original index locations
-	std::vector<size_t> idx(v.size());
-	for(size_t i=0; i < idx.size(); i++)
+	const size_t idxSize = v.size();
+	std::vector<size_t> idx(idxSize);
+	for(size_t i=0; i < idxSize; ++i)
 	{
 		idx[i]=i;
 	}
@@ -723,7 +727,7 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::SurfaceNormalDataPoin
 	// serialize row major
 	const int eigenVeDim = eigenVe.cols();
 	Vector output(eigenVeDim*eigenVeDim);
-	for(int k=0; k < eigenVe.cols(); k++)
+	for(int k=0; k < eigenVeDim; ++k)
 	{
 		output.segment(k*eigenVeDim, eigenVeDim) = 
 			eigenVe.row(k).transpose();
@@ -736,7 +740,7 @@ template<typename T>
 T DataPointsFiltersImpl<T>::SurfaceNormalDataPointsFilter::computeDensity(const Matrix NN)
 {
 	//volume in meter
-	T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff(), 3);
+	const T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff(), 3);
 
 	//volume in decimeter
 	//T volume = (4./3.)*M_PI*std::pow(NN.colwise().norm().maxCoeff()*10.0, 3);
@@ -793,13 +797,14 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::inPlaceFil
 	const int pointsCount(cloud.features.cols());
 	const int featDim(cloud.features.rows());
 	const int descDim(cloud.descriptors.rows());
+	const unsigned int labelDim(cloud.descriptorLabels.size());
 
 	int insertDim(0);
 	if (averageExistingDescriptors)
 	{
 		// TODO: this should be in the form of an assert
 		// Validate descriptors and labels
-		for(unsigned int i = 0; i < cloud.descriptorLabels.size(); i++)
+		for(unsigned int i = 0; i < labelDim ; ++i)
 			insertDim += cloud.descriptorLabels[i].span;
 		if (insertDim != descDim)
 			throw InvalidField("SamplingSurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
@@ -848,9 +853,10 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::inPlaceFil
 	// Bring the data we keep to the front of the arrays then
 	// wipe the leftover unused space.
 	std::sort(buildData.indicesToKeep.begin(), buildData.indicesToKeep.end());
-	int ptsOut = buildData.indicesToKeep.size();
-	for (int i = 0; i < ptsOut; i++){
-		int k = buildData.indicesToKeep[i];
+	const int ptsOut = buildData.indicesToKeep.size();
+	for (int i = 0; i < ptsOut; ++i)
+	{
+		const int k = buildData.indicesToKeep[i];
 		assert(i <= k);
 		cloud.features.col(i) = cloud.features.col(k);
 		if (cloud.descriptors.rows() != 0)
@@ -876,9 +882,10 @@ template<typename T>
 size_t argMax(const typename PointMatcher<T>::Vector& v)
 {
 	//FIXME: Change that to use the new API. the new Eigen API (3.2.8) allows this with the call maxCoeff. See the section Visitors in https://eigen.tuxfamily.org/dox/group__TutorialReductionsVisitorsBroadcasting.html
+	const int size(v.size());
 	T maxVal(0);
 	size_t maxIdx(0);
-	for (int i = 0; i < v.size(); ++i)
+	for (int i = 0; i < size; ++i)
 	{
 		if (v[i] > maxVal)
 		{
@@ -997,13 +1004,13 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	// Filter points randomly
 	if(samplingMethod == 0)
 	{
-		for(int i=0; i<colCount; i++)
+		for(int i=0; i<colCount; ++i)
 		{
 			const float r = (float)std::rand()/(float)RAND_MAX;
 			if(r < ratio)
 			{
 				// Keep points with their descriptors
-				int k = data.indices[first+i];
+				const int k = data.indices[first+i];
 				// Mark the indices which will be part of the final data
 				data.indicesToKeep.push_back(k);
 
@@ -1022,8 +1029,7 @@ void DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter::fuseRange(
 	}
 	else
 	{
-
-		int k = data.indices[first];
+		const int k = data.indices[first];
 		// Mark the indices which will be part of the final data
 		data.indicesToKeep.push_back(k);
 		data.features.col(k).topRows(featDim-1) = mean;
@@ -1110,13 +1116,14 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
   const int pointsCount(cloud.features.cols());
   const int featDim(cloud.features.rows());
   const int descDim(cloud.descriptors.rows());
+	const unsigned int labelDim(cloud.descriptorLabels.size());
 
   int insertDim(0);
   if (averageExistingDescriptors)
   {
     // TODO: this should be in the form of an assert
     // Validate descriptors and labels
-    for(unsigned int i = 0; i < cloud.descriptorLabels.size(); i++)
+    for(unsigned int i = 0; i < labelDim; ++i)
       insertDim += cloud.descriptorLabels[i].span;
     if (insertDim != descDim)
       throw InvalidField("ElipsoidsDataPointsFilter: Error, descriptor labels do not match descriptor data");
@@ -1135,7 +1142,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
 
   // Allocate space for new descriptors
   Labels cloudLabels, timeLabels;
-  if (keepIndices) {
+  if (keepIndices) 
+  {
     cloudLabels.push_back(Label("pointIds", dimPointIds));
     cloudLabels.push_back(Label("pointX", dimPointIds));
     cloudLabels.push_back(Label("pointY", dimPointIds));
@@ -1156,7 +1164,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
     cloudLabels.push_back(Label("weights", dimWeights));
   if (keepMeans)
     cloudLabels.push_back(Label("means", dimMeans));
-  if (keepShapes) {
+  if (keepShapes) 
+  {
     assert(featDim == 3);
     cloudLabels.push_back(Label("shapes", dimShapes)); // Planarity, Cylindricality, Sphericality
   }
@@ -1171,7 +1180,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
   BuildData buildData(cloud.features, cloud.descriptors, cloud.times);
 
   // get views
-  if (keepIndices) {
+  if (keepIndices) 
+  {
     buildData.pointIds = cloud.getDescriptorViewByName("pointIds");
     buildData.pointX = cloud.getDescriptorViewByName("pointX");
     buildData.pointY = cloud.getDescriptorViewByName("pointY");
@@ -1207,15 +1217,17 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::inPlaceFilter(
   // Bring the data we keep to the front of the arrays then
   // wipe the leftover unused space.
   std::sort(buildData.indicesToKeep.begin(), buildData.indicesToKeep.end());
-  int ptsOut = buildData.indicesToKeep.size();
-  for (int i = 0; i < ptsOut; i++){
-    int k = buildData.indicesToKeep[i];
+  const int ptsOut = buildData.indicesToKeep.size();
+  for (int i = 0; i < ptsOut; ++i)
+  {
+    const int k = buildData.indicesToKeep[i];
     assert(i <= k);
     cloud.features.col(i) = cloud.features.col(k);
     cloud.times.col(i) = cloud.times.col(k);
     if (cloud.descriptors.rows() != 0)
       cloud.descriptors.col(i) = cloud.descriptors.col(k);
-    if(keepIndices) {
+    if(keepIndices) 
+    {
       buildData.pointIds->col(i) = buildData.pointIds->col(k);
       buildData.pointX->col(i) = buildData.pointX->col(k);
       buildData.pointY->col(i) = buildData.pointY->col(k);
@@ -1303,7 +1315,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   // build nearest neighbors list
   Matrix d(featDim-1, colCount);
   Int64Matrix t(1, colCount);
-  for (int i = 0; i < colCount; ++i) {
+  for (int i = 0; i < colCount; ++i) 
+  {
     d.col(i) = data.features.block(0,data.indices[first+i],featDim-1, 1);
     t.col(i) = data.times.col(data.indices[first + i]); //, 0);
   }
@@ -1320,9 +1333,9 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   const Vector mean = d.rowwise().sum() / T(colCount);
   const Matrix NN = (d.colwise() - mean);
 
-  boost::int64_t minTime = t.minCoeff();
-  boost::int64_t maxTime = t.maxCoeff();
-  boost::int64_t meanTime = t.sum() / T(colCount);
+  const boost::int64_t minTime = t.minCoeff();
+  const boost::int64_t maxTime = t.maxCoeff();
+  const boost::int64_t meanTime = t.sum() / T(colCount);
 
   // compute covariance
   const Matrix C(NN * NN.transpose());
@@ -1342,11 +1355,12 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
       data.unfitPointsCount += colCount;
       return;
     }
-    if(minPlanarity > 0 ) {
+    if(minPlanarity > 0) 
+    {
       Eigen::Matrix<T, 3, 1> vals;
       (vals << eigenVa(0),eigenVa(1),eigenVa(2));
       vals = vals/eigenVa.sum();
-      T planarity = 2 * vals(1)-2*vals(2);
+      const T planarity = 2 * vals(1)-2*vals(2);
       // throw out surfel if it does not meet planarity criteria
       if (planarity < minPlanarity)
       {
@@ -1360,8 +1374,10 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   Vector pointIds(1,colCount);
   Matrix points(3,colCount);
 
-  if(keepIndices) {
-    for (int i = 0; i < colCount; ++i) {
+  if(keepIndices) 
+  {
+    for (int i = 0; i < colCount; ++i) 
+    {
       pointIds(i) = data.indices[first+i];
       points.col(i) = data.features.block(0,data.indices[first+i],2, 1);
     }
@@ -1389,13 +1405,13 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   if(samplingMethod == 0)
   {
 
-    for(int i=0; i<colCount; i++)
+    for(int i=0; i<colCount; ++i)
     {
       const float r = (float)std::rand()/(float)RAND_MAX;
       if(r < ratio)
       {
         // Keep points with their descriptors
-        int k = data.indices[first+i];
+        const int k = data.indices[first+i];
         // Mark the indices which will be part of the final data
         data.indicesToKeep.push_back(k);
 
@@ -1405,7 +1421,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
         data.times(2, k) = meanTime;
 
         // Build new descriptors
-        if(keepIndices) {
+        if(keepIndices) 
+        {
           data.pointIds->col(k) = pointIds;
           data.pointX->col(k) = points.row(0);
           data.pointY->col(k) = points.row(1);
@@ -1423,9 +1440,10 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
         if(keepCovariances)
           data.covariance->col(k) = serialCovVector;
         if(keepMeans)
-          data.means->col(k) = mean;
+          data.means->col(k) = mean;    
         // a 3d vecetor of shape parameters: planarity (P), cylindricality (C), sphericality (S)
-        if(keepShapes) {
+        if(keepShapes) 
+        {
           Eigen::Matrix<T, 3, 3> shapeMat;
           (shapeMat << 0, 2, -2, 1, -1, 0, 0, 0, 3);
           Eigen::Matrix<T, 3, 1> vals;
@@ -1434,7 +1452,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
           data.shapes->col(k) = shapeMat * vals;
 
         }
-        if(keepWeights) {
+        if(keepWeights) 
+        {
           (*data.weights)(0,k) = colCount;
         }
       }
@@ -1443,7 +1462,7 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
   else
   {
 
-    int k = data.indices[first];
+    const int k = data.indices[first];
     // Mark the indices which will be part of the final data
     data.indicesToKeep.push_back(k);
     data.features.col(k).topRows(featDim-1) = mean;
@@ -1469,7 +1488,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
     }
 
     // Build new descriptors
-    if(keepIndices) {
+    if(keepIndices) 
+    {
       data.pointIds->col(k) = pointIds;
       data.pointX->col(k) = points.row(0);
       data.pointY->col(k) = points.row(1);
@@ -1487,7 +1507,8 @@ void DataPointsFiltersImpl<T>::ElipsoidsDataPointsFilter::fuseRange(BuildData& d
       data.covariance->col(k) = serialCovVector;
     if(keepMeans)
       data.means->col(k) = mean;
-    if(keepShapes) {
+    if(keepShapes) 
+    {
       Eigen::Matrix<T, 3, 3> shapeMat;
       (shapeMat << 0, 2, -2, 1, -1, 0, 0, 0, 3);
       Eigen::Matrix<T, 3, 1> vals;
@@ -1553,13 +1574,14 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
   const int pointsCount(cloud.features.cols());
   const int featDim(cloud.features.rows());
   const int descDim(cloud.descriptors.rows());
+  const unsigned int labelDim(cloud.descriptorLabels.size());
 
   int insertDim(0);
   if (averageExistingDescriptors)
   {
     // TODO: this should be in the form of an assert
     // Validate descriptors and labels
-    for(unsigned int i = 0; i < cloud.descriptorLabels.size(); i++)
+    for(unsigned int i = 0; i < labelDim; ++i)
       insertDim += cloud.descriptorLabels[i].span;
     if (insertDim != descDim)
       throw InvalidField("GestaltDataPointsFilter: Error, descriptor labels do not match descriptor data");
@@ -1586,7 +1608,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
     cloudLabels.push_back(Label("eigVectors", dimEigVectors));
   if (keepCovariances)
     cloudLabels.push_back(Label("covariance", dimCovariances));
-  if (keepGestaltFeatures) {
+  if (keepGestaltFeatures) 
+  {
     cloudLabels.push_back(Label("gestaltMeans", dimGestalt));
     cloudLabels.push_back(Label("gestaltVariances", dimGestalt));
     cloudLabels.push_back(Label("warpedXYZ", 3));
@@ -1613,7 +1636,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
     buildData.eigenVectors = cloud.getDescriptorViewByName("eigVectors");
   if (keepCovariances)
     buildData.covariance = cloud.getDescriptorViewByName("covariance");
-  if (keepGestaltFeatures) {
+  if (keepGestaltFeatures) 
+  {
     buildData.gestaltMeans = cloud.getDescriptorViewByName("gestaltMeans");
     buildData.gestaltVariances = cloud.getDescriptorViewByName("gestaltVariances");
     buildData.warpedXYZ = cloud.getDescriptorViewByName("warpedXYZ");
@@ -1634,9 +1658,10 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
   // Bring the data we keep to the front of the arrays then
   // wipe the leftover unused space.
   std::sort(buildData.indicesToKeep.begin(), buildData.indicesToKeep.end());
-  int ptsOut = buildData.indicesToKeep.size();
-  for (int i = 0; i < ptsOut; i++){
-    int k = buildData.indicesToKeep[i];
+  const int ptsOut = buildData.indicesToKeep.size();
+  for (int i = 0; i < ptsOut; ++i)
+  {
+    const int k = buildData.indicesToKeep[i];
     assert(i <= k);
     cloud.features.col(i) = cloud.features.col(k);
     cloud.times.col(i) = cloud.times.col(k);
@@ -1652,7 +1677,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::inPlaceFilter(
       buildData.eigenVectors->col(i) = buildData.eigenVectors->col(k);
     if(keepCovariances)
       buildData.covariance->col(i) = buildData.covariance->col(k);
-    if(keepGestaltFeatures) {
+    if(keepGestaltFeatures) 
+    {
       buildData.gestaltMeans->col(i) = buildData.gestaltMeans->col(k);
       buildData.gestaltVariances->col(i) = buildData.gestaltVariances->col(k);
       buildData.warpedXYZ->col(i) = buildData.warpedXYZ->col(k);
@@ -1671,26 +1697,26 @@ template<typename T>
 void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data, const int first, const int last, const Vector minValues, const Vector maxValues) const
 {
 
-  T minBoundX = minValues.x() / vSizeX;
-  T maxBoundX = maxValues.x() / vSizeX;
-  T minBoundY = minValues.y() / vSizeY;
-  T maxBoundY = maxValues.y() / vSizeY;
-  T minBoundZ = minValues.z() / vSizeZ;
-  T maxBoundZ = maxValues.z() / vSizeZ;
+  const T minBoundX = minValues.x() / vSizeX;
+  const T maxBoundX = maxValues.x() / vSizeX;
+  const T minBoundY = minValues.y() / vSizeY;
+  const T maxBoundY = maxValues.y() / vSizeY;
+  const T minBoundZ = minValues.z() / vSizeZ;
+  const T maxBoundZ = maxValues.z() / vSizeZ;
 
   // number of divisions is total size / voxel size voxels of equal length + 1
   // with remaining space
-  unsigned int numDivX = 1 + maxBoundX - minBoundX;
-  unsigned int numDivY = 1 + maxBoundY - minBoundY;;
-  unsigned int numDivZ = 1 + maxBoundZ - minBoundZ;
-  unsigned int numVox = numDivX * numDivY * numDivZ;
+  const unsigned int numDivX = 1 + maxBoundX - minBoundX;
+  const unsigned int numDivY = 1 + maxBoundY - minBoundY;;
+  const unsigned int numDivZ = 1 + maxBoundZ - minBoundZ;
+  const unsigned int numVox = numDivX * numDivY * numDivZ;
 
   // Assume point cloud is randomly ordered
   // compute a linear index of the following type
   // i, j, k are the component indices
   // nx, ny number of divisions in x and y components
   // idx = i + j * nx + k * nx * ny
-  int numPoints = last - first;
+  const int numPoints = last - first;
   std::vector<unsigned int> indices(numPoints);
 
   // vector to hold the first point in a voxel
@@ -1699,18 +1725,21 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
   std::vector<typename VoxelGridDataPointsFilter::Voxel>* voxels;
 
   // try allocating vector. If too big return error
-  try {
+  try 
+  {
     voxels = new std::vector<typename VoxelGridDataPointsFilter::Voxel>(numVox);
-  } catch (std::bad_alloc&) {
+  } 
+  catch (std::bad_alloc&) 
+  {
     throw InvalidParameter((boost::format("GestaltDataPointsFilter: Memory allocation error with %1% voxels.  Try increasing the voxel dimensions.") % numVox).str());
   }
 
   const int featDim(data.features.rows());
 
-  for (int p = 0; p < numPoints; p++ )
+  for (int p = 0; p < numPoints; ++p)
   {
-    unsigned int i = floor(data.features(0,p)/vSizeX - minBoundX);
-    unsigned int j = floor(data.features(1,p)/vSizeY- minBoundY);
+    const unsigned int i = floor(data.features(0,p)/vSizeX - minBoundX);
+    const unsigned int j = floor(data.features(1,p)/vSizeY- minBoundY);
     unsigned int k = 0;
     unsigned int idx;
     if ( featDim == 4 )
@@ -1723,7 +1752,7 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
       idx = i + j * numDivX;
     }
 
-    unsigned int pointsInVox = (*voxels)[idx].numPoints + 1;
+    const unsigned int pointsInVox = (*voxels)[idx].numPoints + 1;
 
     if (pointsInVox == 1)
     {
@@ -1741,20 +1770,20 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
 
   // take centers of voxels for now
   // Todo revert to random point selection within cell
-  for (int p = 0; p < numPoints ; p++)
+  for (int p = 0; p < numPoints ; ++p)
   {
     const unsigned int idx = indices[p];
     const unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
     // Choose random point in voxel
     const int randomIndex = std::rand() % numPoints;
-    for (int f = 0; f < (featDim - 1); f++ )
+    for (int f = 0; f < (featDim - 1); ++f)
     {
       data.features(f,firstPoint) = data.features(f,randomIndex);
     }
   }
 
-  for (unsigned int idx = 0; idx < numVox; idx++)
+  for (unsigned int idx = 0; idx < numVox; ++idx)
   {
     const unsigned int numPoints = (*voxels)[idx].numPoints;
     const unsigned int firstPoint = (*voxels)[idx].firstPoint;
@@ -1771,15 +1800,16 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::buildNew(BuildData& data
 
   delete voxels;
 
+	const unsigned int nbPointsToKeep(pointsToKeep.size());
   // now the keypoints are in pointsToKeep
   // downsample with ratio
-  for(unsigned int i=0; i<pointsToKeep.size(); i++)
+  for(unsigned int i=0; i<nbPointsToKeep; ++i)
   {
     const float r = (float)std::rand()/(float)RAND_MAX;
     if(r < ratio)
     {
       // Keep points with their descriptors
-      int k = pointsToKeep[i];
+      const int k = pointsToKeep[i];
       // Mark the indices which will be part of the final data
       data.indicesToKeep.push_back(k);
     }
@@ -1791,52 +1821,60 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
 {
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 
-  const int featDim(data.features.rows());
+  const unsigned int nbIdxToKeep(data.indicesToKeep.size());
+  const int inputFeatDim(input.features.cols());
+  
   std::vector<int> indicesToKeepStrict;
-  for (unsigned int i = 0; i< data.indicesToKeep.size(); ++i) {
+  for (unsigned int i = 0; i < nbIdxToKeep ; ++i) 
+  {
     Eigen::Matrix<T,3,1> keyPoint;
     keyPoint = input.features.col(data.indicesToKeep[i]);
 
     // Define a search box around each keypoint to search for nearest neighbours.
-    T minBoundX = keyPoint(0,0) - radius;
-    T maxBoundX = keyPoint(0,0) + radius;
-    T minBoundY = keyPoint(1,0) - radius;
-    T maxBoundY = keyPoint(1,0) + radius;
-    T minBoundZ = keyPoint(2,0) - radius;
-    T maxBoundZ = keyPoint(2,0) + radius;
+    const T minBoundX = keyPoint(0,0) - radius;
+    const T maxBoundX = keyPoint(0,0) + radius;
+    const T minBoundY = keyPoint(1,0) - radius;
+    const T maxBoundY = keyPoint(1,0) + radius;
+    const T minBoundZ = keyPoint(2,0) - radius;
+    const T maxBoundZ = keyPoint(2,0) + radius;
     // iterate over data and find in- / outliers
     Eigen::Matrix<T,3,1> feature;
     std::vector<int> goodIndices;
-    for (int j = 0; j < input.features.cols(); ++j) {
+    for (int j = 0; j < inputFeatDim; ++j) 
+    {
       feature = input.features.col(j);
       if(feature(0,0) <= maxBoundX && feature(0,0) >= minBoundX &&
           feature(1,0) <= maxBoundY && feature(1,0) >= minBoundY &&
           feature(2,0) <= maxBoundZ && feature(2,0) >= minBoundZ &&
-          keyPoint != feature) {
+          keyPoint != feature) 
+      {
         goodIndices.push_back(j);
       }
     }
-    int colCount = goodIndices.size();
+    const int colCount = goodIndices.size();
     // if empty neighbourhood unfit the point
-    if (colCount == 0) {
-      data.unfitPointsCount++;
+    if (colCount == 0) 
+    {
+      ++(data.unfitPointsCount);
       continue;
     }
+    
+    const int featDim(data.features.rows());
+    
     Matrix d(featDim-1, colCount);
     Int64Matrix t(1, colCount);
 
-    for (int j = 0; j < colCount; ++j) {
+    for (int j = 0; j < colCount; ++j) 
+    {
       d.col(j) = data.features.block(0,data.indices[goodIndices[j]],featDim-1, 1);
       t.col(j) = data.times.col(data.indices[goodIndices[j]]);
     }
 
-    const int featDim(data.features.rows());
-
     const Vector mean = d.rowwise().sum() / T(colCount);
     const Matrix NN = d.colwise() - mean;
-    boost::int64_t minTime = t.minCoeff();
-    boost::int64_t maxTime = t.maxCoeff();
-    boost::int64_t meanTime = t.sum() / T(colCount);
+    const boost::int64_t minTime = t.minCoeff();
+    const boost::int64_t maxTime = t.maxCoeff();
+    const boost::int64_t meanTime = t.sum() / T(colCount);
     // compute covariance
     const Matrix C(NN * NN.transpose());
     Vector eigenVa = Vector::Identity(featDim-1, 1);
@@ -1861,11 +1899,13 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
     double planarity = 0.;
 	double cylindricality = 0.;
 
-    if(keepNormals || keepGestaltFeatures) {
+    if(keepNormals || keepGestaltFeatures) 
+    {
       // calculate orientation of NN
       normal = SurfaceNormalDataPointsFilter::computeNormal(eigenVa, eigenVe);
 
-      if(keepGestaltFeatures) {
+      if(keepGestaltFeatures) 
+      {
         Vector eigenVaSort = SurfaceNormalDataPointsFilter::sortEigenValues(eigenVa);
         planarity = 2 * (eigenVaSort(1) - eigenVaSort(0))/eigenVaSort.sum();
         cylindricality = (eigenVaSort(2) - eigenVaSort(1))/eigenVaSort.sum();
@@ -1883,25 +1923,29 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
             newX(2), newY(2), up(2);
 
         // discard keypoints with high planarity
-        if(planarity > 0.9) {
+        if(planarity > 0.9) 
+        {
           data.unfitPointsCount += colCount;
           continue;
         }
         // discard keypoints with normal too close to vertical
-        if(acos(normal.dot(up)) < abs(10 * M_PI/180)) {
+        if(acos(normal.dot(up)) < abs(10 * M_PI/180)) 
+        {
           data.unfitPointsCount += colCount;
           continue;
         }
 
         // define features in new basis that is oriented with the covariance
-        for (int j = 0; j < colCount; ++j) {
+        for (int j = 0; j < colCount; ++j) 
+        {
           data.warpedXYZ->col(j) = ((data.features.block(0,j,3,1) - keyPoint).transpose() * newBasis).transpose();
         }
       }
     }
     Vector angles(colCount), radii(colCount), heights(colCount);
     Matrix gestaltMeans(4, 8), gestaltVariances(4, 8), numOfValues(4, 8);
-    if(keepGestaltFeatures) {
+    if(keepGestaltFeatures) 
+    {
 
       // calculate the polar coordinates of points
       angles = GestaltDataPointsFilter::calculateAngles(*data.warpedXYZ, keyPoint);
@@ -1909,14 +1953,15 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       heights = data.warpedXYZ->row(2);
 
       // sort points into Gestalt bins
-      T angularBinWidth = M_PI/4;
-      T radialBinWidth = radius/4;
+      const T angularBinWidth = M_PI/4;
+      const T radialBinWidth = radius/4;
       Matrix indices(2, colCount);
       gestaltMeans = Matrix::Zero(4, 8);
       gestaltVariances = Matrix::Zero(4, 8);
       numOfValues = Matrix::Zero(4, 8);
 
-      for (int it=0; it < colCount; ++it) {
+      for (int it=0; it < colCount; ++it) 
+      {
         indices(0,it) = floor(radii(it)/radialBinWidth);
         // if value exceeds borders of bin -> put in outmost bin
         if(indices(0,it) > 3)
@@ -1926,26 +1971,35 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
         if(indices(1,it) > 7)
           indices(1,it) = 7;
         gestaltMeans(indices(0,it), indices(1,it)) += heights(it);
-        numOfValues(indices(0,it), indices(1,it))++;
+        ++(numOfValues(indices(0,it), indices(1,it)));
       }
 
-      for (int radial=0; radial < 4; ++radial) {
-        for (int angular = 0; angular < 8; ++angular) {
-          if (numOfValues(radial, angular) > 0) {
+      for (int radial=0; radial < 4; ++radial) 
+      {
+        for (int angular = 0; angular < 8; ++angular) 
+        {
+          if (numOfValues(radial, angular) > 0) 
+          {
             gestaltMeans(radial, angular) = gestaltMeans(radial, angular)/numOfValues(radial, angular);
           }
         }
       }
-      for (int it=0; it < colCount; ++it) {
+      for (int it=0; it < colCount; ++it) 
+      {
         gestaltVariances(indices(0,it), indices(1,it)) += (heights(it)-gestaltMeans(indices(0,it), indices(1,it))) * (heights(it)-gestaltMeans(indices(0,it), indices(1,it)));
       }
-      for (int radial=0; radial < 4; ++radial) {
-        for (int angular = 0; angular < 8; ++angular) {
+      for (int radial=0; radial < 4; ++radial) 
+      {
+        for (int angular = 0; angular < 8; ++angular) 
+        {
           // if bins are == 0 -> propagate with value in bin closer to keypoint
-          if (gestaltMeans(radial,angular) == 0 && radial > 0) {
+          if (gestaltMeans(radial,angular) == 0 && radial > 0) 
+          {
             gestaltMeans(radial, angular) = gestaltMeans(radial-1, angular);
             gestaltVariances(radial, angular) = gestaltVariances(radial-1, angular);
-          } else if (numOfValues(radial, angular) > 0) {
+          } 
+          else if (numOfValues(radial, angular) > 0) 
+          {
             gestaltVariances(radial, angular) = gestaltVariances(radial, angular)/numOfValues(radial, angular);
           }
         }
@@ -1959,7 +2013,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       serialCovVector = SurfaceNormalDataPointsFilter::serializeEigVec(C);
     Vector serialGestaltMeans;
     Vector serialGestaltVariances;
-    if(keepGestaltFeatures) {
+    if(keepGestaltFeatures) 
+    {
       serialGestaltMeans = GestaltDataPointsFilter::serializeGestaltMatrix(gestaltMeans);
       serialGestaltVariances = GestaltDataPointsFilter::serializeGestaltMatrix(gestaltVariances);
     }
@@ -1983,7 +2038,8 @@ void DataPointsFiltersImpl<T>::GestaltDataPointsFilter::fuseRange(BuildData& dat
       data.eigenVectors->col(data.indicesToKeep[i]) = serialEigVector;
     if(keepCovariances)
       data.covariance->col(data.indicesToKeep[i]) = serialCovVector;
-    if(keepGestaltFeatures) {
+    if(keepGestaltFeatures) 
+    {
       // preserve gestalt features
       data.gestaltMeans->col(data.indicesToKeep[i]) = serialGestaltMeans;
       data.gestaltVariances->col(data.indicesToKeep[i]) = serialGestaltVariances;
@@ -2002,7 +2058,7 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilt
   // serialize the gestalt descriptors
   const int dim = gestaltFeatures.rows() * gestaltFeatures.cols();
   Vector output(dim);
-  for(int k=0; k < gestaltFeatures.rows(); k++)
+  for(int k=0; k < gestaltFeatures.rows(); ++k)
   {
     output.segment(k*gestaltFeatures.cols(), gestaltFeatures.cols()) =
         gestaltFeatures.row(k).transpose();
@@ -2013,9 +2069,10 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilt
 template<typename T>
 typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateAngles(const Matrix points, const Eigen::Matrix<T,3,1> keyPoint) const
 {
-  Vector angles(points.cols());
+	const unsigned int dim(points.cols());
+  Vector angles(dim);
   
-  for (unsigned int i = 0; i<points.cols(); ++i) 
+  for (unsigned int i = 0; i < dim; ++i) 
   {
     angles(i) = atan2(points(0,i), points(1,i));
     if (angles(i) < 0)
@@ -2028,9 +2085,10 @@ typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilt
 template<typename T>
 typename PointMatcher<T>::Vector DataPointsFiltersImpl<T>::GestaltDataPointsFilter::calculateRadii(const Matrix points, const Eigen::Matrix<T,3,1> keyPoint) const
 {
-  Vector radii(points.cols());
+	const unsigned int dim(points.cols());
+  Vector radii(dim);
 
-  for (unsigned int i = 0; i<points.cols(); ++i) 
+  for (unsigned int i = 0; i < dim; ++i) 
   {
     radii(i) = sqrt((points(0,i)) * (points(0,i)) + (points(1,i)) * (points(1,i)));
   }
@@ -2075,7 +2133,8 @@ void DataPointsFiltersImpl<T>::OrientNormalsDataPointsFilter::inPlaceFilter(
 	BOOST_AUTO(normals, cloud.getDescriptorViewByName("normals"));
 	const BOOST_AUTO(observationDirections, cloud.getDescriptorViewByName("observationDirections"));
 	assert(normals.rows() == observationDirections.rows());
-	for (int i = 0; i < cloud.features.cols(); i++)
+	const int featDim(cloud.features.cols());
+	for (int i = 0; i < featDim; ++i)
 	{
 		// Check normal orientation
 		const Vector vecP = observationDirections.col(i);
@@ -2128,8 +2187,10 @@ void DataPointsFiltersImpl<T>::IncidenceAngleDataPointsFilter::inPlaceFilter(
 	const BOOST_AUTO(normals, cloud.getDescriptorViewByName("normals"));
 	const BOOST_AUTO(observationDirections, cloud.getDescriptorViewByName("observationDirections"));
 	assert(normals.rows() == observationDirections.rows());
+	
+	const unsigned int nbPts(cloud.getNbPoints());
 
-	for (unsigned int i = 0; i < cloud.getNbPoints(); i++)
+	for (unsigned int i = 0; i < nbPts; ++i)
 	{
 		// Check normal orientation
 		const Vector vecP = observationDirections.col(i).normalized();
@@ -2177,13 +2238,13 @@ void DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter::inPlaceFilter(
 	const int nbPointsIn = cloud.features.cols();
 
 	int j = 0;
-	for (int i = 0; i < nbPointsIn; i++)
+	for (int i = 0; i < nbPointsIn; ++i)
 	{
 		const float r = (float)std::rand()/(float)RAND_MAX;
 		if (r < prob)
 		{
 			cloud.setColFrom(j, cloud, i);
-			j++;
+			++j;
 		}
 	}
 
@@ -2201,9 +2262,12 @@ DataPointsFiltersImpl<T>::MaxPointCountDataPointsFilter::MaxPointCountDataPoints
 	DataPointsFilter("MaxPointCountDataPointsFilter", MaxPointCountDataPointsFilter::availableParameters(), params),
 	maxCount(Parametrizable::get<unsigned>("maxCount"))
 {
-	try {
+	try 
+	{
 		seed = Parametrizable::get<unsigned>("seed");
-	} catch (const InvalidParameter& e) {
+	} 
+	catch (const InvalidParameter& e) 
+	{
 		seed = static_cast<unsigned int> (1); // rand default seed number
 	}
 }
@@ -2224,28 +2288,29 @@ void DataPointsFiltersImpl<T>::MaxPointCountDataPointsFilter::inPlaceFilter(
 	DataPoints& cloud)
 {
 	unsigned N = static_cast<unsigned> (cloud.features.cols());
-	if (maxCount < N) {
+	if (maxCount < N) 
+	{
 		DataPoints cloud_filtered = cloud.createSimilarEmpty(maxCount);
 		std::srand(seed);
 
 		unsigned top = N - maxCount;
 		unsigned i = 0;
 		unsigned index = 0;
-		for (size_t n = maxCount; n >= 2; n--)
+		for (size_t n = maxCount; n >= 2; --n)
 		{
-			float V = static_cast<float>(rand () / double (RAND_MAX));
+			const float V = static_cast<float>(rand () / double (RAND_MAX));
 			unsigned S = 0;
 			float quot = static_cast<float> (top) / static_cast<float> (N);
 			while (quot > V)
 			{
-				S++;
-				top--;
-				N--;
+				++S;
+				--top;
+				--N;
 				quot = quot * static_cast<float> (top) / static_cast<float> (N);
 			}
 			index += S;
 			cloud_filtered.setColFrom(i++, cloud, index++);
-			N--;
+			--N;
 		}
 
 		index += N * static_cast<unsigned> (static_cast<float>(rand () / double (RAND_MAX)));
@@ -2302,7 +2367,7 @@ void DataPointsFiltersImpl<T>::FixStepSamplingDataPointsFilter::inPlaceFilter(
 	for (int i = phase; i < nbPointsIn; i += iStep)
 	{
 		cloud.setColFrom(j, cloud, i);
-		j++;
+		++j;
 	}
 
 	cloud.conservativeResize(j);
@@ -2352,12 +2417,13 @@ void DataPointsFiltersImpl<T>::ShadowDataPointsFilter::inPlaceFilter(
 		throw InvalidField("ShadowDataPointsFilter, Error: cannot find normals in descriptors");
 	}
 
-	const int dim = cloud.features.rows();
+	const int dim(cloud.features.rows());
+	const int featDim(cloud.features.cols());
 
 	const BOOST_AUTO(normals, cloud.getDescriptorViewByName("normals"));
 	int j = 0;
 
-	for(int i=0; i < cloud.features.cols(); i++)
+	for(int i=0; i < featDim; ++i)
 	{
 		const Vector normal = normals.col(i).normalized();
 		const Vector point = cloud.features.block(0, i, dim-1, 1).normalized();
@@ -2368,7 +2434,7 @@ void DataPointsFiltersImpl<T>::ShadowDataPointsFilter::inPlaceFilter(
 		{
 			cloud.features.col(j) = cloud.features.col(i);
 			cloud.descriptors.col(j) = cloud.descriptors.col(i);
-			j++;
+			++j;
 		}
 	}
 
@@ -2501,6 +2567,7 @@ void DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter::inPlaceFilt
 	DataPoints& cloud)
 {
 	const int dim(cloud.features.rows() - 1);
+	const int featDim(cloud.features.cols());
 	if (dim != 2 && dim != 3)
 	{
 		throw InvalidField(
@@ -2517,7 +2584,7 @@ void DataPointsFiltersImpl<T>::ObservationDirectionDataPointsFilter::inPlaceFilt
 	cloud.allocateDescriptor("observationDirections", dim);
 	BOOST_AUTO(observationDirections, cloud.getDescriptorViewByName("observationDirections"));
 
-	for (int i = 0; i < cloud.features.cols(); i++)
+	for (int i = 0; i < featDim; ++i)
 	{
 		// Check normal orientation
 		const Vector p(cloud.features.block(0, i, dim, 1));
@@ -2553,7 +2620,7 @@ DataPointsFilter("VoxelGridDataPointsFilter", VoxelGridDataPointsFilter::availab
 template <typename T>
 typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::filter(const DataPoints& input)
 {
-    DataPoints output(input);
+	DataPoints output(input);
 	inPlaceFilter(output);
 	return output;
 }
@@ -2561,10 +2628,11 @@ typename PointMatcher<T>::DataPoints DataPointsFiltersImpl<T>::VoxelGridDataPoin
 template <typename T>
 void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoints& cloud)
 {
-    const unsigned int numPoints(cloud.features.cols());
+	const unsigned int numPoints(cloud.features.cols());
 	const int featDim(cloud.features.rows());
 	const int descDim(cloud.descriptors.rows());
 	const int timeDim(cloud.times.rows());
+	const unsigned int labelDim(cloud.descriptorLabels.size());
 
 	assert (featDim == 3 || featDim == 4);
 
@@ -2573,7 +2641,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 	{
 		// TODO: this should be in the form of an assert
 		// Validate descriptors and labels
-		for(unsigned int i = 0; i < cloud.descriptorLabels.size(); i++)
+		for(unsigned int i = 0; i < labelDim ; ++i)
 			insertDim += cloud.descriptorLabels[i].span;
 		if (insertDim != descDim)
 			throw InvalidField("VoxelGridDataPointsFilter: Error, descriptor labels do not match descriptor data");
@@ -2581,37 +2649,38 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 	}
 
 	// TODO: Check that the voxel size is not too small, given the size of the data
+	// TODO: Check if sizes are positive
 
 	// Calculate number of divisions along each axis
 	Vector minValues = cloud.features.rowwise().minCoeff();
 	Vector maxValues = cloud.features.rowwise().maxCoeff();
 
-    T minBoundX = minValues.x() / vSizeX;
-    T maxBoundX = maxValues.x() / vSizeX;
-    T minBoundY = minValues.y() / vSizeY;
-    T maxBoundY = maxValues.y() / vSizeY;
-    T minBoundZ = 0;
-    T maxBoundZ = 0;
+	const T minBoundX = minValues.x() / vSizeX;
+	const T maxBoundX = maxValues.x() / vSizeX;
+	const T minBoundY = minValues.y() / vSizeY;
+	const T maxBoundY = maxValues.y() / vSizeY;
+	T minBoundZ = 0;
+	T maxBoundZ = 0;
 
-    if (featDim == 4)
-    {
-        minBoundZ = minValues.z() / vSizeZ;
-        maxBoundZ = maxValues.z() / vSizeZ;
-    }
+	if (featDim == 4)
+	{
+		minBoundZ = minValues.z() / vSizeZ;
+		maxBoundZ = maxValues.z() / vSizeZ;
+	}
 
-    // number of divisions is total size / voxel size voxels of equal length + 1
-    // with remaining space
-    unsigned int numDivX = 1 + maxBoundX - minBoundX;
-    unsigned int numDivY = 1 + maxBoundY - minBoundY;;
-    unsigned int numDivZ = 0;
+	// number of divisions is total size / voxel size voxels of equal length + 1
+	// with remaining space
+	const unsigned int numDivX = 1 + maxBoundX - minBoundX;
+	const unsigned int numDivY = 1 + maxBoundY - minBoundY;;
+	unsigned int numDivZ = 0;
 
-    // If a 3D point cloud
-    if (featDim == 4 )
-        numDivZ = 1 + maxBoundZ - minBoundZ;
+	// If a 3D point cloud
+	if (featDim == 4 )
+	  numDivZ = 1 + maxBoundZ - minBoundZ;
 
-    unsigned int numVox = numDivX * numDivY;
-    if ( featDim == 4)
-        numVox *= numDivZ;
+	unsigned int numVox = numDivX * numDivY;
+	if (featDim == 4)
+		numVox *= numDivZ;
 	
 	if(numVox == 0)
 	{
@@ -2632,18 +2701,21 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     std::vector<Voxel>* voxels;
 
     // try allocating vector. If too big return error
-    try {
+    try 
+    {
     	voxels = new std::vector<Voxel>(numVox);
-    } catch (std::bad_alloc&) {
+    } 
+    catch (std::bad_alloc&) 
+    {
     	throw InvalidParameter((boost::format("VoxelGridDataPointsFilter: Memory allocation error with %1% voxels.  Try increasing the voxel dimensions.") % numVox).str());
     }
 
-    for (unsigned int p = 0; p < numPoints; p++ )
+    for (unsigned int p = 0; p < numPoints; ++p)
     {	
-        unsigned int i = floor(cloud.features(0,p)/vSizeX - minBoundX);
-        unsigned int j = floor(cloud.features(1,p)/vSizeY- minBoundY);
+        const unsigned int i = floor(cloud.features(0,p)/vSizeX - minBoundX);
+        const unsigned int j = floor(cloud.features(1,p)/vSizeY- minBoundY);
         unsigned int k = 0;
-        unsigned int idx;
+        unsigned int idx = 0;
         if ( featDim == 4 )
         {
             k = floor(cloud.features(2,p)/vSizeZ - minBoundZ);
@@ -2654,7 +2726,7 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
             idx = i + j * numDivX;
         }
 
-        unsigned int pointsInVox = (*voxels)[idx].numPoints + 1;
+        const unsigned int pointsInVox = (*voxels)[idx].numPoints + 1;
 
         if (pointsInVox == 1)
         {
@@ -2675,10 +2747,10 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     if (useCentroid)
     {
         // Iterate through the indices and sum values to compute centroid
-        for (unsigned int p = 0; p < numPoints ; p++)
+        for (unsigned int p = 0; p < numPoints ; ++p)
         {
-            unsigned int idx = indices[p];
-            unsigned int firstPoint = (*voxels)[idx].firstPoint;
+            const unsigned int idx = indices[p];
+            const unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
             // If this is the first point in the voxel, leave as is
             // if not sum up this point for centroid calculation
@@ -2686,17 +2758,18 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
             {
             	// Sum up features and descriptors (if we are also averaging descriptors)
 
-            	for (int f = 0; f < (featDim - 1); f++ )
+            	for (int f = 0; f < (featDim - 1); ++f)
             	{
             		cloud.features(f,firstPoint) += cloud.features(f,p);
             	}
 
-            	if (averageExistingDescriptors) {
-            		for (int d = 0; d < descDim; d++)
+            	if (averageExistingDescriptors) 
+            	{
+            		for (int d = 0; d < descDim; ++d)
             		{
             			cloud.descriptors(d,firstPoint) += cloud.descriptors(d,p);
             		}
-					for (int d = 0; d < timeDim; d++)
+					for (int d = 0; d < timeDim; ++d)
             		{
             			cloud.times(d,firstPoint) += cloud.times(d,p);
             		}
@@ -2707,19 +2780,20 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
         // Now iterating through the voxels
         // Normalize sums to get centroid (average)
         // Some voxels may be empty and are discarded
-        for(unsigned int idx = 0; idx < numVox; idx++)
+        for(unsigned int idx = 0; idx < numVox; ++idx)
         {
-            unsigned int numPoints = (*voxels)[idx].numPoints;
-            unsigned int firstPoint = (*voxels)[idx].firstPoint;
+            const unsigned int numPoints = (*voxels)[idx].numPoints;
+            const unsigned int firstPoint = (*voxels)[idx].firstPoint;
             if(numPoints > 0)
             {
-                for ( int f = 0; f < (featDim - 1); f++ )
+                for (int f = 0; f < (featDim - 1); ++f)
                     cloud.features(f,firstPoint) /= numPoints;
 
-                if (averageExistingDescriptors) {
-                	for ( int d = 0; d < descDim; d++ )
+                if (averageExistingDescriptors) 
+                {
+                	for ( int d = 0; d < descDim; ++d )
                 		cloud.descriptors(d,firstPoint) /= numPoints;
-					for ( int d = 0; d < timeDim; d++ )
+					for ( int d = 0; d < timeDim; ++d )
                 		cloud.times(d,firstPoint) /= numPoints;
 
                 }
@@ -2735,20 +2809,20 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     	if (averageExistingDescriptors)
     	{
     		// Iterate through the indices and sum values to compute centroid
-    		for (unsigned int p = 0; p < numPoints ; p++)
+    		for (unsigned int p = 0; p < numPoints ; ++p)
     		{
-    			unsigned int idx = indices[p];
-    			unsigned int firstPoint = (*voxels)[idx].firstPoint;
+    			const unsigned int idx = indices[p];
+    			const unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
     			// If this is the first point in the voxel, leave as is
     			// if not sum up this point for centroid calculation
     			if (firstPoint != p)
     			{
-    				for (int d = 0; d < descDim; d++ )
+    				for (int d = 0; d < descDim; ++d)
     				{
     					cloud.descriptors(d,firstPoint) += cloud.descriptors(d,p);
     				}
-					for (int d = 0; d < timeDim; d++ )
+					for (int d = 0; d < timeDim; ++d)
     				{
     					cloud.times(d,firstPoint) += cloud.times(d,p);
     				}
@@ -2756,10 +2830,10 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
     		}
     	}
 
-        for (unsigned int idx = 0; idx < numVox; idx++)
+        for (unsigned int idx = 0; idx < numVox; ++idx)
         {
-            unsigned int numPoints = (*voxels)[idx].numPoints;
-            unsigned int firstPoint = (*voxels)[idx].firstPoint;
+            const unsigned int numPoints = (*voxels)[idx].numPoints;
+            const unsigned int firstPoint = (*voxels)[idx].firstPoint;
 
             if (numPoints > 0)
             {
@@ -2791,10 +2865,11 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
                     cloud.features(1,firstPoint) = i * vSizeX + vSizeX / 2;
 
                 // Descriptors : normalize if we are averaging or keep as is
-                if (averageExistingDescriptors) {
-                	for ( int d = 0; d < descDim; d++ )
+                if (averageExistingDescriptors) 
+                {
+                	for ( int d = 0; d < descDim; ++d)
                 		cloud.descriptors(d,firstPoint) /= numPoints;
-					for ( int d = 0; d < timeDim; d++ )
+					for ( int d = 0; d < timeDim; ++d)
                 		cloud.times(d,firstPoint) /= numPoints;
 
                 }
@@ -2813,8 +2888,9 @@ void DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter::inPlaceFilter(DataPoin
 	// wipe the leftover unused space.
 	std::sort(pointsToKeep.begin(), pointsToKeep.end());
 	int numPtsOut = pointsToKeep.size();
-	for (int i = 0; i < numPtsOut; i++){
-		int k = pointsToKeep[i];
+	for (int i = 0; i < numPtsOut; ++i)
+	{
+		const int k = pointsToKeep[i];
 		assert(i <= k);
 		cloud.features.col(i) = cloud.features.col(k);
 		if (cloud.descriptors.rows() != 0)
@@ -2877,25 +2953,25 @@ void DataPointsFiltersImpl<T>::CutAtDescriptorThresholdDataPointsFilter::inPlace
 	int j = 0;
 	if (useLargerThan)
 	{
-		for (int i = 0; i < nbPointsIn; i++)
+		for (int i = 0; i < nbPointsIn; ++i)
 		{
 			const T value(values(0,i));
 			if (value <= threshold)
 			{
 				cloud.setColFrom(j, cloud, i);
-				j++;
+				++j;
 			}
 		}
 	}
 	else
 	{
-		for (int i = 0; i < nbPointsIn; i++)
+		for (int i = 0; i < nbPointsIn; ++i)
 		{
 			const T value(values(0,i));
 			if (value >= threshold)
 			{
 				cloud.setColFrom(j, cloud, i);
-				j++;
+				++j;
 			}
 		}
 	}
