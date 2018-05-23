@@ -14,7 +14,7 @@ file(
 	POINTMATCHER_PROJECT_VERSION          # Where to store the results (should just be one line)
 	REGEX "#define POINTMATCHER_VERSION " # The space after is important to ignore 'POINTMATCHER_VERSION_INT'
 )
-# If no matches found, something is wrong with nabo.h
+# If no matches found, something is wrong with PointMatcher.h
 if (NOT POINTMATCHER_PROJECT_VERSION)
 	message(SEND_ERROR "Cannot find version number in '${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/PointMatcher.h'.")
 endif (NOT POINTMATCHER_PROJECT_VERSION)
@@ -284,19 +284,42 @@ set(POINTMATCHER_SRC
 	pointmatcher/Histogram.cpp
 	pointmatcher/Parametrizable.cpp
 	pointmatcher/LoggerImpl.cpp
-	pointmatcher/DataPointsFiltersImpl.cpp
 	pointmatcher/MatchersImpl.cpp
 	pointmatcher/OutlierFiltersImpl.cpp
 	pointmatcher/ErrorMinimizersImpl.cpp
 	pointmatcher/TransformationsImpl.cpp
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp
+#ErrorMinimizers
 	pointmatcher/ErrorMinimizers/PointToPlane.cpp
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
+#DataPointsFilters
+	pointmatcher/DataPointsFilters/Identity.cpp
+	pointmatcher/DataPointsFilters/RemoveNaN.cpp
+	pointmatcher/DataPointsFilters/MaxDist.cpp
+	pointmatcher/DataPointsFilters/MinDist.cpp
+	pointmatcher/DataPointsFilters/BoundingBox.cpp
+	pointmatcher/DataPointsFilters/MaxQuantileOnAxis.cpp
+	pointmatcher/DataPointsFilters/MaxDensity.cpp
+	pointmatcher/DataPointsFilters/SurfaceNormal.cpp
+	pointmatcher/DataPointsFilters/SamplingSurfaceNormal.cpp
+	pointmatcher/DataPointsFilters/OrientNormals.cpp
+	pointmatcher/DataPointsFilters/IncidenceAngle.cpp
+	pointmatcher/DataPointsFilters/RandomSampling.cpp
+	pointmatcher/DataPointsFilters/MaxPointCount.cpp
+	pointmatcher/DataPointsFilters/FixStepSampling.cpp
+	pointmatcher/DataPointsFilters/Shadow.cpp
+	pointmatcher/DataPointsFilters/SimpleSensorNoise.cpp
+	pointmatcher/DataPointsFilters/ObservationDirection.cpp
+	pointmatcher/DataPointsFilters/VoxelGrid.cpp
+	pointmatcher/DataPointsFilters/CutAtDescriptorThreshold.cpp
+	pointmatcher/DataPointsFilters/Elipsoids.cpp
+	pointmatcher/DataPointsFilters/Gestalt.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/pointmatcher)
+include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
 
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")

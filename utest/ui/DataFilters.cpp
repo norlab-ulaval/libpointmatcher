@@ -71,6 +71,16 @@ public:
 	}
 };
 
+TEST_F(DataFilterTest, IdentityDataPointsFilter)
+{
+	// build test cloud
+	DP ref2DCopy(ref2D);
+	
+	// apply and checked
+	addFilter("IdentityDataPointsFilter");
+	icp.readingDataPointsFilters.apply(ref2DCopy);
+	EXPECT_TRUE(ref2D == ref2DCopy);
+}
 
 TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
 {
