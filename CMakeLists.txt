@@ -383,7 +383,7 @@ if(GENERATE_API_DOC)
 	# use of Latex anyway. This cause problems for user without latex...
 
 	set(DOXYFILE_LATEX "NO")
-	include(UseDoxygen)
+	include(UseDoxygen.cmake)
 
 	set(DOC_INSTALL_TARGET "share/doc/${PROJECT_NAME}/api" CACHE STRING "Target where to install doxygen documentation")
 
