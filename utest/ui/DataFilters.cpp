@@ -390,6 +390,58 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 	}
 }
 
+TEST_F(DataFilterTest, MaxPointCountDataPointsFilter)
+{
+	DP cloud = ref3D;
+	
+	const size_t maxCount = 1000;
+		
+	params = PM::Parameters(); 
+	params["seed"] = "42";
+	params["maxCount"] = toParam(maxCount);
+	
+	PM::DataPointsFilter* maxPtsFilter = 
+			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
+
+	DP filteredCloud = maxPtsFilter->filter(cloud);
+	
+	//Check number of points
+	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+	
+	EXPECT_EQ(filteredCloud.getNbPoints(), maxCount);
+	
+	//Same seed should result same filtered cloud
+	DP filteredCloud2 = maxPtsFilter->filter(cloud);
+	
+	EXPECT_TRUE(filteredCloud == filteredCloud2);
+	
+	//Different seeds should not result same filtered cloud but same number
+	params.clear();
+	params["seed"] = "1";
+	params["maxCount"] = toParam(maxCount);
+	
+	PM::DataPointsFilter* maxPtsFilter2 = 
+			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
+			
+	DP filteredCloud3 = maxPtsFilter2->filter(cloud);
+	
+	EXPECT_FALSE(filteredCloud3 == filteredCloud2);
+	
+	EXPECT_EQ(filteredCloud3.getNbPoints(), maxCount);
+	
+	EXPECT_EQ(filteredCloud3.getNbPoints(), filteredCloud2.getNbPoints());
+	EXPECT_EQ(filteredCloud3.getDescriptorDim(), filteredCloud2.getDescriptorDim());
+	EXPECT_EQ(filteredCloud3.getTimeDim(), filteredCloud2.getTimeDim());
+	
+	//Validate transformation
+	icp.readingDataPointsFilters.clear();
+	addFilter("MaxPointCountDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+}
+
 TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 {
 	// Test with point cloud
@@ -513,4 +565,3 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 		}
 	}
 }
-
