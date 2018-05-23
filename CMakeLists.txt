@@ -413,7 +413,7 @@ add_subdirectory(utest)
 
 #=================== allow find_package() =========================
 #
-# the following case be used in an external project requiring libnabo:
+# the following case be used in an external project requiring libpointmatcher:
 #  ...
 #  find_package(libpointmatcher)
 #  include_directories(${libpointmatcher_INCLUDE_DIRS})
