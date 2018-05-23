@@ -61,8 +61,8 @@ struct MaxPointCountDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 		;
 	}
 
-	const unsigned maxCount;
-	unsigned seed;
+	const size_t maxCount;
+	size_t seed;
 
 	MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~MaxPointCountDataPointsFilter() {};

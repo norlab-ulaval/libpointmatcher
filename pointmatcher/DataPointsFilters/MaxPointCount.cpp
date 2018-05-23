@@ -40,15 +40,15 @@ template<typename T>
 MaxPointCountDataPointsFilter<T>::MaxPointCountDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("MaxPointCountDataPointsFilter", 
 		MaxPointCountDataPointsFilter::availableParameters(), params),
-	maxCount(Parametrizable::get<unsigned>("maxCount"))
+	maxCount(Parametrizable::get<size_t>("maxCount"))
 {
 	try 
 	{
-		seed = Parametrizable::get<unsigned>("seed");
+		seed = Parametrizable::get<size_t>("seed");
 	} 
 	catch (const InvalidParameter& e) 
 	{
-		seed = static_cast<unsigned int> (1); // rand default seed number
+		seed = static_cast<size_t>(1); // rand default seed number
 	}
 }
 
@@ -66,37 +66,37 @@ MaxPointCountDataPointsFilter<T>::filter(const DataPoints& input)
 template<typename T>
 void MaxPointCountDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	unsigned N = static_cast<unsigned> (cloud.features.cols());
+	const size_t N = static_cast<size_t> (cloud.features.cols() - 1) ;
+	
 	if (maxCount < N) 
 	{
-		DataPoints cloud_filtered = cloud.createSimilarEmpty(maxCount);
 		std::srand(seed);
-
-		unsigned top = N - maxCount;
-		unsigned i = 0;
-		unsigned index = 0;
-		for (size_t n = maxCount; n >= 2; --n)
-		{
-			const float V = static_cast<float>(std::rand () / double (RAND_MAX));
-			unsigned S = 0;
-			float quot = static_cast<float> (top) / static_cast<float> (N);
-			while (quot > V)
-			{
-				++S;
-				--top;
-				--N;
-				quot = quot * static_cast<float> (top) / static_cast<float> (N);
-			}
-			index += S;
-			cloud_filtered.setColFrom(i++, cloud, index++);
-			--N;
-		}
-		//FIXME
-		index += N * static_cast<unsigned> (static_cast<float>(std::rand() / double (RAND_MAX)));
-		cloud_filtered.setColFrom(i++, cloud, index++);
 		
-		PointMatcher<T>::swapDataPoints(cloud, cloud_filtered);
-		cloud.conservativeResize(i);
+		for(size_t j=0; j<=maxCount; ++j)
+		{
+			//Get a random index in [j; N]
+			const size_t idx = j + static_cast<size_t>((N-j)*(static_cast<float>(std::rand()/static_cast<float>(RAND_MAX))));
+			
+			//Switch columns j and idx
+			auto feat = cloud.features.col(j);
+			cloud.features.col(j) = cloud.features.col(idx);
+			cloud.features.col(idx) = feat;
+			
+			if (cloud.descriptors.cols() > 0)
+			{
+				auto desc = cloud.descriptors.col(j);
+				cloud.descriptors.col(j) = cloud.descriptors.col(idx);
+				cloud.descriptors.col(idx) = desc;
+			}
+			if (cloud.times.cols() > 0)
+			{
+				auto time = cloud.times.col(j);
+				cloud.times.col(j) = cloud.times.col(idx);
+				cloud.times.col(idx) = time;
+			}	
+		}
+		
+		cloud.conservativeResize(maxCount);
 	}
 }
 
