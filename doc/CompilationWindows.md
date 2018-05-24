@@ -1,4 +1,4 @@
-| [Tutorials Home](Tutorials.md)    | | [Next](Datafilters.md) |
+| [Tutorials Home](index.md)    | | [Next](Datafilters.md) |
 | ------------- |:-------------:| -----:|
 
 # Compiling and Installing libpointmatcher on Windows
@@ -20,16 +20,8 @@ If you are used to development project, here is what you need:
 | CMake | <http://www.cmake.org/cmake/resources/software.html> | cmake-2.8.11.2-win32-x86.exe|
 | Eigen 3 | <http://eigen.tuxfamily.org/index.php?title=Main_Page#Download>  |v3.2.0 |
 | Boost | <http://www.boost.org/users/download/> | v1.54.0 |
-| grep tool | <http://gnuwin32.sourceforge.net/packages/grep.htm>| v2.5.4 |
 
 The rest of this tutorial will guide you through the different requirements step by step.
-
-### Install grep tool
-Install `grep` by following the instructions in <http://gnuwin32.sourceforge.net/packages/grep.htm>. You might need to modify the Path environment variables to make sure that grep can be run from anywhere. To test:
-```
-cd\
-grep --version
-```
 
 ### Building Boost
 1. Open a console that knows the path to the MSVC compiler command (cl). We suggest using **Windows PowerShell**. An alternative is **Developer Command Prompt**, which can be located in the Start menu in the Visual Studio section.
@@ -63,7 +55,7 @@ grep --version
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
 
 1. Click on the button Configure again, then on Generate. Here is an example of what your CMake should look like:
- 
+
 	![alt text](images/win_cmake_libnabo.png "CMake libnabo")
 
 
@@ -72,11 +64,11 @@ grep --version
 1. Build the solution: BUILD -> Build Solution
 
     Alternatively, you can build the solution from the command line. In _(your libnabo folder)_/build:
-    
+
     ```
     $ msbuild /m:2 libnabo.sln
     ```
-    
+
     (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
 
 
@@ -104,15 +96,15 @@ grep --version
 1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
 
 	![alt text](images/win_cmake_libpointmatcher.png "CMake libpointmatcher")
-	
+
 1. In Visual Studio, build the solution: BUILD -> Build Solution
 
     Alternatively, you can build the solution from the command line. In _(your libpointmatcher folder)_/build:
-    
+
     ```
     $ msbuild /m:2 libpointmatcher.sln
     ```
-    
+
     (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
 
 

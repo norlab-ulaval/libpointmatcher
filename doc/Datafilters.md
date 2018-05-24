@@ -1,4 +1,4 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](Compilation.md) | [Next](ApplyingDatafilters.md) |
+| [Tutorials Home](index.md)    | [Previous](Compilation.md) | [Next](ApplyingDatafilters.md) |
 | ------------- |:-------------:| -----:|
 
 # Datapoint Filters
@@ -247,9 +247,9 @@ __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
-|vSizeX     |Size of the voxel along the x-axis | 1.0 | -inf to inf|
-|vSizeY     |Size of the voxel along the y-axis | 1.0 | -inf to inf|
-|vSizeZ     |Size of the voxel along the z-axis | 1.0 | -inf to inf|
+|vSizeX     |Size of the voxel along the x-axis | 1.0 | ]0 ; +inf[|
+|vSizeY     |Size of the voxel along the y-axis | 1.0 | ]0 ; +inf[|
+|vSizeZ     |Size of the voxel along the z-axis | 1.0 | ]0 ; +inf[|
 |useCentroid|If 1, down-sample by using the centroid of each voxel.  If 0, use the voxel center | 1 | 1 or 0|
 |averageExistingDescriptors|If 1, descriptors are down-sampled by taking their average in the voxel.  If 0, we use the descriptors from the first point found in the voxel | 1 | 1 or 0|
 
@@ -290,7 +290,7 @@ __Impact on the number of points:__ none
 ## Surface Normal Filter <a name="surfacenormalhead"></a>
 
 ### Description
-The surface normal to each point is estimated by finding a number of neighboring points and taking the eigen-vector corresponding to the smallest eigen-value of all neighboring points.  For more theoretical background on the estimation of normal vectors for a point cloud the reader is invited to visit [the following][1].
+The surface normal to each point is estimated by finding a number of neighboring points and taking the eigen-vector corresponding to the smallest eigen-value of all neighboring points.
 
 Remark that that given a surface, the normal vector can point in two possible directions.  Following the apartment example used herein throughout, the normal vector of a wall can point inside towards the room, or outside the apartment.  To align all normal vectors in the same direction, the [orient normals filter](#orientnormalshead) can be used.
 
@@ -313,7 +313,6 @@ __Impact on the number of points:__ none
 |keepEigenVectors   | Add eigen vectors to descriptors    | 0 | 1: true, 0: false |
 |keepMatchedIds   | Add identifiers of matched points to descriptors (see)    | 0 | 1: true, 0:false |
 
-[1]:http://people.maths.ox.ac.uk/wendland/research/old/reconhtml/node3.html "Holger, Wendland, Mathematical Institute, University of Oxford"
 
 ### Example
 In this example, we again use a local point cloud of the apartment. You may recognize the input point cloud as a small portion of the local cloud used in the observation direction filter.  The surface normals are extracted using 20 neighboring points and epsilon=0.  In this example, for clarity, we only view a wall section of one of the apartment dataset.  A random set of normal vectors is shown in the figure with arrows.  When looking at the arrow directions on the wall, one may see normal vectors either pointing downwards into the apartment or outside the apartment.

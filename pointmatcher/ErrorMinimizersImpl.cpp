@@ -297,342 +297,6 @@ T ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer::getOverlap() con
 template struct ErrorMinimizersImpl<float>::PointToPointSimilarityErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::PointToPointSimilarityErrorMinimizer;
 
-///////////////////////////////////////////////////////////////////////
-// Point To PLANE ErrorMinimizer
-///////////////////////////////////////////////////////////////////////
-template<typename T>
-ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::PointToPlaneErrorMinimizer(const Parameters& params):
-	ErrorMinimizer("PointToPlaneErrorMinimizer", PointToPlaneErrorMinimizer::availableParameters(), params),
-	force2D(Parametrizable::get<T>("force2D"))
-{
-}
-
-
-template<typename T, typename MatrixA, typename Vector>
-void solvePossiblyUnderdeterminedLinearSystem(const MatrixA& A, const Vector & b, Vector & x) {
-	assert(A.cols() == A.rows());
-	assert(b.cols() == 1);
-	assert(b.rows() == A.rows());
-	assert(x.cols() == 1);
-	assert(x.rows() == A.cols());
-
-	typedef typename PointMatcher<T>::Matrix Matrix;
-
-	BOOST_AUTO(Aqr, A.fullPivHouseholderQr());
-	if (!Aqr.isInvertible())
-	{
-		// Solve reduced problem R1 x = Q1^T b instead of QR x = b, where Q = [Q1 Q2] and R = [ R1 ; R2 ] such that ||R2|| is small (or zero) and therefore A = QR ~= Q1 * R1
-		const int rank = Aqr.rank();
-		const int rows = A.rows();
-		const Matrix Q1t = Aqr.matrixQ().transpose().block(0, 0, rank, rows);
-		const Matrix R1 = (Q1t * A * Aqr.colsPermutation()).block(0, 0, rank, rows);
-
-		const bool findMinimalNormSolution = true; // TODO is that what we want?
-
-		// The under-determined system R1 x = Q1^T b is made unique ..
-		if(findMinimalNormSolution){
-			// by getting the solution of smallest norm (x = R1^T * (R1 * R1^T)^-1 Q1^T b.
-			x = R1.template triangularView<Eigen::Upper>().transpose() * (R1 * R1.transpose()).llt().solve(Q1t * b);
-		} else {
-			// by solving the simplest problem that yields fewest nonzero components in x
-			x.block(0, 0, rank, 1) = R1.block(0, 0, rank, rank).template triangularView<Eigen::Upper>().solve(Q1t * b);
-			x.block(rank, 0, rows - rank, 1).setZero();
-		}
-
-		x = Aqr.colsPermutation() * x;
-
-		BOOST_AUTO(ax , (A * x).eval());
-		if (!b.isApprox(ax, 1e-5)) {
-			LOG_INFO_STREAM("PointMatcher::icp - encountered almost singular matrix while minimizing point to plane distance. QR solution was too inaccurate. Trying more accurate approach using double precision SVD.");
-			x = A.template cast<double>().jacobiSvd(ComputeThinU | ComputeThinV).solve(b.template cast<double>()).template cast<T>();
-			ax = A * x;
-
-			if((b - ax).norm() > 1e-5 * std::max(A.norm() * x.norm(), b.norm())){
-				LOG_WARNING_STREAM("PointMatcher::icp - encountered numerically singular matrix while minimizing point to plane distance and the current workaround remained inaccurate."
-						<< " b=" << b.transpose()
-						<< " !~ A * x=" << (ax).transpose().eval()
-						<< ": ||b- ax||=" << (b - ax).norm()
-						<< ", ||b||=" << b.norm()
-						<< ", ||ax||=" << ax.norm());
-			}
-		}
-	}
-	else {
-		// Cholesky decomposition
-		x = A.llt().solve(b);
-	}
-}
-
-
-template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::compute(const ErrorElements& mPts_const)
-{
-	// Copy error element to use as storage later
-	// TODO: check that, might worth it to only copy useful parts
-	ErrorElements mPts = mPts_const;
-
-	const int dim = mPts.reading.features.rows();
-	const int nbPts = mPts.reading.features.cols();
-
-	// Adjust if the user forces 2D minimization on XY-plane
-	int forcedDim = dim - 1;
-	if(force2D && dim == 4)
-	{
-		mPts.reading.features.conservativeResize(3, Eigen::NoChange);
-		mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
-		mPts.reference.features.conservativeResize(3, Eigen::NoChange);
-		mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
-		forcedDim = dim - 2;
-	}
-
-	// Fetch normal vectors of the reference point cloud (with adjustment if needed)
-	const BOOST_AUTO(normalRef, mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
-
-	// Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
-	assert(normalRef.rows() > 0);
-
-	// Compute cross product of cross = cross(reading X normalRef)
-	const Matrix cross = this->crossProduct(mPts.reading.features, normalRef);
-
-	// wF = [weights*cross, weights*normals]
-	// F  = [cross, normals]
-	Matrix wF(normalRef.rows()+ cross.rows(), normalRef.cols());
-	Matrix F(normalRef.rows()+ cross.rows(), normalRef.cols());
-	
-	for(int i=0; i < cross.rows(); i++)
-	{
-		wF.row(i) = mPts.weights.array() * cross.row(i).array();
-		F.row(i) = cross.row(i);
-	}
-	for(int i=0; i < normalRef.rows(); i++)
-	{
-    	        wF.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
-		F.row(i + cross.rows()) = normalRef.row(i);
-	}
-
-	// Unadjust covariance A = wF * F'
-	const Matrix A = wF * F.transpose();
-
-	const Matrix deltas = mPts.reading.features - mPts.reference.features;
-
-	// dot product of dot = dot(deltas, normals)
-	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
-
-	for(int i=0; i<normalRef.rows(); i++)
-	{
-		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
-	}
-
-	// b = -(wF' * dot)
-	const Vector b = -(wF * dotProd.transpose());
-
-	Vector x(A.rows());
-
-	solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
-
-	// Transform parameters to matrix
-	Matrix mOut;
-	if(dim == 4 && !force2D)
-	{
-		Eigen::Transform<T, 3, Eigen::Affine> transform;
-		// PLEASE DONT USE EULAR ANGLES!!!!
-		// Rotation in Eular angles follow roll-pitch-yaw (1-2-3) rule
-		/*transform = Eigen::AngleAxis<T>(x(0), Eigen::Matrix<T,1,3>::UnitX())
-				* Eigen::AngleAxis<T>(x(1), Eigen::Matrix<T,1,3>::UnitY())
-				* Eigen::AngleAxis<T>(x(2), Eigen::Matrix<T,1,3>::UnitZ());*/
-
-		transform = Eigen::AngleAxis<T>(x.head(3).norm(),x.head(3).normalized());
-
-		// Reverse roll-pitch-yaw conversion, very useful piece of knowledge, keep it with you all time!
-		/*const T pitch = -asin(transform(2,0));
-		const T roll = atan2(transform(2,1), transform(2,2));
-		const T yaw = atan2(transform(1,0) / cos(pitch), transform(0,0) / cos(pitch));
-		std::cerr << "d angles" << x(0) - roll << ", " << x(1) - pitch << "," << x(2) - yaw << std::endl;*/
-		transform.translation() = x.segment(3, 3);
-		mOut = transform.matrix();
-
-		if (mOut != mOut) 
-		{
-			// Degenerate situation. This can happen when the source and reading clouds
-			// are identical, and then b and x above are 0, and the rotation matrix cannot
-			// be determined, it comes out full of NaNs. The correct rotation is the identity.
-			mOut.block(0, 0, dim-1, dim-1) = Matrix::Identity(dim-1, dim-1);
-		}	
-	}
-	else
-	{
-		Eigen::Transform<T, 2, Eigen::Affine> transform;
-		transform = Eigen::Rotation2D<T> (x(0));
-		transform.translation() = x.segment(1, 2);
-
-		if(force2D)
-		{
-			mOut = Matrix::Identity(dim, dim);
-			mOut.topLeftCorner(2, 2) = transform.matrix().topLeftCorner(2, 2);
-			mOut.topRightCorner(2, 1) = transform.matrix().topRightCorner(2, 1);
-		}
-		else
-		{
-			mOut = transform.matrix();
-		}
-	}
-	return mOut; 
-}
-
-
-template<typename T>
-T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::computeResidualError(ErrorElements mPts, const bool& force2D)
-{
-	const int dim = mPts.reading.features.rows();
-	const int nbPts = mPts.reading.features.cols();
-
-	// Adjust if the user forces 2D minimization on XY-plane
-	int forcedDim = dim - 1;
-	if(force2D && dim == 4)
-	{
-		mPts.reading.features.conservativeResize(3, Eigen::NoChange);
-		mPts.reading.features.row(2) = Matrix::Ones(1, nbPts);
-		mPts.reference.features.conservativeResize(3, Eigen::NoChange);
-		mPts.reference.features.row(2) = Matrix::Ones(1, nbPts);
-		forcedDim = dim - 2;
-	}
-
-	// Fetch normal vectors of the reference point cloud (with adjustment if needed)
-	const BOOST_AUTO(normalRef, mPts.reference.getDescriptorViewByName("normals").topRows(forcedDim));
-
-	// Note: Normal vector must be precalculated to use this error. Use appropriate input filter.
-	assert(normalRef.rows() > 0);
-
-	const Matrix deltas = mPts.reading.features - mPts.reference.features;
-
-	// dot product of dot = dot(deltas, normals)
-	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
-
-	for(int i=0; i<normalRef.rows(); i++)
-	{
-		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
-	}
-
-	// return sum of the norm of each dot product
-	Matrix dotProdNorm = dotProd.colwise().norm();
-	return dotProdNorm.sum();
-}
-
-
-template<typename T>
-T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getResidualError(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches) const
-{
-	assert(matches.ids.rows() > 0);
-
-	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
-
-	return PointToPlaneErrorMinimizer::computeResidualError(mPts, force2D);
-}
-
-template<typename T>
-T ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer::getOverlap() const
-{
-
-	// Gather some information on what kind of point cloud we have
-	const bool hasReadingNoise = this->lastErrorElements.reading.descriptorExists("simpleSensorNoise");
-	const bool hasReferenceNoise = this->lastErrorElements.reference.descriptorExists("simpleSensorNoise");
-	const bool hasReferenceDensity = this->lastErrorElements.reference.descriptorExists("densities");
-
-	const int nbPoints = this->lastErrorElements.reading.features.cols();
-	const int dim = this->lastErrorElements.reading.features.rows();
-
-	// basix safety check
-	if(nbPoints == 0)
-	{
-		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
-	}
-	
-	Eigen::Array<T, 1, Eigen::Dynamic>  uncertainties(nbPoints);
-
-	// optimal case
-	if (hasReadingNoise && hasReferenceNoise && hasReferenceDensity)
-	{
-		// find median density
-		
-		Matrix densities = this->lastErrorElements.reference.getDescriptorViewByName("densities");
-		vector<T> values(densities.data(), densities.data() + densities.size());
-
-		// sort up to half the values
-		nth_element(values.begin(), values.begin() + (values.size() * 0.5), values.end());
-
-		// extract median value
-		const T medianDensity = values[values.size() * 0.5];
-		const T medianRadius = 1.0/pow(medianDensity, 1/3.0);
-
-		uncertainties = (medianRadius +
-						this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise").array() +
-						this->lastErrorElements.reference.getDescriptorViewByName("simpleSensorNoise").array());
-	}
-	else if(hasReadingNoise && hasReferenceNoise)
-	{
-		uncertainties = this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise") +
-						this->lastErrorElements.reference.getDescriptorViewByName("simpleSensorNoise");
-	}
-	else if(hasReadingNoise)
-	{
-		uncertainties = this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise");
-	}
-	else if(hasReferenceNoise)
-	{
-		uncertainties = this->lastErrorElements.reference.getDescriptorViewByName("simpleSensorNoise");
-	}
-	else
-	{
-		LOG_INFO_STREAM("PointToPlaneErrorMinimizer - warning, no sensor noise and density. Using best estimate given outlier rejection instead.");
-		return this->getWeightedPointUsedRatio();
-	}
-
-
-	const Vector dists = (this->lastErrorElements.reading.features.topRows(dim-1) - this->lastErrorElements.reference.features.topRows(dim-1)).colwise().norm();
-
-
-	// here we can only loop through a list of links, but we are interested in whether or not
-	// a point has at least one valid match.
-	int count = 0;
-	int nbUniquePoint = 1;
-	Vector lastValidPoint = this->lastErrorElements.reading.features.col(0) * 2.;
-	for(int i=0; i < nbPoints; i++)
-	{
-		const Vector point = this->lastErrorElements.reading.features.col(i);
-
-		if(lastValidPoint != point)
-		{
-			// NOTE: we tried with the projected distance over the normal vector before:
-			// projectionDist = delta dotProduct n.normalized()
-			// but this doesn't make sense 
-
-
-			if(anyabs(dists(i, 0)) < (uncertainties(0,i)))
-			{
-				lastValidPoint = point;
-				count++;
-			}
-		}
-		
-		// Count unique points
-		if(i > 0)
-		{
-			if(point != this->lastErrorElements.reading.features.col(i-1))
-				nbUniquePoint++;
-		}
-
-	}
-	//cout << "count: " << count << ", nbUniquePoint: " << nbUniquePoint << ", this->lastErrorElements.nbRejectedPoints: " << this->lastErrorElements.nbRejectedPoints << endl;
-
-	return (T)count/(T)(nbUniquePoint + this->lastErrorElements.nbRejectedPoints);
-}
-template struct ErrorMinimizersImpl<float>::PointToPlaneErrorMinimizer;
-template struct ErrorMinimizersImpl<double>::PointToPlaneErrorMinimizer;
 
 
 
@@ -668,8 +332,20 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// Singular Value Decomposition
 	const Matrix m(mPts.reference.features.topRows(dimCount-1) * mPts.reading.features.topRows(dimCount-1).transpose());
 	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
-	const Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
-	const Vector trVector(meanReference.head(dimCount-1)- rotMatrix * meanReading.head(dimCount-1));
+  Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
+
+  // It is possible to get a reflection instead of a rotation. In this case, we
+  // take the second best solution, guaranteed to be a rotation. For more details,
+  // read the tech report: "Least-Squares Rigid Motion Using SVD", Olga Sorkine
+  // http://igl.ethz.ch/projects/ARAP/svd_rot.pdf
+  if (rotMatrix.determinant() < 0.)
+  {
+    Matrix tmpV = svd.matrixV().transpose();
+    tmpV.row(dimCount-2) *= -1.;
+    rotMatrix = svd.matrixU() * tmpV;
+  }
+
+  const Vector trVector(meanReference.head(dimCount-1) - rotMatrix * meanReading.head(dimCount-1));
 	
 	Matrix result(Matrix::Identity(dimCount, dimCount));
 	result.topLeftCorner(dimCount-1, dimCount-1) = rotMatrix;
@@ -820,7 +496,6 @@ typename ErrorMinimizersImpl<T>::Matrix ErrorMinimizersImpl<T>::PointToPointWith
 template struct ErrorMinimizersImpl<float>::PointToPointWithCovErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::PointToPointWithCovErrorMinimizer;
 
-
 ///////////////////////////////////////////////////////////////////////
 // Point To PLANE WITH COV ErrorMinimizer
 ///////////////////////////////////////////////////////////////////////
@@ -833,11 +508,16 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::PointToPlaneWithCovEr
 }
 
 template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::compute(const ErrorElements& mPts_const)
+typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::compute(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const OutlierWeights& outlierWeights,
+	const Matches& matches)
 {
-	// Copy error element to use as storage later
-	// TODO: check that, might worth it to only copy useful parts
-	ErrorElements mPts = mPts_const;
+	assert(matches.ids.rows() > 0);
+
+	// Fetch paired points
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
 
 	const int dim = mPts.reading.features.rows();
 	const int nbPts = mPts.reading.features.cols();
@@ -866,7 +546,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	// F  = [cross, normals]
 	Matrix wF(normalRef.rows()+ cross.rows(), normalRef.cols());
 	Matrix F(normalRef.rows()+ cross.rows(), normalRef.cols());
-	
+
 	for(int i=0; i < cross.rows(); i++)
 	{
 		wF.row(i) = mPts.weights.array() * cross.row(i).array();
@@ -874,7 +554,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	}
 	for(int i=0; i < normalRef.rows(); i++)
 	{
-       	        wF.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
+		wF.row(i + cross.rows()) = mPts.weights.array() * normalRef.row(i).array();
 		F.row(i + cross.rows()) = normalRef.row(i);
 	}
 
@@ -885,7 +565,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 
 	// dot product of dot = dot(deltas, normals)
 	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
-	
+
 	for(int i=0; i<normalRef.rows(); i++)
 	{
 		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
@@ -895,7 +575,7 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 	const Vector b = -(wF * dotProd.transpose());
 
 	Vector x(A.rows());
-	
+
 	solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
 
 	// Transform parameters to matrix
@@ -936,31 +616,24 @@ typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::Point
 		}
 	}
 
-	this->covMatrix = this->estimateCovariance(mPts, mOut);
+    if (force2D)
+    {
+			this->covMatrix = this->estimateCovariance2D(filteredReading, filteredReference, matches, outlierWeights, mOut);
+			//std::cout << this->covMatrix << std::endl;
+    }
+    else
+    {
+			this->covMatrix = this->estimateCovariance(filteredReading, filteredReference, matches, outlierWeights, mOut);
+    }
 
-	return mOut; 
-}
-
-template<typename T>
-T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getResidualError(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches) const
-{
-	assert(matches.ids.rows() > 0);
-
-	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
-
-	return PointToPlaneErrorMinimizer::computeResidualError(mPts, force2D);
+	return mOut;
 }
 
 template<typename T>
 typename ErrorMinimizersImpl<T>::Matrix
-ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation)
+ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationParameters& transformation)
 {
-	const int max_nbr_point = mPts.reading.getNbPoints();
+	int max_nbr_point = outlierWeights.cols();
 
 	Matrix covariance(Matrix::Zero(6,6));
 	Matrix J_hessian(Matrix::Zero(6,6));
@@ -973,8 +646,7 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(co
 	Vector reading_direction(Vector::Zero(3));
 	Vector reference_direction(Vector::Zero(3));
 
-	//TODO: should be constView
-	Matrix normals = mPts.reference.getDescriptorViewByName("normals");
+	Matrix normals = reference.getDescriptorViewByName("normals");
 
 	if (normals.rows() < 3)    // Make sure there are normals in DataPoints
 		return std::numeric_limits<T>::max() * Matrix::Identity(6,6);
@@ -990,16 +662,15 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(co
 
 	int valid_points_count = 0;
 
-	//TODO: add missing const
 	for(int i = 0; i < max_nbr_point; ++i)
 	{
-		//if (outlierWeights(0,i) > 0.0)
+		const int reference_idx = matches.ids(0,i);
+		if (reference_idx != Matches::InvalidId && outlierWeights(0,i) > 0.0)
 		{
-			reading_point = mPts.reading.features.block(0,i,3,1);
-			//int reference_idx = matches.ids(0,i);
-			reference_point = mPts.reference.features.block(0,i,3,1);
+			reading_point = reading.features.block(0,i,3,1);
+			reference_point = reference.features.block(0,reference_idx,3,1);
 
-			normal = normals.block(0,i,3,1);
+			normal = normals.block(0,reference_idx,3,1);
 
 			T reading_range = reading_point.norm();
 			reading_direction = reading_point / reading_range;
@@ -1049,7 +720,122 @@ ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance(co
 	return (sensorStdDev * sensorStdDev) * covariance;
 }
 
+template<typename T>
+typename ErrorMinimizersImpl<T>::Matrix
+ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::estimateCovariance2D(const DataPoints& reading, const DataPoints& reference, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationParameters& transformation)
+{
+    int max_nbr_point = outlierWeights.cols();
 
+    Matrix covariance(Matrix::Zero(3,3));
+
+    Matrix d2jX2(Matrix::Zero(3,3));
+    Matrix d2jpX(Matrix::Zero(3, max_nbr_point));
+    Matrix d2jqX(Matrix::Zero(3, max_nbr_point));
+
+    Vector reading_point(Vector::Zero(2));
+    Vector reference_point(Vector::Zero(2));
+    Vector normal(2);
+
+    Vector reading_direction(Vector::Zero(2));
+    Vector reference_direction(Vector::Zero(2));
+
+    Matrix normals = reference.getDescriptorViewByName("normals");
+
+    if (normals.rows() != 2)    // Make sure there are normals in DataPoints
+        return std::numeric_limits<T>::max() * Matrix::Identity(3,3);
+
+    T t_x = transformation(0,2);
+    T t_y = transformation(1,2);
+    T t_t = asin(transformation(1,0));
+
+    T sin_t = sin(t_t);
+    T cos_t = cos(t_t);
+
+    int valid_points_count = 0;
+
+    for(int i = 0; i < max_nbr_point; ++i)
+    {
+        const int reference_idx = matches.ids(0,i);
+        if (reference_idx != Matches::InvalidId && outlierWeights(0,i) > 0.0)
+        {
+            reading_point = reading.features.block(0,i,2,1);
+            T reading_range = reading_point.norm();
+
+            if (reading_range > 0) // skip the case when reading_range is 0. TODO: check why this happens
+            {
+                reference_point = reference.features.block(0,reference_idx,2,1);
+                normal = normals.block(0,reference_idx,2,1);
+
+
+                reading_direction = reading_point / reading_range;
+                T reference_range = reference_point.norm();
+                reference_direction = reference_point / reference_range;
+
+                T d2jx2 = 2*normal(0)*normal(0);
+                T d2jxy = 2*normal(0)*normal(1);
+                T d2jy2 = 2*normal(1)*normal(1);
+
+                T d2jxt = -2*normal(0)*(  normal(0)*(reading_range *reading_direction(1) *cos_t + reading_range * reading_direction(0) *sin_t )
+                                        - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t));
+                T d2jyt = -2*normal(1)*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
+                                        - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t));
+
+                T d2jt2 = 2*pow(normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t) -
+                             normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t),2) -
+                          2*(normal(0)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t) +
+                             normal(1)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t))
+                           *(  normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t)
+                             + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t));
+
+                //f = (normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t) + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t))^2
+
+                d2jX2 += (Matrix(3,3) << d2jx2, d2jxy, d2jxt,
+                                         d2jxy, d2jy2, d2jyt,
+                                         d2jxt, d2jyt, d2jt2).finished();
+
+                T d2jpx = -2*normal(0)*(normal(0)*reference_direction(0) + normal(1)*reference_direction(1));
+                T d2jpy = -2*normal(1)*(normal(0)*reference_direction(0) + normal(1)*reference_direction(1));
+                T d2jpt = 2*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
+                             - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t))
+                           *(  normal(0)*reference_direction(0)
+                             + normal(1)*reference_direction(1));
+
+                T d2jqx = 2*normal(0)*(  normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t)
+                                       + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t));
+                T d2jqy = 2*normal(1)*(  normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t)
+                                       + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t));
+
+                T d2jqt = - 2*(  normal(0)*(reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t)
+                               - normal(1)*(reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t))
+                             *(normal(0)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t) + normal(1)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t))
+                          - 2*(normal(0)*(reading_direction(1)*cos_t + reading_direction(0)*sin_t) - normal(1)*(reading_direction(0)*cos_t - reading_direction(1)*sin_t))
+                             *(  normal(0)*(t_x - reference_range*reference_direction(0) + reading_range*reading_direction(0)*cos_t - reading_range*reading_direction(1)*sin_t)
+                               + normal(1)*(t_y - reference_range*reference_direction(1) + reading_range*reading_direction(1)*cos_t + reading_range*reading_direction(0)*sin_t));
+
+                d2jpX.block(0,valid_points_count,3,1 ) = (Vector(3) << d2jpx,d2jpy,d2jpt ).finished();
+                d2jqX.block(0,valid_points_count,3,1 ) = (Vector(3) << d2jqx,d2jqy,d2jqt ).finished();
+
+                valid_points_count++;
+            } // if (reading_range>0)
+        } // if (outlierWeights(0,i) > 0.0)
+    }
+
+    Matrix d2jZX(Matrix::Zero(3, 2 * valid_points_count));
+    d2jZX.block(0,0,3,valid_points_count) = d2jpX.block(0,0,3,valid_points_count);
+    d2jZX.block(0,valid_points_count,3,valid_points_count) = d2jqX.block(0,0,3,valid_points_count);
+
+    Matrix d2jX2_inv = d2jX2.inverse();
+
+    Matrix covZ(Matrix::Identity(2*valid_points_count,2*valid_points_count));
+    covZ *= (sensorStdDev * sensorStdDev);
+            //sensorStdDev;//
+
+
+    covariance = d2jZX * covZ * d2jZX.transpose();
+    covariance = d2jX2_inv * covariance * d2jX2_inv;
+
+    return  covariance;
+}
 
 template<typename T>
 T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getOverlap() const
@@ -1060,7 +846,7 @@ T ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer::getOverlap() const
 	{
 		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
 	}
-	
+
 	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise") ||
 		!this->lastErrorElements.reading.descriptorExists("normals"))
 	{
@@ -1094,4 +880,3 @@ typename ErrorMinimizersImpl<T>::Matrix ErrorMinimizersImpl<T>::PointToPlaneWith
 
 template struct ErrorMinimizersImpl<float>::PointToPlaneWithCovErrorMinimizer;
 template struct ErrorMinimizersImpl<double>::PointToPlaneWithCovErrorMinimizer;
-

@@ -1,16 +1,79 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](Transformations.md) | [Next](TransformationDev.md) |
+| [Tutorials Home](index.md)    | [Previous](Transformations.md) | [Next](TransformationDev.md) |
 | ------------- |:-------------:| -----:|
 
 # Creating a DataPointsFilter
 
-In the following tutorials we will discuss how you can extend the functionality provided in libpointmatcher by taking advantage of its modular design.  The following tutorial will detail the development of a a new data filter, which is as of yet not included in libpointmatcher.  You may wish to develop customized DataPointFilters, Transformations, OutlierFilters which best fit your project.  However, if you believe that your own contributions would benefit a larger user base, please contact us to see how we can integrate them into libpointmatcher.
+In the following tutorials we will discuss how you can extend the functionality provided in _libpointmatcher_ by taking advantage of its modular design.  The following tutorial will detail the development of a a new data filter, which is as of yet not included in libpointmatcher.  You may wish to develop customized DataPointFilters, Transformations, OutlierFilters which best fit your project.  However, if you believe that your own contributions would benefit a larger user base, please contact us to see how we can integrate them into libpointmatcher.
 
-## The Voxel Grid Filter
-The filter we wish to implement today is a voxel grid filter.  The latter falls into the class of *down-sampling filters*, in that it reduces the number of points in a cloud, as opposed to *descriptive filters* which add information to the points.  
+## Generic procedure
 
-The voxel grid filter down-samples the data by taking a spatial average of the points in the cloud.  In the 2D case, one can simply imagine dividing the plane into a regular grid of rectangles.  While the term is more suited to 3D spaces, these rectangular areas are known as *voxels*.  The sub-sampling rate is adjusted by setting the voxel size along each dimension.  The set of points which lie within the bounds of a voxel are assigned to that voxel and will be combined into one output point.
+For a more detailed procedure or if it's the first time developping a filter, please see the example of the [VoxelGrid filter](#voxelgridhead). Here, to implement a _Dummy_ filter we have to follow these steps:
 
-There are two options as to how to represent the distribution of points in a voxel by a single point.  In the first, we take the centroid or spatial average of the point distribution.  In the second, we simply take the geometrical center of the voxel.  Clearly, the first option is more accurate since it takes into account the point distribution inside the voxels.  However it is more computationally intensive since the centroid must be computed for each voxel.  The computational cost increases linearly with the number of points in the cloud and the number of voxels.
+1. Create files in the [pointmatcher/DataPointsFilters/](/pointmatcher/DataPointsFilters/) folder
+	- the header : `Dummy.h`
+	- the implementation file : `Dummy.cpp`
+1. Declare your filter in the header with the minimal following interface:
+	```cpp
+	template <typename T>
+	struct DummyDataPointsFilter : public PointMatcher<T>::DataPointsFilter
+	{
+		typedef PointMatcherSupport::Parametrizable P;
+		typedef P::Parameters Parameters;
+		typedef P::ParameterDoc ParameterDoc;
+		typedef P::ParametersDoc ParametersDoc;
+		
+		typedef typename PointMatcher<T>::DataPoints DataPoints;
+		
+		inline static const std::string description()
+		{
+			return "description";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return boost::assign::list_of<ParameterDoc>
+			( "param", "param desc", "default value", "lower bound", "upper bound", &P::Comp<value_type> )
+			;
+		}
+
+		DummyDataPointsFilter(const Parameters& params = Parameters());
+		virtual ~DummyDataPointsFilter() {};
+		virtual DataPoints filter(const DataPoints& input);
+		virtual void inPlaceFilter(DataPoints& cloud);
+	};
+	```
+1. Implement the filter in the `.cpp` file and declare the template at the end of the file as follow:
+	```cpp
+	template struct DummyDataPointsFilter<float>;
+	template struct DummyDataPointsFilter<double>;
+	```
+1. Declare the filter in [pointmatcher/DataPointsFiltersImpl.h](/pointmatcher/DataPointsFiltersImpl.h) as follow:
+	```cpp
+	#include "DataPointsFilters/Dummy.h"
+	template<typename T>
+	struct DataPointsFiltersImpl
+	{
+		/* other filters declaration */
+		/* our declaraction -> */ typedef ::DummyDataPointsFilter<T> DummyDataPointsFilter;
+	};
+	```
+1. Add it to the _Registry_ [pointmatcher/Registry.cpp](/pointmatcher/Registry.cpp)
+	- If the filter has some parameters:
+	```cpp
+	ADD_TO_REGISTRAR(DataPointsFilter, DummyDataPointsFilter, typename DataPointsFiltersImpl<T>::DummyDataPointsFilter)
+	```
+	- If not:
+	```cpp
+	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, DummyDataPointsFilter, typename DataPointsFiltersImpl<T>::DummyDataPointsFilter)
+	```
+1. Finally, add the source file in the [CMakeLists.txt](/CMakeLists.txt) in the `POINTMATCHER_SRC` variable.
+
+
+## The Voxel Grid Filter <a name="voxelgridhead"></a>
+The filter we wish to implement today is a voxel grid filter.  The latter falls into the class of *down-sampling filters*, in that it reduces the number of points in a cloud, as opposed to *descriptive filters* which add information to the points.
+
+The voxel grid filter down-samples the data by taking a spatial average of the points in the cloud.  In the 2D case, one can simply imagine dividing the plane into a regular grid of rectangles.  While the term is more suited to 3D spaces, these rectangular areas are known as *voxels*. The sub-sampling rate is adjusted by setting the voxel size along each dimension.  The set of points which lie within the bounds of a voxel are assigned to that voxel and will be combined into one output point.
+
+There are two options as to how to represent the distribution of points in a voxel by a single point. In the first, we take the centroid or spatial average of the point distribution.  In the second, we simply take the geometrical center of the voxel. Clearly, the first option is more accurate since it takes into account the point distribution inside the voxels. However it is more computationally intensive since the centroid must be computed for each voxel.  The computational cost increases linearly with the number of points in the cloud and the number of voxels.
 
 In the following figure we show the application of a 2D voxel filter over a 2D point cloud containing uniformly dispersed points.  We divide each axis into 5 regions resulting in 25 voxels.  The points are down-sampled by taking the centroid of the points within each voxel.  The centroids are shown in red asterisks.  The centers of the voxels are shown in green squares.
 
@@ -25,17 +88,17 @@ We will now implement the voxel grid within the framework of libpointmatcher.  O
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
-|vSizeX     |Size of the voxel along the x-axis | 1.0 | -inf to inf|
-|vSizeY     |Size of the voxel along the y-axis | 1.0 | -inf to inf|
-|vSizeZ     |Size of the voxel along the z-axis | 1.0 | -inf to inf|
+|vSizeX     |Size of the voxel along the x-axis | 1.0 | ]0 ; +inf[|
+|vSizeY     |Size of the voxel along the y-axis | 1.0 | ]0 ; +inf[|
+|vSizeZ     |Size of the voxel along the z-axis | 1.0 | ]0 ; +inf[|
 |useCentroid|If 1, down-sample by using the centroid of each voxel.  If 0, use the voxel center | 1 | 1 or 0|
 |averageExistingDescriptors|If 1, descriptors are down-sampled by taking their average in the voxel.  If 0, we use the descriptors from the first point found in the voxel | 1 | 1 or 0|
 
 ### Declaration
 
-The implementations of data point filters are declared in [pointmatcher/DataPointsFiltersImpl.h](/pointmatcher/DataPointsFiltersImpl.h).  In this file, we declare a new templated struct called `VoxelGridDataPointsFiler`.  This class is derived from the general class `DataPointsFilter` so as to inherit pure virtual methods and functionality that are common to all data point filters.
+The implementations of data point filters are declared in [pointmatcher/DataPointsFilters/](/pointmatcher/DataPointsFilters/). In this folder, we add a new header and source file to implement our filter: for instance, here we create the file [pointmatcher/DataPointsFilters/VoxelGrid.h](/pointmatcher/DataPointsFilters/VoxelGrid.h). In this file, we declare a new templated struct called `VoxelGridDataPointsFiler`. This class is derived from the general class `PointMatcher<T>::DataPointsFilter` so as to inherit pure virtual methods and functionality that are common to all data point filters.
 
-**Note:** *Libpointmatcher is a templated library and supports data of either float or double types.  This allows users the flexibility of selecting between two levels of precision depending on the requirements of their application.  As a result, classes which are added to libpointmatcher should be templated so as to support both types.*
+**Note:** *Libpointmatcher is a templated library and supports data of either float or double types. This allows users the flexibility of selecting between two levels of precision depending on the requirements of their application. As a result, classes which are added to libpointmatcher should be templated so as to support both types.*
 
 ```cpp
 template <typename T>
@@ -105,9 +168,12 @@ virtual DataPoints filter(const DataPoints& input);
 virtual void inPlaceFilter(DataPoints& cloud);
 ```
 
-The `filter` function performs the filter operation on the input point cloud and returns the down-sampled point cloud.  This function in fact calls the `inPlaceFilter` function which performs the filtering operation by directly modifying the input point cloud.  The use of an "in place filter" may be preferable if we do not need to keep an intact copy of the input as we do not need to create a new point cloud to hold the output and the memory footprint is thus lower.  This can make a difference when operating on large point clouds with many voxels.
+The `filter` function performs the filter operation on the input point cloud and returns the down-sampled point cloud. This function in fact calls the `inPlaceFilter` function which performs the filtering operation by directly modifying the input point cloud.  The use of an "in place filter" may be preferable if we do not need to keep an intact copy of the input as we do not need to create a new point cloud to hold the output and the memory footprint is thus lower.  This can make a difference when operating on large point clouds with many voxels.
 
 ### Implementation of the Filter
+
+The implementation of the filter must be in the file [pointmatcher/DataPointsFilters/VoxelGrid.cpp](/pointmatcher/DataPointsFilters/VoxelGrid.cpp) that should also be added to the [CMakelists.txt](/CMakelists.txt) in the `POINTMATCHER_SRC` variable.
+
 The steps performed by the filter are all contained in the `inPlaceFilter` function.  Because the voxel grid filter does not sub-sample points from the input but rather creates new points, we use the following strategy for performing in place filtering.  
 
 1. **Voxel Assignment**<br> We pass through the input point cloud and assign each point to a voxel while recording the number of points contained in each voxel.  We record the index of the first point that is assigned to a given voxel.  This point will be modified to contain the down-sampled point representing the voxel.
@@ -382,6 +448,18 @@ cloud.descriptors.conservativeResize(Eigen::NoChange, numPtsOut);
 We first sort the points voxel points by index and place them in order, at the beginning of the point cloud.  The unwanted points are removed from the point cloud by using Eigen's `conservativeResize` function.
 
 ## Registering the Filter as a Libpointmatcher Module
+
+First, we have to declare it in [pointmatcher/DataPointsFiltersImpl.h](/pointmatcher/DataPointsFiltersImpl.h) as follow:
+
+```cpp
+template<typename T>
+struct DataPointsFiltersImpl
+{
+	/* other filters declaration */
+	typedef ::VoxelGridDataPointsFilter<T> VoxelGridDataPointsFilter;
+};
+```
+
 Now that we have completed the implementation of our voxel filter, we can add it to libpointmatcher as a usable DataPointsFilter.  We do so by adding the following macro function in [pointmatcher/Registry.cpp](/pointmatcher/Registry.cpp)
 
 ```cpp
@@ -389,9 +467,9 @@ ADD_TO_REGISTRAR(DataPointsFilter, VoxelGridDataPointsFilter, typename DataPoint
 ```
 
 Now recompile the library and check that the new transformation is listed as an available module by running `pcmip -l | grep -C 10 VoxelGridDataPointsFilter`.
-  
+
 ## Where To Go From Here
-If you are not comfortable with the material covered in this tutorial, we suggest that you attempt to re-design a very simple filter such as the `MaxDistDataPointsFilter`.  You can find its implementation in [pointmatcher/DataPointsFiltersImpl.h](pointmatcher/DataPointsFiltersImpl.h) and [pointmatcher/DataPointsFiltersImpl.cpp](pointmatcher/DataPointsFiltersImpl.cpp) with which to compare your solution.
+If you are not comfortable with the material covered in this tutorial, we suggest that you attempt to re-design a very simple filter such as the `MaxDistDataPointsFilter`.  You can find its implementation in [pointmatcher/DataPointsFilters/MaxDist.h](pointmatcher/DataPointsFilters/MaxDist.h) and [pointmatcher/DataPointsFilters/MaxDist.cpp](pointmatcher/DataPointsFilters/MaxDist.cpp) with which to compare your solution.
 
 For more information on extending libpointmatcher the [next tutorial](TransformationDev.md) covers the design of a transformation class and is similar in nature to this tutorial.
 

@@ -40,8 +40,47 @@ public:
 		
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
+
+	DP generateRandomDataPoints()
+	{
+
+		const int nbPoints = 100;
+		const int dimFeatures = 4;
+		const int dimDescriptors = 3;
+		const int dimTime = 2;
+
+		PM::Matrix randFeat = PM::Matrix::Random(dimFeatures, nbPoints);
+		DP::Labels featLabels;
+		featLabels.push_back(DP::Label("x", 1));
+		featLabels.push_back(DP::Label("y", 1));
+		featLabels.push_back(DP::Label("z", 1));
+		featLabels.push_back(DP::Label("pad", 1));
+
+		PM::Matrix randDesc = PM::Matrix::Random(dimDescriptors, nbPoints);
+		DP::Labels descLabels;
+		descLabels.push_back(DP::Label("dummyDesc", 3));
+
+		PM::Int64Matrix randTimes = PM::Int64Matrix::Random(dimTime, nbPoints);
+		DP::Labels timeLabels;
+		timeLabels.push_back(DP::Label("dummyTime", 2));
+
+		// Construct the point cloud from the generated matrices
+		DP pointCloud = DP(randFeat, featLabels, randDesc, descLabels, randTimes, timeLabels);
+
+		return pointCloud;
+	}
 };
 
+TEST_F(DataFilterTest, IdentityDataPointsFilter)
+{
+	// build test cloud
+	DP ref2DCopy(ref2D);
+	
+	// apply and checked
+	addFilter("IdentityDataPointsFilter");
+	icp.readingDataPointsFilters.apply(ref2DCopy);
+	EXPECT_TRUE(ref2D == ref2DCopy);
+}
 
 TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
 {
@@ -351,8 +390,80 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 	}
 }
 
+TEST_F(DataFilterTest, MaxPointCountDataPointsFilter)
+{
+	DP cloud = ref3D;
+	
+	const size_t maxCount = 1000;
+		
+	params = PM::Parameters(); 
+	params["seed"] = "42";
+	params["maxCount"] = toParam(maxCount);
+	
+	PM::DataPointsFilter* maxPtsFilter = 
+			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
+
+	DP filteredCloud = maxPtsFilter->filter(cloud);
+	
+	//Check number of points
+	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+	
+	EXPECT_EQ(filteredCloud.getNbPoints(), maxCount);
+	
+	//Same seed should result same filtered cloud
+	DP filteredCloud2 = maxPtsFilter->filter(cloud);
+	
+	EXPECT_TRUE(filteredCloud == filteredCloud2);
+	
+	//Different seeds should not result same filtered cloud but same number
+	params.clear();
+	params["seed"] = "1";
+	params["maxCount"] = toParam(maxCount);
+	
+	PM::DataPointsFilter* maxPtsFilter2 = 
+			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
+			
+	DP filteredCloud3 = maxPtsFilter2->filter(cloud);
+	
+	EXPECT_FALSE(filteredCloud3 == filteredCloud2);
+	
+	EXPECT_EQ(filteredCloud3.getNbPoints(), maxCount);
+	
+	EXPECT_EQ(filteredCloud3.getNbPoints(), filteredCloud2.getNbPoints());
+	EXPECT_EQ(filteredCloud3.getDescriptorDim(), filteredCloud2.getDescriptorDim());
+	EXPECT_EQ(filteredCloud3.getTimeDim(), filteredCloud2.getTimeDim());
+	
+	//Validate transformation
+	icp.readingDataPointsFilters.clear();
+	addFilter("MaxPointCountDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+}
+
 TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 {
+	// Test with point cloud
+	DP cloud = generateRandomDataPoints();
+
+	params = PM::Parameters(); 
+	params["vSizeX"] = "0.5";
+	params["vSizeY"] = "0.5";
+	params["vSizeZ"] = "0.5";
+	params["useCentroid"] = toParam(true);
+	params["averageExistingDescriptors"] = toParam(true);
+
+	PM::DataPointsFilter* voxelFilter = 
+			PM::get().DataPointsFilterRegistrar.create("VoxelGridDataPointsFilter", params);
+
+	DP filteredCloud = voxelFilter->filter(cloud);
+
+	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+	// Test with ICP
 	vector<bool> useCentroid = list_of(false)(true);
 	vector<bool> averageExistingDescriptors = list_of(false)(true);
 	for (unsigned i = 0 ; i < useCentroid.size() ; i++) 
@@ -454,4 +565,3 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 		}
 	}
 }
-
