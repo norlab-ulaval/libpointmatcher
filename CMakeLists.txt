@@ -293,7 +293,10 @@ set(POINTMATCHER_SRC
 #ErrorMinimizers
 	pointmatcher/ErrorMinimizers/PointToPlane.cpp
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
-#DataPointsFilters
+#DataPointsFilters	
+	#DataPointsFilters/utils	
+		pointmatcher/DataPointsFilters/utils/octree.cpp	
+	#-----------------------	
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
@@ -320,6 +323,7 @@ set(POINTMATCHER_SRC
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/pointmatcher)
 include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
+include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils)
 
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
