@@ -370,6 +370,10 @@ struct PointMatcher
 		typedef Matrix Dists; //!< Squared distances to closest points, dense matrix of ScalarType
 		typedef IntMatrix Ids; //!< Identifiers of closest points, dense matrix of integers
 	
+
+		static constexpr int InvalidId = -1; //! In case of too few matches the ids are filled with InvalidId
+		static constexpr T InvalidDist = std::numeric_limits<T>::infinity(); //! In case of too few matches the dists are filled with InvalidDist
+
 		Matches();
 		Matches(const Dists& dists, const Ids ids);
 		Matches(const int knn, const int pointsCount);
@@ -529,7 +533,7 @@ struct PointMatcher
 			T weightedPointUsedRatio;//!< the ratio of how many points were used (with weight) for error minimization
 
 			ErrorElements();
-			ErrorElements(const DataPoints& requestedPts, const DataPoints sourcePts, const OutlierWeights outlierWeights, const Matches matches);
+			ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches);
 		};
 		
 		ErrorMinimizer();

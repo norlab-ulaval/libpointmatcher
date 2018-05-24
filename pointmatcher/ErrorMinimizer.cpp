@@ -56,7 +56,7 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements():
 
 //! Constructor from existing data. This will align the data.
 template<typename T>
-PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& requestedPts, const DataPoints sourcePts, const OutlierWeights outlierWeights, const Matches matches)
+PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches)
 {
 	typedef typename Matches::Ids Ids;
 	typedef typename Matches::Dists Dists;
@@ -100,6 +100,11 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& 
 		matchExist = false;
 		for(int k = 0; k < knn; k++) // knn
 		{
+			const auto matchDist = matches.dists(k, i);
+			if (matchDist == Matches::InvalidDist){
+				continue;
+			}
+
 			if (outlierWeights(k,i) != 0.0)
 			{
 				if(dimReqDesc > 0)
@@ -111,7 +116,7 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(const DataPoints& 
 				
 				keptFeat.col(j) = requestedPts.features.col(i);
 				keptMatches.ids(0, j) = matches.ids(k, i);
-				keptMatches.dists(0, j) = matches.dists(k, i);
+				keptMatches.dists(0, j) = matchDist;
 				keptWeights(0,j) = outlierWeights(k,i);
 				++j;
 				this->weightedPointUsedRatio += outlierWeights(k,i);

@@ -320,25 +320,42 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataLinks(
 	}
 	const int knn = matches.ids.rows();
 	
-	stream << "LINES " << readingPtCount*knn << " "  << readingPtCount*knn * 3 << "\n";
-	//int j = 0;
-	for(int k = 0; k < knn; k++) // knn
+	size_t matchCount = readingPtCount*knn;
+	for (int k = 0; k < knn; ++k)
 	{
 		for (int i = 0; i < readingPtCount; ++i)
 		{
-			stream << "2 " << refPtCount + i << " " << matches.ids(k, i) << "\n";
+			if (matches.ids(k, i) == Matches::InvalidId){
+				matchCount --;
+			}
 		}
 	}
 
-	stream << "CELL_DATA " << readingPtCount*knn << "\n";
+	stream << "LINES " << matchCount << " "  << matchCount * 3 << "\n";
+	//int j = 0;
+	for (int k = 0; k < knn; k++) // knn
+	{
+		for (int i = 0; i < readingPtCount; ++i)
+		{
+			const auto id = matches.ids(k, i);
+			if (id != Matches::InvalidId){
+				stream << "2 " << refPtCount + i << " " << id << "\n";
+			}
+		}
+	}
+
+	stream << "CELL_DATA " << matchCount << "\n";
 	stream << "SCALARS outlier float 1\n";
 	stream << "LOOKUP_TABLE default\n";
 	//stream << "LOOKUP_TABLE alphaOutlier\n";
-	for(int k = 0; k < knn; k++) // knn
+	for (int k = 0; k < knn; k++) // knn
 	{
 		for (int i = 0; i < readingPtCount; ++i) //nb pts
 		{
-			stream << featureOutlierWeights(k, i) << "\n";
+			const auto id = matches.ids(k, i);
+			if (id != Matches::InvalidId){
+				stream << featureOutlierWeights(k, i) << "\n";
+			}
 		}
 	}
 

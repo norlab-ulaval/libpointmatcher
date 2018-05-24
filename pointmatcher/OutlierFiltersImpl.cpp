@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OutlierFiltersImpl.h"
 #include "PointMatcherPrivate.h"
 #include "Functions.h"
+#include "MatchersImpl.h"
 
 #include <algorithm>
 #include <vector>
@@ -250,6 +251,11 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 			{
 				const int idRef = input.ids(y, x);
 
+				if (idRef == MatchersImpl<T>::NNS::InvalidIndex) {
+					w(y, x) = 0;
+					continue;
+				}
+
 				const Vector normalRef = normalsReference.col(idRef).normalized();
 
 				const T value = anyabs(normalRead.dot(normalRef));
@@ -327,18 +333,23 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	{
 		for(int i=0; i < readPtsCount; i++)
 		{
+			const int idRead = input.ids(k, i);
+			if (idRead == MatchersImpl<T>::NNS::InvalidIndex){
+				w(k,i) = 0;
+				continue;
+			}
 			if(useSoftThreshold == false)
 			{
 				if(useLargerThan == true)
 				{
-					if(desc(0, input.ids(k,i)) > threshold)
+					if (desc(0, idRead) > threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
 				}
 				else
 				{
-					if(desc(0, input.ids(k,i)) < threshold)
+					if (desc(0, idRead) < threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
@@ -347,7 +358,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 			else
 			{
 				// use soft threshold by assigning the weight using the descriptor
-				w(k,i) = desc(0, input.ids(k,i));
+				w(k,i) = desc(0, idRead);
 			}
 		}
 	}

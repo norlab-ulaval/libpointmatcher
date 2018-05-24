@@ -93,6 +93,8 @@ typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeMatcher::findClosests(
 		typename Matches::Ids(knn, pointsCount)
 	);
 	
+	static_assert(NNS::InvalidIndex == Matches::InvalidId, "");
+	static_assert(NNS::InvalidValue == Matches::InvalidDist, "");
 	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, NNS::ALLOW_SELF_MATCH, maxDist);
 
 	return matches;
@@ -140,6 +142,8 @@ typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeVarDistMatcher::findClo
 	
 	const BOOST_AUTO(maxDists, filteredReading.getDescriptorViewByName(maxDistField));
 	
+	static_assert(NNS::InvalidIndex == Matches::InvalidId, "");
+	static_assert(NNS::InvalidValue == Matches::InvalidDist, "");
 	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, maxDists.transpose(), knn, epsilon, NNS::ALLOW_SELF_MATCH);
 
 	return matches;
