@@ -59,6 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //#include <cstdint>
 #include <boost/cstdint.hpp>
 
+#include "DeprecationWarnings.h"
 #include "Parametrizable.h"
 #include "Registrar.h"
  
@@ -732,7 +733,15 @@ struct PointMatcher
 		bool hasMap() const;
 		bool setMap(const DataPoints& map);
 		void clearMap();
+		PM_DEPRECATED("Use getPrefilteredInternalMap instead. "
+		              "Reason for renaming stated here and in associated PR: "
+		              "https://github.com/ethz-asl/libpointmatcher/issues/209.")
+		const DataPoints& getInternalMap() const;
 		const DataPoints& getPrefilteredInternalMap() const;
+		PM_DEPRECATED("Use getPrefilteredMap instead. "
+			            "Reason for renaming stated here and in associated PR: "
+			            "https://github.com/ethz-asl/libpointmatcher/issues/209")
+		const DataPoints getMap() const;
 		const DataPoints getPrefilteredMap() const;
 		
 	protected:

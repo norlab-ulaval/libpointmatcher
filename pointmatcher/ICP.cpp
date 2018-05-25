@@ -507,11 +507,23 @@ const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getPref
 	return globalMap;
 }
 
+//! Return the map, in global coordinates (slow). Deprecated in favor of getPrefilteredMap()
+template<typename T>
+const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getMap() const {
+	return PointMatcher<T>::ICPSequence::getPrefilteredMap();
+}
+
 //! Return the map, in internal coordinates (fast)
 template<typename T>
 const typename PointMatcher<T>::DataPoints& PointMatcher<T>::ICPSequence::getPrefilteredInternalMap() const
 {
 	return mapPointCloud;
+}
+
+//! Return the map, in internal coordinates (fast). Deprecated in favor of getPrefilteredInternalMap().
+template<typename T>
+const typename PointMatcher<T>::DataPoints& PointMatcher<T>::ICPSequence::getInternalMap() const {
+	return PointMatcher<T>::ICPSequence::getPrefilteredInternalMap();
 }
 
 //! Apply ICP to cloud cloudIn, with identity as initial guess
