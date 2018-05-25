@@ -62,8 +62,8 @@ if(WIN32)
 	endif()
 endif()
 
-# GCC specialities
-if(CMAKE_COMPILER_IS_GNUCXX)
+# GCC / Clang specialities
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 	### General stuff
 	if(WIN32)
 		set(CMAKE_SHARED_LIBRARY_PREFIX "")	# DLLs do not have a "lib" prefix
