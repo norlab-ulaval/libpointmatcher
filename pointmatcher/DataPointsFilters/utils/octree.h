@@ -127,7 +127,6 @@ private:
 	DataContainer data;	
 	
 	std::size_t depth;
-	bool parallel_build;
 	
 public:
 	Octree();
@@ -143,7 +142,6 @@ public:
 	inline bool isRoot() const;
 	inline bool isEmpty()const;
 	
-	inline void setParallel(bool enable);
 	
 	inline std::size_t idx(const XYZ& xyz) const;
 	inline std::size_t idx(T x, T y, T z) const;
@@ -153,12 +151,12 @@ public:
 	Octree<T>* operator[](std::size_t idx);
 	
 	// Build tree from DataPoints with a specified number of points by node
-	bool build(const DP& pts, std::size_t maxDataByNode);
+	bool build(const DP& pts, std::size_t maxDataByNode, bool parallel_build=false);
 	bool build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, std::size_t maxDataByNode);
 	bool build(const DP& pts, DataContainer&& datas, BoundingBox && bb, std::size_t maxDataByNode);
 	
 	// Build tree from DataPoints with a specified max size by node
-	bool build(const DP& pts, T maxSizeByNode);
+	bool build(const DP& pts, T maxSizeByNode, bool parallel_build=false);
 	bool build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode);
 	bool build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode);
 	
