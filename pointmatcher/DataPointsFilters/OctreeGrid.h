@@ -64,6 +64,8 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
+	
+	typedef typename DataPoints::Index Index;
 
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
 
@@ -80,6 +82,7 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 		( "maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "+inf", &P::Comp<std::size_t> )
 		( "maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0.01", "0.0001", "+inf", &P::Comp<T> )
 		( "samplingMethod", "Method to sample the Octree: First Point (0), Random (1), Centroid (2) (more accurate but costly)", "0", "0", "2", &P::Comp<int> )
+		//FIXME: add seed parameter for the random sampling
 		;
 	}
 
@@ -151,3 +154,11 @@ public:
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 };
+
+//Helper function
+template<typename T>
+void swapCols(typename PointMatcher<T>::DataPoints& self, 
+	typename PointMatcher<T>::DataPoints::Index iCol, 
+	typename PointMatcher<T>::DataPoints::Index jCol);
+	
+

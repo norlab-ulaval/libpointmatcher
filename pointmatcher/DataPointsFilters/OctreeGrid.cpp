@@ -34,6 +34,31 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "OctreeGrid.h"
 
+//Helper function
+//FIXME: to put in DataPoints implementation
+template<typename T>
+void swapCols(typename PointMatcher<T>::DataPoints& self, 
+	typename PointMatcher<T>::DataPoints::Index iCol, 
+	typename PointMatcher<T>::DataPoints::Index jCol)
+{
+	//Switch columns j and idx
+	const auto feat = self.features.col(iCol);
+	self.features.col(iCol) = self.features.col(jCol);
+	self.features.col(jCol) = feat;
+
+	if (self.descriptors.cols() > 0)
+	{
+		const auto desc = self.descriptors.col(iCol);
+		self.descriptors.col(iCol) = self.descriptors.col(jCol);
+		self.descriptors.col(jCol) = desc;
+	}
+	if (self.times.cols() > 0)
+	{
+		const auto time = self.times.col(iCol);
+		self.times.col(iCol) = self.times.col(jCol);
+		self.times.col(jCol) = time;
+	}	
+}
 
 //Define Visitor classes to apply processing
 template<typename T>
@@ -57,23 +82,8 @@ bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree<T>& oc)
 			j = mapidx[d];
 			
 		//Switch columns j and idx
-		const auto feat = pts.features.col(idx);
-		pts.features.col(idx) = pts.features.col(j);
-		pts.features.col(j) = feat;
-	
-		if (pts.descriptors.cols() > 0)
-		{
-			const auto desc = pts.descriptors.col(idx);
-			pts.descriptors.col(idx) = pts.descriptors.col(j);
-			pts.descriptors.col(j) = desc;
-		}
-		if (pts.times.cols() > 0)
-		{
-			const auto time = pts.times.col(idx);
-			pts.times.col(idx) = pts.times.col(j);
-			pts.times.col(j) = time;
-		}	
-		
+		swapCols<T>(pts, idx, j);
+				
 		//Maintain new index position	
 		mapidx[idx] = j;
 		//Update index
@@ -127,22 +137,7 @@ bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree<T>& oc)
 			j = mapidx[d];
 			
 		//Switch columns j and idx
-		const auto feat = pts.features.col(idx);
-		pts.features.col(idx) = pts.features.col(j);
-		pts.features.col(j) = feat;
-	
-		if (pts.descriptors.cols() > 0)
-		{
-			const auto desc = pts.descriptors.col(idx);
-			pts.descriptors.col(idx) = pts.descriptors.col(j);
-			pts.descriptors.col(j) = desc;
-		}
-		if (pts.times.cols() > 0)
-		{
-			const auto time = pts.times.col(idx);
-			pts.times.col(idx) = pts.times.col(j);
-			pts.times.col(j) = time;
-		}	
+		swapCols<T>(pts, idx, j);	
 		
 		//Maintain new index position	
 		mapidx[idx] = j;
@@ -211,22 +206,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 			pts.times.col(j) /= nbData;
 				
 		//Switch columns j and idx
-		const auto feat = pts.features.col(idx);
-		pts.features.col(idx) = pts.features.col(j);
-		pts.features.col(j) = feat;
-	
-		if (pts.descriptors.cols() > 0)
-		{
-			const auto desc = pts.descriptors.col(idx);
-			pts.descriptors.col(idx) = pts.descriptors.col(j);
-			pts.descriptors.col(j) = desc;
-		}
-		if (pts.times.cols() > 0)
-		{
-			const auto time = pts.times.col(idx);
-			pts.times.col(idx) = pts.times.col(j);
-			pts.times.col(j) = time;
-		}	
+		swapCols<T>(pts, idx, j);
 		
 		//Maintain new index position	
 		mapidx[idx] = j;
@@ -272,10 +252,46 @@ OctreeGridDataPointsFilter<T>::filter(const DataPoints& input)
 template <typename T>
 void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
+
+	Octree<T> oc{};
 	
+	switch(buildMethod) 
+	{
+		case BuildMethod::MAX_POINT:
+		{
+			oc.build(cloud, maxPointByNode, parallel_build);
+			break;
+		}
+		case BuildMethod::MAX_SIZE:
+		{
+			oc.build(cloud, maxSizeByNode, parallel_build);
+			break;
+		}
+	}
+#if 1	
+	switch(samplingMethod)
+	{
+		case SamplingMethod::FIRST_PTS:
+		{
+			FirstPtsSampler sampler(cloud);
+			oc.visit(sampler);
+			break;
+		}
+		case SamplingMethod::RAND_PTS:
+		{
+			RandomPtsSampler sampler(cloud); //FIXME: add seed parameter
+			oc.visit(sampler);
+			break;
+		}
+		case SamplingMethod::CENTROID:
+		{
+			CentroidSampler sampler(cloud);
+			oc.visit(sampler);
+			break;
+		}
+	}
+#endif
 }
 
 template struct OctreeGridDataPointsFilter<float>;
 template struct OctreeGridDataPointsFilter<double>;
-
-
