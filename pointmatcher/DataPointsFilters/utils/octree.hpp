@@ -590,7 +590,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 
 //------------------------------------------------------------------------------
 template< typename T >
-template < typename Callback >
+template< typename Callback >
 bool Octree<T>::visit(Callback& cb)
 {
 	// Call the callback for this node (if the callback returns false, then

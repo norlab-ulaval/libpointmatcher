@@ -163,3 +163,5 @@ public:
 	template < typename Callback >
 	bool visit(Callback& cb);
 };
+
+#include "octree.hpp"
