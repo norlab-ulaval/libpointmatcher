@@ -564,7 +564,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 		const XYZ offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
-	}s
+	}
 	
 	//For each child build recursively	
 	std::vector<std::thread> threads;
