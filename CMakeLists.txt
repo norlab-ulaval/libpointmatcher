@@ -294,9 +294,6 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/PointToPlane.cpp
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
 #DataPointsFilters	
-	#DataPointsFilters/utils	
-		pointmatcher/DataPointsFilters/utils/octree.cpp	
-	#-----------------------	
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
@@ -318,6 +315,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/CutAtDescriptorThreshold.cpp
 	pointmatcher/DataPointsFilters/Elipsoids.cpp
 	pointmatcher/DataPointsFilters/Gestalt.cpp
+	pointmatcher/DataPointsFilters/OctreeGrid.cpp		
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
