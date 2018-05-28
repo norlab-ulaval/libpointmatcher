@@ -138,9 +138,9 @@ public:
 	Octree<T>& operator=(const Octree<T>&o); //Deep-copy
 	Octree<T>& operator=(Octree<T>&& o);
 	
-	inline bool isLeaf() const;
-	inline bool isRoot() const;
-	inline bool isEmpty()const;
+	bool isLeaf() const;
+	bool isRoot() const;
+	bool isEmpty()const;
 	
 	
 	inline std::size_t idx(const XYZ& xyz) const;
