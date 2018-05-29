@@ -252,7 +252,8 @@ OctreeGridDataPointsFilter<T>::filter(const DataPoints& input)
 template <typename T>
 void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-
+	assert(cloud.features.rows() == 4); //3D points only
+	
 	Octree<T> oc{};
 	
 	switch(buildMethod) 
@@ -268,29 +269,31 @@ void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			break;
 		}
 	}
-#if 1	
+	
 	switch(samplingMethod)
 	{
 		case SamplingMethod::FIRST_PTS:
 		{
 			FirstPtsSampler sampler(cloud);
 			oc.visit(sampler);
+			sampler.finalize();
 			break;
 		}
 		case SamplingMethod::RAND_PTS:
 		{
 			RandomPtsSampler sampler(cloud); //FIXME: add seed parameter
 			oc.visit(sampler);
+			sampler.finalize();
 			break;
 		}
 		case SamplingMethod::CENTROID:
 		{
 			CentroidSampler sampler(cloud);
 			oc.visit(sampler);
+			sampler.finalize();
 			break;
 		}
 	}
-#endif
 }
 
 template struct OctreeGridDataPointsFilter<float>;
