@@ -91,7 +91,7 @@ Octree<T>::Octree(Octree<T>&& o)
 	{
 		octants[i] = o.octants[i];
 		//Nullify ptrs
-		octants[i]=nullptr;
+		o.octants[i]=nullptr;
 	}
 }
 
@@ -157,7 +157,7 @@ Octree<T>& Octree<T>::operator=(Octree<T>&&o)
 	{
 		octants[i] = o.octants[i];
 		//Nullify ptrs
-		octants[i]=nullptr;
+		o.octants[i]=nullptr;
 	}
 	
 	return *this;
