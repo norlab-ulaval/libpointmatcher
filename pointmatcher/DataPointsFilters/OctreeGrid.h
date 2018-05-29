@@ -47,8 +47,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \date 24/05/2018
  * \version 0.1
  *
- * Processings are applyed via Visitors through Depth-first search in the Octree (DFS)
- * i.e. for each node, the Visitor/Callback is call
+ * Processings are applyed via a Visitor through Depth-first search in the Octree (DFS)
+ * i.e. for each node, the Visitor/Callback is called
  */
 template<typename T>
 struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
@@ -79,7 +79,7 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 		return boost::assign::list_of<ParameterDoc>
 		( "buildMethod", "Method to build the Octree: maxPoint (0), maxSize (1)", "0", "0", "1", &P::Comp<int> )
 		( "buildParallel", "If 1 (true), use threads to build the octree.", "1", "0", "1", P::Comp<bool> )
-		( "maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "+inf", &P::Comp<std::size_t> )
+		( "maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "4294967295", &P::Comp<std::size_t> )
 		( "maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0.01", "0.0001", "+inf", &P::Comp<T> )
 		( "samplingMethod", "Method to sample the Octree: First Point (0), Random (1), Centroid (2) (more accurate but costly)", "0", "0", "2", &P::Comp<int> )
 		//FIXME: add seed parameter for the random sampling
