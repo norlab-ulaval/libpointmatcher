@@ -41,10 +41,8 @@ public:
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
 
-	DP generateRandomDataPoints()
+	DP generateRandomDataPoints(int nbPoints = 100)
 	{
-
-		const int nbPoints = 100;
 		const int dimFeatures = 4;
 		const int dimDescriptors = 3;
 		const int dimTime = 2;
