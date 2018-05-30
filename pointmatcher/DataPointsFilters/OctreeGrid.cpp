@@ -41,23 +41,12 @@ void swapCols(typename PointMatcher<T>::DataPoints& self,
 	typename PointMatcher<T>::DataPoints::Index iCol, 
 	typename PointMatcher<T>::DataPoints::Index jCol)
 {
-	//Switch columns j and idx
-	const auto feat = self.features.col(iCol);
-	self.features.col(iCol) = self.features.col(jCol);
-	self.features.col(jCol) = feat;
-
+	//Switch columns j and i
+	self.features.col(iCol).swap(self.features.col(jCol));
 	if (self.descriptors.cols() > 0)
-	{
-		const auto desc = self.descriptors.col(iCol);
-		self.descriptors.col(iCol) = self.descriptors.col(jCol);
-		self.descriptors.col(jCol) = desc;
-	}
+		self.descriptors.col(iCol).swap(self.descriptors.col(jCol));
 	if (self.times.cols() > 0)
-	{
-		const auto time = self.times.col(iCol);
-		self.times.col(iCol) = self.times.col(jCol);
-		self.times.col(jCol) = time;
-	}	
+		self.times.col(iCol).swap(self.times.col(jCol));
 }
 
 //Define Visitor classes to apply processing
@@ -169,6 +158,10 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
+		const int featDim(pts.features.rows());
+		const int descDim(pts.descriptors.rows());
+		const int timeDim(pts.times.rows());
+		
 		auto* data = oc.getData();
 		const std::size_t nbData = (*data).size();
 			
@@ -178,7 +171,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 		//retrieve index from lookup table if sampling in already switched element
 		if(std::size_t(d)<idx)
 			j = mapidx[d];
-		
+			
 		//We sum all the data in the first data
 		for(std::size_t id=1;id<nbData;++id)
 		{
@@ -189,22 +182,31 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 			//retrieve index from lookup table if sampling in already switched element
 			if(std::size_t(curId)<idx)
 				i = mapidx[curId];
-				
-			pts.features.col(j) += pts.features.col(i);
+			
+			for (int f = 0; f < (featDim - 1); ++f)
+				pts.features(f,j) += pts.features(f,i);
 			
 			if (pts.descriptors.cols() > 0)
-				pts.descriptors.col(j) += pts.descriptors.col(i);
+				for (int d = 0; d < descDim; ++d)
+					pts.descriptors(d,j) += pts.descriptors(d,i);
+			
 			if (pts.times.cols() > 0)
-				pts.times.col(j) += pts.times.col(i);	
+				for (int t = 0; t < timeDim; ++t)
+					pts.times(t,j) += pts.times(t,i);	
 		}
 		
 		// Normalize sums to get centroid (average)
-		pts.features.col(j) /= nbData;
+		for (int f = 0; f < (featDim - 1); ++f)
+			pts.features(f,j) /= T(nbData);
+		
 		if (pts.descriptors.cols() > 0)
-			pts.descriptors.col(j) /= nbData;
+			for (int d = 0; d < descDim; ++d)
+				pts.descriptors(d,j) /= T(nbData);
+		
 		if (pts.times.cols() > 0)
-			pts.times.col(j) /= nbData;
-				
+			for (int t = 0; t < timeDim; ++t)
+				pts.times(t,j) /= T(nbData);	
+								
 		//Switch columns j and idx
 		swapCols<T>(pts, idx, j);
 		
@@ -229,13 +231,13 @@ OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& para
 	try 
 	{
 		const int bm = Parametrizable::get<int>("buildMethod");
-		buildMethod =  BuildMethod(bm);
+		buildMethod = BuildMethod(bm);
 		const int sm = Parametrizable::get<int>("samplingMethod");
-		samplingMethod =  SamplingMethod(sm);
+		samplingMethod = SamplingMethod(sm);
 	}
 	catch (const InvalidParameter& e) 
 	{
-		buildMethod =  BuildMethod::MAX_POINT;
+		buildMethod = BuildMethod::MAX_POINT;
 		samplingMethod = SamplingMethod::FIRST_PTS;
 	}
 }
