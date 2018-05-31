@@ -262,8 +262,8 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 	static XY offsetTable[4] =
 		{
 			XY{-0.5, -0.5},
-			XY{-0.5, +0.5},
 			XY{+0.5, -0.5},
+			XY{-0.5, +0.5},
 			XY{+0.5, +0.5}
 		};
 	//Check maxData count
@@ -326,8 +326,8 @@ bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox &&
 	static XY offsetTable[4] =
 		{
 			XY{-0.5, -0.5},
-			XY{-0.5, +0.5},
 			XY{+0.5, -0.5},
+			XY{-0.5, +0.5},
 			XY{+0.5, +0.5}
 		};
 	
@@ -438,8 +438,8 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 	static XY offsetTable[4] =
 		{
 			XY{-0.5, -0.5},
-			XY{-0.5, +0.5},
 			XY{+0.5, -0.5},
+			XY{-0.5, +0.5},
 			XY{+0.5, +0.5}
 		};
 	//Check maxData count
@@ -501,8 +501,8 @@ bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox &&
 	static XY offsetTable[4] =
 		{
 			XY{-0.5, -0.5},
-			XY{-0.5, +0.5},
 			XY{+0.5, -0.5},
+			XY{-0.5, +0.5},
 			XY{+0.5, +0.5}
 		};
 	
