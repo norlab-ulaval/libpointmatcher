@@ -52,7 +52,7 @@ void swapCols(typename PointMatcher<T>::DataPoints& self,
 //Define Visitor classes to apply processing
 template<typename T>
 OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp) 
-	: idx{0}, pts{dp} 
+	: idx{0}, pts(dp) 
 {
 }
 
