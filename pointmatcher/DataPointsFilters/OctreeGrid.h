@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 #include "utils/octree.h"
+#include "utils/quadtree.h"
 
 #include <unordered_map>
 
@@ -88,6 +89,7 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 public:
 //Visitors class to apply processing
+	template<template<typename> typename Tree>
 	struct FirstPtsSampler
 	{
 		std::size_t idx;
@@ -99,14 +101,16 @@ public:
 
 		FirstPtsSampler(DataPoints& dp);
 		virtual ~FirstPtsSampler(){}
-		virtual bool operator()(Octree<T>& oc);
+		virtual bool operator()(Tree<T>& oc);
 		virtual bool finalize();
 	};
-	struct RandomPtsSampler : public FirstPtsSampler
+	
+	template<template<typename> typename Tree>
+	struct RandomPtsSampler : public FirstPtsSampler<Tree>
 	{
-		using FirstPtsSampler::idx;
-		using FirstPtsSampler::pts;
-		using FirstPtsSampler::mapidx;
+		using FirstPtsSampler<Tree>::idx;
+		using FirstPtsSampler<Tree>::pts;
+		using FirstPtsSampler<Tree>::mapidx;
 		
 		const std::size_t seed;
 	
@@ -114,22 +118,32 @@ public:
 		RandomPtsSampler(DataPoints& dp, const std::size_t seed_);
 		virtual ~RandomPtsSampler(){}
 	
-		virtual bool operator()(Octree<T>& oc);
+		virtual bool operator()(Tree<T>& oc);
 		virtual bool finalize();
 	};
-	struct CentroidSampler : public FirstPtsSampler
+	
+	template<template<typename> typename Tree>
+	struct CentroidSampler : public FirstPtsSampler<Tree>
 	{
-		using FirstPtsSampler::idx;
-		using FirstPtsSampler::pts;
-		using FirstPtsSampler::mapidx;
+		using FirstPtsSampler<Tree>::idx;
+		using FirstPtsSampler<Tree>::pts;
+		using FirstPtsSampler<Tree>::mapidx;
 		
 		CentroidSampler(DataPoints& dp);
 	
 		virtual ~CentroidSampler(){}
 	
-		virtual bool operator()(Octree<T>& oc);
+		virtual bool operator()(Tree<T>& oc);
 	};
 
+//Aliases
+	using FirstPtsSampler3D = FirstPtsSampler<Octree>;
+	using RandomPtsSampler3D = FirstPtsSampler<Octree>;
+	using CentroidSampler3D = FirstPtsSampler<Octree>;
+	using FirstPtsSampler2D = FirstPtsSampler<Quadtree>;
+	using RandomPtsSampler2D = FirstPtsSampler<Quadtree>;
+	using CentroidSampler2D = FirstPtsSampler<Quadtree>;
+	
 //-------	
 	enum BuildMethod : int { MAX_POINT=0, MAX_SIZE=1 }; 
 	enum SamplingMethod : int { FIRST_PTS=0, RAND_PTS=1, CENTROID=2 };
@@ -153,6 +167,10 @@ public:
 
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
+	
+protected:
+	template<template<typename> typename Tree>
+	void applySampler(DataPoints& cloud);
 };
 
 //Helper function
