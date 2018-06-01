@@ -37,21 +37,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 
 template< typename T >
-Quadtree<T>::Quadtree()
-	: parent{nullptr}, 
-		cells{nullptr,nullptr,nullptr,nullptr},
-		depth{0}
+Quadtree<T>::Quadtree(): parent{nullptr}, 
+    cells{nullptr,nullptr,nullptr,nullptr}, depth{0}
 {
 }
 
 template< typename T >
-Quadtree<T>::Quadtree(const Quadtree<T>& o)
-	: bb{o.bb.center, o.bb.radius}, depth{o.depth}
+Quadtree<T>::Quadtree(const Quadtree<T>& o): 
+    bb{o.bb.center, o.bb.radius}, depth{o.depth}
 {
-	if (!o.parent) parent = nullptr;	
+	if (!o.parent) 
+	    parent = nullptr;
+	    	
 	if(o.isLeaf()) //Leaf case
 	{
-		//nullify childs
+		//nullify children
 		for(size_t i=0; i<4; ++i)
 			cells[i]= nullptr;
 		//Copy data
@@ -60,19 +60,19 @@ Quadtree<T>::Quadtree(const Quadtree<T>& o)
 	else //Node case
 	{
 		//Create each child recursively
-  	for(size_t i=0; i<4;++i)
-  	{
-  		cells[i] = new Quadtree<T>(*(o.cells[i]));	
+		for(size_t i=0; i<4;++i)
+		{
+			cells[i] = new Quadtree<T>(*(o.cells[i]));	
 			//Assign parent  	
-  		cells[i]->parent = this;
-  	}
-  	//no data in node to copy 	
+			cells[i]->parent = this;
+		}
+		//no data in node to copy 	
 	}
 }
 
 template< typename T >
-Quadtree<T>::Quadtree(Quadtree<T>&& o)
-	: parent{nullptr}, bb{o.bb.center, o.bb.radius}, depth{o.depth}
+Quadtree<T>::Quadtree(Quadtree<T>&& o): 
+		parent{nullptr}, bb{o.bb.center, o.bb.radius}, depth{o.depth}
 {
 	//only allow move of root node
 	assert(o.isRoot());
@@ -85,7 +85,7 @@ Quadtree<T>::Quadtree(Quadtree<T>&& o)
 			std::make_move_iterator(o.data.end()));
 	}
 	
-	//copy child ptr
+	//copy children ptr
 	for(size_t i=0; i<4; ++i)
 	{
 		cells[i] = o.cells[i];
@@ -97,7 +97,7 @@ Quadtree<T>::Quadtree(Quadtree<T>&& o)
 template< typename T >
 Quadtree<T>::~Quadtree()
 {	
-	//delete recursively childs
+	//delete recursively children
 	if(!isLeaf())
 		for(size_t i=0; i<4; ++i)
 			delete cells[i];
@@ -106,12 +106,14 @@ Quadtree<T>::~Quadtree()
 template< typename T >	
 Quadtree<T>& Quadtree<T>::operator=(const Quadtree<T>&o)
 {
-	if (!o.parent) parent = nullptr;
+	if (!o.parent) 
+	    parent = nullptr;
+	    
 	depth=o.depth;
 	
 	if(o.isLeaf()) //Leaf case
 	{
-		//nullify childs
+		//nullify children
 		for(size_t i=0; i<4; ++i)
 			cells[i]= nullptr;
 		//Copy data
@@ -151,7 +153,7 @@ Quadtree<T>& Quadtree<T>::operator=(Quadtree<T>&&o)
 			std::make_move_iterator(o.data.end()));
 	}
 	
-	//copy childs ptrs
+	//copy children ptrs
 	for(size_t i=0; i<4; ++i)
 	{
 		cells[i] = o.cells[i];
@@ -178,7 +180,7 @@ bool Quadtree<T>::isEmpty() const
 	return (data.size() == 0);
 }
 template< typename T >
-size_t Quadtree<T>::idx(const XY& xy) const
+size_t Quadtree<T>::idx(const Point& xy) const
 {
 	size_t id = 0;
 	id|= ((xy.x > bb.center.x) << 0);
@@ -226,11 +228,11 @@ bool Quadtree<T>::build(const DP& pts, size_t maxDataByNode, bool parallel_build
 	BoundingBox box;
 	
 	Vector minValues = pts.features.rowwise().minCoeff();
-	XY min{minValues(0), minValues(1)};
+	Point min{minValues(0), minValues(1)};
 	Vector maxValues = pts.features.rowwise().maxCoeff();
-	XY max{maxValues(0), maxValues(1)};
+	Point max{maxValues(0), maxValues(1)};
 	
-	XY radii = max - min;
+	Point radii = max - min;
 	box.center = min + radii * 0.5;
 	box.radius = radii.x;
 	if (box.radius < radii.y) box.radius = radii.y;
@@ -259,12 +261,12 @@ bool Quadtree<T>::build(const DP& pts, size_t maxDataByNode, bool parallel_build
 template< typename T >
 bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode)
 {
-	static XY offsetTable[4] =
+	static Point offsetTable[4] =
 		{
-			XY{-0.5, -0.5},
-			XY{+0.5, -0.5},
-			XY{-0.5, +0.5},
-			XY{+0.5, +0.5}
+			Point{-0.5, -0.5},
+			Point{+0.5, -0.5},
+			Point{-0.5, +0.5},
+			Point{+0.5, +0.5}
 		};
 	//Check maxData count
 	if(datas.size() <= maxDataByNode)
@@ -288,7 +290,7 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 		
 	for(auto&& d : datas)
 	{
-		//FIXME: Should be a generic conversion from DataPoint considering Data to XY
+		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
 		(sDatas[idx( TO_XY(pts,d) )]).emplace_back(d);
 	}
 	
@@ -300,7 +302,7 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<4; ++i)
 	{
-		const XY offset = offsetTable[i] * this->bb.radius;
+		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}
@@ -310,6 +312,7 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 	for(size_t i=0; i<4; ++i)
 	{
 		cells[i] = new Quadtree<T>();
+		//Assign depth
 		cells[i]->depth = this->depth+1;
 		ret = ret and cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode);		
 		//Assign parent
@@ -323,12 +326,12 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 template< typename T >
 bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode)
 {
-	static XY offsetTable[4] =
+	static Point offsetTable[4] =
 		{
-			XY{-0.5, -0.5},
-			XY{+0.5, -0.5},
-			XY{-0.5, +0.5},
-			XY{+0.5, +0.5}
+			Point{-0.5, -0.5},
+			Point{+0.5, -0.5},
+			Point{-0.5, +0.5},
+			Point{+0.5, +0.5}
 		};
 	
 	//Check maxData count
@@ -353,7 +356,7 @@ bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox &&
 		
 	for(auto&& d : datas)
 	{
-		//FIXME: Should be a generic conversion from DataPoint considering Data to XY
+		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
 		(sDatas[idx( TO_XY(pts,d) )]).emplace_back(d);
 	}
 	
@@ -365,7 +368,7 @@ bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox &&
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<4; ++i)
 	{
-		const XY offset = offsetTable[i] * this->bb.radius;
+		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}
@@ -402,11 +405,11 @@ bool Quadtree<T>::build(const DP& pts, T maxSizeByNode, bool parallel_build)
 	BoundingBox box;
 	
 	Vector minValues = pts.features.rowwise().minCoeff();
-	XY min{minValues(0), minValues(1)};
+	Point min{minValues(0), minValues(1)};
 	Vector maxValues = pts.features.rowwise().maxCoeff();
-	XY max{maxValues(0), maxValues(1)};
+	Point max{maxValues(0), maxValues(1)};
 	
-	XY radii = max - min;
+	Point radii = max - min;
 	box.center = min + radii * 0.5;
 	box.radius = radii.x;
 	if (box.radius < radii.y) box.radius = radii.y;
@@ -435,14 +438,14 @@ bool Quadtree<T>::build(const DP& pts, T maxSizeByNode, bool parallel_build)
 template< typename T >
 bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode)
 {
-	static XY offsetTable[4] =
+	static Point offsetTable[4] =
 		{
-			XY{-0.5, -0.5},
-			XY{+0.5, -0.5},
-			XY{-0.5, +0.5},
-			XY{+0.5, +0.5}
+			Point{-0.5, -0.5},
+			Point{+0.5, -0.5},
+			Point{-0.5, +0.5},
+			Point{+0.5, +0.5}
 		};
-	//Check maxData count
+	//Check bounding box size or if there is data
 	if((bb.radius*2.0 <= maxSizeByNode) or (datas.size() <= 1))
 	{
 		//insert data
@@ -464,7 +467,7 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 		
 	for(auto&& d : datas)
 	{
-		//FIXME: Should be a generic conversion from DataPoint considering Data to XY
+		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
 		(sDatas[idx( TO_XY(pts,d) )]).emplace_back(d);
 	}
 	
@@ -476,7 +479,7 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<4; ++i)
 	{
-		const XY offset = offsetTable[i] * this->bb.radius;
+		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}
@@ -486,6 +489,7 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 	for(size_t i=0; i<4; ++i)
 	{
 		cells[i] = new Quadtree<T>();
+		//Assign depth
 		cells[i]->depth = this->depth+1;	
 		ret = ret and cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxSizeByNode);		
 		//Assign parent
@@ -498,15 +502,15 @@ bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb,
 template< typename T >
 bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode)
 {
-	static XY offsetTable[4] =
+	static Point offsetTable[4] =
 		{
-			XY{-0.5, -0.5},
-			XY{+0.5, -0.5},
-			XY{-0.5, +0.5},
-			XY{+0.5, +0.5}
+			Point{-0.5, -0.5},
+			Point{+0.5, -0.5},
+			Point{-0.5, +0.5},
+			Point{+0.5, +0.5}
 		};
 	
-	//Check maxData count
+	//Check bounding box size or if there is data
 	if((bb.radius*2.0 <= maxSizeByNode) or (datas.size() <= 1))
 	{			
 		//insert data
@@ -528,7 +532,7 @@ bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox &&
 		
 	for(auto&& d : datas)
 	{
-		//FIXME: Should be a generic conversion from DataPoint considering Data to XY
+		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
 		(sDatas[idx( TO_XY(pts,d) )]).emplace_back(d);
 	}
 	
@@ -540,7 +544,7 @@ bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox &&
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<4; ++i)
 	{
-		const XY offset = offsetTable[i] * this->bb.radius;
+		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}

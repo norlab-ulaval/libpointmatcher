@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Quadtree implementation for decomposing point cloud. 
  * The current implementation use the data structure PointMatcher<T>::DataPoints. 
- * It ensures that each node has either 4 or 0 childs. 
+ * It ensures that each node has either 4 or 0 children. 
  *
  * Can create an quadtree with the 2 following crieterions:
  *	- max number of data by node
@@ -79,34 +79,34 @@ public:
 	using Data = typename DP::Index; /**/
 	using DataContainer = std::vector<Data>;
 
-private:
-	struct XY
+	struct Point
 	{
 		T x;
 		T y;
 		
-		XY(T x_=T(0.0), T y_=T(0.0)) : x{x_}, y{y_} {}
+		Point(T x_=T(0.0), T y_=T(0.0)) : x{x_}, y{y_} {}
 	
-		void operator+=(const XY& v){ x+=v.x; y+=v.y;}
-		void operator-=(const XY& v){ x-=v.x; y-=v.y;}
-		void operator*=(const XY& v){ x*=v.x; y*=v.y;}
+		void operator+=(const Point& v){ x+=v.x; y+=v.y;}
+		void operator-=(const Point& v){ x-=v.x; y-=v.y;}
+		void operator*=(const Point& v){ x*=v.x; y*=v.y;}
 		void operator*=(const T& s) { x*=s; y*=s;}
 		void operator/=(const T& s) { x/=s; y/=s;}
 		
-		XY operator+(const XY& v2){return XY{x+v2.x,y+v2.y};}
-		XY operator-(const XY& v2){return XY{x-v2.x,y-v2.y};}
-		XY operator*(const XY& v2){return XY{x*v2.x,y*v2.y};}
-		XY operator*(const T& s)  {return XY{s*x,s*y};}
-		XY operator/(const XY& v2){return XY{x/v2.x,y/v2.y};}
-		XY operator/(const T& s)  {return XY{s/x,s/y};}
+		Point operator+(const Point& v2){return Point{x+v2.x,y+v2.y};}
+		Point operator-(const Point& v2){return Point{x-v2.x,y-v2.y};}
+		Point operator*(const Point& v2){return Point{x*v2.x,y*v2.y};}
+		Point operator*(const T& s)  {return Point{s*x,s*y};}
+		Point operator/(const Point& v2){return Point{x/v2.x,y/v2.y};}
+		Point operator/(const T& s)  {return Point{s/x,s/y};}
 	};
 	
 	struct BoundingBox 
 	{
-			XY center;
+			Point center;
 			T 	radius;
 	};
-	
+
+protected:	
 	Quadtree* parent;
 	Quadtree* cells[4];
 	
@@ -140,7 +140,7 @@ public:
 	bool isRoot() const;
 	bool isEmpty()const;
 	
-	inline std::size_t idx(const XY& xy) const;
+	inline std::size_t idx(const Point& xy) const;
 	inline std::size_t idx(T x, T y) const;
 	
 	inline std::size_t getDepth() const;
