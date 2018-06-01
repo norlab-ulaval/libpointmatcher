@@ -266,8 +266,9 @@ void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 template <typename T>
 template<template<typename> typename Tree>
-void OctreeGridDataPointsFilter<T>::applySampler(DataPoints& cloud){
-	Tree<T> oc{};
+void OctreeGridDataPointsFilter<T>::applySampler(DataPoints& cloud)
+{
+	Tree<T> oc;
 	
 	switch(buildMethod) 
 	{
