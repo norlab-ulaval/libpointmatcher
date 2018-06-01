@@ -72,13 +72,13 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 	inline static const std::string description()
 	{
-		return "Construct an Octree grid representation of the point cloud. Constructed either by limiting the number of point in each octant or by limiting the size of the bounding box. Down-sample by taking either the first or a random point, or compute the centroid.";
+		return "Construct an Octree/Quadtree grid representation of the point cloud. Constructed either by limiting the number of point in each octant or by limiting the size of the bounding box. Down-sample by taking either the first or a random point, or compute the centroid.";
 	}
 
 	inline static const ParametersDoc availableParameters()
 	{
 		return boost::assign::list_of<ParameterDoc>
-		( "buildMethod", "Method to build the Octree: maxPoint (0), maxSize (1)", "0", "0", "1", &P::Comp<int> )
+		( "buildMethod", "Method to build the Octree/Quadtree: maxPoint (0), maxSize (1)", "0", "0", "1", &P::Comp<int> )
 		( "buildParallel", "If 1 (true), use threads to build the octree.", "1", "0", "1", P::Comp<bool> )
 		( "maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "4294967295", &P::Comp<std::size_t> )
 		( "maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0.01", "0.0001", "+inf", &P::Comp<T> )
