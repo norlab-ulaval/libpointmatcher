@@ -51,15 +51,14 @@ void swapCols(typename PointMatcher<T>::DataPoints& self,
 
 //Define Visitor classes to apply processing
 template<typename T>
-template<template<typename> typename Tree>
-OctreeGridDataPointsFilter<T>::FirstPtsSampler<Tree>::FirstPtsSampler(DataPoints& dp) 
-	: idx{0}, pts(dp) 
+OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp):
+	idx{0}, pts(dp) 
 {
 }
 
 template <typename T>
 template<template<typename> typename Tree>
-bool OctreeGridDataPointsFilter<T>::FirstPtsSampler<Tree>::operator()(Tree<T>& oc)
+bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -85,8 +84,7 @@ bool OctreeGridDataPointsFilter<T>::FirstPtsSampler<Tree>::operator()(Tree<T>& o
 }
  
 template <typename T>
-template<template<typename> typename Tree>
-bool OctreeGridDataPointsFilter<T>::FirstPtsSampler<Tree>::finalize()
+bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::finalize()
 {
 	//Resize point cloud
 	pts.conservativeResize(idx);
@@ -97,23 +95,20 @@ bool OctreeGridDataPointsFilter<T>::FirstPtsSampler<Tree>::finalize()
 
 
 template<typename T>
-template<template<typename> typename Tree>
-OctreeGridDataPointsFilter<T>::RandomPtsSampler<Tree>::RandomPtsSampler(DataPoints& dp) 
-	: OctreeGridDataPointsFilter<T>::template FirstPtsSampler<Tree>{dp}, seed{1}
+OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(DataPoints& dp) 
+	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}, seed{1}
+{
+	std::srand(seed);
+}
+template<typename T>
+OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(DataPoints& dp, const std::size_t seed_): 
+	OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}, seed{seed_}
 {
 	std::srand(seed);
 }
 template<typename T>
 template<template<typename> typename Tree>
-OctreeGridDataPointsFilter<T>::RandomPtsSampler<Tree>::RandomPtsSampler(
-	DataPoints& dp, const std::size_t seed_
-): OctreeGridDataPointsFilter<T>::template FirstPtsSampler<Tree>{dp}, seed{seed_}
-{
-	std::srand(seed);
-}
-template<typename T>
-template<template<typename> typename Tree>
-bool OctreeGridDataPointsFilter<T>::RandomPtsSampler<Tree>::operator()(Tree<T>& oc)
+bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -144,10 +139,9 @@ bool OctreeGridDataPointsFilter<T>::RandomPtsSampler<Tree>::operator()(Tree<T>& 
 }
 	
 template<typename T>
-template<template<typename> typename Tree>
-bool OctreeGridDataPointsFilter<T>::RandomPtsSampler<Tree>::finalize()
+bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::finalize()
 {
-	bool ret = FirstPtsSampler<Tree>::finalize();
+	bool ret = FirstPtsSampler::finalize();
 	//Reset seed
 	std::srand(seed);
 	
@@ -155,15 +149,14 @@ bool OctreeGridDataPointsFilter<T>::RandomPtsSampler<Tree>::finalize()
 }
 
 template<typename T>
-template<template<typename> typename Tree>
-OctreeGridDataPointsFilter<T>::CentroidSampler<Tree>::CentroidSampler(DataPoints& dp)  
-	: OctreeGridDataPointsFilter<T>::template FirstPtsSampler<Tree>{dp}
+OctreeGridDataPointsFilter<T>::CentroidSampler::CentroidSampler(DataPoints& dp):
+	OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
 {
 }
 	
 template<typename T>
 template<template<typename> typename Tree>
-bool OctreeGridDataPointsFilter<T>::CentroidSampler<Tree>::operator()(Tree<T>& oc)
+bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -230,7 +223,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler<Tree>::operator()(Tree<T>& o
 
 // OctreeGridDataPointsFilter
 template <typename T>
-OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& params) :
+OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("OctreeGridDataPointsFilter", 
 		OctreeGridDataPointsFilter::availableParameters(), params),
 	parallel_build{Parametrizable::get<bool>("buildParallel")},
@@ -294,21 +287,21 @@ void OctreeGridDataPointsFilter<T>::applySampler(DataPoints& cloud){
 	{
 		case SamplingMethod::FIRST_PTS:
 		{
-			FirstPtsSampler<Tree> sampler(cloud);
+			FirstPtsSampler sampler(cloud);
 			oc.visit(sampler);
 			sampler.finalize();
 			break;
 		}
 		case SamplingMethod::RAND_PTS:
 		{
-			RandomPtsSampler<Tree> sampler(cloud); //FIXME: add seed parameter
+			RandomPtsSampler sampler(cloud); //FIXME: add seed parameter
 			oc.visit(sampler);
 			sampler.finalize();
 			break;
 		}
 		case SamplingMethod::CENTROID:
 		{
-			CentroidSampler<Tree> sampler(cloud);
+			CentroidSampler sampler(cloud);
 			oc.visit(sampler);
 			sampler.finalize();
 			break;

@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*!
  * \class OctreeGridDataPointsFilter
- * \brief Data Filter based on Octree representation
+ * \brief Data Filter based on Octree/Quadtree representation
  *
  * \author Mathieu Labussiere (<mathieu dot labu at gmail dot com>)
  * \date 24/05/2018
@@ -89,7 +89,6 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 public:
 //Visitors class to apply processing
-	template<template<typename> typename Tree>
 	struct FirstPtsSampler
 	{
 		std::size_t idx;
@@ -101,16 +100,19 @@ public:
 
 		FirstPtsSampler(DataPoints& dp);
 		virtual ~FirstPtsSampler(){}
-		virtual bool operator()(Tree<T>& oc);
+		
+		template<template<typename> typename Tree>
+		bool operator()(Tree<T>& oc);
+		
 		virtual bool finalize();
 	};
 	
-	template<template<typename> typename Tree>
-	struct RandomPtsSampler : public FirstPtsSampler<Tree>
+	
+	struct RandomPtsSampler : public FirstPtsSampler
 	{
-		using FirstPtsSampler<Tree>::idx;
-		using FirstPtsSampler<Tree>::pts;
-		using FirstPtsSampler<Tree>::mapidx;
+		using FirstPtsSampler::idx;
+		using FirstPtsSampler::pts;
+		using FirstPtsSampler::mapidx;
 		
 		const std::size_t seed;
 	
@@ -118,32 +120,26 @@ public:
 		RandomPtsSampler(DataPoints& dp, const std::size_t seed_);
 		virtual ~RandomPtsSampler(){}
 	
-		virtual bool operator()(Tree<T>& oc);
+		template<template<typename> typename Tree>
+		bool operator()(Tree<T>& oc);
+		
 		virtual bool finalize();
 	};
 	
-	template<template<typename> typename Tree>
-	struct CentroidSampler : public FirstPtsSampler<Tree>
+	struct CentroidSampler : public FirstPtsSampler
 	{
-		using FirstPtsSampler<Tree>::idx;
-		using FirstPtsSampler<Tree>::pts;
-		using FirstPtsSampler<Tree>::mapidx;
+		using FirstPtsSampler::idx;
+		using FirstPtsSampler::pts;
+		using FirstPtsSampler::mapidx;
 		
 		CentroidSampler(DataPoints& dp);
 	
 		virtual ~CentroidSampler(){}
 	
-		virtual bool operator()(Tree<T>& oc);
+		template<template<typename> typename Tree>
+		bool operator()(Tree<T>& oc);
 	};
 
-//Aliases
-	using FirstPtsSampler3D = FirstPtsSampler<Octree>;
-	using RandomPtsSampler3D = FirstPtsSampler<Octree>;
-	using CentroidSampler3D = FirstPtsSampler<Octree>;
-	using FirstPtsSampler2D = FirstPtsSampler<Quadtree>;
-	using RandomPtsSampler2D = FirstPtsSampler<Quadtree>;
-	using CentroidSampler2D = FirstPtsSampler<Quadtree>;
-	
 //-------	
 	enum BuildMethod : int { MAX_POINT=0, MAX_SIZE=1 }; 
 	enum SamplingMethod : int { FIRST_PTS=0, RAND_PTS=1, CENTROID=2 };
