@@ -37,22 +37,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 
 template< typename T >
-Octree<T>::Octree()
-	: parent{nullptr}, 
-		octants{nullptr,nullptr,nullptr,nullptr,
-						nullptr,nullptr,nullptr,nullptr},
-		depth{0}
+Octree<T>::Octree(): parent{nullptr}, 
+	octants{nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr},
+	depth{0}
 {
 }
 
 template< typename T >
-Octree<T>::Octree(const Octree<T>& o)
-	: bb{o.bb.center, o.bb.radius}, depth{o.depth}
+Octree<T>::Octree(const Octree<T>& o): 
+	bb{o.bb.center, o.bb.radius}, depth{o.depth}
 {
-	if (!o.parent) parent = nullptr;	
+	if (!o.parent) 
+		parent = nullptr;	
+		
 	if(o.isLeaf()) //Leaf case
 	{
-		//nullify childs
+		//nullify children
 		for(size_t i=0; i<8; ++i)
 			octants[i]= nullptr;
 		//Copy data
@@ -61,19 +61,19 @@ Octree<T>::Octree(const Octree<T>& o)
 	else //Node case
 	{
 		//Create each child recursively
-  	for(size_t i=0; i<8;++i)
-  	{
-  		octants[i] = new Octree<T>(*(o.octants[i]));	
+		for(size_t i=0; i<8;++i)
+		{
+			octants[i] = new Octree<T>(*(o.octants[i]));	
 			//Assign parent  	
-  		octants[i]->parent = this;
-  	}
-  	//no data in node to copy 	
+			octants[i]->parent = this;
+		}
+		//no data in node to copy 	
 	}
 }
 
 template< typename T >
-Octree<T>::Octree(Octree<T>&& o)
-	: parent{nullptr}, bb{o.bb.center, o.bb.radius}, depth{o.depth}
+Octree<T>::Octree(Octree<T>&& o): 
+	parent{nullptr}, bb{o.bb.center, o.bb.radius}, depth{o.depth}
 {
 	//only allow move of root node
 	assert(o.isRoot());
@@ -98,7 +98,7 @@ Octree<T>::Octree(Octree<T>&& o)
 template< typename T >
 Octree<T>::~Octree()
 {	
-	//delete recursively childs
+	//delete recursively children
 	if(!isLeaf())
 		for(size_t i=0; i<8; ++i)
 			delete octants[i];
@@ -107,12 +107,13 @@ Octree<T>::~Octree()
 template< typename T >	
 Octree<T>& Octree<T>::operator=(const Octree<T>&o)
 {
-	if (!o.parent) parent = nullptr;
+	if (!o.parent) 
+		parent = nullptr;
 	depth=o.depth;
 	
 	if(o.isLeaf()) //Leaf case
 	{
-		//nullify childs
+		//nullify children
 		for(size_t i=0; i<8; ++i)
 			octants[i]= nullptr;
 		//Copy data
@@ -139,6 +140,7 @@ Octree<T>& Octree<T>::operator=(Octree<T>&&o)
 	assert(o.isRoot());
 	
 	parent = nullptr;
+	
 	bb.center = o.bb.center;
 	bb.radius = o.bb.radius;
 	
@@ -152,7 +154,7 @@ Octree<T>& Octree<T>::operator=(Octree<T>&&o)
 			std::make_move_iterator(o.data.end()));
 	}
 	
-	//copy childs ptrs
+	//copy children ptrs
 	for(size_t i=0; i<8; ++i)
 	{
 		octants[i] = o.octants[i];
@@ -179,7 +181,7 @@ bool Octree<T>::isEmpty() const
 	return (data.size() == 0);
 }
 template< typename T >
-size_t Octree<T>::idx(const XYZ& xyz) const
+size_t Octree<T>::idx(const Point& xyz) const
 {
 	size_t id = 0;
 	id|= ((xyz.x > bb.center.x) << 0);
@@ -217,7 +219,7 @@ Octree<T>* Octree<T>::operator[](size_t idx)
 #define TO_DATA(pts_, ids_) ([](const DP& pts, const std::vector<Id>& ids) -> DataContainer \
 		{ return DataContainer{ids.begin(), ids.end()}; })(pts_, ids_)
 						
-#define TO_XYZ(pts, d) pts.features(0,d),pts.features(1,d),pts.features(2,d)
+#define TO_POINT(pts, d) pts.features(0,d),pts.features(1,d),pts.features(2,d)
 
 // Build tree from DataPoints with a specified number of points by node
 template< typename T >
@@ -229,11 +231,11 @@ bool Octree<T>::build(const DP& pts, size_t maxDataByNode, bool parallel_build)
 	BoundingBox box;
 	
 	Vector minValues = pts.features.rowwise().minCoeff();
-	XYZ min{minValues(0), minValues(1), minValues(2)};
+	Point min{minValues(0), minValues(1), minValues(2)};
 	Vector maxValues = pts.features.rowwise().maxCoeff();
-	XYZ max{maxValues(0), maxValues(1), maxValues(2)};
+	Point max{maxValues(0), maxValues(1), maxValues(2)};
 	
-	XYZ radii = max - min;
+	Point radii = max - min;
 	box.center = min + radii * 0.5;
 	box.radius = radii.x;
 	if (box.radius < radii.y) box.radius = radii.y;
@@ -263,16 +265,16 @@ bool Octree<T>::build(const DP& pts, size_t maxDataByNode, bool parallel_build)
 template< typename T >
 bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode)
 {
-	static XYZ offsetTable[8] =
+	static Point offsetTable[8] =
 		{
-			XYZ{-0.5, -0.5, -0.5},
-			XYZ{+0.5, -0.5, -0.5},
-			XYZ{-0.5, -0.5, +0.5},
-			XYZ{+0.5, -0.5, +0.5},
-			XYZ{-0.5, +0.5, -0.5},
-			XYZ{+0.5, +0.5, -0.5},
-			XYZ{-0.5, +0.5, +0.5},
-			XYZ{+0.5, +0.5, +0.5}
+			Point{-0.5, -0.5, -0.5},
+			Point{+0.5, -0.5, -0.5},
+			Point{-0.5, -0.5, +0.5},
+			Point{+0.5, -0.5, +0.5},
+			Point{-0.5, +0.5, -0.5},
+			Point{+0.5, +0.5, -0.5},
+			Point{-0.5, +0.5, +0.5},
+			Point{+0.5, +0.5, +0.5}
 		};
 	//Check maxData count
 	if(datas.size() <= maxDataByNode)
@@ -296,8 +298,8 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, s
 		
 	for(auto&& d : datas)
 	{
-		//FIXME: Should be a generic conversion from DataPoint considering Data to XYZ
-		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
+		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
+		(sDatas[idx( TO_POINT(pts,d) )]).emplace_back(d);
 	}
 	
 	for(size_t i=0; i<8; ++i)
@@ -308,7 +310,7 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, s
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<8; ++i)
 	{
-		const XYZ offset = offsetTable[i] * this->bb.radius;
+		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}
@@ -331,16 +333,16 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, s
 template< typename T >
 bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode)
 {
-	static XYZ offsetTable[8] =
+	static Point offsetTable[8] =
 		{
-			XYZ{-0.5, -0.5, -0.5},
-			XYZ{+0.5, -0.5, -0.5},
-			XYZ{-0.5, -0.5, +0.5},
-			XYZ{+0.5, -0.5, +0.5},
-			XYZ{-0.5, +0.5, -0.5},
-			XYZ{+0.5, +0.5, -0.5},
-			XYZ{-0.5, +0.5, +0.5},
-			XYZ{+0.5, +0.5, +0.5}
+			Point{-0.5, -0.5, -0.5},
+			Point{+0.5, -0.5, -0.5},
+			Point{-0.5, -0.5, +0.5},
+			Point{+0.5, -0.5, +0.5},
+			Point{-0.5, +0.5, -0.5},
+			Point{+0.5, +0.5, -0.5},
+			Point{-0.5, +0.5, +0.5},
+			Point{+0.5, +0.5, +0.5}
 		};
 	
 	//Check maxData count
@@ -365,8 +367,8 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 		
 	for(auto&& d : datas)
 	{
-		//FIXME: Should be a generic conversion from DataPoint considering Data to XYZ
-		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
+		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
+		(sDatas[idx( TO_POINT(pts,d) )]).emplace_back(d);
 	}
 	
 	for(size_t i=0; i<8; ++i)
@@ -377,7 +379,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<8; ++i)
 	{
-		const XYZ offset = offsetTable[i] * this->bb.radius;
+		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}
@@ -414,11 +416,11 @@ bool Octree<T>::build(const DP& pts, T maxSizeByNode, bool parallel_build)
 	BoundingBox box;
 	
 	Vector minValues = pts.features.rowwise().minCoeff();
-	XYZ min{minValues(0), minValues(1), minValues(2)};
+	Point min{minValues(0), minValues(1), minValues(2)};
 	Vector maxValues = pts.features.rowwise().maxCoeff();
-	XYZ max{maxValues(0), maxValues(1), maxValues(2)};
+	Point max{maxValues(0), maxValues(1), maxValues(2)};
 	
-	XYZ radii = max - min;
+	Point radii = max - min;
 	box.center = min + radii * 0.5;
 	box.radius = radii.x;
 	if (box.radius < radii.y) box.radius = radii.y;
@@ -448,18 +450,18 @@ bool Octree<T>::build(const DP& pts, T maxSizeByNode, bool parallel_build)
 template< typename T >
 bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode)
 {
-	static XYZ offsetTable[8] =
+	static Point offsetTable[8] =
 		{
-			XYZ{-0.5, -0.5, -0.5},
-			XYZ{+0.5, -0.5, -0.5},
-			XYZ{-0.5, -0.5, +0.5},
-			XYZ{+0.5, -0.5, +0.5},
-			XYZ{-0.5, +0.5, -0.5},
-			XYZ{+0.5, +0.5, -0.5},
-			XYZ{-0.5, +0.5, +0.5},
-			XYZ{+0.5, +0.5, +0.5}
+			Point{-0.5, -0.5, -0.5},
+			Point{+0.5, -0.5, -0.5},
+			Point{-0.5, -0.5, +0.5},
+			Point{+0.5, -0.5, +0.5},
+			Point{-0.5, +0.5, -0.5},
+			Point{+0.5, +0.5, -0.5},
+			Point{-0.5, +0.5, +0.5},
+			Point{+0.5, +0.5, +0.5}
 		};
-	//Check maxData count
+	//Check bounding box size or if there is data
 	if((bb.radius*2.0 <= maxSizeByNode) or (datas.size() <= 1))
 	{
 		//insert data
@@ -481,8 +483,8 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T
 		
 	for(auto&& d : datas)
 	{
-		//FIXME: Should be a generic conversion from DataPoint considering Data to XYZ
-		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
+		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
+		(sDatas[idx( TO_POINT(pts,d) )]).emplace_back(d);
 	}
 	
 	for(size_t i=0; i<8; ++i)
@@ -493,7 +495,7 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<8; ++i)
 	{
-		const XYZ offset = offsetTable[i] * this->bb.radius;
+		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}
@@ -515,16 +517,16 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T
 template< typename T >
 bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode)
 {
-	static XYZ offsetTable[8] =
+	static Point offsetTable[8] =
 		{
-			XYZ{-0.5, -0.5, -0.5},
-			XYZ{+0.5, -0.5, -0.5},
-			XYZ{-0.5, -0.5, +0.5},
-			XYZ{+0.5, -0.5, +0.5},
-			XYZ{-0.5, +0.5, -0.5},
-			XYZ{+0.5, +0.5, -0.5},
-			XYZ{-0.5, +0.5, +0.5},
-			XYZ{+0.5, +0.5, +0.5}
+			Point{-0.5, -0.5, -0.5},
+			Point{+0.5, -0.5, -0.5},
+			Point{-0.5, -0.5, +0.5},
+			Point{+0.5, -0.5, +0.5},
+			Point{-0.5, +0.5, -0.5},
+			Point{+0.5, +0.5, -0.5},
+			Point{-0.5, +0.5, +0.5},
+			Point{+0.5, +0.5, +0.5}
 		};
 	
 	//Check maxData count
@@ -549,8 +551,8 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 		
 	for(auto&& d : datas)
 	{
-		//FIXME: Should be a generic conversion from DataPoint considering Data to XYZ
-		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
+		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
+		(sDatas[idx( TO_POINT(pts,d) )]).emplace_back(d);
 	}
 	
 	for(size_t i=0; i<8; ++i)
@@ -561,7 +563,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<8; ++i)
 	{
-		const XYZ offset = offsetTable[i] * this->bb.radius;
+		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}

@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Octree implementation for decomposing point cloud. 
  * The current implementation use the data structure PointMatcher<T>::DataPoints. 
- * It ensures that each node has either 8 or 0 childs. 
+ * It ensures that each node has either 8 or 0 childrend. 
  *
  * Can create an octree with the 2 following crieterions:
  *	- max number of data by node
@@ -79,35 +79,35 @@ public:
 	using Data = typename DP::Index; /**/
 	using DataContainer = std::vector<Data>;
 
-private:
-	struct XYZ 
+	struct Point 
 	{
 		T x;
 		T y;
 		T z;
 		
-		XYZ(T x_=T(0.0), T y_=T(0.0), T z_=T(0.0)) : x{x_}, y{y_}, z{z_} {}
+		Point(T x_=T(0.0), T y_=T(0.0), T z_=T(0.0)) : x{x_}, y{y_}, z{z_} {}
 	
-		void operator+=(const XYZ& v){ x+=v.x; y+=v.y; z+=v.z; }
-		void operator-=(const XYZ& v){ x-=v.x; y-=v.y; z-=v.z; }
-		void operator*=(const XYZ& v){ x*=v.x; y*=v.y; z*=v.z; }
+		void operator+=(const Point& v){ x+=v.x; y+=v.y; z+=v.z; }
+		void operator-=(const Point& v){ x-=v.x; y-=v.y; z-=v.z; }
+		void operator*=(const Point& v){ x*=v.x; y*=v.y; z*=v.z; }
 		void operator*=(const T& s){ x*=s; y*=s; z*=s; }
 		void operator/=(const T& s){ x/=s; y/=s; z/=s; }
 		
-		XYZ operator+(const XYZ& v2){return XYZ{x+v2.x,y+v2.y,z+v2.z};}
-		XYZ operator-(const XYZ& v2){return XYZ{x-v2.x,y-v2.y,z-v2.z};}
-		XYZ operator*(const XYZ& v2){return XYZ{x*v2.x,y*v2.y,z*v2.z};}
-		XYZ operator*(const T& s)   {return XYZ{s*x,s*y,s*z};}
-		XYZ operator/(const XYZ& v2){return XYZ{x/v2.x,y/v2.y,z/v2.z};}
-		XYZ operator/(const T& s)   {return XYZ{s/x,s/y,s/z};}
+		Point operator+(const Point& v2){return Point{x+v2.x,y+v2.y,z+v2.z};}
+		Point operator-(const Point& v2){return Point{x-v2.x,y-v2.y,z-v2.z};}
+		Point operator*(const Point& v2){return Point{x*v2.x,y*v2.y,z*v2.z};}
+		Point operator*(const T& s)   {return Point{s*x,s*y,s*z};}
+		Point operator/(const Point& v2){return Point{x/v2.x,y/v2.y,z/v2.z};}
+		Point operator/(const T& s)   {return Point{s/x,s/y,s/z};}
 	};
 	
 	struct BoundingBox 
 	{
-			XYZ center;
+			Point center;
 			T 	radius;
 	};
-	
+
+protected:	
 	Octree* parent;
 	Octree* octants[8];
 	
@@ -143,7 +143,7 @@ public:
 	bool isEmpty()const;
 	
 	
-	inline std::size_t idx(const XYZ& xyz) const;
+	inline std::size_t idx(const Point& xyz) const;
 	inline std::size_t idx(T x, T y, T z) const;
 	
 	inline std::size_t getDepth() const;
