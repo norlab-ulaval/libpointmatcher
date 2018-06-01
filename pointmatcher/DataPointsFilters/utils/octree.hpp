@@ -86,7 +86,7 @@ Octree<T>::Octree(Octree<T>&& o):
 			std::make_move_iterator(o.data.end()));
 	}
 	
-	//copy child ptr
+	//copy children ptr
 	for(size_t i=0; i<8; ++i)
 	{
 		octants[i] = o.octants[i];
@@ -219,7 +219,7 @@ Octree<T>* Octree<T>::operator[](size_t idx)
 #define TO_DATA(pts_, ids_) ([](const DP& pts, const std::vector<Id>& ids) -> DataContainer \
 		{ return DataContainer{ids.begin(), ids.end()}; })(pts_, ids_)
 						
-#define TO_POINT(pts, d) pts.features(0,d),pts.features(1,d),pts.features(2,d)
+#define TO_XYZ(pts, d) pts.features(0,d),pts.features(1,d),pts.features(2,d)
 
 // Build tree from DataPoints with a specified number of points by node
 template< typename T >
@@ -299,7 +299,7 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, s
 	for(auto&& d : datas)
 	{
 		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
-		(sDatas[idx( TO_POINT(pts,d) )]).emplace_back(d);
+		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
 	}
 	
 	for(size_t i=0; i<8; ++i)
@@ -320,6 +320,7 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, s
 	for(size_t i=0; i<8; ++i)
 	{
 		octants[i] = new Octree<T>();
+		//Assign depth
 		octants[i]->depth = this->depth+1;
 		ret = ret and octants[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode);		
 		//Assign parent
@@ -368,7 +369,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 	for(auto&& d : datas)
 	{
 		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
-		(sDatas[idx( TO_POINT(pts,d) )]).emplace_back(d);
+		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
 	}
 	
 	for(size_t i=0; i<8; ++i)
@@ -484,7 +485,7 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T
 	for(auto&& d : datas)
 	{
 		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
-		(sDatas[idx( TO_POINT(pts,d) )]).emplace_back(d);
+		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
 	}
 	
 	for(size_t i=0; i<8; ++i)
@@ -505,6 +506,7 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T
 	for(size_t i=0; i<8; ++i)
 	{
 		octants[i] = new Octree<T>();
+		//Assign depth
 		octants[i]->depth = this->depth+1;	
 		ret = ret and octants[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxSizeByNode);		
 		//Assign parent
@@ -529,7 +531,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 			Point{+0.5, +0.5, +0.5}
 		};
 	
-	//Check maxData count
+	//Check bounding box size or if there is data
 	if((bb.radius*2.0 <= maxSizeByNode) or (datas.size() <= 1))
 	{			
 		//insert data
@@ -552,7 +554,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 	for(auto&& d : datas)
 	{
 		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
-		(sDatas[idx( TO_POINT(pts,d) )]).emplace_back(d);
+		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
 	}
 	
 	for(size_t i=0; i<8; ++i)
