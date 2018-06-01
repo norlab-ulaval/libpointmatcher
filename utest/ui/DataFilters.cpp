@@ -498,8 +498,29 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 		//Validate transformation
 		icp.readingDataPointsFilters.clear();
 		addFilter("OctreeGridDataPointsFilter", params);
-		//validate2dTransformation();
 		validate3dTransformation();
+	}
+	
+	for(const auto& meth : samplingMethods)
+	{
+		params.clear();
+		params["buildMethod"] = "0";
+		params["maxPointByNode"] = "10";
+		params["samplingMethod"] = toParam(meth);
+		params["buildParallel"] = "1";
+		
+		octreeFilter = 
+				PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
+	
+		const DP filteredCloud = octreeFilter->filter(cloud);
+		
+		//Check number of points
+		EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	
+		//Validate transformation
+		icp.readingDataPointsFilters.clear();
+		addFilter("OctreeGridDataPointsFilter", params);
+		validate2dTransformation();
 	}
 
 //CASE (3): octants max size 10cm
@@ -523,8 +544,30 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 		//Validate transformation
 		icp.readingDataPointsFilters.clear();
 		addFilter("OctreeGridDataPointsFilter", params);
-		//validate2dTransformation();
 		validate3dTransformation();
+	}
+	
+	for(const auto& meth : samplingMethods)
+	{
+		params.clear();
+		params["buildMethod"] = "1";
+		params["maxPointByNode"] = "1";
+		params["maxSizeByNode"] = "0.05";
+		params["samplingMethod"] = toParam(meth);
+		params["buildParallel"] = "1";
+	
+		octreeFilter = 
+				PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
+	
+		const DP filteredCloud = octreeFilter->filter(cloud);
+		
+		//Check number of points
+		EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+		
+		//Validate transformation
+		icp.readingDataPointsFilters.clear();
+		addFilter("OctreeGridDataPointsFilter", params);
+		validate2dTransformation();
 	}
 }
 

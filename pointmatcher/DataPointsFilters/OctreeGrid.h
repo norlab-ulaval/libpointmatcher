@@ -36,12 +36,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 #include "utils/octree.h"
+#include "utils/quadtree.h"
 
 #include <unordered_map>
 
 /*!
  * \class OctreeGridDataPointsFilter
- * \brief Data Filter based on Octree representation
+ * \brief Data Filter based on Octree/Quadtree representation
  *
  * \author Mathieu Labussiere (<mathieu dot labu at gmail dot com>)
  * \date 24/05/2018
@@ -71,13 +72,13 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 	inline static const std::string description()
 	{
-		return "Construct an Octree grid representation of the point cloud. Constructed either by limiting the number of point in each octant or by limiting the size of the bounding box. Down-sample by taking either the first or a random point, or compute the centroid.";
+		return "Construct an Octree/Quadtree grid representation of the point cloud. Constructed either by limiting the number of point in each octant or by limiting the size of the bounding box. Down-sample by taking either the first or a random point, or compute the centroid.";
 	}
 
 	inline static const ParametersDoc availableParameters()
 	{
 		return boost::assign::list_of<ParameterDoc>
-		( "buildMethod", "Method to build the Octree: maxPoint (0), maxSize (1)", "0", "0", "1", &P::Comp<int> )
+		( "buildMethod", "Method to build the Octree/Quadtree: maxPoint (0), maxSize (1)", "0", "0", "1", &P::Comp<int> )
 		( "buildParallel", "If 1 (true), use threads to build the octree.", "1", "0", "1", P::Comp<bool> )
 		( "maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "4294967295", &P::Comp<std::size_t> )
 		( "maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0.01", "0.0001", "+inf", &P::Comp<T> )
@@ -99,9 +100,14 @@ public:
 
 		FirstPtsSampler(DataPoints& dp);
 		virtual ~FirstPtsSampler(){}
-		virtual bool operator()(Octree<T>& oc);
+		
+		template<template<typename> class Tree>
+		bool operator()(Tree<T>& oc);
+		
 		virtual bool finalize();
 	};
+	
+	
 	struct RandomPtsSampler : public FirstPtsSampler
 	{
 		using FirstPtsSampler::idx;
@@ -114,9 +120,12 @@ public:
 		RandomPtsSampler(DataPoints& dp, const std::size_t seed_);
 		virtual ~RandomPtsSampler(){}
 	
-		virtual bool operator()(Octree<T>& oc);
+		template<template<typename> class Tree>
+		bool operator()(Tree<T>& oc);
+		
 		virtual bool finalize();
 	};
+	
 	struct CentroidSampler : public FirstPtsSampler
 	{
 		using FirstPtsSampler::idx;
@@ -127,7 +136,8 @@ public:
 	
 		virtual ~CentroidSampler(){}
 	
-		virtual bool operator()(Octree<T>& oc);
+		template<template<typename> class Tree>
+		bool operator()(Tree<T>& oc);
 	};
 
 //-------	
@@ -153,6 +163,10 @@ public:
 
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
+	
+protected:
+	template<template<typename> class Tree>
+	void applySampler(DataPoints& cloud);
 };
 
 //Helper function

@@ -32,48 +32,47 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-#include "octree.h"
+#include "quadtree.h"
 
 #include <iterator>
 
 template< typename T >
-Octree<T>::Octree(): parent{nullptr}, 
-	octants{nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr},
-	depth{0}
+Quadtree<T>::Quadtree(): parent{nullptr}, 
+    cells{nullptr,nullptr,nullptr,nullptr}, depth{0}
 {
 }
 
 template< typename T >
-Octree<T>::Octree(const Octree<T>& o): 
-	bb{o.bb.center, o.bb.radius}, depth{o.depth}
+Quadtree<T>::Quadtree(const Quadtree<T>& o): 
+    bb{o.bb.center, o.bb.radius}, depth{o.depth}
 {
 	if (!o.parent) 
-		parent = nullptr;	
-		
+	    parent = nullptr;
+	    	
 	if(o.isLeaf()) //Leaf case
 	{
 		//nullify children
-		for(size_t i=0; i<8; ++i)
-			octants[i]= nullptr;
+		for(size_t i=0; i<4; ++i)
+			cells[i]= nullptr;
 		//Copy data
 		data.insert(data.end(), o.data.begin(), o.data.end());
 	}
 	else //Node case
 	{
 		//Create each child recursively
-		for(size_t i=0; i<8;++i)
+		for(size_t i=0; i<4;++i)
 		{
-			octants[i] = new Octree<T>(*(o.octants[i]));	
+			cells[i] = new Quadtree<T>(*(o.cells[i]));	
 			//Assign parent  	
-			octants[i]->parent = this;
+			cells[i]->parent = this;
 		}
 		//no data in node to copy 	
 	}
 }
 
 template< typename T >
-Octree<T>::Octree(Octree<T>&& o): 
-	parent{nullptr}, bb{o.bb.center, o.bb.radius}, depth{o.depth}
+Quadtree<T>::Quadtree(Quadtree<T>&& o): 
+		parent{nullptr}, bb{o.bb.center, o.bb.radius}, depth{o.depth}
 {
 	//only allow move of root node
 	assert(o.isRoot());
@@ -87,46 +86,47 @@ Octree<T>::Octree(Octree<T>&& o):
 	}
 	
 	//copy children ptr
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
-		octants[i] = o.octants[i];
+		cells[i] = o.cells[i];
 		//Nullify ptrs
-		o.octants[i]=nullptr;
+		o.cells[i]=nullptr;
 	}
 }
 
 template< typename T >
-Octree<T>::~Octree()
+Quadtree<T>::~Quadtree()
 {	
 	//delete recursively children
 	if(!isLeaf())
-		for(size_t i=0; i<8; ++i)
-			delete octants[i];
+		for(size_t i=0; i<4; ++i)
+			delete cells[i];
 }
 
 template< typename T >	
-Octree<T>& Octree<T>::operator=(const Octree<T>&o)
+Quadtree<T>& Quadtree<T>::operator=(const Quadtree<T>&o)
 {
 	if (!o.parent) 
-		parent = nullptr;
+	    parent = nullptr;
+	    
 	depth=o.depth;
 	
 	if(o.isLeaf()) //Leaf case
 	{
 		//nullify children
-		for(size_t i=0; i<8; ++i)
-			octants[i]= nullptr;
+		for(size_t i=0; i<4; ++i)
+			cells[i]= nullptr;
 		//Copy data
 		data.insert(data.end(), o.data.begin(), o.data.end());
 	}
 	else //Node case
 	{
 		//Create each child recursively
-		for(size_t i=0; i<8; ++i)
+		for(size_t i=0; i<4; ++i)
 		{
-			octants[i] = new Octree<T>(*(o.octants[i]));	
+			cells[i] = new Quadtree<T>(*(o.cells[i]));	
 			//Assign parent  	
-			octants[i]->parent = this;
+			cells[i]->parent = this;
 		}
 		//no data in node to copy 	
 	}
@@ -134,13 +134,12 @@ Octree<T>& Octree<T>::operator=(const Octree<T>&o)
 }
 
 template< typename T >	
-Octree<T>& Octree<T>::operator=(Octree<T>&&o)
+Quadtree<T>& Quadtree<T>::operator=(Quadtree<T>&&o)
 {
 	//only allow move of root node
 	assert(o.isRoot());
 	
 	parent = nullptr;
-	
 	bb.center = o.bb.center;
 	bb.radius = o.bb.radius;
 	
@@ -155,75 +154,73 @@ Octree<T>& Octree<T>::operator=(Octree<T>&&o)
 	}
 	
 	//copy children ptrs
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
-		octants[i] = o.octants[i];
+		cells[i] = o.cells[i];
 		//Nullify ptrs
-		o.octants[i]=nullptr;
+		o.cells[i]=nullptr;
 	}
 	
 	return *this;
 }
 
 template< typename T >
-bool Octree<T>::isLeaf() const
+bool Quadtree<T>::isLeaf() const
 {
-	return (octants[0]==nullptr);
+	return (cells[0]==nullptr);
 }
 template< typename T >
-bool Octree<T>::isRoot() const
+bool Quadtree<T>::isRoot() const
 {
 	return (parent==nullptr);
 }
 template< typename T >
-bool Octree<T>::isEmpty() const
+bool Quadtree<T>::isEmpty() const
 {
 	return (data.size() == 0);
 }
 template< typename T >
-size_t Octree<T>::idx(const Point& xyz) const
+size_t Quadtree<T>::idx(const Point& xy) const
 {
 	size_t id = 0;
-	id|= ((xyz.x > bb.center.x) << 0);
-	id|= ((xyz.z > bb.center.z) << 1);
-	id|= ((xyz.y > bb.center.y) << 2);
+	id|= ((xy.x > bb.center.x) << 0);
+	id|= ((xy.y > bb.center.y) << 1);
 	return id;
 }
 template< typename T >
-size_t Octree<T>::idx(T x, T y, T z) const
+size_t Quadtree<T>::idx(T x, T y) const
 {
 	size_t id = 0;
 	id|= ((x > bb.center.x) << 0);
-	id|= ((z > bb.center.z) << 1);
-	id|= ((y > bb.center.y) << 2);
+	id|= ((y > bb.center.y) << 1);
 	return id;
 }
 template< typename T >
-size_t Octree<T>::getDepth() const
+size_t Quadtree<T>::getDepth() const
 {
 	return depth;
 }
 template< typename T >
-typename Octree<T>::DataContainer * Octree<T>::getData()
+typename Quadtree<T>::DataContainer * Quadtree<T>::getData()
 {
 	return &data;
 }
 template< typename T >
-Octree<T>* Octree<T>::operator[](size_t idx)
+Quadtree<T>* Quadtree<T>::operator[](size_t idx)
 {
-	assert(idx<8);
-	return octants[idx];
+	assert(idx<4);
+	return cells[idx];
 }
 
 
 #define TO_DATA(pts_, ids_) ([](const DP& pts, const std::vector<Id>& ids) -> DataContainer \
 		{ return DataContainer{ids.begin(), ids.end()}; })(pts_, ids_)
 						
-#define TO_XYZ(pts, d) pts.features(0,d),pts.features(1,d),pts.features(2,d)
+#define TO_XY(pts, d) pts.features(0,d),pts.features(1,d)
 
 // Build tree from DataPoints with a specified number of points by node
 template< typename T >
-bool Octree<T>::build(const DP& pts, size_t maxDataByNode, bool parallel_build)
+bool Quadtree<T>::build(const DP& pts, size_t maxDataByNode, bool parallel_build)
 {
 	typedef typename PM::Vector Vector;
 	
@@ -231,15 +228,14 @@ bool Octree<T>::build(const DP& pts, size_t maxDataByNode, bool parallel_build)
 	BoundingBox box;
 	
 	Vector minValues = pts.features.rowwise().minCoeff();
-	Point min{minValues(0), minValues(1), minValues(2)};
+	Point min{minValues(0), minValues(1)};
 	Vector maxValues = pts.features.rowwise().maxCoeff();
-	Point max{maxValues(0), maxValues(1), maxValues(2)};
+	Point max{maxValues(0), maxValues(1)};
 	
 	Point radii = max - min;
 	box.center = min + radii * 0.5;
 	box.radius = radii.x;
 	if (box.radius < radii.y) box.radius = radii.y;
-	if (box.radius < radii.z) box.radius = radii.z;
 	
 	//Transform pts in data
 	const size_t nbpts = pts.getNbPoints();
@@ -263,18 +259,14 @@ bool Octree<T>::build(const DP& pts, size_t maxDataByNode, bool parallel_build)
 }
 
 template< typename T >
-bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode)
+bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode)
 {
-	static Point offsetTable[8] =
+	static Point offsetTable[4] =
 		{
-			Point{-0.5, -0.5, -0.5},
-			Point{+0.5, -0.5, -0.5},
-			Point{-0.5, -0.5, +0.5},
-			Point{+0.5, -0.5, +0.5},
-			Point{-0.5, +0.5, -0.5},
-			Point{+0.5, +0.5, -0.5},
-			Point{-0.5, +0.5, +0.5},
-			Point{+0.5, +0.5, +0.5}
+			Point{-0.5, -0.5},
+			Point{+0.5, -0.5},
+			Point{-0.5, +0.5},
+			Point{+0.5, +0.5}
 		};
 	//Check maxData count
 	if(datas.size() <= maxDataByNode)
@@ -292,23 +284,23 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, s
 	//Split datas
 	const std::size_t nbData = datas.size();
 	
-	DataContainer sDatas[8];
-	for(size_t i=0; i<8; ++i)
+	DataContainer sDatas[4];
+	for(size_t i=0; i<4; ++i)
 		sDatas[i].reserve(nbData);
 		
 	for(auto&& d : datas)
 	{
 		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
-		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
+		(sDatas[idx( TO_XY(pts,d) )]).emplace_back(d);
 	}
 	
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 		sDatas[i].shrink_to_fit();
 	
 	//Compute new bounding boxes
-	BoundingBox boxes[8];
+	BoundingBox boxes[4];
 	const T half_radius = this->bb.radius * 0.5;
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
 		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
@@ -317,14 +309,14 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, s
 	
 	//For each child build recursively
 	bool ret = true;
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
-		octants[i] = new Octree<T>();
+		cells[i] = new Quadtree<T>();
 		//Assign depth
-		octants[i]->depth = this->depth+1;
-		ret = ret and octants[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode);		
+		cells[i]->depth = this->depth+1;
+		ret = ret and cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode);		
 		//Assign parent
-		octants[i]->parent = this;
+		cells[i]->parent = this;
 	}
 
 	return (!isLeaf() and ret);
@@ -332,18 +324,14 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, s
 
 #include <thread>
 template< typename T >
-bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode)
+bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode)
 {
-	static Point offsetTable[8] =
+	static Point offsetTable[4] =
 		{
-			Point{-0.5, -0.5, -0.5},
-			Point{+0.5, -0.5, -0.5},
-			Point{-0.5, -0.5, +0.5},
-			Point{+0.5, -0.5, +0.5},
-			Point{-0.5, +0.5, -0.5},
-			Point{+0.5, +0.5, -0.5},
-			Point{-0.5, +0.5, +0.5},
-			Point{+0.5, +0.5, +0.5}
+			Point{-0.5, -0.5},
+			Point{+0.5, -0.5},
+			Point{-0.5, +0.5},
+			Point{+0.5, +0.5}
 		};
 	
 	//Check maxData count
@@ -362,23 +350,23 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 	//Split datas
 	const std::size_t nbData = datas.size();
 	
-	DataContainer sDatas[8];
-	for(size_t i=0; i<8; ++i)
+	DataContainer sDatas[4];
+	for(size_t i=0; i<4; ++i)
 		sDatas[i].reserve(nbData);
 		
 	for(auto&& d : datas)
 	{
 		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
-		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
+		(sDatas[idx( TO_XY(pts,d) )]).emplace_back(d);
 	}
 	
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 		sDatas[i].shrink_to_fit();
 	
 	//Compute new bounding boxes
-	BoundingBox boxes[8];
+	BoundingBox boxes[4];
 	const T half_radius = this->bb.radius * 0.5;
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
 		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
@@ -388,15 +376,15 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 	//Parallely build each child recursively	
 	std::vector<std::thread> threads;
 	bool ret = true;
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
 		threads.push_back( std::thread( [maxDataByNode, i, &pts, &sDatas, &boxes, this](){
-			this->octants[i] = new Octree<T>();
+			this->cells[i] = new Quadtree<T>();
 			//Assign depth
-			this->octants[i]->depth = this->depth+1;	
+			this->cells[i]->depth = this->depth+1;	
 			//Assign parent
-			this->octants[i]->parent = this;
-			this->octants[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode);	
+			this->cells[i]->parent = this;
+			this->cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode);	
 		}));
 	}
 	
@@ -409,7 +397,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 
 //------------------------------------------------------------------------------
 template< typename T >
-bool Octree<T>::build(const DP& pts, T maxSizeByNode, bool parallel_build)
+bool Quadtree<T>::build(const DP& pts, T maxSizeByNode, bool parallel_build)
 {
 	typedef typename PM::Vector Vector;
 	
@@ -417,15 +405,14 @@ bool Octree<T>::build(const DP& pts, T maxSizeByNode, bool parallel_build)
 	BoundingBox box;
 	
 	Vector minValues = pts.features.rowwise().minCoeff();
-	Point min{minValues(0), minValues(1), minValues(2)};
+	Point min{minValues(0), minValues(1)};
 	Vector maxValues = pts.features.rowwise().maxCoeff();
-	Point max{maxValues(0), maxValues(1), maxValues(2)};
+	Point max{maxValues(0), maxValues(1)};
 	
 	Point radii = max - min;
 	box.center = min + radii * 0.5;
 	box.radius = radii.x;
 	if (box.radius < radii.y) box.radius = radii.y;
-	if (box.radius < radii.z) box.radius = radii.z;
 	
 	//Transform pts in data
 	const size_t nbpts = pts.getNbPoints();
@@ -449,18 +436,14 @@ bool Octree<T>::build(const DP& pts, T maxSizeByNode, bool parallel_build)
 }
 
 template< typename T >
-bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode)
+bool Quadtree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode)
 {
-	static Point offsetTable[8] =
+	static Point offsetTable[4] =
 		{
-			Point{-0.5, -0.5, -0.5},
-			Point{+0.5, -0.5, -0.5},
-			Point{-0.5, -0.5, +0.5},
-			Point{+0.5, -0.5, +0.5},
-			Point{-0.5, +0.5, -0.5},
-			Point{+0.5, +0.5, -0.5},
-			Point{-0.5, +0.5, +0.5},
-			Point{+0.5, +0.5, +0.5}
+			Point{-0.5, -0.5},
+			Point{+0.5, -0.5},
+			Point{-0.5, +0.5},
+			Point{+0.5, +0.5}
 		};
 	//Check bounding box size or if there is data
 	if((bb.radius*2.0 <= maxSizeByNode) or (datas.size() <= 1))
@@ -478,23 +461,23 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T
 	//Split datas
 	const std::size_t nbData = datas.size();
 	
-	DataContainer sDatas[8];
-	for(size_t i=0; i<8; ++i)
+	DataContainer sDatas[4];
+	for(size_t i=0; i<4; ++i)
 		sDatas[i].reserve(nbData);
 		
 	for(auto&& d : datas)
 	{
 		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
-		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
+		(sDatas[idx( TO_XY(pts,d) )]).emplace_back(d);
 	}
 	
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 		sDatas[i].shrink_to_fit();
 	
 	//Compute new bounding boxes
-	BoundingBox boxes[8];
+	BoundingBox boxes[4];
 	const T half_radius = this->bb.radius * 0.5;
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
 		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
@@ -503,32 +486,28 @@ bool Octree<T>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T
 	
 	//For each child build recursively
 	bool ret = true;
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
-		octants[i] = new Octree<T>();
+		cells[i] = new Quadtree<T>();
 		//Assign depth
-		octants[i]->depth = this->depth+1;	
-		ret = ret and octants[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxSizeByNode);		
+		cells[i]->depth = this->depth+1;	
+		ret = ret and cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxSizeByNode);		
 		//Assign parent
-		octants[i]->parent = this;
+		cells[i]->parent = this;
 	}
 
 	return (!isLeaf() and ret);
 }
 
 template< typename T >
-bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode)
+bool Quadtree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode)
 {
-	static Point offsetTable[8] =
+	static Point offsetTable[4] =
 		{
-			Point{-0.5, -0.5, -0.5},
-			Point{+0.5, -0.5, -0.5},
-			Point{-0.5, -0.5, +0.5},
-			Point{+0.5, -0.5, +0.5},
-			Point{-0.5, +0.5, -0.5},
-			Point{+0.5, +0.5, -0.5},
-			Point{-0.5, +0.5, +0.5},
-			Point{+0.5, +0.5, +0.5}
+			Point{-0.5, -0.5},
+			Point{+0.5, -0.5},
+			Point{-0.5, +0.5},
+			Point{+0.5, +0.5}
 		};
 	
 	//Check bounding box size or if there is data
@@ -547,23 +526,23 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 	//Split datas
 	const std::size_t nbData = datas.size();
 	
-	DataContainer sDatas[8];
-	for(size_t i=0; i<8; ++i)
+	DataContainer sDatas[4];
+	for(size_t i=0; i<4; ++i)
 		sDatas[i].reserve(nbData);
 		
 	for(auto&& d : datas)
 	{
 		//FIXME: Should be a generic conversion from DataPoint considering Data to Point
-		(sDatas[idx( TO_XYZ(pts,d) )]).emplace_back(d);
+		(sDatas[idx( TO_XY(pts,d) )]).emplace_back(d);
 	}
 	
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 		sDatas[i].shrink_to_fit();
 	
 	//Compute new bounding boxes
-	BoundingBox boxes[8];
+	BoundingBox boxes[4];
 	const T half_radius = this->bb.radius * 0.5;
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
 		const Point offset = offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
@@ -573,15 +552,15 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 	//For each child build recursively	
 	std::vector<std::thread> threads;
 	bool ret = true;
-	for(size_t i=0; i<8; ++i)
+	for(size_t i=0; i<4; ++i)
 	{
 		threads.push_back( std::thread( [maxSizeByNode, i, &pts, &sDatas, &boxes, this](){
-			this->octants[i] = new Octree<T>();
+			this->cells[i] = new Quadtree<T>();
 			//Assign depth
-			this->octants[i]->depth = this->depth+1;	
+			this->cells[i]->depth = this->depth+1;	
 			//Assign parent
-			this->octants[i]->parent = this;
-			this->octants[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxSizeByNode);	
+			this->cells[i]->parent = this;
+			this->cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxSizeByNode);	
 		}));
 	}
 	
@@ -595,7 +574,7 @@ bool Octree<T>::build_par(const DP& pts, DataContainer&& datas, BoundingBox && b
 //------------------------------------------------------------------------------
 template< typename T >
 template< typename Callback >
-bool Octree<T>::visit(Callback& cb)
+bool Quadtree<T>::visit(Callback& cb)
 {
 	// Call the callback for this node (if the callback returns false, then
 	// stop traversing.
@@ -603,11 +582,11 @@ bool Octree<T>::visit(Callback& cb)
 
 	// If I'm a node, recursively traverse my children
 	if (!isLeaf())
-		for (size_t i=0; i<8; ++i)
-			if (!octants[i]->visit(cb)) return false;
+		for (size_t i=0; i<4; ++i)
+			if (!cells[i]->visit(cb)) return false;
 
 	return true;
 }
 
-template class Octree<float>;
-template class Octree<double>;
+template class Quadtree<float>;
+template class Quadtree<double>;

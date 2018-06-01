@@ -51,13 +51,14 @@ void swapCols(typename PointMatcher<T>::DataPoints& self,
 
 //Define Visitor classes to apply processing
 template<typename T>
-OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp) 
-	: idx{0}, pts(dp) 
+OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp):
+	idx{0}, pts(dp) 
 {
 }
 
 template <typename T>
-bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree<T>& oc)
+template<template<typename> class Tree>
+bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -100,14 +101,14 @@ OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(DataPoints& dp
 	std::srand(seed);
 }
 template<typename T>
-OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(
-	DataPoints& dp, const std::size_t seed_
-): OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}, seed{seed_}
+OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(DataPoints& dp, const std::size_t seed_): 
+	OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}, seed{seed_}
 {
 	std::srand(seed);
 }
 template<typename T>
-bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree<T>& oc)
+template<template<typename> class Tree>
+bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -148,13 +149,14 @@ bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::finalize()
 }
 
 template<typename T>
-OctreeGridDataPointsFilter<T>::CentroidSampler::CentroidSampler(DataPoints& dp)  
-	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
+OctreeGridDataPointsFilter<T>::CentroidSampler::CentroidSampler(DataPoints& dp):
+	OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
 {
 }
 	
 template<typename T>
-bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
+template<template<typename> class Tree>
+bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -221,7 +223,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 
 // OctreeGridDataPointsFilter
 template <typename T>
-OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& params) :
+OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("OctreeGridDataPointsFilter", 
 		OctreeGridDataPointsFilter::availableParameters(), params),
 	parallel_build{Parametrizable::get<bool>("buildParallel")},
@@ -254,9 +256,19 @@ OctreeGridDataPointsFilter<T>::filter(const DataPoints& input)
 template <typename T>
 void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	assert(cloud.features.rows() == 4); //3D points only
+	assert(cloud.features.rows() == 4 || cloud.features.rows() == 3 );
 	
-	Octree<T> oc{};
+	if(cloud.features.rows() == 4) //3D case
+		applySampler<Octree>(cloud);
+	else if (cloud.features.rows() == 3) //2D case
+		applySampler<Quadtree>(cloud);
+}
+
+template <typename T>
+template<template<typename> class Tree>
+void OctreeGridDataPointsFilter<T>::applySampler(DataPoints& cloud)
+{
+	Tree<T> oc;
 	
 	switch(buildMethod) 
 	{
@@ -295,7 +307,7 @@ void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			sampler.finalize();
 			break;
 		}
-	}
+	}	
 }
 
 template struct OctreeGridDataPointsFilter<float>;
