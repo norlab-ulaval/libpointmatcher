@@ -57,7 +57,7 @@ OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp):
 }
 
 template <typename T>
-template<template<typename> typename Tree>
+template<template<typename> class Tree>
 bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
@@ -107,7 +107,7 @@ OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(DataPoints& dp
 	std::srand(seed);
 }
 template<typename T>
-template<template<typename> typename Tree>
+template<template<typename> class Tree>
 bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
@@ -155,7 +155,7 @@ OctreeGridDataPointsFilter<T>::CentroidSampler::CentroidSampler(DataPoints& dp):
 }
 	
 template<typename T>
-template<template<typename> typename Tree>
+template<template<typename> class Tree>
 bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Tree<T>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
@@ -265,7 +265,7 @@ void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 }
 
 template <typename T>
-template<template<typename> typename Tree>
+template<template<typename> class Tree>
 void OctreeGridDataPointsFilter<T>::applySampler(DataPoints& cloud)
 {
 	Tree<T> oc;

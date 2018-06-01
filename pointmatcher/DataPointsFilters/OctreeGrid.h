@@ -101,7 +101,7 @@ public:
 		FirstPtsSampler(DataPoints& dp);
 		virtual ~FirstPtsSampler(){}
 		
-		template<template<typename> typename Tree>
+		template<template<typename> class Tree>
 		bool operator()(Tree<T>& oc);
 		
 		virtual bool finalize();
@@ -120,7 +120,7 @@ public:
 		RandomPtsSampler(DataPoints& dp, const std::size_t seed_);
 		virtual ~RandomPtsSampler(){}
 	
-		template<template<typename> typename Tree>
+		template<template<typename> class Tree>
 		bool operator()(Tree<T>& oc);
 		
 		virtual bool finalize();
@@ -136,7 +136,7 @@ public:
 	
 		virtual ~CentroidSampler(){}
 	
-		template<template<typename> typename Tree>
+		template<template<typename> class Tree>
 		bool operator()(Tree<T>& oc);
 	};
 
@@ -165,7 +165,7 @@ public:
 	virtual void inPlaceFilter(DataPoints& cloud);
 	
 protected:
-	template<template<typename> typename Tree>
+	template<template<typename> class Tree>
 	void applySampler(DataPoints& cloud);
 };
 
