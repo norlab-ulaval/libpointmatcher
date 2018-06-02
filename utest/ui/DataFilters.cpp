@@ -445,87 +445,47 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 	const unsigned int nbPts = 60000;
 	const DP cloud = generateRandomDataPoints(nbPts);	
 	params = PM::Parameters(); 
-	
-//CASE (1): 1/pts by octants + validate parallel build
-// the number of point should not change
-// the sampling methods should not change anything
+
 	PM::DataPointsFilter* octreeFilter;
 	
-	const vector<int> samplingMethods = list_of (0) (1) (2);
-	const vector<bool> parallels = list_of (true) (false);
+	for(const int meth : {0,1,2})
+		for(const size_t maxData : {1,200})
+			for(const float maxSize : {0.,0.1})
+			{
+				params.clear();
+				params["maxPointByNode"] = toParam(maxData);
+				params["maxSizeByNode"] = toParam(maxSize);
+				params["samplingMethod"] = toParam(meth);
+				params["buildParallel"] = "1";
 	
-	for(const auto& par : parallels)
-	{
-		for(const auto& meth : samplingMethods)
-		{
-			params.clear();
-			params["buildMethod"] = "0";
-			params["maxPointByNode"] = "1";
-			params["samplingMethod"] = toParam(meth);
-			params["buildParallel"] = toParam(par);
-		
-			octreeFilter = 
-				PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
-	
-			const DP filteredCloud = octreeFilter->filter(cloud);
-		
-			//Check number of points
-			EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
-			EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
-			EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
-		
-			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
-		}
-	}
-	
-//CASE (2): 200/pts by octants	
-	for(const auto& meth : samplingMethods)
-	{
-		params.clear();
-		params["buildMethod"] = "0";
-		params["maxPointByNode"] = "200";
-		params["samplingMethod"] = toParam(meth);
-		params["buildParallel"] = "1";
-		
-		octreeFilter = 
-				PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
-	
-		const DP filteredCloud = octreeFilter->filter(cloud);
-		
-		//Check number of points
-		EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
-	
-		//Validate transformation
-		icp.readingDataPointsFilters.clear();
-		addFilter("OctreeGridDataPointsFilter", params);
-		//validate2dTransformation();
-		validate3dTransformation();
-	}
+				octreeFilter = 
+						PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
 
-//CASE (3): octants max size 10cm
-	for(const auto& meth : samplingMethods)
-	{
-		params.clear();
-		params["buildMethod"] = "1";
-		params["maxPointByNode"] = "1";
-		params["maxSizeByNode"] = "0.1";
-		params["samplingMethod"] = toParam(meth);
-		params["buildParallel"] = "1";
+				const DP filteredCloud = octreeFilter->filter(cloud);
+			
+				if(maxData==1 and maxSize==0.)
+				{
+					// 1/pts by octants + validate parallel build
+					// the number of point should not change
+					// the sampling methods should not change anything
+					//Check number of points
+					EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
+					EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+					EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
 	
-		octreeFilter = 
-				PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
-	
-		const DP filteredCloud = octreeFilter->filter(cloud);
-		
-		//Check number of points
-		EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
-		
-		//Validate transformation
-		icp.readingDataPointsFilters.clear();
-		addFilter("OctreeGridDataPointsFilter", params);
-		//validate2dTransformation();
-		validate3dTransformation();
-	}
+					EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
+				}
+				else
+				{	
+					//Check number of points
+					EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+				}
+				//Validate transformation
+				icp.readingDataPointsFilters.clear();
+				addFilter("OctreeGridDataPointsFilter", params);
+				//validate2dTransformation();
+				validate3dTransformation();
+			}
 }
 
 TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
