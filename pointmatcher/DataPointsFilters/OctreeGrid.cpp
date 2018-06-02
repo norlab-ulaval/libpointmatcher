@@ -171,9 +171,11 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 		//retrieve index from lookup table if sampling in already switched element
 		if(std::size_t(d)<idx)
 			j = mapidx[d];
-			
+		
+		T acc[featDim-1] = {0.};
+		
 		//We sum all the data in the first data
-		for(std::size_t id=1;id<nbData;++id)
+		for(std::size_t id=0;id<nbData;++id)
 		{
 			//get current idx
 			const auto& curId = (*data)[id];
@@ -184,7 +186,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 				i = mapidx[curId];
 			
 			for (int f = 0; f < (featDim - 1); ++f)
-				pts.features(f,j) += pts.features(f,i);
+				acc[f] += pts.features(f,i);
 			
 			if (pts.descriptors.cols() > 0)
 				for (int d = 0; d < descDim; ++d)
@@ -197,7 +199,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 		
 		// Normalize sums to get centroid (average)
 		for (int f = 0; f < (featDim - 1); ++f)
-			pts.features(f,j) /= T(nbData);
+			pts.features(f,j) = acc[f]/T(nbData);
 		
 		if (pts.descriptors.cols() > 0)
 			for (int d = 0; d < descDim; ++d)
@@ -224,20 +226,17 @@ template <typename T>
 OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& params) :
 	PointMatcher<T>::DataPointsFilter("OctreeGridDataPointsFilter", 
 		OctreeGridDataPointsFilter::availableParameters(), params),
-	parallel_build{Parametrizable::get<bool>("buildParallel")},
+	buildParallel{Parametrizable::get<bool>("buildParallel")},
 	maxPointByNode{Parametrizable::get<std::size_t>("maxPointByNode")},
 	maxSizeByNode{Parametrizable::get<T>("maxSizeByNode")}
 {
 	try 
 	{
-		const int bm = Parametrizable::get<int>("buildMethod");
-		buildMethod = BuildMethod(bm);
 		const int sm = Parametrizable::get<int>("samplingMethod");
 		samplingMethod = SamplingMethod(sm);
 	}
 	catch (const InvalidParameter& e) 
 	{
-		buildMethod = BuildMethod::MAX_POINT;
 		samplingMethod = SamplingMethod::FIRST_PTS;
 	}
 }
@@ -257,20 +256,7 @@ void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	assert(cloud.features.rows() == 4); //3D points only
 	
 	Octree<T> oc{};
-	
-	switch(buildMethod) 
-	{
-		case BuildMethod::MAX_POINT:
-		{
-			oc.build(cloud, maxPointByNode, parallel_build);
-			break;
-		}
-		case BuildMethod::MAX_SIZE:
-		{
-			oc.build(cloud, maxSizeByNode, parallel_build);
-			break;
-		}
-	}
+	oc.build(cloud, maxPointByNode, maxSizeByNode, buildParallel);
 	
 	switch(samplingMethod)
 	{

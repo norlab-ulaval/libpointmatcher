@@ -77,10 +77,9 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	inline static const ParametersDoc availableParameters()
 	{
 		return boost::assign::list_of<ParameterDoc>
-		( "buildMethod", "Method to build the Octree: maxPoint (0), maxSize (1)", "0", "0", "1", &P::Comp<int> )
 		( "buildParallel", "If 1 (true), use threads to build the octree.", "1", "0", "1", P::Comp<bool> )
 		( "maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "4294967295", &P::Comp<std::size_t> )
-		( "maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0.01", "0.0001", "+inf", &P::Comp<T> )
+		( "maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0", "0", "+inf", &P::Comp<T> )
 		( "samplingMethod", "Method to sample the Octree: First Point (0), Random (1), Centroid (2) (more accurate but costly)", "0", "0", "2", &P::Comp<int> )
 		//FIXME: add seed parameter for the random sampling
 		;
@@ -131,12 +130,10 @@ public:
 	};
 
 //-------	
-	enum BuildMethod : int { MAX_POINT=0, MAX_SIZE=1 }; 
 	enum SamplingMethod : int { FIRST_PTS=0, RAND_PTS=1, CENTROID=2 };
 
 //Atributes
-	bool parallel_build;
-	BuildMethod buildMethod;
+	bool buildParallel;
 	
 	std::size_t maxPointByNode;
 	T           maxSizeByNode;
