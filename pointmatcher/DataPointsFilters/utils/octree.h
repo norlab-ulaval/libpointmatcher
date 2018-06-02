@@ -38,6 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include "PointMatcher.h"
 
+#include "utils.h"
+
 /*!
  * \class octree.h
  * \brief Octree class for DataPoints spatial representation
@@ -46,9 +48,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \date 24/05/2018
  * \version 0.1
  *
- * Octree implementation for decomposing point cloud. 
+ * \date 01/06/2018
+ * \version 0.2
+ *
+ * Octree/Quadtree implementation for decomposing point cloud. 
  * The current implementation use the data structure PointMatcher<T>::DataPoints. 
- * It ensures that each node has either 8 or 0 childs. 
+ * It ensures that each node has either (8/4) or 0 childs. 
  *
  * Can create an octree with the 2 following crieterions:
  *	- max number of data by node
@@ -65,59 +70,45 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Remark:
  *	- Current implementation only store the indexes of the points from the pointcloud.
  *	- Data element are exclusively contained in leaves node.
- *	- Some leaves node contains no data (to ensure 8 or 0 childs).
+ *	- Some leaves node contains no data (to ensure (8/4) or 0 childs).
  *
  */
-template < typename T >
-class Octree 
+
+template < typename T, std::size_t dim >
+class Octree_ 
 {
-public:
+public:	
 	using PM = PointMatcher<T>;
 	using DP = typename PM::DataPoints; /**/
 	using Id = typename DP::Index; /**/
 	
 	using Data = typename DP::Index; /**/
 	using DataContainer = std::vector<Data>;
-
+	
+	using Point = Eigen::Matrix<T,dim,1>;
+	
+//private:
+	static constexpr std::size_t nbCells = utils::pow_<std::size_t, 2, dim>::value;
+	
 private:
-	struct XYZ 
-	{
-		T x;
-		T y;
-		T z;
-		
-		XYZ(T x_=T(0.0), T y_=T(0.0), T z_=T(0.0)) : x{x_}, y{y_}, z{z_} {}
-	
-		void operator+=(const XYZ& v){ x+=v.x; y+=v.y; z+=v.z; }
-		void operator-=(const XYZ& v){ x-=v.x; y-=v.y; z-=v.z; }
-		void operator*=(const XYZ& v){ x*=v.x; y*=v.y; z*=v.z; }
-		void operator*=(const T& s){ x*=s; y*=s; z*=s; }
-		void operator/=(const T& s){ x/=s; y/=s; z/=s; }
-		
-		XYZ operator+(const XYZ& v2){return XYZ{x+v2.x,y+v2.y,z+v2.z};}
-		XYZ operator-(const XYZ& v2){return XYZ{x-v2.x,y-v2.y,z-v2.z};}
-		XYZ operator*(const XYZ& v2){return XYZ{x*v2.x,y*v2.y,z*v2.z};}
-		XYZ operator*(const T& s)   {return XYZ{s*x,s*y,s*z};}
-		XYZ operator/(const XYZ& v2){return XYZ{x/v2.x,y/v2.y,z/v2.z};}
-		XYZ operator/(const T& s)   {return XYZ{s/x,s/y,s/z};}
-	};
-	
 	struct BoundingBox 
 	{
-			XYZ center;
+			Point center;
 			T 	radius;
 	};
 	
-	Octree* parent;
-	Octree* octants[8];
+	Octree_* parent;
+	Octree_* cells[nbCells];
 	
 	/******************************************************
-	 *	Octants id are assigned as their position 
+	 *	Cells id are assigned as their position 
 	 *   on a hamming cube (+ greater than center, - lower than center)
 	 *
-	 *	  	0	1	2	3	4	5	6	7
-	 * 	x:	-	+	-	+	-	+	-	+
-	 * 	z:	-	-	+	+	-	-	+	+
+	 *		for 3D case									for 2D case
+	 *
+	 *	  	0	1	2	3	4	5	6	7		  	0	1	2	3
+	 * 	x:	-	+	-	+	-	+	-	+		x:	-	+	-	+
+	 * 	z:	-	-	+	+	-	-	+	+		y:	-	-	+	+	
 	 * 	y:	-	-	-	-	+	+	+	+
 	 *
 	 *****************************************************/
@@ -127,41 +118,44 @@ private:
 	DataContainer data;	
 	
 	std::size_t depth;
-	
+		
 public:
-	Octree();
-	Octree(const Octree<T>& o); //Deep-copy
-	Octree(Octree<T>&&o);
+	Octree_();
+	Octree_(const Octree_<T,dim>& o); //Deep-copy
+	Octree_(Octree_<T,dim>&&o);
 	
-	virtual ~Octree();
+	virtual ~Octree_();
 	
-	Octree<T>& operator=(const Octree<T>&o); //Deep-copy
-	Octree<T>& operator=(Octree<T>&& o);
+	Octree_<T,dim>& operator=(const Octree_<T,dim>&o);//Deep-copy
+	Octree_<T,dim>& operator=(Octree_<T,dim>&& o);
 	
 	bool isLeaf() const;
 	bool isRoot() const;
 	bool isEmpty()const;
 	
+	inline std::size_t idx(const Point& pt) const;
+	inline std::size_t idx(const DP& pts, const Data d) const;
 	
-	inline std::size_t idx(const XYZ& xyz) const;
-	inline std::size_t idx(T x, T y, T z) const;
-	
-	inline std::size_t getDepth() const;
+	std::size_t getDepth() const;
 	DataContainer * getData();
-	Octree<T>* operator[](std::size_t idx);
+	Octree_<T, dim>* operator[](std::size_t idx);
 	
-	// Build tree from DataPoints with a specified number of points by node
-	bool build(const DP& pts, std::size_t maxDataByNode, bool parallel_build=false);
-	bool build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, std::size_t maxDataByNode);
-	bool build(const DP& pts, DataContainer&& datas, BoundingBox && bb, std::size_t maxDataByNode);
+	// Build tree from DataPoints with a specified stop parameter
+	bool build(const DP& pts, size_t maxDataByNode=1, T maxSizeByNode=T(0.), bool parallelBuild=false);
+
+protected:
+	//real build function
+	bool build(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode=1, T maxSizeByNode=T(0.), bool parallelBuild=false);
 	
-	// Build tree from DataPoints with a specified max size by node
-	bool build(const DP& pts, T maxSizeByNode, bool parallel_build=false);
-	bool build_par(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode);
-	bool build(const DP& pts, DataContainer&& datas, BoundingBox && bb, T maxSizeByNode);
+	inline DataContainer toData(const DP& pts, const std::vector<Id>& ids);
 	
+public:	
 	template < typename Callback >
 	bool visit(Callback& cb);
 };
-
+	
 #include "octree.hpp"
+
+template<typename T> using Quadtree = Octree_<T,2>;
+template<typename T> using Octree = Octree_<T,3>;
+
