@@ -256,31 +256,34 @@ TEST(icpTest, icpSequenceTest)
 
 	EXPECT_FALSE(icpSequence.hasMap());
 
-	DP map = icpSequence.getInternalMap();
+	DP map = icpSequence.getPrefilteredInternalMap();
 	EXPECT_EQ(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), 0u);
 	
-	map = icpSequence.getMap();
+	map = icpSequence.getPrefilteredMap();
 	EXPECT_EQ(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), 0u);
 
 	icpSequence.setMap(pts0);
-	map = icpSequence.getInternalMap();
-	EXPECT_EQ(map.getNbPoints(), pts0.getNbPoints());
+	map = icpSequence.getPrefilteredInternalMap();
+	EXPECT_LE(map.getNbPoints(), pts0.getNbPoints());
+	EXPECT_GT(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), pts0.getHomogeneousDim());
 
 	Ticp = icpSequence(pts1);
-	map = icpSequence.getMap();
-	EXPECT_EQ(map.getNbPoints(), pts0.getNbPoints());
+	map = icpSequence.getPrefilteredMap();
+	EXPECT_LE(map.getNbPoints(), pts0.getNbPoints());
+	EXPECT_GT(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), pts0.getHomogeneousDim());
 	
 	Ticp = icpSequence(pts2);
-	map = icpSequence.getMap();
-	EXPECT_EQ(map.getNbPoints(), pts0.getNbPoints());
+	map = icpSequence.getPrefilteredMap();
+	EXPECT_LE(map.getNbPoints(), pts0.getNbPoints());
+	EXPECT_GT(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), pts0.getHomogeneousDim());
 
 	icpSequence.clearMap();
-	map = icpSequence.getInternalMap();
+	map = icpSequence.getPrefilteredInternalMap();
 	EXPECT_EQ(map.getNbPoints(), 0u);
 	EXPECT_EQ(map.getHomogeneousDim(), 0u);
 }
