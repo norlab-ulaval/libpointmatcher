@@ -35,7 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "octree.h"
 
 #include <iterator>
-#include <thread>
+#include <future>
 
 template<typename T, std::size_t dim>
 Octree_<T,dim>::Octree_(): parent{nullptr},	depth{0}
@@ -347,7 +347,7 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 	
 	//For each child build recursively
 	bool ret = true;
-	std::vector<std::thread> threads; //may be useless
+	std::vector<std::future<void>> threads;
 	
 	for(size_t i=0; i<nbCells; ++i)
 	{		
@@ -362,7 +362,7 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 		}
 		else //parallelBuild
 		{
-			threads.push_back( std::thread( [maxDataByNode, maxSizeByNode, i, &pts, &sDatas, &boxes, this](){
+			threads.push_back( std::async( std::launch::async, [maxDataByNode, maxSizeByNode, i, &pts, &sDatas, &boxes, this](){
 				this->cells[i] = new Octree_<T,dim>();
 				//Assign depth
 				this->cells[i]->depth = this->depth+1;
@@ -373,10 +373,6 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 			}));
 		}
 	}
-	
-	if(parallelBuild) // Wait for all thread to finish
-		for (std::thread & t : threads)
-			if (t.joinable()) t.join();
 
 	return (!isLeaf() and ret);
 }
