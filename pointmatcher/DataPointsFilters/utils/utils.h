@@ -41,6 +41,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace utils {
 
+template<class T>
+inline constexpr T pow(const T base, const std::size_t exponent)
+{
+    // (parentheses not required in next line)
+    return (exponent == 0)     ? 1 :
+           (exponent % 2 == 0) ? pow(base, exponent/2)*pow(base, exponent/2) :
+           base * pow(base, (exponent-1)/2) * pow(base, (exponent-1)/2);
+}
+template < typename T, T base, std::size_t exponent >
+using pow_ = std::integral_constant<T, pow(base, exponent)>;
+
+
 template<typename T>
 struct IdxCompare
 {
