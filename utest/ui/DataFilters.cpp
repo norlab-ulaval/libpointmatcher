@@ -449,7 +449,7 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 	PM::DataPointsFilter* octreeFilter;
 	
 	for(const int meth : {0,1,2})
-		for(const size_t maxData : {1,200})
+		for(const size_t maxData : {1,20})
 			for(const float maxSize : {0.,0.1})
 			{
 				params.clear();
@@ -483,7 +483,7 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 				//Validate transformation
 				icp.readingDataPointsFilters.clear();
 				addFilter("OctreeGridDataPointsFilter", params);
-				//validate2dTransformation();
+				validate2dTransformation();
 				validate3dTransformation();
 			}
 }
