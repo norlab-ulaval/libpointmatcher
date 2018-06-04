@@ -57,7 +57,8 @@ OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp)
 }
 
 template <typename T>
-bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree<T>& oc)
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -107,7 +108,8 @@ OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(
 	std::srand(seed);
 }
 template<typename T>
-bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree<T>& oc)
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -154,7 +156,8 @@ OctreeGridDataPointsFilter<T>::CentroidSampler::CentroidSampler(DataPoints& dp)
 }
 	
 template<typename T>
-bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -253,9 +256,23 @@ OctreeGridDataPointsFilter<T>::filter(const DataPoints& input)
 template <typename T>
 void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	assert(cloud.features.rows() == 4); //3D points only
+	const std::size_t featDim = cloud.features.rows();
 	
-	Octree<T> oc{};
+	assert(featDim == 4 or featDim == 3);
+
+	if(featDim==3) //2D case
+		this->sample<2>(cloud);
+		
+	else if(featDim==4) //3D case
+		this->sample<3>(cloud);
+}
+
+template<typename T>
+template<std::size_t dim>
+void OctreeGridDataPointsFilter<T>::sample(DataPoints& cloud)
+{
+	Octree_<T,dim> oc;
+	
 	oc.build(cloud, maxPointByNode, maxSizeByNode, buildParallel);
 	
 	switch(samplingMethod)
@@ -283,6 +300,7 @@ void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		}
 	}
 }
+
 
 template struct OctreeGridDataPointsFilter<float>;
 template struct OctreeGridDataPointsFilter<double>;

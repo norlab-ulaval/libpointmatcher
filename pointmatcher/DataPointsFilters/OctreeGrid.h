@@ -98,7 +98,10 @@ public:
 
 		FirstPtsSampler(DataPoints& dp);
 		virtual ~FirstPtsSampler(){}
-		virtual bool operator()(Octree<T>& oc);
+		
+		template<std::size_t dim>
+		bool operator()(Octree_<T,dim>& oc);
+		
 		virtual bool finalize();
 	};
 	struct RandomPtsSampler : public FirstPtsSampler
@@ -113,7 +116,9 @@ public:
 		RandomPtsSampler(DataPoints& dp, const std::size_t seed_);
 		virtual ~RandomPtsSampler(){}
 	
-		virtual bool operator()(Octree<T>& oc);
+		template<std::size_t dim>
+		bool operator()(Octree_<T,dim>& oc);
+		
 		virtual bool finalize();
 	};
 	struct CentroidSampler : public FirstPtsSampler
@@ -126,7 +131,8 @@ public:
 	
 		virtual ~CentroidSampler(){}
 	
-		virtual bool operator()(Octree<T>& oc);
+		template<std::size_t dim>
+		bool operator()(Octree_<T,dim>& oc);
 	};
 
 //-------	
@@ -150,6 +156,9 @@ public:
 
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
+
+private:
+	template<std::size_t dim> void sample(DataPoints& cloud);
 };
 
 //Helper function
