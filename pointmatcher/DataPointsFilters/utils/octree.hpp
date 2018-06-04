@@ -298,10 +298,10 @@ struct helper<T,2>
 template<typename T>
 const typename Octree_<T,2>::Point helper<T,2>::offsetTable[Octree_<T,2>::nbCells] = 
 		{
-			typename Octree_<T,2>::PointPoint{-0.5, -0.5},
-			typename Octree_<T,2>::PointPoint{+0.5, -0.5},
-			typename Octree_<T,2>::PointPoint{-0.5, +0.5},
-			typename Octree_<T,2>::PointPoint{+0.5, +0.5}
+			typename Octree_<T,2>::Point{-0.5, -0.5},
+			typename Octree_<T,2>::Point{+0.5, -0.5},
+			typename Octree_<T,2>::Point{-0.5, +0.5},
+			typename Octree_<T,2>::Point{+0.5, +0.5}
 		};
 
 
