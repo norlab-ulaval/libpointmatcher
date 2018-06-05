@@ -77,7 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template < typename T, std::size_t dim >
 class Octree_ 
 {
-public:	
+public:		
 	using PM = PointMatcher<T>;
 	using DP = typename PM::DataPoints; /**/
 	using Id = typename DP::Index; /**/
@@ -88,7 +88,7 @@ public:
 	using Point = Eigen::Matrix<T,dim,1>;
 	
 //private:
-	static constexpr std::size_t nbCells = utils::pow_<std::size_t, 2, dim>::value;
+	static constexpr std::size_t nbCells = PointMatcherSupport::pow<std::size_t, 2, dim>::value;
 	
 private:
 	struct BoundingBox 

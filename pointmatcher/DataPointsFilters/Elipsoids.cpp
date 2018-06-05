@@ -238,7 +238,7 @@ void ElipsoidsDataPointsFilter<T>::buildNew(
 	BuildData& data, const int first, const int last, 
 	Vector&& minValues, Vector&& maxValues) const
 {
-  using namespace utils;
+  using namespace PointMatcherSupport;
   
   const int count(last - first);
   if (count <= int(knn))
@@ -285,7 +285,7 @@ template<typename T>
 void ElipsoidsDataPointsFilter<T>::fuseRange(
 	BuildData& data, const int first, const int last) const
 {
-  using namespace utils;
+  using namespace PointMatcherSupport;
   
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 
