@@ -257,44 +257,40 @@ bool Octree_<T,dim>::build(const DP& pts, size_t maxDataByNode, T maxSizeByNode,
 
 //Offset lookup table
 template<typename T, std::size_t dim>
-struct helper
-{
-	static const typename Octree_<T,dim>::Point offsetTable[Octree_<T,dim>::nbCells];
-};
-template<typename T, std::size_t dim>
-const typename Octree_<T,dim>::Point helper<T,dim>::offsetTable[Octree_<T,dim>::nbCells] = {typename Octree_<T,dim>::Point{}};
+struct OctreeHelper;
 
 template<typename T>
-struct helper<T,3>
+struct OctreeHelper<T,3>
 {
 	static const typename Octree_<T,3>::Point offsetTable[Octree_<T,3>::nbCells];
 };
 template<typename T>
-const typename Octree_<T,3>::Point helper<T,3>::offsetTable[Octree_<T,3>::nbCells] = 
+const typename Octree_<T,3>::Point OctreeHelper<T,3>::offsetTable[Octree_<T,3>::nbCells] = 
 		{
-			typename Octree_<T,3>::Point{-0.5, -0.5, -0.5},
-			typename Octree_<T,3>::Point{+0.5, -0.5, -0.5},
-			typename Octree_<T,3>::Point{-0.5, -0.5, +0.5},
-			typename Octree_<T,3>::Point{+0.5, -0.5, +0.5},
-			typename Octree_<T,3>::Point{-0.5, +0.5, -0.5},
-			typename Octree_<T,3>::Point{+0.5, +0.5, -0.5},
-			typename Octree_<T,3>::Point{-0.5, +0.5, +0.5},
-			typename Octree_<T,3>::Point{+0.5, +0.5, +0.5}
+			{-0.5, -0.5, -0.5},
+			{+0.5, -0.5, -0.5},
+			{-0.5, +0.5, -0.5},
+			{+0.5, +0.5, -0.5},
+			{-0.5, -0.5, +0.5},
+			{+0.5, -0.5, +0.5},
+			{-0.5, +0.5, +0.5},
+			{+0.5, +0.5, +0.5}
 		};
 
 template<typename T>
-struct helper<T,2>
+struct OctreeHelper<T,2>
 {
 	static const typename Octree_<T,2>::Point offsetTable[Octree_<T,2>::nbCells];
 };
 template<typename T>
-const typename Octree_<T,2>::Point helper<T,2>::offsetTable[Octree_<T,2>::nbCells] = 
+const typename Octree_<T,2>::Point OctreeHelper<T,2>::offsetTable[Octree_<T,2>::nbCells] = 
 		{
-			typename Octree_<T,2>::Point{-0.5, -0.5},
-			typename Octree_<T,2>::Point{+0.5, -0.5},
-			typename Octree_<T,2>::Point{-0.5, +0.5},
-			typename Octree_<T,2>::Point{+0.5, +0.5}
+			{-0.5, -0.5},
+			{+0.5, -0.5},
+			{-0.5, +0.5},
+			{+0.5, +0.5}
 		};
+
 
 
 template<typename T, std::size_t dim>
@@ -332,7 +328,7 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 	const T half_radius = this->bb.radius * 0.5;
 	for(size_t i=0; i<nbCells; ++i)
 	{
-		const Point offset = helper<T,dim>::offsetTable[i] * this->bb.radius;
+		const Point offset = OctreeHelper<T,dim>::offsetTable[i] * this->bb.radius;
 		boxes[i].radius = half_radius;
 		boxes[i].center = this->bb.center + offset;
 	}
