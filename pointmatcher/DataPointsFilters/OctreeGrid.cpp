@@ -175,8 +175,6 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 		if(std::size_t(d)<idx)
 			j = mapidx[d];
 		
-		T acc[featDim-1] = {0.};
-		
 		//We sum all the data in the first data
 		for(std::size_t id=0;id<nbData;++id)
 		{
@@ -189,7 +187,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 				i = mapidx[curId];
 			
 			for (int f = 0; f < (featDim - 1); ++f)
-				acc[f] += pts.features(f,i);
+				pts.features(f,j) += pts.features(f,i);
 			
 			if (pts.descriptors.cols() > 0)
 				for (int d = 0; d < descDim; ++d)
@@ -202,7 +200,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 		
 		// Normalize sums to get centroid (average)
 		for (int f = 0; f < (featDim - 1); ++f)
-			pts.features(f,j) = acc[f]/T(nbData);
+			pts.features(f,j) /= T(nbData);
 		
 		if (pts.descriptors.cols() > 0)
 			for (int d = 0; d < descDim; ++d)
