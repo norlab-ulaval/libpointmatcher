@@ -47,6 +47,7 @@ inline constexpr T pow_(const T base, const std::size_t exponent)
 {
     return (exponent == 0 ? 1 : base * pow_(base, exponent - 1));
 }
+/* use template to force compile time evaluation : https://stackoverflow.com/a/16443849 */
 template < typename T, T base, std::size_t exponent >
 using pow = std::integral_constant<T, pow_(base, exponent)>;
 
