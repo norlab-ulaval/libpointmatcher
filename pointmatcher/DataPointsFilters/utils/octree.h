@@ -102,14 +102,14 @@ private:
 	
 	/******************************************************
 	 *	Cells id are assigned as their position 
-	 *   on a hamming cube (+ greater than center, - lower than center)
+	 *   from the center (+ greater than center, - lower than center)
 	 *
 	 *		for 3D case									for 2D case
 	 *
 	 *	  	0	1	2	3	4	5	6	7		  	0	1	2	3
 	 * 	x:	-	+	-	+	-	+	-	+		x:	-	+	-	+
-	 * 	z:	-	-	+	+	-	-	+	+		y:	-	-	+	+	
-	 * 	y:	-	-	-	-	+	+	+	+
+	 * 	y:	-	-	+	+	-	-	+	+		y:	-	-	+	+	
+	 * 	z:	-	-	-	-	+	+	+	+
 	 *
 	 *****************************************************/
 	
@@ -122,11 +122,11 @@ private:
 public:
 	Octree_();
 	Octree_(const Octree_<T,dim>& o); //Deep-copy
-	Octree_(Octree_<T,dim>&&o);
+	Octree_(Octree_<T,dim>&& o);
 	
 	virtual ~Octree_();
 	
-	Octree_<T,dim>& operator=(const Octree_<T,dim>&o);//Deep-copy
+	Octree_<T,dim>& operator=(const Octree_<T,dim>& o);//Deep-copy
 	Octree_<T,dim>& operator=(Octree_<T,dim>&& o);
 	
 	bool isLeaf() const;
@@ -145,7 +145,7 @@ public:
 
 protected:
 	//real build function
-	bool build(const DP& pts, DataContainer&& datas, BoundingBox && bb, size_t maxDataByNode=1, T maxSizeByNode=T(0.), bool parallelBuild=false);
+	bool build(const DP& pts, DataContainer&& datas, BoundingBox&& bb, size_t maxDataByNode=1, T maxSizeByNode=T(0.), bool parallelBuild=false);
 	
 	inline DataContainer toData(const DP& pts, const std::vector<Id>& ids);
 	

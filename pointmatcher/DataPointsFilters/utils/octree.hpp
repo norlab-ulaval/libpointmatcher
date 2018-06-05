@@ -180,14 +180,6 @@ template<typename T, std::size_t dim>
 size_t Octree_<T,dim>::idx(const Point& pt) const
 {
 	size_t id = 0;
-	if(dim==3) //Special case for the hamming cube
-	{
-		id|= ((pt(0) > bb.center(0)) << 0);
-		id|= ((pt(2) > bb.center(2)) << 1);
-		id|= ((pt(1) > bb.center(1)) << 2);
-		
-		return id;
-	}
 
 	for(size_t i=0; i<dim; ++i)
 		id|= ((pt(i) > bb.center(i)) << i);
