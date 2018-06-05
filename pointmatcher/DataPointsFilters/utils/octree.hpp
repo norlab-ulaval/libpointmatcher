@@ -307,6 +307,10 @@ template<typename T, std::size_t dim>
 bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, 
 	size_t maxDataByNode, T maxSizeByNode, bool parallelBuild)
 {
+	//Assign bounding box
+	this->bb.center = bb.center;
+	this->bb.radius = bb.radius;
+
 	//Check stop condition
 	if((bb.radius*2.0 <= maxSizeByNode) or (datas.size() <= maxDataByNode))
 	{		
@@ -315,10 +319,6 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 			std::make_move_iterator(datas.begin()), make_move_iterator(datas.end()));
 		return (isLeaf());
 	}
-	
-	//Assign bounding box
-	this->bb.center = bb.center;
-	this->bb.radius = bb.radius;
 	
 	//Split datas
 	const std::size_t nbData = datas.size();
