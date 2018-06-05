@@ -137,6 +137,10 @@ public:
 	inline std::size_t idx(const DP& pts, const Data d) const;
 	
 	std::size_t getDepth() const;
+	
+	T getRadius() const;
+	Point getCenter() const;
+	
 	DataContainer * getData();
 	Octree_<T, dim>* operator[](std::size_t idx);
 	

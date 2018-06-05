@@ -198,6 +198,16 @@ size_t Octree_<T,dim>::getDepth() const
 	return depth;
 }
 template<typename T, std::size_t dim>
+T Octree_<T,dim>::getRadius() const
+{
+	return bb.radius;
+}
+template<typename T, std::size_t dim>
+typename Octree_<T,dim>::Point Octree_<T,dim>::getCenter() const
+{
+	return bb.center;
+}
+template<typename T, std::size_t dim>
 typename Octree_<T,dim>::DataContainer * Octree_<T,dim>::getData()
 {
 	return &data;
