@@ -39,18 +39,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <algorithm>
 
-namespace utils {
+namespace PointMatcherSupport
+{
 
 template<class T>
-inline constexpr T pow(const T base, const std::size_t exponent)
+inline constexpr T pow_(const T base, const std::size_t exponent)
 {
-    // (parentheses not required in next line)
-    return (exponent == 0)     ? 1 :
-           (exponent % 2 == 0) ? pow(base, exponent/2)*pow(base, exponent/2) :
-           base * pow(base, (exponent-1)/2) * pow(base, (exponent-1)/2);
+    return (exponent == 0 ? 1 : base * pow_(base, exponent - 1));
 }
 template < typename T, T base, std::size_t exponent >
-using pow_ = std::integral_constant<T, pow(base, exponent)>;
+using pow = std::integral_constant<T, pow_(base, exponent)>;
 
 
 template<typename T>
@@ -61,7 +59,7 @@ struct IdxCompare
 
 	IdxCompare(const typename PointMatcher<T>::Vector& target): target(target) {}
 
-	bool operator()(size_t a, size_t b) const { return target(a,0) < target(b,0); }
+	bool operator()(size_t a, size_t b) const { return target(a, 0) < target(b, 0); }
 };
 
 
