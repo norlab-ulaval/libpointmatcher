@@ -335,22 +335,11 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 	
 	//For each child build recursively
 	bool ret = true;
-	std::vector<std::future<void>> threads;
-	
+	std::vector<std::future<void>> futures;
+
 	for(size_t i=0; i<nbCells; ++i)
 	{		
-		if(not parallelBuild)
-		{
-			cells[i] = new Octree_<T,dim>();
-			cells[i]->depth = this->depth+1;
-			//next call is not parallelizable
-			ret = ret and cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode, maxSizeByNode, false);
-			//Assign parent
-			cells[i]->parent = this;
-		}
-		else //parallelBuild
-		{
-			threads.push_back( std::async( std::launch::async, [maxDataByNode, maxSizeByNode, i, &pts, &sDatas, &boxes, this](){
+		auto compute = [maxDataByNode, maxSizeByNode, i, &pts, &sDatas, &boxes, this](){
 				this->cells[i] = new Octree_<T,dim>();
 				//Assign depth
 				this->cells[i]->depth = this->depth+1;
@@ -358,9 +347,15 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 				this->cells[i]->parent = this;
 				//next call is not parallelizable
 				this->cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode, maxSizeByNode, false);	
-			}));
-		}
+			};
+		
+		if(not parallelBuild)
+			compute();
+		else
+			futures.push_back( std::async( std::launch::async, compute ));
 	}
+
+	for(auto& f : futures) f.get();
 
 	return (!isLeaf() and ret);
 }
