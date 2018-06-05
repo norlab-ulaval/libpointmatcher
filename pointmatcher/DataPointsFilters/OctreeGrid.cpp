@@ -176,7 +176,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 			j = mapidx[d];
 		
 		//We sum all the data in the first data
-		for(std::size_t id=0;id<nbData;++id)
+		for(std::size_t id=1;id<nbData;++id)
 		{
 			//get current idx
 			const auto& curId = (*data)[id];
