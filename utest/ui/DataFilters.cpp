@@ -449,8 +449,8 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 	PM::DataPointsFilter* octreeFilter;
 	
 	for(const int meth : {0,1,2})
-		for(const size_t maxData : {1,20})
-			for(const float maxSize : {0.,0.1})
+		for(const size_t maxData : {1,5})
+			for(const float maxSize : {0.,0.05})
 			{
 				params.clear();
 				params["maxPointByNode"] = toParam(maxData);
