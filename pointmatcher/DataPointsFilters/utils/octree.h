@@ -88,7 +88,7 @@ public:
 	using Point = Eigen::Matrix<T,dim,1>;
 	
 //private:
-	static constexpr std::size_t nbCells = PointMatcherSupport::pow<std::size_t, 2, dim>::value;
+	static constexpr std::size_t nbCells = PointMatcherSupport::pow(2, dim);
 	
 private:
 	struct BoundingBox 

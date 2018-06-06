@@ -260,9 +260,7 @@ bool Octree_<T,dim>::build(const DP& pts, size_t maxDataByNode, T maxSizeByNode,
 	DataContainer datas = toData(pts, indexes);
 	
 	//build
-	bool ret = this->build(pts, std::move(datas), std::move(box), maxDataByNode, maxSizeByNode, parallelBuild);
-
-	return ret;
+	return this->build(pts, std::move(datas), std::move(box), maxDataByNode, maxSizeByNode, parallelBuild);
 }
 
 //Offset lookup table
@@ -300,8 +298,6 @@ const typename Octree_<T,2>::Point OctreeHelper<T,2>::offsetTable[Octree_<T,2>::
 			{-0.5, +0.5},
 			{+0.5, +0.5}
 		};
-
-
 
 template<typename T, std::size_t dim>
 bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && bb, 
@@ -359,10 +355,10 @@ bool Octree_<T,dim>::build(const DP& pts, DataContainer&& datas, BoundingBox && 
 				this->cells[i]->build(pts, std::move(sDatas[i]), std::move(boxes[i]), maxDataByNode, maxSizeByNode, false);	
 			};
 		
-		if(not parallelBuild)
-			compute();
-		else
+		if(parallelBuild)
 			futures.push_back( std::async( std::launch::async, compute ));
+		else
+			compute();
 	}
 
 	for(auto& f : futures) f.get();

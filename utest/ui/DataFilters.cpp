@@ -458,8 +458,7 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 				params["samplingMethod"] = toParam(meth);
 				params["buildParallel"] = "1";
 	
-				octreeFilter = 
-						PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
+				octreeFilter = PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
 
 				const DP filteredCloud = octreeFilter->filter(cloud);
 			
