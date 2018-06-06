@@ -278,6 +278,7 @@ struct PointMatcher
 		DataPoints createSimilarEmpty() const;
 		DataPoints createSimilarEmpty(Index pointCount) const;
 		void setColFrom(Index thisCol, const DataPoints& that, Index thatCol);
+		void swapCols(Index iCol,Index jCol);
 		
 		// methods related to features
 		void allocateFeature(const std::string& name, const unsigned dim);

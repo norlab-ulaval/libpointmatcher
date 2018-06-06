@@ -34,21 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "OctreeGrid.h"
 
-//Helper function
-//FIXME: to put in DataPoints implementation
-template<typename T>
-void swapCols(typename PointMatcher<T>::DataPoints& self, 
-	typename PointMatcher<T>::DataPoints::Index iCol, 
-	typename PointMatcher<T>::DataPoints::Index jCol)
-{
-	//Switch columns j and i
-	self.features.col(iCol).swap(self.features.col(jCol));
-	if (self.descriptors.cols() > 0)
-		self.descriptors.col(iCol).swap(self.descriptors.col(jCol));
-	if (self.times.cols() > 0)
-		self.times.col(iCol).swap(self.times.col(jCol));
-}
-
 //Define Visitor classes to apply processing
 template<typename T>
 OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp) 
@@ -72,7 +57,7 @@ bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree_<T,dim>& 
 			j = mapidx[d];
 			
 		//Switch columns j and idx
-		swapCols<T>(pts, idx, j);
+		pts.swapCols(idx, j);
 				
 		//Maintain new index position	
 		mapidx[idx] = j;
@@ -128,7 +113,7 @@ bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree_<T,dim>&
 			j = mapidx[d];
 			
 		//Switch columns j and idx
-		swapCols<T>(pts, idx, j);	
+		pts.swapCols(idx, j);	
 		
 		//Maintain new index position	
 		mapidx[idx] = j;
@@ -211,7 +196,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 				pts.times(t,j) /= T(nbData);	
 								
 		//Switch columns j and idx
-		swapCols<T>(pts, idx, j);
+		pts.swapCols(idx, j);
 		
 		//Maintain new index position	
 		mapidx[idx] = j;

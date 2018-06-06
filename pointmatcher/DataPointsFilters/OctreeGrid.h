@@ -160,11 +160,3 @@ public:
 private:
 	template<std::size_t dim> void sample(DataPoints& cloud);
 };
-
-//Helper function
-template<typename T>
-void swapCols(typename PointMatcher<T>::DataPoints& self, 
-	typename PointMatcher<T>::DataPoints::Index iCol, 
-	typename PointMatcher<T>::DataPoints::Index jCol);
-	
-
