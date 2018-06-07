@@ -65,7 +65,7 @@ struct NormalSpaceDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 		return boost::assign::list_of<ParameterDoc>
 		( "nbSample", "Number of point to select.", "5000", "1", "4294967295", &P::Comp<std::size_t> )
 		( "seed", "Seed for the random generator.", "1", "0", "4294967295", &P::Comp<std::size_t> )
-		( "epsilon", "Step of discretization for the angle spaces", "0.04908738521" /* PI/64 */, "0.00153398078" /* PI/2048 */, "6.28318530718" /* 2PI */, &P::Comp<T> )
+		( "epsilon", "Step of discretization for the angle spaces", "0.09817477042" /* PI/32 */, "0.04908738521" /* PI/64 */, "3.14159265359" /* PI */, &P::Comp<T> )
 		;
 	}
 

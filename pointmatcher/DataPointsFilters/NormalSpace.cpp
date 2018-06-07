@@ -37,7 +37,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <unordered_map>
 #include <random>
-#include <fstream>
 
 // NormalSpaceDataPointsFilter
 template <typename T>
@@ -47,7 +46,7 @@ NormalSpaceDataPointsFilter<T>::NormalSpaceDataPointsFilter(const Parameters& pa
 	nbSample{Parametrizable::get<std::size_t>("nbSample")},
 	seed{Parametrizable::get<std::size_t>("seed")},
 	epsilon{Parametrizable::get<T>("epsilon")},
-	nbBucket{std::size_t((2.0*M_PI/epsilon) * (M_PI/epsilon))}
+	nbBucket{std::size_t((2.0 * M_PI / epsilon) * (M_PI / epsilon))}
 {
 }
 
@@ -77,7 +76,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
 	std::uniform_real_distribution<> uni01(0., 1.);
 	
-	//bucket space
+	//bucketed normal space
 	std::vector<std::vector<int>> idBuckets; //stock int so we can marked selected with -1
 	idBuckets.resize(nbBucket);
 	
@@ -102,39 +101,39 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	while(keepIndexes.size() < nbSample)
 	{
 		const T theta = std::acos(1 - 2 * uni01(gen));
-        const T phi = 2. * M_PI * uni01(gen);
-		
-        std::vector<int>& curBucket = idBuckets[bucketIdx(theta, phi)];
-        
-        //Check size
-        if(curBucket.empty())
-    		continue;
-    		
-    	const std::size_t bucketSize = curBucket.size();
-    	
-    	//Check if not already all sampled
-    	bool isEntireBucketSampled = true;
-    	for(std::size_t id = 0; id < bucketSize and isEntireBucketSampled; ++id)
-    	{
-    		isEntireBucketSampled = isEntireBucketSampled and (curBucket[id]==-1);
-    	}
-    	
-    	if(isEntireBucketSampled)
-    		continue;
-    	    	
-    	///(3) A point is randomly picked in a bucket that contains multiple points
-    	int idToKeep = 0;
-    	std::size_t idInBucket = 0;
-    	do
-    	{
-    		 idInBucket = static_cast<std::size_t>(bucketSize * uni01(gen));
-    		 idToKeep = curBucket[idInBucket];
+		const T phi = 2. * M_PI * uni01(gen);
 
-    	} while(idToKeep == -1); 
-        
-        keepIndexes.push_back(static_cast<std::size_t>(idToKeep));
-        
-        curBucket[idInBucket] = -1; //set sampled flag
+		std::vector<int>& curBucket = idBuckets[bucketIdx(theta, phi)];
+
+		//Check size
+		if(curBucket.empty())
+			continue;
+	
+		const std::size_t bucketSize = curBucket.size();
+
+		//Check if not already all sampled
+		bool isEntireBucketSampled = true;
+		for(std::size_t id = 0; id < bucketSize and isEntireBucketSampled; ++id)
+		{
+			isEntireBucketSampled = isEntireBucketSampled and (curBucket[id] == -1);
+		}
+
+		if(isEntireBucketSampled)
+			continue;
+			
+		///(3) A point is randomly picked in a bucket that contains multiple points
+		int idToKeep = 0;
+		std::size_t idInBucket = 0;
+		do
+		{
+			 idInBucket = static_cast<std::size_t>(bucketSize * uni01(gen));
+			 idToKeep = curBucket[idInBucket];
+
+		} while(idToKeep == -1); 
+
+		keepIndexes.push_back(static_cast<std::size_t>(idToKeep));
+
+		curBucket[idInBucket] = -1; //set sampled flag
 	}
 	//TODO: evaluate performances between this solution and sorting the indexes
 	// We build map of (old index to new index), in case we sample pts at the begining of the pointcloud
