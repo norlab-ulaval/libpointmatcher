@@ -34,21 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "OctreeGrid.h"
 
-//Helper function
-//FIXME: to put in DataPoints implementation
-template<typename T>
-void swapCols(typename PointMatcher<T>::DataPoints& self, 
-	typename PointMatcher<T>::DataPoints::Index iCol, 
-	typename PointMatcher<T>::DataPoints::Index jCol)
-{
-	//Switch columns j and i
-	self.features.col(iCol).swap(self.features.col(jCol));
-	if (self.descriptors.cols() > 0)
-		self.descriptors.col(iCol).swap(self.descriptors.col(jCol));
-	if (self.times.cols() > 0)
-		self.times.col(iCol).swap(self.times.col(jCol));
-}
-
 //Define Visitor classes to apply processing
 template<typename T>
 OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp) 
@@ -57,7 +42,8 @@ OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp)
 }
 
 template <typename T>
-bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree<T>& oc)
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -71,7 +57,7 @@ bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree<T>& oc)
 			j = mapidx[d];
 			
 		//Switch columns j and idx
-		swapCols<T>(pts, idx, j);
+		pts.swapCols(idx, j);
 				
 		//Maintain new index position	
 		mapidx[idx] = j;
@@ -107,7 +93,8 @@ OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(
 	std::srand(seed);
 }
 template<typename T>
-bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree<T>& oc)
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -126,7 +113,7 @@ bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree<T>& oc)
 			j = mapidx[d];
 			
 		//Switch columns j and idx
-		swapCols<T>(pts, idx, j);	
+		pts.swapCols(idx, j);	
 		
 		//Maintain new index position	
 		mapidx[idx] = j;
@@ -154,7 +141,8 @@ OctreeGridDataPointsFilter<T>::CentroidSampler::CentroidSampler(DataPoints& dp)
 }
 	
 template<typename T>
-bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -171,7 +159,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 		//retrieve index from lookup table if sampling in already switched element
 		if(std::size_t(d)<idx)
 			j = mapidx[d];
-			
+		
 		//We sum all the data in the first data
 		for(std::size_t id=1;id<nbData;++id)
 		{
@@ -208,7 +196,7 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree<T>& oc)
 				pts.times(t,j) /= T(nbData);	
 								
 		//Switch columns j and idx
-		swapCols<T>(pts, idx, j);
+		pts.swapCols(idx, j);
 		
 		//Maintain new index position	
 		mapidx[idx] = j;
@@ -224,20 +212,17 @@ template <typename T>
 OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& params) :
 	PointMatcher<T>::DataPointsFilter("OctreeGridDataPointsFilter", 
 		OctreeGridDataPointsFilter::availableParameters(), params),
-	parallel_build{Parametrizable::get<bool>("buildParallel")},
+	buildParallel{Parametrizable::get<bool>("buildParallel")},
 	maxPointByNode{Parametrizable::get<std::size_t>("maxPointByNode")},
 	maxSizeByNode{Parametrizable::get<T>("maxSizeByNode")}
 {
 	try 
 	{
-		const int bm = Parametrizable::get<int>("buildMethod");
-		buildMethod = BuildMethod(bm);
 		const int sm = Parametrizable::get<int>("samplingMethod");
 		samplingMethod = SamplingMethod(sm);
 	}
 	catch (const InvalidParameter& e) 
 	{
-		buildMethod = BuildMethod::MAX_POINT;
 		samplingMethod = SamplingMethod::FIRST_PTS;
 	}
 }
@@ -254,23 +239,24 @@ OctreeGridDataPointsFilter<T>::filter(const DataPoints& input)
 template <typename T>
 void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	assert(cloud.features.rows() == 4); //3D points only
+	const std::size_t featDim = cloud.features.rows();
 	
-	Octree<T> oc{};
+	assert(featDim == 4 or featDim == 3);
+
+	if(featDim==3) //2D case
+		this->sample<2>(cloud);
+		
+	else if(featDim==4) //3D case
+		this->sample<3>(cloud);
+}
+
+template<typename T>
+template<std::size_t dim>
+void OctreeGridDataPointsFilter<T>::sample(DataPoints& cloud)
+{
+	Octree_<T,dim> oc;
 	
-	switch(buildMethod) 
-	{
-		case BuildMethod::MAX_POINT:
-		{
-			oc.build(cloud, maxPointByNode, parallel_build);
-			break;
-		}
-		case BuildMethod::MAX_SIZE:
-		{
-			oc.build(cloud, maxSizeByNode, parallel_build);
-			break;
-		}
-	}
+	oc.build(cloud, maxPointByNode, maxSizeByNode, buildParallel);
 	
 	switch(samplingMethod)
 	{
@@ -297,6 +283,7 @@ void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		}
 	}
 }
+
 
 template struct OctreeGridDataPointsFilter<float>;
 template struct OctreeGridDataPointsFilter<double>;

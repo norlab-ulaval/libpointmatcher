@@ -400,6 +400,16 @@ void PointMatcher<T>::DataPoints::setColFrom(Index thisCol, const DataPoints& th
 		times.col(thisCol) = that.times.col(thatCol);
 
 }
+//! Swap column i and j in the point cloud, swap also features and descriptors if any. Assumes sizes are similar
+template<typename T>
+void PointMatcher<T>::DataPoints::swapCols(Index iCol,Index jCol)
+{
+	features.col(iCol).swap(features.col(jCol));
+	if (descriptors.cols() > 0)
+		descriptors.col(iCol).swap(descriptors.col(jCol));
+	if (times.cols() > 0)
+		times.col(iCol).swap(times.col(jCol));
+}
 
 //------------------------------------
 // Methods related to features

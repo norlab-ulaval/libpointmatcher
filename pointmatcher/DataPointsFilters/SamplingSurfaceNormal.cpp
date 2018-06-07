@@ -174,7 +174,7 @@ void SamplingSurfaceNormalDataPointsFilter<T>::buildNew(
 	BuildData& data, const int first, const int last, 
 	Vector&& minValues, Vector&& maxValues) const
 {
-	using namespace utils;
+	using namespace PointMatcherSupport;
 	
 	const int count(last - first);
 	if (count <= int(knn))
@@ -225,7 +225,7 @@ template<typename T>
 void SamplingSurfaceNormalDataPointsFilter<T>::fuseRange(
 	BuildData& data, const int first, const int last) const
 {
-	using namespace utils;
+	using namespace PointMatcherSupport;
 	
 	const int colCount(last-first);
 	const int featDim(data.features.rows());
