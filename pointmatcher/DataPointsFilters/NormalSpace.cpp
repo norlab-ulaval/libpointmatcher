@@ -62,6 +62,8 @@ NormalSpaceDataPointsFilter<T>::filter(const DataPoints& input)
 template <typename T>
 void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
+	static const int alreadySampled = -1;
+	
 	//Check number of points
 	const int nbPoints = cloud.getNbPoints();		
 	if(nbSample >= std::size_t(nbPoints))
@@ -115,7 +117,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		bool isEntireBucketSampled = true;
 		for(std::size_t id = 0; id < bucketSize and isEntireBucketSampled; ++id)
 		{
-			isEntireBucketSampled = isEntireBucketSampled and (curBucket[id] == -1);
+			isEntireBucketSampled = isEntireBucketSampled and (curBucket[id] == alreadySampled);
 		}
 
 		if(isEntireBucketSampled)
@@ -129,11 +131,11 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			 idInBucket = static_cast<std::size_t>(bucketSize * uni01(gen));
 			 idToKeep = curBucket[idInBucket];
 
-		} while(idToKeep == -1); 
+		} while(idToKeep == alreadySampled); 
 
 		keepIndexes.push_back(static_cast<std::size_t>(idToKeep));
 
-		curBucket[idInBucket] = -1; //set sampled flag
+		curBucket[idInBucket] = alreadySampled; //set sampled flag
 	}
 	//TODO: evaluate performances between this solution and sorting the indexes
 	// We build map of (old index to new index), in case we sample pts at the begining of the pointcloud
