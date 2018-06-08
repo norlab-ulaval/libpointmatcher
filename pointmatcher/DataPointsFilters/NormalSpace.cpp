@@ -91,7 +91,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		//Theta = polar angle in [0 ; pi]
 		const T theta = std::acos(normals(2, i)); 
 		//Phi = azimuthal angle in [0 ; 2pi] 
-		const T phi = std::atan2(normals(1, i), normals(0, i)) + M_PI;
+		const T phi = std::fmod(std::atan2(normals(1, i), normals(0, i)) + 2. * M_PI, 2. * M_PI);
 		
 		//assert(theta >= 0. and theta =< M_PI and phi >= 0. and phi <= 2.*M_PI);
 		
