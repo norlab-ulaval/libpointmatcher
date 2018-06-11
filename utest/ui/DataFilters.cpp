@@ -525,16 +525,14 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 			
 			const DP filteredCloud = nssFilter->filter(cloud);
 					
-			if(nbSample == nbPts2D)
+			if(nbSample <= nbPts2D)
 			{
 				validate2dTransformation();
-				
-				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts2D);
+				EXPECT_LE(filteredCloud.getNbPoints(), nbPts2D);
+				continue;
 			}
 			else if (nbSample == nbPts3D)
 			{
-				validate3dTransformation();
-				
 				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts3D);
 			}
 			else if (nbSample == nbPts)
@@ -545,17 +543,10 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 				EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
 
 				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
-			
-				validate2dTransformation();
-				validate3dTransformation();
 			}
-			else
-			{	
-				validate2dTransformation();
-				validate3dTransformation();
-				
-				EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
-			}			
+			
+			validate3dTransformation();			
+			EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
 		}
 }
 
