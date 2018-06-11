@@ -80,7 +80,7 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 		( "buildParallel", "If 1 (true), use threads to build the octree.", "1", "0", "1", P::Comp<bool> )
 		( "maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "4294967295", &P::Comp<std::size_t> )
 		( "maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0", "0", "+inf", &P::Comp<T> )
-		( "samplingMethod", "Method to sample the Octree: First Point (0), Random (1), Centroid (2) (more accurate but costly)", "0", "0", "2", &P::Comp<int> )
+		( "samplingMethod", "Method to sample the Octree: First Point (0), Random (1), Centroid (2) (more accurate but costly), Medoid (3) (more accurate but costly)", "0", "0", "3", &P::Comp<int> )
 		//FIXME: add seed parameter for the random sampling
 		;
 	}
@@ -134,9 +134,23 @@ public:
 		template<std::size_t dim>
 		bool operator()(Octree_<T,dim>& oc);
 	};
+	//Nearest point from the centroid (contained in the cloud)
+	struct MedoidSampler : public FirstPtsSampler
+	{
+		using FirstPtsSampler::idx;
+		using FirstPtsSampler::pts;
+		using FirstPtsSampler::mapidx;
+		
+		MedoidSampler(DataPoints& dp);
+	
+		virtual ~MedoidSampler(){}
+	
+		template<std::size_t dim>
+		bool operator()(Octree_<T,dim>& oc);		
+	};
 
 //-------	
-	enum SamplingMethod : int { FIRST_PTS=0, RAND_PTS=1, CENTROID=2 };
+	enum SamplingMethod : int { FIRST_PTS=0, RAND_PTS=1, CENTROID=2, MEDOID=3 };
 
 //Atributes
 	bool buildParallel;

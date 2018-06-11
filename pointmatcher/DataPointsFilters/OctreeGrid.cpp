@@ -34,6 +34,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "OctreeGrid.h"
 
+#include <limits>
+
 //Define Visitor classes to apply processing
 template<typename T>
 OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp) 
@@ -206,6 +208,78 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 	
 	return true;
 }
+template<typename T>
+OctreeGridDataPointsFilter<T>::MedoidSampler::MedoidSampler(DataPoints& dp)  
+	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
+{
+}
+	
+template<typename T>
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::MedoidSampler::operator()(Octree_<T,dim>& oc)
+{
+	if(oc.isLeaf() and not oc.isEmpty())
+	{		
+		auto* data = oc.getData();
+		const std::size_t nbData = (*data).size();
+
+		auto dist = [](const typename Octree_<T,dim>::Point& p1, const typename Octree_<T,dim>::Point& p2) -> T {		
+				return (p1 - p2).norm();		
+			};
+			
+		//Build centroid
+		typename Octree_<T,dim>::Point center;
+		for(std::size_t i=0;i<dim;++i) center(i)=T(0.);
+		
+		for(std::size_t id=0;id<nbData;++id)
+		{
+			//get current idx
+			const auto& curId = (*data)[id];
+			std::size_t i = curId; //i contains real index
+			
+			//retrieve index from lookup table if sampling in already switched element
+			if(std::size_t(curId)<idx)
+				i = mapidx[curId];
+			
+			for (int f = 0; f < dim; ++f)
+				center(f) += pts.features(f,i);	
+		}
+		for(std::size_t i=0;i<dim;++i) center(i)/=T(nbData);
+		
+		//Get the closest point from the center 
+		T minDist = std::numeric_limits<T>::max();
+		std::size_t medId = 0;
+			
+		for(std::size_t id=0;id<nbData;++id)
+		{
+			//get current idx
+			const auto curId = (*data)[id];
+			std::size_t i = curId; //i contains real index
+			
+			//retrieve index from lookup table if sampling in already switched element
+			if(std::size_t(curId)<idx)
+				i = mapidx[curId];
+				
+			const T curDist = dist(pts.features.col(i).head(dim), center);
+			if(curDist<minDist)
+			{
+				minDist = curDist;
+				medId=i;
+			}
+		}
+				
+		//Switch columns j and idx
+		pts.swapCols(idx, medId);
+	
+		//Maintain new index position	
+		mapidx[idx] = medId;
+	
+		//Update index
+		++idx;		
+	}
+
+	return true;
+}
 
 // OctreeGridDataPointsFilter
 template <typename T>
@@ -277,6 +351,13 @@ void OctreeGridDataPointsFilter<T>::sample(DataPoints& cloud)
 		case SamplingMethod::CENTROID:
 		{
 			CentroidSampler sampler(cloud);
+			oc.visit(sampler);
+			sampler.finalize();
+			break;
+		}
+		case SamplingMethod::MEDOID:
+		{
+			MedoidSampler sampler(cloud);
 			oc.visit(sampler);
 			sampler.finalize();
 			break;
