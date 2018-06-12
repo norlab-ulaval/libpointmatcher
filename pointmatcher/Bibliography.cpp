@@ -194,6 +194,19 @@ namespace PointMatcherSupport
 				( "publisher", "IEEE Computer Society" )
 				( "address", "Washington, DC, USA" )
 			))
+			( "Rusinkiewicz2001", makeMap(map_list_of
+				( "type", "inproceedings" )
+				( "author", "Rusinkiewicz, Szymon and Levoy, Marc" )
+				( "title", "Efficient Variants of the ICP Algorithm" )
+				( "journal", "Proceedings Third International Conference on 3-D Digital Imaging and Modeling" )
+				( "volume", "13" )
+				( "year", "2001" )
+				( "isbn", "0769509843" )
+				( "pages", "145--152" )
+				( "doi", "10.1109/IM.2001.924423" )
+				( "publisher", "IEEE Computer Society" )
+				( "address", "Quebec City, Quebec, Canada" )
+			))
 		;
 	}
 	

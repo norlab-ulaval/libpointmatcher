@@ -241,7 +241,7 @@ bool OctreeGridDataPointsFilter<T>::MedoidSampler::operator()(Octree_<T,dim>& oc
 			if(std::size_t(curId)<idx)
 				i = mapidx[curId];
 			
-			for (int f = 0; f < dim; ++f)
+			for (std::size_t f = 0; f < dim; ++f)
 				center(f) += pts.features(f,i);	
 		}
 		for(std::size_t i=0;i<dim;++i) center(i)/=T(nbData);

@@ -57,7 +57,7 @@ struct NormalSpaceDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 	inline static const std::string description()
 	{
-		return "Normal Space Sampling (NSS) from S. Rusinkiewicz and M. Levoy, “Efficient Variants of the ICP Algorithm,” in Proceedings Third International Conference on 3-D Digital Imaging and Modeling, 2001, pp. 145–152. Construct a set of buckets in the normal-space, then put all points of the data into buckets based on their normal direction; Finally, uniformly pick points from all the buckets until the desired number of points is selected. **Required** to compute normals as pre-step.";
+		return "Normal Space Sampling (NSS) \\cite{Rusinkiewicz2001}. Construct a set of buckets in the normal-space, then put all points of the data into buckets based on their normal direction; Finally, uniformly pick points from all the buckets until the desired number of points is selected. **Required** to compute normals as pre-step.";
 	}
 
 	inline static const ParametersDoc availableParameters()
