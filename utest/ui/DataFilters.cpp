@@ -448,7 +448,7 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 
 	PM::DataPointsFilter* octreeFilter;
 	
-	for(const int meth : {0,1,2})
+	for(const int meth : {0,1,2,3})
 		for(const size_t maxData : {1,5})
 			for(const float maxSize : {0.,0.05})
 			{
@@ -485,6 +485,69 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 				validate2dTransformation();
 				validate3dTransformation();
 			}
+}
+
+TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
+{
+	const size_t nbPts = 60000;
+	DP cloud = generateRandomDataPoints(nbPts);	
+	params = PM::Parameters(); 
+	
+	const size_t nbPts2D = ref2D.getNbPoints();
+	const size_t nbPts3D = ref3D.getNbPoints();
+	
+	PM::DataPointsFilter* nssFilter;
+	
+	//Compute normals
+	auto paramsNorm = PM::Parameters();
+			paramsNorm["knn"] = "5"; 
+			paramsNorm["epsilon"] = "0.1"; 
+			paramsNorm["keepNormals"] = "1";
+	PM::DataPointsFilter*	normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
+
+	normalFilter->inPlaceFilter(cloud);
+	
+	//Evaluate filter
+	std::vector<size_t> samples = {2*nbPts2D/3, nbPts2D, 1500, 5000, nbPts, nbPts3D};
+	for(const float epsilon : {M_PI/6., M_PI/32., M_PI/64.})
+		for(const size_t nbSample : samples)
+		{
+			icp.readingDataPointsFilters.clear();
+			
+			params.clear();
+			params["epsilon"] = toParam(epsilon);
+			params["nbSample"] = toParam(nbSample);
+
+			nssFilter = PM::get().DataPointsFilterRegistrar.create("NormalSpaceDataPointsFilter", params);
+
+			addFilter("SurfaceNormalDataPointsFilter", paramsNorm);
+			addFilter("NormalSpaceDataPointsFilter", params);
+			
+			const DP filteredCloud = nssFilter->filter(cloud);
+					
+			if(nbSample <= nbPts2D)
+			{
+				validate2dTransformation();
+				EXPECT_LE(filteredCloud.getNbPoints(), nbPts2D);
+				continue;
+			}
+			else if (nbSample == nbPts3D)
+			{
+				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts3D);
+			}
+			else if (nbSample == nbPts)
+			{
+				//Check number of points
+				EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
+				EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+				EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
+			}
+			
+			validate3dTransformation();			
+			EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
+		}
 }
 
 TEST_F(DataFilterTest, VoxelGridDataPointsFilter)

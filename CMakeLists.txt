@@ -315,7 +315,8 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/CutAtDescriptorThreshold.cpp
 	pointmatcher/DataPointsFilters/Elipsoids.cpp
 	pointmatcher/DataPointsFilters/Gestalt.cpp
-	pointmatcher/DataPointsFilters/OctreeGrid.cpp		
+	pointmatcher/DataPointsFilters/OctreeGrid.cpp
+	pointmatcher/DataPointsFilters/NormalSpace.cpp	
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
