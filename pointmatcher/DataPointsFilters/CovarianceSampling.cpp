@@ -64,13 +64,13 @@ CovarianceSamplingDataPointsFilter<T>::filter(const DataPoints& input)
 template <typename T>
 void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {	
+	const std::size_t featDim(cloud.features.rows());
+	assert(featDim == 4); //3D pts only
+	
 	//Check number of points
 	const int nbPoints = cloud.getNbPoints();		
 	if(nbSample >= std::size_t(nbPoints))
 		return;
-	
-	const std::size_t featDim(cloud.features.rows());
-	assert(featDim == 4); //3D pts only
 	
 	//Check if there is normals info
 	if (!cloud.descriptorExists("normals"))
