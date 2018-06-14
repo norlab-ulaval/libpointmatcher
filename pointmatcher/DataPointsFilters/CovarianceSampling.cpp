@@ -38,13 +38,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <list>
 #include <utility>
 #include <unordered_map>
-#include <random>
 
 // Eigenvalues
 #include "Eigen/QR"
 #include "Eigen/Eigenvalues"
 
-// NormalSpaceDataPointsFilter
+// CovarianceSamplingDataPointsFilter
 template <typename T>
 CovarianceSamplingDataPointsFilter<T>::CovarianceSamplingDataPointsFilter(const Parameters& params) :
 	PointMatcher<T>::DataPointsFilter("CovarianceSamplingDataPointsFilter", 
@@ -88,13 +87,13 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	
 	//Compute centroid
 	Vector3 center;
-	for(std::size_t i=0;i<featDim-1;++i) center(i)=T(0.);
+	for(std::size_t i = 0; i < featDim - 1; ++i) center(i) = T(0.);
 	
 	for (int i = 0; i < nbPoints; ++i)
 		for (std::size_t f = 0; f < featDim-1; ++f)
 				center(f) += cloud.features(f,i);
 	
-	for(std::size_t i=0;i<featDim-1;++i) center(i)/=T(nbPoints);
+	for(std::size_t i = 0; i < featDim - 1; ++i) center(i) /= T(nbPoints);
 	
 	std::vector<std::size_t> keepIndexes;
 	keepIndexes.resize(nbSample);
@@ -118,8 +117,8 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 				const Vector3 p = cloud.features.col(i).head(3) - center; // pi-c
 				const Vector3 ni = normals.col(i).head(3);
 				
-				//compute (1/L)*(pi-c) x ni 
-				F.template block<3, 1>(0, i) = (1./Lmax) * p.cross(ni);
+				//compute (1 / L) * (pi - c) x ni 
+				F.template block<3, 1>(0, i) = (1. / Lmax) * p.cross(ni);
 				//set ni part
 				F.template block<3, 1>(3, i) = ni;
 			}
@@ -137,19 +136,15 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	
 	///---- Part B
 	//B.1 - Compute the v-6 for each candidate
-	std::vector<Vector6, Eigen::aligned_allocator<Vector6>> v; // v[i] = [(pi-c)x ni ; ni ]'
-	try{
+	std::vector<Vector6, Eigen::aligned_allocator<Vector6>> v; // v[i] = [(pi-c) x ni ; ni ]'
 	v.resize(nbCandidates);
-	}catch(...)
-	{
-		std::cout << "Ho-ho" << std::endl;
-	}
+
 	for(std::size_t i = 0; i < nbCandidates; ++i)
 	{
 		const Vector3 p = cloud.features.col(candidates[i]).head(3) - center; // pi-c
 		const Vector3 ni = normals.col(candidates[i]).head(3);
 		
-		v[i].template block<3, 1>(0, 0) = (1./Lmax) * p.cross(ni);
+		v[i].template block<3, 1>(0, 0) = (1. / Lmax) * p.cross(ni);
 		v[i].template block<3, 1>(3, 0) = ni;
 	}
 	

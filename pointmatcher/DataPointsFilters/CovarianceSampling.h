@@ -58,11 +58,9 @@ struct CovarianceSamplingDataPointsFilter : public PointMatcher<T>::DataPointsFi
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::Matrix Matrix;	
 	
-	
 	using Matrix66 = Eigen::Matrix<T, 6, 6>;
 	using Vector6  = Eigen::Matrix<T, 6, 1>;
 	using Vector3  = Eigen::Matrix<T, 3, 1>;
-	
 
 	inline static const std::string description()
 	{
@@ -81,7 +79,7 @@ public:
 	
 	//Ctor, uses parameter interface
 	CovarianceSamplingDataPointsFilter(const Parameters& params = Parameters());
-	//NormalSpaceDataPointsFilter();
+	//CovarianceSamplingDataPointsFilter();
 	
 	//Dtor
 	virtual ~CovarianceSamplingDataPointsFilter() {};
