@@ -556,7 +556,6 @@ TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
 	DP cloud = generateRandomDataPoints(nbPts);	
 	params = PM::Parameters(); 
 	
-	const size_t nbPts2D = ref2D.getNbPoints();
 	const size_t nbPts3D = ref3D.getNbPoints();
 	
 	PM::DataPointsFilter* covsFilter;
@@ -571,7 +570,7 @@ TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
 	normalFilter->inPlaceFilter(cloud);
 	
 	//Evaluate filter
-	std::vector<size_t> samples = {4*nbPts2D/5, nbPts2D, 1500, 5000, nbPts, nbPts3D};
+	std::vector<size_t> samples = {500, 1500, 5000, nbPts, nbPts3D};
 	for(const size_t nbSample : samples)
 	{
 		icp.readingDataPointsFilters.clear();
@@ -586,13 +585,7 @@ TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
 		
 		const DP filteredCloud = covsFilter->filter(cloud);
 				
-		if(nbSample <= nbPts2D)
-		{
-			validate2dTransformation();
-			EXPECT_LE(filteredCloud.getNbPoints(), nbPts2D);
-			continue;
-		}
-		else if (nbSample == nbPts3D)
+		if (nbSample == nbPts3D)
 		{
 			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts3D);
 		}
@@ -605,6 +598,7 @@ TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
 
 			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
 		}
+		
 		validate3dTransformation();			
 		EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
 	}
