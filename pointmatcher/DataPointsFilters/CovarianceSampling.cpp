@@ -50,6 +50,15 @@ CovarianceSamplingDataPointsFilter<T>::CovarianceSamplingDataPointsFilter(const 
 		CovarianceSamplingDataPointsFilter::availableParameters(), params),
 	nbSample{Parametrizable::get<std::size_t>("nbSample")}
 {
+	try 
+	{
+		const std::uint8_t tnm = Parametrizable::get<std::uint8_t>("torqueNorm");
+		normalizationMethod = TorqueNormMethod(tnm);
+	}
+	catch (const InvalidParameter& e) 
+	{
+		normalizationMethod = TorqueNormMethod::Lavg;
+	}
 }
 
 template <typename T>
@@ -68,8 +77,8 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	assert(featDim == 4); //3D pts only
 	
 	//Check number of points
-	const int nbPoints = cloud.getNbPoints();		
-	if(nbSample >= std::size_t(nbPoints))
+	const std::size_t nbPoints = cloud.getNbPoints();		
+	if(nbSample >= nbPoints)
 		return;
 	
 	//Check if there is normals info
@@ -77,48 +86,64 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		throw InvalidField("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors.");
 
 	const auto& normals = cloud.getDescriptorViewByName("normals");
-
-	//Compute torque normalization
-	const Vector minValues = cloud.features.rowwise().minCoeff();
-	const Vector maxValues = cloud.features.rowwise().maxCoeff();
-	const Vector radii = maxValues - minValues;
-	
-	const T Lmax = radii.head(featDim-1).maxCoeff();
-	
-	//Compute centroid
-	Vector3 center;
-	for(std::size_t i = 0; i < featDim - 1; ++i) center(i) = T(0.);
-	
-	for (int i = 0; i < nbPoints; ++i)
-		for (std::size_t f = 0; f < featDim-1; ++f)
-				center(f) += cloud.features(f,i);
-	
-	for(std::size_t i = 0; i < featDim - 1; ++i) center(i) /= T(nbPoints);
 	
 	std::vector<std::size_t> keepIndexes;
 	keepIndexes.resize(nbSample);
 	
 	///---- Part A, as we compare the cloud with himself, the overlap is 100%, so we keep all points 
 	//A.1 and A.2 - Compute candidates
-	std::vector<int> candidates ; //int so we can mark index as already sampled
+	std::vector<std::size_t> candidates ;
 	candidates.resize(nbPoints);
 	
-	for (int i = 0; i < nbPoints; ++i) candidates[i] = i;
+	for (std::size_t i = 0; i < nbPoints; ++i) candidates[i] = i;
 	
 	const std::size_t nbCandidates = candidates.size();
 	
-	//A.3 - Compute 6x6 covariance matrix + EigenVectors
-	auto computeCovariance = [Lmax, nbPoints, &cloud, &center, &normals](Matrix66 & cov) -> void {
-			//Compute F matrix, see Eq. (4)
-			Eigen::Matrix<T, 6, Eigen::Dynamic> F(6, nbPoints);
+	//Compute centroid
+	Vector3 center;
+	for(std::size_t i = 0; i < featDim - 1; ++i) center(i) = T(0.);
 	
-			for(int i = 0; i < nbPoints; ++i)
+	for (std::size_t i = 0; i < nbCandidates; ++i)
+		for (std::size_t f = 0; f <= 3; ++f)
+			center(f) += cloud.features(f,candidates[i]);
+	
+	for(std::size_t i = 0; i <= 3; ++i) center(i) /= T(nbCandidates);
+	
+	//Compute torque normalization
+	T Lnorm = 1.0;
+	
+	if(normalizationMethod == TorqueNormMethod::L1)
+	{
+		Lnorm = 1.0;
+	}
+	else if(normalizationMethod == TorqueNormMethod::Lavg)
+	{
+		Lnorm = 0.0;
+		for (std::size_t i = 0; i < nbCandidates; ++i)
+			Lnorm += (cloud.features.col(candidates[i]).head(3) - center).norm();
+		Lnorm /= nbCandidates;
+	}
+	else if(normalizationMethod == TorqueNormMethod::Lmax)	
+	{	
+		const Vector minValues = cloud.features.rowwise().minCoeff();
+		const Vector maxValues = cloud.features.rowwise().maxCoeff();
+		const Vector3 radii = maxValues.head(3) - minValues.head(3);
+
+		Lnorm = radii.maxCoeff() / 2.; //radii.mean() / 2.; 
+	}
+	
+	//A.3 - Compute 6x6 covariance matrix + EigenVectors
+	auto computeCovariance = [Lnorm, nbCandidates, &cloud, &center, &normals, &candidates](Matrix66 & cov) -> void {
+			//Compute F matrix, see Eq. (4)
+			Eigen::Matrix<T, 6, Eigen::Dynamic> F(6, nbCandidates);
+	
+			for(std::size_t i = 0; i < nbCandidates; ++i)
 			{
-				const Vector3 p = cloud.features.col(i).head(3) - center; // pi-c
-				const Vector3 ni = normals.col(i).head(3);
+				const Vector3 p = cloud.features.col(candidates[i]).head(3) - center; // pi-c
+				const Vector3 ni = normals.col(candidates[i]).head(3);
 				
 				//compute (1 / L) * (pi - c) x ni 
-				F.template block<3, 1>(0, i) = (1. / Lmax) * p.cross(ni);
+				F.template block<3, 1>(0, i) = (1. / Lnorm) * p.cross(ni);
 				//set ni part
 				F.template block<3, 1>(3, i) = ni;
 			}
@@ -144,7 +169,7 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		const Vector3 p = cloud.features.col(candidates[i]).head(3) - center; // pi-c
 		const Vector3 ni = normals.col(candidates[i]).head(3);
 		
-		v[i].template block<3, 1>(0, 0) = (1. / Lmax) * p.cross(ni);
+		v[i].template block<3, 1>(0, 0) = (1. / Lnorm) * p.cross(ni);
 		v[i].template block<3, 1>(3, 0) = ni;
 	}
 	
@@ -161,7 +186,7 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	{		
 		for(std::size_t i = 0; i < nbCandidates; ++i )
 		{
-			L[k].push_back(std::make_pair(candidates[i], std::fabs( v[i].dot(eigenVe.template block<6,1>(0, k)) )));
+			L[k].push_back(std::make_pair(i, std::fabs( v[i].dot(eigenVe.template block<6,1>(0, k)) )));
 		}
 		
 		L[k].sort(comp);
@@ -173,8 +198,6 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	///Add point iteratively till we got the desired number of point
 	for(std::size_t i = 0; i < nbSample; ++i)
 	{
-		std::size_t idToKeep = 0;
-		
 		//B.3 - Equally constrained all eigen vectors		
 		// magnitude contribute to t_i where i is the indice of th least contrained eigen vector
 		
@@ -190,7 +213,7 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			L[k].pop_front(); //remove already sampled point
 		
 		//Get index to keep
-		idToKeep = static_cast<std::size_t>(L[k].front().first);
+		const std::size_t idToKeep = static_cast<std::size_t>(L[k].front().first);
 		L[k].pop_front();
 			
 		sampledPoints[idToKeep] = true; //set flag to avoid resampling
@@ -199,10 +222,10 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		for (std::size_t k = 0; k < 6; ++k)
 		{
 			const T magnitude = v[idToKeep].dot(eigenVe.template block<6, 1>(0, k));
-			t[k] += magnitude * magnitude;
+			t[k] += (magnitude * magnitude);
 		}
 		
-		keepIndexes[i] = idToKeep;
+		keepIndexes[i] = candidates[idToKeep];
 	}
 
 	//TODO: evaluate performances between this solution and sorting the indexes
