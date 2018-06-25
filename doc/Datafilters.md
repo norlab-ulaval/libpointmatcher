@@ -35,7 +35,7 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 9. [Shadow Point Filter](#shadowpointhead)
 
-10. [Voxel Grid Filter](#voxelgridhead) **deprecated**
+10. [Voxel Grid Filter](#voxelgridhead) (**deprecated**)
 
 11. [Octree Grid Filter](#octreegridhead)
 
@@ -236,7 +236,10 @@ __Impact on the number of points:__ reduces number of points
 
 *IMPORTANT:* The surface normal descriptors are required in the input point cloud. 
 
-## Voxel Grid Filter **deprecated** <a name="voxelgridhead"></a>
+## Voxel Grid Filter (**deprecated**) <a name="voxelgridhead"></a>
+
+**Deprecated** : please, due to unefficient memory usage, consider switching to [Octree Grid filter](#octreegridhead).
+
 ### Description
 While, the previous filters were sub-sampling filters in that they returned a sub-set of points from the original point cloud, the voxel grid filter instead returns a point cloud with a smaller number of points which should best represent the input point cloud as a whole.
 
