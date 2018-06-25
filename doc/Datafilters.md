@@ -374,7 +374,7 @@ Three methods can be used to balance rotation and translation through torque nor
 - L=Lavg (average distance to centroid) : same contribution for _t-normals_ and _r-normals_ as torque is scale-independent
 - L=Lmax (in unit ball): more _r-normals_
 
-__Required descriptors:__  none  
+__Required descriptors:__  `normals` (see SurfaceNormalDataPointsFilter)  
 __Output descriptor:__ none  
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ reduces number of points  
