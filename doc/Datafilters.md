@@ -35,7 +35,9 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 9. [Shadow Point Filter](#shadowpointhead)
 
-10. [Voxel Grid Filter](#voxelgridhead)
+10. [Voxel Grid Filter](#voxelgridhead) **deprecated**
+
+11. [Octree Grid Filter](#octreegridhead)
 
 ### Descriptor Augmenting 
 1. [Observation Direction Filter](#obsdirectionhead)
@@ -230,7 +232,7 @@ __Impact on the number of points:__ reduces number of points
 
 *IMPORTANT:* The surface normal descriptors are required in the input point cloud. 
 
-## Voxel Grid Filter <a name="voxelgridhead"></a>
+## Voxel Grid Filter **deprecated** <a name="voxelgridhead"></a>
 ### Description
 While, the previous filters were sub-sampling filters in that they returned a sub-set of points from the original point cloud, the voxel grid filter instead returns a point cloud with a smaller number of points which should best represent the input point cloud as a whole.
 
@@ -261,6 +263,58 @@ In this example, we apply the voxel grid filter using centroid down-sampling to 
 |Figure:  Applying the voxel grid filter filter to the appartment point cloud. | Parameters used |
 |---|:---|  
 |![dir after](images/appt_voxel.png "Applying the voxel grid filter filter to a local point cloud") | vSizeX : 0.2 <br> vSizeY : 0.2 <br> vSizeZ : 0,2 <br> useCentroid : 1 |
+
+## Octree Grid Filter <a name="octreegridhead"></a>
+
+### Description
+
+The concept is quite the same as the voxel grid but use an [Octree](https://en.wikipedia.org/wiki/Octree) (3D case) or a [Quadtree](https://en.wikipedia.org/wiki/Quadtree) (2D case). The filter use the efficent spatial representation of the pointcloud by the octree to sub-sample point in each leaf.
+
+Some information about the octree structure:
+- the current implementation ensures to have either 0 or 8 (resp. 4) children for each node of the octree (resp. quadtree)
+- only leaf nodes contain data
+- data contained by the octree are currently the indexes of the points from the `DataPoint` structure
+- processing are applied by calling a callback for each node in a depth-first search ([DFS](https://en.wikipedia.org/wiki/Depth-first_search))
+- parallel build can be enabled (but only the first level is parallelized)
+- the octree can be build given two criterion: number of data by leaf node, or size of the leaf node
+
+**Remark 1:** currently the space is decomposed from the Cartesian coordinates (x,y,z), but there should be no limitation to use other dimensions (such as normal coordinates for instance).
+
+With this new structure, the `DataPointsFilter` named `OctreeGridDataPointsFilter` works as follow:
+- build an octree spatial representation of the point cloud
+- apply a process to sample in each leaf node
+
+Three sampling methods have been developed:
+- take the first point of each node (`FirstPtsSampler`)
+- take a random point of each node (_quite similar to the previous one since the point cloud is not supposed to be ordered_) (`RandomPtsSampler`)
+- compute [centroid](https://en.wikipedia.org/wiki/Centroid) of each node (_more precise but more costly_) (`CentroidSampler`)
+- compute [medoid](https://en.wikipedia.org/wiki/Medoid) of each node (_more precise but more costly_) (`MedoidSampler`)
+
+**Remark 2:** Theoretically, any process can be applied to the point cloud (sampling, feature enhancement, filtering, etc.) since the octree give a spatial representation of the point cloud (_ex: we could estimate the normal of each leaf_).
+
+__Required descriptors:__  none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
+
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|buildParallel	| flag for enabling parallel build of the octree | true (1) | 0 or 1 |
+|maxPointByNode	| number of point under which the octree stop dividing | 1 | min: 1, max: 4294967295 |
+|maxSizeByNode	| size of the bounding box under which the octree stop dividing | 0.0 | min: 0.0, max: +inf |
+|samplingMethod	| method to sample the octree: First Point (0), Random (1), Centroid (2) (more accurate but costly), Medoid (3) (more accurate but costly) | 0 | min: 0, max: 3 |
+
+### Example
+The following example uses a structured point cloud from the apartment dataset. As the pointcloud is structured we use the size criterion set to 20 cm to decompose the point cloud. In each leaf, we took the _centroid_ (bottom) or the _medoid_ (top) colored in green (output points), where the color of the pointcloud represents the indexes in the octree.
+
+|Figure:  Applying the Octree Grid Filter on a structured point cloud  | Parameters used |
+|---|:---|  
+|![octree centroid medoid](https://user-images.githubusercontent.com/38259866/41250974-80e6bee2-6d86-11e8-872f-c5687d7535d5.png "Applying the Octree Grid Filter on a structured point cloud") | maxSizeByNode : 0.2 (20cm) <br> at the top, samplingMethod : 3 (_medoid_) <br>
+at the bottom, samplingMethod : 2 (_centroid_)|
+
+**Remark 3:** using centroid can lead to false results in the ICP registration. In deed, the centroid is not guaranteed to be a point of the cloud, which induce a new spatial representation and so an offset in the registration, whereas the medoid is by construction a point of the cloud. Both produce a similar sampled point cloud, but looking closer we can see that:
+- In the top-right corner, sampled points are contained in the original point cloud
+- In the bottom-right corner, sampled points are out of the point cloud.
 
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
 
