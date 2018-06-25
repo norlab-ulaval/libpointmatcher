@@ -550,6 +550,60 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 		}
 }
 
+TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
+{
+	const size_t nbPts = 60000;
+	DP cloud = generateRandomDataPoints(nbPts);	
+	params = PM::Parameters(); 
+	
+	const size_t nbPts3D = ref3D.getNbPoints();
+	
+	PM::DataPointsFilter* covsFilter;
+	
+	//Compute normals
+	auto paramsNorm = PM::Parameters();
+			paramsNorm["knn"] = "5"; 
+			paramsNorm["epsilon"] = "0.1"; 
+			paramsNorm["keepNormals"] = "1";
+	PM::DataPointsFilter*	normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
+
+	normalFilter->inPlaceFilter(cloud);
+	
+	//Evaluate filter
+	std::vector<size_t> samples = {500, 1500, 5000, nbPts, nbPts3D};
+	for(const size_t nbSample : samples)
+	{
+		icp.readingDataPointsFilters.clear();
+		
+		params.clear();
+		params["nbSample"] = toParam(nbSample);
+
+		covsFilter = PM::get().DataPointsFilterRegistrar.create("CovarianceSamplingDataPointsFilter", params);
+
+		addFilter("SurfaceNormalDataPointsFilter", paramsNorm);
+		addFilter("CovarianceSamplingDataPointsFilter", params);
+		
+		const DP filteredCloud = covsFilter->filter(cloud);
+				
+		if (nbSample == nbPts3D)
+		{
+			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts3D);
+		}
+		else if (nbSample == nbPts)
+		{
+			//Check number of points
+			EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
+			EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+			EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
+		}
+		
+		validate3dTransformation();			
+		EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	}
+}
+
 TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 {
 	// Test with point cloud
