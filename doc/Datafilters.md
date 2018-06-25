@@ -292,10 +292,10 @@ Three sampling methods have been developed:
 
 **Remark 2:** Theoretically, any process can be applied to the point cloud (sampling, feature enhancement, filtering, etc.) since the octree give a spatial representation of the point cloud (_ex: we could estimate the normal of each leaf_).
 
-__Required descriptors:__  none
-__Output descriptor:__ none
-__Sensor assumed to be at the origin:__ no
-__Impact on the number of points:__ reduces number of points
+__Required descriptors:__  none  
+__Output descriptor:__ none  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ reduces number of points  
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -309,8 +309,7 @@ The following example uses a structured point cloud from the apartment dataset. 
 
 |Figure:  Applying the Octree Grid Filter on a structured point cloud  | Parameters used |
 |---|:---|  
-|![octree centroid medoid](https://user-images.githubusercontent.com/38259866/41250974-80e6bee2-6d86-11e8-872f-c5687d7535d5.png "Applying the Octree Grid Filter on a structured point cloud") | maxSizeByNode : 0.2 (20cm) <br> at the top, samplingMethod : 3 (_medoid_) <br>
-at the bottom, samplingMethod : 2 (_centroid_)|
+|![octree centroid medoid](https://user-images.githubusercontent.com/38259866/41250974-80e6bee2-6d86-11e8-872f-c5687d7535d5.png "Applying the Octree Grid Filter on a structured point cloud") | maxSizeByNode : 0.2 <br> _at the top_, samplingMethod : 3 (_medoid_) <br> _at the bottom_, samplingMethod : 2 (_centroid_)|
 
 **Remark 3:** using centroid can lead to false results in the ICP registration. In deed, the centroid is not guaranteed to be a point of the cloud, which induce a new spatial representation and so an offset in the registration, whereas the medoid is by construction a point of the cloud. Both produce a similar sampled point cloud, but looking closer we can see that:
 - In the top-right corner, sampled points are contained in the original point cloud
