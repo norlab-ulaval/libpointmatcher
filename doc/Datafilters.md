@@ -41,6 +41,8 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 12. [Normal Space Sampling (NSS) Filter](#nsshead)
 
+13. [Covariance Sampling (CovS) Filter](#covshead)
+
 ### Descriptor Augmenting 
 1. [Observation Direction Filter](#obsdirectionhead)
 
@@ -328,7 +330,7 @@ The algorithm works as follow:
 1. Then put all points of the data into buckets based on their normal direction; 
 1. Finally, uniformly pick points from all the buckets until the desired number of points is selected.
 
-**Remark:** a point is randomly picked in a bucket that contains multiple points. 
+**Remark:** a point is randomly picked in a bucket that contains multiple points.  
 **Remark:** the uniform sampling is based on a standard Mersenne twister engine
 
 As the normals are supposed normed, the _n_-space can be represented by polar coordinates, with:
@@ -358,6 +360,38 @@ The following example uses a structured point cloud from the apartment dataset. 
 
 where the left-white point cloud is the normal distribution of the original point cloud,
 where the right-red point cloud is the normal distribution of the sampled point cloud
+
+## Covariance Sampling Filter <a name="covshead"></a>
+
+### Description
+
+Sub-sampling filter based on Covariance Sampling (CovS) from _N. Gelfand, L. Ikemoto, S. Rusinkiewicz, and M. Levoy, “Geometrically stable sampling for the ICP algorithm,” in Fourth International Conference on 3-D Digital Imaging and Modeling, 2003. 3DIM 2003. Proceedings., 2003, pp. 260–267._ 
+
+The filter analyses the force (_t-normals_: **n**) and the torque (_r-normals_: **n x p**) to select geometrically stable points that can bind the rotational components as well as the translational. Unlike the original article, we match the point-cloud with itself (considering then an overlap of 100%).
+
+Three methods can be used to balance rotation and translation through torque normalization (L):
+- L=1 (no normalization): more _t-normals_
+- L=Lavg (average distance to centroid) : same contribution for _t-normals_ and _r-normals_ as torque is scale-independent
+- L=Lmax (in unit ball): more _r-normals_
+
+__Required descriptors:__  none  
+__Output descriptor:__ none  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ reduces number of points  
+	
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|nbSample	| number of point to select | 5000 | min: 1, max: 4294967295|
+|torqueNorm	| method for torque normalization: (0) L=1, (1) L=Lavg, (2) L=Lmax | 1 | min: 0, max: 2 |
+
+### Example
+The following example uses a structured point cloud from the apartment dataset. The following gives the selected points (output) considering the three proposed normalization methods (L=1 in blue, L=Lavg in yellow and L=Lmax in red).
+
+|Figure: Applying the CovS Filter on a structured point cloud | Parameters used |
+|---|:---|  
+|![covs](https://user-images.githubusercontent.com/38259866/41663461-7e1954bc-7471-11e8-886e-dcf7439d7f0f.png "Applying the CovS Filter on a structured point cloud") | nbSample : 25000 <br> torqueNorm : <br> 0 (blue) <br> 1 (yellow) <br> 2 (red) |
+
+**Remark:** the filter is not very well suited for large scan with uneven density, it is preferably to use it for computer vision applications, or small scan.
 
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
 
