@@ -288,13 +288,13 @@ With this new structure, the `DataPointsFilter` named `OctreeGridDataPointsFilte
 - build an octree spatial representation of the point cloud
 - apply a process to sample in each leaf node
 
-Three sampling methods have been developed:
+Four sampling methods are available:
 - take the first point of each node (`FirstPtsSampler`)
 - take a random point of each node (_quite similar to the previous one since the point cloud is not supposed to be ordered_) (`RandomPtsSampler`)
 - compute [centroid](https://en.wikipedia.org/wiki/Centroid) of each node (_more precise but more costly_) (`CentroidSampler`)
 - compute [medoid](https://en.wikipedia.org/wiki/Medoid) of each node (_more precise but more costly_) (`MedoidSampler`)
 
-**Remark 2:** Theoretically, any process can be applied to the point cloud (sampling, feature enhancement, filtering, etc.) since the octree give a spatial representation of the point cloud (_ex: we could estimate the normal of each leaf_).
+**Remark 2:** Theoretically, any process can be applied to the point cloud (sampling, feature enhancement, filtering, etc.) since the octree give an efficient spatial representation of the point cloud (_ex: we could estimate the normal of each leaf_).
 
 __Required descriptors:__  none  
 __Output descriptor:__ none  
