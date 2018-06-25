@@ -39,6 +39,8 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 11. [Octree Grid Filter](#octreegridhead)
 
+12. [Normal Space Sampling (NSS) Filter](#nsshead)
+
 ### Descriptor Augmenting 
 1. [Observation Direction Filter](#obsdirectionhead)
 
@@ -314,6 +316,48 @@ The following example uses a structured point cloud from the apartment dataset. 
 **Remark 3:** using centroid can lead to false results in the ICP registration. In deed, the centroid is not guaranteed to be a point of the cloud, which induce a new spatial representation and so an offset in the registration, whereas the medoid is by construction a point of the cloud. Both produce a similar sampled point cloud, but looking closer we can see that:
 - In the top-right corner, sampled points are contained in the original point cloud
 - In the bottom-right corner, sampled points are out of the point cloud.
+
+## Normal Space Sampling Filter <a name="nsshead"></a>
+
+### Description
+
+Sub-sampling filter based on Normal Space Sampling (NSS) from _S. Rusinkiewicz and M. Levoy, “Efficient Variants of the ICP Algorithm,” in Proceedings Third International Conference on 3-D Digital Imaging and Modeling, 2001, pp. 145–152_. 
+
+The algorithm works as follow:
+1. Construct a set of buckets in the normal-space (stocked in a `std::vector`) 
+1. Then put all points of the data into buckets based on their normal direction; 
+1. Finally, uniformly pick points from all the buckets until the desired number of points is selected.
+
+**Remark:** a point is randomly picked in a bucket that contains multiple points. 
+**Remark:** the uniform sampling is based on a standard Mersenne twister engine
+
+As the normals are supposed normed, the _n_-space can be represented by polar coordinates, with:
+- _theta_, the polar angle in [0 ; pi]
+- _phi_, the azimuthal angle in [0 ; 2pi]
+- _r_=1, the radius can be omitted
+
+Resources to better understand uniform sampling in normal-space can be found [here](http://corysimon.github.io/articles/uniformdistn-on-sphere/).
+
+__Required descriptors:__  `normals` (see SurfaceNormalDataPointsFilter)  
+__Output descriptor:__ none  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ reduces number of points  
+	
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|nbSample	| number of point to select | 5000 | min: 1, max: 4294967295|
+|seed	| seed for the random generator | 1 | min: 0, max: 4294967295 |
+|epsilon	| step of discretization for the angle spaces | PI/32 | min: PI/64, max: PI |
+
+### Example
+The following example uses a structured point cloud from the apartment dataset. The following gives the normal representation (on a sphere) of the original point cloud (we can clearly see that some areas are more populated) and the normal representation of the uniform sampled pointcloud (output). 
+
+|Figure: Applying the NSS Filter on a structured point cloud | Parameters used |
+|---|:---|  
+|![nss](https://image.ibb.co/gosJk8/nss.png "Applying the NSS Filter on a structured point cloud") | nbSample : 5000 <br> seed : 1 <br> epsilon : PI/32 |
+
+where the left-white point cloud is the normal distribution of the original point cloud,
+where the right-red point cloud is the normal distribution of the sampled point cloud
 
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
 
