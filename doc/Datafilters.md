@@ -343,6 +343,8 @@ As the normals are supposed normed, the _n_-space can be represented by polar co
 
 Resources to better understand uniform sampling in normal-space can be found [here](http://corysimon.github.io/articles/uniformdistn-on-sphere/).
 
+**Remark:** the current implementation only supports 3D point cloud  
+
 __Required descriptors:__  `normals` (see SurfaceNormalDataPointsFilter)  
 __Output descriptor:__ none  
 __Sensor assumed to be at the origin:__ no  
