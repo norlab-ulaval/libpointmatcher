@@ -22,6 +22,7 @@ PointToPlaneErrorMinimizer<T>::PointToPlaneErrorMinimizer(const Parameters& para
 	ErrorMinimizer(name(), availableParameters(), params),
 	force2D(Parametrizable::get<T>("force2D"))
 {
+	LOG_INFO_STREAM("PointMatcher::PointToPlaneErrorMinimizer - minimization will be in 2D.");
 }
 
 template<typename T>
@@ -29,6 +30,7 @@ PointToPlaneErrorMinimizer<T>::PointToPlaneErrorMinimizer(const ParametersDoc pa
 	ErrorMinimizer(name(), paramsDoc, params),
 	force2D(Parametrizable::get<T>("force2D"))
 {
+	LOG_INFO_STREAM("PointMatcher::PointToPlaneErrorMinimizer - minimization will be in 2D.");
 }
 
 
