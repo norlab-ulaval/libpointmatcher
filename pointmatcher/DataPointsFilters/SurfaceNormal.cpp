@@ -88,7 +88,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
 	typedef typename PointMatcher<T>::Matches Matches;
 	
-	using namespace utils;
+	using namespace PointMatcherSupport;
 
 	const int pointsCount(cloud.features.cols());
 	const int featDim(cloud.features.rows());

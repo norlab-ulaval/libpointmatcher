@@ -35,7 +35,13 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 9. [Shadow Point Filter](#shadowpointhead)
 
-10. [Voxel Grid Filter](#voxelgridhead)
+10. [Voxel Grid Filter](#voxelgridhead) (**deprecated**)
+
+11. [Octree Grid Filter](#octreegridhead)
+
+12. [Normal Space Sampling (NSS) Filter](#nsshead)
+
+13. [Covariance Sampling (CovS) Filter](#covshead)
 
 ### Descriptor Augmenting 
 1. [Observation Direction Filter](#obsdirectionhead)
@@ -230,7 +236,10 @@ __Impact on the number of points:__ reduces number of points
 
 *IMPORTANT:* The surface normal descriptors are required in the input point cloud. 
 
-## Voxel Grid Filter <a name="voxelgridhead"></a>
+## Voxel Grid Filter (**deprecated**) <a name="voxelgridhead"></a>
+
+**Deprecated** : please, due to unefficient memory usage, consider switching to [Octree Grid filter](#octreegridhead).
+
 ### Description
 While, the previous filters were sub-sampling filters in that they returned a sub-set of points from the original point cloud, the voxel grid filter instead returns a point cloud with a smaller number of points which should best represent the input point cloud as a whole.
 
@@ -261,6 +270,133 @@ In this example, we apply the voxel grid filter using centroid down-sampling to 
 |Figure:  Applying the voxel grid filter filter to the appartment point cloud. | Parameters used |
 |---|:---|  
 |![dir after](images/appt_voxel.png "Applying the voxel grid filter filter to a local point cloud") | vSizeX : 0.2 <br> vSizeY : 0.2 <br> vSizeZ : 0,2 <br> useCentroid : 1 |
+
+## Octree Grid Filter <a name="octreegridhead"></a>
+
+### Description
+
+The concept is quite the same as the voxel grid but use an [Octree](https://en.wikipedia.org/wiki/Octree) (3D case) or a [Quadtree](https://en.wikipedia.org/wiki/Quadtree) (2D case). The filter use the efficent spatial representation of the pointcloud by the octree to sub-sample point in each leaf.
+
+Some information about the octree structure:
+- the current implementation ensures to have either 0 or 8 (resp. 4) children for each node of the octree (resp. quadtree)
+- only leaf nodes contain data
+- data contained by the octree are currently the indexes of the points from the `DataPoint` structure
+- processing are applied by calling a callback for each node in a depth-first search ([DFS](https://en.wikipedia.org/wiki/Depth-first_search))
+- parallel build can be enabled (but only the first level is parallelized)
+- the octree can be build given two criterion: number of data by leaf node, or size of the leaf node
+
+**Remark 1:** currently the space is decomposed from the Cartesian coordinates (x,y,z), but there should be no limitation to use other dimensions (such as normal coordinates for instance).
+
+With this new structure, the `DataPointsFilter` named `OctreeGridDataPointsFilter` works as follow:
+- build an octree spatial representation of the point cloud
+- apply a process to sample in each leaf node
+
+Four sampling methods are available:
+- take the first point of each node (`FirstPtsSampler`)
+- take a random point of each node (_quite similar to the previous one since the point cloud is not supposed to be ordered_) (`RandomPtsSampler`)
+- compute [centroid](https://en.wikipedia.org/wiki/Centroid) of each node (_more precise but more costly_) (`CentroidSampler`)
+- compute [medoid](https://en.wikipedia.org/wiki/Medoid) of each node (_more precise but more costly_) (`MedoidSampler`)
+
+**Remark 2:** Theoretically, any process can be applied to the point cloud (sampling, feature enhancement, filtering, etc.) since the octree give an efficient spatial representation of the point cloud (_ex: we could estimate the normal of each leaf_).
+
+__Required descriptors:__  none  
+__Output descriptor:__ none  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ reduces number of points  
+
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|buildParallel	| flag for enabling parallel build of the octree | true (1) | 0 or 1 |
+|maxPointByNode	| number of point under which the octree stop dividing | 1 | min: 1, max: 4294967295 |
+|maxSizeByNode	| size of the bounding box under which the octree stop dividing | 0.0 | min: 0.0, max: +inf |
+|samplingMethod	| method to sample the octree: First Point (0), Random (1), Centroid (2) (more accurate but costly), Medoid (3) (more accurate but costly) | 0 | min: 0, max: 3 |
+
+### Example
+The following example uses a structured point cloud from the apartment dataset. As the pointcloud is structured we use the size criterion set to 20 cm to decompose the point cloud. In each leaf, we took the _centroid_ (bottom) or the _medoid_ (top) colored in green (output points), where the color of the pointcloud represents the indexes in the octree.
+
+|Figure:  Applying the Octree Grid Filter on a structured point cloud  | Parameters used |
+|---|:---|  
+|![octree centroid medoid](https://user-images.githubusercontent.com/38259866/41250974-80e6bee2-6d86-11e8-872f-c5687d7535d5.png "Applying the Octree Grid Filter on a structured point cloud") | maxSizeByNode : 0.2 <br> _at the top_, samplingMethod : 3 (_medoid_) <br> _at the bottom_, samplingMethod : 2 (_centroid_)|
+
+**Remark 3:** using centroid can lead to false results in the ICP registration. In deed, the centroid is not guaranteed to be a point of the cloud, which induce a new spatial representation and so an offset in the registration, whereas the medoid is by construction a point of the cloud. Both produce a similar sampled point cloud, but looking closer we can see that:
+- In the top-right corner, sampled points are contained in the original point cloud
+- In the bottom-right corner, sampled points are out of the point cloud.
+
+## Normal Space Sampling Filter <a name="nsshead"></a>
+
+### Description
+
+Sub-sampling filter based on Normal Space Sampling (NSS) from _S. Rusinkiewicz and M. Levoy, “Efficient Variants of the ICP Algorithm,” in Proceedings Third International Conference on 3-D Digital Imaging and Modeling, 2001, pp. 145–152_. 
+
+The algorithm works as follow:
+1. Construct a set of buckets in the normal-space (stocked in a `std::vector`) 
+1. Then put all points of the data into buckets based on their normal direction; 
+1. Finally, uniformly pick points from all the buckets until the desired number of points is selected.
+
+**Remark:** a point is randomly picked in a bucket that contains multiple points.  
+**Remark:** the uniform sampling is based on a standard Mersenne twister engine
+
+As the normals are supposed normed, the _n_-space can be represented by polar coordinates, with:
+- _theta_, the polar angle in [0 ; pi]
+- _phi_, the azimuthal angle in [0 ; 2pi]
+- _r_=1, the radius can be omitted
+
+Resources to better understand uniform sampling in normal-space can be found [here](http://corysimon.github.io/articles/uniformdistn-on-sphere/).
+
+**Remark:** the current implementation only supports 3D point cloud  
+
+__Required descriptors:__  `normals` (see SurfaceNormalDataPointsFilter)  
+__Output descriptor:__ none  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ reduces number of points  
+	
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|nbSample	| number of point to select | 5000 | min: 1, max: 4294967295|
+|seed	| seed for the random generator | 1 | min: 0, max: 4294967295 |
+|epsilon	| step of discretization for the angle spaces | PI/32 | min: PI/64, max: PI |
+
+### Example
+The following example uses a structured point cloud from the apartment dataset. The following gives the normal representation (on a sphere) of the original point cloud (we can clearly see that some areas are more populated) and the normal representation of the uniform sampled pointcloud (output). 
+
+|Figure: Applying the NSS Filter on a structured point cloud | Parameters used |
+|---|:---|  
+|![nss](https://image.ibb.co/gosJk8/nss.png "Applying the NSS Filter on a structured point cloud") | nbSample : 5000 <br> seed : 1 <br> epsilon : PI/32 |
+
+where the left-white point cloud is the normal distribution of the original point cloud,
+where the right-red point cloud is the normal distribution of the sampled point cloud
+
+## Covariance Sampling Filter <a name="covshead"></a>
+
+### Description
+
+Sub-sampling filter based on Covariance Sampling (CovS) from _N. Gelfand, L. Ikemoto, S. Rusinkiewicz, and M. Levoy, “Geometrically stable sampling for the ICP algorithm,” in Fourth International Conference on 3-D Digital Imaging and Modeling, 2003. 3DIM 2003. Proceedings., 2003, pp. 260–267._ 
+
+The filter analyses the force (_t-normals_: **n**) and the torque (_r-normals_: **n x p**) to select geometrically stable points that can bind the rotational components as well as the translational. Unlike the original article, we match the point-cloud with itself (considering then an overlap of 100%).
+
+Three methods can be used to balance rotation and translation through torque normalization (L):
+- L=1 (no normalization): more _t-normals_
+- L=Lavg (average distance to centroid) : same contribution for _t-normals_ and _r-normals_ as torque is scale-independent
+- L=Lmax (in unit ball): more _r-normals_
+
+__Required descriptors:__  `normals` (see SurfaceNormalDataPointsFilter)  
+__Output descriptor:__ none  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ reduces number of points  
+	
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|nbSample	| number of point to select | 5000 | min: 1, max: 4294967295|
+|torqueNorm	| method for torque normalization: (0) L=1, (1) L=Lavg, (2) L=Lmax | 1 | min: 0, max: 2 |
+
+### Example
+The following example uses a structured point cloud from the apartment dataset. The following gives the selected points (output) considering the three proposed normalization methods (L=1 in blue, L=Lavg in yellow and L=Lmax in red).
+
+|Figure: Applying the CovS Filter on a structured point cloud | Parameters used |
+|---|:---|  
+|![covs](https://user-images.githubusercontent.com/38259866/41663461-7e1954bc-7471-11e8-886e-dcf7439d7f0f.png "Applying the CovS Filter on a structured point cloud") | nbSample : 25000 <br> torqueNorm : <br> 0 (blue) <br> 1 (yellow) <br> 2 (red) |
+
+**Remark:** the filter is not very well suited for large scan with uneven density, it is preferably to use it for computer vision applications, or small scan.
 
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
 

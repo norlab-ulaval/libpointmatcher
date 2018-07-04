@@ -343,7 +343,7 @@ template<typename T>
 void GestaltDataPointsFilter<T>::fuseRange(
 	BuildData& data, DataPoints& input, const int first, const int last) const
 {
-  using namespace utils;
+  using namespace PointMatcherSupport;
   
   typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 

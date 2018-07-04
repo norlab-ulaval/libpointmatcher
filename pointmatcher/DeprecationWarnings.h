@@ -1,14 +1,11 @@
 // kate: replace-tabs off; indent-width 4; indent-mode normal
 // vim: ts=4:sw=4:noexpandtab
 /*
-
-Copyright (c) 2010--2018,
+Copyright (c) 2010--2012,
 François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
 You can contact the authors at <f dot pomerleau at gmail dot com> and
 <stephane at magnenat dot net>
-
 All rights reserved.
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
     * Redistributions of source code must retain the above copyright
@@ -19,7 +16,6 @@ modification, are permitted provided that the following conditions are met:
     * Neither the name of the <organization> nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,42 +26,23 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 */
-#pragma once
 
-#include "PointMatcher.h"
+#ifndef __POINTMATCHER_DEPRECATION_WARNINGS_H
+#define __POINTMATCHER_DEPRECATION_WARNINGS_H
 
-//! Maximum number of points
-template<typename T>
-struct MaxPointCountDataPointsFilter: public PointMatcher<T>::DataPointsFilter
-{
-	typedef PointMatcherSupport::Parametrizable Parametrizable;
-	typedef PointMatcherSupport::Parametrizable P;
-	typedef Parametrizable::Parameters Parameters;
-	typedef Parametrizable::ParameterDoc ParameterDoc;
-	typedef Parametrizable::ParametersDoc ParametersDoc;
-	typedef Parametrizable::InvalidParameter InvalidParameter;
-	
-	typedef typename PointMatcher<T>::DataPoints DataPoints;
-	
-	inline static const std::string description()
-	{
-		return "Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above maxCount. Based on \\cite{Masuda1996Random}";
-	}
-	inline static const ParametersDoc availableParameters()
-	{
-		return boost::assign::list_of<ParameterDoc>
-		( "seed", "srand seed", "1", "0", "2147483647", &P::Comp<size_t> )
-		( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<size_t> )
-		;
-	}
 
-	const size_t maxCount;
-	size_t seed;
+#if __cplusplus >= 201402L
+#define PM_DEPRECATED(msg) [[deprecated(msg)]]
+#define PM_DEPRECATION_SUPPORTED
+#elif defined(__GNUC__)
+#define PM_DEPRECATED(msg) __attribute__((deprecated))
+#define PM_DEPRECATION_SUPPORTED
+#elif defined(_MSC_VER)
+#define PM_DEPRECATED(msg) __declspec(deprecated)
+#define PM_DEPRECATION_SUPPORTED
+#else
+#define PM_DEPRECATED(msg)
+#endif
 
-	MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
-	virtual ~MaxPointCountDataPointsFilter() {};
-	virtual DataPoints filter(const DataPoints& input);
-	virtual void inPlaceFilter(DataPoints& cloud);
-};
+#endif /* __POINTMATCHER_DEPRECATION_WARNINGS_H */

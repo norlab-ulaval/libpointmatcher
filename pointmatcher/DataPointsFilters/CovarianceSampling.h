@@ -36,10 +36,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
-//! Maximum number of points
 template<typename T>
-struct MaxPointCountDataPointsFilter: public PointMatcher<T>::DataPointsFilter
+struct CovarianceSamplingDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
+  	// Type definitions
+	typedef PointMatcher<T> PM;
+	typedef typename PM::DataPoints DataPoints;
+	typedef typename PM::DataPointsFilter DataPointsFilter;
+
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
@@ -47,25 +51,46 @@ struct MaxPointCountDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
 	
-	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename DataPoints::Index Index;
+
+	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
 	
+	typedef typename PointMatcher<T>::Vector Vector;
+	typedef typename PointMatcher<T>::Matrix Matrix;	
+	
+	using Matrix66 = Eigen::Matrix<T, 6, 6>;
+	using Vector6  = Eigen::Matrix<T, 6, 1>;
+	using Vector3  = Eigen::Matrix<T, 3, 1>;
+
 	inline static const std::string description()
 	{
-		return "Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above maxCount. Based on \\cite{Masuda1996Random}";
+		return "Covariance Sampling (CovS) \\cite{Gelfand2003}. Performs stability analysis to select geometrically stable points that can bind the rotational components as well as the translational. Uses an estimate of the covariance matrix to detect pair of points which will not be constrained.";
 	}
+
 	inline static const ParametersDoc availableParameters()
 	{
 		return boost::assign::list_of<ParameterDoc>
-		( "seed", "srand seed", "1", "0", "2147483647", &P::Comp<size_t> )
-		( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<size_t> )
+		( "nbSample", "Number of point to select.", "5000", "1", "4294967295", &P::Comp<std::size_t> )
+		( "torqueNorm", "Method for torque normalization: (0) L=1 (no normalization, more t-normals), (1) L=Lavg (average distance, torque is scale-independent), (2) L=Lmax (scale in unit ball, more r-normals)", "1", "0", "2", &P::Comp<std::uint8_t> )
 		;
 	}
 
-	const size_t maxCount;
-	size_t seed;
+	enum TorqueNormMethod : std::uint8_t { L1=0, Lavg=1, Lmax=2 };
 
-	MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
-	virtual ~MaxPointCountDataPointsFilter() {};
+	std::size_t nbSample;
+	TorqueNormMethod normalizationMethod;
+	
+	//Ctor, uses parameter interface
+	CovarianceSamplingDataPointsFilter(const Parameters& params = Parameters());
+	//CovarianceSamplingDataPointsFilter();
+	
+	//Dtor
+	virtual ~CovarianceSamplingDataPointsFilter() {};
+
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
+
+	static T computeConditionNumber(const Matrix66 &cov);
 };
+	
+

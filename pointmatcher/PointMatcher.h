@@ -59,6 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //#include <cstdint>
 #include <boost/cstdint.hpp>
 
+#include "DeprecationWarnings.h"
 #include "Parametrizable.h"
 #include "Registrar.h"
  
@@ -277,6 +278,7 @@ struct PointMatcher
 		DataPoints createSimilarEmpty() const;
 		DataPoints createSimilarEmpty(Index pointCount) const;
 		void setColFrom(Index thisCol, const DataPoints& that, Index thatCol);
+		void swapCols(Index iCol,Index jCol);
 		
 		// methods related to features
 		void allocateFeature(const std::string& name, const unsigned dim);
@@ -732,8 +734,20 @@ struct PointMatcher
 		bool hasMap() const;
 		bool setMap(const DataPoints& map);
 		void clearMap();
+		PM_DEPRECATED("Use getPrefilteredInternalMap instead. "
+			            "Function now always returns map with filter chain applied. "
+			            "This may have altered your program behavior."
+		              "Reasons for this stated here and in associated PR: "
+		              "https://github.com/ethz-asl/libpointmatcher/issues/209.")
 		const DataPoints& getInternalMap() const;
+		const DataPoints& getPrefilteredInternalMap() const;
+		PM_DEPRECATED("Use getPrefilteredMap instead. "
+									"Function now always returns map with filter chain applied. "
+			            "This may have altered your program behavior."
+			            "Reasons for this stated here and in associated PR: "
+			            "https://github.com/ethz-asl/libpointmatcher/issues/209")
 		const DataPoints getMap() const;
+		const DataPoints getPrefilteredMap() const;
 		
 	protected:
 		DataPoints mapPointCloud; //!< point cloud of the map, always in global frame (frame of first point cloud)

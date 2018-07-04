@@ -57,6 +57,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/CutAtDescriptorThreshold.h"
 #include "DataPointsFilters/Elipsoids.h"
 #include "DataPointsFilters/Gestalt.h"
+#include "DataPointsFilters/OctreeGrid.h"
+#include "DataPointsFilters/NormalSpace.h"
+#include "DataPointsFilters/CovarianceSampling.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -82,6 +85,9 @@ struct DataPointsFiltersImpl
 	typedef ::CutAtDescriptorThresholdDataPointsFilter<T> CutAtDescriptorThresholdDataPointsFilter;
 	typedef ::ElipsoidsDataPointsFilter<T> ElipsoidsDataPointsFilter;
 	typedef ::GestaltDataPointsFilter<T> GestaltDataPointsFilter;
+	typedef ::OctreeGridDataPointsFilter<T> OctreeGridDataPointsFilter;
+	typedef ::NormalSpaceDataPointsFilter<T> NormalSpaceDataPointsFilter;
+	typedef ::CovarianceSamplingDataPointsFilter<T> CovarianceSamplingDataPointsFilter;
 
 }; // DataPointsFiltersImpl
 

@@ -36,10 +36,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
-//! Maximum number of points
 template<typename T>
-struct MaxPointCountDataPointsFilter: public PointMatcher<T>::DataPointsFilter
+struct NormalSpaceDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
+  	// Type definitions
+	typedef PointMatcher<T> PM;
+	typedef typename PM::DataPoints DataPoints;
+	typedef typename PM::DataPointsFilter DataPointsFilter;
+
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
@@ -47,25 +51,43 @@ struct MaxPointCountDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
 	
-	typedef typename PointMatcher<T>::DataPoints DataPoints;
-	
+	typedef typename DataPoints::Index Index;
+
+	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
+
 	inline static const std::string description()
 	{
-		return "Conditional subsampling. This filter reduces the size of the point cloud by randomly dropping points if their number is above maxCount. Based on \\cite{Masuda1996Random}";
+		return "Normal Space Sampling (NSS) \\cite{Rusinkiewicz2001}. Construct a set of buckets in the normal-space, then put all points of the data into buckets based on their normal direction; Finally, uniformly pick points from all the buckets until the desired number of points is selected. **Required** to compute normals as pre-step.";
 	}
+
 	inline static const ParametersDoc availableParameters()
 	{
 		return boost::assign::list_of<ParameterDoc>
-		( "seed", "srand seed", "1", "0", "2147483647", &P::Comp<size_t> )
-		( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<size_t> )
+		( "nbSample", "Number of point to select.", "5000", "1", "4294967295", &P::Comp<std::size_t> )
+		( "seed", "Seed for the random generator.", "1", "0", "4294967295", &P::Comp<std::size_t> )
+		( "epsilon", "Step of discretization for the angle spaces", "0.09817477042" /* PI/32 */, "0.04908738521" /* PI/64 */, "3.14159265359" /* PI */, &P::Comp<T> )
 		;
 	}
 
-	const size_t maxCount;
-	size_t seed;
+public:
+	const std::size_t nbSample;
+	const std::size_t seed;
+	const T epsilon;
+	
+	//Ctor, uses parameter interface
+	NormalSpaceDataPointsFilter(const Parameters& params = Parameters());
+	//NormalSpaceDataPointsFilter();
+	
+	//Dtor
+	virtual ~NormalSpaceDataPointsFilter() {};
 
-	MaxPointCountDataPointsFilter(const Parameters& params = Parameters());
-	virtual ~MaxPointCountDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
+
+private:
+	inline std::size_t bucketIdx(T theta, T phi) const;
+	
+	const std::size_t nbBucket;
 };
+	
+

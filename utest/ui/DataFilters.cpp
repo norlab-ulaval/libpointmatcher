@@ -41,10 +41,8 @@ public:
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
 
-	DP generateRandomDataPoints()
+	DP generateRandomDataPoints(int nbPoints = 100)
 	{
-
-		const int nbPoints = 100;
 		const int dimFeatures = 4;
 		const int dimDescriptors = 3;
 		const int dimTime = 2;
@@ -390,6 +388,224 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 	}
 }
 
+TEST_F(DataFilterTest, MaxPointCountDataPointsFilter)
+{
+	DP cloud = ref3D;
+	
+	const size_t maxCount = 1000;
+		
+	params = PM::Parameters(); 
+	params["seed"] = "42";
+	params["maxCount"] = toParam(maxCount);
+	
+	PM::DataPointsFilter* maxPtsFilter = 
+			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
+
+	DP filteredCloud = maxPtsFilter->filter(cloud);
+	
+	//Check number of points
+	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+	
+	EXPECT_EQ(filteredCloud.getNbPoints(), maxCount);
+	
+	//Same seed should result same filtered cloud
+	DP filteredCloud2 = maxPtsFilter->filter(cloud);
+	
+	EXPECT_TRUE(filteredCloud == filteredCloud2);
+	
+	//Different seeds should not result same filtered cloud but same number
+	params.clear();
+	params["seed"] = "1";
+	params["maxCount"] = toParam(maxCount);
+	
+	PM::DataPointsFilter* maxPtsFilter2 = 
+			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
+			
+	DP filteredCloud3 = maxPtsFilter2->filter(cloud);
+	
+	EXPECT_FALSE(filteredCloud3 == filteredCloud2);
+	
+	EXPECT_EQ(filteredCloud3.getNbPoints(), maxCount);
+	
+	EXPECT_EQ(filteredCloud3.getNbPoints(), filteredCloud2.getNbPoints());
+	EXPECT_EQ(filteredCloud3.getDescriptorDim(), filteredCloud2.getDescriptorDim());
+	EXPECT_EQ(filteredCloud3.getTimeDim(), filteredCloud2.getTimeDim());
+	
+	//Validate transformation
+	icp.readingDataPointsFilters.clear();
+	addFilter("MaxPointCountDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+}
+
+TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
+{
+	const unsigned int nbPts = 60000;
+	const DP cloud = generateRandomDataPoints(nbPts);	
+	params = PM::Parameters(); 
+
+	PM::DataPointsFilter* octreeFilter;
+	
+	for(const int meth : {0,1,2,3})
+		for(const size_t maxData : {1,5})
+			for(const float maxSize : {0.,0.05})
+			{
+				params.clear();
+				params["maxPointByNode"] = toParam(maxData);
+				params["maxSizeByNode"] = toParam(maxSize);
+				params["samplingMethod"] = toParam(meth);
+				params["buildParallel"] = "1";
+	
+				octreeFilter = PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
+
+				const DP filteredCloud = octreeFilter->filter(cloud);
+			
+				if(maxData==1 and maxSize==0.)
+				{
+					// 1/pts by octants + validate parallel build
+					// the number of point should not change
+					// the sampling methods should not change anything
+					//Check number of points
+					EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
+					EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+					EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+	
+					EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
+				}
+				else
+				{	
+					//Check number of points
+					EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+				}
+				//Validate transformation
+				icp.readingDataPointsFilters.clear();
+				addFilter("OctreeGridDataPointsFilter", params);
+				validate2dTransformation();
+				validate3dTransformation();
+			}
+}
+
+TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
+{
+	const size_t nbPts = 60000;
+	DP cloud = generateRandomDataPoints(nbPts);	
+	params = PM::Parameters(); 
+	
+	//const size_t nbPts2D = ref2D.getNbPoints();
+	const size_t nbPts3D = ref3D.getNbPoints();
+	
+	PM::DataPointsFilter* nssFilter;
+	
+	//Compute normals
+	auto paramsNorm = PM::Parameters();
+			paramsNorm["knn"] = "5"; 
+			paramsNorm["epsilon"] = "0.1"; 
+			paramsNorm["keepNormals"] = "1";
+	PM::DataPointsFilter*	normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
+
+	normalFilter->inPlaceFilter(cloud);
+	
+	//Evaluate filter
+	std::vector<size_t> samples = {/* 2*nbPts2D/3, nbPts2D,*/ 1500, 5000, nbPts, nbPts3D};
+	for(const float epsilon : {M_PI/6., M_PI/32., M_PI/64.})
+		for(const size_t nbSample : samples)
+		{
+			icp.readingDataPointsFilters.clear();
+			
+			params.clear();
+			params["epsilon"] = toParam(epsilon);
+			params["nbSample"] = toParam(nbSample);
+
+			nssFilter = PM::get().DataPointsFilterRegistrar.create("NormalSpaceDataPointsFilter", params);
+
+			addFilter("SurfaceNormalDataPointsFilter", paramsNorm);
+			addFilter("NormalSpaceDataPointsFilter", params);
+			
+			const DP filteredCloud = nssFilter->filter(cloud);
+					
+			/*
+			if(nbSample <= nbPts2D)
+			{
+				validate2dTransformation();
+				EXPECT_LE(filteredCloud.getNbPoints(), nbPts2D);
+				continue;
+			}
+			else if (nbSample == nbPts3D)
+			{
+				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts3D);
+			}
+			else */ 
+			if (nbSample == nbPts)
+			{
+				//Check number of points
+				EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
+				EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+				EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
+			}
+			
+			validate3dTransformation();			
+			EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
+		}
+}
+
+TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
+{
+	const size_t nbPts = 60000;
+	DP cloud = generateRandomDataPoints(nbPts);	
+	params = PM::Parameters(); 
+	
+	const size_t nbPts3D = ref3D.getNbPoints();
+	
+	PM::DataPointsFilter* covsFilter;
+	
+	//Compute normals
+	auto paramsNorm = PM::Parameters();
+			paramsNorm["knn"] = "5"; 
+			paramsNorm["epsilon"] = "0.1"; 
+			paramsNorm["keepNormals"] = "1";
+	PM::DataPointsFilter*	normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
+
+	normalFilter->inPlaceFilter(cloud);
+	
+	//Evaluate filter
+	std::vector<size_t> samples = {500, 1500, 5000, nbPts, nbPts3D};
+	for(const size_t nbSample : samples)
+	{
+		icp.readingDataPointsFilters.clear();
+		
+		params.clear();
+		params["nbSample"] = toParam(nbSample);
+
+		covsFilter = PM::get().DataPointsFilterRegistrar.create("CovarianceSamplingDataPointsFilter", params);
+
+		addFilter("SurfaceNormalDataPointsFilter", paramsNorm);
+		addFilter("CovarianceSamplingDataPointsFilter", params);
+		
+		const DP filteredCloud = covsFilter->filter(cloud);
+				
+		if (nbSample == nbPts3D)
+		{
+			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts3D);
+		}
+		else if (nbSample == nbPts)
+		{
+			//Check number of points
+			EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
+			EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+			EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
+		}
+		
+		validate3dTransformation();			
+		EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	}
+}
+
 TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 {
 	// Test with point cloud
@@ -513,4 +729,3 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 		}
 	}
 }
-
