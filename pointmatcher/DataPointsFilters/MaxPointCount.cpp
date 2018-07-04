@@ -44,7 +44,7 @@ MaxPointCountDataPointsFilter<T>::MaxPointCountDataPointsFilter(const Parameters
 {
 	try 
 	{
-		seed = Parametrizable::get<size_t>("seed");
+		seed = this->template get<size_t>("seed");
 	} 
 	catch (const InvalidParameter& e) 
 	{

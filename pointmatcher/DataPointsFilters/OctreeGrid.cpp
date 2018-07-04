@@ -292,7 +292,7 @@ OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& para
 {
 	try 
 	{
-		const int sm = Parametrizable::get<int>("samplingMethod");
+		const int sm = this->template get<int>("samplingMethod");
 		samplingMethod = SamplingMethod(sm);
 	}
 	catch (const InvalidParameter& e) 

@@ -52,7 +52,7 @@ CovarianceSamplingDataPointsFilter<T>::CovarianceSamplingDataPointsFilter(const 
 {
 	try 
 	{
-		const std::uint8_t tnm = Parametrizable::get<std::uint8_t>("torqueNorm");
+		const std::uint8_t tnm = this->template get<std::uint8_t>("torqueNorm");
 		normalizationMethod = TorqueNormMethod(tnm);
 	}
 	catch (const InvalidParameter& e) 
