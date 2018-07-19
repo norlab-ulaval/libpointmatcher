@@ -37,4 +37,16 @@ std::istream & safeGetLine( std::istream& is, std::string & t)
    }
 }
 
+std::experimental::filesystem::path uniqueName(const std::string &name) {
+    std::experimental::filesystem::path possibleName{name};
+    auto stem = possibleName.stem().string();
+    auto ext = possibleName.extension().string();
+    for (int i=1; std::experimental::filesystem::exists(possibleName); ++i) {
+        std::ostringstream fn;
+        fn << "(" << i << ")" << stem << ext;
+        possibleName.replace_filename(fn.str());
+    }
+    return possibleName;
+}
+
 }// namespace PointMatcherSupport
