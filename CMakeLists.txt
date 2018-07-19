@@ -379,6 +379,7 @@ target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher
 add_definitions(-Wall)
 #target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
 target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
+target_link_libraries(pointmatcher stdc++fs)
 
 if(EXTRA_DEPS)
 	add_dependencies(pointmatcher ${EXTRA_DEPS})
