@@ -772,7 +772,8 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 {
 	ostringstream oss;
 	oss << baseFileName << "-" << role << "-" << iterationNumber << ".vtk";
-	ofstream* file = new ofstream(oss.str().c_str());
+    std::string finalFileName = PointMatcherSupport::uniqueName(oss.str());
+	ofstream* file = new ofstream(finalFileName.c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	return file;
