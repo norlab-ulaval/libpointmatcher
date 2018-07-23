@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <stdexcept>
 #include <stdio.h>
-#include <experimental/filesystem>
 
 namespace PointMatcherSupport
 {
@@ -157,7 +156,7 @@ std::istream & readVtkData(std::string dataType, bool readBinary, MatrixRef into
 
 //! Replaces getline for handling windows style CR/LF line endings
 std::istream & safeGetLine( std::istream& is, std::string & t);
-std::experimental::filesystem::path uniqueName(const std::string &name);
+std::string uniqueName(const std::string &name);
 
 
 } // PointMatcherSupport

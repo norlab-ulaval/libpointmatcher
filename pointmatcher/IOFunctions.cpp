@@ -1,4 +1,5 @@
 #include "IOFunctions.h"
+#include "boost/filesystem.hpp"
 
 namespace PointMatcherSupport
 {
@@ -37,16 +38,16 @@ std::istream & safeGetLine( std::istream& is, std::string & t)
    }
 }
 
-std::experimental::filesystem::path uniqueName(const std::string &name) {
-    std::experimental::filesystem::path possibleName{name};
-    auto stem = possibleName.stem().string();
-    auto ext = possibleName.extension().string();
-    for (int i=1; std::experimental::filesystem::exists(possibleName); ++i) {
-        std::ostringstream fn;
-        fn << "(" << i << ")" << stem << ext;
-        possibleName.replace_filename(fn.str());
+std::string uniqueName(const std::string &name) {
+    boost::filesystem::path possibleName(name);
+
+    for (int i=1; boost::filesystem::exists(possibleName); ++i) {
+        std::string fn = "(";
+        fn += std::to_string(i) + ")" + name;
+        possibleName = fn;
     }
-    return possibleName;
+
+    return possibleName.string();
 }
 
 }// namespace PointMatcherSupport

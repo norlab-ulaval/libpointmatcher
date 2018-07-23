@@ -727,16 +727,16 @@ void InspectorsImpl<T>::VTKFileInspector::init()
 {
 
 	if (!bDumpIterationInfo) return;
- 
+
 	ostringstream oss;
 	oss << baseFileName << "-iterationInfo.csv";
 	//std::cerr << "writing to " << oss.str() << std::endl;
 	LOG_INFO_STREAM("writing to " << oss.str());
 
-	this->streamIter = new ofstream(oss.str().c_str());
+	this->streamIter = new ofstream(this->dumpPath + oss.str().c_str());
 	if (this->streamIter->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
-	
+
 }
 
 template<typename T>
@@ -761,7 +761,7 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 
 	//std::cerr << "writing to " << oss.str() << std::endl;
 	LOG_INFO_STREAM("writing to " << oss.str());
-	ofstream* file = new ofstream(oss.str().c_str(), std::ios::binary);
+	ofstream* file = new ofstream(this->dumpPath + oss.str().c_str(), std::ios::binary);
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	return file;
@@ -772,8 +772,15 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 {
 	ostringstream oss;
 	oss << baseFileName << "-" << role << "-" << iterationNumber << ".vtk";
-    std::string finalFileName = PointMatcherSupport::uniqueName(oss.str());
-	ofstream* file = new ofstream(finalFileName.c_str());
+  std::string finalFileName = PointMatcherSupport::uniqueName(oss.str());
+	//std::cout << "finalFileName = " << finalFileName << endl;
+	if (this->dumpPath.back() != '/') {
+		this->dumpPath += "/";
+	}
+
+	std::cout << "Dump Full Path: " << this->dumpPath << std::endl;
+
+	ofstream* file = new ofstream(this->dumpPath + finalFileName.c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	return file;
