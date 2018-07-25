@@ -142,7 +142,9 @@ InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string&
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
 	bDumpReference(Parametrizable::get<bool>("dumpReference")),
-	bWriteBinary(Parametrizable::get<bool>("writeBinary"))
+  bWriteBinary(Parametrizable::get<bool>("writeBinary")),
+  bDumpReferenceOnlyFirstIter(Parametrizable::get<bool>("dumpReferenceOnlyFirstIter")),
+  isFirstIter(true)
 {
 }
 
@@ -404,7 +406,10 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 		closeStream(streamRead);
 	}
 	
-	if (bDumpReference){
+  if (bDumpReference &&
+        ((bDumpReferenceOnlyFirstIter && isFirstIter) || !bDumpReferenceOnlyFirstIter)
+      ){
+    isFirstIter = false;
 		ostream* streamRef(openStream("reference", iterationNumber));
 		dumpDataPoints(filteredReference, *streamRef);
 		closeStream(streamRef);
@@ -718,7 +723,9 @@ InspectorsImpl<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
 	bDumpIterationInfo(Parametrizable::get<bool>("dumpIterationInfo")),
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
-	bDumpReference(Parametrizable::get<bool>("dumpReference"))
+  bDumpReference(Parametrizable::get<bool>("dumpReference")),
+  bDumpReferenceOnlyFirstIter(Parametrizable::get<bool>("dumpReferenceOnlyFirstIter")),
+  isFirstIter(true)
 {
 }
 

@@ -120,6 +120,8 @@ struct InspectorsImpl
 		const bool bDumpDataLinks;
 		const bool bDumpReading;
 		const bool bDumpReference;
+    const bool bDumpReferenceOnlyFirstIter;
+    bool isFirstIter;
 		const bool bWriteBinary;
 
 	public:
@@ -172,6 +174,7 @@ struct InspectorsImpl
 				{"dumpReading", "dump the reading cloud at each iteration", "0"},
 				{"dumpReference", "dump the reference cloud at each iteration", "0"},
 				{"writeBinary", "write binary VTK files", "0"}
+				{"dumpReferenceOnlyFirstIter", "dump the reference cloud only for the first iteration", "0"}
 			};
 		}
 		
@@ -180,11 +183,13 @@ struct InspectorsImpl
 		const bool bDumpDataLinks;
 		const bool bDumpReading;
 		const bool bDumpReference;
+    const bool bDumpReferenceOnlyFirstIter;
 		
 	protected:
 		virtual std::ostream* openStream(const std::string& role);
 		virtual std::ostream* openStream(const std::string& role, const size_t iterationCount);
 		virtual void closeStream(std::ostream* stream);
+    bool isFirstIter;
 		
 	public:
 		VTKFileInspector(const Parameters& params = Parameters());
