@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "PointMatcher.h"
+#include <array>
 
 template<typename T>
 struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilter
@@ -60,7 +61,11 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 	
 	inline static const std::string description()
 	{
-		return "description";
+		return "Remove the bias induced by the angle of incidence\n\n"
+			   "Required descriptors: incidenceAngles, observationDirections.\n"
+		       "Produced descritors:  none.\n"
+			   "Altered descriptors:  none.\n"
+			   "Altered features:     none.";
 	}
 	
 	inline static const ParametersDoc availableParameters()
@@ -81,6 +86,41 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 
+
 private:
+	const T tau=50e-9;//s - pulse length
+	const T pulse_intensity=0.39;//w.m^-2 - pulse intensity
+	const T lambda_light=905e-9;//m - wavelength of the laser
+	const T c = 299792458.0; // m.s^-1 - celerity of light
+
+	std::array<T,4> getCoefficients(const T depth, const T theta, const T aperture);
+	T diffDist(const T depth, const T theta, const T aperture);
+	T ratioCurvature(const T depth, const T theta, const T aperture);
+
+	struct SensorParameters{
+	private:
+		SensorParameters(T aperture_, T k1_, T k2_):
+			aperture{aperture_},
+			k1{k1_},
+			k2{k2_}
+		{
+		
+		}
+	public:
+		const T aperture;
+		const T k1;
+		const T k2;
 	
+		static const SensorParameters LMS_1xx;
+		static const SensorParameters HDL_32E;
+	};
 };
+
+template<typename T>
+const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::LMS_1xx =
+	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(1.413717e-2, 2.52773563, 0.007084910);
+
+template<typename T>
+const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::HDL_32E =
+	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(2.967060e-4, 1.54987849, 0.00359711);
+

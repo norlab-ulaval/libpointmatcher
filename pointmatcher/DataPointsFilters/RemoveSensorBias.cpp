@@ -41,6 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/format.hpp>
 
+#include <boost/units/systems/si/codata/universal_constants.hpp>
+
 
 // RemoveSensorBiasDataPointsFilter
 // Constructor
@@ -68,31 +70,111 @@ template<typename T>
 void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
 	//Check if there is normals info
-	if (!cloud.descriptorExists("normals"))
-		throw InvalidField("RemoveSensorBiasDataPointsFilter: Error, cannot find normals in descriptors.");
+	if (!cloud.descriptorExists("incidenceAngles"))
+		throw InvalidField("RemoveSensorBiasDataPointsFilter: Error, cannot find incidence angles in descriptors.");
 	//Check if there is normals info
 	if (!cloud.descriptorExists("observationDirections"))
 		throw InvalidField("RemoveSensorBiasDataPointsFilter: Error, cannot find observationDirections in descriptors.");
 		
-	const auto& normals = cloud.getDescriptorViewByName("normals");
+	const auto& incidenceAngles = cloud.getDescriptorViewByName("incidenceAngles");
 	const auto& observationDirections = cloud.getDescriptorViewByName("observationDirections");
+
+	T aperture;
+	T k1,k2;
 
 	switch(sensorType)
 	{
 		case LMS_1XX: 
 		{
-			/* do something */
+			aperture = SensorParameters::LMS_1xx.aperture;
+			k1 = SensorParameters::LMS_1xx.k1;
+			k2 = SensorParameters::LMS_1xx.k2;
 			break;
 		}
 		case HDL_32E: 
 		{
-			/* do something */
+			aperture = SensorParameters::HDL_32E.aperture;
+			k1 = SensorParameters::HDL_32E.k1;
+			k2 = SensorParameters::HDL_32E.k2;
 			break;
 		}
 		default:
 		throw InvalidParameter(
 			(boost::format("RemoveSensorBiasDataPointsFilter: Error, cannot remove bias for sensorType id %1% .") % sensorType).str());
 	}
+
+	const std::size_t nbPts = cloud.getNbPoints();
+
+	for(std::size_t i = 0; i < nbPts; ++i)
+	{
+		const Vector vObs = observationDirections.col(i);
+
+		const T depth = vObs.norm();
+		const T incidence = incidenceAngles(0, i);
+		
+
+		const T correction = k1*diffDist(depth, incidence, aperture) + k2*ratioCurvature(depth, incidence, aperture);
+
+		Vector p = cloud.features.col(i);
+		p.head(3) += correction * vObs; 
+
+		cloud.features.col(i) = p;
+	}
+}
+
+template<typename T>
+std::array<T, 4> RemoveSensorBiasDataPointsFilter<T>::getCoefficients(const T depth, const T theta, const T aperture)
+{
+	const T sigma = tau / sqrt(2. * M_PI);
+	const T w0 = lambda_light / (M_PI * aperture);
+
+	const T A  = 2. * std::pow(depth * std::tan(theta), 2) / std::pow(sigma * c, 2) + 2. / std::pow(aperture,2);
+	const T K1 = std::pow(std::cos(theta), 3);
+	const T K2 = 3. * std::pow(std::cos(theta),2) * std::sin(theta);
+	const T L1 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) *
+		std::sqrt(M_PI) * std::erf(aperture * std::sqrt(A)) / (2. * std::pow(A,3. / 2.));
+	const T L2 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) * K2 / (2. * A);
+
+	const T a0 = 2. * A * K1 * L1;
+	const T a1 = -(2. * std::tan(theta) * depth * 
+			(L1 * K2 - 2 * L2 * aperture * std::exp(-A * std::pow(aperture, 2)))) / (std::pow(sigma, 2) * c);
+	const T a2 = -L1 * 2. * A * K1 * (std::pow(sigma * c * std::cos(theta),2) * A + 2. * std::pow(std::cos(theta) * depth, 2) - 2. * std::pow(depth, 2)) / 
+		(2 * std::pow(c * std::cos(theta), 2) * std::pow(sigma, 4) * A);
+	const T a3 = L1 * K2 * depth * std::tan(theta) * (std::pow(sigma * c, 2) * A - 2. * std::pow(depth *std::tan(theta), 2)) / 
+		(std::pow(sigma, 6) * std::pow(c, 3) * A); 
+
+	return {a0, a1, a2, a3};
+}
+
+template<typename T>
+T RemoveSensorBiasDataPointsFilter<T>::diffDist(const T depth, const T theta, const T aperture)
+{
+	const std::array<T, 4> a = getCoefficients(depth, theta, aperture);
+
+	T Tmax;
+
+	if(theta < 1e-5) // approx. 0
+		Tmax=0.;
+	else // theta >0
+		Tmax= (-2 * a[2] - std::sqrt(4 * pow(a[2], 2) - 12 * a[1] * a[3])) / (6 * a[3]);
+	
+	return Tmax * c / 2.;
+}
+
+template<typename T>
+T RemoveSensorBiasDataPointsFilter<T>::ratioCurvature(const T depth, const T theta, const T aperture)
+{
+	const std::array<T,4> a = getCoefficients(depth, theta, aperture);
+	const std::array<T,4> b = getCoefficients(depth, 0., aperture);
+
+	T Tmax;
+
+	if(theta < 1e-5) // approx. 0
+		Tmax=0.;
+	else // theta >0
+		Tmax= ( -2 * a[2] - std::sqrt(4 * pow(a[2], 2) - 12 * a[1] * a[3])) / (6 * a[3]);
+	
+	return 1. - 2 * b[2] / (2 * a[2] - 6 * Tmax * a[3]);
 }
 
 template struct RemoveSensorBiasDataPointsFilter<float>;
