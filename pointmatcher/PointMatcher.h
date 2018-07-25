@@ -629,8 +629,8 @@ struct PointMatcher
 		virtual void dumpIteration(const size_t iterationNumber, const TransformationParameters& parameters, const DataPoints& filteredReference, const DataPoints& reading, const Matches& matches, const OutlierWeights& outlierWeights, const TransformationCheckers& transformationCheckers);
 		virtual void finish(const size_t iterationCount);
 
-		virtual void setDumpPath(std::string path) { dumpPath = path; }
-		virtual std::string getDumpPath() const { return dumpPath; }
+    virtual void setAndValidateDumpPath(std::string path);
+    virtual std::string getDumpPath() const;
 
   protected:
     std::string dumpPath;

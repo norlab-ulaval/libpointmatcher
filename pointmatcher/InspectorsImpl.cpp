@@ -771,16 +771,10 @@ template<typename T>
 std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string& role, const size_t iterationNumber)
 {
 	ostringstream oss;
-	oss << baseFileName << "-" << role << "-" << iterationNumber << ".vtk";
-  std::string finalFileName = PointMatcherSupport::uniqueName(oss.str());
-	//std::cout << "finalFileName = " << finalFileName << endl;
-	if (this->dumpPath.back() != '/') {
-		this->dumpPath += "/";
-	}
+  oss << baseFileName << "-" << role << "-" << iterationNumber << ".vtk";
 
-	std::cout << "Dump Full Path: " << this->dumpPath << std::endl;
-
-	ofstream* file = new ofstream(this->dumpPath + finalFileName.c_str());
+  LOG_INFO_STREAM("writing to " << oss.str());
+  ofstream* file = new ofstream(this->dumpPath + oss.str().c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	return file;
