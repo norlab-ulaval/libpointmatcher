@@ -115,13 +115,16 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		const T depth = vObs.norm();
 		const T incidence = incidenceAngles(0, i);
 
-		const T correction = k1 * diffDist(depth, incidence, aperture) + k2 * ratioCurvature(depth, incidence, aperture);
+		if( ! std::isnan(incidence) )
+		{
+			const T correction = k1 * diffDist(depth, incidence, aperture) + k2 * ratioCurvature(depth, incidence, aperture);
 
-		Vector p = cloud.features.col(i);
-		
-		p.head(dim-1) -= (correction / vObs.norm()) * vObs; 
+			Vector p = cloud.features.col(i);
 
-		cloud.features.col(i) = p;
+			p.head(dim-1) += (correction / vObs.norm()) * vObs; 
+
+			cloud.features.col(i) = p;
+		}
 	}
 }
 
