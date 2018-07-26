@@ -860,7 +860,7 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 	
 	for(std::size_t i = 0; i< nbPts; ++i)
 	{
-		const double error = resultCloud.features.col(i).norm() - pointCloud.features.col(i).norm();
+		const double error = pointCloud.features.col(i).norm() - resultCloud.features.col(i).norm();
 		EXPECT_NEAR(expectedErrors_LMS1xx[i], error, 1e-4); // below mm
 	}
 	
@@ -870,7 +870,7 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 	
 	for(std::size_t i = 0; i< nbPts; ++i)
 	{
-		const double error = resultCloud.features.col(i).norm() - pointCloud.features.col(i).norm();
+		const double error = pointCloud.features.col(i).norm() - resultCloud.features.col(i).norm();
 		EXPECT_NEAR(expectedErrors_HDL32E[i], error, 1e-4); // below mm
 	}
 }
