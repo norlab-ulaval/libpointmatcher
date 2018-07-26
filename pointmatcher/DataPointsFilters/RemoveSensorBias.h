@@ -61,11 +61,11 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 	
 	inline static const std::string description()
 	{
-		return "Remove the bias induced by the angle of incidence\n\n";
-			  // "Required descriptors: incidenceAngles, observationDirections.\n"
-		      // "Produced descritors:  none.\n"
-			  // "Altered descriptors:  none.\n"
-			  // "Altered features:     none.";
+		return "Remove the bias induced by the angle of incidence\n\n"
+			   "Required descriptors: incidenceAngles, observationDirections.\n"
+		       "Produced descritors:  none.\n"
+			   "Altered descriptors:  none.\n"
+			   "Altered features:     points coordinates.";
 	}
 	
 	inline static const ParametersDoc availableParameters()
