@@ -75,7 +75,7 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 		;
 	}
 	
-	enum SensorType : int { LMS_1XX=0, HDL_32E=1}; //add sensor here
+	enum SensorType : int { LMS_1XX=0, HDL_32E=1 }; //add sensor here
 	
 //attributes here
 	const SensorType sensorType;
@@ -88,36 +88,30 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 
 
 private:
-	const T tau=50e-9;//s - pulse length
-	const T pulse_intensity=0.39;//w.m^-2 - pulse intensity
-	const T lambda_light=905e-9;//m - wavelength of the laser
-	const T c = 299792458.0; // m.s^-1 - celerity of light
+	static constexpr T tau = 50e-9; //s - pulse length
+	static constexpr T pulse_intensity = 0.39; //w.m^-2 - pulse intensity
+	static constexpr T lambda_light = 905e-9; //m - wavelength of the laser
+	static constexpr T c = 299792458.0; //m.s^-1 - celerity of light
 
-	std::array<T,4> getCoefficients(const T depth, const T theta, const T aperture);
-	T diffDist(const T depth, const T theta, const T aperture);
-	T ratioCurvature(const T depth, const T theta, const T aperture);
+	std::array<T,4> getCoefficients(const T depth, const T theta, const T aperture) const;
+	T diffDist(const T depth, const T theta, const T aperture) const;
+	T ratioCurvature(const T depth, const T theta, const T aperture) const;
 
 	struct SensorParameters{
 	private:
-		SensorParameters(T aperture_, T k1_, T k2_):
-			aperture{aperture_},
-			k1{k1_},
-			k2{k2_}
-		{
-		
-		}
+		SensorParameters(T aperture_, T k1_, T k2_): aperture{aperture_}, k1{k1_}, k2{k2_} {}
 	public:
 		const T aperture;
 		const T k1;
 		const T k2;
-	
-		static const SensorParameters LMS_1xx;
+		//Instances
+		static const SensorParameters LMS_1XX;
 		static const SensorParameters HDL_32E;
 	};
 };
 
 template<typename T>
-const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::LMS_1xx =
+const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::LMS_1XX =
 	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(1.413717e-2,  1.54987849, 0.00359711);
 
 template<typename T>
