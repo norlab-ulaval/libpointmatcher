@@ -104,6 +104,9 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	}
 
 	const std::size_t nbPts = cloud.getNbPoints();
+	const std::size_t dim = cloud.features.rows();
+
+	assert(dim == 3 or dim == 4); //check 2D or 3D
 
 	for(std::size_t i = 0; i < nbPts; ++i)
 	{
@@ -115,7 +118,8 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		const T correction = k1 * diffDist(depth, incidence, aperture) + k2 * ratioCurvature(depth, incidence, aperture);
 
 		Vector p = cloud.features.col(i);
-		p.head(3) -= (correction / vObs.norm()) * vObs; 
+		
+		p.head(dim-1) -= (correction / vObs.norm()) * vObs; 
 
 		cloud.features.col(i) = p;
 	}
