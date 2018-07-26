@@ -61,21 +61,21 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 	
 	inline static const std::string description()
 	{
-		return "Remove the bias induced by the angle of incidence\n\n"
-			   "Required descriptors: incidenceAngles, observationDirections.\n"
-		       "Produced descritors:  none.\n"
-			   "Altered descriptors:  none.\n"
-			   "Altered features:     none.";
+		return "Remove the bias induced by the angle of incidence\n\n";
+			  // "Required descriptors: incidenceAngles, observationDirections.\n"
+		      // "Produced descritors:  none.\n"
+			  // "Altered descriptors:  none.\n"
+			  // "Altered features:     none.";
 	}
 	
 	inline static const ParametersDoc availableParameters()
 	{
 		return boost::assign::list_of<ParameterDoc>
-			( "sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Velodyne HDL-32E", "0", "0", "255", &P::Comp<std::uint8_t> )
+			( "sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Velodyne HDL-32E", "0", "0", "255", &P::Comp<int> )
 		;
 	}
 	
-	enum SensorType : std::uint8_t { LMS_1XX=0, HDL_32E=1}; //add sensor here
+	enum SensorType : int { LMS_1XX=0, HDL_32E=1}; //add sensor here
 	
 //attributes here
 	const SensorType sensorType;
@@ -118,9 +118,9 @@ private:
 
 template<typename T>
 const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::LMS_1xx =
-	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(1.413717e-2, 2.52773563, 0.007084910);
+	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(1.413717e-2,  1.54987849, 0.00359711);
 
 template<typename T>
 const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::HDL_32E =
-	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(2.967060e-4, 1.54987849, 0.00359711);
+	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(2.967060e-3,2.52773563, 0.007084910);
 
