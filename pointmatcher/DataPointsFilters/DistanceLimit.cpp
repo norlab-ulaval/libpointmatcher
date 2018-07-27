@@ -33,6 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 #include "DistanceLimit.h"
+#include "pointmatcher/Functions.h"
 
 // DistanceLimitDataPointsFilter
 // Constructor
@@ -60,6 +61,65 @@ template<typename T>
 void DistanceLimitDataPointsFilter<T>::inPlaceFilter(
 	DataPoints& cloud)
 {
+	using namespace PointMatcherSupport;
+
+	if(dim >= cloud.features.rows() - 1)
+	{
+		throw InvalidParameter(
+				(boost::format("DistanceLimitDataPointsFilter: Error, filtering on dimension number %1%, larger than authorized axis id %2%") % dim % (cloud.features.rows() - 2)).str());
+	}
+
+	const int nbPointsIn = cloud.features.cols();
+	const int nbRows = cloud.features.rows();
+
+	int j = 0;
+	if(dim == -1) // Euclidean distance
+	{
+		const T absMaxDist = anyabs(dist);
+		for(int i = 0; i < nbPointsIn; ++i)
+		{
+			if(removeInside)
+			{
+				if(cloud.features.col(i).head(nbRows-1).norm() > absMaxDist)
+				{
+					cloud.setColFrom(j, cloud, i);
+					++j;
+				}
+			}
+			else
+			{
+				if(cloud.features.col(i).head(nbRows-1).norm() < absMaxDist)
+				{
+					cloud.setColFrom(j, cloud, i);
+					++j;
+				}
+			}
+		}
+	}
+	else // Single-axis distance
+	{
+		for(int i = 0; i < nbPointsIn; ++i)
+		{
+			if(removeInside)
+			{
+				if((cloud.features(dim, i)) > dist)
+				{
+					cloud.setColFrom(j, cloud, i);
+					++j;
+				}
+			}
+			else
+			{
+				if((cloud.features(dim, i)) < dist)
+				{
+					cloud.setColFrom(j, cloud, i);
+					++j;
+				}
+			}
+		}
+	}
+
+	cloud.conservativeResize(j);
 }
 
 template struct DistanceLimitDataPointsFilter<float>;
