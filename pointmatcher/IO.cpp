@@ -1085,6 +1085,15 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 				loadedPoints.addDescriptor(name, descriptor);
 			}
 		}
+		else if(fieldName == "METADATA") // Skip METADATA block
+		{
+			getline(is, line);
+			getline(is, line);
+			while(!line.empty())
+			{
+				getline(is, line);
+			}
+		}
 		else // Load descriptors or time
 		{
 
