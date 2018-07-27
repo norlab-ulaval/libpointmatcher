@@ -126,7 +126,8 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 			Vector p = cloud.features.col(i);
 			p.head(dim-1) += correction * vObs.normalized(); 
-			cloud.features.col(j) = p;
+			cloud.features.col(i) = p;
+			cloud.setColFrom(j, cloud, i);
 			++j;
 		}		
 	}
