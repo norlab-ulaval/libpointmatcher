@@ -65,13 +65,14 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 			   "Required descriptors: incidenceAngles, observationDirections.\n"
 		       "Produced descritors:  none.\n"
 			   "Altered descriptors:  none.\n"
-			   "Altered features:     points coordinates.";
+			   "Altered features:     points coordinates and number of points.";
 	}
 	
 	inline static const ParametersDoc availableParameters()
 	{
 		return boost::assign::list_of<ParameterDoc>
-			( "sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Velodyne HDL-32E", "0", "0", "255", &P::Comp<int> )
+			( "sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Velodyne HDL-32E", "0", "0", "1", &P::Comp<int> )
+			( "angleThreshold", "Threshold at which angle the correction is not applied, in degrees", "88.", "0.", "90.", &P::Comp<T> )
 		;
 	}
 	
@@ -79,7 +80,8 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 	
 //attributes here
 	const SensorType sensorType;
-	
+	const T angleThreshold;
+
 	//! Constructor, uses parameter interface
 	RemoveSensorBiasDataPointsFilter(const Parameters& params = Parameters());
 	

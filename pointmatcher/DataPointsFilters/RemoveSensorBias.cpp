@@ -50,7 +50,8 @@ template<typename T>
 RemoveSensorBiasDataPointsFilter<T>::RemoveSensorBiasDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("RemoveSensorBiasDataPointsFilter", 
 		RemoveSensorBiasDataPointsFilter::availableParameters(), params),
-	sensorType(SensorType(Parametrizable::get<int>("sensorType")))
+	sensorType(SensorType(Parametrizable::get<int>("sensorType"))),
+	angleThreshold(Parametrizable::get<T>("angleThreshold")/180.*M_PI)
 {
 }
 
@@ -105,9 +106,11 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 	const std::size_t nbPts = cloud.getNbPoints();
 	const std::size_t dim = cloud.features.rows();
+	
 
 	assert(dim == 3 or dim == 4); //check 2D or 3D
 
+	std::size_t j = 0;
 	for(std::size_t i = 0; i < nbPts; ++i)
 	{
 		const Vector vObs = observationDirections.col(i);
@@ -115,17 +118,19 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		const T depth = vObs.norm();
 		const T incidence = incidenceAngles(0, i);
 
-		if( ! std::isnan(incidence) )
+		//check if the incidence angle could be estimated.
+		//For angles very close to 90 degrees, a small error of estimation could change drastically the correction, so we skip those points.
+		if(not std::isnan(incidence) and incidence >= 0. and incidence < angleThreshold)
 		{
 			const T correction = k1 * diffDist(depth, incidence, aperture) + k2 * ratioCurvature(depth, incidence, aperture);
 
 			Vector p = cloud.features.col(i);
-
-			p.head(dim-1) += (correction / vObs.norm()) * vObs; 
-
-			cloud.features.col(i) = p;
-		}
+			p.head(dim-1) += correction * vObs.normalized(); 
+			cloud.features.col(j) = p;
+			++j;
+		}		
 	}
+	cloud.conservativeResize(j);
 }
 
 template<typename T>
