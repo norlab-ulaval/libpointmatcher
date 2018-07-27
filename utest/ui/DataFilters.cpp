@@ -838,6 +838,11 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 		-1, -1, -1, -5, -5, -5,
 		0,  0,  0,  0,  0,  0, // observation : point to sensor
 		0,  0,  0,  0,  0,  0).finished();
+	
+	PM::Matrix desc2 = (PM::Matrix(4,6) << 0., 0.7854, std::nanf(""), 0., 0.7854, M_PI_2, //0,45,90 degrees
+		-1, -1, -1, -5, -5, -5,
+		0,  0,  0,  0,  0,  0, // observation : point to sensor
+		0,  0,  0,  0,  0,  0).finished();
 	DP::Labels descLabels;
 	descLabels.push_back(DP::Label("incidenceAngles", 1));
 	descLabels.push_back(DP::Label("observationDirections", 3));
@@ -854,8 +859,6 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 	parameters["sensorType"] = toParam(0); //LMS_1xx
 	std::shared_ptr<PM::DataPointsFilter> removeSensorBiasFilter = PM::get().DataPointsFilterRegistrar.create("RemoveSensorBiasDataPointsFilter", parameters);
 	DP resultCloud = removeSensorBiasFilter->filter(pointCloud);
-	
-	//tests
 	EXPECT_EQ(pointCloud.getNbPoints(), resultCloud.getNbPoints());
 	
 	for(std::size_t i = 0; i< nbPts; ++i)
@@ -873,4 +876,16 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 		const double error = pointCloud.features.col(i).norm() - resultCloud.features.col(i).norm();
 		EXPECT_NEAR(expectedErrors_HDL32E[i], error, 1e-4); // below mm
 	}
+
+
+	//test points rejection
+	pointCloud = DP(points, pointsLabels, desc2, descLabels, randTimes, timeLabels);
+
+	parameters["sensorType"] = toParam(0); //LMS_1xx
+	parameters["angleThreshold"] = toParam(30.);
+	removeSensorBiasFilter = PM::get().DataPointsFilterRegistrar.create("RemoveSensorBiasDataPointsFilter", parameters);
+	resultCloud = removeSensorBiasFilter->filter(pointCloud);	
+
+	//four points should have been rejected
+	EXPECT_EQ(pointCloud.getNbPoints()-4, resultCloud.getNbPoints());
 }
