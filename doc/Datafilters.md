@@ -25,23 +25,25 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 4. [Minimum Distance Filter](#mindistancehead)
 
-5. [Maximum Point Count Filter](#maxpointcounthead)
+5. [Distance Limit Filter](#distancelimithead)
 
-6. [Maximum Quantile on Axis Filter](#maxquantilehead)
+6. [Maximum Point Count Filter](#maxpointcounthead)
 
-7. [Random Sampling Filter](#randomsamplinghead)
+7. [Maximum Quantile on Axis Filter](#maxquantilehead)
 
-8. [Remove NaN Filter](#removenanhead)
+8. [Random Sampling Filter](#randomsamplinghead)
 
-9. [Shadow Point Filter](#shadowpointhead)
+9. [Remove NaN Filter](#removenanhead)
 
-10. [Voxel Grid Filter](#voxelgridhead) (**deprecated**)
+10. [Shadow Point Filter](#shadowpointhead)
 
-11. [Octree Grid Filter](#octreegridhead)
+11. [Voxel Grid Filter](#voxelgridhead) (**deprecated**)
 
-12. [Normal Space Sampling (NSS) Filter](#nsshead)
+12. [Octree Grid Filter](#octreegridhead)
 
-13. [Covariance Sampling (CovS) Filter](#covshead)
+13. [Normal Space Sampling (NSS) Filter](#nsshead)
+
+14. [Covariance Sampling (CovS) Filter](#covshead)
 
 ### Descriptor Augmenting 
 1. [Observation Direction Filter](#obsdirectionhead)
@@ -151,6 +153,28 @@ __Impact on the number of points:__ reduces number of points
 |---------  |:---------|:----------------|:--------------|
 |dim        | Dimension over which the distance is thresholded.  If -1, then the threshold is a radial distance from the center | -1 | 0: x, 1: y, 2: z, -1: radial|
 |minDist |Distance threshold (in m) beyond which points are selected | 1.0 | min: -inf, max: inf|
+
+## Distance Limit Filter <a name="distancelimithead"></a>
+### Description
+These filters remove points which lie before or beyond a threshold distance from the coordinate center. The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
+
+__Required descriptors:__ none  
+__Output descriptor:__ none  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ reduces number of points  
+
+|Parameter   |Description  |Default value    |Allowable range|
+|---------   |:---------|:----------------|:--------------|
+|dim         |Dimension over which the distance is thresholded.  If -1, then the threshold is a radial distance from the center | -1 | 0: x, 1: y, 2: z, -1: radial|
+|dist        |Distance threshold (in m) used to reject points | 1.0 | min: -inf, max: inf|
+|removeInside|If set to 1, points contained before the limit are removed, else points beyond are removed  |1   | 0 or 1|
+
+### Example
+In the following example, a distance threshold of 1m is applied radially by setting the dimension parameter to -1. Also, the removeInside parameter is set to 0 in order to remove points beyond the distance limit. As shown on the image below, points which lie within a sphere of radius 1m centered at the origin are selected by the filter and are displayed in white.  All other points are rejected by the filter.  Were the removeInside parameter value to be replaced by 1, only points outside the sphere would be selected. 
+
+|Figure: Distance limit filter applied to subsection of the apartment dataset. On the <br>original data, low density regions are blue and high density regions are red. The <br>sampled points are overlaid in white.   | Parameters used |
+|---|:---|
+|![distance limit after](images/distance_limit.png "After applying distance limit filter with a distance threshold of 1m, the dimension parameter set to radial and the removeInside parameter set to 0") | dist : 1.0 <br> dim : -1 <br> removeInside : 0 |
 
 ## Maximum Point Count Filter <a name="maxpointcounthead"></a>
 ### Description
