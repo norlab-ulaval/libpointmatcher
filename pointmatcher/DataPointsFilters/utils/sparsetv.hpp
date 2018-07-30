@@ -506,8 +506,7 @@ void TensorVoting<T>::decompose()
 			sparsePlate(i) 	<< 0.0001,0.,0.,0.;
 			sparseBall(i) 	<< 0.0001,0.,0.,0.;
 			
-			std::cerr << "Warning: eigen values not ordered ("<<eigenVa(0)<<", "<<eigenVa(1)<<", "<<eigenVa(2)<<")" << std::endl;
-			
+			//std::cerr << "Warning: eigen values not ordered ("<<eigenVa(0)<<", "<<eigenVa(1)<<", "<<eigenVa(2)<<")" << std::endl;
 			continue;
 		}
 				
