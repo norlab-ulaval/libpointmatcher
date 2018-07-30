@@ -67,7 +67,7 @@ struct SaliencyDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	{
 		return boost::assign::list_of<ParameterDoc>
 		( "k", "Number of neighbors to consider", "50", "6", "4294967295", &P::Comp<std::size_t> )
-		( "sigma", "Seed for the random generator.", "0.2", "0.", "+inf", &P::Comp<T> )
+		( "sigma", "Scale of the vote", "0.2", "0.", "+inf", &P::Comp<T> )
 		( "keepNormals", "Flag to keep normals computed by TV.", "1", "0", "1", P::Comp<bool> )
 		( "keepLabels", "Flag to keep labels computed by TV.", "1", "0", "1", P::Comp<bool> )
 		( "keepTensors", "Flag to keep elements Tensors computed by TV.", "1", "0", "1", P::Comp<bool> )
