@@ -340,6 +340,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/DistanceLimit.cpp
 	pointmatcher/DataPointsFilters/RemoveSensorBias.cpp
 	pointmatcher/DataPointsFilters/Sphericality.cpp
+	pointmatcher/DataPointsFilters/Saliency.cpp	
 )
 
 
