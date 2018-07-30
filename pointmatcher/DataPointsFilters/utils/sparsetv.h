@@ -71,6 +71,7 @@ struct TensorVoting
 	using Vector = typename PM::Vector;
 	
 	using NNS = Nabo::NearestNeighbourSearch<T>;
+	using Index = typename NNS::Index;
 	using IndexMatrix = typename NNS::IndexMatrix;
 	
 	enum Encoding : std::uint8_t { ZERO, UBALL, BALL, SBALL, UPLATE, PLATE, SPLATE, USTICK, STICK, SSTICK, AWARE_TENSOR};
@@ -78,7 +79,7 @@ struct TensorVoting
 public:
 //--attributes
 	const T sigma; //control the scale of the voting field
-	const std::size_t k; //number of neighbors
+	std::size_t k; //number of neighbors
 
 	Tensors tensors;
 	
@@ -176,6 +177,7 @@ public:
 		}
 	};
 private:
+	void computeKnn(const DP& pts);
 };
 
 #include "sparsetv.hpp"
