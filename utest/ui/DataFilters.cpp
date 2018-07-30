@@ -905,3 +905,42 @@ TEST_F(DataFilterTest, SaliencyDataPointsFilter)
 	addFilter("SaliencyDataPointsFilter", params);
 	validate3dTransformation();
 }
+
+TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
+{
+	// Test with point cloud
+	DP cloud = generateRandomDataPoints(300000);
+	
+	// This filter creates descriptors
+	params = PM::Parameters();
+		params["k"] = "50";
+		params["sigma"] = "0.1";
+		params["radius"] = "0.4";
+		params["itMax"] = "15";
+		params["keepNormals"] = "1";
+		params["keepLabels"] = "1";
+		params["keepLambdas"] = "1";
+		params["keepTensors"] = "1";
+		
+	PM::DataPointsFilter* spdf = 
+			PM::get().DataPointsFilterRegistrar.create("SpectralDecompositionDataPointsFilter", params);
+
+	DP filteredCloud = spdf->filter(cloud);
+
+	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	EXPECT_EQ(cloud.getDescriptorDim()+(3+3+1+3+1+4+7+3), filteredCloud.getDescriptorDim());
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+	
+	params = PM::Parameters();
+		params["k"] = "50";
+		params["sigma"] = "1.";
+		params["radius"] = "2.";
+		params["itMax"] = "15";
+		params["keepNormals"] = "1";
+		params["keepLabels"] = "1";
+		params["keepLambdas"] = "1";
+		params["keepTensors"] = "1";
+		
+	addFilter("SpectralDecompositionDataPointsFilter", params);
+	validate3dTransformation();
+}
