@@ -507,7 +507,7 @@ void TensorVoting<T>::computeKnn(const DP& pts)
 {
 	const std::size_t nbPts = pts.getNbPoints();
 	
-	if(k > nbPts) k = nbPts - 1;
+	if(k >= nbPts) k = nbPts - 1;
 	
 	std::shared_ptr<NNS> knn(
 		NNS::create(pts.features, pts.features.rows() - 1, 
