@@ -210,25 +210,11 @@ void TensorVoting<T>::refine(const DP& pts)
 template <typename T>
 void TensorVoting<T>::ballVote(const DP& pts, bool doKnn)
 {
-	using Index = typename NNS::Index;
-	
 	const std::size_t nbPts = pts.getNbPoints();
 	
 	const Tensor I = Tensor::Identity();
 	
-	if(doKnn)
-	{
-		std::shared_ptr<NNS> knn(
-			NNS::create(pts.features, pts.features.rows() - 1, 
-				(k<30? NNS::SearchType::KDTREE_LINEAR_HEAP : NNS::SearchType::KDTREE_TREE_HEAP)	
-			)
-		);
-	
-		indices = IndexMatrix::Zero(k, nbPts);
-		dist = Matrix::Zero(k, nbPts);
-	
-		knn->knn(pts.features, indices, dist, Index(k));
-	}
+	if(doKnn) computeKnn(pts);
 	
 	for(std::size_t voter = 0; voter < nbPts; ++voter)
 	{
@@ -266,24 +252,10 @@ void TensorVoting<T>::stickVote(const DP& pts, bool doKnn)
 		throw InvalidField("TensorVoting<T>::stickVote: Error, cannot find sticks in descriptors.");
 
 	const auto& sticks_ = pts.getDescriptorViewByName("sticks");
-
-	using Index = typename NNS::Index;
 	
 	const std::size_t nbPts = pts.getNbPoints();
 		
-	if(doKnn)
-	{
-		std::shared_ptr<NNS> knn(
-			NNS::create(pts.features, pts.features.rows() - 1, 
-				(k<30? NNS::SearchType::KDTREE_LINEAR_HEAP : NNS::SearchType::KDTREE_TREE_HEAP)	
-			)
-		);
-	
-		indices = IndexMatrix::Zero(k, nbPts);
-		dist = Matrix::Zero(k, nbPts);
-	
-		knn->knn(pts.features, indices, dist, Index(k));
-	}
+	if(doKnn) computeKnn(pts);
 	
 	for(std::size_t voter = 0; voter < nbPts; ++voter)
 	{
@@ -340,24 +312,10 @@ void TensorVoting<T>::plateVote(const DP& pts, bool doKnn)
 		throw InvalidField("TensorVoting<T>::stickVote: Error, cannot find plates in descriptors.");
 
 	const auto& plates_ = pts.getDescriptorViewByName("plates");
-
-	using Index = typename NNS::Index;
 	
 	const std::size_t nbPts = pts.getNbPoints();
 		
-	if(doKnn)
-	{
-		std::shared_ptr<NNS> knn(
-			NNS::create(pts.features, pts.features.rows() - 1, 
-				(k<30? NNS::SearchType::KDTREE_LINEAR_HEAP : NNS::SearchType::KDTREE_TREE_HEAP)	
-			)
-		);
-	
-		indices = IndexMatrix::Zero(k, nbPts);
-		dist = Matrix::Zero(k, nbPts);
-	
-		knn->knn(pts.features, indices, dist, Index(k));
-	}
+	if(doKnn) computeKnn(pts);
 		
 	for(std::size_t voter = 0; voter < nbPts; ++voter)
 	{
@@ -418,23 +376,9 @@ void TensorVoting<T>::plateVote(const DP& pts, bool doKnn)
 template <typename T>
 void TensorVoting<T>::cfvote(const DP& pts, bool doKnn)
 {
-	using Index = typename NNS::Index;
-	
 	const std::size_t nbPts = pts.getNbPoints();
 		
-	if(doKnn)
-	{
-		std::shared_ptr<NNS> knn(
-			NNS::create(pts.features, pts.features.rows() - 1, 
-				(k<30? NNS::SearchType::KDTREE_LINEAR_HEAP : NNS::SearchType::KDTREE_TREE_HEAP)	
-			)
-		);
-	
-		indices = IndexMatrix::Zero(k, nbPts);
-		dist = Matrix::Zero(k, nbPts);
-	
-		knn->knn(pts.features, indices, dist, Index(k));
-	}
+	if(doKnn) computeKnn(pts);
 	
 	const Tensors K = tensors; //save old tensors values
 	encode(pts, Encoding::ZERO); //all tensors are zero
@@ -556,4 +500,23 @@ void TensorVoting<T>::toDescriptors()
 		
 		balls(i) = sparseBall(i)(0); //s
 	}
+}
+
+template <typename T>
+void TensorVoting<T>::computeKnn(const DP& pts)
+{
+	const std::size_t nbPts = pts.getNbPoints();
+	
+	if(k > nbPts) k = nbPts - 1;
+	
+	std::shared_ptr<NNS> knn(
+		NNS::create(pts.features, pts.features.rows() - 1, 
+			(k<30? NNS::SearchType::KDTREE_LINEAR_HEAP : NNS::SearchType::KDTREE_TREE_HEAP)	
+		)
+	);
+
+	indices = IndexMatrix::Zero(k, nbPts);
+	dist = Matrix::Zero(k, nbPts);
+
+	knn->knn(pts.features, indices, dist, Index(k));
 }
