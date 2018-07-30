@@ -94,7 +94,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		const std::size_t nbPts = pts.getNbPoints();
 		bool ret = (oldnbPts - nbPts) < threshold;
 		
-		std::cout << "["<<int(ret or (it+1) >= itMax_)<<"] oldnbPts ("<<oldnbPts<<") - nbPts ("<<nbPts<<") -> "<<int(ret) << " -- Iteration "<<it+1<<" / "<<itMax_ << std::endl;
+		//std::cout << "["<<int(ret or (it+1) >= itMax_)<<"] oldnbPts ("<<oldnbPts<<") - nbPts ("<<nbPts<<") -> "<<int(ret) << " -- Iteration "<<it+1<<" / "<<itMax_ << std::endl;
 		
 		oldnbPts = nbPts;
 		
@@ -103,7 +103,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	
 	do 
 	{
-		std::cout << "Iteration : " << it << "("<< cloud.getNbPoints() << ")" << std::endl;	
+		//std::cout << "Iteration : " << it << "("<< cloud.getNbPoints() << ")" << std::endl;	
 #if 0
 	// 2.1 On pointness
 		reduce(cloud, thresh_pointness, "pointness");
@@ -112,7 +112,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	// 2.3 On surfaceness
 		reduce(cloud, thresh_surfaceness, "surfaceness");
 #else
-	std::cout << "Filtering..."<< std::endl;
+	//std::cout << "Filtering..."<< std::endl;
 	// 2.1 On pointness
 		filterPointness(cloud, xi_expectation(3, sigma, radius), k);
 	// 2.2 On curveness
@@ -121,15 +121,15 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		filterSurfaceness(cloud, xi_expectation(2, sigma, radius), k);
 #endif
 	//Re-compute vote...
-		std::cout << "Recompute vote..."<< std::endl;
+		//std::cout << "Recompute vote..."<< std::endl;
 		tv.refine(cloud);
-		std::cout << "Add descriptors..."<< std::endl;
+		//std::cout << "Add descriptors..."<< std::endl;
 		addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, true /*lambdas*/, false /*tensors*/);
 	} 
 	while(not checkConvergence(cloud, 15 /*delta points*/));
 	
 //--- 3. Re-encode as Aware tensors + Re-vote ----------------------------------
-	std::cout << "Re-encode as Aware tensors + Re-vote"<< std::endl;
+	//std::cout << "Re-encode as Aware tensors + Re-vote"<< std::endl;
 	addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, false /*lambdas*/, true /*tensors*/);
 	tv.encode(cloud, TensorVoting<T>::Encoding::AWARE_TENSOR);
 	tv.cfvote(cloud);
