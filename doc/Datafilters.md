@@ -21,9 +21,9 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 2. [Maximum Density Filter](#maxdensityhead)
 
-3. [Maximum Distance Filter](#maxdistancehead)
+3. [Maximum Distance Filter](#maxdistancehead) (**deprecated**)
 
-4. [Minimum Distance Filter](#mindistancehead)
+4. [Minimum Distance Filter](#mindistancehead) (**deprecated**)
 
 5. [Distance Limit Filter](#distancelimithead)
 
@@ -119,7 +119,10 @@ In the following example we observe the effect of the maximum density filter on 
 |---|:---| 
 |![max density before](images/appt_0_maxdens.png "Max density filter applied to subsection of the apartment dataset.  On the original data, low density regions are blue and high density regions are red.  The sampled points are overlaid in white.") | maxDensity: 50000 |
 
-## Maximum Distance Filter <a name="maxdistancehead"></a>
+## Maximum Distance Filter (**deprecated**) <a name="maxdistancehead"></a>
+
+**Deprecated** : please consider switching to [Distance Limit Filter](#distancelimithead).
+
 ### Description
 These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center **greater than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
 
@@ -140,7 +143,10 @@ In the following example, a maximum distance threshold of 1m is applied radially
 |---|:---|
 |![max distance after](images/max_dis.png "After applying maximum distance filter with a distance threshold of 1m and the dimension parameter set to radial") | maxDist : 1.0 <br> dim : -1 |
 
-## Minimum Distance Filter <a name="mindistancehead"></a>
+## Minimum Distance Filter (**deprecated**) <a name="mindistancehead"></a>
+
+**Deprecated** : please consider switching to [Distance Limit Filter](#distancelimithead).
+
 ### Description
 These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center **smaller than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
 
