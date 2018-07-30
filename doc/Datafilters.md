@@ -124,7 +124,7 @@ In the following example we observe the effect of the maximum density filter on 
 **Deprecated** : please consider switching to [Distance Limit Filter](#distancelimithead).
 
 ### Description
-These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center **greater than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
+These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center is **smaller than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
 
 __Required descriptors:__ none   
 __Output descriptor:__ none  
@@ -148,7 +148,7 @@ In the following example, a maximum distance threshold of 1m is applied radially
 **Deprecated** : please consider switching to [Distance Limit Filter](#distancelimithead).
 
 ### Description
-These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center **smaller than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
+These filters remove points which lie beyond a threshold distance from the coordinate center.  Points are kept if their distance from the center is **greater than** the threshold.  The distance threshold can be defined on the x,y, and z axes or can be a radial distance from the center.
 
 __Required descriptors:__ none   
 __Output descriptor:__ none  
