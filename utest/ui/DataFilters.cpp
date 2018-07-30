@@ -891,3 +891,17 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 	//four points should have been rejected
 	EXPECT_EQ(pointCloud.getNbPoints()-4, resultCloud.getNbPoints());
 }
+
+TEST_F(DataFilterTest, SaliencyDataPointsFilter)
+{
+	// This filter creates descriptors
+	params = PM::Parameters();
+	params["k"] = "50";
+	params["sigma"] = "1.0";
+	params["keepNormals"] = "1";
+	params["keepLabels"] = "1";
+	params["keepTensors"] = "1";
+
+	addFilter("SaliencyDataPointsFilter", params);
+	validate3dTransformation();
+}
