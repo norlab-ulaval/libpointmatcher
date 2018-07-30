@@ -90,6 +90,8 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, NormalSpaceDataPointsFilter, typename DataPointsFiltersImpl<T>::NormalSpaceDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, CovarianceSamplingDataPointsFilter, typename DataPointsFiltersImpl<T>::CovarianceSamplingDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SaliencyDataPointsFilter, typename DataPointsFiltersImpl<T>::SaliencyDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, SpectralDecompositionDataPointsFilter, typename DataPointsFiltersImpl<T>::SpectralDecompositionDataPointsFilter)
+	
 	
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)
