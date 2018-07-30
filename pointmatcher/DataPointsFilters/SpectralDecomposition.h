@@ -67,16 +67,16 @@ struct SpectralDecompositionDataPointsFilter : public PointMatcher<T>::DataPoint
 
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-		( "k", "Number of neighbors to consider", "50", "6", "4294967295", &P::Comp<std::size_t> )
-		( "sigma", "Scale of the vote in TensorVoting.", "0.2", "0.", "+inf", &P::Comp<T> )
-		( "radius", "Radius to control scale od uniform distribution.", "0.4", "0.", "+inf", &P::Comp<T> )
-		( "itMax", "Number max of iterations to do", "10", "1", "4294967295", &P::Comp<std::size_t> )
-		( "keepNormals", "Flag to keep normals computed by TV.", "1", "0", "1", P::Comp<bool> )
-		( "keepLabels", "Flag to keep labels computed by TV.", "1", "0", "1", P::Comp<bool> )
-		( "keepLambdas", "Flag to keep lambdas computed by TV.", "1", "0", "1", P::Comp<bool> )
-		( "keepTensors", "Flag to keep elements Tensors computed by TV.", "1", "0", "1", P::Comp<bool> )
-		;
+		return {
+			{"k", "Number of neighbors to consider", "50", "6", "4294967295", &P::Comp<std::size_t>},
+			{"sigma", "Scale of the vote in TensorVoting.", "0.2", "0.", "+inf", &P::Comp<T>},
+			{"radius", "Radius to control scale od uniform distribution.", "0.4", "0.", "+inf", &P::Comp<T>},
+			{"itMax", "Number max of iterations to do", "10", "1", "4294967295", &P::Comp<std::size_t>},
+			{"keepNormals", "Flag to keep normals computed by TV.", "1", "0", "1", P::Comp<bool>},
+			{"keepLabels", "Flag to keep labels computed by TV.", "1", "0", "1", P::Comp<bool>},
+			{"keepLambdas", "Flag to keep lambdas computed by TV.", "1", "0", "1", P::Comp<bool>},
+			{"keepTensors", "Flag to keep elements Tensors computed by TV.", "1", "0", "1", P::Comp<bool>}
+		};
 	}
 
 public:
