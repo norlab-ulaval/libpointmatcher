@@ -66,70 +66,52 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
 	const std::size_t nbPts = cloud.getNbPoints();
 	
+	if(k > nbPts) return;
+	
 	TensorVoting<T> tv{sigma, k};
 	
-	//Refinement step
-	tv.refine(cloud);
-	
-	//Compute real saliencies
-	tv.disableBallComponent();
-	tv.cfvote(cloud, false);
+//--- 1. Vote to determine prefered orientation + density estimation -----------
+	tv.encode(cloud, TensorVoting<T>::Encoding::BALL);
+	tv.cfvote(cloud, true);
 	tv.decompose();
 	tv.toDescriptors();
-#if 0	
-	const T thresh_pointness = 5. * xi_expectation(3, sigma, radius) / 6.;
-	const T thresh_curveness = xi_expectation(1, sigma, radius / 2.) / 2.;
-	const T thresh_surfaceness = xi_expectation(2, sigma, radius) / 4.; 
-#endif	
-//--- 1. Vote to determine prefered orientation + density estimation -----------
-	tv.refine(cloud);
 	addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, true /*lambdas*/, false /*tensors*/);
 	
 //--- 2. Filter iteratively on each measure (surfaceness, curveness, pointness)
 	std::size_t it = 0;
 	const std::size_t itMax_ = itMax;
+	const std::size_t k_ = k;
 	std::size_t oldnbPts = nbPts;
 	
-	auto checkConvergence = [&oldnbPts, &it, &itMax_](const DataPoints& pts, const std::size_t threshold) mutable ->bool{		
+	auto checkConvergence = [&oldnbPts, &it, &itMax_, &k_](const DataPoints& pts, const std::size_t threshold) mutable ->bool{		
 		const std::size_t nbPts = pts.getNbPoints();
 		bool ret = (oldnbPts - nbPts) < threshold;
 		
-		//std::cout << "["<<int(ret or (it+1) >= itMax_)<<"] oldnbPts ("<<oldnbPts<<") - nbPts ("<<nbPts<<") -> "<<int(ret) << " -- Iteration "<<it+1<<" / "<<itMax_ << std::endl;
-		
 		oldnbPts = nbPts;
 		
-		return ret or ++it >= itMax_;		
+		return ret or ++it >= itMax_ or k_ >= nbPts;		
 	};
 	
 	do 
-	{
-		//std::cout << "Iteration : " << it << "("<< cloud.getNbPoints() << ")" << std::endl;	
-#if 0
-	// 2.1 On pointness
-		reduce(cloud, thresh_pointness, "pointness");
-	// 2.2 On curveness
-		reduce(cloud, thresh_curveness, "curveness");
-	// 2.3 On surfaceness
-		reduce(cloud, thresh_surfaceness, "surfaceness");
-#else
-	//std::cout << "Filtering..."<< std::endl;
+	{	
 	// 2.1 On pointness
 		filterPointness(cloud, xi_expectation(3, sigma, radius), k);
 	// 2.2 On curveness
 		filterCurveness(cloud, xi_expectation(1, sigma, radius / 2.), k);
 	// 2.3 On surfaceness
 		filterSurfaceness(cloud, xi_expectation(2, sigma, radius), k);
-#endif
+
 	//Re-compute vote...
-		//std::cout << "Recompute vote..."<< std::endl;
-		tv.refine(cloud);
+		tv.encode(cloud, TensorVoting<T>::Encoding::BALL);
+		tv.cfvote(cloud, true);
+		tv.decompose();
+		tv.toDescriptors();
 		//std::cout << "Add descriptors..."<< std::endl;
 		addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, true /*lambdas*/, false /*tensors*/);
 	} 
-	while(not checkConvergence(cloud, 15 /*delta points*/));
+	while(not checkConvergence(cloud, 5 /*delta points*/));
 	
 //--- 3. Re-encode as Aware tensors + Re-vote ----------------------------------
-	//std::cout << "Re-encode as Aware tensors + Re-vote"<< std::endl;
 	addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, false /*lambdas*/, true /*tensors*/);
 	tv.encode(cloud, TensorVoting<T>::Encoding::AWARE_TENSOR);
 	tv.cfvote(cloud);
@@ -318,7 +300,7 @@ void SpectralDecompositionDataPointsFilter<T>::filterCurveness(DataPoints& pts, 
 		const T nl2 = lambda2(0,i) / k;
 		const T nl3 = lambda3(0,i) / k;
 		
-		if (nl1 < xi or nl2 < xi or nl3 < 0.5 * xi or randv < 0.8)
+		if (nl1 < xi or nl2 < xi or nl3 < 0.5 * xi or randv < 0.5)
 		{
 			pts.setColFrom(j, pts, i);
 			++j;
