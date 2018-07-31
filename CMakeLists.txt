@@ -149,7 +149,7 @@ message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INC
 #--------------------
 # DEPENDENCY: OpenMP (optional)
 #--------------------
-set(USE_OPEN_MP TRUE CACHE BOOL "Set to FALSE to not use OpenMP")
+set(USE_OPEN_MP FALSE CACHE BOOL "Set to TRUE to use OpenMP")
 if (USE_OPEN_MP)
 	find_package(OpenMP)
 	if (OPENMP_FOUND)
