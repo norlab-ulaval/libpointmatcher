@@ -743,3 +743,79 @@ TEST_F(DataFilterTest, SaliencyDataPointsFilter)
 	addFilter("SaliencyDataPointsFilter", params);
 	validate3dTransformation();
 }
+
+TEST_F(DataFilterTest, DistanceLimitDataPointsFilter)
+{
+	params = PM::Parameters();
+	params["dim"] = "0";
+	params["dist"] = toParam(6.0);
+	params["removeInside"] = "0";
+
+	// Filter on x axis
+	params["dim"] = "0";
+	icp.readingDataPointsFilters.clear();
+	addFilter("DistanceLimitDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+
+	// Filter on y axis
+	params["dim"] = "1";
+	icp.readingDataPointsFilters.clear();
+	addFilter("DistanceLimitDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+
+	// Filter on z axis (not existing)
+	params["dim"] = "2";
+	icp.readingDataPointsFilters.clear();
+	addFilter("DistanceLimitDataPointsFilter", params);
+	EXPECT_ANY_THROW(validate2dTransformation());
+	validate3dTransformation();
+
+	// Filter on a radius
+	params["dim"] = "-1";
+	icp.readingDataPointsFilters.clear();
+	addFilter("DistanceLimitDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+
+	// Parameter outside valid range
+	params["dim"] = "3";
+	//TODO: specify the exception, move that to GenericTest
+	EXPECT_ANY_THROW(addFilter("DistanceLimitDataPointsFilter", params));
+
+
+	params = PM::Parameters();
+	params["dim"] = "0";
+	params["dist"] = toParam(0.05);
+	params["removeInside"] = "1";
+
+	// Filter on x axis
+	params["dim"] = "0";
+	icp.readingDataPointsFilters.clear();
+	addFilter("DistanceLimitDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+
+	// Filter on y axis
+	params["dim"] = "1";
+	icp.readingDataPointsFilters.clear();
+	addFilter("DistanceLimitDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+
+	//TODO: move that to specific 2D test
+	// Filter on z axis (not existing)
+	params["dim"] = "2";
+	icp.readingDataPointsFilters.clear();
+	addFilter("DistanceLimitDataPointsFilter", params);
+	EXPECT_ANY_THROW(validate2dTransformation());
+	validate3dTransformation();
+
+	// Filter on a radius
+	params["dim"] = "-1";
+	icp.readingDataPointsFilters.clear();
+	addFilter("DistanceLimitDataPointsFilter", params);
+	validate2dTransformation();
+	validate3dTransformation();
+}

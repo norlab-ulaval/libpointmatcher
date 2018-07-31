@@ -61,6 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/NormalSpace.h"
 #include "DataPointsFilters/CovarianceSampling.h"
 #include "DataPointsFilters/Saliency.h"
+#include "DataPointsFilters/DistanceLimit.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -90,6 +91,7 @@ struct DataPointsFiltersImpl
 	typedef ::NormalSpaceDataPointsFilter<T> NormalSpaceDataPointsFilter;
 	typedef ::CovarianceSamplingDataPointsFilter<T> CovarianceSamplingDataPointsFilter;
 	typedef ::SaliencyDataPointsFilter<T> SaliencyDataPointsFilter;
+	typedef ::DistanceLimitDataPointsFilter<T> DistanceLimitDataPointsFilter;
 
 }; // DataPointsFiltersImpl
 
