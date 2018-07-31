@@ -146,6 +146,21 @@ include_directories(${libnabo_INCLUDE_DIRS})
 set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
 message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
 
+#--------------------
+# DEPENDENCY: OpenMP (optional)
+#--------------------
+set(USE_OPEN_MP FALSE CACHE BOOL "Set to TRUE to use OpenMP")
+if (USE_OPEN_MP)
+	find_package(OpenMP)
+	if (OPENMP_FOUND)
+		add_definitions(-fopenmp -DHAVE_OPENMP)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+		if (CMAKE_COMPILER_IS_GNUCC)
+			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
+    	message("-- OpenMP found, parallel computer enabled")
+		endif(CMAKE_COMPILER_IS_GNUCC)
+	endif(OPENMP_FOUND)
+endif (USE_OPEN_MP)
 
 #--------------------
 # DEPENDENCY: OpenCL (optional)
