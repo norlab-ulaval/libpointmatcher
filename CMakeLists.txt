@@ -335,6 +335,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/CovarianceSampling.cpp	
 	pointmatcher/DataPointsFilters/Saliency.cpp	
 	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp	
+	pointmatcher/DataPointsFilters/DistanceLimit.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

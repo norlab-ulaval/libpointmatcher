@@ -62,6 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/CovarianceSampling.h"
 #include "DataPointsFilters/Saliency.h"
 #include "DataPointsFilters/SpectralDecomposition.h"
+#include "DataPointsFilters/DistanceLimit.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -92,7 +93,7 @@ struct DataPointsFiltersImpl
 	typedef ::CovarianceSamplingDataPointsFilter<T> CovarianceSamplingDataPointsFilter;
 	typedef ::SaliencyDataPointsFilter<T> SaliencyDataPointsFilter;
 	typedef ::SpectralDecompositionDataPointsFilter<T> SpectralDecompositionDataPointsFilter;
-	
+	typedef ::DistanceLimitDataPointsFilter<T> DistanceLimitDataPointsFilter;
 
 }; // DataPointsFiltersImpl
 
