@@ -122,7 +122,10 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 //--- 4. Add descriptors
 	addDescriptor(cloud, tv, keepNormals, keepLabels, keepLambdas, keepTensors);
 	
-//--- 5. Remove randomly point till desired number
+//--- 5. Remove outliers
+	removeOutlier(cloud, tv);
+	
+//--- 6. Remove randomly point till desired number
 	const std::size_t reducedNbPts = cloud.getNbPoints();
 	if(nbMaxPts < reducedNbPts)
 	{
@@ -216,6 +219,42 @@ void SpectralDecompositionDataPointsFilter<T>::addDescriptor(DataPoints& pts, co
 	    std::cerr << "SpectralDecomposition<T>::inPlaceFilter::addDescriptor: Cannot add descriptors to pointcloud" << std::endl;
 	}
 
+}
+
+template <typename T>
+void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, const TensorVoting<T> &tv) const
+{
+	static constexpr int POINT = 0;
+	static constexpr int CURVE = 1;
+	static constexpr int SURFACE = 2;
+	
+	const std::size_t nbPts = pts.getNbPoints();
+	
+	const T th_p = (tv.pointness.maxCoeff() - tv.pointness.minCoeff()) * 0.1 + tv.pointness.minCoeff();
+	const T th_c = (tv.curveness.maxCoeff() - tv.curveness.minCoeff()) * 0.1 + tv.curveness.minCoeff();
+	const T th_s = (tv.surfaceness.maxCoeff() - tv.surfaceness.minCoeff()) * 0.1 + tv.surfaceness.minCoeff();
+	
+	std::size_t j = 0;
+	for (std::size_t i = 0; i < nbPts; ++i)
+	{
+		const T surfaceness = tv.surfaceness(i);
+		const T curveness = tv.curveness(i);
+		const T pointness = tv.pointness(i);
+		
+		int label;
+		(Vector(3) << pointness, curveness, surfaceness).finished().maxCoeff(&label); 
+
+		bool keepPt = ((label == POINT) and  (pointness > th_p)) 
+			or ((label == CURVE) and  (curveness > th_c)) 
+			or ((label == SURFACE) and  (surfaceness > th_s));
+		
+		if (keepPt)
+		{
+			pts.setColFrom(j, pts, i);
+			++j;
+		}
+	}
+	pts.conservativeResize(j);	
 }
 
 //------------------------------------------------------------------------------
