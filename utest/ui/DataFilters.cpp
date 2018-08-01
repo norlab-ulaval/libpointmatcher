@@ -751,6 +751,7 @@ TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 	
 	// This filter creates descriptors
 	params = PM::Parameters();
+		params["nbMaxPts"] = "5000";
 		params["k"] = "50";
 		params["sigma"] = "0.1";
 		params["radius"] = "0.4";
@@ -769,7 +770,8 @@ TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 	EXPECT_EQ(cloud.getDescriptorDim()+(3+3+1+3+1+4+7+3), filteredCloud.getDescriptorDim());
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
 	
-	params = PM::Parameters();
+	params.clear();
+		params["nbMaxPts"] = std::to_string(static_cast<std::size_t>(ref3D.getNbPoints() / 10.));
 		params["k"] = "50";
 		params["sigma"] = "1.";
 		params["radius"] = "2.";

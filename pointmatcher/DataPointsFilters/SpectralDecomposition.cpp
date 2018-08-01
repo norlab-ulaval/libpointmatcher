@@ -41,6 +41,7 @@ template <typename T>
 SpectralDecompositionDataPointsFilter<T>::SpectralDecompositionDataPointsFilter(const Parameters& params) :
 	PointMatcher<T>::DataPointsFilter("SpectralDecompositionDataPointsFilter", 
 		SpectralDecompositionDataPointsFilter::availableParameters(), params),
+	nbMaxPts{Parametrizable::get<std::size_t>("nbMaxPts")},
 	k{Parametrizable::get<std::size_t>("k")},
 	sigma{Parametrizable::get<T>("sigma")},
 	radius{Parametrizable::get<T>("radius")},
@@ -95,11 +96,11 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	do 
 	{	
 	// 2.1 On pointness
-		filterPointness(cloud, xi_expectation(3, sigma, radius), k);
+		filterPointness(cloud, xi_expectation(3, sigma, radius), tv.k);
 	// 2.2 On curveness
-		filterCurveness(cloud, xi_expectation(1, sigma, radius / 2.), k);
+		filterCurveness(cloud, xi_expectation(1, sigma, radius / 2.), tv.k);
 	// 2.3 On surfaceness
-		filterSurfaceness(cloud, xi_expectation(2, sigma, radius), k);
+		filterSurfaceness(cloud, xi_expectation(2, sigma, radius), tv.k);
 
 	//Re-compute vote...
 		tv.encode(cloud, TensorVoting<T>::Encoding::BALL);
@@ -120,6 +121,35 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 //--- 4. Add descriptors
 	addDescriptor(cloud, tv, keepNormals, keepLabels, keepLambdas, keepTensors);
+	
+//--- 5. Remove randomly point till desired number
+	const std::size_t reducedNbPts = cloud.getNbPoints();
+	if(nbMaxPts < reducedNbPts)
+	{
+	#if 0
+		constexpr std::size_t seed = 1;
+		std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
+		std::uniform_int_distribution<> unipts(0, reducedNbPts);
+	
+		for(std::size_t i = 0; i < nbMaxPts; ++i)
+		{
+			//cloud.swapCols(i, unipts(gen));
+			const std::size_t idx = unipts(gen);
+			cloud.setColFrom(i, cloud, idx);
+		}
+		std::cout << "\n------------" << nbMaxPts << " / " << reducedNbPts << " / " << nbPts << std::endl;
+		cloud.conservativeResize(nbMaxPts);
+		std::cout << "ça bug ici?" << std::endl;
+	#else
+		const T prob = T(nbMaxPts) / T(reducedNbPts);
+		Parameters params;	
+			params["prob"] = std::to_string(prob);
+		DataPointsFilter* rand_df= 
+			PM::get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
+		
+		rand_df->inPlaceFilter(cloud);
+	#endif
+	}
 }
 
 

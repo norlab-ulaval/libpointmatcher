@@ -68,6 +68,7 @@ struct SpectralDecompositionDataPointsFilter : public PointMatcher<T>::DataPoint
 	inline static const ParametersDoc availableParameters()
 	{
 		return boost::assign::list_of<ParameterDoc>
+		( "nbMaxPts", "Number max of points to keep", "5000", "30", "4294967295", &P::Comp<std::size_t> )
 		( "k", "Number of neighbors to consider", "50", "6", "4294967295", &P::Comp<std::size_t> )
 		( "sigma", "Scale of the vote in TensorVoting.", "0.2", "0.", "+inf", &P::Comp<T> )
 		( "radius", "Radius to control scale od uniform distribution.", "0.4", "0.", "+inf", &P::Comp<T> )
@@ -80,6 +81,7 @@ struct SpectralDecompositionDataPointsFilter : public PointMatcher<T>::DataPoint
 	}
 
 public:
+	const std::size_t nbMaxPts;
 	const std::size_t k;
 	const T sigma;
 	const T radius;
