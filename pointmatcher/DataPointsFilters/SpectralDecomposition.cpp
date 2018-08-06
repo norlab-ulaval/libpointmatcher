@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SpectralDecomposition.h"
 
 #include <random>
+#include <algorithm>
 
 // SpectralDecomposition
 template <typename T>
@@ -78,7 +79,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	tv.toDescriptors();
 	addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, true /*lambdas*/, false /*tensors*/);
 	
-//--- 2. Filter iteratively on each measure (surfaceness, curveness, pointness)
+//--- 2. Filter iteratively on each measure (surfaceness, curveness, pointness) to uniformize density
 	std::size_t it = 0;
 	const std::size_t itMax_ = itMax;
 	const std::size_t k_ = k;
@@ -125,6 +126,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 //--- 5. Remove outliers
 	removeOutlier(cloud, tv);
 	
+#if 0
 //--- 6. Remove randomly point till desired number
 	const std::size_t reducedNbPts = cloud.getNbPoints();
 	if(nbMaxPts < reducedNbPts)
@@ -153,6 +155,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		rand_df->inPlaceFilter(cloud);
 	#endif
 	}
+#endif
 }
 
 
@@ -230,9 +233,48 @@ void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, co
 	
 	const std::size_t nbPts = pts.getNbPoints();
 	
+	if(nbMaxPts > nbPts) return ; //nothing to do
+	
+	const T ratio = T(nbMaxPts) / T(nbPts);
+		
+	Vector labels(nbPts);
+	Matrix saliencies = (Matrix(nbPts,3) << tv.pointness.transpose(), tv.curveness.transpose(), tv.surfaceness.transpose()).finished();
+	for(std::size_t i = 0; i < nbPts; ++i)
+		saliencies.row(i).maxCoeff(&labels(i));
+	
+	const std::size_t nbSurface = (labels.array() == SURFACE).count();
+	const std::size_t nthSurface = static_cast<std::size_t>(nbSurface * ratio);
+	
+	const std::size_t nbCurve = (labels.array() == CURVE).count();
+	const std::size_t nthCurve = static_cast<std::size_t>(nbCurve * ratio);
+	
+	const std::size_t nbPoint = (labels.array() == POINT).count();
+	const std::size_t nthPoint = static_cast<std::size_t>(nbPoint * ratio);
+		
+	std::vector<T> surfaceness_(tv.surfaceness.data(), tv.surfaceness.data()+nbPts);
+	std::vector<T>  curveness_(tv.curveness.data(), tv.curveness.data()+nbPts);
+	std::vector<T>  pointness_(tv.pointness.data(), tv.pointness.data()+nbPts);
+
+	std::nth_element(surfaceness_.begin(), surfaceness_.begin() + nthSurface, surfaceness_.end(), std::greater<T>());
+	std::nth_element(curveness_.begin(), curveness_.begin() + nthCurve, curveness_.end(), std::greater<T>());
+	std::nth_element(pointness_.begin(), pointness_.begin() + nthPoint, pointness_.end(), std::greater<T>());	
+
+	const T th_s = surfaceness_[nthSurface];
+	const T th_c = curveness_[nthCurve];
+	const T th_p = pointness_[nthPoint];
+#if 0		
+	std::cout   << nbMaxPts << " / "<< nbPts << " = " << ratio <<std::endl
+				<< "S=" <<nbSurface << ", C="<< nbCurve << ", P=" << nbPoint <<std::endl
+				<< "--------------------------------------------------------" <<std::endl
+				<< "nthS=" <<nthSurface << ", nthC="<< nthCurve << ", nthP=" << nthPoint <<std::endl
+				<< "--------------------------------------------------------" <<std::endl
+				<< "th_S=" <<th_s << ", th_C="<< th_c << ", th_P=" << th_p <<std::endl << std::endl;
+#endif
+#if 0
 	const T th_p = (tv.pointness.maxCoeff() - tv.pointness.minCoeff()) * 0.1 + tv.pointness.minCoeff();
 	const T th_c = (tv.curveness.maxCoeff() - tv.curveness.minCoeff()) * 0.1 + tv.curveness.minCoeff();
 	const T th_s = (tv.surfaceness.maxCoeff() - tv.surfaceness.minCoeff()) * 0.1 + tv.surfaceness.minCoeff();
+#endif
 	
 	std::size_t j = 0;
 	for (std::size_t i = 0; i < nbPts; ++i)
@@ -241,12 +283,14 @@ void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, co
 		const T curveness = tv.curveness(i);
 		const T pointness = tv.pointness(i);
 		
+		const int label = static_cast<int>(labels(i));
+#if 0
 		int label;
 		(Vector(3) << pointness, curveness, surfaceness).finished().maxCoeff(&label); 
-
-		bool keepPt = ((label == POINT) and  (pointness > th_p)) 
-			or ((label == CURVE) and  (curveness > th_c)) 
-			or ((label == SURFACE) and  (surfaceness > th_s));
+#endif
+		bool keepPt = ((label == POINT) and  (pointness >= th_p)) 
+			or ((label == CURVE) and  (curveness >= th_c)) 
+			or ((label == SURFACE) and  (surfaceness >= th_s));
 		
 		if (keepPt)
 		{
