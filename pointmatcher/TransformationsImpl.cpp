@@ -129,7 +129,7 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 
 		// R = [ a b]
 		//     [-b a]
-		if(parameters(0,0) - parameters(1,1) > epsilon || parameters(1,0) + parameters(0,1) > epsilon)
+		if(anyabs(parameters(0,0) - parameters(1,1)) > epsilon || anyabs(parameters(1,0) + parameters(0,1)) > epsilon)
 		{
 			throw TransformationError("RigidTransformation: Error, non-rigid transformations are not supported.");
 		}
