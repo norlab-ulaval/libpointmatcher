@@ -99,7 +99,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	// 2.1 On pointness
 		filterPointness(cloud, xi_expectation(3, sigma, radius), tv.k);
 	// 2.2 On curveness
-		filterCurveness(cloud, xi_expectation(1, sigma, radius / 2.), tv.k);
+		filterCurveness(cloud, xi_expectation(1, sigma, radius/* / 2. */), tv.k);
 	// 2.3 On surfaceness
 		filterSurfaceness(cloud, xi_expectation(2, sigma, radius), tv.k);
 
@@ -121,11 +121,114 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	tv.toDescriptors();
 
 //--- 4. Add descriptors
-	addDescriptor(cloud, tv, keepNormals, keepLabels, keepLambdas, keepTensors);
+	addDescriptor(cloud, tv, keepNormals, true /*labels*/, keepLambdas, keepTensors); //TODO: add remove not kept descriptors
 	
 //--- 5. Remove outliers
 	removeOutlier(cloud, tv);
 	
+	//std::cout<< "NbPts: " << cloud.getNbPoints() << std::endl;
+
+#if 1
+//--- 6. Reduce point cloud
+	static constexpr int POINT = 1;
+	static constexpr int CURVE = 2;
+	static constexpr int SURFACE = 3;
+	
+	constexpr std::size_t seed = 1;
+	std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
+	std::uniform_real_distribution<> uni01(0., 1.);
+	
+	Matrix labels = cloud.getDescriptorViewByName("labels");
+	
+	const std::size_t nbSurface = (labels.array() == SURFACE).count();
+	const std::size_t nbCurve = (labels.array() == CURVE).count();
+	const std::size_t nbPoint = (labels.array() == POINT).count();
+
+	//std::cout<< "NbCurve = " << nbCurve << ", NbSurface = " << nbSurface << ", NbPoint = " << nbPoint << std::endl;
+	
+	T surfaceRatio = 0.; bool keepAllSurface = false;
+	T curveRatio = 0.; bool keepAllCurve = false;
+	T pointRatio = 0.; 
+	
+	if(nbMaxPts < cloud.getNbPoints())
+	{
+		#if 0
+		// 6.1 Keep curves
+		int leftToKeep = nbMaxPts - nbCurve;
+		if(leftToKeep < 0.) //more curve than desried pts 
+		{ 
+			curveRatio = T(nbMaxPts) / T(nbCurve);
+		}
+		else
+		{
+			keepAllCurve = true;
+			
+			// 6.2 Keep surfaces
+			leftToKeep = leftToKeep - nbSurface;
+			if(leftToKeep < 0.) //more curve than desried pts 
+			{ 
+				surfaceRatio = T(nbMaxPts - nbCurve) / T(nbSurface);
+			}
+			else
+			{
+				keepAllSurface = true;
+				
+				// 6.3 Keep points
+				leftToKeep = leftToKeep - nbPoint;
+				pointRatio = T(nbMaxPts - nbCurve - nbPoint) / T(nbPoint);	
+			}		
+		}		
+		#else
+		// 6.1 Keep surfaces
+		int leftToKeep = nbMaxPts - nbSurface;
+		if(leftToKeep < 0.) //more curve than desried pts 
+		{ 
+			surfaceRatio = T(nbMaxPts) / T(nbSurface);
+		}
+		else
+		{
+			keepAllSurface = true;
+			
+			// 6.2 Keep curves
+			leftToKeep = leftToKeep - nbCurve;
+			if(leftToKeep < 0.) //more curve than desried pts 
+			{ 
+				curveRatio = T(nbMaxPts - nbSurface) / T(nbCurve);
+			}
+			else
+			{
+				keepAllCurve = true;
+				
+				// 6.3 Keep points
+				leftToKeep = leftToKeep - nbPoint;
+				pointRatio = T(nbMaxPts - nbCurve - nbPoint) / T(nbPoint);	
+			}		
+		}	
+		#endif
+
+		//std::cout<< "("<<keepAllCurve<<") cr= " << curveRatio << std::endl;
+		//std::cout<< "("<<keepAllSurface<<") sr= " << surfaceRatio << std::endl;
+		//std::cout<< "(0) pr= " << pointRatio << std::endl;
+	
+		std::size_t j = 0;
+		for (std::size_t i = 0; i < cloud.getNbPoints(); ++i)
+		{
+			const int label = static_cast<int>(labels(i));
+			const T randv = uni01(gen);
+
+			bool keepPt = ((label == POINT) and  (randv < pointRatio)) 
+				or ((label == CURVE) and  (keepAllCurve or randv < curveRatio)) 
+				or ((label == SURFACE) and  (keepAllSurface or randv < surfaceRatio));
+		
+			if (keepPt)
+			{
+				cloud.setColFrom(j, cloud, i);
+				++j;
+			}
+		}
+		cloud.conservativeResize(j);	
+	}
+#endif	
 #if 0
 //--- 6. Remove randomly point till desired number
 	const std::size_t reducedNbPts = cloud.getNbPoints();
@@ -156,6 +259,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	#endif
 	}
 #endif
+	//cloud.save("spdf-"+std::to_string(getpid())+"-"+std::to_string(cloud.getNbPoints())+".vtk");
 }
 
 
@@ -234,7 +338,8 @@ void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, co
 	const std::size_t nbPts = pts.getNbPoints();
 	
 	if(nbMaxPts > nbPts) return ; //nothing to do
-	
+
+#if 0	
 	const T ratio = T(nbMaxPts) / T(nbPts);
 		
 	Vector labels(nbPts);
@@ -251,7 +356,7 @@ void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, co
 	const std::size_t nbPoint = (labels.array() == POINT).count();
 	const std::size_t nthPoint = static_cast<std::size_t>(nbPoint * ratio);
 		
-	std::vector<T> surfaceness_(tv.surfaceness.data(), tv.surfaceness.data()+nbPts);
+	std::vector<T>  surfaceness_(tv.surfaceness.data(), tv.surfaceness.data()+nbPts);
 	std::vector<T>  curveness_(tv.curveness.data(), tv.curveness.data()+nbPts);
 	std::vector<T>  pointness_(tv.pointness.data(), tv.pointness.data()+nbPts);
 
@@ -262,15 +367,15 @@ void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, co
 	const T th_s = surfaceness_[nthSurface];
 	const T th_c = curveness_[nthCurve];
 	const T th_p = pointness_[nthPoint];
-#if 0		
-	std::cout   << nbMaxPts << " / "<< nbPts << " = " << ratio <<std::endl
-				<< "S=" <<nbSurface << ", C="<< nbCurve << ", P=" << nbPoint <<std::endl
-				<< "--------------------------------------------------------" <<std::endl
-				<< "nthS=" <<nthSurface << ", nthC="<< nthCurve << ", nthP=" << nthPoint <<std::endl
-				<< "--------------------------------------------------------" <<std::endl
-				<< "th_S=" <<th_s << ", th_C="<< th_c << ", th_P=" << th_p <<std::endl << std::endl;
-#endif
-#if 0
+	#if 0		
+		std::cout   << nbMaxPts << " / "<< nbPts << " = " << ratio <<std::endl
+					<< "S=" <<nbSurface << ", C="<< nbCurve << ", P=" << nbPoint <<std::endl
+					<< "--------------------------------------------------------" <<std::endl
+					<< "nthS=" <<nthSurface << ", nthC="<< nthCurve << ", nthP=" << nthPoint <<std::endl
+					<< "--------------------------------------------------------" <<std::endl
+					<< "th_S=" <<th_s << ", th_C="<< th_c << ", th_P=" << th_p <<std::endl << std::endl;
+	#endif
+#else
 	const T th_p = (tv.pointness.maxCoeff() - tv.pointness.minCoeff()) * 0.1 + tv.pointness.minCoeff();
 	const T th_c = (tv.curveness.maxCoeff() - tv.curveness.minCoeff()) * 0.1 + tv.curveness.minCoeff();
 	const T th_s = (tv.surfaceness.maxCoeff() - tv.surfaceness.minCoeff()) * 0.1 + tv.surfaceness.minCoeff();
@@ -282,9 +387,9 @@ void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, co
 		const T surfaceness = tv.surfaceness(i);
 		const T curveness = tv.curveness(i);
 		const T pointness = tv.pointness(i);
-		
+#if 0		
 		const int label = static_cast<int>(labels(i));
-#if 0
+#else
 		int label;
 		(Vector(3) << pointness, curveness, surfaceness).finished().maxCoeff(&label); 
 #endif
