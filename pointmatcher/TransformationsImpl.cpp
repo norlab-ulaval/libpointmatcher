@@ -97,7 +97,7 @@ bool TransformationsImpl<T>::RigidTransformation::checkParameters(const Transfor
 
 	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
 	
-	if(anyabs(1 - anyabs(R.determinant())) > epsilon)
+	if(anyabs(1 - R.determinant()) > epsilon)
 		return false;
 	else
 		return true;
@@ -125,8 +125,14 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 	}
 	else if(ortho.cols() == 3)
 	{
+		const T epsilon = 0.001;
+
 		// R = [ a b]
 		//     [-b a]
+		if(parameters(0,0) - parameters(1,1) > epsilon || parameters(1,0) + parameters(0,1) > epsilon)
+		{
+			throw TransformationError("RigidTransformation: Error, non-rigid transformations are not supported.");
+		}
 		
 		// mean of a and b
 		T a = (parameters(0,0) + parameters(1,1))/2; 	
