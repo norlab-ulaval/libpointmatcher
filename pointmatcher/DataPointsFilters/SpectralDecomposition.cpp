@@ -37,6 +37,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <random>
 #include <algorithm>
 
+#include "OctreeGrid.h"
+
+#define OCTREE_VERSION 1
+#define RANDOM_VERSION 0
+#define SURFACE_FIRST_VERSION 0
+#define SALIENCIES_VERSION 0
+
 // SpectralDecomposition
 template <typename T>
 SpectralDecompositionDataPointsFilter<T>::SpectralDecompositionDataPointsFilter(const Parameters& params) :
@@ -128,57 +135,79 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	
 	//std::cout<< "NbPts: " << cloud.getNbPoints() << std::endl;
 
-#if 1
-//--- 6. Reduce point cloud
-	static constexpr int POINT = 1;
-	static constexpr int CURVE = 2;
-	static constexpr int SURFACE = 3;
-	
-	constexpr std::size_t seed = 1;
-	std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
-	std::uniform_real_distribution<> uni01(0., 1.);
-	
-	Matrix labels = cloud.getDescriptorViewByName("labels");
-	
-	const std::size_t nbSurface = (labels.array() == SURFACE).count();
-	const std::size_t nbCurve = (labels.array() == CURVE).count();
-	const std::size_t nbPoint = (labels.array() == POINT).count();
-
-	//std::cout<< "NbCurve = " << nbCurve << ", NbSurface = " << nbSurface << ", NbPoint = " << nbPoint << std::endl;
-	
-	T surfaceRatio = 0.; bool keepAllSurface = false;
-	T curveRatio = 0.; bool keepAllCurve = false;
-	T pointRatio = 0.; 
-	
 	if(nbMaxPts < cloud.getNbPoints())
 	{
-		#if 0
-		// 6.1 Keep curves
-		int leftToKeep = nbMaxPts - nbCurve;
-		if(leftToKeep < 0.) //more curve than desried pts 
-		{ 
-			curveRatio = T(nbMaxPts) / T(nbCurve);
-		}
-		else
+#if OCTREE_VERSION
+//--- 6. Reduce point cloud using octree for spatial distribution (surface first, then curve, then point)
+		static constexpr int CURVE = 2;
+		static constexpr int SURFACE = 3;
+		
+		Matrix labels = cloud.getDescriptorViewByName("labels");
+	
+		const std::size_t nbSurface = (labels.array() == SURFACE).count();
+		const std::size_t nbCurve = (labels.array() == CURVE).count();
+
+		//std::cout<< "NbCurve = " << nbCurve << ", NbSurface = " << nbSurface << ", NbPoint = " << nbPoint << std::endl;
+	
+		bool keepAllSurface = true, keepAllCurve = true, keepAllPoint = true;
+	
+		int leftToKeep = nbMaxPts - nbSurface;
+		if(leftToKeep < 0) keepAllCurve = false;
+		leftToKeep -= nbCurve;
+		if(leftToKeep < 0) keepAllPoint = false;
+	
+		if(!keepAllPoint) 
 		{
-			keepAllCurve = true;
-			
-			// 6.2 Keep surfaces
-			leftToKeep = leftToKeep - nbSurface;
-			if(leftToKeep < 0.) //more curve than desried pts 
-			{ 
-				surfaceRatio = T(nbMaxPts - nbCurve) / T(nbSurface);
-			}
-			else
+			std::size_t j = 0;
+			for (std::size_t i = 0; i < cloud.getNbPoints(); ++i)
 			{
-				keepAllSurface = true;
-				
-				// 6.3 Keep points
-				leftToKeep = leftToKeep - nbPoint;
-				pointRatio = T(nbMaxPts - nbCurve - nbPoint) / T(nbPoint);	
-			}		
-		}		
-		#else
+				const int label = static_cast<int>(labels(i));
+
+				bool keepPt = ((label == CURVE) and keepAllCurve) 
+					or ((label == SURFACE) and keepAllSurface);
+		
+				if (keepPt)
+				{
+					cloud.setColFrom(j, cloud, i);
+					++j;
+				}
+			}
+			cloud.conservativeResize(j);
+		}
+	
+		const T ratio = T(cloud.getNbPoints()) / T(nbMaxPts); 
+	
+		Parameters params; 
+			params["maxPointByNode"] = std::to_string(static_cast<std::size_t>(ratio));
+			params["samplingMethod"] = "3"; //medoid
+			params["buildParallel"] = "0";
+		
+		DataPointsFilter* octreeFilter = 
+			PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
+
+		octreeFilter->inPlaceFilter(cloud);
+		
+		const T prob = T(nbMaxPts) / T(cloud.getNbPoints());
+		params.clear();	params["prob"] = std::to_string(prob);
+		DataPointsFilter* rand_df= 
+			PM::get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
+		
+		rand_df->inPlaceFilter(cloud);
+		
+#elif SURFACE_FIRST_VERSION
+//--- 6. Reduce point cloud taking surface first, then curves, then points
+		static constexpr int POINT = 1;
+		static constexpr int CURVE = 2;
+		static constexpr int SURFACE = 3;
+
+		constexpr std::size_t seed = 1;
+		std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
+		std::uniform_real_distribution<> uni01(0., 1.);
+		
+		T surfaceRatio = 0.; bool keepAllSurface = false;
+		T curveRatio = 0.; bool keepAllCurve = false;
+		T pointRatio = 0.; 
+	
 		// 6.1 Keep surfaces
 		int leftToKeep = nbMaxPts - nbSurface;
 		if(leftToKeep < 0.) //more curve than desried pts 
@@ -203,8 +232,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 				leftToKeep = leftToKeep - nbPoint;
 				pointRatio = T(nbMaxPts - nbCurve - nbPoint) / T(nbPoint);	
 			}		
-		}	
-		#endif
+		}
 
 		//std::cout<< "("<<keepAllCurve<<") cr= " << curveRatio << std::endl;
 		//std::cout<< "("<<keepAllSurface<<") sr= " << surfaceRatio << std::endl;
@@ -227,28 +255,11 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			}
 		}
 		cloud.conservativeResize(j);	
-	}
-#endif	
-#if 0
-//--- 6. Remove randomly point till desired number
-	const std::size_t reducedNbPts = cloud.getNbPoints();
-	if(nbMaxPts < reducedNbPts)
-	{
-	#if 0
-		constexpr std::size_t seed = 1;
-		std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
-		std::uniform_int_distribution<> unipts(0, reducedNbPts);
 	
-		for(std::size_t i = 0; i < nbMaxPts; ++i)
-		{
-			//cloud.swapCols(i, unipts(gen));
-			const std::size_t idx = unipts(gen);
-			cloud.setColFrom(i, cloud, idx);
-		}
-		std::cout << "\n------------" << nbMaxPts << " / " << reducedNbPts << " / " << nbPts << std::endl;
-		cloud.conservativeResize(nbMaxPts);
-		std::cout << "ça bug ici?" << std::endl;
-	#else
+#elif RANDOM_VERSION
+//--- 6. Remove randomly point till desired number
+		const std::size_t reducedNbPts = cloud.getNbPoints();
+
 		const T prob = T(nbMaxPts) / T(reducedNbPts);
 		Parameters params;	
 			params["prob"] = std::to_string(prob);
@@ -256,10 +267,10 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			PM::get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
 		
 		rand_df->inPlaceFilter(cloud);
-	#endif
-	}
 #endif
-	//cloud.save("spdf-"+std::to_string(getpid())+"-"+std::to_string(cloud.getNbPoints())+".vtk");
+	} //nbMaxPts < cloud.getNbPoints()
+	
+	cloud.save("spdf-"+std::to_string(getpid())+"-"+std::to_string(cloud.getNbPoints())+".vtk");
 }
 
 
@@ -339,7 +350,7 @@ void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, co
 	
 	if(nbMaxPts > nbPts) return ; //nothing to do
 
-#if 0	
+#if SALIENCIES_VERSION	
 	const T ratio = T(nbMaxPts) / T(nbPts);
 		
 	Vector labels(nbPts);
@@ -387,7 +398,7 @@ void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, co
 		const T surfaceness = tv.surfaceness(i);
 		const T curveness = tv.curveness(i);
 		const T pointness = tv.pointness(i);
-#if 0		
+#if SALIENCIES_VERSION		
 		const int label = static_cast<int>(labels(i));
 #else
 		int label;
