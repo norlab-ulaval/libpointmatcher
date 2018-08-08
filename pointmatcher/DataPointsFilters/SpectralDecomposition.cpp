@@ -179,7 +179,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	
 		Parameters params; 
 			params["maxPointByNode"] = std::to_string(static_cast<std::size_t>(ratio));
-			params["samplingMethod"] = "3"; //medoid
+			params["samplingMethod"] = "2"; //medoid
 			params["buildParallel"] = "0";
 		
 		DataPointsFilter* octreeFilter = 
