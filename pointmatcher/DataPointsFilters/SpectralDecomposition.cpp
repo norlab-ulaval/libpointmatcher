@@ -38,13 +38,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 #include "OctreeGrid.h"
+#include "SamplingSurfaceNormal.h"
 
-#define OCTREE_VERSION 1
+#define OCTREE_GEOM_VERSION 1
+#define SSNORM_VERSION 0
+#define OCTREE_VERSION 0
 #define RANDOM_VERSION 0
 #define SURFACE_FIRST_VERSION 0
 #define SALIENCIES_VERSION 0
 
-#define INSPECT_POINTCLOUD 0
+#define INSPECT_POINTCLOUD 1
 
 // SpectralDecomposition
 template <typename T>
@@ -139,10 +142,138 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 	if(nbMaxPts < cloud.getNbPoints())
 	{
-#if OCTREE_VERSION
+#if OCTREE_GEOM_VERSION
+//--- 6. Reduce point cloud using octree for spatial distribution on each geometric features
+	//6.1 create pointcloud associated to each geometric features
+		auto cutlabels = [](const DP& cloud, bool largerThan, T threshold) -> DP {
+			Parameters params; 
+				params["descName"] = "labels";
+				params["useLargerThan"] = std::to_string(largerThan);
+				params["threshold"] = std::to_string(threshold);
+		
+			DataPointsFilter* trimDesc = 
+				PM::get().DataPointsFilterRegistrar.create("CutAtDescriptorThresholdDataPointsFilter", params);
+
+			return trimDesc->filter(cloud);
+		};
+		
+		DP junctions = cutlabels(cloud, true, 1.5);
+		const DP temp = cutlabels(cloud, false, 1.5);
+		DP curves = cutlabels(temp, true, 2.5);
+		DP surfaces = cutlabels(temp, false, 2.5);
+		
+		//std::cout<< "NbCurve = " << curves.getNbPoints() << ", NbSurface = " << surfaces.getNbPoints() << ", NbPoint = " << junctions.getNbPoints() << std::endl;
+		
+	//6.2 Compute parameters for each geometric features
+		auto maxparam = [](const DP& pts, std::size_t nbPts, std::size_t nbMaxPts) -> std::size_t {
+			return static_cast<std::size_t>(T(pts.getNbPoints() * nbMaxPts) / T(nbPts));
+		};
+	
+	//6.3 Subsample using octree for each geometric features
+		auto octreefilter = [](DP& cloud, std::size_t nbMaxPts){
+			//std::cout << "nbmaxPts = " << nbMaxPts << std::endl;
+			
+			const T ratio = T(cloud.getNbPoints()) / T(nbMaxPts); 
+			Parameters params; 
+				params["maxPointByNode"] = std::to_string(static_cast<std::size_t>(ratio));
+				params["samplingMethod"] = "2"; //centroid
+				params["buildParallel"] = "0";
+		
+			DataPointsFilter* octreeFilter = 
+				PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
+
+			octreeFilter->inPlaceFilter(cloud);
+			
+			const T prob = T(nbMaxPts) / T(cloud.getNbPoints()); if(prob > T(1.)) return;
+			
+			params.clear();	params["prob"] = std::to_string(prob);
+			DataPointsFilter* rand_df= 
+				PM::get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params);
+		
+			rand_df->inPlaceFilter(cloud);
+		};
+		
+		octreefilter(surfaces, maxparam(surfaces, cloud.getNbPoints(), nbMaxPts));
+		octreefilter(curves, maxparam(curves, cloud.getNbPoints(), nbMaxPts));
+		octreefilter(junctions, maxparam(junctions, cloud.getNbPoints(), nbMaxPts));
+	
+	//6.4 Reassemble point cloud
+		std::size_t j = 0;
+		
+		auto inplace = [&j](DP& dest, const DP& origin) -> void {
+			for (std::size_t i = 0; i < origin.getNbPoints(); ++i)
+			{
+				dest.setColFrom(j, origin, i);
+				++j;
+			}
+		};
+		
+		inplace(cloud, surfaces);
+		inplace(cloud, curves);
+		inplace(cloud, junctions);
+		
+		cloud.conservativeResize(j);
+
+#elif SSNORM_VERSION 
+//--- 6. Reduce point cloud using covariance analysis to keep stable points
+		static constexpr int CURVE = 2;
+		static constexpr int SURFACE = 3;
+		
+		constexpr std::size_t seed = 1;
+		std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
+		std::uniform_real_distribution<> uni01(0., 1.);
+		
+		Matrix labels = cloud.getDescriptorViewByName("labels");
+	
+		const std::size_t nbSurface = (labels.array() == SURFACE).count();
+		const std::size_t nbCurve = (labels.array() == CURVE).count();
+
+		//std::cout<< "NbCurve = " << nbCurve << ", NbSurface = " << nbSurface << ", NbPoint = " << nbPoint << std::endl;
+	
+		bool keepAllSurface = true, keepAllCurve = true, keepAllPoint = true;
+	
+		int leftToKeep = nbMaxPts - nbSurface;
+		if(leftToKeep < 0) keepAllCurve = false;
+		leftToKeep -= nbCurve;
+		if(leftToKeep < 0) keepAllPoint = false;
+	
+		if(!keepAllPoint) 
+		{
+			std::size_t j = 0;
+			for (std::size_t i = 0; i < cloud.getNbPoints(); ++i)
+			{
+				const int label = static_cast<int>(labels(i));
+
+				bool keepPt = ((label == CURVE) and keepAllCurve) 
+					or ((label == SURFACE) and keepAllSurface);
+		
+				if (keepPt)
+				{
+					cloud.setColFrom(j, cloud, i);
+					++j;
+				}
+			}
+			cloud.conservativeResize(j);
+		}
+	
+		const T ratio = std::max(T(cloud.getNbPoints()) / T(nbMaxPts), T(3.)); 
+		
+		Parameters params; 
+			params["knn"] = std::to_string(static_cast<std::size_t>(ratio));
+			params["samplingMethod"] = "1"; //1 pt/knn
+		
+		DataPointsFilter* ssnormdf = 
+			PM::get().DataPointsFilterRegistrar.create("SamplingSurfaceNormalDataPointsFilter", params);
+			
+		ssnormdf->inPlaceFilter(cloud);	
+#elif OCTREE_VERSION
 //--- 6. Reduce point cloud using octree for spatial distribution (surface first, then curve, then point)
 		static constexpr int CURVE = 2;
 		static constexpr int SURFACE = 3;
+		
+		constexpr std::size_t seed = 1;
+		std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
+		std::uniform_real_distribution<> uni01(0., 1.);
 		
 		Matrix labels = cloud.getDescriptorViewByName("labels");
 	
