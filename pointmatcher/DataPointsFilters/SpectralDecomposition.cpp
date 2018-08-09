@@ -44,6 +44,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SURFACE_FIRST_VERSION 0
 #define SALIENCIES_VERSION 0
 
+#define INSPECT_POINTCLOUD 0
+
 // SpectralDecomposition
 template <typename T>
 SpectralDecompositionDataPointsFilter<T>::SpectralDecompositionDataPointsFilter(const Parameters& params) :
@@ -270,7 +272,9 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 #endif
 	} //nbMaxPts < cloud.getNbPoints()
 	
+#if INSPECT_POINTCLOUD
 	cloud.save("spdf-"+std::to_string(getpid())+"-"+std::to_string(cloud.getNbPoints())+".vtk");
+#endif
 }
 
 
