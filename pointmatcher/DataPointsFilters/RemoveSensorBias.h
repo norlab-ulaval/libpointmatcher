@@ -114,9 +114,9 @@ private:
 
 template<typename T>
 const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::LMS_1XX =
-	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(1.413717e-2,  1.54987849, 0.00359711);
+	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(0.0075049, 6.08040951e+00, 3.17921789e-03 );
 
 template<typename T>
 const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::HDL_32E =
-	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(2.967060e-3,2.52773563, 0.007084910);
+	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(0.0014835, 1.03211569e+01, 7.07893371e-03);
 

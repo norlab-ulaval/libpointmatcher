@@ -820,10 +820,10 @@ TEST_F(DataFilterTest, SameFilterInstanceTwice)
 TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 {
 	const size_t nbPts = 6;
-	const double expectedErrors_LMS1xx[6] = {0., -0.0016698, -0.06121,
-						 0., -0.0023898, -0.15710};
-	const double expectedErrors_HDL32E[6]  = {0., -0.0029476, -0.07590,
-						  0., -0.0029993, -0.08273};
+	const double expectedErrors_LMS1xx[6] = {0., -0.0015156, -0.059276,
+						 0., -0.002311, -0.163689};
+	const double expectedErrors_HDL32E[6]  = {0., -0.002945, -0.075866,
+						  0., -0.002998,-0.082777 };
 	
 	PM::Matrix points = (PM::Matrix(3,6) << 1, 1, 1, 5, 5, 5,
 		0, 0, 0, 0, 0, 0,
@@ -864,7 +864,7 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 	for(std::size_t i = 0; i< nbPts; ++i)
 	{
 		const double error = pointCloud.features.col(i).norm() - resultCloud.features.col(i).norm();
-		EXPECT_NEAR(expectedErrors_LMS1xx[i], error, 1e-4); // below mm
+		EXPECT_NEAR(expectedErrors_LMS1xx[i], error, 1e-3); // below mm
 	}
 	
 	parameters["sensorType"] = toParam(1); //HDL32E
