@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SURFACE_FIRST_VERSION 0
 #define SALIENCIES_VERSION 0
 
-#define INSPECT_POINTCLOUD 1
+#define INSPECT_POINTCLOUD 0
 
 // SpectralDecomposition
 template <typename T>
@@ -106,14 +106,25 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		return ret or ++it >= itMax_ or k_ >= nbPts;		
 	};
 	
+	const T xi3 = xi_expectation(3, sigma, radius);
+	const T xi2 = xi_expectation(2, sigma, radius);
+	const T xi1 = xi_expectation(1, sigma, radius/* / 2. */);
+	
+	#if INSPECT_POINTCLOUD
+		std::cout << "Xi3 = " << xi3 << ", Xi2 = " << xi2 << ", Xi1 = " << xi1 << std::endl;
+	#endif
+	
 	do 
 	{	
+		#if INSPECT_POINTCLOUD
+			cloud.save("spdf-"+std::to_string(getpid())+"-"+std::to_string(it)+".vtk");
+		#endif
 	// 2.1 On pointness
-		filterPointness(cloud, xi_expectation(3, sigma, radius), tv.k);
+		filterPointness(cloud, xi3, tv.k);
 	// 2.2 On curveness
-		filterCurveness(cloud, xi_expectation(1, sigma, radius/* / 2. */), tv.k);
+		filterCurveness(cloud, xi1, tv.k);
 	// 2.3 On surfaceness
-		filterSurfaceness(cloud, xi_expectation(2, sigma, radius), tv.k);
+		filterSurfaceness(cloud, xi2, tv.k);
 
 	//Re-compute vote...
 		tv.encode(cloud, TensorVoting<T>::Encoding::BALL);
@@ -124,6 +135,10 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, true /*lambdas*/, false /*tensors*/);
 	} 
 	while(not checkConvergence(cloud, 5 /*delta points*/));
+	
+	#if INSPECT_POINTCLOUD
+		cloud.save("spdf-"+std::to_string(getpid())+"-"+std::to_string(it)+".vtk");
+	#endif
 	
 //--- 3. Re-encode as Aware tensors + Re-vote ----------------------------------
 	addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, false /*lambdas*/, true /*tensors*/);
