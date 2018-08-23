@@ -74,7 +74,7 @@ void InspectorsImpl<T>::PerformanceInspector::addStat(const std::string& name, d
 	HistogramMap::iterator it(stats.find(name));
 	if (it == stats.end()) {
 		LOG_INFO_STREAM("Adding new stat: " << name);
-		it = stats.insert(HistogramMap::value_type(name, Histogram(16, name, baseFileName, bDumpPerfOnExit))).first;
+		it = stats.insert(HistogramMap::value_type(name, Histogram(16, name, this->dumpPath + baseFileName, bDumpPerfOnExit))).first;
 	}
 	it->second.push_back(data);
 }
