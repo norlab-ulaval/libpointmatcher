@@ -408,7 +408,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 	
 	if (bDumpReference &&
 			((bDumpReferenceOnlyFirstIter && isFirstIter) || !bDumpReferenceOnlyFirstIter)
-		){
+	){
 		isFirstIter = false;
 		ostream* streamRef(openStream("reference", iterationNumber));
 		dumpDataPoints(filteredReference, *streamRef);
