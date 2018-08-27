@@ -120,8 +120,8 @@ struct InspectorsImpl
 		const bool bDumpDataLinks;
 		const bool bDumpReading;
 		const bool bDumpReference;
-    const bool bDumpReferenceOnlyFirstIter;
-    bool isFirstIter;
+		const bool bDumpReferenceOnlyFirstIter;
+		bool isFirstIter;
 		const bool bWriteBinary;
 
 	public:
@@ -183,13 +183,13 @@ struct InspectorsImpl
 		const bool bDumpDataLinks;
 		const bool bDumpReading;
 		const bool bDumpReference;
-    const bool bDumpReferenceOnlyFirstIter;
+		const bool bDumpReferenceOnlyFirstIter;
 		
 	protected:
 		virtual std::ostream* openStream(const std::string& role);
 		virtual std::ostream* openStream(const std::string& role, const size_t iterationCount);
 		virtual void closeStream(std::ostream* stream);
-    bool isFirstIter;
+		bool isFirstIter;
 		
 	public:
 		VTKFileInspector(const Parameters& params = Parameters());

@@ -88,15 +88,15 @@ void PointMatcher<T>::Inspector::finish(const size_t iterationCount)
 
 template<typename T>
 void PointMatcher<T>::Inspector::setAndValidateDumpPath(std::string path) {
-  if (!path.empty() && path.back() != '/') {
-    path += "/";
-  }
-  dumpPath = path;
+	if (!path.empty() && path.back() != '/') {
+		path += "/";
+	}
+	dumpPath = path;
 }
 
 template<typename T>
 std::string PointMatcher<T>::Inspector::getDumpPath() const {
-  return dumpPath;
+	return dumpPath;
 }
 
 template struct PointMatcher<float>::Inspector;

@@ -142,9 +142,9 @@ InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string&
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
 	bDumpReference(Parametrizable::get<bool>("dumpReference")),
-  bWriteBinary(Parametrizable::get<bool>("writeBinary")),
-  bDumpReferenceOnlyFirstIter(Parametrizable::get<bool>("dumpReferenceOnlyFirstIter")),
-  isFirstIter(true)
+	bWriteBinary(Parametrizable::get<bool>("writeBinary")),
+	bDumpReferenceOnlyFirstIter(Parametrizable::get<bool>("dumpReferenceOnlyFirstIter")),
+	isFirstIter(true)
 {
 }
 
@@ -406,15 +406,15 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpIteration(
 		closeStream(streamRead);
 	}
 	
-  if (bDumpReference &&
-        ((bDumpReferenceOnlyFirstIter && isFirstIter) || !bDumpReferenceOnlyFirstIter)
-      ){
-    isFirstIter = false;
+	if (bDumpReference &&
+			((bDumpReferenceOnlyFirstIter && isFirstIter) || !bDumpReferenceOnlyFirstIter)
+		){
+		isFirstIter = false;
 		ostream* streamRef(openStream("reference", iterationNumber));
 		dumpDataPoints(filteredReference, *streamRef);
 		closeStream(streamRef);
 	}
-        
+
 	if (!bDumpIterationInfo) return;
 
 	// streamIter must be define by children
@@ -723,9 +723,9 @@ InspectorsImpl<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
 	bDumpIterationInfo(Parametrizable::get<bool>("dumpIterationInfo")),
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
-  bDumpReference(Parametrizable::get<bool>("dumpReference")),
-  bDumpReferenceOnlyFirstIter(Parametrizable::get<bool>("dumpReferenceOnlyFirstIter")),
-  isFirstIter(true)
+	bDumpReference(Parametrizable::get<bool>("dumpReference")),
+	bDumpReferenceOnlyFirstIter(Parametrizable::get<bool>("dumpReferenceOnlyFirstIter")),
+	isFirstIter(true)
 {
 }
 
@@ -778,10 +778,10 @@ template<typename T>
 std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string& role, const size_t iterationNumber)
 {
 	ostringstream oss;
-  oss << baseFileName << "-" << role << "-" << iterationNumber << ".vtk";
+	oss << baseFileName << "-" << role << "-" << iterationNumber << ".vtk";
 
-  LOG_INFO_STREAM("writing to " << oss.str());
-  ofstream* file = new ofstream(this->dumpPath + oss.str().c_str());
+	LOG_INFO_STREAM("writing to " << oss.str());
+	ofstream* file = new ofstream(this->dumpPath + oss.str().c_str());
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	return file;
