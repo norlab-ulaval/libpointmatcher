@@ -723,9 +723,7 @@ InspectorsImpl<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
 	bDumpIterationInfo(Parametrizable::get<bool>("dumpIterationInfo")),
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
-	bDumpReference(Parametrizable::get<bool>("dumpReference")),
-	bDumpReferenceOnlyFirstIter(Parametrizable::get<bool>("dumpReferenceOnlyFirstIter")),
-	isFirstIter(true)
+	bDumpReference(Parametrizable::get<bool>("dumpReference"))
 {
 }
 
