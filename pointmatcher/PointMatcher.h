@@ -632,6 +632,8 @@ struct PointMatcher
 		virtual void setAndValidateDumpPath(std::string path);
 		virtual std::string getDumpPath() const;
 
+    virtual void resetIsFirstIter() {}
+
 	protected:
 		std::string dumpPath;
 	};
