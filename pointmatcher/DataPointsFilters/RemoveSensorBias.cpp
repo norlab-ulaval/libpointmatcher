@@ -189,7 +189,7 @@ T RemoveSensorBiasDataPointsFilter<T>::ratioCurvature(const T depth, const T the
 	else // theta >0
 		Tmax = ( -2 * a[2] - std::sqrt(4 * std::pow(a[2], 2) - 12 * a[1] * a[3])) / (6 * a[3]);
 	
-	return 1. - 2 * b[2] / (2 * a[2] - 6 * Tmax * a[3]);
+	return 1. - 2 * b[2] / (2 * a[2] + 6 * Tmax * a[3]);
 }
 
 template struct RemoveSensorBiasDataPointsFilter<float>;
