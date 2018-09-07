@@ -125,8 +125,14 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 	}
 	else if(ortho.cols() == 3)
 	{
+		const T epsilon = 0.001;
+
 		// R = [ a b]
 		//     [-b a]
+		if(anyabs(parameters(0,0) - parameters(1,1)) > epsilon || anyabs(parameters(1,0) + parameters(0,1)) > epsilon)
+		{
+			throw TransformationError("RigidTransformation: Error, only proper rigid transformations are supported.");
+		}
 		
 		// mean of a and b
 		T a = (parameters(0,0) + parameters(1,1))/2; 	
