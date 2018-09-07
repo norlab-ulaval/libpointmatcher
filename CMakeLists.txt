@@ -381,6 +381,7 @@ set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VE
 #========================= Install header ===========================
 
 install(FILES
+	pointmatcher/DeprecationWarnings.h
 	pointmatcher/PointMatcher.h
 	pointmatcher/PointMatcherPrivate.h
 	pointmatcher/Parametrizable.h
