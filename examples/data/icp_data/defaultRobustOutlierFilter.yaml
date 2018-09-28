@@ -8,7 +8,10 @@ matcher:
     epsilon: 0 
 
 outlierFilters:
-  - RobustWelschOutlierFilter:
+  - RobustOutlierFilter:
+      robustFct: cauchy
+      scaleEstimator: mad
+      tuning: 1
 
 errorMinimizer:
   PointToPointErrorMinimizer
