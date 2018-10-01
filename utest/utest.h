@@ -44,7 +44,7 @@ public:
 				"VTKFileInspector", 
 				boost::assign::map_list_of
 					("baseFileName","./unitTest")
-			)
+			).get()
 		);
 	}
 	

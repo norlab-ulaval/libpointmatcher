@@ -121,8 +121,8 @@ int main(int argc, const char *argv[])
 	PM::TransformationParameters rotation =
 			parseRotation(initRotation, cloudDimension);
 	PM::TransformationParameters initTransfo = translation*rotation;
-
-	PM::Transformation* rigidTrans;
+	
+	std::shared_ptr<PM::Transformation> rigidTrans;
 	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
 
 	if (!rigidTrans->checkParameters(initTransfo)) {
@@ -164,8 +164,8 @@ int main(int argc, const char *argv[])
 	Parametrizable::Parameters params;
 	params["knn"] =  toParam(1); // for Hausdorff distance, we only need the first closest point
 	params["epsilon"] =  toParam(0);
-
-	PM::Matcher* matcherHausdorff = PM::get().MatcherRegistrar.create("KDTreeMatcher", params);
+	
+	std::shared_ptr<PM::Matcher> matcherHausdorff = PM::get().MatcherRegistrar.create("KDTreeMatcher", params);
 	
 	// max. distance from reading to reference
 	matcherHausdorff->init(ref);

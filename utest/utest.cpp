@@ -247,7 +247,7 @@ TEST(icpTest, icpSequenceTest)
 	DP pts1 = DP::load(dataPath + "cloud.00001.vtk");
 	DP pts2 = DP::load(dataPath + "cloud.00002.vtk");
 	
-	PM::TransformationParameters Ticp   = PM::Matrix::Identity(4,4);
+	PM::TransformationParameters Ticp = PM::Matrix::Identity(4,4);
 
 	PM::ICPSequence icpSequence;
 

@@ -84,7 +84,7 @@ namespace PointMatcherSupport
 			//! Virtual destructor, do nothing
 			virtual ~ClassDescriptor() {}
 			//! Create an instance of Interface using params
-			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const = 0;
+			virtual std::shared_ptr<Interface> createInstance(const std::string& className, const Parametrizable::Parameters& params) const = 0;
 			//! Return the description of this class
 			virtual const std::string description() const = 0;
 			//! Return the available parameters for this class
@@ -95,15 +95,14 @@ namespace PointMatcherSupport
 		template<typename C>
 		struct GenericClassDescriptor: public ClassDescriptor
 		{
-			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const
+			virtual std::shared_ptr<Interface> createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
-				C* instance(new C(params));
+				std::shared_ptr<C> instance = std::make_shared<C>(params);
 				
 				// check that all parameters were set
 				for (BOOST_AUTO(it, params.begin()); it != params.end() ;++it)
 				{
 					if (instance->parametersUsed.find(it->first) == instance->parametersUsed.end()){
-						delete instance;
 						throw Parametrizable::InvalidParameter(
 							(boost::format("Parameter %1% for module %2% was set but is not used") % it->first % className).str()
 						);
@@ -126,13 +125,13 @@ namespace PointMatcherSupport
 		template<typename C>
 		struct GenericClassDescriptorNoParam: public ClassDescriptor
 		{
-			virtual Interface* createInstance(const std::string& className, const Parametrizable::Parameters& params) const
+			virtual std::shared_ptr<Interface> createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
 				for (BOOST_AUTO(it, params.begin()); it != params.end() ;++it)
 					throw Parametrizable::InvalidParameter(
 							(boost::format("Parameter %1% was set but module %2% dos not use any parameter") % it->first % className).str()
 						);
-				return new C();
+				return std::make_shared<C>();
 			}
 			virtual const std::string description() const
 			{
@@ -177,13 +176,13 @@ namespace PointMatcherSupport
 		}
 		
 		//! Create an instance
-		Interface* create(const std::string& name, const Parametrizable::Parameters& params = Parametrizable::Parameters()) const
+		std::shared_ptr<Interface> create(const std::string& name, const Parametrizable::Parameters& params = Parametrizable::Parameters()) const
 		{
 			return getDescriptor(name)->createInstance(name, params);
 		}
 				
 		//! Create an instance from a YAML node
-        Interface* createFromYAML(const YAML::Node& module) const
+        	std::shared_ptr<Interface> createFromYAML(const YAML::Node& module) const
 		{
 			std::string name;
 			Parametrizable::Parameters params;
