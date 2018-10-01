@@ -30,7 +30,7 @@ public:
 	{
 		testedMatcher = 
 			PM::get().MatcherRegistrar.create(name, params);
-		icp.matcher.reset(testedMatcher.get());
+		icp.matcher = testedMatcher;
 	}
 
 };

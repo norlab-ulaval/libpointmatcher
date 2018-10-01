@@ -105,11 +105,11 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->readingDataPointsFilters.push_back(std::make_shared<typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter>());
 	this->referenceDataPointsFilters.push_back(std::make_shared<typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter>());
 	this->outlierFilters.push_back(std::make_shared<typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter>());
-	this->matcher.reset(new typename MatchersImpl<T>::KDTreeMatcher());
-	this->errorMinimizer.reset(new PointToPlaneErrorMinimizer<T>());
+	this->matcher = std::make_shared<typename MatchersImpl<T>::KDTreeMatcher>();
+	this->errorMinimizer = std::make_shared<PointToPlaneErrorMinimizer<T> >();
 	this->transformationCheckers.push_back(std::make_shared<typename TransformationCheckersImpl<T>::CounterTransformationChecker>());
 	this->transformationCheckers.push_back(std::make_shared<typename TransformationCheckersImpl<T>::DifferentialTransformationChecker>());
-	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
+	this->inspector = std::make_shared<typename InspectorsImpl<T>::NullInspector>();
 }
 
 //! Construct an ICP algorithm from a YAML file
@@ -207,7 +207,7 @@ const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(cons
 	if (reg)
 	{
 		//cout << regName << endl;
-		module.reset(registrar.createFromYAML(*reg).get());
+		module = registrar.createFromYAML(*reg);
 	}
 	else
 		module.reset();

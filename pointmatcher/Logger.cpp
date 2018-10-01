@@ -98,6 +98,6 @@ namespace PointMatcherSupport
 	void setLogger(std::shared_ptr<Logger> newLogger)
 	{
 		boost::mutex::scoped_lock lock(loggerMutex);
-		logger.reset(newLogger.get());
+		logger = newLogger;
 	}
 }

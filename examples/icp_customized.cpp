@@ -156,18 +156,18 @@ int main(int argc, char *argv[])
 	icp.referenceDataPointsFilters.push_back(minDist_ref);
 	icp.referenceDataPointsFilters.push_back(rand_ref);
 
-	icp.matcher.reset(kdtree.get());
+	icp.matcher = kdtree;
 	
 	icp.outlierFilters.push_back(trim);
 	
-	icp.errorMinimizer.reset(pointToPoint.get());
+	icp.errorMinimizer = pointToPoint;
 
 	icp.transformationCheckers.push_back(maxIter);
 	icp.transformationCheckers.push_back(diff);
 	
 	// toggle to write vtk files per iteration
-	icp.inspector.reset(nullInspect.get());
-	//icp.inspector.reset(vtkInspect); 
+	icp.inspector = nullInspect;
+	//icp.inspector = vtkInspect;
 
 	icp.transformations.push_back(rigidTrans);
 

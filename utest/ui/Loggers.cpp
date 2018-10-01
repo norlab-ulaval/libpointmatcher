@@ -23,11 +23,11 @@ TEST(Loggers, FileLogger)
 				("infoFileName", infoFileName)
 				("warningFileName", warningFileName)
 				("displayLocation", "1")
-		)
-	;
-	//TODO: we only test constructor here, check other things...
-
+		);
+	
 	// Remove file from disk
 	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(infoFileName)));
 	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(warningFileName)));
+	
+	//TODO: we only test constructor here, check other things...
 }

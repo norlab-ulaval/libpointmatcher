@@ -13,10 +13,9 @@ TEST(Inspectors, PerformanceInspector)
 			"PerformanceInspector", map_list_of
 				("baseFileName", "/tmp/utest_performances")
 				("dumpPerfOnExit", "1")
-		)
-	;
-
-  performances->init();
+		);
+	
+	performances->init();
 
 	//TODO: we only test constructor here, check other things...
 }
@@ -28,9 +27,9 @@ TEST(Inspectors, VTKFileInspector)
 			"VTKFileInspector", map_list_of
 				("baseFileName", "/tmp/utest_vtk")
 				("dumpPerfOnExit", "1")
-		)
-	;
+		);
+	
+	vtkFile->init();
+	
 	//TODO: we only test constructor here, check other things...
-
-  vtkFile->init();
 }

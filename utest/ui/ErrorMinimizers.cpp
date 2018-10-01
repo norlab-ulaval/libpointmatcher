@@ -27,7 +27,7 @@ public:
 	void setError(string name)
 	{
 		errorMin = PM::get().ErrorMinimizerRegistrar.create(name);
-		icp.errorMinimizer.reset(errorMin.get());
+		icp.errorMinimizer = errorMin;
 	}
 };
 
