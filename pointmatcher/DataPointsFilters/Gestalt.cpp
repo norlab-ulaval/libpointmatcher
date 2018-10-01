@@ -245,12 +245,12 @@ void GestaltDataPointsFilter<T>::buildNew(
   // vector to hold the first point in a voxel
   // this point will be ovewritten in the input cloud with
   // the output value
-  std::vector<Voxel>* voxels;
+  std::shared_ptr<std::vector<Voxel> > voxels;
 
   // try allocating vector. If too big return error
   try 
   {
-    voxels = new std::vector<Voxel>(numVox);
+    voxels = std::make_shared<std::vector<Voxel> >(numVox);
   } 
   catch (std::bad_alloc&) 
   {
@@ -320,8 +320,6 @@ void GestaltDataPointsFilter<T>::buildNew(
       pointsToKeep.push_back(firstPoint);
     }
   }
-
-  delete voxels;
 
 	const unsigned int nbPointsToKeep(pointsToKeep.size());
   // now the keypoints are in pointsToKeep

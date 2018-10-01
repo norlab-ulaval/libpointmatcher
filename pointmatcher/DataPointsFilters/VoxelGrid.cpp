@@ -140,12 +140,12 @@ void VoxelGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	// this point will be ovewritten in the input cloud with
 	// the output value
 
-	std::vector<Voxel>* voxels;
+	std::shared_ptr<std::vector<Voxel> > voxels;
 
 	// try allocating vector. If too big return error
 	try 
 	{
-		voxels = new std::vector<Voxel>(numVox);
+		voxels = std::make_shared<std::vector<Voxel> >(numVox);
 	} 
 	catch (std::bad_alloc&) 
 	{
@@ -315,9 +315,6 @@ void VoxelGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			}
 		}
 	}
-
-	// deallocate memory for voxels information
-	delete voxels;
 
 	// Move the points to be kept to the start
 	// Bring the data we keep to the front of the arrays then
