@@ -131,9 +131,12 @@ find_path(EIGEN_INCLUDE_DIR Eigen/Core
 include_directories(${EIGEN_INCLUDE_DIR})
 #note: no library to add, eigen rely only on headers
 
+# Suppress Eigen's warning by adding it to the system's library
+include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
+
 #TODO: this should be a more standard way
 #find_package(Eigen3 REQUIRED)
-#message("-- eigen3 found, version ${Eigen3_VERSION}")
+#message("-- eigen3 , version ${EIGEN_VERSION}")
 
 
 

@@ -52,7 +52,8 @@ struct OutlierFiltersImpl
 	typedef typename PointMatcher<T>::Matches Matches;
 	typedef typename PointMatcher<T>::OutlierFilter OutlierFilter;
 	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
-	typedef typename PointMatcher<T>::Matrix Matrix;	
+	typedef typename PointMatcher<T>::Matrix Matrix;
+	typedef typename PointMatcher<T>::Array Array;
 	typedef typename PointMatcher<T>::Vector Vector;
 	
 	struct NullOutlierFilter: public OutlierFilter

@@ -536,15 +536,14 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::RobustOutlierFil
 	}
 	iteration++;
 
-	auto dists = distanceType == "point2point" ? input.dists : computePointToPlanDistance(filteredReading, filteredReference, input);
+	Matrix dists = distanceType == "point2point" ? input.dists : computePointToPlanDistance(filteredReading, filteredReference, input);
 
 	// e² = scaled squared distance
-	auto e2 = dists.array() / (scale * scale);
+	Array e2 = dists.array() / (scale * scale);
 
 	T k = tuning;
 	const T k2 = k * k;
-
-	OutlierWeights w, aboveThres, bellowThres;
+	Array w, aboveThres, bellowThres;
 	switch (robustFctId) {
 		case RobustFctId::Cauchy: // 1/(1 + e²/k²)
 			w = (1 + e2 / k2).inverse();
