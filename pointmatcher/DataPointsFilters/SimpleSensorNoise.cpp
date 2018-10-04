@@ -45,16 +45,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Constructor
 template<typename T>
 SimpleSensorNoiseDataPointsFilter<T>::SimpleSensorNoiseDataPointsFilter(const Parameters& params):
-	PointMatcher<T>::DataPointsFilter("SimpleSensorNoiseDataPointsFilter", 
-		SimpleSensorNoiseDataPointsFilter::availableParameters(), params),
+	PointMatcher<T>::DataPointsFilter("SimpleSensorNoiseDataPointsFilter",
+	SimpleSensorNoiseDataPointsFilter::availableParameters(), params),
 	sensorType(Parametrizable::get<unsigned>("sensorType")),
 	gain(Parametrizable::get<T>("gain"))
 {
-  std::vector<std::string> sensorNames = boost::assign::list_of ("Sick LMS-1xx")("Hokuyo URG-04LX")("Hokuyo UTM-30LX")("Kinect / Xtion")("Sick Tim3xx");
+	std::vector<std::string> sensorNames = {"Sick LMS-1xx",
+											"Hokuyo URG-04LX",
+											"Hokuyo UTM-30LX",
+											"Kinect / Xtion","Sick Tim3xx"};
 	if (sensorType >= sensorNames.size())
 	{
 		throw InvalidParameter(
-			(boost::format("SimpleSensorNoiseDataPointsFilter: Error, sensorType id %1% does not exist.") % sensorType).str());
+				(boost::format("SimpleSensorNoiseDataPointsFilter: Error, sensorType id %1% does not exist.") % sensorType).str());
 	}
 
 	LOG_INFO_STREAM("SimpleSensorNoiseDataPointsFilter - using sensor noise model: " << sensorNames[sensorType]);

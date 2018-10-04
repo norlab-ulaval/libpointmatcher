@@ -37,7 +37,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace PointMatcherSupport;
-using boost::assign::map_list_of;
 
 // TODO: avoid global by using testing::Environment
 

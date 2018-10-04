@@ -39,16 +39,17 @@ public:
 
 TEST_F(TransformationCheckerTest, CounterTransformationChecker)
 {
-	addFilter("CounterTransformationChecker", map_list_of ("maxIterationCount", toParam(20)) );
+	addFilter("CounterTransformationChecker", {{"maxIterationCount", toParam(20)}});
 	validate2dTransformation();
 }
 
 TEST_F(TransformationCheckerTest, DifferentialTransformationChecker)
 {
-	addFilter("DifferentialTransformationChecker", map_list_of
-		("minDiffRotErr", toParam(0.001))
-		("minDiffTransErr", toParam(0.001))
-		("smoothLength", toParam(4))
+	addFilter("DifferentialTransformationChecker", {
+			{"minDiffRotErr", toParam(0.001)},
+			{"minDiffTransErr", toParam(0.001)},
+			{"smoothLength", toParam(4)}
+		}
 	);
 	validate2dTransformation();
 }
@@ -65,9 +66,10 @@ TEST_F(TransformationCheckerTest, BoundTransformationChecker)
 	);
 	icp.transformationCheckers.push_back(extraTransformCheck);
 	
-	addFilter("BoundTransformationChecker", map_list_of
-		("maxRotationNorm", toParam(1.0))
-		("maxTranslationNorm", toParam(1.0))
+	addFilter("BoundTransformationChecker", {
+			{"maxRotationNorm", toParam(1.0)},
+			{"maxTranslationNorm", toParam(1.0)}
+		}
 	);
 	validate2dTransformation();
 }

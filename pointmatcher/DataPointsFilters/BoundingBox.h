@@ -56,15 +56,15 @@ struct BoundingBoxDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	}
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-			( "xMin", "minimum value on x-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T> )
-			( "xMax", "maximum value on x-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T> )
-			( "yMin", "minimum value on y-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T> )
-			( "yMax", "maximum value on y-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T> )
-			( "zMin", "minimum value on z-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T> )
-			( "zMax", "maximum value on z-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T> )
-			( "removeInside", "If set to true (1), remove points inside the bounding box; else (0), remove points outside the bounding box", "1", "0", "1", P::Comp<bool> )
-		;
+		return {
+			{"xMin", "minimum value on x-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T>},
+			{"xMax", "maximum value on x-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T>},
+			{"yMin", "minimum value on y-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T>},
+			{"yMax", "maximum value on y-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T>},
+			{"zMin", "minimum value on z-axis defining one side of the bounding box", "-1", "-inf", "inf", &P::Comp<T>},
+			{"zMax", "maximum value on z-axis defining one side of the bounding box", "1", "-inf", "inf", &P::Comp<T>},
+			{"removeInside", "If set to true (1), remove points inside the bounding box; else (0), remove points outside the bounding box", "1", "0", "1", P::Comp<bool>}
+		};
 	}
 
 	const T xMin;

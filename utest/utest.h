@@ -42,8 +42,7 @@ public:
 		icp.inspector.reset(
 			PM::get().InspectorRegistrar.create(
 				"VTKFileInspector", 
-				boost::assign::map_list_of
-					("baseFileName","./unitTest")
+				{{"baseFileName", "./unitTest"}}
 			)
 		);
 	}

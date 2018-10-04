@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parametrizable.h"
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <string>
 
 namespace PointMatcherSupport
 {
@@ -121,7 +122,7 @@ namespace PointMatcherSupport
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue):
 		name(name),
 		doc(doc),
-		defaultValue(boost::lexical_cast<string>(defaultValue)), 
+		defaultValue(boost::lexical_cast<string>(defaultValue)),
 		minValue(""), 
 		maxValue(""),
 		comp(FalseLexicalComparison)

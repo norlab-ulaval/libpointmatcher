@@ -58,23 +58,24 @@ struct ElipsoidsDataPointsFilter: public PointMatcher<T>::DataPointsFilter
   }
   inline static const ParametersDoc availableParameters()
   {
-    return boost::assign::list_of<ParameterDoc>
-    ( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> )
-    ( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
-    ( "samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> )
-    ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
-    ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
-    ( "maxTimeWindow", "maximum spread of times in a surfel", "inf" )
-    ( "minPlanarity", "to what extend planarity of surfels needs to be enforced", "0")
-    ( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
-    ( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" )
-    ( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
-    ( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
-    ( "keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" )
-    ( "keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0" )
-    ( "keepWeights", "whether the original number of points should be added as descriptors to the resulting cloud", "0" )
-    ( "keepShapes", "whether the shape parameters of cylindricity (C), sphericality (S) and planarity (P) shall be calculated", "0" )
-    ( "keepIndices", "whether the indices of points an ellipsoid is constructed of shall be kept", "0" )
+    return {
+		{"ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.5", "0.0000001", "0.9999999", &P::Comp<T> },
+		{"knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> },
+		{"samplingMethod", "if set to 0, random subsampling using the parameter ratio. If set to 1, bin subsampling with the resulting number of points being 1/knn.", "0", "0", "1", &P::Comp<unsigned> },
+		{"maxBoxDim", "maximum length of a box above which the box is discarded", "inf" },
+		{"averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" },
+		{"maxTimeWindow", "maximum spread of times in a surfel", "inf" },
+		{"minPlanarity", "to what extend planarity of surfels needs to be enforced", "0"},
+		{"keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" },
+		{"keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" },
+		{"keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" },
+		{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" },
+		{"keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" },
+		{"keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0" },
+		{"keepWeights", "whether the original number of points should be added as descriptors to the resulting cloud", "0" },
+		{"keepShapes", "whether the shape parameters of cylindricity (C), sphericality (S) and planarity (P) shall be calculated", "0" },
+		{"keepIndices", "whether the indices of points an ellipsoid is constructed of shall be kept", "0" }
+    }
     ;
   }
 
@@ -107,8 +108,8 @@ struct ElipsoidsDataPointsFilter: public PointMatcher<T>::DataPointsFilter
   {
     typedef std::vector<int> Indices;
     typedef typename DataPoints::View View;
-    typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
-    typedef typename Eigen::Matrix<boost::int64_t, 1, Eigen::Dynamic> Int64Vector;
+    typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+    typedef typename Eigen::Matrix<std::int64_t, 1, Eigen::Dynamic> Int64Vector;
 
     Indices indices;
     Indices indicesToKeep;

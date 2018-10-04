@@ -240,7 +240,7 @@ TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
 {
 	// Ratio has been selected to not affect the points too much
- 	vector<double> ratio = list_of (100) (1000) (5000);
+ 	vector<double> ratio = {100, 1000, 5000};
  
  	for(unsigned i=0; i < ratio.size(); i++)
  	{
@@ -348,8 +348,9 @@ TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 			"SurfaceNormalDataPointsFilter");
 	icp.readingDataPointsFilters.push_back(extraDataPointFilter);
 	addFilter("ObservationDirectionDataPointsFilter");
-	addFilter("OrientNormalsDataPointsFilter", map_list_of
-		("towardCenter", toParam(false))
+	addFilter("OrientNormalsDataPointsFilter", {
+		{"towardCenter", toParam(false)}
+	}
 	);
 	validate2dTransformation();
 	validate3dTransformation();
@@ -358,8 +359,8 @@ TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 
 TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 {
-	vector<double> prob = list_of (0.80) (0.85) (0.90) (0.95);
-	for(unsigned i=0; i<prob.size(); i++)
+	vector<double> prob = {0.80, 0.85, 0.90, 0.95};
+	for(unsigned i = 0; i < prob.size(); i++)
 	{
 		// Try to avoid to low value for the reduction to avoid under sampling
 		params = PM::Parameters();
@@ -374,7 +375,7 @@ TEST_F(DataFilterTest, RandomSamplingDataPointsFilter)
 
 TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 {
-	vector<unsigned> steps = list_of (1) (2) (3);
+	vector<unsigned> steps = {1, 2, 3};
 	for(unsigned i=0; i<steps.size(); i++)
 	{
 		// Try to avoid too low value for the reduction to avoid under sampling
@@ -628,8 +629,8 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
 
 	// Test with ICP
-	vector<bool> useCentroid = list_of(false)(true);
-	vector<bool> averageExistingDescriptors = list_of(false)(true);
+	vector<bool> useCentroid = {false, true};
+	vector<bool> averageExistingDescriptors = {false, true};
 	for (unsigned i = 0 ; i < useCentroid.size() ; i++) 
 	{
 		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++) 
@@ -668,7 +669,7 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 {
 	// Copied from density ratio above
-	vector<double> thresholds = list_of (100) (1000) (5000);
+	vector<double> thresholds = {100, 1000, 5000};
 
 	DP ref3Ddensities = ref3D;
 	// Adding descriptor "densities"

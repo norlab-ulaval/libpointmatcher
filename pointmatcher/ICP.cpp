@@ -201,7 +201,7 @@ const std::string& PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(con
 //! Instantiate a module if its name is in the YAML file
 template<typename T>
 template<typename R>
-const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module)
+const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module)
 {
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
