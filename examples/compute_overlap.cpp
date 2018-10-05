@@ -133,8 +133,7 @@ int main(int argc, char *argv[])
 			PM::DataPointsFilter* subSample(
 				PM::get().DataPointsFilterRegistrar.create(
 					"RandomSamplingDataPointsFilter", 
-					map_list_of
-						("prob", "0.5")
+					{{"prob", "0.5"}}
 				)
 			);
 
@@ -153,10 +152,11 @@ int main(int argc, char *argv[])
 
 			PM::DataPointsFilter* computeDensity(
 				PM::get().DataPointsFilterRegistrar.create(
-					"SurfaceNormalDataPointsFilter", 
-					map_list_of
-						("knn", "20")
-						("keepDensities", "1")
+					"SurfaceNormalDataPointsFilter",
+					{
+						{"knn", "20"},
+						{"keepDensities", "1"}
+					}
 				)
 			);
 
@@ -188,17 +188,17 @@ int main(int argc, char *argv[])
 				PM::Matcher* matcherSelf(
 					PM::get().MatcherRegistrar.create(
 						"KDTreeMatcher",
-						map_list_of
-							("knn", toParam(knn))
+						{{"knn", toParam(knn)}}
 					)
 				);
 
 				PM::Matcher* matcherTarget(
 					PM::get().MatcherRegistrar.create(
 						"KDTreeVarDistMatcher",
-						map_list_of
-							("knn", toParam(knnAll))
-							("maxDistField", "maxSearchDist")
+						{
+							{"knn", toParam(knnAll)},
+							{"maxDistField", "maxSearchDist"}
+						}
 					)
 				);
 

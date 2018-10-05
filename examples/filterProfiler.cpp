@@ -48,8 +48,7 @@ int main(int argc, char *argv[])
 		PM::DataPointsFilter* randomSample(
 				PM::get().DataPointsFilterRegistrar.create(
 						"RandomSamplingDataPointsFilter",
-						map_list_of
-						("prob", toParam(0.5))
+						{{"prob", toParam(0.5)}}
 				)
 		);
 
@@ -71,12 +70,13 @@ int main(int argc, char *argv[])
 		PM::DataPointsFilter* voxelf(
 				PM::get().DataPointsFilterRegistrar.create(
 						"VoxelGridDataPointsFilter",
-						map_list_of
-						("vSizeX", "0.2")
-						("vSizeY", "0.2")
-						("vSizeZ", "0.2")
-						("useCentroid",useCentroid)
-						("averageExistingDescriptors","0")
+						{
+							{"vSizeX", "0.2"},
+							{"vSizeY", "0.2"},
+							{"vSizeZ", "0.2"},
+							{"useCentroid",useCentroid},
+							{"averageExistingDescriptors","0"}
+						}
 				)
 		);
 
