@@ -93,14 +93,6 @@ namespace PointMatcherSupport
 		//! return an exception when a transformation has invalid parameters
 		TransformationError(const std::string& reason);
 	};
-
-	//! A vector of std::shared_ptr<S> that behaves like a std::vector<S>
-	template<typename S>
-	struct SharedPtrVector: public std::vector<std::shared_ptr<S> >
-	{
-		//! Add an instance of S to the vector, take ownership
-		void push_back(std::shared_ptr<S> v) { std::vector<std::shared_ptr<S> >::push_back(std::shared_ptr<S>(v)); }
-	};
 	
 	//! The logger interface, used to output warnings and informations
 	struct Logger: public Parametrizable
@@ -415,7 +407,7 @@ struct PointMatcher
 	};
 	
 	//! A chain of Transformation
-	struct Transformations: public PointMatcherSupport::SharedPtrVector<Transformation>
+	struct Transformations: public std::vector<std::shared_ptr<Transformation> >
 	{
 		void apply(DataPoints& cloud, const TransformationParameters& parameters) const;
 	};
@@ -445,7 +437,7 @@ struct PointMatcher
 	};
 	
 	//! A chain of DataPointsFilter
-	struct DataPointsFilters: public PointMatcherSupport::SharedPtrVector<DataPointsFilter>
+	struct DataPointsFilters: public std::vector<std::shared_ptr<DataPointsFilter> >
 	{
 		DataPointsFilters();
 		DataPointsFilters(std::istream& in);
@@ -502,7 +494,7 @@ struct PointMatcher
 	
 	
 	//! A chain of OutlierFilter
-	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<OutlierFilter>
+	struct OutlierFilters: public std::vector<std::shared_ptr<OutlierFilter> >
 	{
 		
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
@@ -601,7 +593,7 @@ struct PointMatcher
 	};
 	
 	//! A chain of TransformationChecker
-	struct TransformationCheckers: public PointMatcherSupport::SharedPtrVector<TransformationChecker>
+	struct TransformationCheckers: public std::vector<std::shared_ptr<TransformationChecker> >
 	{
 		void init(const TransformationParameters& parameters, bool& iterate);
 		void check(const TransformationParameters& parameters, bool& iterate);
@@ -678,7 +670,7 @@ struct PointMatcher
 		
 		//! Instantiate modules if their names are in the YAML file
 		template<typename R>
-        const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
+        const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, std::vector<std::shared_ptr<typename R::TargetType> >& modules);
 		
 		//! Instantiate a module if its name is in the YAML file
 		template<typename R>
