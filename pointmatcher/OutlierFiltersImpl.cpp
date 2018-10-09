@@ -460,7 +460,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::RobustOutlierFil
 
 template<typename T>
 typename PointMatcher<T>::Matrix
-OutlierFiltersImpl<T>::RobustOutlierFilter::computePointToPlanDistance(
+OutlierFiltersImpl<T>::RobustOutlierFilter::computePointToPlaneDistance(
 		const DataPoints& reading,
 		const DataPoints& reference,
 		const Matches& input) {
@@ -536,14 +536,14 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::RobustOutlierFil
 	}
 	iteration++;
 
-	Matrix dists = distanceType == "point2point" ? input.dists : computePointToPlanDistance(filteredReading, filteredReference, input);
+	Matrix dists = distanceType == "point2point" ? input.dists : computePointToPlaneDistance(filteredReading, filteredReference, input);
 
 	// e² = scaled squared distance
 	Array e2 = dists.array() / (scale * scale);
 
 	T k = tuning;
 	const T k2 = k * k;
-	Array w, aboveThres, bellowThres;
+	Array w, aboveThres, belowThres;
 	switch (robustFctId) {
 		case RobustFctId::Cauchy: // 1/(1 + e²/k²)
 			w = (1 + e2 / k2).inverse();
@@ -551,16 +551,16 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::RobustOutlierFil
 		case RobustFctId::Welsch: // exp(-e²/k²)
 			w = (-e2 / k2).exp();
 			break;
-		case RobustFctId::SwitchableConstraint: // if e² > k² then 4 * k²/(k + e²)²
+		case RobustFctId::SwitchableConstraint: // if e² > k then 4 * k²/(k + e²)²
 			aboveThres = 4.0 * k2 * ((k + e2).square()).inverse();
 			w = (e2 >= k).select(aboveThres, 1.0);
 			break;
 		case RobustFctId::GM:    // k²/(k + e²)²
 			w = k2*((k + e2).square()).inverse();
 			break;
-		case RobustFctId::Tukey: // if e² < k then (1-e²/k²)²
-			bellowThres = (1 - e2 / k2).square();
-			w = (e2 >= k2).select(0.0, bellowThres);
+		case RobustFctId::Tukey: // if e² < k² then (1-e²/k²)²
+			belowThres = (1 - e2 / k2).square();
+			w = (e2 >= k2).select(0.0, belowThres);
 			break;
 		case RobustFctId::Huber: // if |e| >= k then k/|e| = k/sqrt(e²)
 			aboveThres = k * (e2.sqrt().inverse());
