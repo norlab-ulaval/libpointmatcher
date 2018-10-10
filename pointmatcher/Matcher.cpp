@@ -36,6 +36,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 #include "PointMatcherPrivate.h"
 
+#include <limits>
+
+using namespace std;
+
 //! Construct without parameter
 template<typename T>
 PointMatcher<T>::Matcher::Matcher():

@@ -93,6 +93,7 @@ TEST(icpTest, icpTest)
 	{
 		if (!fs::is_regular_file(d->status()) ) continue;
 
+		std::cout << "Testing file " << d->path().string() << std::endl;
 		// Load config file, and form ICP object
 		PM::ICP icp;
 		std::string config_file = d->path().string();
