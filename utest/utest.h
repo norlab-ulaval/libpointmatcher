@@ -39,13 +39,12 @@ public:
 	virtual void dumpVTK()
 	{
 		// Make available a VTK inspector for manual inspection
-		icp.inspector.reset(
+		icp.inspector =
 			PM::get().InspectorRegistrar.create(
 				"VTKFileInspector", 
 				boost::assign::map_list_of
 					("baseFileName","./unitTest")
-			)
-		);
+			);
 	}
 	
 	void validate2dTransformation()

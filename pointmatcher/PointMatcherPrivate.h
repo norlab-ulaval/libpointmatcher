@@ -41,7 +41,7 @@ namespace PointMatcherSupport
 	//! Mutex to protect creation and deletion of logger
 	extern boost::mutex loggerMutex;
 	//! Logger pointer
-	extern boost::shared_ptr<Logger> logger;
+	extern std::shared_ptr<Logger> logger;
 	
 	// macros holding the name of current function, send patches for your favourite compiler
 	#if defined(MSVC)

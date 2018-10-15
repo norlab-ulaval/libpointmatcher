@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 		setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 
 	// Prepare transformation chain for maps
-	PM::Transformation* rigidTransform;
+	std::shared_ptr<PM::Transformation> rigidTransform;
 	rigidTransform = PM::get().TransformationRegistrar.create("RigidTransformation");
 	
 	PM::Transformations transformations;
@@ -130,35 +130,32 @@ int main(int argc, char *argv[])
 			transformations.apply(reference, Tref);
 
 			// Preprare filters
-			PM::DataPointsFilter* subSample(
+			std::shared_ptr<PM::DataPointsFilter> subSample =
 				PM::get().DataPointsFilterRegistrar.create(
 					"RandomSamplingDataPointsFilter", 
 					map_list_of
 						("prob", "0.5")
-				)
-			);
-
-			PM::DataPointsFilter* maxDensity(
+				);
+			
+			std::shared_ptr<PM::DataPointsFilter> maxDensity =
 				PM::get().DataPointsFilterRegistrar.create(
 					"MaxDensityDataPointsFilter"
-				)
-			);
+				);
 			
-			/*PM::DataPointsFilter* cutInHalf;
+			/*std::shared_ptr<PM::DataPointsFilter> cutInHalf;
 			cutInHalf = PM::get().DataPointsFilterRegistrar.create(
 				"MinDistDataPointsFilter", PM::Parameters({
 					{"dim", "1"},
 					{"minDist", "0"}
 				}));*/
-
-			PM::DataPointsFilter* computeDensity(
+			
+			std::shared_ptr<PM::DataPointsFilter> computeDensity =
 				PM::get().DataPointsFilterRegistrar.create(
 					"SurfaceNormalDataPointsFilter", 
 					map_list_of
 						("knn", "20")
 						("keepDensities", "1")
-				)
-			);
+				);
 
 			reading = subSample->filter(reading);
 			reading = computeDensity->filter(reading);
@@ -185,22 +182,20 @@ int main(int argc, char *argv[])
 				// Build kd-tree
 				int knn = 20;
 				int knnAll = 50;
-				PM::Matcher* matcherSelf(
+				std::shared_ptr<PM::Matcher> matcherSelf =
 					PM::get().MatcherRegistrar.create(
 						"KDTreeMatcher",
 						map_list_of
 							("knn", toParam(knn))
-					)
-				);
-
-				PM::Matcher* matcherTarget(
+					);
+				
+				std::shared_ptr<PM::Matcher> matcherTarget =
 					PM::get().MatcherRegistrar.create(
 						"KDTreeVarDistMatcher",
 						map_list_of
 							("knn", toParam(knnAll))
 							("maxDistField", "maxSearchDist")
-					)
-				);
+					);
 
 				matcherSelf->init(self);
 				matcherTarget->init(target);

@@ -44,14 +44,13 @@ int main(int argc, char *argv[])
 		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 
 		DP in(DP::load(argv[1]));
-
-		PM::DataPointsFilter* randomSample(
+	
+		std::shared_ptr<PM::DataPointsFilter> randomSample =
 				PM::get().DataPointsFilterRegistrar.create(
 						"RandomSamplingDataPointsFilter",
 						map_list_of
 						("prob", toParam(0.5))
-				)
-		);
+				);
 
 		cout << "starting random sample filter" << endl;
 		clock_t time_a = clock();
@@ -67,8 +66,8 @@ int main(int argc, char *argv[])
 		{
 		    cout << "Performed random sampling in " << (float)(time_b - time_a)/CLOCKS_PER_SEC << " seconds" << endl;
 		}
-
-		PM::DataPointsFilter* voxelf(
+	
+		std::shared_ptr<PM::DataPointsFilter> voxelf =
 				PM::get().DataPointsFilterRegistrar.create(
 						"VoxelGridDataPointsFilter",
 						map_list_of
@@ -77,8 +76,7 @@ int main(int argc, char *argv[])
 						("vSizeZ", "0.2")
 						("useCentroid",useCentroid)
 						("averageExistingDescriptors","0")
-				)
-		);
+				);
 
 		cout << "starting voxel grid sample filter, useCentroid: " << useCentroid << endl;
 		time_a = clock();

@@ -13,7 +13,7 @@ class MatcherTest: public IcpHelper
 
 public:
 
-	PM::Matcher* testedMatcher;
+	std::shared_ptr<PM::Matcher> testedMatcher;
 
 	// Will be called for every tests
 	virtual void SetUp()
@@ -30,7 +30,7 @@ public:
 	{
 		testedMatcher = 
 			PM::get().MatcherRegistrar.create(name, params);
-		icp.matcher.reset(testedMatcher);
+		icp.matcher = testedMatcher;
 	}
 
 };

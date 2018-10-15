@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace PointMatcherSupport
 {
 	boost::mutex loggerMutex; //!< mutex to protect access to logging 
-	boost::shared_ptr<Logger> logger; //!< the current logger
+	std::shared_ptr<Logger> logger; //!< the current logger
 	
 	//! Construct without parameter
 	Logger::Logger()
@@ -95,9 +95,9 @@ namespace PointMatcherSupport
 	{}
 	
 	//! Set a new logger, protected by a mutex
-	void setLogger(Logger* newLogger)
+	void setLogger(std::shared_ptr<Logger> newLogger)
 	{
 		boost::mutex::scoped_lock lock(loggerMutex);
-		logger.reset(newLogger);
+		logger = newLogger;
 	}
 }

@@ -128,8 +128,8 @@ int main(int argc, const char *argv[])
 	PM::TransformationParameters rotation =
 			parseRotation(initRotation, cloudDimension);
 	PM::TransformationParameters initTransfo = translation*rotation;
-
-	PM::Transformation* rigidTrans;
+	
+	std::shared_ptr<PM::Transformation> rigidTrans;
 	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
 
 	if (!rigidTrans->checkParameters(initTransfo)) {

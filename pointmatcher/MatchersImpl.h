@@ -92,7 +92,7 @@ struct MatchersImpl
 		const T maxDist;
 
 	protected:
-		boost::shared_ptr<NNS> featureNNS;
+		std::shared_ptr<NNS> featureNNS;
 
 	public:
 		KDTreeMatcher(const Parameters& params = Parameters());
@@ -123,7 +123,7 @@ struct MatchersImpl
 		const std::string maxDistField;
 
 	protected:
-		boost::shared_ptr<NNS> featureNNS;
+		std::shared_ptr<NNS> featureNNS;
 
 	public:
 		KDTreeVarDistMatcher(const Parameters& params = Parameters());

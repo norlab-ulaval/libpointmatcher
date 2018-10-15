@@ -11,7 +11,7 @@ using namespace PointMatcherSupport;
 class ErrorMinimizerTest: public IcpHelper
 {
 public:
-	PM::ErrorMinimizer* errorMin;
+	std::shared_ptr<PM::ErrorMinimizer> errorMin;
 
 	// Will be called for every tests
 	virtual void SetUp()
@@ -27,7 +27,7 @@ public:
 	void setError(string name)
 	{
 		errorMin = PM::get().ErrorMinimizerRegistrar.create(name);
-		icp.errorMinimizer.reset(errorMin);
+		icp.errorMinimizer = errorMin;
 	}
 };
 

@@ -101,15 +101,15 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 {
 	this->cleanup();
 	
-	this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
-	this->readingDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter());
-	this->referenceDataPointsFilters.push_back(new typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter());
-	this->outlierFilters.push_back(new typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter());
-	this->matcher.reset(new typename MatchersImpl<T>::KDTreeMatcher());
-	this->errorMinimizer.reset(new PointToPlaneErrorMinimizer<T>());
-	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::CounterTransformationChecker());
-	this->transformationCheckers.push_back(new typename TransformationCheckersImpl<T>::DifferentialTransformationChecker());
-	this->inspector.reset(new typename InspectorsImpl<T>::NullInspector);
+	this->transformations.push_back(std::make_shared<typename TransformationsImpl<T>::RigidTransformation>());
+	this->readingDataPointsFilters.push_back(std::make_shared<typename DataPointsFiltersImpl<T>::RandomSamplingDataPointsFilter>());
+	this->referenceDataPointsFilters.push_back(std::make_shared<typename DataPointsFiltersImpl<T>::SamplingSurfaceNormalDataPointsFilter>());
+	this->outlierFilters.push_back(std::make_shared<typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter>());
+	this->matcher = std::make_shared<typename MatchersImpl<T>::KDTreeMatcher>();
+	this->errorMinimizer = std::make_shared<PointToPlaneErrorMinimizer<T> >();
+	this->transformationCheckers.push_back(std::make_shared<typename TransformationCheckersImpl<T>::CounterTransformationChecker>());
+	this->transformationCheckers.push_back(std::make_shared<typename TransformationCheckersImpl<T>::DifferentialTransformationChecker>());
+	this->inspector = std::make_shared<typename InspectorsImpl<T>::NullInspector>();
 }
 
 //! Construct an ICP algorithm from a YAML file
@@ -143,9 +143,9 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 
 	// See if to use a rigid transformation
 	if (nodeVal("errorMinimizer", doc) != "PointToPointSimilarityErrorMinimizer")
-		this->transformations.push_back(new typename TransformationsImpl<T>::RigidTransformation());
+		this->transformations.push_back(std::make_shared<typename TransformationsImpl<T>::RigidTransformation>());
 	else
-		this->transformations.push_back(new typename TransformationsImpl<T>::SimilarityTransformation());
+		this->transformations.push_back(std::make_shared<typename TransformationsImpl<T>::SimilarityTransformation>());
 	
 	usedModuleTypes.insert(createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers));
 	usedModuleTypes.insert(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector));
@@ -183,7 +183,7 @@ unsigned PointMatcher<T>::ICPChainBase::getPrefilteredReferencePtsCount() const
 //! Instantiate modules if their names are in the YAML file
 template<typename T>
 template<typename R>
-const std::string& PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules)
+const std::string& PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::vector<std::shared_ptr<typename R::TargetType> >& modules)
 {
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
@@ -201,13 +201,13 @@ const std::string& PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(con
 //! Instantiate a module if its name is in the YAML file
 template<typename T>
 template<typename R>
-const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module)
+const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module)
 {
 	const YAML::Node *reg = doc.FindValue(regName);
 	if (reg)
 	{
 		//cout << regName << endl;
-		module.reset(registrar.createFromYAML(*reg));
+		module = registrar.createFromYAML(*reg);
 	}
 	else
 		module.reset();

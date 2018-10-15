@@ -80,30 +80,28 @@ int main(int argc, char *argv[])
 	TP T = TP::Identity(4,4);
 
 	// Define transformation chain
-	PM::Transformation* transformation;
+	std::shared_ptr<PM::Transformation> transformation;
 	transformation = PM::get().REG(Transformation).create("RigidTransformation");
 
 	// This filter will remove a sphere of 1 m radius. Easy way to remove the sensor self-scanning.
-	PM::DataPointsFilter* removeScanner(
+	std::shared_ptr<PM::DataPointsFilter> removeScanner =
 		PM::get().DataPointsFilterRegistrar.create(
-			"MinDistDataPointsFilter", 
+			"MinDistDataPointsFilter",
 			map_list_of
 				("minDist", "1.0")
-		)
-	);
+		);
 	
 	// This filter will randomly remove 35% of the points.
-	PM::DataPointsFilter* randSubsample(
+	std::shared_ptr<PM::DataPointsFilter> randSubsample =
 		PM::get().DataPointsFilterRegistrar.create(
-			"RandomSamplingDataPointsFilter", 
+			"RandomSamplingDataPointsFilter",
 			map_list_of
 				("prob", toParam(0.65))
-		)
-	);
+		);
 
 	// For a complete description of filter, see 
 	// https://github.com/ethz-asl/libpointmatcher/blob/master/doc/Datafilters.md
-	PM::DataPointsFilter* normalFilter(
+	std::shared_ptr<PM::DataPointsFilter> normalFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter",
 			map_list_of
@@ -111,10 +109,9 @@ int main(int argc, char *argv[])
 				("epsilon", toParam(5)) 
 				("keepNormals",toParam(1))
 				("keepDensities",toParam(0))
-		)
-	);
+		);
 
-	PM::DataPointsFilter* densityFilter(
+	std::shared_ptr<PM::DataPointsFilter> densityFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter",
 			map_list_of
@@ -122,36 +119,31 @@ int main(int argc, char *argv[])
 				("epsilon", "5") 
 				("keepNormals","0")
 				("keepDensities","1")
-		)
-	);
+		);
 	
-	PM::DataPointsFilter* observationDirectionFilter(
+	std::shared_ptr<PM::DataPointsFilter> observationDirectionFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"ObservationDirectionDataPointsFilter"
-		)
-	);
+		);
 	
-	PM::DataPointsFilter* orientNormalFilter(
+	std::shared_ptr<PM::DataPointsFilter> orientNormalFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"OrientNormalsDataPointsFilter",
 			map_list_of
 				("towardCenter", "1")
-		)
-	);
+		);
 	
-	PM::DataPointsFilter* uniformSubsample(
+	std::shared_ptr<PM::DataPointsFilter> uniformSubsample =
 		PM::get().DataPointsFilterRegistrar.create(
 			"MaxDensityDataPointsFilter",
 			map_list_of
 				("maxDensity", toParam(30))
-		)
-	);
+		);
 	
-	PM::DataPointsFilter* shadowFilter(
+	std::shared_ptr<PM::DataPointsFilter> shadowFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"ShadowDataPointsFilter"
-		)
-	);
+		);
 
 	for(unsigned i=0; i < list.size(); i++)
 	{

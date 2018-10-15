@@ -93,14 +93,6 @@ namespace PointMatcherSupport
 		//! return an exception when a transformation has invalid parameters
 		TransformationError(const std::string& reason);
 	};
-
-	//! A vector of boost::shared_ptr<S> that behaves like a std::vector<S>
-	template<typename S>
-	struct SharedPtrVector: public std::vector<boost::shared_ptr<S> >
-	{
-		//! Add an instance of S to the vector, take ownership
-		void push_back(S* v) { std::vector<boost::shared_ptr<S> >::push_back(boost::shared_ptr<S>(v)); }
-	};
 	
 	//! The logger interface, used to output warnings and informations
 	struct Logger: public Parametrizable
@@ -119,7 +111,7 @@ namespace PointMatcherSupport
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func);
 	};
 	
-	void setLogger(Logger* newLogger);
+	void setLogger(std::shared_ptr<Logger> newLogger);
 	
 	void validateFile(const std::string& fileName);
 	
@@ -421,7 +413,7 @@ struct PointMatcher
 	};
 	
 	//! A chain of Transformation
-	struct Transformations: public PointMatcherSupport::SharedPtrVector<Transformation>
+	struct Transformations: public std::vector<std::shared_ptr<Transformation> >
 	{
 		void apply(DataPoints& cloud, const TransformationParameters& parameters) const;
 	};
@@ -451,7 +443,7 @@ struct PointMatcher
 	};
 	
 	//! A chain of DataPointsFilter
-	struct DataPointsFilters: public PointMatcherSupport::SharedPtrVector<DataPointsFilter>
+	struct DataPointsFilters: public std::vector<std::shared_ptr<DataPointsFilter> >
 	{
 		DataPointsFilters();
 		DataPointsFilters(std::istream& in);
@@ -508,7 +500,7 @@ struct PointMatcher
 	
 	
 	//! A chain of OutlierFilter
-	struct OutlierFilters: public PointMatcherSupport::SharedPtrVector<OutlierFilter>
+	struct OutlierFilters: public std::vector<std::shared_ptr<OutlierFilter> >
 	{
 		
 		OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
@@ -607,7 +599,7 @@ struct PointMatcher
 	};
 	
 	//! A chain of TransformationChecker
-	struct TransformationCheckers: public PointMatcherSupport::SharedPtrVector<TransformationChecker>
+	struct TransformationCheckers: public std::vector<std::shared_ptr<TransformationChecker> >
 	{
 		void init(const TransformationParameters& parameters, bool& iterate);
 		void check(const TransformationParameters& parameters, bool& iterate);
@@ -658,11 +650,11 @@ struct PointMatcher
 		DataPointsFilters readingStepDataPointsFilters; //!< filters for reading, applied at each step
 		DataPointsFilters referenceDataPointsFilters; //!< filters for reference
 		Transformations transformations; //!< transformations
-		boost::shared_ptr<Matcher> matcher; //!< matcher
+		std::shared_ptr<Matcher> matcher; //!< matcher
 		OutlierFilters outlierFilters; //!< outlier filters
-		boost::shared_ptr<ErrorMinimizer> errorMinimizer; //!< error minimizer
+		std::shared_ptr<ErrorMinimizer> errorMinimizer; //!< error minimizer
 		TransformationCheckers transformationCheckers; //!< transformation checkers
-		boost::shared_ptr<Inspector> inspector; //!< inspector
+		std::shared_ptr<Inspector> inspector; //!< inspector
 		
 		virtual ~ICPChainBase();
 
@@ -684,11 +676,11 @@ struct PointMatcher
 		
 		//! Instantiate modules if their names are in the YAML file
 		template<typename R>
-        const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, PointMatcherSupport::SharedPtrVector<typename R::TargetType>& modules);
+        const std::string& createModulesFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, std::vector<std::shared_ptr<typename R::TargetType> >& modules);
 		
 		//! Instantiate a module if its name is in the YAML file
 		template<typename R>
-        const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, boost::shared_ptr<typename R::TargetType>& module);
+        const std::string& createModuleFromRegistrar(const std::string& regName, const PointMatcherSupport::YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module);
 		
 		//! Get the value of a field in a node
         std::string nodeVal(const std::string& regName, const PointMatcherSupport::YAML::Node& doc);

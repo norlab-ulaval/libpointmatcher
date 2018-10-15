@@ -89,7 +89,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	std::uniform_real_distribution<> uni01(0., 1.);
 	
 	//bucketed normal space
-	std::vector<std::vector<int>> idBuckets; //stock int so we can marked selected with -1
+	std::vector<std::vector<int> > idBuckets; //stock int so we can marked selected with -1
 	idBuckets.resize(nbBucket);
 	
 	std::vector<std::size_t> keepIndexes;

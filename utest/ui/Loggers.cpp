@@ -17,19 +17,17 @@ TEST(Loggers, FileLogger)
 	string infoFileName = "utest_info";
 	string warningFileName = "utest_warn";
 
-	Logger* fileLog = 
+	std::shared_ptr<Logger> fileLog =
 		PM::get().REG(Logger).create(
 			"FileLogger", map_list_of
 				("infoFileName", infoFileName)
 				("warningFileName", warningFileName)
 				("displayLocation", "1")
-		)
-	;
-	//TODO: we only test constructor here, check other things...
-
-	delete fileLog;
-
+		);
+	
 	// Remove file from disk
 	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(infoFileName)));
 	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(warningFileName)));
+	
+	//TODO: we only test constructor here, check other things...
 }

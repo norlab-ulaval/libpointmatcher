@@ -27,7 +27,7 @@ public:
 
 	void addFilter(string name, PM::Parameters params)
 	{
-		PM::DataPointsFilter* testedDataPointFilter = 
+		std::shared_ptr<PM::DataPointsFilter> testedDataPointFilter =
 			PM::get().DataPointsFilterRegistrar.create(name, params);
 	
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
@@ -35,7 +35,7 @@ public:
 	
 	void addFilter(string name)
 	{
-		PM::DataPointsFilter* testedDataPointFilter = 
+		std::shared_ptr<PM::DataPointsFilter> testedDataPointFilter =
 			PM::get().DataPointsFilterRegistrar.create(name);
 		
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
@@ -343,7 +343,7 @@ TEST_F(DataFilterTest, GestaltDataPointsFilter)
 TEST_F(DataFilterTest, OrientNormalsDataPointsFilter)
 {
 	// Used to create normal for reading point cloud
-	PM::DataPointsFilter* extraDataPointFilter;
+	std::shared_ptr<PM::DataPointsFilter> extraDataPointFilter;
 	extraDataPointFilter = PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter");
 	icp.readingDataPointsFilters.push_back(extraDataPointFilter);
@@ -398,7 +398,7 @@ TEST_F(DataFilterTest, MaxPointCountDataPointsFilter)
 	params["seed"] = "42";
 	params["maxCount"] = toParam(maxCount);
 	
-	PM::DataPointsFilter* maxPtsFilter = 
+	std::shared_ptr<PM::DataPointsFilter> maxPtsFilter =
 			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
 
 	DP filteredCloud = maxPtsFilter->filter(cloud);
@@ -420,7 +420,7 @@ TEST_F(DataFilterTest, MaxPointCountDataPointsFilter)
 	params["seed"] = "1";
 	params["maxCount"] = toParam(maxCount);
 	
-	PM::DataPointsFilter* maxPtsFilter2 = 
+	std::shared_ptr<PM::DataPointsFilter> maxPtsFilter2 =
 			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
 			
 	DP filteredCloud3 = maxPtsFilter2->filter(cloud);
@@ -446,7 +446,7 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 	const DP cloud = generateRandomDataPoints(nbPts);	
 	params = PM::Parameters(); 
 
-	PM::DataPointsFilter* octreeFilter;
+	std::shared_ptr<PM::DataPointsFilter> octreeFilter;
 	
 	for(const int meth : {0,1,2,3})
 		for(const size_t maxData : {1,5})
@@ -496,14 +496,14 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 	//const size_t nbPts2D = ref2D.getNbPoints();
 	const size_t nbPts3D = ref3D.getNbPoints();
 	
-	PM::DataPointsFilter* nssFilter;
+	std::shared_ptr<PM::DataPointsFilter> nssFilter;
 	
 	//Compute normals
 	auto paramsNorm = PM::Parameters();
 			paramsNorm["knn"] = "5"; 
 			paramsNorm["epsilon"] = "0.1"; 
 			paramsNorm["keepNormals"] = "1";
-	PM::DataPointsFilter*	normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
+	std::shared_ptr<PM::DataPointsFilter> normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
 
 	normalFilter->inPlaceFilter(cloud);
 	
@@ -560,14 +560,14 @@ TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
 	
 	const size_t nbPts3D = ref3D.getNbPoints();
 	
-	PM::DataPointsFilter* covsFilter;
+	std::shared_ptr<PM::DataPointsFilter> covsFilter;
 	
 	//Compute normals
 	auto paramsNorm = PM::Parameters();
 			paramsNorm["knn"] = "5"; 
 			paramsNorm["epsilon"] = "0.1"; 
 			paramsNorm["keepNormals"] = "1";
-	PM::DataPointsFilter*	normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
+	std::shared_ptr<PM::DataPointsFilter> normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
 
 	normalFilter->inPlaceFilter(cloud);
 	
@@ -618,7 +618,7 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 	params["useCentroid"] = toParam(true);
 	params["averageExistingDescriptors"] = toParam(true);
 
-	PM::DataPointsFilter* voxelFilter = 
+	std::shared_ptr<PM::DataPointsFilter> voxelFilter =
 			PM::get().DataPointsFilterRegistrar.create("VoxelGridDataPointsFilter", params);
 
 	DP filteredCloud = voxelFilter->filter(cloud);
@@ -804,4 +804,14 @@ TEST_F(DataFilterTest, DistanceLimitDataPointsFilter)
 	addFilter("DistanceLimitDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
+}
+
+TEST_F(DataFilterTest, SameFilterInstanceTwice)
+{
+	params = PM::Parameters();
+	
+	std::shared_ptr<PM::DataPointsFilter> df = PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
+	
+	icp.referenceDataPointsFilters.push_back(df);
+	icp.readingDataPointsFilters.push_back(df);
 }
