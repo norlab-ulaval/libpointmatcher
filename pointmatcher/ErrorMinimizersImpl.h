@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 #include "ErrorMinimizers/PointToPlane.h"
 #include "ErrorMinimizers/PointToPlaneWithCov.h"
+#include "ErrorMinimizers/PointToPoint.h"
 
 template<typename T>
 struct ErrorMinimizersImpl
@@ -67,21 +68,6 @@ struct ErrorMinimizersImpl
 
 		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 		virtual TransformationParameters compute(const ErrorElements& mPts);
-	};
-
-	struct PointToPointErrorMinimizer: ErrorMinimizer
-	{
-		inline static const std::string description()
-		{
-			return "Point-to-point error. Based on SVD decomposition. Per \\cite{Besl1992Point2Point}.";
-		}
-
-		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
-		virtual TransformationParameters compute(const ErrorElements& mPts);
-		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
-		virtual T getOverlap() const;
-
-		static T computeResidualError(const ErrorElements& mPts);
 	};
 
 	struct PointToPointSimilarityErrorMinimizer: ErrorMinimizer

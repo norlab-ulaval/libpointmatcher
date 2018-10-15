@@ -311,6 +311,7 @@ set(POINTMATCHER_SRC
 #ErrorMinimizers
 	pointmatcher/ErrorMinimizers/PointToPlane.cpp
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
+	pointmatcher/ErrorMinimizers/PointToPoint.cpp
 #DataPointsFilters	
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
