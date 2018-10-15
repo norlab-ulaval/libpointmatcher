@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ErrorMinimizers/PointToPlane.h"
 #include "ErrorMinimizers/PointToPlaneWithCov.h"
 #include "ErrorMinimizers/PointToPoint.h"
+#include "ErrorMinimizers/PointToPointSimilarity.h"
 
 template<typename T>
 struct ErrorMinimizersImpl
@@ -68,19 +69,6 @@ struct ErrorMinimizersImpl
 
 		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 		virtual TransformationParameters compute(const ErrorElements& mPts);
-	};
-
-	struct PointToPointSimilarityErrorMinimizer: ErrorMinimizer
-	{
-		inline static const std::string description()
-		{
-			return "Point-to-point similarity error (rotation + translation + scale). The scale is the same for all coordinates. Based on SVD decomposition. Per \\cite{Umeyama1991}.";
-		}
-
-		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
-		virtual TransformationParameters compute(const ErrorElements& mPts);
-		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
-		virtual T getOverlap() const;
 	};
 
 	struct PointToPointWithCovErrorMinimizer: ErrorMinimizer
