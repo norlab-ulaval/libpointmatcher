@@ -45,12 +45,11 @@ int main(int argc, char *argv[])
 
 		DP in(DP::load(argv[1]));
 
-		PM::DataPointsFilter* randomSample(
-				PM::get().DataPointsFilterRegistrar.create(
-						"RandomSamplingDataPointsFilter",
-						{{"prob", toParam(0.5)}}
-				)
-		);
+		std::shared_ptr<PM::DataPointsFilter> randomSample =
+			PM::get().DataPointsFilterRegistrar.create(
+					"RandomSamplingDataPointsFilter",
+					{{"prob", toParam(0.5)}}
+			);
 
 		cout << "starting random sample filter" << endl;
 		clock_t time_a = clock();
@@ -67,18 +66,17 @@ int main(int argc, char *argv[])
 		    cout << "Performed random sampling in " << (float)(time_b - time_a)/CLOCKS_PER_SEC << " seconds" << endl;
 		}
 
-		PM::DataPointsFilter* voxelf(
-				PM::get().DataPointsFilterRegistrar.create(
-						"VoxelGridDataPointsFilter",
-						{
-							{"vSizeX", "0.2"},
-							{"vSizeY", "0.2"},
-							{"vSizeZ", "0.2"},
-							{"useCentroid",useCentroid},
-							{"averageExistingDescriptors","0"}
-						}
-				)
-		);
+		std::shared_ptr<PM::DataPointsFilter> voxelf =
+			PM::get().DataPointsFilterRegistrar.create(
+					"VoxelGridDataPointsFilter",
+					{
+						{"vSizeX", "0.2"},
+						{"vSizeY", "0.2"},
+						{"vSizeZ", "0.2"},
+						{"useCentroid",useCentroid},
+						{"averageExistingDescriptors","0"}
+					}
+			);
 
 		cout << "starting voxel grid sample filter, useCentroid: " << useCentroid << endl;
 		time_a = clock();

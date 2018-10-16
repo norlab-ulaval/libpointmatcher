@@ -92,6 +92,7 @@ TEST(icpTest, icpTest)
 	{
 		if (!fs::is_regular_file(d->status()) ) continue;
 
+		std::cout << "Testing file " << d->path().string() << std::endl;
 		// Load config file, and form ICP object
 		PM::ICP icp;
 		std::string config_file = d->path().string();
@@ -246,7 +247,7 @@ TEST(icpTest, icpSequenceTest)
 	DP pts1 = DP::load(dataPath + "cloud.00001.vtk");
 	DP pts2 = DP::load(dataPath + "cloud.00002.vtk");
 	
-	PM::TransformationParameters Ticp   = PM::Matrix::Identity(4,4);
+	PM::TransformationParameters Ticp = PM::Matrix::Identity(4,4);
 
 	PM::ICPSequence icpSequence;
 

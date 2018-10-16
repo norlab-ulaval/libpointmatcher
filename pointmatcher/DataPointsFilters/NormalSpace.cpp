@@ -89,7 +89,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	std::uniform_real_distribution<> uni01(0., 1.);
 	
 	//bucketed normal space
-	std::vector<std::vector<int>> idBuckets; //stock int so we can marked selected with -1
+	std::vector<std::vector<int> > idBuckets; //stock int so we can marked selected with -1
 	idBuckets.resize(nbBucket);
 	
 	std::vector<std::size_t> keepIndexes;
@@ -98,7 +98,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	///(1) put all points of the data into buckets based on their normal direction
 	for (int i = 0; i < nbPoints; ++i)
 	{
-		assert(normals.col(i).head(3).norm() == 1);
+		assert(normals.col(i).head(3).norm() > 0.99999);
 		
 		//Theta = polar angle in [0 ; pi]
 		const T theta = std::acos(normals(2, i)); 

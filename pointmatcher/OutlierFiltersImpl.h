@@ -52,7 +52,8 @@ struct OutlierFiltersImpl
 	typedef typename PointMatcher<T>::Matches Matches;
 	typedef typename PointMatcher<T>::OutlierFilter OutlierFilter;
 	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
-	typedef typename PointMatcher<T>::Matrix Matrix;	
+	typedef typename PointMatcher<T>::Matrix Matrix;
+	typedef typename PointMatcher<T>::Array Array;
 	typedef typename PointMatcher<T>::Vector Vector;
 	
 	struct NullOutlierFilter: public OutlierFilter
@@ -218,25 +219,61 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
-	struct RobustWelschOutlierFilter: public OutlierFilter
+	struct RobustOutlierFilter: public OutlierFilter
 	{
+
 		inline static const std::string description()
 		{
-			return "Robust weight function part of the M-Estimator familly. The Welsch weight uses an exponential decay reducing the influence of matched point farther away \\cite{RobustWeightFunctions}. More explicitly, the function is w = exp[- (matched distance)^2/scale^2].";
+			return "Robust weight function. 8 robust functions to choose from (Cauchy, Welsch, Switchable Constraint, Geman-McClure, Tukey, Huber, L1 and Student). All the functions are M-Estimator (\\cite{RobustWeightFunctions}) except L1 and Student.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{
 			return {
-				{"scale", "Tuning parameter used to limit the influence of outliers. It could be interpreted as a standard deviation. The unit of this parameter is the same as the distance used, typically meters.", "5.0", "0.0000001", "inf", &P::Comp<T>},
+				{"robustFct", "Type of robust function used. Available fct: 'cauchy', 'welsch', 'sc'(aka Switchable-Constraint), 'gm' (aka Geman-McClure), 'tukey', 'huber' and 'L1'. (Default: cauchy)", "cauchy"},
+				{"tuning", "Tuning parameter used to limit the influence of outliers."
+				  "If the 'scaleEstimator' is 'mad' or 'none', this parameter acts as the tuning parameter."
+				  "If the 'scaleEstimator' is 'berg' this parameter acts as the target scale (σ*).", "1.0", "0.0000001", "inf", &P::Comp<T>},
+				{"scaleEstimator", "The scale estimator is used to convert the error distance into a Mahalanobis distance. 3 estimators are available: "
+				  "'none': no estimator (scale = 1), "
+				  "'mad': use the median of absolute deviation (a kind of robust standard deviation), "
+				  "'berg': an iterative exponentially decreasing estimator", "mad"},
+				{"nbIterationForScale", "For how many iteration the 'scaleEstimator' is recalculated. After 'nbIterationForScale' iteration the previous scale is kept. A nbIterationForScale==0 means that the estiamtor is recalculated at each iteration.", "0", "0", "100", &P::Comp<int>},
+				{"distanceType", "Type of error distance used, either point to point ('point2point') or point to plane('point2plane'). Point to point gives better result normally.", "point2point"},
 				{"approximation", "If the matched distance is larger than this threshold, its weight will be forced to zero. This can save computation as zero values are not minimized. If set to inf (default value), no approximation is done. The unit of this parameter is the same as the distance used, typically meters.", "inf", "0.0", "inf", &P::Comp<T>}
 			};
 		}
-		
-		const T squaredScale;
-		const T squaredApproximation;
-		
-		RobustWelschOutlierFilter(const Parameters& params = Parameters());
+
+		Matrix computePointToPlaneDistance(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+		RobustOutlierFilter(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+		RobustOutlierFilter(const Parameters& params = Parameters());
+		protected:
+		enum RobustFctId {
+			Cauchy=0,
+			Welsch=1,
+			SwitchableConstraint=2,
+			GM=3,
+			Tukey=4,
+			Huber=5,
+			L1=6,
+			Student=7
+		};
+		typedef std::map<std::string, RobustFctId> RobustFctMap;
+		static RobustFctMap robustFcts;
+		const std::string robustFctName;
+		T tuning;
+		const T squaredApproximation;
+		const std::string scaleEstimator;
+		const int nbIterationForScale;
+		const std::string distanceType;
+		int robustFctId;
+		int iteration;
+		T scale;
+		T berg_target_scale;
+
+
+		virtual void resolveEstimatorName();
+		virtual OutlierWeights robustFiltering(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
 }; // OutlierFiltersImpl

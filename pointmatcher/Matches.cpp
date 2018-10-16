@@ -75,7 +75,7 @@ T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 	}
 	if (values.size() == 0)
 		throw ConvergenceError("no outlier to filter");
-	
+
 	if (quantile < 0.0 || quantile > 1.0)
 		throw ConvergenceError("quantile must be between 0 and 1");
 
@@ -85,6 +85,49 @@ T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 	nth_element(values.begin(), values.begin() + (values.size() * quantile), values.end());
 	return values[values.size() * quantile];
 }
+
+//! Calculate the Median of Absolute Deviation(MAD), which is median(|x-median(x)|), a kind of robust standard deviation
+template<typename T>
+T PointMatcher<T>::Matches::getMedianAbsDeviation() const
+{
+	vector<T> values;
+	values.reserve(dists.rows() * dists.cols());
+	const long cols = dists.cols();
+	const long rows = dists.rows();
+	for (int x = 0; x < cols; ++x)
+	{
+		for (int y = 0; y < rows; ++y)
+		{
+			if (dists(y, x) != numeric_limits<T>::infinity())
+			{
+				values.push_back(dists(y, x));
+			}
+		}
+	}
+	if (values.size() == 0)
+		throw ConvergenceError("no outlier to filter");
+
+	nth_element(values.begin(), values.begin() + (values.size() / 2), values.end());
+	const T median =  values[values.size() / 2];
+
+	// Compute absolute deviation
+	const unsigned size = values.size();
+	for (unsigned i = 0; i < size; ++i)
+	{
+		values[i] = fabs(values[i] - median);
+	}
+	// Median of the absolute deviation
+	nth_element(values.begin(), values.begin() + (values.size() / 2), values.end());
+	return values[values.size() / 2];
+}
+
+template<typename T>
+T PointMatcher<T>::Matches::getStandardDeviation() const
+{
+	auto d = dists.array();
+	return std::sqrt((d - d.mean()).square().sum()/(d.size()-1));
+}
+
 
 template struct PointMatcher<float>::Matches;
 template struct PointMatcher<double>::Matches;

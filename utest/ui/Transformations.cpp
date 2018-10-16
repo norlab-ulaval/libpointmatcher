@@ -12,7 +12,7 @@ using namespace PointMatcherSupport;
 class TransformationCheckerTest: public IcpHelper
 {
 public:
-	PM::TransformationChecker* transformCheck;
+	std::shared_ptr<PM::TransformationChecker> transformCheck;
 
 	// Will be called for every tests
 	virtual void SetUp()
@@ -59,7 +59,7 @@ TEST_F(TransformationCheckerTest, BoundTransformationChecker)
 	// Since that transChecker is trigger when the distance is growing
 	// and that we do not expect that to happen in the test dataset, we
 	// keep the Counter to get out of the looop	
-	PM::TransformationChecker* extraTransformCheck;
+	std::shared_ptr<PM::TransformationChecker> extraTransformCheck;
 	
 	extraTransformCheck = PM::get().TransformationCheckerRegistrar.create(
 		"CounterTransformationChecker"
@@ -79,7 +79,7 @@ TEST_F(TransformationCheckerTest, BoundTransformationChecker)
 //---------------------------
 TEST(Transformation, RigidTransformation)
 {
-	PM::Transformation* rigidTrans;
+	std::shared_ptr<PM::Transformation> rigidTrans;
 	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
 
 	//-------------------------------------
@@ -128,6 +128,4 @@ TEST(Transformation, RigidTransformation)
 	T_2D_reflection(1,1) = -1;
 
 	EXPECT_THROW(rigidTrans->correctParameters(T_2D_reflection), TransformationError);
-
-	delete rigidTrans;
 }

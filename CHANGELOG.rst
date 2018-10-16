@@ -2,6 +2,13 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.4 (2018-10-15)
+------------------
+* Support of Eigen 3.3
+* Introduced SurfaceNormalDataPointsFilter, OctreeGridDataPointsFilter and NormalSpaceDataPointsFilter
+* A lot of bugs were fixed
+
+
 1.2.3 (2015-05-15)
 ------------------
 * Support including other versions of YAML in compilation units that also include the YAML version packed with libpointmatcher (PR #80)

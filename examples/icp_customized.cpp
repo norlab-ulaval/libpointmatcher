@@ -74,26 +74,26 @@ int main(int argc, char *argv[])
 	// Prepare reading filters
 	name = "MinDistDataPointsFilter";
 	params["minDist"] = "1.0";
-	PM::DataPointsFilter* minDist_read = 
+	std::shared_ptr<PM::DataPointsFilter> minDist_read =
 		PM::get().DataPointsFilterRegistrar.create(name, params);
 	params.clear();
 
 	name = "RandomSamplingDataPointsFilter";
 	params["prob"] = "0.05";
-	PM::DataPointsFilter* rand_read = 
+	std::shared_ptr<PM::DataPointsFilter> rand_read =
 		PM::get().DataPointsFilterRegistrar.create(name, params);
 	params.clear();
 
 	// Prepare reference filters
 	name = "MinDistDataPointsFilter";
 	params["minDist"] = "1.0";
-	PM::DataPointsFilter* minDist_ref = 
+	std::shared_ptr<PM::DataPointsFilter> minDist_ref =
 		PM::get().DataPointsFilterRegistrar.create(name, params);
 	params.clear();
 
 	name = "RandomSamplingDataPointsFilter";
 	params["prob"] = "0.05";
-	PM::DataPointsFilter* rand_ref = 
+	std::shared_ptr<PM::DataPointsFilter> rand_ref =
 		PM::get().DataPointsFilterRegistrar.create(name, params);
 	params.clear();
 
@@ -101,26 +101,26 @@ int main(int argc, char *argv[])
 	name = "KDTreeMatcher";
 	params["knn"] = "1";
 	params["epsilon"] = "3.16";
-	PM::Matcher* kdtree = 
+	std::shared_ptr<PM::Matcher> kdtree =
 		PM::get().MatcherRegistrar.create(name, params);
 	params.clear();
 
 	// Prepare outlier filters
 	name = "TrimmedDistOutlierFilter";
 	params["ratio"] = "0.75";
-	PM::OutlierFilter* trim = 
+	std::shared_ptr<PM::OutlierFilter> trim =
 		PM::get().OutlierFilterRegistrar.create(name, params);
 	params.clear();
 
 	// Prepare error minimization
 	name = "PointToPointErrorMinimizer";
-	PM::ErrorMinimizer* pointToPoint =   
+	std::shared_ptr<PM::ErrorMinimizer> pointToPoint =
 		PM::get().ErrorMinimizerRegistrar.create(name);
 
 	// Prepare transformation checker filters
 	name = "CounterTransformationChecker";
 	params["maxIterationCount"] = "150";
-	PM::TransformationChecker* maxIter = 
+	std::shared_ptr<PM::TransformationChecker> maxIter =
 		PM::get().TransformationCheckerRegistrar.create(name, params);
 	params.clear();
 
@@ -128,12 +128,12 @@ int main(int argc, char *argv[])
 	params["minDiffRotErr"] = "0.001";
 	params["minDiffTransErr"] = "0.01";
 	params["smoothLength"] = "4";
-	PM::TransformationChecker* diff = 
+	std::shared_ptr<PM::TransformationChecker> diff =
 		PM::get().TransformationCheckerRegistrar.create(name, params);
 	params.clear();
 
 	// Prepare inspector
-	PM::Inspector* nullInspect =
+	std::shared_ptr<PM::Inspector> nullInspect =
 		PM::get().InspectorRegistrar.create("NullInspector");
 
 	//name = "VTKFileInspector";
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 	params.clear();
 	
 	// Prepare transformation
-	PM::Transformation* rigidTrans =
+	std::shared_ptr<PM::Transformation> rigidTrans =
 		PM::get().TransformationRegistrar.create("RigidTransformation");
 	
 	// Build ICP solution
@@ -156,18 +156,18 @@ int main(int argc, char *argv[])
 	icp.referenceDataPointsFilters.push_back(minDist_ref);
 	icp.referenceDataPointsFilters.push_back(rand_ref);
 
-	icp.matcher.reset(kdtree);
+	icp.matcher = kdtree;
 	
 	icp.outlierFilters.push_back(trim);
 	
-	icp.errorMinimizer.reset(pointToPoint);
+	icp.errorMinimizer = pointToPoint;
 
 	icp.transformationCheckers.push_back(maxIter);
 	icp.transformationCheckers.push_back(diff);
 	
 	// toggle to write vtk files per iteration
-	icp.inspector.reset(nullInspect);
-	//icp.inspector.reset(vtkInspect); 
+	icp.inspector = nullInspect;
+	//icp.inspector = vtkInspect;
 
 	icp.transformations.push_back(rigidTrans);
 

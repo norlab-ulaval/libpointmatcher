@@ -11,7 +11,7 @@ using namespace PointMatcherSupport;
 class OutlierFilterTest: public IcpHelper
 {
 public:
-	PM::OutlierFilter* testedOutlierFilter;
+	std::shared_ptr<PM::OutlierFilter> testedOutlierFilter;
 
 	// Will be called for every tests
 	virtual void SetUp()
@@ -59,7 +59,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter2D)
 {
 	// Since not sure how useful is that filter, we keep the 
 	// MaxDistOutlierFilter with it
-	PM::OutlierFilter* extraOutlierFilter;
+	std::shared_ptr<PM::OutlierFilter> extraOutlierFilter;
 	
 	extraOutlierFilter = 
 		PM::get().OutlierFilterRegistrar.create(
@@ -78,7 +78,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter3D)
 {
 	// Since not sure how useful is that filter, we keep the 
 	// MaxDistOutlierFilter with it
-	PM::OutlierFilter* extraOutlierFilter;
+	std::shared_ptr<PM::OutlierFilter> extraOutlierFilter;
 	
 	extraOutlierFilter = 
 		PM::get().OutlierFilterRegistrar.create(

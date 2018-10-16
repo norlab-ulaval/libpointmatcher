@@ -8,7 +8,7 @@ using namespace PointMatcherSupport;
 //---------------------------
 TEST(Inspectors, PerformanceInspector)
 {
-	PM::Inspector* performances =
+	std::shared_ptr<PM::Inspector> performances =
 		PM::get().REG(Inspector).create(
 			"PerformanceInspector", {
 				{"baseFileName", "/tmp/utest_performances"},
@@ -20,23 +20,16 @@ TEST(Inspectors, PerformanceInspector)
   performances->init();
 
 	//TODO: we only test constructor here, check other things...
-
-  delete performances;
 }
 
 TEST(Inspectors, VTKFileInspector)
 {
-	PM::Inspector* vtkFile = 
+	std::shared_ptr<PM::Inspector> vtkFile =
 		PM::get().REG(Inspector).create(
 			"VTKFileInspector", {
 				{"baseFileName", "/tmp/utest_vtk"},
 				{"dumpPerfOnExit", "1"}
 			}
-		)
-	;
+		);
 	//TODO: we only test constructor here, check other things...
-
-  vtkFile->init();
-
-  delete vtkFile;
 }
