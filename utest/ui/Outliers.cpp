@@ -83,7 +83,7 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter3D)
 	extraOutlierFilter = 
 		PM::get().OutlierFilterRegistrar.create(
 			"MaxDistOutlierFilter", {
-				{"maxDist", toParam(0.10)}
+				{"maxDist", toParam(1.0)}
 			}
 		)
 	;
