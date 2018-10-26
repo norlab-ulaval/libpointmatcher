@@ -56,9 +56,9 @@ struct MaxDensityDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	}
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-			( "maxDensity", "Maximum density of points to target. Unit: number of points per m^3.", "10", "0.0000001", "inf", &P::Comp<T> )
-		;
+		return {
+			{"maxDensity", "Maximum density of points to target. Unit: number of points per m^3.", "10", "0.0000001", "inf", &P::Comp<T>}
+		};
 	}
 	
 	const T maxDensity;

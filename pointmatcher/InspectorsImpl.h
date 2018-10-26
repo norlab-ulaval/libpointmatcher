@@ -73,11 +73,11 @@ struct InspectorsImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return boost::assign::list_of<ParameterDoc>
-				( "baseFileName", "base file name for the statistics files (if empty, disabled)", "" )
-				( "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" )
-				( "dumpStats", "dump the statistics on first and last step", "0" )
-			;
+			return {
+				{"baseFileName", "base file name for the statistics files (if empty, disabled)", ""},
+				{"dumpPerfOnExit", "dump performance statistics to stderr on exit", "0"},
+				{"dumpStats", "dump the statistics on first and last step", "0"}
+			};
 		}
 
 		const std::string baseFileName;
@@ -159,16 +159,16 @@ struct InspectorsImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return boost::assign::list_of<ParameterDoc>
-				( "baseFileName", "base file name for the VTK files ", "point-matcher-output" )
-				( "dumpPerfOnExit", "dump performance statistics to stderr on exit", "0" )
-				( "dumpStats", "dump the statistics on first and last step", "0" )
-				( "dumpIterationInfo", "dump iteration info", "0" )
-				( "dumpDataLinks", "dump data links at each iteration", "0" ) 
-				( "dumpReading", "dump the reading cloud at each iteration", "0" )
-				( "dumpReference", "dump the reference cloud at each iteration", "0" )
-				( "writeBinary", "write binary VTK files", "0" )
-			;
+			return {
+				{"baseFileName", "base file name for the VTK files ", "point-matcher-output"},
+				{"dumpPerfOnExit", "dump performance statistics to stderr on exit", "0"},
+				{"dumpStats", "dump the statistics on first and last step", "0"},
+				{"dumpIterationInfo", "dump iteration info", "0"},
+				{"dumpDataLinks", "dump data links at each iteration", "0" },
+				{"dumpReading", "dump the reading cloud at each iteration", "0"},
+				{"dumpReference", "dump the reference cloud at each iteration", "0"},
+				{"writeBinary", "write binary VTK files", "0"}
+			};
 		}
 		
 		const std::string baseFileName;

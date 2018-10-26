@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/typeof/typeof.hpp>
 #include <boost/lexical_cast.hpp>
 #define BOOST_ASSIGN_MAX_PARAMS 6
-#include <boost/assign/list_of.hpp>
 #include <iostream>
 #include <cassert>
 #include <stdexcept>
@@ -46,7 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace PointMatcherSupport
 {
 	using namespace std;
-	using boost::assign::map_list_of;
 	
 	template<typename M>
 	bool contains(const M& m, const typename M::key_type& k)
@@ -64,160 +62,152 @@ namespace PointMatcherSupport
 		else
 			throw std::runtime_error("unknown key");
 	}
-
-	// Hack: extra indirection to make nested map_list_of work with C++11
-	template<typename T>
-	StringMap makeMap(const T& mapInitializer)
-	{
-		StringMap m = mapInitializer;
-		return m;
-	}
 	
 	static Bibliography bibliography()
 	{
-		return map_list_of<std::string, StringMap>
-			( "Phillips2007VarTrimmed", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "title", "Outlier robust ICP for minimizing fractional RMSD" )
-				( "author", "Phillips, J.M. and Liu, R. and Tomasi, C." )
-				( "booktitle", "3-D Digital Imaging and Modeling, 2007. 3DIM '07. Sixth International Conference on" )
-				( "year", "2007" )
-				( "pages", "427--434" )
-				( "publisher", "IEEE Press" )
-				( "doi", "10.1109/3DIM.2007.39" )
-				( "fulltext", "http://x86.cs.duke.edu/~tomasi/papers/phillips/phillips3DIM07.pdf" )
-			))
-			( "Chetverikov2002Trimmed", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "title", "The Trimmed Iterative Closest Point Algorithm" )
-				( "author", "Chetverikov, D. and Svirko, D. and Stepanov, D. and Krsek, P." )
-				( "booktitle", "Pattern Recognition, 2002. Proceedings. 16th International Conference on" )
-				( "year", "2002" )
-				( "pages", "545--548" )
-				( "publisher", "IEEE Press" )
-				( "doi", "10.1109/ICPR.2002.1047997 " )
-				( "fulltext", "http://hci.iwr.uni-heidelberg.de/publications/dip/2002/ICPR2002/DATA/10_1_03.PDF" )
-			))
-			( "Besl1992Point2Point", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "title", "A Method for Registration of 3-D Shapes" )
-				( "author", "Besl, P.J. and McKay, H.D." )
-				( "booktitle", "Pattern Analysis and Machine Intelligence, IEEE Transactions" )
-				( "year", "1992" )
-				( "pages", "239--256" )
-				( "publisher", "IEEE Press" )
-				( "doi", "10.1109/34.121791" )
-				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=121791")
-			))
-			( "Censi2007ICPCovariance", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "title", "An Accurate Closed-Form Estimate of {ICP}'s Covariance" )
-				( "author", "Censi, A." )
-				( "booktitle", "Proceedings of the {IEEE} International Conference on Robotics and Automation ({ICRA})" )
-				( "year", "2007" )
-				( "pages", "3167--3172" )
-				( "publisher", "IEEE Press" )
-				( "doi", "10.1109/ROBOT.2007.363961" )
-				( "fulltext", "http://purl.org/censi/research/2007-icra-icpcov.pdf")
-			))
-			( "Chen1991Point2Plane", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "title", "Object modeling by registration of multiple range images" )
-				( "author", "Chen, Y. and Medioni, G." )
-				( "booktitle", "Robotics and Automation, 1991. Proceedings., 1991 IEEE International Conference on" )
-				( "year", "1991" )
-				( "pages", "2724--2729" )
-				( "publisher", "IEEE Press" )
-				( "doi", "10.1109/ROBOT.1991.132043" )
-				( "fulltext", "http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=132043")
-			))
-			( "Masuda1996Random", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "title", "Registration and integration of multiple range images for 3-D model construction" )
-				( "author", "Masuda, T. and Sakaue, K. and Yokoya, N." )
-				( "booktitle", "Pattern Recognition, 1996., Proceedings of the 13th International Conference on" )
-				( "year", "1996" )
-				( "pages", "879--883" )
-				( "publisher", "IEEE Press" )
-				( "doi", "10.1109/ICPR.1996.546150" )
-				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=546150")
-			))
-			( "Diebel2004Median", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "title", "Simultaneous Localization and Mapping with Active Stereo Vision" )
-				( "author", "Diebel, J. and Reutersward, K. and Thrun, S. and Davis, J. and Gupta, R." )
-				( "booktitle", "Intelligent Robots and Systems, 2004. (IROS 2004). Proceedings. 2004 IEEE/RSJ International Conference on" )
-				( "year", "2004" )
-				( "pages", "3436--3443" )
-				( "publisher", "IEEE Press" )
-				( "doi", "10.1109/IROS.2004.1389948" )
-				( "fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1389948")
-			))
-			( "Pomerleau2012Noise", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "title", "Noise Characterization of Depth Sensors for Surface Inspections" )
-				( "author", "F. Pomerleau, A. Breitenmoser, M. Liu, F. Colas, R. Siegwart" )
-				( "booktitle", " International Conference on Applied Robotics for the Power Industry, 2012. (CARPI 2012). Proceedings of the IEEE" )
-				( "year", "2012" )
-				( "pages", "1--8" )
-				( "publisher", "IEEE Press" )
-				( "doi", "" )
-				( "fulltext", "")
-			))
-			( "RobustWeightFunctions", makeMap(map_list_of
-				( "type", "article" )
-				( "title", "Robust regression using iteratively reweighted least-squares" )
-				( "author", "Paul W Holland and Roy E Welsch" )
-				( "booktitle", "Communications in Statistics - Theory and Methods" )
-				( "year", "1977" )
-				( "pages", "813-827" )
-				( "publisher", "" )
-				( "doi", "10.1080/03610927708827533" )
-				( "fulltext", "")
-			))
-			( "Umeyama1991", makeMap(map_list_of
-				( "type", "article" )
-				( "author", "Umeyama, Shinji" )
-				( "title", "Least-Squares Estimation of Transformation Parameters Between Two Point Patterns" )
-				( "journal", "IEEE Trans. Pattern Anal. Mach. Intell." )
-				( "issue_date", "April 1991" )
-				( "volume", "13" )
-				( "number", "4" )
-				( "month", "apr" )
-				( "year", "1991" )
-				( "issn", "0162-8828" )
-				( "pages", "376--380" )
-				( "numpages", "5" )
-				( "url", "http://dx.doi.org/10.1109/34.88573" )
-				( "doi", "10.1109/34.88573" )
-				( "acmid", "105525" )
-				( "publisher", "IEEE Computer Society" )
-				( "address", "Washington, DC, USA" )
-			))
-			( "Rusinkiewicz2001", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "author", "Rusinkiewicz, Szymon and Levoy, Marc" )
-				( "title", "Efficient Variants of the ICP Algorithm" )
-				( "journal", "Proceedings Third International Conference on 3-D Digital Imaging and Modeling" )
-				( "year", "2001" )
-				( "isbn", "0769509843" )
-				( "pages", "145--152" )
-				( "doi", "10.1109/IM.2001.924423" )
-				( "publisher", "IEEE Computer Society" )
-				( "address", "Quebec City, Quebec, Canada" )
-			))
-			( "Gelfand2003", makeMap(map_list_of
-				( "type", "inproceedings" )
-				( "author", "Gelfand, N. and Ikemoto, L. and Rusinkiewicz, Szymon and Levoy, M." )
-				( "title", "Geometrically stable sampling for the ICP algorithm" )
-				( "journal", "Fourth International Conference on 3-D Digital Imaging and Modeling, 2003. 3DIM 2003. Proceedings." )
-				( "year", "2003" )
-				( "isbn", "0-7695-1991-1" )
-				( "pages", "260--267" )
-				( "doi", "10.1109/IM.2003.1240258" )
-				( "publisher", "IEEE Computer Society" )
-			))
-		;
+		return {
+			{"Phillips2007VarTrimmed", {
+				{"type", "inproceedings"},
+				{"title", "Outlier robust ICP for minimizing fractional RMSD"},
+				{"author", "Phillips, J.M. and Liu, R. and Tomasi, C."},
+				{"booktitle", "3-D Digital Imaging and Modeling, 2007. 3DIM '07. Sixth International Conference on"},
+				{"year", "2007"},
+				{"pages", "427--434"},
+				{"publisher", "IEEE Press"},
+				{"doi", "10.1109/3DIM.2007.39"},
+				{"fulltext", "http://x86.cs.duke.edu/~tomasi/papers/phillips/phillips3DIM07.pdf"}
+			}},
+			{"Chetverikov2002Trimmed", {
+				{"type", "inproceedings"},
+				{"title", "The Trimmed Iterative Closest Point Algorithm"},
+				{"author", "Chetverikov, D. and Svirko, D. and Stepanov, D. and Krsek, P."},
+				{"booktitle", "Pattern Recognition, 2002. Proceedings. 16th International Conference on"},
+				{"year", "2002"},
+				{"pages", "545--548"},
+				{"publisher", "IEEE Press"},
+				{"doi", "10.1109/ICPR.2002.1047997 "},
+				{"fulltext", "http://hci.iwr.uni-heidelberg.de/publications/dip/2002/ICPR2002/DATA/10_1_03.PDF"}
+			}},
+			{"Besl1992Point2Point", {
+				{"type", "inproceedings"},
+				{"title", "A Method for Registration of 3-D Shapes"},
+				{"author", "Besl, P.J. and McKay, H.D."},
+				{"booktitle", "Pattern Analysis and Machine Intelligence, IEEE Transactions"},
+				{"year", "1992"},
+				{"pages", "239--256"},
+				{"publisher", "IEEE Press"},
+				{"doi", "10.1109/34.121791"},
+				{"fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=121791"}
+			}},
+			{"Censi2007ICPCovariance", {
+				{"type", "inproceedings" },
+				{"title", "An Accurate Closed-Form Estimate of {ICP}'s Covariance" },
+				{"author", "Censi, A." },
+				{"booktitle", "Proceedings of the {IEEE} International Conference on Robotics and Automation ({ICRA})" },
+				{"year", "2007" },
+				{"pages", "3167--3172" },
+				{"publisher", "IEEE Press" },
+				{"doi", "10.1109/ROBOT.2007.363961" },
+				{"fulltext", "http://purl.org/censi/research/2007-icra-icpcov.pdf"}
+			}},
+			{"Chen1991Point2Plane", {
+				{"type", "inproceedings"},
+				{"title", "Object modeling by registration of multiple range images"},
+				{"author", "Chen, Y. and Medioni, G."},
+				{"booktitle", "Robotics and Automation, 1991. Proceedings., 1991 IEEE International Conference on"},
+				{"year", "1991"},
+				{"pages", "2724--2729"},
+				{"publisher", "IEEE Press"},
+				{"doi", "10.1109/ROBOT.1991.132043"},
+				{"fulltext", "http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=132043"}
+			}},
+			{"Masuda1996Random", {
+				{"type", "inproceedings"},
+				{"title", "Registration and integration of multiple range images for 3-D model construction"},
+				{"author", "Masuda, T. and Sakaue, K. and Yokoya, N."},
+				{"booktitle", "Pattern Recognition, 1996., Proceedings of the 13th International Conference on"},
+				{"year", "1996"},
+				{"pages", "879--883"},
+				{"publisher", "IEEE Press"},
+				{"doi", "10.1109/ICPR.1996.546150"},
+				{"fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=546150"}
+			}},
+			{"Diebel2004Median", {
+				{"type", "inproceedings"},
+				{"title", "Simultaneous Localization and Mapping with Active Stereo Vision"},
+				{"author", "Diebel, J. and Reutersward, K. and Thrun, S. and Davis, J. and Gupta, R."},
+				{"booktitle", "Intelligent Robots and Systems, 2004. (IROS 2004). Proceedings. 2004 IEEE/RSJ International Conference on"},
+				{"year", "2004"},
+				{"pages", "3436--3443"},
+				{"publisher", "IEEE Press"},
+				{"doi", "10.1109/IROS.2004.1389948"},
+				{"fulltext", "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1389948"}
+			}},
+			{"Pomerleau2012Noise", {
+				{"type", "inproceedings"},
+				{"title", "Noise Characterization of Depth Sensors for Surface Inspections"},
+				{"author", "F. Pomerleau, A. Breitenmoser, M. Liu, F. Colas, R. Siegwart"},
+				{"booktitle", " International Conference on Applied Robotics for the Power Industry, 2012. (CARPI 2012). Proceedings of the IEEE"},
+				{"year", "2012"},
+				{"pages", "1--8"},
+				{"publisher", "IEEE Press"},
+				{"doi", ""},
+				{"fulltext", ""}
+			}},
+			{"RobustWeightFunctions", {
+				{"type", "article"},
+				{"title", "Robust regression using iteratively reweighted least-squares"},
+				{"author", "Paul W Holland and Roy E Welsch"},
+				{"booktitle", "Communications in Statistics - Theory and Methods"},
+				{"year", "1977"},
+				{"pages", "813-827"},
+				{"publisher", ""},
+				{"doi", "10.1080/03610927708827533"},
+				{"fulltext", ""}
+			}},
+			{"Umeyama1991", {
+				{"type", "article"},
+				{"author", "Umeyama, Shinji"},
+				{"title", "Least-Squares Estimation of Transformation Parameters Between Two Point Patterns"},
+				{"journal", "IEEE Trans. Pattern Anal. Mach. Intell."},
+				{"issue_date", "April 1991"},
+				{"volume", "13"},
+				{"number", "4"},
+				{"month", "apr"},
+				{"year", "1991"},
+				{"issn", "0162-8828"},
+				{"pages", "376--380"},
+				{"numpages", "5"},
+				{"url", "http://dx.doi.org/10.1109/34.88573"},
+				{"doi", "10.1109/34.88573"},
+				{"acmid", "105525"},
+				{"publisher", "IEEE Computer Society"},
+				{"address", "Washington, DC, USA"}
+			}},
+			{"Rusinkiewicz2001", {
+				{"type", "inproceedings"},
+				{"author", "Rusinkiewicz, Szymon and Levoy, Marc"},
+				{"title", "Efficient Variants of the ICP Algorithm"},
+				{"journal", "Proceedings Third International Conference on 3-D Digital Imaging and Modeling"},
+				{"year", "2001"},
+				{"isbn", "0769509843"},
+				{"pages", "145--152"},
+				{"doi", "10.1109/IM.2001.924423"},
+				{"publisher", "IEEE Computer Society"},
+				{"address", "Quebec City, Quebec, Canada"}
+			}},
+			{"Gelfand2003", {
+				{"type", "inproceedings"},
+				{"author", "Gelfand, N. and Ikemoto, L. and Rusinkiewicz, Szymon and Levoy, M."},
+				{"title", "Geometrically stable sampling for the ICP algorithm"},
+				{"journal", "Fourth International Conference on 3-D Digital Imaging and Modeling, 2003. 3DIM 2003. Proceedings."},
+				{"year", "2003"},
+				{"isbn", "0-7695-1991-1"},
+				{"pages", "260--267"},
+				{"doi", "10.1109/IM.2003.1240258"},
+				{"publisher", "IEEE Computer Society"}
+			}}
+		};
 	}
 	
 	CurrentBibliography::CurrentBibliography(Mode mode):
@@ -366,14 +356,14 @@ namespace PointMatcherSupport
 						newText += "[[#" + key + "|";
 					if (contains(indices, key))
 					{
-						newText += boost::lexical_cast<string>(get(indices, key)+1);
+						newText += std::to_string(get(indices, key)+1);
 					}
 					else
 					{
 						size_t index(entries.size());
 						entries.push_back(key);
 						indices[key] = index;
-						newText += boost::lexical_cast<string>(index+1);
+						newText += std::to_string(index+1);
 					}
 					if (mode == CurrentBibliography::ROSWIKI)
 						newText += "]]";

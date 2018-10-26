@@ -38,16 +38,18 @@ public:
 //No commun parameters were found for 2D and 3D, tests are splited
 TEST_F(OutlierFilterTest, MaxDistOutlierFilter2D)
 {
-	addFilter("MaxDistOutlierFilter", map_list_of
-		("maxDist", toParam(0.10))
+	addFilter("MaxDistOutlierFilter", {
+			{"maxDist", toParam(0.10)}
+		}
 	);
 	validate2dTransformation();
 }
 
 TEST_F(OutlierFilterTest, MaxDistOutlierFilter3D)
 {
-	addFilter("MaxDistOutlierFilter", map_list_of
-		("maxDist", toParam(1.0))
+	addFilter("MaxDistOutlierFilter", {
+			{"maxDist", toParam(1.0)}
+		}
 	);
 	validate3dTransformation();
 }
@@ -61,13 +63,13 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter2D)
 	
 	extraOutlierFilter = 
 		PM::get().OutlierFilterRegistrar.create(
-			"MaxDistOutlierFilter", map_list_of 
-				("maxDist", toParam(0.10))
-		)
-	;
+			"MaxDistOutlierFilter", {
+				{"maxDist", toParam(0.10)}
+			}
+		);
 	icp.outlierFilters.push_back(extraOutlierFilter);
 	
-	addFilter("MinDistOutlierFilter", map_list_of ("minDist", toParam(0.0002)) );
+	addFilter("MinDistOutlierFilter", {{"minDist", toParam(0.0002)}});
 	
 	validate2dTransformation();
 }
@@ -80,20 +82,21 @@ TEST_F(OutlierFilterTest, MinDistOutlierFilter3D)
 	
 	extraOutlierFilter = 
 		PM::get().OutlierFilterRegistrar.create(
-			"MaxDistOutlierFilter", map_list_of 
-				("maxDist", toParam(1.0))
+			"MaxDistOutlierFilter", {
+				{"maxDist", toParam(1.0)}
+			}
 		)
 	;
 	icp.outlierFilters.push_back(extraOutlierFilter);
 	
-	addFilter("MinDistOutlierFilter", map_list_of ("minDist", toParam(0.0002)) );
+	addFilter("MinDistOutlierFilter", {{"minDist", toParam(0.0002)}});
 	
 	validate3dTransformation();
 }
 
 TEST_F(OutlierFilterTest, MedianDistOutlierFilter)
 {
-	addFilter("MedianDistOutlierFilter", map_list_of ("factor", toParam(3.5)));
+	addFilter("MedianDistOutlierFilter", {{"factor", toParam(3.5)}});
 	validate2dTransformation();
 	validate3dTransformation();
 }
@@ -101,7 +104,7 @@ TEST_F(OutlierFilterTest, MedianDistOutlierFilter)
 
 TEST_F(OutlierFilterTest, TrimmedDistOutlierFilter)
 {
-	addFilter("TrimmedDistOutlierFilter", map_list_of ("ratio", toParam(0.85)) );
+	addFilter("TrimmedDistOutlierFilter", {{"ratio", toParam(0.85)}});
 	validate2dTransformation();
 	validate3dTransformation();
 }
@@ -109,10 +112,11 @@ TEST_F(OutlierFilterTest, TrimmedDistOutlierFilter)
 
 TEST_F(OutlierFilterTest, VarTrimmedDistOutlierFilter)
 {
-	addFilter("VarTrimmedDistOutlierFilter", map_list_of
-		("minRatio", toParam(0.60))
-		("maxRatio", toParam(0.80))
-		("lambda", toParam(0.9))
+	addFilter("VarTrimmedDistOutlierFilter", {
+			{"minRatio", toParam(0.60)},
+			{"maxRatio", toParam(0.80)},
+			{"lambda", toParam(0.9)}
+		}
 	);
 	validate2dTransformation();
 	validate3dTransformation();

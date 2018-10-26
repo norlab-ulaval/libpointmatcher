@@ -55,11 +55,11 @@ struct DistanceLimitDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	}
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-				( "dim", "dimension on which the filter will be applied. x=0, y=1, z=2, radius=-1", "-1", "-1", "2", &P::Comp<int> )
-				( "dist", "distance limit of the filter. If dim is set to -1 (radius), the absolute value of dist will be used", "1", "-inf", "inf", &P::Comp<T> )
-				("removeInside", "If set to true (1), remove points before the distance limit; else (0), remove points beyond the distance limit", "1", "0", "1", P::Comp<bool>)
-				;
+		return {
+				{"dim", "dimension on which the filter will be applied. x=0, y=1, z=2, radius=-1", "-1", "-1", "2", &P::Comp<int>},
+				{"dist", "distance limit of the filter. If dim is set to -1 (radius), the absolute value of dist will be used", "1", "-inf", "inf", &P::Comp<T>},
+				{"removeInside", "If set to true (1), remove points before the distance limit; else (0), remove points beyond the distance limit", "1", "0", "1", P::Comp<bool>}
+		};
 	}
 
 	const int dim;

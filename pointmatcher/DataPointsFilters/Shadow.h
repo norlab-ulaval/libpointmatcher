@@ -58,9 +58,9 @@ struct ShadowDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-			( "eps", "Small angle (in rad) around which a normal shoudn't be observable", "0.1", "0.0", "3.1416", &P::Comp<T> )
-		;
+		return {
+			{"eps", "Small angle (in rad) around which a normal shoudn't be observable", "0.1", "0.0", "3.1416", &P::Comp<T>}
+		};
 	}
 
 	const T eps;

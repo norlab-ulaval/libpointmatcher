@@ -287,7 +287,7 @@ void ElipsoidsDataPointsFilter<T>::fuseRange(
 {
   using namespace PointMatcherSupport;
   
-  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+  typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 
   const int colCount(last-first);
   const int featDim(data.features.rows());
@@ -301,7 +301,7 @@ void ElipsoidsDataPointsFilter<T>::fuseRange(
     t.col(i) = data.times.col(data.indices[first + i]); //, 0);
   }
   const Vector box = d.rowwise().maxCoeff() - d.rowwise().minCoeff();
-  const boost::int64_t timeBox = t.maxCoeff() - t.minCoeff();
+  const std::int64_t timeBox = t.maxCoeff() - t.minCoeff();
 
   const T boxDim(box.maxCoeff());
   // drop box if it is too large or max timeframe is exceeded
@@ -313,9 +313,9 @@ void ElipsoidsDataPointsFilter<T>::fuseRange(
   const Vector mean = d.rowwise().sum() / T(colCount);
   const Matrix NN = (d.colwise() - mean);
 
-  const boost::int64_t minTime = t.minCoeff();
-  const boost::int64_t maxTime = t.maxCoeff();
-  const boost::int64_t meanTime = t.sum() / T(colCount);
+  const std::int64_t minTime = t.minCoeff();
+  const std::int64_t maxTime = t.maxCoeff();
+  const std::int64_t meanTime = t.sum() / T(colCount);
 
   // compute covariance
   const Matrix C(NN * NN.transpose());

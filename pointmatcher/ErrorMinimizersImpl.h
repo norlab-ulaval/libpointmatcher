@@ -106,9 +106,9 @@ struct ErrorMinimizersImpl
 
 		inline static const ParametersDoc availableParameters()
 		{
-			return boost::assign::list_of<ParameterDoc>
-				( "sensorStdDev", "sensor standard deviation", "0.01", "0.", "inf", &P::Comp<T>)
-			;
+			return {
+				{"sensorStdDev", "sensor standard deviation", "0.01", "0.", "inf", &P::Comp<T>}
+			};
 		}
 
 		const T sensorStdDev;

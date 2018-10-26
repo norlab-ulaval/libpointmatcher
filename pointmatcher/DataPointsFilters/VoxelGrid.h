@@ -65,13 +65,13 @@ struct VoxelGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-		( "vSizeX", "Dimension of each voxel cell in x direction", "1.0", "0.001", "+inf", &P::Comp<T> )
-		( "vSizeY", "Dimension of each voxel cell in y direction", "1.0", "0.001", "+inf", &P::Comp<T> )
-		( "vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "0.001", "+inf", &P::Comp<T> )
-		( "useCentroid", "If 1 (true), down-sample by using centroid of voxel cell.  If false (0), use center of voxel cell.", "1", "0", "1", P::Comp<bool> )
-		( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1", "0", "1", P::Comp<bool> )
-		;
+		return {
+			{"vSizeX", "Dimension of each voxel cell in x direction", "1.0", "0.001", "+inf", &P::Comp<T>},
+			{"vSizeY", "Dimension of each voxel cell in y direction", "1.0", "0.001", "+inf", &P::Comp<T>},
+			{"vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "0.001", "+inf", &P::Comp<T>},
+			{"useCentroid", "If 1 (true), down-sample by using centroid of voxel cell.  If false (0), use center of voxel cell.", "1", "0", "1", P::Comp<bool>},
+			{"averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1", "0", "1", P::Comp<bool>}
+		};
 	}
 
 	const T vSizeX;

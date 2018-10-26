@@ -58,23 +58,23 @@ struct GestaltDataPointsFilter: public PointMatcher<T>::DataPointsFilter
   }
   inline static const ParametersDoc availableParameters()
   {
-    return boost::assign::list_of<ParameterDoc>
-    ( "ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.1", "0.0000001", "0.9999999", &P::Comp<T> )
-    ( "radius", "is the radius of the gestalt descriptor, will be divided into 4 circular and 8 radial bins = 32 bins", "5", "0.1", "2147483647", &P::Comp<T> )
-    ( "knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned> )
-    ( "vSizeX", "Dimension of each voxel cell in x direction", "1.0", "-inf", "inf", &P::Comp<T> )
-    ( "vSizeY", "Dimension of each voxel cell in y direction", "1.0", "-inf", "inf", &P::Comp<T> )
-    ( "vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "-inf", "inf", &P::Comp<T> )
-    ( "keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0" )
-    ( "maxBoxDim", "maximum length of a box above which the box is discarded", "inf" )
-    ( "averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1" )
-    ( "maxTimeWindow", "maximum spread of times in a surfel", "inf" )
-    ( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
-    ( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
-    ( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
-    ( "keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0" )
-    ( "keepGestaltFeatures", "whether the Gestalt features shall be added to the resulting cloud", "1" )
-    ;
+    return {
+		{"ratio", "ratio of points to keep with random subsampling. Matrix (normal, density, etc.) will be associated to all points in the same bin.", "0.1", "0.0000001", "0.9999999", &P::Comp<T>},
+		{"radius", "is the radius of the gestalt descriptor, will be divided into 4 circular and 8 radial bins = 32 bins", "5", "0.1", "2147483647", &P::Comp<T>},
+		{"knn", "determined how many points are used to compute the normals. Direct link with the rapidity of the computation (large = fast). Technically, limit over which a box is splitted in two", "7", "3", "2147483647", &P::Comp<unsigned>},
+		{"vSizeX", "Dimension of each voxel cell in x direction", "1.0", "-inf", "inf", &P::Comp<T>},
+		{"vSizeY", "Dimension of each voxel cell in y direction", "1.0", "-inf", "inf", &P::Comp<T>},
+		{"vSizeZ", "Dimension of each voxel cell in z direction", "1.0", "-inf", "inf", &P::Comp<T>},
+		{"keepMeans", "whether the means should be added as descriptors to the resulting cloud", "0"},
+		{"maxBoxDim", "maximum length of a box above which the box is discarded", "inf"},
+		{"averageExistingDescriptors", "whether the filter keep the existing point descriptors and average them or should it drop them", "1"},
+		{"maxTimeWindow", "maximum spread of times in a surfel", "inf"},
+		{"keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1"},
+		{"keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0"},
+		{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0"},
+		{"keepCovariances", "whether the covariances should be added as descriptors to the resulting cloud", "0"},
+		{"keepGestaltFeatures", "whether the Gestalt features shall be added to the resulting cloud", "1"}
+    };
   }
 
   const T ratio;
@@ -110,8 +110,8 @@ struct GestaltDataPointsFilter: public PointMatcher<T>::DataPointsFilter
   {
     typedef std::vector<int> Indices;
     typedef typename DataPoints::View View;
-    typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
-    typedef typename Eigen::Matrix<boost::int64_t, 1, Eigen::Dynamic> Int64Vector;
+    typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+    typedef typename Eigen::Matrix<std::int64_t, 1, Eigen::Dynamic> Int64Vector;
 
     Indices indices;
     Indices indicesToKeep;

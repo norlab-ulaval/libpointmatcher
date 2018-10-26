@@ -62,11 +62,11 @@ struct ObservationDirectionDataPointsFilter: public PointMatcher<T>::DataPointsF
 	
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-			( "x", "x-coordinate of sensor", "0" )
-			( "y", "y-coordinate of sensor", "0" )
-			( "z", "z-coordinate of sensor", "0" )
-		;
+		return {
+			{"x", "x-coordinate of sensor", "0"},
+			{"y", "y-coordinate of sensor", "0"},
+			{"z", "z-coordinate of sensor", "0"}
+		};
 	}
 
 	const T centerX;

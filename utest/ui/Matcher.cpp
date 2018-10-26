@@ -37,9 +37,9 @@ public:
 
 TEST_F(MatcherTest, KDTreeMatcher)
 {
-	vector<unsigned> knn = list_of (1) (2) (3);
-	vector<double> epsilon = list_of (0.0) (0.2);
-	vector<double> maxDist = list_of (1.0) (0.5);
+	vector<unsigned> knn = {1, 2, 3};
+	vector<double> epsilon = {0.0, 0.2};
+	vector<double> maxDist = {1.0, 0.5};
 
 	for(unsigned i=0; i < knn.size(); i++)
 	{

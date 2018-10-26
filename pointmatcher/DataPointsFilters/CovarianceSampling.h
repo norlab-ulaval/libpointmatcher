@@ -69,10 +69,10 @@ struct CovarianceSamplingDataPointsFilter : public PointMatcher<T>::DataPointsFi
 
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-		( "nbSample", "Number of point to select.", "5000", "1", "4294967295", &P::Comp<std::size_t> )
-		( "torqueNorm", "Method for torque normalization: (0) L=1 (no normalization, more t-normals), (1) L=Lavg (average distance, torque is scale-independent), (2) L=Lmax (scale in unit ball, more r-normals)", "1", "0", "2", &P::Comp<std::uint8_t> )
-		;
+		return {
+			{"nbSample", "Number of point to select.", "5000", "1", "4294967295", &P::Comp<std::size_t>},
+			{"torqueNorm", "Method for torque normalization: (0) L=1 (no normalization, more t-normals), (1) L=Lavg (average distance, torque is scale-independent), (2) L=Lmax (scale in unit ball, more r-normals)", "1", "0", "2", &P::Comp<std::uint8_t>}
+		};
 	}
 
 	enum TorqueNormMethod : std::uint8_t { L1=0, Lavg=1, Lmax=2 };
