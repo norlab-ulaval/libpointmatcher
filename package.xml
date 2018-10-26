@@ -1,6 +1,6 @@
 <package>
 	<name>libpointmatcher</name>
-	<version>1.2.4</version>
+	<version>1.3.0</version>
 	<description>
 		libpointmatcher is a modular ICP library, useful for robotics and computer vision.
 	</description>
