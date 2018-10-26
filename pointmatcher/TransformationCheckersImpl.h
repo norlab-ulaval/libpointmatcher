@@ -114,8 +114,8 @@ struct TransformationCheckersImpl
 		inline static const ParametersDoc availableParameters()
 		{
 			return {
-					{"maxRotationNorm",    "rotation bound",    "1", "0", "inf", &P::Comp < T > },
-					{"maxTranslationNorm", "translation bound", "1", "0", "inf", &P::Comp < T > }
+				{"maxRotationNorm",    "rotation bound",    "1", "0", "inf", &P::Comp < T > },
+				{"maxTranslationNorm", "translation bound", "1", "0", "inf", &P::Comp < T > }
 			};
 		}
 			

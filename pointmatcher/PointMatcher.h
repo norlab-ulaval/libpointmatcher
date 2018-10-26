@@ -91,14 +91,6 @@ namespace PointMatcherSupport
 		//! return an exception when a transformation has invalid parameters
 		TransformationError(const std::string& reason);
 	};
-
-	//! A vector of std::shared_ptr<S> that behaves like a std::vector<S>
-	template<typename S>
-	struct SharedPtrVector: public std::vector<std::shared_ptr<S> >
-	{
-		//! Add an instance of S to the vector, take ownership
-		void push_back(S* v) { std::vector<std::shared_ptr<S> >::push_back(std::shared_ptr<S>(v)); }
-	};
 	
 	//! The logger interface, used to output warnings and informations
 	struct Logger: public Parametrizable

@@ -122,8 +122,8 @@ namespace PointMatcherSupport
 	Parametrizable::ParameterDoc::ParameterDoc(const std::string& name, const std::string& doc, const std::string& defaultValue):
 		name(name),
 		doc(doc),
-		defaultValue(boost::lexical_cast<string>(defaultValue)),
-		minValue(""), 
+		defaultValue(defaultValue),
+		minValue(""),
 		maxValue(""),
 		comp(FalseLexicalComparison)
 	{}
