@@ -2,12 +2,16 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.0 (2018-10-26)
+------------------
+* Removed some boost utilities supported by c++11
+* Replaced raw pointers by std smart pointers
+
 1.2.4 (2018-10-15)
 ------------------
 * Support of Eigen 3.3
 * Introduced SurfaceNormalDataPointsFilter, OctreeGridDataPointsFilter and NormalSpaceDataPointsFilter
 * A lot of bugs were fixed
-
 
 1.2.3 (2015-05-15)
 ------------------
