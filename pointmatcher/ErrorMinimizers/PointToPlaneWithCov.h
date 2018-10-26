@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define POINT_TO_PLANE_WITH_COV_ERROR_MINIMIZER_H
 
 #include "PointMatcher.h"
-#include "ErrorMinimizers/PointToPlane.h"
+#include "ErrorMinimizersImpl.h"
 
 template<typename T>
 struct PointToPlaneWithCovErrorMinimizer: public PointToPlaneErrorMinimizer<T>

@@ -33,26 +33,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_ERRORMINIMIZERS_H
-#define __POINTMATCHER_ERRORMINIMIZERS_H
+#ifndef LIBPOINTMATCHER_IDENTITY_H
+#define LIBPOINTMATCHER_IDENTITY_H
 
 #include "PointMatcher.h"
-#include "ErrorMinimizers/PointToPlane.h"
-#include "ErrorMinimizers/PointToPlaneWithCov.h"
-#include "ErrorMinimizers/PointToPoint.h"
-#include "ErrorMinimizers/PointToPointWithCov.h"
-#include "ErrorMinimizers/PointToPointSimilarity.h"
-#include "ErrorMinimizers/Identity.h"
 
-template<typename T>
-struct ErrorMinimizersImpl
+template <typename T>
+struct IdentityErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 {
-	typedef ::PointToPlaneErrorMinimizer<T> PointToPlaneErrorMinimizer;
-	typedef ::PointToPlaneWithCovErrorMinimizer<T> PointToPlaneWithCovErrorMinimizer;
-	typedef ::PointToPointErrorMinimizer<T> PointToPointErrorMinimizer;
-	typedef ::PointToPointWithCovErrorMinimizer<T> PointToPointWithCovErrorMinimizer;
-	typedef ::PointToPointSimilarityErrorMinimizer<T> PointToPointSimilarityErrorMinimizer;
-	typedef ::IdentityErrorMinimizer<T> IdentityErrorMinimizer;
-}; // ErrorMinimizersImpl
+	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
+	typedef typename PointMatcher<T>::ErrorMinimizer::ErrorElements ErrorElements;
+	
+	inline static const std::string description()
+	{
+		return "Does nothing.";
+	}
+	
+	//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+	virtual TransformationParameters compute(const ErrorElements& mPts);
+};
 
-#endif // __POINTMATCHER_ERRORMINIMIZER_H
+#endif //LIBPOINTMATCHER_IDENTITY_H

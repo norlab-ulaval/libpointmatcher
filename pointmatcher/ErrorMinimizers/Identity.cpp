@@ -34,25 +34,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ErrorMinimizersImpl.h"
-#include "PointMatcherPrivate.h"
-#include "Functions.h"
 
-#include "Eigen/SVD"
-#include <iostream>
-
-using namespace Eigen;
-using namespace std;
-using namespace PointMatcherSupport;
-
-///////////////////////////////////////////////////////////////////////
-// Identity Error Minimizer
-///////////////////////////////////////////////////////////////////////
 template<typename T>
-typename PointMatcher<T>::TransformationParameters ErrorMinimizersImpl<T>::IdentityErrorMinimizer::compute(const ErrorElements& mPts)
+typename PointMatcher<T>::TransformationParameters IdentityErrorMinimizer<T>::compute(const ErrorElements& mPts)
 {
 	const int dim = mPts.reading.getHomogeneousDim();
 	return TransformationParameters::Identity(dim, dim);
 }
 
-template struct ErrorMinimizersImpl<float>::IdentityErrorMinimizer;
-template struct ErrorMinimizersImpl<double>::IdentityErrorMinimizer;
+template struct IdentityErrorMinimizer<float>;
+template struct IdentityErrorMinimizer<double>;
