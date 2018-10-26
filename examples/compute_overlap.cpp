@@ -133,10 +133,9 @@ int main(int argc, char *argv[])
 			std::shared_ptr<PM::DataPointsFilter> subSample =
 				PM::get().DataPointsFilterRegistrar.create(
 					"RandomSamplingDataPointsFilter", 
-					map_list_of
-						("prob", "0.5")
+					{{"prob", "0.5"}}
 				);
-			
+
 			std::shared_ptr<PM::DataPointsFilter> maxDensity =
 				PM::get().DataPointsFilterRegistrar.create(
 					"MaxDensityDataPointsFilter"
@@ -148,13 +147,14 @@ int main(int argc, char *argv[])
 					{"dim", "1"},
 					{"minDist", "0"}
 				}));*/
-			
+
 			std::shared_ptr<PM::DataPointsFilter> computeDensity =
 				PM::get().DataPointsFilterRegistrar.create(
-					"SurfaceNormalDataPointsFilter", 
-					map_list_of
-						("knn", "20")
-						("keepDensities", "1")
+					"SurfaceNormalDataPointsFilter",
+					{
+						{"knn", "20"},
+						{"keepDensities", "1"}
+					}
 				);
 
 			reading = subSample->filter(reading);
@@ -185,16 +185,16 @@ int main(int argc, char *argv[])
 				std::shared_ptr<PM::Matcher> matcherSelf =
 					PM::get().MatcherRegistrar.create(
 						"KDTreeMatcher",
-						map_list_of
-							("knn", toParam(knn))
+						{{"knn", toParam(knn)}}
 					);
-				
+
 				std::shared_ptr<PM::Matcher> matcherTarget =
 					PM::get().MatcherRegistrar.create(
 						"KDTreeVarDistMatcher",
-						map_list_of
-							("knn", toParam(knnAll))
-							("maxDistField", "maxSearchDist")
+						{
+							{"knn", toParam(knnAll)},
+							{"maxDistField", "maxSearchDist"}
+						}
 					);
 
 				matcherSelf->init(self);

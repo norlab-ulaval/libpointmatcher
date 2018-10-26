@@ -73,19 +73,19 @@ int main(int argc, char *argv[])
 	std::shared_ptr<PM::DataPointsFilter> densityFilter =
 					PM::get().DataPointsFilterRegistrar.create(
 						"SurfaceNormalDataPointsFilter",
-						map_list_of
-						("knn", "10")
-						("epsilon", "5") 
-						("keepNormals", "0")
-						("keepDensities", "1")
-						);
-	
+						{
+							{"knn", "10"},
+							{"epsilon", "5"},
+							{"keepNormals", "0"},
+							{"keepDensities", "1"}
+						}
+                    );
+
 	std::shared_ptr<PM::DataPointsFilter> maxDensitySubsample =
 					PM::get().DataPointsFilterRegistrar.create(
 						"MaxDensityDataPointsFilter",
-						map_list_of
-						("maxDensity", toParam(30))
-						);
+						{{"maxDensity", toParam(30)}}
+                    );
 	// Main algorithm definition
 	PM::ICP icp;
 

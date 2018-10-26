@@ -64,19 +64,19 @@ struct SurfaceNormalDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	}
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-			( "knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned> )
-			( "maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T> )
-			( "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> )
-			( "keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1" )
-			( "keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0" )
-			( "keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0" )
-			( "keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0" )
-			( "keepMatchedIds" , "whether the identifiers of matches points should be added as descriptors to the resulting cloud", "0" )
-			( "keepMeanDist" , "whether the distance to the nearest neighbor mean should be added as descriptors to the resulting cloud", "0" )
-			( "sortEigen" , "whether the eigenvalues and eigenvectors should be sorted (ascending) based on the eigenvalues", "0" )
-			( "smoothNormals", "whether the normal vector should be average with the nearest neighbors", "0" )
-		;
+		return {
+			{"knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned>},
+			{"maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>},
+			{"epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T>},
+			{"keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1"},
+			{"keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0"},
+			{"keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0"},
+			{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0"},
+			{"keepMatchedIds" , "whether the identifiers of matches points should be added as descriptors to the resulting cloud", "0"},
+			{"keepMeanDist" , "whether the distance to the nearest neighbor mean should be added as descriptors to the resulting cloud", "0"},
+			{"sortEigen" , "whether the eigenvalues and eigenvectors should be sorted (ascending) based on the eigenvalues", "0"},
+			{"smoothNormals", "whether the normal vector should be average with the nearest neighbors", "0"}
+		};
 	}
 	
 	const unsigned knn;

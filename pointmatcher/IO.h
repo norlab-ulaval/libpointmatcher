@@ -118,42 +118,42 @@ struct PointMatcherIO
 	{
 		// This table can be read as:
 		//   (internalName, externalName, type)
-		const static SupportedLabels labels = boost::assign::list_of<SupportedLabel>
-			("x", "x", FEATURE)
-			("y", "y", FEATURE)
-			("z", "z", FEATURE)
-			("pad", "pad", FEATURE)
-			//("internalName", "externalName", FEATURE)
-			("normals", "nx", DESCRIPTOR)
-			("normals", "ny", DESCRIPTOR)
-			("normals", "nz", DESCRIPTOR)
-			("normals", "normal_x", DESCRIPTOR)
-			("normals", "normal_y", DESCRIPTOR)
-			("normals", "normal_z", DESCRIPTOR)
-			("observationDirections", "observationDirections0", DESCRIPTOR)
-			("observationDirections", "observationDirections1", DESCRIPTOR)
-			("observationDirections", "observationDirections2", DESCRIPTOR)
-			("color", "red", DESCRIPTOR)
-			("color", "green", DESCRIPTOR)
-			("color", "blue", DESCRIPTOR)
-			("color", "alpha", DESCRIPTOR)
-			("eigValues", "eigValues0", DESCRIPTOR)
-			("eigValues", "eigValues1", DESCRIPTOR)
-			("eigValues", "eigValues2", DESCRIPTOR)
-			("eigVectors", "eigVectors0X", DESCRIPTOR)
-			("eigVectors", "eigVectors0Y", DESCRIPTOR)
-			("eigVectors", "eigVectors0Z", DESCRIPTOR)
-			("eigVectors", "eigVectors1X", DESCRIPTOR)
-			("eigVectors", "eigVectors1Y", DESCRIPTOR)
-			("eigVectors", "eigVectors1Z", DESCRIPTOR)
-			("eigVectors", "eigVectors2X", DESCRIPTOR)
-			("eigVectors", "eigVectors2Y", DESCRIPTOR)
-			("eigVectors", "eigVectors2Z", DESCRIPTOR)
-			("intensity", "intensity", DESCRIPTOR)
-			//("internalName", "externalName", DESCRIPTOR)
-			("time", "time", TIME)
-			//("internalName", "externalName", TIME)
-			;
+		const static SupportedLabels labels = {
+				{"x", "x", FEATURE},
+				{"y", "y", FEATURE},
+				{"z", "z", FEATURE},
+				{"pad", "pad", FEATURE},
+				//{"internalName", "externalName", FEATURE},
+				{"normals", "nx", DESCRIPTOR},
+				{"normals", "ny", DESCRIPTOR},
+				{"normals", "nz", DESCRIPTOR},
+				{"normals", "normal_x", DESCRIPTOR},
+				{"normals", "normal_y", DESCRIPTOR},
+				{"normals", "normal_z", DESCRIPTOR},
+				{"observationDirections", "observationDirections0", DESCRIPTOR},
+				{"observationDirections", "observationDirections1", DESCRIPTOR},
+				{"observationDirections", "observationDirections2", DESCRIPTOR},
+				{"color", "red", DESCRIPTOR},
+				{"color", "green", DESCRIPTOR},
+				{"color", "blue", DESCRIPTOR},
+				{"color", "alpha", DESCRIPTOR},
+				{"eigValues", "eigValues0", DESCRIPTOR},
+				{"eigValues", "eigValues1", DESCRIPTOR},
+				{"eigValues", "eigValues2", DESCRIPTOR},
+				{"eigVectors", "eigVectors0X", DESCRIPTOR},
+				{"eigVectors", "eigVectors0Y", DESCRIPTOR},
+				{"eigVectors", "eigVectors0Z", DESCRIPTOR},
+				{"eigVectors", "eigVectors1X", DESCRIPTOR},
+				{"eigVectors", "eigVectors1Y", DESCRIPTOR},
+				{"eigVectors", "eigVectors1Z", DESCRIPTOR},
+				{"eigVectors", "eigVectors2X", DESCRIPTOR},
+				{"eigVectors", "eigVectors2Y", DESCRIPTOR},
+				{"eigVectors", "eigVectors2Z", DESCRIPTOR},
+				{"intensity", "intensity", DESCRIPTOR},
+				//{"internalName", "externalName", DESCRIPTOR},
+				{"time", "time", TIME}
+				//{"internalName", "externalName", TIME}
+			};
 
 			return labels;
 	}

@@ -58,9 +58,9 @@ struct OrientNormalsDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-			( "towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the observation points).", "1", "0", "1", &P::Comp<bool> )
-		;
+		return {
+			{"towardCenter", "If set to true(1), all the normals will point inside the surface (i.e. toward the observation points).", "1", "0", "1", &P::Comp<bool>}
+		};
 	}
 
 	OrientNormalsDataPointsFilter(const Parameters& params = Parameters());

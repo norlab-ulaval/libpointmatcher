@@ -57,9 +57,9 @@ struct RandomSamplingDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	}
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-			( "prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T> )
-		;
+		return {
+			{"prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T>}
+		};
 	}
 	
 	const double prob;

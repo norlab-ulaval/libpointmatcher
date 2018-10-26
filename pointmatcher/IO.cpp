@@ -747,7 +747,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 						descriptors(matrixRow, matrixCol) = lexical_cast_scalar_to_string<T>(token);
 						break;
 					case TIME:
-						times(matrixRow, matrixCol) = lexical_cast_scalar_to_string<boost::int64_t>(token);
+						times(matrixRow, matrixCol) = lexical_cast_scalar_to_string<std::int64_t>(token);
 						break;
 					default:
 						throw runtime_error(string("CSV parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
@@ -1242,7 +1242,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 		for(int i=0; i<it->second.high32.cols(); i++)
 		{
 		
-			timeData(0,i) = (((boost::int64_t) it->second.high32(0,i)) << 32) | ((boost::int64_t) it->second.low32(0,i));
+			timeData(0,i) = (((std::int64_t) it->second.high32(0,i)) << 32) | ((std::int64_t) it->second.low32(0,i));
 		}
 
 		loadedPoints.addTime(it->first, timeData);
@@ -2205,7 +2205,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 						descriptors(row+j, col) = boost::lexical_cast<T>(tokens[fileCol]);
 						break;
 					case TIME:
-						times(row+j, col) = boost::lexical_cast<boost::int64_t>(tokens[fileCol]);
+						times(row+j, col) = boost::lexical_cast<std::int64_t>(tokens[fileCol]);
 						break;
 					case UNSUPPORTED:
 						throw runtime_error("Implementation error in loadPCD(). This should not throw.");
