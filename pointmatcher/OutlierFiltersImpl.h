@@ -154,7 +154,7 @@ struct OutlierFiltersImpl
 			return {
 				{"minRatio", "min ratio", "0.05","0.0000001", "1", &P::Comp<T>},
 				{"maxRatio", "max ratio", "0.99", "0.0000001", "1", &P::Comp<T>},
-				{"lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda", "0.95"}
+				{"lambda", "lambda (part of the term that balance the rmsd: 1/ratio^lambda", "2.35"}
 			};
 		}
 

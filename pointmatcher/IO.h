@@ -152,7 +152,7 @@ struct PointMatcherIO
 				{"intensity", "intensity", DESCRIPTOR},
 				//{"internalName", "externalName", DESCRIPTOR},
 				{"time", "time", TIME}
-				//("internalName", "externalName", TIME)
+				//{"internalName", "externalName", TIME}
 			};
 
 			return labels;

@@ -34,7 +34,7 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     inline static const ParametersDoc availableParameters()
     {
         return {
-				{"force2D", "If set to true(1), the minimization will be force to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>}
+        	{"force2D", "If set to true(1), the minimization will be force to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>}
             };
     }
 
