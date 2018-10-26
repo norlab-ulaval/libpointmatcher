@@ -58,11 +58,11 @@ struct CutAtDescriptorThresholdDataPointsFilter: public PointMatcher<T>::DataPoi
   }
   inline static const ParametersDoc availableParameters()
   {
-    return boost::assign::list_of<ParameterDoc>
-    ( "descName", "Descriptor name used to cut points", "none")
-    ( "useLargerThan", "If set to 1 (true), points with values above the 'threshold' will be cut.  If set to 0 (false), points with values below the 'threshold' will be cut.", "1", "0", "1", P::Comp<bool>)
-    ( "threshold", "Value at which to cut.", "0", "-inf", "inf", &P::Comp<T>)
-    ;
+    return {
+    	{"descName", "Descriptor name used to cut points", "none"},
+    	{"useLargerThan", "If set to 1 (true), points with values above the 'threshold' will be cut.  If set to 0 (false), points with values below the 'threshold' will be cut.", "1", "0", "1", P::Comp<bool>},
+    	{"threshold", "Value at which to cut.", "0", "-inf", "inf", &P::Comp<T>}
+    };
   }
 
   const std::string descName;

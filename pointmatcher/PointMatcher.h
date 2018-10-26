@@ -70,15 +70,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //! version of the Pointmatcher library as string
-#define POINTMATCHER_VERSION "1.2.4"
+#define POINTMATCHER_VERSION "1.3.0"
 //! version of the Pointmatcher library as an int
-#define POINTMATCHER_VERSION_INT 10204
+#define POINTMATCHER_VERSION_INT 10300
 
 //! Functions and classes that are not dependant on scalar type are defined in this namespace
 namespace PointMatcherSupport
 {
-	using boost::assign::list_of;
-	using boost::assign::map_list_of;
 	// TODO: gather all exceptions
 
 	//! An exception thrown when one tries to use a module type that does not exist
@@ -164,7 +162,7 @@ struct PointMatcher
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	//! A dense signed 64-bits matrix
-	typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+	typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	//! A dense array over ScalarType
 	typedef typename Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> Array;
 

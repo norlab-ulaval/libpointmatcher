@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/lexical_cast.hpp>
 #include <limits>
 #define BOOST_ASSIGN_MAX_PARAMS 6
-#include <boost/assign/list_of.hpp>
 #include <boost/assign/list_inserter.hpp>
 
 

@@ -343,7 +343,7 @@ void GestaltDataPointsFilter<T>::fuseRange(
 {
   using namespace PointMatcherSupport;
   
-  typedef typename Eigen::Matrix<boost::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+  typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 
   const unsigned int nbIdxToKeep(data.indicesToKeep.size());
   const int inputFeatDim(input.features.cols());
@@ -396,9 +396,9 @@ void GestaltDataPointsFilter<T>::fuseRange(
 
     const Vector mean = d.rowwise().sum() / T(colCount);
     const Matrix NN = d.colwise() - mean;
-    const boost::int64_t minTime = t.minCoeff();
-    const boost::int64_t maxTime = t.maxCoeff();
-    const boost::int64_t meanTime = t.sum() / T(colCount);
+    const std::int64_t minTime = t.minCoeff();
+    const std::int64_t maxTime = t.maxCoeff();
+    const std::int64_t meanTime = t.sum() / T(colCount);
     // compute covariance
     const Matrix C(NN * NN.transpose());
     Vector eigenVa = Vector::Identity(featDim-1, 1);

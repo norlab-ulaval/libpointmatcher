@@ -86,17 +86,15 @@ int main(int argc, char *argv[])
 	// This filter will remove a sphere of 1 m radius. Easy way to remove the sensor self-scanning.
 	std::shared_ptr<PM::DataPointsFilter> removeScanner =
 		PM::get().DataPointsFilterRegistrar.create(
-			"MinDistDataPointsFilter",
-			map_list_of
-				("minDist", "1.0")
+			"MinDistDataPointsFilter", 
+			{{"minDist", "1.0"}}
 		);
 	
 	// This filter will randomly remove 35% of the points.
 	std::shared_ptr<PM::DataPointsFilter> randSubsample =
 		PM::get().DataPointsFilterRegistrar.create(
 			"RandomSamplingDataPointsFilter",
-			map_list_of
-				("prob", toParam(0.65))
+			{{"prob", toParam(0.65)}}
 		);
 
 	// For a complete description of filter, see 
@@ -104,21 +102,23 @@ int main(int argc, char *argv[])
 	std::shared_ptr<PM::DataPointsFilter> normalFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter",
-			map_list_of
-				("knn", toParam(10))
-				("epsilon", toParam(5)) 
-				("keepNormals",toParam(1))
-				("keepDensities",toParam(0))
+			{
+				{"knn", toParam(10)},
+				{"epsilon", toParam(5)},
+				{"keepNormals",toParam(1)},
+				{"keepDensities",toParam(0)}
+			}
 		);
 
 	std::shared_ptr<PM::DataPointsFilter> densityFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter",
-			map_list_of
-				("knn", "10")
-				("epsilon", "5") 
-				("keepNormals","0")
-				("keepDensities","1")
+			{
+				{"knn", "10"},
+				{"epsilon", "5"},
+				{"keepDensities","1"},
+				{"keepNormals","0"}
+			}
 		);
 	
 	std::shared_ptr<PM::DataPointsFilter> observationDirectionFilter =
@@ -129,15 +129,13 @@ int main(int argc, char *argv[])
 	std::shared_ptr<PM::DataPointsFilter> orientNormalFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"OrientNormalsDataPointsFilter",
-			map_list_of
-				("towardCenter", "1")
+			{{"towardCenter", "1"}}
 		);
 	
 	std::shared_ptr<PM::DataPointsFilter> uniformSubsample =
 		PM::get().DataPointsFilterRegistrar.create(
 			"MaxDensityDataPointsFilter",
-			map_list_of
-				("maxDensity", toParam(30))
+			{{"maxDensity", toParam(30)}}
 		);
 	
 	std::shared_ptr<PM::DataPointsFilter> shadowFilter =
@@ -204,8 +202,7 @@ int main(int argc, char *argv[])
 					cout << "Randomly keep " << probToKeep*100 << "\% points" << endl; 
 					randSubsample = PM::get().DataPointsFilterRegistrar.create(
 						"RandomSamplingDataPointsFilter", 
-						map_list_of
-							("prob", toParam(probToKeep))
+						{{"prob", toParam(probToKeep)}}
 					);
 					mapCloud = randSubsample->filter(mapCloud);
 				}

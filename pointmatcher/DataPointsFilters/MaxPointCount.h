@@ -55,9 +55,10 @@ struct MaxPointCountDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	}
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-		( "seed", "srand seed", "1", "0", "2147483647", &P::Comp<size_t> )
-		( "maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<size_t> )
+		return {
+			{"seed",     "srand seed",               "1",    "0", "2147483647", &P::Comp<size_t>},
+			{"maxCount", "maximum number of points", "1000", "0", "2147483647", &P::Comp<size_t>}
+		}
 		;
 	}
 

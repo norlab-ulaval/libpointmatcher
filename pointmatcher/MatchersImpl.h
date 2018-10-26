@@ -78,12 +78,12 @@ struct MatchersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return boost::assign::list_of<ParameterDoc>
-				( "knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned> )
-				( "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> )
-				( "searchType", "Nabo search type. 0: brute force, check distance to every point in the data (very slow), 1: kd-tree with linear heap, good for small knn (~up to 30) and 2: kd-tree with tree heap, good for large knn (~from 30)", "1", "0", "2", &P::Comp<unsigned> )
-				( "maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T> )
-			;
+			return {
+				{"knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned>},
+				{"epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T>},
+				{"searchType", "Nabo search type. 0: brute force, check distance to every point in the data (very slow), 1: kd-tree with linear heap, good for small knn (~up to 30) and 2: kd-tree with tree heap, good for large knn (~from 30)", "1", "0", "2", &P::Comp<unsigned>},
+				{"maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>}
+			};
 		}
 		
 		const int knn;
@@ -109,12 +109,12 @@ struct MatchersImpl
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			return boost::assign::list_of<ParameterDoc>
-				( "knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned> )
-				( "epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T> )
-				( "searchType", "Nabo search type. 0: brute force, check distance to every point in the data (very slow), 1: kd-tree with linear heap, good for small knn (~up to 30) and 2: kd-tree with tree heap, good for large knn (~from 30)", "1", "0", "2", &P::Comp<unsigned> )
-				( "maxDistField", "descriptor field name used to set a maximum distance to consider for neighbors per point", "maxSearchDist" )
-			;
+			return {
+				{"knn", "number of nearest neighbors to consider it the reference", "1", "1", "2147483647", &P::Comp<unsigned>},
+				{"epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T>},
+				{"searchType", "Nabo search type. 0: brute force, check distance to every point in the data (very slow), 1: kd-tree with linear heap, good for small knn (~up to 30) and 2: kd-tree with tree heap, good for large knn (~from 30)", "1", "0", "2", &P::Comp<unsigned>},
+				{"maxDistField", "descriptor field name used to set a maximum distance to consider for neighbors per point", "maxSearchDist"}
+			};
 		}
 		
 		const int knn;
