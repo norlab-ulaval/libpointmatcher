@@ -33,44 +33,50 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_ERRORMINIMIZERS_H
-#define __POINTMATCHER_ERRORMINIMIZERS_H
+#ifndef LIBPOINTMATCHER_POINTTOPOINTWITHCOV_H
+#define LIBPOINTMATCHER_POINTTOPOINTWITHCOV_H
 
 #include "PointMatcher.h"
-#include "ErrorMinimizers/PointToPlane.h"
-#include "ErrorMinimizers/PointToPlaneWithCov.h"
-#include "ErrorMinimizers/PointToPoint.h"
-#include "ErrorMinimizers/PointToPointWithCov.h"
-#include "ErrorMinimizers/PointToPointSimilarity.h"
 
-template<typename T>
-struct ErrorMinimizersImpl
+template <typename T>
+struct PointToPointWithCovErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 {
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
-	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
-
-	typedef typename PointMatcher<T>::DataPoints DataPoints;
-	typedef typename PointMatcher<T>::Matches Matches;
-	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
-	typedef typename PointMatcher<T>::ErrorMinimizer ErrorMinimizer;
-	typedef typename PointMatcher<T>::ErrorMinimizer::ErrorElements ErrorElements;
-	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
-	typedef typename PointMatcher<T>::Vector Vector;
+	
 	typedef typename PointMatcher<T>::Matrix Matrix;
-
-	struct IdentityErrorMinimizer: ErrorMinimizer
+	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
+	typedef typename PointMatcher<T>::ErrorMinimizer::ErrorElements ErrorElements;
+	typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
+	typedef typename PointMatcher<T>::Matches Matches;
+	typedef typename PointMatcher<T>::ErrorMinimizer ErrorMinimizer;
+	typedef typename PointMatcher<T>::Vector Vector;
+	
+	inline static const std::string description()
 	{
-		inline static const std::string description()
-		{
-			return "Does nothing.";
-		}
+		return "Point-to-point error. Based on SVD decomposition. Based on \\cite{Besl1992Point2Point}. Covariance estimation based on \\cite{Censi2007ICPCovariance}.";
+	}
+	
+	inline static const ParametersDoc availableParameters()
+	{
+		return {
+			{"sensorStdDev", "sensor standard deviation", "0.01", "0.", "inf", &P::Comp<T>}
+		};
+	}
+	
+	const T sensorStdDev;
+	Matrix covMatrix;
+	
+	PointToPointWithCovErrorMinimizer(const Parameters& params = Parameters());
+	//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+	virtual TransformationParameters compute(const ErrorElements& mPts);
+	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
+	virtual T getOverlap() const;
+	virtual Matrix getCovariance() const;
+	Matrix estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation);
+};
 
-		//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
-		virtual TransformationParameters compute(const ErrorElements& mPts);
-	};
-}; // ErrorMinimizersImpl
-
-#endif // __POINTMATCHER_ERRORMINIMIZER_H
+#endif //LIBPOINTMATCHER_POINTTOPOINTWITHCOV_H
