@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
 	// This filter will randomly remove 35% of the points.
 	std::shared_ptr<PM::DataPointsFilter> randSubsample =
 		PM::get().DataPointsFilterRegistrar.create(
-			"RandomSamplingDataPointsFilter", 
-            {{"prob", toParam(0.65)}}
+			"RandomSamplingDataPointsFilter",
+			{{"prob", toParam(0.65)}}
 		);
 
 	// For a complete description of filter, see 
