@@ -40,13 +40,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Eigen;
 
 template<typename T>
+PointToPointErrorMinimizer<T>::PointToPointErrorMinimizer()
+{
+}
+
+template<typename T>
+PointToPointErrorMinimizer<T>::PointToPointErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):
+	ErrorMinimizer(className, paramsDoc, params)
+{
+}
+
+template<typename T>
 typename PointMatcher<T>::TransformationParameters PointToPointErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
 {
-	// Copy error element to use as storage later
-	// TODO: check that, might worth it to only copy useful parts
 	ErrorElements mPts = mPts_const;
-	
-	// now minimize on kept points
+	return compute_in_place(mPts);
+}
+
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointToPointErrorMinimizer<T>::compute_in_place(ErrorElements& mPts) {
 	const int dimCount(mPts.reading.features.rows());
 	//const int ptsCount(mPts.reading.features.cols()); //Both point clouds have now the same number of (matched) point
 	
