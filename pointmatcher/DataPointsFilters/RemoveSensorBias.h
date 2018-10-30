@@ -40,20 +40,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<typename T>
 struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 {
-	// Type definitions
-	typedef PointMatcher<T> PM;
-	typedef typename PM::DataPoints DataPoints;
-	typedef typename PM::DataPointsFilter DataPointsFilter;
-	
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
-	
 	typedef Parametrizable::Parameters Parameters;
 	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
-	
 	typedef Parametrizable::InvalidParameter InvalidParameter;
 	
+	typedef PointMatcher<T> PM;
+	typedef typename PM::DataPoints DataPoints;
+	typedef typename PM::DataPointsFilter DataPointsFilter;
 	typedef typename PM::Matrix Matrix;
 	typedef typename PM::Vector Vector;
 	
@@ -76,40 +72,35 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 		};
 	}
 	
-	enum SensorType : int { LMS_1XX=0, HDL_32E=1 }; //add sensor here
-	
-//attributes here
-	const SensorType sensorType;
-	const T angleThreshold;
-
-	//! Constructor, uses parameter interface
 	RemoveSensorBiasDataPointsFilter(const Parameters& params = Parameters());
-	
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 
-
 private:
-	static constexpr T tau = 50e-9; //s - pulse length
-	static constexpr T pulse_intensity = 0.39; //w.m^-2 - pulse intensity
-	static constexpr T lambda_light = 905e-9; //m - wavelength of the laser
-	static constexpr T c = 299792458.0; //m.s^-1 - celerity of light
-
-	std::array<T,4> getCoefficients(const T depth, const T theta, const T aperture) const;
-	T diffDist(const T depth, const T theta, const T aperture) const;
-	T ratioCurvature(const T depth, const T theta, const T aperture) const;
-
+	enum SensorType : int { LMS_1XX=0, HDL_32E=1 };
 	struct SensorParameters{
 	private:
-		SensorParameters(T aperture_, T k1_, T k2_): aperture{aperture_}, k1{k1_}, k2{k2_} {}
+		SensorParameters(T aperture_, T k1_, T k2_): aperture(aperture_), k1(k1_), k2(k2_) {}
 	public:
 		const T aperture;
 		const T k1;
 		const T k2;
-		//Instances
+		
 		static const SensorParameters LMS_1XX;
 		static const SensorParameters HDL_32E;
 	};
+	
+	static constexpr T tau = 50e-9; //s - pulse length
+	static constexpr T pulse_intensity = 0.39; //w.m^-2 - pulse intensity
+	static constexpr T lambda_light = 905e-9; //m - wavelength of the laser
+	static constexpr T c = 299792458.0; //m.s^-1 - celerity of light
+	
+	const SensorType sensorType;
+	const T angleThreshold;
+
+	std::array<T,4> getCoefficients(const T depth, const T theta, const T aperture) const;
+	T diffDist(const T depth, const T theta, const T aperture) const;
+	T ratioCurvature(const T depth, const T theta, const T aperture) const;
 };
 
 template<typename T>
@@ -119,4 +110,5 @@ const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSenso
 template<typename T>
 const typename RemoveSensorBiasDataPointsFilter<T>::SensorParameters RemoveSensorBiasDataPointsFilter<T>::SensorParameters::HDL_32E =
 	RemoveSensorBiasDataPointsFilter<T>::SensorParameters(0.0014835, 1.03211569e+01, 7.07893371e-03);
+
 
