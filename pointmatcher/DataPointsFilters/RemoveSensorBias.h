@@ -70,10 +70,10 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 	
 	inline static const ParametersDoc availableParameters()
 	{
-		return boost::assign::list_of<ParameterDoc>
-			( "sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Velodyne HDL-32E", "0", "0", "1", &P::Comp<int> )
-			( "angleThreshold", "Threshold at which angle the correction is not applied, in degrees", "88.", "0.", "90.", &P::Comp<T> )
-		;
+		return {
+			{"sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Velodyne HDL-32E", "0", "0", "1", &P::Comp < int >},
+			{"angleThreshold", "Threshold at which angle the correction is not applied, in degrees", "88.", "0.", "90.", &P::Comp < T >}
+		};
 	}
 	
 	enum SensorType : int { LMS_1XX=0, HDL_32E=1 }; //add sensor here
