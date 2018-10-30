@@ -44,8 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/units/systems/si/codata/universal_constants.hpp>
 
 
-// RemoveSensorBiasDataPointsFilter
-// Constructor
 template<typename T>
 RemoveSensorBiasDataPointsFilter<T>::RemoveSensorBiasDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("RemoveSensorBiasDataPointsFilter", 
@@ -55,8 +53,6 @@ RemoveSensorBiasDataPointsFilter<T>::RemoveSensorBiasDataPointsFilter(const Para
 {
 }
 
-// RemoveSensorBiasDataPointsFilter
-// Compute
 template<typename T>
 typename PointMatcher<T>::DataPoints 
 RemoveSensorBiasDataPointsFilter<T>::filter(const DataPoints& input)
@@ -66,7 +62,6 @@ RemoveSensorBiasDataPointsFilter<T>::filter(const DataPoints& input)
 	return output;
 }
 
-// In-place filter
 template<typename T>
 void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
