@@ -304,13 +304,16 @@ set(POINTMATCHER_SRC
 	pointmatcher/LoggerImpl.cpp
 	pointmatcher/MatchersImpl.cpp
 	pointmatcher/OutlierFiltersImpl.cpp
-	pointmatcher/ErrorMinimizersImpl.cpp
 	pointmatcher/TransformationsImpl.cpp
 	pointmatcher/TransformationCheckersImpl.cpp
 	pointmatcher/InspectorsImpl.cpp
 #ErrorMinimizers
 	pointmatcher/ErrorMinimizers/PointToPlane.cpp
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
+	pointmatcher/ErrorMinimizers/PointToPoint.cpp
+	pointmatcher/ErrorMinimizers/PointToPointWithCov.cpp
+	pointmatcher/ErrorMinimizers/PointToPointSimilarity.cpp
+	pointmatcher/ErrorMinimizers/Identity.cpp
 #DataPointsFilters	
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp

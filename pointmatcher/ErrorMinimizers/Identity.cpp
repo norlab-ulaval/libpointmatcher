@@ -33,26 +33,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_ERRORMINIMIZERS_H
-#define __POINTMATCHER_ERRORMINIMIZERS_H
-
-#include "PointMatcher.h"
-#include "ErrorMinimizers/PointToPlane.h"
-#include "ErrorMinimizers/PointToPlaneWithCov.h"
-#include "ErrorMinimizers/PointToPoint.h"
-#include "ErrorMinimizers/PointToPointWithCov.h"
-#include "ErrorMinimizers/PointToPointSimilarity.h"
-#include "ErrorMinimizers/Identity.h"
+#include "ErrorMinimizersImpl.h"
 
 template<typename T>
-struct ErrorMinimizersImpl
+typename PointMatcher<T>::TransformationParameters IdentityErrorMinimizer<T>::compute(const ErrorElements& mPts)
 {
-	typedef ::PointToPlaneErrorMinimizer<T> PointToPlaneErrorMinimizer;
-	typedef ::PointToPlaneWithCovErrorMinimizer<T> PointToPlaneWithCovErrorMinimizer;
-	typedef ::PointToPointErrorMinimizer<T> PointToPointErrorMinimizer;
-	typedef ::PointToPointWithCovErrorMinimizer<T> PointToPointWithCovErrorMinimizer;
-	typedef ::PointToPointSimilarityErrorMinimizer<T> PointToPointSimilarityErrorMinimizer;
-	typedef ::IdentityErrorMinimizer<T> IdentityErrorMinimizer;
-}; // ErrorMinimizersImpl
+	const int dim = mPts.reading.getHomogeneousDim();
+	return TransformationParameters::Identity(dim, dim);
+}
 
-#endif // __POINTMATCHER_ERRORMINIMIZER_H
+template struct IdentityErrorMinimizer<float>;
+template struct IdentityErrorMinimizer<double>;
