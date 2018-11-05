@@ -338,8 +338,9 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Gestalt.cpp
 	pointmatcher/DataPointsFilters/OctreeGrid.cpp
 	pointmatcher/DataPointsFilters/NormalSpace.cpp
-	pointmatcher/DataPointsFilters/CovarianceSampling.cpp	
+	pointmatcher/DataPointsFilters/CovarianceSampling.cpp
 	pointmatcher/DataPointsFilters/DistanceLimit.cpp
+	pointmatcher/DataPointsFilters/RemoveSensorBias.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
