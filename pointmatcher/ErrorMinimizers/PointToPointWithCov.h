@@ -37,9 +37,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define LIBPOINTMATCHER_POINTTOPOINTWITHCOV_H
 
 #include "PointMatcher.h"
+#include "ErrorMinimizersImpl.h"
 
 template <typename T>
-struct PointToPointWithCovErrorMinimizer: PointMatcher<T>::ErrorMinimizer
+struct PointToPointWithCovErrorMinimizer: public PointToPointErrorMinimizer<T>
 {
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
@@ -71,10 +72,7 @@ struct PointToPointWithCovErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 	Matrix covMatrix;
 	
 	PointToPointWithCovErrorMinimizer(const Parameters& params = Parameters());
-	//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 	virtual TransformationParameters compute(const ErrorElements& mPts);
-	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
-	virtual T getOverlap() const;
 	virtual Matrix getCovariance() const;
 	Matrix estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation);
 };

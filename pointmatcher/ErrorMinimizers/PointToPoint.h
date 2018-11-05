@@ -41,6 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<typename T>
 struct PointToPointErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 {
+	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef Parametrizable::Parameters Parameters;
+	typedef Parametrizable::ParametersDoc ParametersDoc;
+	
 	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
 	typedef typename PointMatcher<T>::ErrorMinimizer::ErrorElements ErrorElements;
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
@@ -55,7 +59,11 @@ struct PointToPointErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 		return "Point-to-point error. Based on SVD decomposition. Per \\cite{Besl1992Point2Point}.";
 	}
 	
+	
+	PointToPointErrorMinimizer();
+	PointToPointErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
 	virtual TransformationParameters compute(const ErrorElements& mPts);
+	TransformationParameters compute_in_place(ErrorElements& mPts);
 	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
 	virtual T getOverlap() const;
 	

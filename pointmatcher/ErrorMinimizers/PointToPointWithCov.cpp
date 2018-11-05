@@ -41,7 +41,7 @@ using namespace Eigen;
 
 template<typename T>
 PointToPointWithCovErrorMinimizer<T>::PointToPointWithCovErrorMinimizer(const Parameters& params):
-	ErrorMinimizer("PointToPointWithCovErrorMinimizer", availableParameters(), params),
+	PointToPointErrorMinimizer<T>("PointToPointWithCovErrorMinimizer", availableParameters(), params),
 	sensorStdDev(Parametrizable::get<T>("sensorStdDev"))
 {
 }
@@ -49,62 +49,12 @@ PointToPointWithCovErrorMinimizer<T>::PointToPointWithCovErrorMinimizer(const Pa
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointToPointWithCovErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
 {
-	// Copy error element to use as storage later
-	// TODO: check that, might worth it to only copy useful parts
 	ErrorElements mPts = mPts_const;
-	
-	// minimize on kept points
-	const int dimCount(mPts.reading.features.rows());
-	const int ptsCount(mPts.reading.features.cols()); //Both point cloud have now the same number of (matched) point
-	
-	// Compute the mean of each point cloud
-	const Vector meanReading = mPts.reading.features.rowwise().sum() / ptsCount;
-	const Vector meanReference = mPts.reference.features.rowwise().sum() / ptsCount;
-	
-	// Remove the mean from the point clouds
-	mPts.reading.features.colwise() -= meanReading;
-	mPts.reference.features.colwise() -= meanReference;
-	
-	// Singular Value Decomposition
-	const Matrix m(mPts.reference.features.topRows(dimCount-1) * mPts.reading.features.topRows(dimCount-1).transpose());
-	const JacobiSVD<Matrix> svd(m, ComputeThinU | ComputeThinV);
-	Matrix rotMatrix(svd.matrixU() * svd.matrixV().transpose());
-	
-	// It is possible to get a reflection instead of a rotation. In this case, we
-	// take the second best solution, guaranteed to be a rotation. For more details,
-	// read the tech report: "Least-Squares Rigid Motion Using SVD", Olga Sorkine
-	// http://igl.ethz.ch/projects/ARAP/svd_rot.pdf
-	if (rotMatrix.determinant() < 0.)
-	{
-		Matrix tmpV = svd.matrixV().transpose();
-		tmpV.row(dimCount-2) *= -1.;
-		rotMatrix = svd.matrixU() * tmpV;
-	}
-	
-	const Vector trVector(meanReference.head(dimCount-1) - rotMatrix * meanReading.head(dimCount-1));
-	
-	Matrix result(Matrix::Identity(dimCount, dimCount));
-	result.topLeftCorner(dimCount-1, dimCount-1) = rotMatrix;
-	result.topRightCorner(dimCount-1, 1) = trVector;
+	typename PointMatcher<T>::TransformationParameters result = PointToPointErrorMinimizer<T>::compute_in_place(mPts);
 	
 	this->covMatrix = this->estimateCovariance(mPts, result);
 	
 	return result;
-}
-
-template<typename T>
-T PointToPointWithCovErrorMinimizer<T>::getResidualError(
-	const DataPoints& filteredReading,
-	const DataPoints& filteredReference,
-	const OutlierWeights& outlierWeights,
-	const Matches& matches) const
-{
-	assert(matches.ids.rows() > 0);
-	
-	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches);
-	
-	return PointToPointErrorMinimizer<T>::computeResidualError(mPts);
 }
 
 //TODO: rewrite this using ErrorElements struct
@@ -192,34 +142,6 @@ typename PointToPointWithCovErrorMinimizer<T>::Matrix PointToPointWithCovErrorMi
 	covariance = inv_J_hessian * covariance * inv_J_hessian;
 	
 	return (sensorStdDev * sensorStdDev) * covariance;
-}
-
-template<typename T>
-T PointToPointWithCovErrorMinimizer<T>::getOverlap() const
-{
-	const int nbPoints = this->lastErrorElements.reading.getNbPoints();
-	if(nbPoints == 0)
-	{
-		throw std::runtime_error("Error, last error element empty. Error minimizer needs to be called at least once before using this method.");
-	}
-	
-	if (!this->lastErrorElements.reading.descriptorExists("simpleSensorNoise"))
-	{
-		LOG_INFO_STREAM("PointToPointWithCovErrorMinimizer - warning, no sensor noise found. Using best estimate given outlier rejection instead.");
-		return this->getWeightedPointUsedRatio();
-	}
-	
-	const BOOST_AUTO(noises, this->lastErrorElements.reading.getDescriptorViewByName("simpleSensorNoise"));
-	int count = 0;
-	for(int i=0; i < nbPoints; i++)
-	{
-		const T dist = (this->lastErrorElements.reading.features.col(i) - this->lastErrorElements.reference.features.col(i)).norm();
-		if(dist < noises(0,i))
-			count++;
-		
-	}
-	
-	return (T)count/(T)nbPoints;
 }
 
 template<typename T>
