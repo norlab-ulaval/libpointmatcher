@@ -46,7 +46,10 @@ struct RemoveNaNDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	{
 		return "Remove points having NaN as coordinate.";
 	}
-	
+
+	RemoveNaNDataPointsFilter() : PointMatcher<T>::DataPointsFilter("RemoveNaNDataPointsFilter",
+																																 PointMatcher<T>::ParametersDoc(),
+																																 PointMatcher<T>::Parameters()) {}
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 };

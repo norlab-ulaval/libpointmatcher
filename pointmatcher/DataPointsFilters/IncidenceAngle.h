@@ -52,7 +52,11 @@ struct IncidenceAngleDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 			   "Altered descriptors:  none.\n"
 			   "Altered features:     none.";
 	}
-	
+
+
+	IncidenceAngleDataPointsFilter() : PointMatcher<T>::DataPointsFilter("IncidenceAngleDataPointsFilter",
+																																 				PointMatcher<T>::ParametersDoc(),
+																																 				PointMatcher<T>::Parameters()) {}
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 };

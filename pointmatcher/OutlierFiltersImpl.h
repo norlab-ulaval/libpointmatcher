@@ -62,7 +62,8 @@ struct OutlierFiltersImpl
 		{
 			return "Does nothing.";
 		}
-		
+
+		NullOutlierFilter() : OutlierFilter("NullOutlierFilter",  ParametersDoc(), Parameters()) {}
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
