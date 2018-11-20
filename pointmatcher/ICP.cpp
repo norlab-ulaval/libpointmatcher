@@ -312,6 +312,16 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	const TransformationParameters& T_refIn_refMean,
 	const TransformationParameters& T_refIn_dataIn)
 {
+	const int dim(reference.features.rows());
+
+	if (T_refIn_dataIn.cols() != T_refIn_dataIn.rows()) {
+		throw runtime_error("The initial transformation matrix must be squared.");
+	}
+	if (dim != T_refIn_dataIn.cols()) {
+		throw runtime_error("The shape of initial transformation matrix must be NxN. "
+											  "Where N is the number of rows in the read/reference scans.");
+	}
+
 	timer t; // Print how long take the algo
 	
 	// Apply readings filters
@@ -321,7 +331,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	this->readingDataPointsFilters.init();
 	this->readingDataPointsFilters.apply(reading);
 	readingFiltered = reading;
-	
+
 	// Reajust reading position: 
 	// from here reading is express in frame <refMean>
 	TransformationParameters 
@@ -333,7 +343,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	
 	// Since reading and reference are express in <refMean>
 	// the frame <refMean> is equivalent to the frame <iter(0)>
-	const int dim(reference.features.rows());
 	TransformationParameters T_iter = Matrix::Identity(dim, dim);
 	
 	bool iterate(true);
