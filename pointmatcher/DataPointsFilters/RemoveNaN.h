@@ -48,8 +48,8 @@ struct RemoveNaNDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	}
 
 	RemoveNaNDataPointsFilter() : PointMatcher<T>::DataPointsFilter("RemoveNaNDataPointsFilter",
-																																 PointMatcher<T>::ParametersDoc(),
-																																 PointMatcher<T>::Parameters()) {}
+																																	PointMatcherSupport::Parametrizable::ParametersDoc(),
+																																	PointMatcherSupport::Parametrizable::Parameters()) {}
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 };

@@ -55,8 +55,8 @@ struct IncidenceAngleDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 
 
 	IncidenceAngleDataPointsFilter() : PointMatcher<T>::DataPointsFilter("IncidenceAngleDataPointsFilter",
-																																 				PointMatcher<T>::ParametersDoc(),
-																																 				PointMatcher<T>::Parameters()) {}
+																																			 PointMatcherSupport::Parametrizable::ParametersDoc(),
+																																			 PointMatcherSupport::Parametrizable::Parameters()) {}
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 };
