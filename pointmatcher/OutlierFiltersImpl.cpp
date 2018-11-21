@@ -286,6 +286,55 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 template struct OutlierFiltersImpl<float>::SurfaceNormalOutlierFilter;
 template struct OutlierFiltersImpl<double>::SurfaceNormalOutlierFilter;
 
+
+// GenericDescriptorOutlierFilter
+template<typename T>
+OutlierFiltersImpl<T>::SensorNoiseOutlierFilter::SensorNoiseOutlierFilter(const Parameters& params):
+				OutlierFilter("SensorNoiseOutlierFilter", SensorNoiseOutlierFilter::availableParameters(), params)
+{
+}
+
+template<typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SensorNoiseOutlierFilter::compute(
+				const DataPoints& filteredReading,
+				const DataPoints& filteredReference,
+				const Matches& input)
+{
+	typedef typename DataPoints::ConstView ConstView;
+
+	const int knn = input.dists.rows();
+	const int readPtsCount = input.dists.cols();
+
+	OutlierWeights w(knn, readPtsCount);
+
+	ConstView descRefe(filteredReference.getDescriptorViewByName("simpleSensorNoise"));
+	ConstView descRead(filteredReading.getDescriptorViewByName("simpleSensorNoise"));
+
+	if(descRefe.rows() != 1)
+	{
+		throw InvalidParameter(
+						(boost::format("SensorNoiseOutlierFilter: Error, the descriptor 'simpleSensorNoise' must be a 1D descriptor but it is %2%D") % descRefe.rows()).str());
+	}
+
+	for(int k=0; k < knn; k++)
+	{
+		for(int i=0; i < readPtsCount; i++)
+		{
+			const int idRef = input.ids(k, i);
+			if (idRef == MatchersImpl<T>::NNS::InvalidIndex){
+				w(k,i) = 0;
+				continue;
+			}
+			w(k,i) = 1.0 / descRefe(0, idRef) / descRead(0, i);
+		}
+	}
+
+	return w;
+}
+
+template struct OutlierFiltersImpl<float>::SensorNoiseOutlierFilter;
+template struct OutlierFiltersImpl<double>::SensorNoiseOutlierFilter;
+
 // GenericDescriptorOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::GenericDescriptorOutlierFilter::GenericDescriptorOutlierFilter(const Parameters& params):

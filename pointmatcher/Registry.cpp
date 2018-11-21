@@ -101,6 +101,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(OutlierFilter, TrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::TrimmedDistOutlierFilter)
 	ADD_TO_REGISTRAR(OutlierFilter, VarTrimmedDistOutlierFilter, typename OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter)
 	ADD_TO_REGISTRAR(OutlierFilter, SurfaceNormalOutlierFilter, typename OutlierFiltersImpl<T>::SurfaceNormalOutlierFilter)
+	ADD_TO_REGISTRAR(OutlierFilter, SensorNoiseOutlierFilter, typename OutlierFiltersImpl<T>::SensorNoiseOutlierFilter)
 	ADD_TO_REGISTRAR(OutlierFilter, GenericDescriptorOutlierFilter, typename OutlierFiltersImpl<T>::GenericDescriptorOutlierFilter)
 	ADD_TO_REGISTRAR(OutlierFilter, RobustOutlierFilter, typename OutlierFiltersImpl<T>::RobustOutlierFilter)
 	

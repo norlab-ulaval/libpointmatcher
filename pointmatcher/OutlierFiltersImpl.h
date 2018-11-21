@@ -192,6 +192,21 @@ struct OutlierFiltersImpl
 		SurfaceNormalOutlierFilter(const Parameters& params = Parameters());
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
+		struct SensorNoiseOutlierFilter: public OutlierFilter
+		{
+				inline static const std::string description()
+				{
+					return "This filter weights matched points based on the sensor noise from SimpleSensorNoiseDataPointsFilter. "
+						     "The weight equals to 1/σ of the reference multiply 1/σ of the reading.";
+				}
+				inline static const ParametersDoc availableParameters()
+				{
+					return ParametersDoc();
+				}
+
+				SensorNoiseOutlierFilter(const Parameters& params = Parameters());
+				virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+		};
 
 	struct GenericDescriptorOutlierFilter: public OutlierFilter
 	{

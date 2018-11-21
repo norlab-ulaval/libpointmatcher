@@ -392,7 +392,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		//-----------------------------
 		// Dump
 		this->inspector->dumpIteration(
-			iterationCount, T_iter, reference, stepReading, matches, outlierWeights, this->transformationCheckers
+			iterationCount, T_refIn_refMean * T_iter * T_refMean_dataIn, reference, stepReading, matches, outlierWeights, this->transformationCheckers
 		);
 		
 		//-----------------------------
@@ -400,7 +400,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
-			stepReading, reference, outlierWeights, matches) * T_iter;
+			stepReading, reference, outlierWeights, matches) * T_iter	;
 		
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(
