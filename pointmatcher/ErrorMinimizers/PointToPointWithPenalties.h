@@ -33,42 +33,49 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef LIBPOINTMATCHER_POINTTOPOINT_H
-#define LIBPOINTMATCHER_POINTTOPOINT_H
+#ifndef LIBPOINTMATCHER_POINTTOPOINTWITHPENALTIES_H
+#define LIBPOINTMATCHER_POINTTOPOINTWITHPENALTIES_H
 
 #include "PointMatcher.h"
+#include "ErrorMinimizersImpl.h"
 
-template<typename T>
-struct PointToPointErrorMinimizer: PointMatcher<T>::ErrorMinimizer
+template <typename T>
+struct PointToPointWithPenaltiesErrorMinimizer: public PointToPointErrorMinimizer<T>
 {
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
+	typedef PointMatcherSupport::Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	
+	typedef typename PointMatcher<T>::Matrix Matrix;
 	typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
 	typedef typename PointMatcher<T>::ErrorMinimizer::ErrorElements ErrorElements;
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
 	typedef typename PointMatcher<T>::Matches Matches;
-	typedef typename PointMatcher<T>::Vector Vector;
-	typedef typename PointMatcher<T>::Matrix Matrix;
 	typedef typename PointMatcher<T>::ErrorMinimizer ErrorMinimizer;
-	typedef typename ErrorMinimizer::Penalties Penalties;
+	typedef typename PointMatcher<T>::Vector Vector;
 	
 	inline static const std::string description()
 	{
-		return "Point-to-point error. Based on SVD decomposition. Per \\cite{Besl1992Point2Point}.";
+		return "Point-to-point error. "
+				   "Expect that `SensorNoiseOutlierFilter` is used to convert the distance to a Mahalalobis distance. "
+				   "This minimizer uses the penalties to help the minimization.";
 	}
 	
+	inline static const ParametersDoc availableParameters()
+	{
+		return {
+			{"confidenceInPenalties", "What is the ratio of importance that the penalties must have in the minimization? "
+														    "A ratio of 0 would have the same behavior has `PointToPointErrorMinimizer`. "
+									              "A ratio of 1 would ignore the pointclouds.", "0.5", "0.", "1", &P::Comp<T>}
+		};
+	}
 	
-	PointToPointErrorMinimizer();
-	PointToPointErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params);
+	const T confidenceInPenalties;
+
+	PointToPointWithPenaltiesErrorMinimizer(const Parameters& params = Parameters());
 	virtual TransformationParameters compute(const ErrorElements& mPts);
-	TransformationParameters compute_in_place(ErrorElements& mPts);
-	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties) const;
-	virtual T getOverlap() const;
-	
-	static T computeResidualError(const ErrorElements& mPts);
 };
 
-#endif //LIBPOINTMATCHER_POINTTOPOINT_H
+#endif //LIBPOINTMATCHER_POINTTOPOINTWITHCOV_H

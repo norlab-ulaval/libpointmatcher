@@ -110,6 +110,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR_NO_PARAM(ErrorMinimizer, PointToPointSimilarityErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointSimilarityErrorMinimizer)
 	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPlaneErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPlaneErrorMinimizer)
 	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPointWithCovErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointWithCovErrorMinimizer)
+	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPointWithPenaltiesErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPointWithPenaltiesErrorMinimizer)
 	ADD_TO_REGISTRAR(ErrorMinimizer, PointToPlaneWithCovErrorMinimizer, typename ErrorMinimizersImpl<T>::PointToPlaneWithCovErrorMinimizer)
 	
 	ADD_TO_REGISTRAR(TransformationChecker, CounterTransformationChecker, typename TransformationCheckersImpl<T>::CounterTransformationChecker)

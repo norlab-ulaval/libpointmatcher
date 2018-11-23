@@ -54,7 +54,8 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     typedef typename PointMatcher<T>::ErrorMinimizer::ErrorElements ErrorElements;
     typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
     typedef typename PointMatcher<T>::Vector Vector;
-    typedef typename PointMatcher<T>::Matrix Matrix;
+		typedef typename PointMatcher<T>::Matrix Matrix;
+		typedef typename PointMatcher<T>::ErrorMinimizer::Penalties Penalties;
 
 	virtual inline const std::string name()
 	{
@@ -80,7 +81,7 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     //virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
     virtual TransformationParameters compute(const ErrorElements& mPts);
 	TransformationParameters compute_in_place(ErrorElements& mPts);
-    virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
+    virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties) const;
     virtual T getOverlap() const;
 
     static T computeResidualError(ErrorElements mPts, const bool& force2D);

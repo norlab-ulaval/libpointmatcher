@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ErrorMinimizers/PointToPlaneWithCov.h"
 #include "ErrorMinimizers/PointToPoint.h"
 #include "ErrorMinimizers/PointToPointWithCov.h"
+#include "ErrorMinimizers/PointToPointWithPenalties.h"
 #include "ErrorMinimizers/PointToPointSimilarity.h"
 #include "ErrorMinimizers/Identity.h"
 
@@ -51,6 +52,7 @@ struct ErrorMinimizersImpl
 	typedef ::PointToPlaneWithCovErrorMinimizer<T> PointToPlaneWithCovErrorMinimizer;
 	typedef ::PointToPointErrorMinimizer<T> PointToPointErrorMinimizer;
 	typedef ::PointToPointWithCovErrorMinimizer<T> PointToPointWithCovErrorMinimizer;
+	typedef ::PointToPointWithPenaltiesErrorMinimizer<T> PointToPointWithPenaltiesErrorMinimizer;
 	typedef ::PointToPointSimilarityErrorMinimizer<T> PointToPointSimilarityErrorMinimizer;
 	typedef ::IdentityErrorMinimizer<T> IdentityErrorMinimizer;
 }; // ErrorMinimizersImpl

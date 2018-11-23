@@ -179,6 +179,7 @@ struct PointMatcher
 	typedef Parametrizable::ParameterDoc ParameterDoc; //!< alias
 	typedef Parametrizable::ParametersDoc ParametersDoc; //!< alias
 	typedef Parametrizable::InvalidParameter InvalidParameter; //!< alias
+
 	
 	// ---------------------------------
 	// input types
@@ -518,6 +519,9 @@ struct PointMatcher
 	*/
 	struct ErrorMinimizer: public Parametrizable
 	{
+		typedef std::pair<Matrix, Matrix> Penalty;
+		typedef std::vector<Penalty, Eigen::aligned_allocator<Penalty> > Penalties;
+
 		//! A structure holding data ready for minimization. The data are "normalized", for instance there are no points with 0 weight, etc.
 		struct ErrorElements
 		{
@@ -529,9 +533,10 @@ struct PointMatcher
 			int nbRejectedPoints; //!< number of points with all matches set to zero weights
 			T pointUsedRatio;  //!< the ratio of how many points were used for error minimization
 			T weightedPointUsedRatio;//!< the ratio of how many points were used (with weight) for error minimization
+			Penalties penalties;
 
 			ErrorElements();
-			ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches);
+			ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties);
 		};
 		
 		ErrorMinimizer();
@@ -543,10 +548,10 @@ struct PointMatcher
 		ErrorElements getErrorElements() const; //TODO: ensure that is return a usable value
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
-		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties) const;
 		
 		//! Find the transformation that minimizes the error
-		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties);
 		//! Find the transformation that minimizes the error given matched pair of points. This function most be defined for all new instances of ErrorMinimizer.
 		virtual TransformationParameters compute(const ErrorElements& matchedPoints) = 0;
 		
@@ -687,6 +692,8 @@ struct PointMatcher
 	//! ICP algorithm
 	struct ICP: ICPChainBase
 	{
+		typedef typename ErrorMinimizer::Penalties Penalties;
+
 		TransformationParameters operator()(
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn);
@@ -695,21 +702,40 @@ struct PointMatcher
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
-		
+
+		TransformationParameters operator()(
+			const DataPoints& readingIn,
+			const DataPoints& referenceIn,
+			const TransformationParameters& initialTransformationParameters,
+			const Penalties& penalties);
+
 		TransformationParameters compute(
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
+
+		TransformationParameters compute(
+			const DataPoints& readingIn,
+			const DataPoints& referenceIn,
+			const TransformationParameters& initialTransformationParameters,
+			const Penalties& penalties);
 
 		//! Return the filtered point cloud reading used in the ICP chain
 		const DataPoints& getReadingFiltered() const { return readingFiltered; }
 
 	protected:
 		TransformationParameters computeWithTransformedReference(
+			const DataPoints& readingIn,
+			const DataPoints& reference,
+			const TransformationParameters& T_refIn_refMean,
+			const TransformationParameters& initialTransformationParameters);
+
+		TransformationParameters computeWithTransformedReference(
 			const DataPoints& readingIn, 
 			const DataPoints& reference, 
 			const TransformationParameters& T_refIn_refMean,
-			const TransformationParameters& initialTransformationParameters);
+			const TransformationParameters& initialTransformationParameters,
+			const Penalties& penalties);
 
 		DataPoints readingFiltered; //!< reading point cloud after the filters were applied
 	};

@@ -239,7 +239,17 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operato
 {
 	const int dim = readingIn.features.rows();
 	const TransformationParameters identity = TransformationParameters::Identity(dim, dim);
-	return this->compute(readingIn, referenceIn, identity);
+	return this->compute(readingIn, referenceIn, identity, Penalties());
+}
+
+//! Perform ICP from initial guess and return optimised transformation matrix
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operator ()(
+				const DataPoints& readingIn,
+				const DataPoints& referenceIn,
+				const TransformationParameters& initialTransformationParameters)
+{
+	return this->compute(readingIn, referenceIn, initialTransformationParameters, Penalties());
 }
 
 //! Perform ICP from initial guess and return optimised transformation matrix
@@ -247,9 +257,20 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operator ()(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn,
-	const TransformationParameters& initialTransformationParameters)
+	const TransformationParameters& initialTransformationParameters,
+	const Penalties& penalties)
 {
-	return this->compute(readingIn, referenceIn, initialTransformationParameters);
+	return this->compute(readingIn, referenceIn, initialTransformationParameters, penalties);
+}
+
+//! Perform ICP from initial guess and return optimised transformation matrix
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute(
+				const DataPoints& readingIn,
+				const DataPoints& referenceIn,
+				const TransformationParameters& initialTransformationParameters)
+{
+	return this->compute(readingIn, referenceIn, initialTransformationParameters, Penalties());
 }
 
 //! Perform ICP from initial guess and return optimised transformation matrix
@@ -257,7 +278,8 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn,
-	const TransformationParameters& T_refIn_dataIn)
+	const TransformationParameters& T_refIn_dataIn,
+	const Penalties& penalties)
 {
 	// Ensuring minimum definition of components
 	if (!this->matcher)
@@ -289,6 +311,15 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// from here reference is express in frame <refMean>
 	// Shortcut to do T_refIn_refMean.inverse() * reference
 	reference.features.topRows(dim-1).colwise() -= meanReference.head(dim-1);
+
+	Penalties penalties_refMean;
+	penalties_refMean.reserve(penalties.size());
+	for (auto& penalty : penalties) {
+		Matrix tf = penalty.first;
+		tf.topRows(dim-1).colwise() -= meanReference.head(dim-1);
+		const Matrix& cov = penalty.second;
+		penalties_refMean.push_back(std::make_pair(tf, cov));
+	}
 	
 	// Init matcher with reference points center on its mean
 	this->matcher->init(reference);
@@ -300,26 +331,48 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	LOG_INFO_STREAM("PointMatcher::icp - reference pre-processing took " << t.elapsed() << " [s]");
 	this->prefilteredReferencePtsCount = reference.features.cols();
 	
-	return computeWithTransformedReference(readingIn, reference, T_refIn_refMean, T_refIn_dataIn);
+	return computeWithTransformedReference(readingIn, reference, T_refIn_refMean, T_refIn_dataIn, penalties_refMean);
 	
 }
-
-//! Perferm ICP using an already-transformed reference and with an already-initialized matcher
+//! Perform ICP using an already-transformed reference and with an already-initialized matcher
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::computeWithTransformedReference(
+				const DataPoints& readingIn,
+				const DataPoints& reference,
+				const TransformationParameters& T_refIn_refMean,
+				const TransformationParameters& T_refIn_dataIn)
+{
+	return computeWithTransformedReference(readingIn, reference, T_refIn_refMean, T_refIn_dataIn, Penalties());
+}
+//! Perform ICP using an already-transformed reference and with an already-initialized matcher
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::computeWithTransformedReference(
 	const DataPoints& readingIn, 
 	const DataPoints& reference, 
 	const TransformationParameters& T_refIn_refMean,
-	const TransformationParameters& T_refIn_dataIn)
+	const TransformationParameters& T_refIn_dataIn,
+	const Penalties& penalties)
 {
 	const int dim(reference.features.rows());
 
+	// Validate input's shapes
 	if (T_refIn_dataIn.cols() != T_refIn_dataIn.rows()) {
 		throw runtime_error("The initial transformation matrix must be squared.");
 	}
 	if (dim != T_refIn_dataIn.cols()) {
 		throw runtime_error("The shape of initial transformation matrix must be NxN. "
 											  "Where N is the number of rows in the read/reference scans.");
+	}
+
+	for (auto& penalty : penalties) {
+		if (penalty.first.cols() != dim || penalty.first.rows() != dim) {
+			throw runtime_error("The transformation matrix of each penalty must must be NxN. "
+													"Where N is the number of rows in the read/reference scans.");
+		}
+		if (penalty.second.cols() != dim - 1 || penalty.second.rows() != dim - 1) {
+			throw runtime_error("The covariance matrix of each penalty must must be NxN. "
+													"Where N+1 is the number of rows in the read/reference scans.");
+		}
 	}
 
 	timer t; // Print how long take the algo
@@ -400,7 +453,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
-			stepReading, reference, outlierWeights, matches) * T_iter	;
+			stepReading, reference, outlierWeights, matches, penalties) * T_iter	;
 		
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(

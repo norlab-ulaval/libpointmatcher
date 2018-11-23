@@ -310,6 +310,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
 	pointmatcher/ErrorMinimizers/PointToPoint.cpp
 	pointmatcher/ErrorMinimizers/PointToPointWithCov.cpp
+	pointmatcher/ErrorMinimizers/PointToPointWithPenalties.cpp
 	pointmatcher/ErrorMinimizers/PointToPointSimilarity.cpp
 	pointmatcher/ErrorMinimizers/Identity.cpp
 #DataPointsFilters	

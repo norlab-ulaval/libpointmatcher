@@ -49,6 +49,7 @@ struct PointToPointSimilarityErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::Matrix Matrix;
 	typedef typename PointMatcher<T>::ErrorMinimizer ErrorMinimizer;
+	typedef typename ErrorMinimizer::Penalties Penalties;
 	
 	inline static const std::string description()
 	{
@@ -60,7 +61,7 @@ struct PointToPointSimilarityErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 																												 PointMatcherSupport::Parametrizable::Parameters()) {}
 	//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 	virtual TransformationParameters compute(const ErrorElements& mPts);
-	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
+	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties) const;
 	virtual T getOverlap() const;
 };
 
