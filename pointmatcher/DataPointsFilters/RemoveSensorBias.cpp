@@ -40,6 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #include <boost/format.hpp>
+#include <ciso646>
+#include <cmath>
 
 
 template<typename T>

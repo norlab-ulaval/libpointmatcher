@@ -38,6 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 namespace PointMatcherSupport
 {

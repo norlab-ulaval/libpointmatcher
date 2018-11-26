@@ -67,8 +67,9 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 # For Windows
-if( MSVC ) # VS2012 does not support tuples correctly yet
-	add_definitions( /D _VARIADIC_MAX=10 )
+if( MSVC )
+	add_definitions( /D _VARIADIC_MAX=10 ) # VS2012 does not support tuples correctly yet
+	add_definitions( /D _USE_MATH_DEFINES) # defines M_PI for Visual Studio
 endif()
 
 #======================= installation =====================================
