@@ -288,12 +288,13 @@ T PointToPlaneErrorMinimizer<T>::getResidualError(
 	const DataPoints& filteredReference,
 	const OutlierWeights& outlierWeights,
 	const Matches& matches,
-	const Penalties& penalties) const
+	const Penalties& penalties,
+	const TransformationParameters& T_refMean_iter) const
 {
 	assert(matches.ids.rows() > 0);
 
 	// Fetch paired points
-	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches, penalties);
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches, penalties, T_refMean_iter);
 
 	return PointToPlaneErrorMinimizer::computeResidualError(mPts, force2D);
 }

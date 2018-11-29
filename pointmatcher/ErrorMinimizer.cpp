@@ -62,7 +62,8 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(
 				const DataPoints& sourcePts,
 				const OutlierWeights& outlierWeights,
 				const Matches& matches,
-				const Penalties& penalties)
+				const Penalties& penalties,
+				const TransformationParameters& T_refMean_iter)
 {
 	typedef typename Matches::Ids Ids;
 	typedef typename Matches::Dists Dists;
@@ -197,6 +198,7 @@ PointMatcher<T>::ErrorMinimizer::ErrorElements::ErrorElements(
 	this->nbRejectedMatches = rejectedMatchCount;
 	this->nbRejectedPoints = rejectedPointCount;
 	this->penalties = penalties;
+	this->T_refMean_iter = T_refMean_iter;
 }
 
 
@@ -227,11 +229,12 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ErrorMinimiz
 				const DataPoints& filteredReference,
 				const OutlierWeights& outlierWeights,
 				const Matches& matches,
-				const Penalties& penalties)
+				const Penalties& penalties,
+				const TransformationParameters& T_refMean_iter)
 {
 	
 	// generates pairs of matching points
-	typename ErrorMinimizer::ErrorElements matchedPoints(filteredReading, filteredReference, outlierWeights, matches, penalties);
+	typename ErrorMinimizer::ErrorElements matchedPoints(filteredReading, filteredReference, outlierWeights, matches, penalties, T_refMean_iter);
 	
 	// calls specific instantiation for a given ErrorMinimizer
 	TransformationParameters transform = this->compute(matchedPoints);

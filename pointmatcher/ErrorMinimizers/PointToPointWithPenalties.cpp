@@ -51,21 +51,9 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointToPointWithPenaltiesErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
 {
 	ErrorElements mPts = mPts_const;
-
-	// To minimize both the distances from the point cloud and the penalties at the same time we convert the penalties to fake points.
-	// These fake points will have a weight corresponding to a element in the covariance's diagonal.
-	// For instance, imagine a penalty with the following parameters:
-	// tf = [ 1 0 0 x]  cov = [ σ0  0  0]
-	//      [ 0 1 0 y]        [  0 σ1  0]
-	//      [ 0 0 1 z]        [  0  0 σ2]
-	//      [ 0 0 0 1]
-	// To represent this penalty with a point to point minimization, we add 3 fakes points with corresponding weight:
-	// pts_fake = [x 0 0]   W = [1/σ0 1/σ1 1/σ2]
-	//            [0 y 0]
-	//            [0 0 z]
-	//
-	// for this hack to works the covariance matrix must be diagonal and penalties must be only in translation.
 	const auto dim(mPts.reference.features.rows() - 1);
+
+	// We have no way of knowing the dimension of T_iter in the constructor, so we initialize it here
 
 	const size_t nbPenalty(mPts_const.penalties.size());
 
@@ -82,34 +70,48 @@ typename PointMatcher<T>::TransformationParameters PointToPointWithPenaltiesErro
 		const T pointsWeightSum = mPts_const.weights.sum();
 		T penaltiesWeightSum = 0;
 		for (size_t i = 0; i < mPts_const.penalties.size(); ++i) {
+			// To minimize both the distances from the point cloud and the penalties at the same time we convert the penalties to fake points.
+			// These fake points will have a weight corresponding to a element in the covariance's diagonal.
+			// For instance, imagine a penalty with the following parameters:
+			// tf = [ 1 0 0 x]  cov = [ σ0  0  0]
+			//      [ 0 1 0 y]        [  0 σ1  0]
+			//      [ 0 0 1 z]        [  0  0 σ2]
+			//      [ 0 0 0 1]
+			// To represent this penalty with a point to point minimization, we add 3 fakes points with corresponding weight:
+			// pts_fake = [x 0 0]   W = [1/σ0 1/σ1 1/σ2]
+			//            [0 y 0]
+			//            [0 0 z]
+			// The fake points are added to the reference. Meanwhile the corresponding fake point for the reading corresponds
+			// to the origin. At each iteration the reading and its origin are moved, thus the fake points for the reading are:
+			// pts_fake = [tx  0  0]
+			//            [ 0 ty  0]
+			//            [ 0  0 tz]
+			// where [tx, ty, tz] is the translation part of the transformation matrix at the current iteration (T_refMean_iter).
+			// Note: for this hack to works the covariance matrix must be diagonal and penalties must be only in translation.
 			const auto &penalty = mPts_const.penalties[i];
-			// Take translation part of the transformation matrix and create a diagonal matrix with it
-			Matrix trans(penalty.first.col(dim).asDiagonal());
-			trans.row(dim).setOnes();
+			// Take translation part of the penalty's transformation matrix and create a diagonal matrix with it
+			Matrix transInRef(penalty.first.col(dim).asDiagonal());
+
+			// We must move the reading origin [0, 0, 0], we extract the translation part of the reading's tf,
+			// since apply a tf on a zero vector is the same as extracting the translation part of the tf.
+			Matrix transInRead((mPts_const.T_refMean_iter.col(dim)).asDiagonal());
+
+			transInRef.row(dim).setOnes();
+			transInRead.row(dim).setOnes();
 			// Convert sigma on the covariance matrix diagonal to 1/sigma
 			const Vector penaltiesWeight = penalty.second.diagonal().array().inverse().matrix();
-			mPts.reference.features.block(0, refSize + dim * i, dim, dim) = trans;
-			mPts.reading.features.block(0, readSize + dim * i, dim, dim) = trans;
+			mPts.reference.features.block(0, refSize + dim * i, dim, dim) = transInRef;
+			mPts.reading.features.block(0, readSize + dim * i, dim, dim) = transInRead;
 			mPts.weights.block(0, readSize + dim * i, 1, dim) = penaltiesWeight.transpose();
 			penaltiesWeightSum += penaltiesWeight.sum();
-//			std::cout <<"penalty.second:" << std::endl << penalty.second << std::endl;
-//			std::cout <<"penaltiesWeight:" << penaltiesWeight << std::endl;
-//			std::cout <<"trans:" << trans << std::endl;
-//			std::cout <<"mPts_const.reference.features:" << std::endl << mPts_const.reference.features << std::endl;
-//			std::cout <<"mPts.reference.features:" << std::endl << mPts.reference.features << std::endl;
-//			std::cout <<"mPts.weight:" << std::endl << mPts.weights << std::endl;
 		}
 		// Normalize the weight so the confidenceInPenalties determine the influence of the penalties on the minimization
 //		std::cout <<"before mPts.weight:" << std::endl << mPts.weights << " penaltiesWeightSum "<< penaltiesWeightSum << std::endl;
 		mPts.weights.block(0,        0, 1,        readSize) *= (1 - confidenceInPenalties) / pointsWeightSum;
 		mPts.weights.block(0, readSize, 1, dim * nbPenalty) *= confidenceInPenalties / penaltiesWeightSum;
-//		std::cout <<"mPts_const.reference.features:" << std::endl << mPts_const.reference.features << std::endl;
-//		std::cout <<"mPts.reference.features:" << std::endl << mPts.reference.features << std::endl;
-//		std::cout <<"mPts.weight:" << std::endl << mPts.weights << " penaltiesWeightSum "<< penaltiesWeightSum << std::endl;
 	}
 
 	typename PointMatcher<T>::TransformationParameters result = PointToPointErrorMinimizer<T>::compute_in_place(mPts);
-	
 	return result;
 }
 

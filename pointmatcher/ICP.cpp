@@ -453,7 +453,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
-			stepReading, reference, outlierWeights, matches, penalties) * T_iter	;
+			stepReading, reference, outlierWeights, matches, penalties, T_iter * T_refMean_dataIn) * T_iter	;
 		
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(
@@ -481,7 +481,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// so we have: 
 	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_refMean_dataIn
 	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_iter(0)_dataIn
-	// T_refIn_refMean remove the temperary frame added during initialization
+	// T_refIn_refMean remove the temporary frame added during initialization
 	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
 }
 

@@ -91,7 +91,7 @@ TEST_F(ErrorMinimizerTest, ErrorElements)
 
 	
 	// Finally, the constructor for ErrorElements
-	PM::ErrorMinimizer::ErrorElements mPts(request, source, weights, matches, PM::ErrorMinimizer::Penalties());
+	PM::ErrorMinimizer::ErrorElements mPts(request, source, weights, matches, PM::ErrorMinimizer::Penalties(), PM::TransformationParameters());
 
 	// check number of points
 	EXPECT_EQ(mPts.reference.getNbPoints(), nbPoints);

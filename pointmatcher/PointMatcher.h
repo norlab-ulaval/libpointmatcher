@@ -532,11 +532,12 @@ struct PointMatcher
 			int nbRejectedMatches; //!< number of matches with zero weights
 			int nbRejectedPoints; //!< number of points with all matches set to zero weights
 			T pointUsedRatio;  //!< the ratio of how many points were used for error minimization
-			T weightedPointUsedRatio;//!< the ratio of how many points were used (with weight) for error minimization
-			Penalties penalties;
+			T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+			Penalties penalties; //!< Additional constraints for the minimization
+			TransformationParameters T_refMean_iter;
 
 			ErrorElements();
-			ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties);
+			ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter);
 		};
 		
 		ErrorMinimizer();
@@ -551,7 +552,7 @@ struct PointMatcher
 		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties) const;
 		
 		//! Find the transformation that minimizes the error
-		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties);
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter);
 		//! Find the transformation that minimizes the error given matched pair of points. This function most be defined for all new instances of ErrorMinimizer.
 		virtual TransformationParameters compute(const ErrorElements& matchedPoints) = 0;
 		
