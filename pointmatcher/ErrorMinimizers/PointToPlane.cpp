@@ -273,7 +273,7 @@ T PointToPlaneErrorMinimizer<T>::computeResidualError(ErrorElements mPts, const 
 
 	for(int i=0; i<normalRef.rows(); i++)
 	{
-		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
+		dotProd += (mPts.weights.row(0).array() * deltas.row(i).array().square() * normalRef.row(i).array()).matrix();
 	}
 
 	// return sum of the norm of each dot product
