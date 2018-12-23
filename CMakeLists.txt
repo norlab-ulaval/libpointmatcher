@@ -70,6 +70,7 @@ endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 if( MSVC )
 	add_definitions( /D _VARIADIC_MAX=10 ) # VS2012 does not support tuples correctly yet
 	add_definitions( /D _USE_MATH_DEFINES) # defines M_PI for Visual Studio
+	add_definitions( /D _ENABLE_EXTENDED_ALIGNED_STORAGE) # this variable must be defined with VS2017 to acknowledge alignment changes of aligned_storage
 endif()
 
 #======================= installation =====================================
