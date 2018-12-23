@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.11)
 
 include(CheckSymbolExists)
 
@@ -345,21 +345,18 @@ set(POINTMATCHER_SRC
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/pointmatcher)
-include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
-include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils)
 
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 
-# MacOS deals with shared/dynamic library differently. For
-# simplicity, we only authorize static library in that case.
-if(APPLE)
+# MacOS and Windows deal with shared/dynamic library differently. For
+# simplicity, we only authorize static library in those cases.
+if(APPLE OR WIN32)
 
 	add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 
-else(APPLE)
+else(APPLE OR WIN32)
 	set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
 
 	if (SHARED_LIBS)
@@ -373,8 +370,11 @@ else(APPLE)
 		add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 		install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
 	endif(SHARED_LIBS)
-endif(APPLE)
+endif(APPLE OR WIN32)
 
+target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher)
+target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
+target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils)
 
 # link all libraries to libpointmatcher
 add_definitions(-Wall)
