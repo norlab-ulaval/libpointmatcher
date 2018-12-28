@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Eigen;
 using namespace std;
-using namespace PointMatcherSupport;
 
 typedef PointMatcherSupport::Parametrizable Parametrizable;
 typedef PointMatcherSupport::Parametrizable P;
@@ -375,7 +374,7 @@ T PointToPlaneErrorMinimizer<T>::getOverlap() const
 			// but this doesn't make sense 
 
 
-			if(anyabs(dists(i, 0)) < (uncertainties(0,i)))
+			if(PointMatcherSupport::anyabs(dists(i, 0)) < (uncertainties(0,i)))
 			{
 				lastValidPoint = point;
 				count++;

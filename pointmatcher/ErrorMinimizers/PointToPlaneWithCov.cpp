@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Eigen;
 using namespace std;
-using namespace PointMatcherSupport;
 
 typedef PointMatcherSupport::Parametrizable Parametrizable;
 typedef PointMatcherSupport::Parametrizable P;

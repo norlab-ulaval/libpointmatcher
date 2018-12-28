@@ -37,6 +37,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <unordered_map>
 #include <random>
+#include <ciso646>
+#include <cmath>
 
 // NormalSpaceDataPointsFilter
 template <typename T>
