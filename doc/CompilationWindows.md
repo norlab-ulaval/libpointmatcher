@@ -36,7 +36,7 @@ The rest of this tutorial will guide you through the different requirements step
 
 
 ### Build libnabo
-You may need to install grep to build libnabo. You can get the Windows version <a href=”http://gnuwin32.sourceforge.net/packages/grep.htm”>here</a>.
+You may need to install grep to build libnabo. You can get the Windows version [here](http://gnuwin32.sourceforge.net/packages/grep.htm).
 
 1. Start **CMake GUI**
 
