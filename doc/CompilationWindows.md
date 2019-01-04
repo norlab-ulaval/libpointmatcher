@@ -70,9 +70,9 @@ You may need to install grep to build libnabo. You can get the Windows version [
       2 Error(s)
     ```
 
-    If this is the case, remove the line `add_subdirectory(tests)` from libnabo/CMakeLists.txt
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If this is the case, remove the line `add_subdirectory(tests)` from libnabo/CMakeLists.txt
 
-    ii. Press Configure again
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Press Configure again
 
 1. Click on the button Generate. Here is an example of what your CMake should look like:
 
@@ -97,9 +97,9 @@ You may need to install grep to build libnabo. You can get the Windows version [
     cl : Command line error D8021: invalid numeric argument '/Wextra'
     ```
 
-    If this is the case, remove the line `add_definitions(-Wall -Wextra)` from libnabo/CMakeLists.txt, go back to CMake GUI and press Configure and Generate again
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If this is the case, remove the line `add_definitions(-Wall -Wextra)` from libnabo/CMakeLists.txt, go back to CMake GUI and press Configure and Generate again
 
-    ii. Rebuild the solution in Visual Studio: BUILD -> Rebuild Solution
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Rebuild the solution in Visual Studio: BUILD -> Rebuild Solution
 
 
 ### Build libpointmatcher
