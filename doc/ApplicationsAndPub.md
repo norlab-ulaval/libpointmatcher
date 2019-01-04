@@ -97,7 +97,7 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 
 ## Publications using libpointmatcher
-1. F. Pomerleau, F. Colas and R. Siegwart (2015), "A Review of Point Cloud Registration Algorithms for Mobile Robotics", Foundations and Trends® in Robotics: Vol. 4: No. 1, pp 1-104. http://dx.doi.org/10.1561/2300000035 or [Research Gate link](https://www.researchgate.net/publication/277558596_A_Review_of_Point_Cloud_Registration_Algorithms_for_Mobile_Robotics)
+1. F. Pomerleau, F. Colas and R. Siegwart (2015), "A Review of Point Cloud Registration Algorithms for Mobile Robotics", Foundations and Trends® in Robotics: Vol. 4: No. 1, pp 1-104. https://doi.org/10.1561/2300000035 or [Research Gate link](https://www.researchgate.net/publication/277558596_A_Review_of_Point_Cloud_Registration_Algorithms_for_Mobile_Robotics)
 
 1. G. Hitz, F. Pomerleau, F. Colas, and R. Siegwart. "State Estimation for Shore Monitoring Using an Autonomous Surface Vessel." International Symposium on Experimental Robotics (ISER), 2014, 2014.
 

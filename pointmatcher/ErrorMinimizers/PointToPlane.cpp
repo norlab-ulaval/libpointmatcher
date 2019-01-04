@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace Eigen;
 using namespace std;
-using namespace PointMatcherSupport;
 
 typedef PointMatcherSupport::Parametrizable Parametrizable;
 typedef PointMatcherSupport::Parametrizable P;
@@ -268,17 +267,17 @@ T PointToPlaneErrorMinimizer<T>::computeResidualError(ErrorElements mPts, const 
 
 	const Matrix deltas = mPts.reading.features - mPts.reference.features;
 
-	// dot product of dot = dot(deltas, normals)
+	// dotProd = dot(deltas, normals) = d.n
 	Matrix dotProd = Matrix::Zero(1, normalRef.cols());
-
-	for(int i=0; i<normalRef.rows(); i++)
+	for(int i = 0; i < normalRef.rows(); i++)
 	{
 		dotProd += (deltas.row(i).array() * normalRef.row(i).array()).matrix();
 	}
+	// residual = w*(d.n)²
+	dotProd = (mPts.weights.row(0).array() * dotProd.array().square()).matrix();
 
 	// return sum of the norm of each dot product
-	Matrix dotProdNorm = dotProd.colwise().norm();
-	return dotProdNorm.sum();
+	return dotProd.sum();
 }
 
 
@@ -375,7 +374,7 @@ T PointToPlaneErrorMinimizer<T>::getOverlap() const
 			// but this doesn't make sense 
 
 
-			if(anyabs(dists(i, 0)) < (uncertainties(0,i)))
+			if(PointMatcherSupport::anyabs(dists(i, 0)) < (uncertainties(0,i)))
 			{
 				lastValidPoint = point;
 				count++;

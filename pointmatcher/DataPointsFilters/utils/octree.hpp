@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iterator>
 #include <future>
+#include <ciso646>
 
 template<typename T, std::size_t dim>
 Octree_<T,dim>::Octree_(): parent{nullptr},	depth{0}

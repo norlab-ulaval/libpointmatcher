@@ -36,6 +36,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "utils.h"
 
+#include <cmath>
+
 // Eigenvalues
 #include "Eigen/QR"
 #include "Eigen/Eigenvalues"

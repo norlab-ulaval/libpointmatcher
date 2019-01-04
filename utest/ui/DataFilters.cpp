@@ -1,4 +1,6 @@
 #include "../utest.h"
+#include <ciso646>
+#include <cmath>
 
 using namespace std;
 using namespace PointMatcherSupport;

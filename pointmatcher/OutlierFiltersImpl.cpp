@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <limits>
 #include <numeric>
+#include <ciso646>
 
 using namespace std;
 using namespace PointMatcherSupport;
