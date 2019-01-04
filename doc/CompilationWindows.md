@@ -71,6 +71,7 @@ You may need to install grep to build libnabo. You can get the Windows version [
     ```
 
     If this is the case, remove the line `add_subdirectory(tests)` from libnabo/CMakeLists.txt
+
     1. Press Configure again
 
 1. Click on the button Generate. Here is an example of what your CMake should look like:
@@ -97,6 +98,7 @@ You may need to install grep to build libnabo. You can get the Windows version [
     ```
 
     If this is the case, remove the line `add_definitions(-Wall -Wextra)` from libnabo/CMakeLists.txt, go back to CMake GUI and press Configure and Generate again
+
     1. Rebuild the solution in Visual Studio: BUILD -> Rebuild Solution
 
 
