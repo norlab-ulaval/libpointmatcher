@@ -107,7 +107,7 @@ You may need to install grep to build libnabo. You can get the Windows version [
 
 1. Locate _your eigen folder_ in the field **EIGEN_INCLUDE_DIR**
 
-1. Add the following boolean variable and set it to true: **Boost_USE_STATIC_LIBS**
+1. Add the following boolean variable and set it to `true`: **Boost_USE_STATIC_LIBS**
 
 1. Add the following PATH variable and set it to _(your Boost folder)_/build: **BOOST_ROOT**
 
