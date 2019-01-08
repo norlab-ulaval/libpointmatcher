@@ -8,7 +8,7 @@ Documentation and Tutorials
 ===========================
 libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
 
-**Quick link for the tutorial pages: [Tutorials](doc/index.md ) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
+**Quick link for the tutorial pages: [Tutorials](doc/index.md) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
 
 Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
 
@@ -21,7 +21,7 @@ You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 Quick Start
 ==================
 
-Although we suggest to use the [tutorials](doc/Tutorials.md ), here is a quick version of it:
+Although we suggest to use the [tutorials](doc/index.md), here is a quick version of it:
 
 The library has a light dependency list:
 
@@ -122,7 +122,7 @@ Projects and Partners
 If you are using libpointmatcher in your project and you would like to have it listed here, please contact [François Pomerleau](mailto:f.pomerleau@gmail.com).
 
  * European Project [NIFTi](http://www.nifti.eu/) (FP7 ICT-247870): Search and rescue project in dynamic environments. Results: [video of multi-floor reconstruction](http://www.youtube.com/watch?v=lP5Mj-TGaiw) and [video of railyard reconstruction](http://www.youtube.com/watch?v=ygIvzWVfPYk). All results with real-time computation.
- * NASA Ames [Stereo Pipeline](http://ti.arc.nasa.gov/tech/asr/intelligent-robotics/ngt/stereo/): Planetary reconstruction from satellite observations. Results: used for Mars, Moon and Earth point clouds.
+ * NASA Ames [Stereo Pipeline](https://ti.arc.nasa.gov/tech/asr/groups/intelligent-robotics/ngt/stereo/): Planetary reconstruction from satellite observations. Results: used for Mars, Moon and Earth point clouds.
  * Armasuisse S+T UGV research program [ARTOR](http://www.artor.ethz.ch/): Development of techniques for reliable autonomous navigation of a wheeled robot in rough, outdoor terrain. Results: [video of urban and dynamic 3D reconstruction](http://www.youtube.com/watch?v=UCCAUf64tD0) and [video of open space 3D reconstruction](http://www.youtube.com/watch?v=M5Y99o7um88) with real-time computation.
  * Swiss National Science Foundation - [Limnobotics](http://www.limnobotics.ch/): Robotic solution for toxic algae monitoring in lacs. Result: [video of 3D shore reconstruction](http://www.youtube.com/watch?v=g8l-Xq4qYeE) with real-time computation.
 
