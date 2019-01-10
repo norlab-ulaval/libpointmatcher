@@ -26,6 +26,7 @@ TEST(Loggers, FileLogger)
 			}
 		);
 
+	fileLog.reset(); // The logger needs to release the files to allow them to be removed
 	// Remove file from disk
 	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(infoFileName)));
 	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(warningFileName)));
