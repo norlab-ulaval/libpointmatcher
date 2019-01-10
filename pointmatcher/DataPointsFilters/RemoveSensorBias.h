@@ -78,29 +78,30 @@ struct RemoveSensorBiasDataPointsFilter: public PointMatcher<T>::DataPointsFilte
 
 private:
 	enum SensorType : int { LMS_1XX=0, HDL_32E=1 };
+	// doubles are used since large and tiny numbers are handled in this filter
 	struct SensorParameters{
 	private:
-		SensorParameters(T aperture_, T k1_, T k2_): aperture(aperture_), k1(k1_), k2(k2_) {}
+		SensorParameters(double aperture_, double k1_, double k2_): aperture(aperture_), k1(k1_), k2(k2_) {}
 	public:
-		const T aperture;
-		const T k1;
-		const T k2;
+		const double aperture;
+		const double k1;
+		const double k2;
 		
 		static const SensorParameters LMS_1XX;
 		static const SensorParameters HDL_32E;
 	};
 	
-	static constexpr T tau = 50e-9; //s - pulse length
-	static constexpr T pulse_intensity = 0.39; //w.m^-2 - pulse intensity
-	static constexpr T lambda_light = 905e-9; //m - wavelength of the laser
-	static constexpr T c = 299792458.0; //m.s^-1 - celerity of light
+	static constexpr double tau = 50e-9; //s - pulse length
+	static constexpr double pulse_intensity = 0.39; //w.m^-2 - pulse intensity
+	static constexpr double lambda_light = 905e-9; //m - wavelength of the laser
+	static constexpr double c = 299792458.0; //m.s^-1 - celerity of light
 	
 	const SensorType sensorType;
 	const T angleThreshold;
 
-	std::array<T,4> getCoefficients(const T depth, const T theta, const T aperture) const;
-	T diffDist(const T depth, const T theta, const T aperture) const;
-	T ratioCurvature(const T depth, const T theta, const T aperture) const;
+	std::array<double,4> getCoefficients(const double depth, const T theta, const double aperture) const;
+	double diffDist(const double depth, const T theta, const double aperture) const;
+	double ratioCurvature(const double depth, const T theta, const double aperture) const;
 };
 
 template<typename T>
