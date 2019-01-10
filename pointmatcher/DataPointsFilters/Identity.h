@@ -46,9 +46,10 @@ struct IdentityDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	{
 		return "Does nothing.";
 	}
-	
-	//! Constructor, uses parameter interface
-	//IdentityDataPointsFilter(const Parameters& params = Parameters());
+
+		IdentityDataPointsFilter() : PointMatcher<T>::DataPointsFilter("IdentityDataPointsFilter",
+																																	 PointMatcherSupport::Parametrizable::ParametersDoc(),
+																																	 PointMatcherSupport::Parametrizable::Parameters()) {}
 	
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);

@@ -54,7 +54,10 @@ struct PointToPointSimilarityErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 	{
 		return "Point-to-point similarity error (rotation + translation + scale). The scale is the same for all coordinates. Based on SVD decomposition. Per \\cite{Umeyama1991}.";
 	}
-	
+
+	PointToPointSimilarityErrorMinimizer(): ErrorMinimizer("PointToPointSimilarityErrorMinimizer",
+																												 PointMatcherSupport::Parametrizable::ParametersDoc(),
+																												 PointMatcherSupport::Parametrizable::Parameters()) {}
 	//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 	virtual TransformationParameters compute(const ErrorElements& mPts);
 	virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;

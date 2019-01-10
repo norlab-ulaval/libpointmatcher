@@ -47,6 +47,9 @@ namespace PointMatcherSupport
 		{
 			return "Does not log anything.";
 		}
+		NullLogger(): Logger("NullLogger",
+												 ParametersDoc(),
+												 Parameters()) {}
 	};
 	
 	struct FileLogger: public Logger
