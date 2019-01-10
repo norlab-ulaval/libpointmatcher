@@ -65,7 +65,8 @@ struct MatchersImpl
 		{
 			return "Does nothing, returns no match.";
 		}
-		
+
+		NullMatcher() : Matcher("NullMatcher",  ParametersDoc(), Parameters()) {}
 		virtual void init(const DataPoints& filteredReference);
 		virtual Matches findClosests(const DataPoints& filteredReading);
 	};

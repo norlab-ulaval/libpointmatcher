@@ -40,9 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Eigen;
 
 template<typename T>
-PointToPointErrorMinimizer<T>::PointToPointErrorMinimizer()
-{
-}
+PointToPointErrorMinimizer<T>::PointToPointErrorMinimizer() :
+PointMatcher<T>::ErrorMinimizer("PointToPointErrorMinimizer",
+																ParametersDoc(),
+																Parameters()) {}
 
 template<typename T>
 PointToPointErrorMinimizer<T>::PointToPointErrorMinimizer(const std::string& className, const ParametersDoc paramsDoc, const Parameters& params):

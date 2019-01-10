@@ -48,7 +48,10 @@ struct IdentityErrorMinimizer: PointMatcher<T>::ErrorMinimizer
 	{
 		return "Does nothing.";
 	}
-	
+
+	IdentityErrorMinimizer() : PointMatcher<T>::ErrorMinimizer("IdentityErrorMinimizer",
+																														 PointMatcherSupport::Parametrizable::ParametersDoc(),
+																														 PointMatcherSupport::Parametrizable::Parameters()) {}
 	//virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
 	virtual TransformationParameters compute(const ErrorElements& mPts);
 };

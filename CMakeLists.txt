@@ -130,8 +130,6 @@ find_path(EIGEN_INCLUDE_DIR Eigen/Core
 	/usr/local/include/eigen3
 	/usr/include/eigen3
 )
-include_directories(${EIGEN_INCLUDE_DIR})
-#note: no library to add, eigen rely only on headers
 
 # Suppress Eigen's warning by adding it to the system's library
 include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")

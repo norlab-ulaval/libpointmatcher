@@ -63,6 +63,10 @@ struct InspectorsImpl
 		{
 			return "Does nothing.";
 		}
+
+		// This constructor is not required. It make the attribute className == "NullInspector" instead of 'unknown'
+		NullInspector() : Inspector("NullInspector",  ParametersDoc(), Parameters()) {}
+
 	};
 	
 	struct PerformanceInspector: public Inspector
