@@ -132,15 +132,16 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 template<typename T>
 std::array<T, 4> RemoveSensorBiasDataPointsFilter<T>::getCoefficients(const T depth, const T theta, const T aperture) const
 {
-	const T sigma = tau / std::sqrt(2. * M_PI);
-	const T w0 = lambda_light / (M_PI * aperture);
+	// intermediate values are stored as double since very big and very small numbers are multiplied together...
+	const double sigma = tau / std::sqrt(2. * M_PI);
+	const double w0 = lambda_light / (M_PI * aperture);
 
-	const T A  = 2. * std::pow(depth * std::tan(theta), 2) / std::pow(sigma * c, 2) + 2. / std::pow(aperture, 2);
-	const T K1 = std::pow(std::cos(theta), 3);
-	const T K2 = 3. * std::pow(std::cos(theta), 2) * std::sin(theta);
-	const T L1 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) *
+	const double A  = 2. * std::pow(depth * std::tan(theta), 2) / std::pow(sigma * c, 2) + 2. / std::pow(aperture, 2);
+	const double K1 = std::pow(std::cos(theta), 3);
+	const double K2 = 3. * std::pow(std::cos(theta), 2) * std::sin(theta);
+	const double L1 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) *
 		std::sqrt(M_PI) * std::erf(aperture * std::sqrt(A)) / (2. * std::pow(A, 3. / 2.));
-	const T L2 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) * K2 / (2. * A);
+	const double L2 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) * K2 / (2. * A);
 
 	const T a0 = 2. * A * K1 * L1;
 	const T a1 = -(2. * std::tan(theta) * depth * 
@@ -148,7 +149,7 @@ std::array<T, 4> RemoveSensorBiasDataPointsFilter<T>::getCoefficients(const T de
 	const T a2 = -L1 * 2. * A * K1 * (std::pow(sigma * c * std::cos(theta), 2) * A + 2. * std::pow(std::cos(theta) * depth, 2) - 2. * std::pow(depth, 2)) / 
 		(2 * std::pow(c * std::cos(theta), 2) * std::pow(sigma, 4) * A);
 	const T a3 = L1 * K2 * depth * std::tan(theta) * (std::pow(sigma * c, 2) * A - 2. * std::pow(depth * std::tan(theta), 2)) / 
-		(std::pow(sigma, 6) * std::pow(c, 3) * A); 
+		(std::pow(sigma, 6) * std::pow(c, 3) * A);
 
 	return {a0, a1, a2, a3};
 }
