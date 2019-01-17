@@ -60,10 +60,9 @@ namespace PointMatcherSupport
 		}
 		inline static const ParametersDoc availableParameters()
 		{
-			// FIXME: this cause portability problem because of default path set to /dev/stdout which doesn't exist on Windows
 			return {
-				{"infoFileName", "name of the file to output infos to", "/dev/stdout"},
-				{"warningFileName", "name of the file to output warnings to", "/dev/stderr"},
+				{"infoFileName", "name of the file to output infos to, or an empty string to output infos to the standard output stream", ""},
+				{"warningFileName", "name of the file to output warnings to, or an empty string to output warnings to the standard error stream", ""},
 				{"displayLocation", "display the location of message in source code", "0"}
 			};
 		};
@@ -84,8 +83,10 @@ namespace PointMatcherSupport
 		virtual void finishWarningEntry(const char *file, unsigned line, const char *func);
 		
 	protected:
-		std::ofstream _infoStream;
-		std::ofstream _warningStream;
+		std::ofstream _infoFileStream;
+		std::ofstream _warningFileStream;
+		std::ostream _infoStream;
+		std::ostream _warningStream;
 	};
 } //PointMatcherSupport
 
