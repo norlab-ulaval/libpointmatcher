@@ -761,7 +761,7 @@ std::ostream* InspectorsImpl<T>::VTKFileInspector::openStream(const std::string&
 
 	//std::cerr << "writing to " << oss.str() << std::endl;
 	LOG_INFO_STREAM("writing to " << oss.str());
-	ofstream* file = new ofstream(oss.str().c_str());
+	ofstream* file = new ofstream(oss.str().c_str(), std::ios::binary);
 	if (file->fail())
 		throw std::runtime_error("Couldn't open the file \"" + oss.str() + "\". Check if directory exist.");
 	return file;

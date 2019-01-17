@@ -75,8 +75,7 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	const auto& incidenceAngles = cloud.getDescriptorViewByName("incidenceAngles");
 	const auto& observationDirections = cloud.getDescriptorViewByName("observationDirections");
 
-	T aperture;
-	T k1, k2;
+	double aperture, k1, k2;
 
 	switch(sensorType)
 	{
@@ -110,14 +109,14 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	{
 		const Vector vObs = observationDirections.col(i);
 
-		const T depth = vObs.norm();
+		const double depth = vObs.norm();
 		const T incidence = incidenceAngles(0, i);
 
 		//check if the incidence angle could be estimated.
 		//For angles very close to 90 degrees, a small error of estimation could change drastically the correction, so we skip those points.
 		if(not std::isnan(incidence) and incidence >= 0. and incidence < angleThreshold)
 		{
-			const T correction = k1 * diffDist(depth, incidence, aperture) + k2 * ratioCurvature(depth, incidence, aperture);
+			const double correction = k1 * diffDist(depth, incidence, aperture) + k2 * ratioCurvature(depth, incidence, aperture);
 
 			Vector p = cloud.features.col(i);
 			p.head(dim-1) += correction * vObs.normalized(); 
@@ -130,37 +129,37 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 }
 
 template<typename T>
-std::array<T, 4> RemoveSensorBiasDataPointsFilter<T>::getCoefficients(const T depth, const T theta, const T aperture) const
+std::array<double, 4> RemoveSensorBiasDataPointsFilter<T>::getCoefficients(const double depth, const T theta, const double aperture) const
 {
-	const T sigma = tau / std::sqrt(2. * M_PI);
-	const T w0 = lambda_light / (M_PI * aperture);
+	const double sigma = tau / std::sqrt(2. * M_PI);
+	const double w0 = lambda_light / (M_PI * aperture);
 
-	const T A  = 2. * std::pow(depth * std::tan(theta), 2) / std::pow(sigma * c, 2) + 2. / std::pow(aperture, 2);
-	const T K1 = std::pow(std::cos(theta), 3);
-	const T K2 = 3. * std::pow(std::cos(theta), 2) * std::sin(theta);
-	const T L1 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) *
+	const double A  = 2. * std::pow(depth * std::tan(theta), 2) / std::pow(sigma * c, 2) + 2. / std::pow(aperture, 2);
+	const double K1 = std::pow(std::cos(theta), 3);
+	const double K2 = 3. * std::pow(std::cos(theta), 2) * std::sin(theta);
+	const double L1 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) *
 		std::sqrt(M_PI) * std::erf(aperture * std::sqrt(A)) / (2. * std::pow(A, 3. / 2.));
-	const T L2 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) * K2 / (2. * A);
+	const double L2 = pulse_intensity * std::pow(w0 / (aperture * depth * std::cos(theta)), 2) * K2 / (2. * A);
 
-	const T a0 = 2. * A * K1 * L1;
-	const T a1 = -(2. * std::tan(theta) * depth * 
+	const double a0 = 2. * A * K1 * L1;
+	const double a1 = -(2. * std::tan(theta) * depth * 
 			(L1 * K2 - 2. * L2 * aperture * std::exp(-A * std::pow(aperture, 2)))) / (std::pow(sigma, 2) * c);
-	const T a2 = -L1 * 2. * A * K1 * (std::pow(sigma * c * std::cos(theta), 2) * A + 2. * std::pow(std::cos(theta) * depth, 2) - 2. * std::pow(depth, 2)) / 
+	const double a2 = -L1 * 2. * A * K1 * (std::pow(sigma * c * std::cos(theta), 2) * A + 2. * std::pow(std::cos(theta) * depth, 2) - 2. * std::pow(depth, 2)) / 
 		(2 * std::pow(c * std::cos(theta), 2) * std::pow(sigma, 4) * A);
-	const T a3 = L1 * K2 * depth * std::tan(theta) * (std::pow(sigma * c, 2) * A - 2. * std::pow(depth * std::tan(theta), 2)) / 
-		(std::pow(sigma, 6) * std::pow(c, 3) * A); 
+	const double a3 = L1 * K2 * depth * std::tan(theta) * (std::pow(sigma * c, 2) * A - 2. * std::pow(depth * std::tan(theta), 2)) / 
+		(std::pow(sigma, 6) * std::pow(c, 3) * A);
 
 	return {a0, a1, a2, a3};
 }
 
 template<typename T>
-T RemoveSensorBiasDataPointsFilter<T>::diffDist(const T depth, const T theta, const T aperture) const
+double RemoveSensorBiasDataPointsFilter<T>::diffDist(const double depth, const T theta, const double aperture) const
 {
-	static constexpr T epsilon = 1e-5;
+	static constexpr double epsilon = 1e-5;
 	
-	const std::array<T, 4> a = getCoefficients(depth, theta, aperture);
+	const std::array<double, 4> a = getCoefficients(depth, theta, aperture);
 
-	T Tmax;
+	double Tmax;
 
 	if(theta < epsilon) // approx. 0
 		Tmax = 0.;
@@ -171,13 +170,13 @@ T RemoveSensorBiasDataPointsFilter<T>::diffDist(const T depth, const T theta, co
 }
 
 template<typename T>
-T RemoveSensorBiasDataPointsFilter<T>::ratioCurvature(const T depth, const T theta, const T aperture) const
+double RemoveSensorBiasDataPointsFilter<T>::ratioCurvature(const double depth, const T theta, const double aperture) const
 {
-	static constexpr T epsilon = 1e-5;
-	const std::array<T,4> a = getCoefficients(depth, theta, aperture);
-	const std::array<T,4> b = getCoefficients(depth, 0., aperture);
+	static constexpr double epsilon = 1e-5;
+	const std::array<double,4> a = getCoefficients(depth, theta, aperture);
+	const std::array<double,4> b = getCoefficients(depth, 0., aperture);
 
-	T Tmax;
+	double Tmax;
 
 	if(theta < epsilon) // approx. 0
 		Tmax = 0.;
