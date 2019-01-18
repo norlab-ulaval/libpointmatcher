@@ -47,13 +47,36 @@ namespace PointMatcherSupport
 		infoFileName(Parametrizable::get<std::string>("infoFileName")),
 		warningFileName(Parametrizable::get<std::string>("warningFileName")),
 		displayLocation(Parametrizable::get<bool>("displayLocation")),
-		_infoStream(infoFileName.c_str()),
-		_warningStream(warningFileName.c_str())
+		_infoFileStream(infoFileName.c_str()),
+		_warningFileStream(warningFileName.c_str()),
+		_infoStream(nullptr),
+		_warningStream(nullptr)
 	{
-		if (!_infoStream.good())
-			throw runtime_error(string("FileLogger::Cannot open info stream to file ") + infoFileName);
-		if (!_warningStream.good())
-			throw runtime_error(string("FileLogger::Cannot open warning stream to file ") + warningFileName);
+		if (infoFileName.empty())
+		{
+			_infoStream.rdbuf(std::cout.rdbuf());
+		}
+		else
+		{
+			if (!_infoFileStream.good())
+			{
+				throw runtime_error(string("FileLogger::Cannot open info stream to file ") + infoFileName);
+			}
+			_infoStream.rdbuf(_infoFileStream.rdbuf());
+		}
+
+		if (warningFileName.empty())
+		{
+			_warningStream.rdbuf(std::cerr.rdbuf());
+		}
+		else
+		{
+			if (!_warningFileStream.good())
+			{
+				throw runtime_error(string("FileLogger::Cannot open warning stream to file ") + warningFileName);
+			}
+			_warningStream.rdbuf(_warningFileStream.rdbuf());
+		}
 	}
 	
 	bool FileLogger::hasInfoChannel() const
