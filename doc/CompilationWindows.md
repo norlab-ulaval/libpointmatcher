@@ -91,16 +91,6 @@ You may need to install grep to build libnabo. You can get the Windows version [
 
     (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
 
-    1. You might get the following error:
-
-    ```
-    cl : Command line error D8021: invalid numeric argument '/Wextra'
-    ```
-
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If this is the case, remove the line `add_definitions(-Wall -Wextra)` from libnabo/CMakeLists.txt, go back to CMake GUI and press Configure and Generate again
-
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Rebuild the solution in Visual Studio: BUILD -> Rebuild Solution
-
 
 ### Build libpointmatcher
 1. Start **CMake GUI**, follow the same steps to configure the source and build folders for _libpointmatcher_, then click the Configure button.
