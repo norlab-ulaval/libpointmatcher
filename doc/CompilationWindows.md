@@ -56,25 +56,7 @@ You may need to install grep to build libnabo. You can get the Windows version [
 
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
 
-1. Click on the button Configure again
-    1. You might get the following error:
-
-    ```
-    invalid_matrix_types.obj : **error** LNK2019: unresolved external symbol "public: static struct Nabo::NearestNeighbourSearch<float,class Eigen::Matrix<float,-1,-1,0,-1,-1> > * __cdecl Nabo::NearestNeighbourSearch<float,class Eigen::Matrix<float,-1,-1,0,-1,-1> >::create(class Eigen::Matrix<float,-1,-1,0,-1,-1> const &,int,enum Nabo::NearestNeighbourSearch<float,class Eigen::Matrix<float,-1,-1,0,-1,-1> >::SearchType,unsigned int,struct Nabo::Parameters const &)" (?create@?$NearestNeighbourSearch@MV?$Matrix@M$0?0$0?0$0A@$0?0$0?0@Eigen@@@Nabo@@SAPEAU12@AEBV?$Matrix@M$0?0$0?0$0A@$0?0$0?0@Eigen@@HW4SearchType@12@IAEBUParameters@2@@Z) referenced in function "int __cdecl testFunction<class Eigen::Matrix<float,-1,-1,0,-1,-1> >(void)" (??$testFunction@V?$Matrix@M$0?0$0?0$0A@$0?0$0?0@Eigen@@@@YAHXZ) [C:\libnabo\build_libnabo_vs2017_x64\tests\CMakeFiles\CMakeTmp\cmTC_b6580.vcxproj]
-
-    C:\libnabo\build_libnabo_vs2017_x64\tests\CMakeFiles\CMakeTmp\Debug\cmTC_b6580.exe : fatal **error** LNK1120: 1 unresolved externals [C:\libnabo\build_libnabo_vs2017_x64\tests\CMakeFiles\CMakeTmp\cmTC_b6580.vcxproj]
-
-
-      1 Warning(s)
-
-      2 Error(s)
-    ```
-
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If this is the case, remove the line `add_subdirectory(tests)` from libnabo/CMakeLists.txt
-
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ii. Press Configure again
-
-1. Click on the button Generate. Here is an example of what your CMake should look like:
+1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
 
 	![alt text](images/win_cmake_libnabo.png "CMake libnabo")
 
