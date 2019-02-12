@@ -26,6 +26,7 @@ Beginner<a name="beginner"></a>
 Advanced<a name="advanced"></a>
 -------
 - [How to link a project to libpointmatcher?](LinkingProjects.md)
+- [How to use libpointmatcher in ROS?](UsingInRos.md)
 - [How are point clouds represented?](Pointclouds.md)
 - [Example: Writing a program which performs ICP](BasicRegistration.md)
 - [How to move a point cloud using a rigid transformation?](Transformations.md)
