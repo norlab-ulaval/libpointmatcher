@@ -325,7 +325,8 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SensorNoiseOutli
 				w(k,i) = 0;
 				continue;
 			}
-			w(k,i) = 1.0 / descRefe(0, idRef) / descRead(0, i);
+			// We add the square of the variance together
+			w(k,i) = 1.0 / (descRefe(0, idRef)*descRefe(0, idRef) + descRead(0, i)*descRead(0, i));
 		}
 	}
 

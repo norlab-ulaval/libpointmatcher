@@ -60,7 +60,6 @@ else (NOT CMAKE_BUILD_TYPE)
   endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif (NOT CMAKE_BUILD_TYPE)
 
-
 #================= extra building definitions ==============================
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-O3)
@@ -308,6 +307,8 @@ set(POINTMATCHER_SRC
 #ErrorMinimizers
 	pointmatcher/ErrorMinimizers/PointToPlane.cpp
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
+	pointmatcher/ErrorMinimizers/PointToPlaneWithPenalties.cpp
+	pointmatcher/ErrorMinimizers/PointToGaussian.cpp
 	pointmatcher/ErrorMinimizers/PointToPoint.cpp
 	pointmatcher/ErrorMinimizers/PointToPointWithCov.cpp
 	pointmatcher/ErrorMinimizers/PointToPointWithPenalties.cpp
@@ -322,6 +323,8 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/MaxQuantileOnAxis.cpp
 	pointmatcher/DataPointsFilters/MaxDensity.cpp
 	pointmatcher/DataPointsFilters/SurfaceNormal.cpp
+	pointmatcher/DataPointsFilters/SurfaceCovariance.cpp
+	pointmatcher/DataPointsFilters/DecomposeCovariance.cpp
 	pointmatcher/DataPointsFilters/SamplingSurfaceNormal.cpp
 	pointmatcher/DataPointsFilters/OrientNormals.cpp
 	pointmatcher/DataPointsFilters/IncidenceAngle.cpp

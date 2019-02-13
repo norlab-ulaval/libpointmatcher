@@ -286,7 +286,7 @@ typename PointMatcher<T>::Matrix PointMatcher<T>::ErrorMinimizer::getCovariance(
 
 //! If not redefined by child class, return max value for T
 template<typename T>
-T PointMatcher<T>::ErrorMinimizer::getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties) const
+T PointMatcher<T>::ErrorMinimizer::getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter) const
 {
 	LOG_WARNING_STREAM("ErrorMinimizer - warning, no specific method to compute residual was provided for the ErrorMinimizer used.");
 	return std::numeric_limits<T>::max();

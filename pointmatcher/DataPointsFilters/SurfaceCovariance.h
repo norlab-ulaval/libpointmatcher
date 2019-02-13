@@ -36,9 +36,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
-//! Sick LMS-xxx noise model
+#include <vector>
+
+//! Find the covariance of the surface for every point using of neighbour points
 template<typename T>
-struct SimpleSensorNoiseDataPointsFilter: public PointMatcher<T>::DataPointsFilter
+struct SurfaceCovarianceDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 {
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
@@ -46,41 +48,31 @@ struct SimpleSensorNoiseDataPointsFilter: public PointMatcher<T>::DataPointsFilt
 	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
-
+	
 	typedef typename PointMatcher<T>::Vector Vector;
-	typedef typename PointMatcher<T>::Matrix Matrix;
+	typedef typename PointMatcher<T>::Matrix Matrix;	
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
-	
+
 	inline static const std::string description()
 	{
-		return "Add a 1D descriptor named <sensorNoise> that would represent the noise radius expressed in meter based on SICK LMS specifications \\cite{Pomerleau2012Noise}.";
+		return "This filter estimate the covariance matrix of the nearest neighbour around each points.";
 	}
-	
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
-			{"sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Hokuyo URG-04LX, 2=Hokuyo UTM-30LX, 3=Kinect/Xtion", "0", "0", "2147483647", &P::Comp<unsigned>},
-			{"gain", "If the point cloud is coming from an untrusty source, you can use the gain to augment the uncertainty", "1", "1", "inf", &P::Comp<T>},
-			{"covariance", "Create a covariance matrix based on the sensor noise", "0", "0", "1", &P::Comp<unsigned>}
+			{"knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned>},
+			{"maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>},
+			{"epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T>}
 		};
 	}
-
-	const unsigned sensorType;
-	const T gain;
-	const bool covariance;
-
-	//! Constructor, uses parameter interface
-	SimpleSensorNoiseDataPointsFilter(const Parameters& params = Parameters());
 	
+	const unsigned knn;
+	const T maxDist;
+	const T epsilon;
+
+SurfaceCovarianceDataPointsFilter(const Parameters& params = Parameters());
+	virtual ~SurfaceCovarianceDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
-
-private:
-	/// @param minRadius in meter, noise level of depth measurements
-	/// @param beamAngle in rad, half of the total laser beam
-	/// @param beamConst in meter, minimum size of the laser beam
-	/// @param features points from the sensor
-	Matrix computeLaserNoise(const T minRadius, const T beamAngle, const T beamConst, const Matrix& features);
-
 };

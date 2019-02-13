@@ -48,7 +48,8 @@ SimpleSensorNoiseDataPointsFilter<T>::SimpleSensorNoiseDataPointsFilter(const Pa
 	PointMatcher<T>::DataPointsFilter("SimpleSensorNoiseDataPointsFilter",
 	SimpleSensorNoiseDataPointsFilter::availableParameters(), params),
 	sensorType(Parametrizable::get<unsigned>("sensorType")),
-	gain(Parametrizable::get<T>("gain"))
+	gain(Parametrizable::get<T>("gain")),
+	covariance(Parametrizable::get<unsigned>("covariance") == 1)
 {
 	std::vector<std::string> sensorNames = {"Sick LMS-1xx",
 											"Hokuyo URG-04LX",
@@ -79,7 +80,19 @@ SimpleSensorNoiseDataPointsFilter<T>::filter(const DataPoints& input)
 template<typename T>
 void SimpleSensorNoiseDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
+	typedef typename DataPoints::View View;
+
+	const int dim(cloud.features.rows()-1);
+	const int nbPoints(cloud.features.cols());
+
 	cloud.allocateDescriptor("simpleSensorNoise", 1);
+
+	if (!cloud.descriptorExists("covariances")) {
+		// Reserve memory
+		cloud.allocateDescriptor("covariances", dim * dim);
+		cloud.getDescriptorViewByName("covariances").setZero();
+	}
+
 	BOOST_AUTO(noise, cloud.getDescriptorViewByName("simpleSensorNoise"));
 
 	switch(sensorType)
@@ -116,6 +129,18 @@ void SimpleSensorNoiseDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 			(boost::format("SimpleSensorNoiseDataPointsFilter: Error, cannot compute noise for sensorType id %1% .") % sensorType).str());
 	}
 
+
+	if (covariance) {
+		View cov = cloud.getDescriptorViewByName("covariances");
+		// The covariance will always be diagonal. So we can multiply an identity matrix by the weight value
+		// [[1 0] => [1 0 0 1] * w_i == [w_i 0 0 w_i]
+		//   0 1]]
+		const Matrix identity = Matrix::Identity(dim, dim);
+		const Matrix covIden = Eigen::Map<const Vector>(identity.data(), dim*dim).replicate(1, nbPoints);
+		// noise.row(0) -> convert the noise matrix to a Eigen::Vector
+		const Matrix noiseCov = (covIden.array().rowwise() * noise.row(0).array().pow(2)).matrix();
+		cov += noiseCov;
+	}
 }
 
 template<typename T>

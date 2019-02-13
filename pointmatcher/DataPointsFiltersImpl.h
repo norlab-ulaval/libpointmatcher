@@ -43,7 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/BoundingBox.h"
 #include "DataPointsFilters/MaxQuantileOnAxis.h"
 #include "DataPointsFilters/MaxDensity.h"
+#include "DataPointsFilters/DecomposeCovariance.h"
 #include "DataPointsFilters/SurfaceNormal.h"
+#include "DataPointsFilters/SurfaceCovariance.h"
 #include "DataPointsFilters/SamplingSurfaceNormal.h"
 #include "DataPointsFilters/OrientNormals.h"
 #include "DataPointsFilters/IncidenceAngle.h"
@@ -73,6 +75,8 @@ struct DataPointsFiltersImpl
 	typedef ::BoundingBoxDataPointsFilter<T> BoundingBoxDataPointsFilter;
 	typedef ::MaxQuantileOnAxisDataPointsFilter<T> MaxQuantileOnAxisDataPointsFilter;
 	typedef ::MaxDensityDataPointsFilter<T> MaxDensityDataPointsFilter;
+	typedef ::DecomposeCovarianceDataPointsFilter<T> DecomposeCovarianceDataPointsFilter;
+	typedef ::SurfaceCovarianceDataPointsFilter<T> SurfaceCovarianceDataPointsFilter;
 	typedef ::SurfaceNormalDataPointsFilter<T> SurfaceNormalDataPointsFilter;
 	typedef ::SamplingSurfaceNormalDataPointsFilter<T> SamplingSurfaceNormalDataPointsFilter;
 	typedef ::OrientNormalsDataPointsFilter<T>  OrientNormalsDataPointsFilter;

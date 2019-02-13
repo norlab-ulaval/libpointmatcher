@@ -36,9 +36,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
-//! Sick LMS-xxx noise model
+#include <vector>
+
+//! Compute the eigen-decomposition every covariance
 template<typename T>
-struct SimpleSensorNoiseDataPointsFilter: public PointMatcher<T>::DataPointsFilter
+struct DecomposeCovarianceDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 {
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
@@ -46,41 +48,33 @@ struct SimpleSensorNoiseDataPointsFilter: public PointMatcher<T>::DataPointsFilt
 	typedef Parametrizable::ParameterDoc ParameterDoc;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
-
+	
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::Matrix Matrix;
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
-	
+
 	inline static const std::string description()
 	{
-		return "Add a 1D descriptor named <sensorNoise> that would represent the noise radius expressed in meter based on SICK LMS specifications \\cite{Pomerleau2012Noise}.";
+		return "This filter does the eigen-decomposition of the covariance matrix. ";
 	}
-	
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
-			{"sensorType", "Type of the sensor used. Choices: 0=Sick LMS-1xx, 1=Hokuyo URG-04LX, 2=Hokuyo UTM-30LX, 3=Kinect/Xtion", "0", "0", "2147483647", &P::Comp<unsigned>},
-			{"gain", "If the point cloud is coming from an untrusty source, you can use the gain to augment the uncertainty", "1", "1", "inf", &P::Comp<T>},
-			{"covariance", "Create a covariance matrix based on the sensor noise", "0", "0", "1", &P::Comp<unsigned>}
+			{"keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "1"},
+			{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "1"},
+			{"keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "0"},
+			{"sortEigen" , "whether the eigenvalues and eigenvectors should be sorted (ascending) based on the eigenvalues", "0"}
 		};
 	}
 
-	const unsigned sensorType;
-	const T gain;
-	const bool covariance;
+	const bool keepNormals;
+	const bool keepEigenValues;
+	const bool keepEigenVectors;
+	const bool sortEigen;
 
-	//! Constructor, uses parameter interface
-	SimpleSensorNoiseDataPointsFilter(const Parameters& params = Parameters());
-	
+	DecomposeCovarianceDataPointsFilter(const Parameters& params = Parameters());
+	virtual ~DecomposeCovarianceDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
-
-private:
-	/// @param minRadius in meter, noise level of depth measurements
-	/// @param beamAngle in rad, half of the total laser beam
-	/// @param beamConst in meter, minimum size of the laser beam
-	/// @param features points from the sensor
-	Matrix computeLaserNoise(const T minRadius, const T beamAngle, const T beamConst, const Matrix& features);
-
 };

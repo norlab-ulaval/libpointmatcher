@@ -33,8 +33,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_CORE_H
-#define __POINTMATCHER_CORE_H
+//#ifndef __POINTMATCHER_CORE_H
+//#define __POINTMATCHER_CORE_H
+#pragma once
 
 #ifndef EIGEN_USE_NEW_STDVECTOR
 #define EIGEN_USE_NEW_STDVECTOR
@@ -549,7 +550,7 @@ struct PointMatcher
 		ErrorElements getErrorElements() const; //TODO: ensure that is return a usable value
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
-		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties) const;
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter) const;
 		
 		//! Find the transformation that minimizes the error
 		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter);
@@ -788,5 +789,5 @@ struct PointMatcher
 	
 }; // PointMatcher<T>
 
-#endif // __POINTMATCHER_CORE_H
+//#endif // __POINTMATCHER_CORE_H
 

@@ -51,14 +51,10 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointToPointWithPenaltiesErrorMinimizer<T>::compute(const ErrorElements& mPts_const)
 {
 	ErrorElements mPts = mPts_const;
-	const auto dim(mPts.reference.features.rows() - 1);
-
-	// We have no way of knowing the dimension of T_iter in the constructor, so we initialize it here
-
+	const size_t dim(mPts.reference.features.rows() - 1);
 	const size_t nbPenalty(mPts_const.penalties.size());
-
-	const auto refSize(mPts_const.reference.features.cols());
-	const auto readSize(mPts_const.reading.features.cols());
+	const size_t refSize(mPts_const.reference.features.cols());
+	const size_t readSize(mPts_const.reading.features.cols());
 
 
 	mPts.reference.features.conservativeResize(Eigen::NoChange, nbPenalty * dim + refSize);
@@ -107,8 +103,8 @@ typename PointMatcher<T>::TransformationParameters PointToPointWithPenaltiesErro
 		}
 		// Normalize the weight so the confidenceInPenalties determine the influence of the penalties on the minimization
 //		std::cout <<"before mPts.weight:" << std::endl << mPts.weights << " penaltiesWeightSum "<< penaltiesWeightSum << std::endl;
-		mPts.weights.block(0,        0, 1,        readSize) *= (1 - confidenceInPenalties) / pointsWeightSum;
-		mPts.weights.block(0, readSize, 1, dim * nbPenalty) *= confidenceInPenalties / penaltiesWeightSum;
+//		mPts.weights.block(0,        0, 1,        readSize) *= (1 - confidenceInPenalties) / pointsWeightSum;
+//		mPts.weights.block(0, readSize, 1, dim * nbPenalty) *= confidenceInPenalties / penaltiesWeightSum;
 	}
 
 	typename PointMatcher<T>::TransformationParameters result = PointToPointErrorMinimizer<T>::compute_in_place(mPts);

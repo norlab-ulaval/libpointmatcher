@@ -102,6 +102,31 @@ serializeEigVec(const typename PointMatcher<T>::Matrix& eigenVe)
 }
 
 template<typename T>
+typename PointMatcher<T>::Vector
+serializeEigVecColMajor(const typename PointMatcher<T>::Matrix& eigenVe)
+{
+	typedef typename PointMatcher<T>::Vector Vector;
+	typedef typename PointMatcher<T>::Matrix Matrix;
+
+	// serialize col major
+	const Matrix output = Eigen::Map<const Vector>(eigenVe.data(), eigenVe.cols() * eigenVe.rows());
+	return output;
+}
+
+template<typename T>
+typename PointMatcher<T>::Matrix
+unserializeEigVecColMajor(const typename PointMatcher<T>::Vector& eigenVe)
+{
+	typedef typename PointMatcher<T>::Vector Vector;
+	typedef typename PointMatcher<T>::Matrix Matrix;
+
+	// unserialize col major
+	const Matrix output = Eigen::Map<const Matrix>(eigenVe.data(), eigenVe.cols() * eigenVe.rows());
+	return output;
+}
+
+
+template<typename T>
 T computeDensity(const typename PointMatcher<T>::Matrix& NN)
 {
 	//volume in meter

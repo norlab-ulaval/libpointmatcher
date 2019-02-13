@@ -69,7 +69,7 @@ void RemoveSensorBiasDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	//Check if there is normals info
 	if (!cloud.descriptorExists("observationDirections"))
 		throw InvalidField("RemoveSensorBiasDataPointsFilter: Error, cannot find observationDirections in descriptors.");
-		
+
 	const auto& incidenceAngles = cloud.getDescriptorViewByName("incidenceAngles");
 	const auto& observationDirections = cloud.getDescriptorViewByName("observationDirections");
 
