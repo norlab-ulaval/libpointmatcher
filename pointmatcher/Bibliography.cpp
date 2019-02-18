@@ -178,7 +178,7 @@ namespace PointMatcherSupport
 				{"issn", "0162-8828"},
 				{"pages", "376--380"},
 				{"numpages", "5"},
-				{"url", "http://dx.doi.org/10.1109/34.88573"},
+				{"url", "https://doi.org/10.1109/34.88573"},
 				{"doi", "10.1109/34.88573"},
 				{"acmid", "105525"},
 				{"publisher", "IEEE Computer Society"},
@@ -276,7 +276,7 @@ namespace PointMatcherSupport
 			if (contains(entry, "year"))
 				os << " " << get(entry, "year") << ".";
 			if (contains(entry, "doi"))
-				os << " DOI: [[http://dx.doi.org/" << get(entry, "doi") << "|" << get(entry, "doi") << "]].";
+				os << " DOI: [[https://doi.org/" << get(entry, "doi") << "|" << get(entry, "doi") << "]].";
 			if (contains(entry, "fulltext"))
 				os << " [[" << get(entry, "fulltext") << "|full text]].";
 			os << endl;

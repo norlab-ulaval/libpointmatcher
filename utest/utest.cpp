@@ -201,6 +201,7 @@ TEST(icpTest, icpIdentity)
 {
 	// Here we test point-to-plane ICP where we expect the output transform to be 
 	// the identity. This situation requires special treatment in the algorithm.
+	const float epsilon = 0.0001;
 	
 	DP pts0 = DP::load(dataPath + "cloud.00000.vtk");
 	DP pts1 = DP::load(dataPath + "cloud.00000.vtk");
@@ -214,8 +215,8 @@ TEST(icpTest, icpIdentity)
 
 	// Compute current ICP transform
 	PM::TransformationParameters curT = icp(pts0, pts1);
-    
-	EXPECT_EQ(curT, PM::Matrix::Identity(4,4)) << "Expecting identity transform." << endl;
+
+	EXPECT_TRUE(curT.isApprox(PM::Matrix::Identity(4, 4), epsilon)) << "Expecting identity transform." << endl;
 }
 
 TEST(icpTest, similarityTransform)

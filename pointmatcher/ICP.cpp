@@ -64,7 +64,8 @@ InvalidModuleType::InvalidModuleType(const std::string& reason):
 template<typename T>
 PointMatcher<T>::ICPChainBase::ICPChainBase():
 	prefilteredReadingPtsCount(0),
-	prefilteredReferencePtsCount(0)
+	prefilteredReferencePtsCount(0),
+	maxNumIterationsReached(false)
 {}
 
 //! virtual desctructor
@@ -177,6 +178,13 @@ template<typename T>
 unsigned PointMatcher<T>::ICPChainBase::getPrefilteredReferencePtsCount() const
 {
 	return prefilteredReferencePtsCount;
+}
+
+//! Return the flag that informs if we reached the maximum number of iterations during the last iterative process
+template<typename T>
+bool PointMatcher<T>::ICPChainBase::getMaxNumIterationsReached() const
+{
+	return maxNumIterationsReached;
 }
 
 //! Instantiate modules if their names are in the YAML file
@@ -399,6 +407,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	TransformationParameters T_iter = Matrix::Identity(dim, dim);
 	
 	bool iterate(true);
+	this->maxNumIterationsReached = false;
 	this->transformationCheckers.init(T_iter, iterate);
 
 	size_t iterationCount(0);
@@ -460,8 +469,15 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		//	stepReading, reference, outlierWeights, matches);
 		
 		// in test
-		
-		this->transformationCheckers.check(T_iter, iterate);
+		try
+		{
+			this->transformationCheckers.check(T_iter, iterate);
+		}
+		catch(const typename TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached & e)
+		{
+			iterate = false;
+			this->maxNumIterationsReached = true;
+		}
 	
 		++iterationCount;
 	}

@@ -10,16 +10,16 @@
 If you are used to development project, here is what you need:
 
 
-| Name   | Link | Version <br> (Tested March 29, 2014)|
+| Name   | Link | Version <br> (Tested December 29, 2018)|
 | ------ | ---- | ------------- |
-| Windows |     | 7              |
-|  git | <http://windows.github.com/> | v1.0 |
-|  libpointmatcher sources   | <https://github.com/ethz-asl/libpointmatcher> | |
+| Windows |  | 10 |
+|  git | <https://git-scm.com/> | v2.20.1 |
+|  libpointmatcher sources | <https://github.com/ethz-asl/libpointmatcher> |  |
 | libnabo sources | <https://github.com/ethz-asl/libnabo> |  |
-| Visual Studio |  <http://www.microsoft.com/visualstudio/eng/downloads>  | Visual Studio 2012 Express for Windows Desktop |
-| CMake | <http://www.cmake.org/cmake/resources/software.html> | cmake-2.8.11.2-win32-x86.exe|
-| Eigen 3 | <http://eigen.tuxfamily.org/index.php?title=Main_Page#Download>  |v3.2.0 |
-| Boost | <http://www.boost.org/users/download/> | v1.54.0 |
+| Visual Studio |  <https://visualstudio.microsoft.com/>  | Visual Studio 2017 15.9.4 |
+| CMake | <https://cmake.org/> | v3.13.2 |
+| Eigen 3 | <http://eigen.tuxfamily.org/index.php> | v3.3.7 |
+| Boost | <https://www.boost.org/> | v1.69.0 |
 
 The rest of this tutorial will guide you through the different requirements step by step.
 
@@ -28,20 +28,22 @@ The rest of this tutorial will guide you through the different requirements step
 1. Go to your Boost source directory, and do:
 
     ```
-    $ bootstrap
-    $ b2 install --prefix=build address-model=64
+    $ .\bootstrap.bat
+    $ .\b2.exe install --prefix=build address-model=64
     ```
 
 1. It may take a while to finish.
 
 
 ### Build libnabo
+You may need to install grep to build libnabo. You can get the Windows version [here](http://gnuwin32.sourceforge.net/packages/grep.htm).
+
 1. Start **CMake GUI**
 
 1. Add the path of your libnabo source folder in the field _Where is the source code_.
 1. Add a folder named build in the field _Where to build the binary_. This will allow you to do out-of-source compilation.
 1. Click on the button Configure
-    1. Select the generator for the project (Visual Studio 11 Win 64)
+    1. Select the generator for the project (Visual Studio 15 2017 Win64)
     1. Typically you will select "Use default native compilers" for the generator
     1. Click "Finish"
     1. An error will be reported, because CMake does not know yet where to find the libraries. The next steps will tell it where to find them.
@@ -54,12 +56,12 @@ The rest of this tutorial will guide you through the different requirements step
 
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
 
-1. Click on the button Configure again, then on Generate. Here is an example of what your CMake should look like:
+1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
 
 	![alt text](images/win_cmake_libnabo.png "CMake libnabo")
 
 
-1. Locate the Microsoft Visual Studio Solution file (libnabo.sln) in the your build folder and open it. Visual Studio should open.
+1. Locate the Microsoft Visual Studio Solution file (libnabo.sln) in your build folder and open it. Visual Studio should open.
 
 1. Build the solution: BUILD -> Build Solution
 
@@ -75,23 +77,17 @@ The rest of this tutorial will guide you through the different requirements step
 ### Build libpointmatcher
 1. Start **CMake GUI**, follow the same steps to configure the source and build folders for _libpointmatcher_, then click the Configure button.
 
-1. Add the following boolean variable and set it to true: Boost_USE_STATIC_LIBS
+1. Locate _your eigen folder_ in the field **EIGEN_INCLUDE_DIR**
 
-1. Add the following PATH variable and set it to _(your Boost folder)_/build: BOOST_ROOT
+1. Add the following boolean variable and set it to `true`: **Boost_USE_STATIC_LIBS**
+
+1. Add the following PATH variable and set it to _(your Boost folder)_/build: **BOOST_ROOT**
+
+1. Add the following PATH variable and set it to _(your libnabo source folder)_: **NABO_INCLUDE_DIR**
+
+1. Add the following FILEPATH variable and set it to _(your libnabo source folder)_/build/RelWithDebInfo/nabo.lib: **NABO_LIBRARY**
 
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
-
-1. You will need to manually add and set the following variables:
-
-    - **EIGEN_INCLUDE_DIR** (PATH type) to _(your eigen source folder)_
-    - **NABO_INCLUDE_DIR** (PATH type) to _(your libnabo source folder)_
-    - **NABO_LIBRARY** (FILEPATH type) to _(your libnabo source folder)_/build/RelWithDebInfo/nabo.lib
-    - **libnabo_DIR** will automatically be set to your libnabo build folder
-    - **yaml-cpp_INCLUDE_DIRS** (PATH type) to _(your yaml-cpp source folder)_
-    - **yaml-cpp_LIBRARIES** (FILEPATH type) to _(your yaml-cpp source folder)_/build/RelWithDebInfo/libyaml-cppmd.lib
-    - **GTEST_INCLUDE_DIR** (PATH type) to _(your gtest source folder)_
-    - **GTEST_LIBRARY** (FILEPATH type) to _(your gtest source folder)_/build/RelWithDebInfo/gtest.lib
-    - **GTEST_MAIN_LIBRARY** (FILEPATH type) to _(your gtest source folder)_/build/RelWithDebInfo/gtest_main.lib
 
 1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
 

@@ -69,7 +69,10 @@ void TransformationCheckersImpl<T>::CounterTransformationChecker::check(const Tr
 	//cerr << parameters << endl;
 	
 	if (this->conditionVariables(0) >= this->limits(0))
+	{
 		iterate = false;
+		throw MaxNumIterationsReached();
+	}
 }
 
 template struct TransformationCheckersImpl<float>::CounterTransformationChecker;
