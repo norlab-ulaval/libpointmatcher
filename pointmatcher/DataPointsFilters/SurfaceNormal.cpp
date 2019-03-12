@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Constructor
 template<typename T>
 SurfaceNormalDataPointsFilter<T>::SurfaceNormalDataPointsFilter(const Parameters& params):
-	PointMatcher<T>::DataPointsFilter("SurfaceNormalDataPointsFilter", 
+	PointMatcher<T>::DataPointsFilter("SurfaceNormalDataPointsFilter",
 		SurfaceNormalDataPointsFilter::availableParameters(), params),
 	knn(Parametrizable::get<int>("knn")),
 	maxDist(Parametrizable::get<T>("maxDist")),
@@ -68,7 +68,7 @@ SurfaceNormalDataPointsFilter<T>::SurfaceNormalDataPointsFilter(const Parameters
 
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints 
+typename PointMatcher<T>::DataPoints
 SurfaceNormalDataPointsFilter<T>::filter(
 	const DataPoints& input)
 {
@@ -87,7 +87,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 	typedef typename DataPoints::Labels Labels;
 	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
 	typedef typename PointMatcher<T>::Matches Matches;
-	
+
 	using namespace PointMatcherSupport;
 
 	const int pointsCount(cloud.features.cols());
@@ -154,7 +154,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 	boost::assign::insert(param) ( "knn", toParam(knn) );
 	boost::assign::insert(param) ( "epsilon", toParam(epsilon) );
 	boost::assign::insert(param) ( "maxDist", toParam(maxDist) );
-	
+
 	KDTreeMatcher matcher(param);
 	matcher.init(cloud);
 
@@ -245,7 +245,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 				(*meanDists)(0, i) = (point - mean).norm();
 			}
 		}
-		
+
 	}
 
 	if(keepMatchedIds)
