@@ -54,7 +54,8 @@ SurfaceCovarianceDataPointsFilter<T>::SurfaceCovarianceDataPointsFilter(const Pa
 																		SurfaceCovarianceDataPointsFilter::availableParameters(), params),
 	knn(Parametrizable::get<int>("knn")),
 	maxDist(Parametrizable::get<T>("maxDist")),
-	epsilon(Parametrizable::get<T>("epsilon"))
+	epsilon(Parametrizable::get<T>("epsilon")),
+	keepDensities(Parametrizable::get<bool>("keepDensities"))
 {
 }
 
@@ -85,6 +86,8 @@ void SurfaceCovarianceDataPointsFilter<T>::inPlaceFilter(
 	const int descDim(cloud.descriptors.rows());
 	const unsigned int labelDim(cloud.descriptorLabels.size());
 
+	boost::optional<View> densities;
+
 	// Validate descriptors and labels
 	int insertDim(0);
 	for(unsigned int i = 0; i < labelDim ; ++i)
@@ -95,12 +98,18 @@ void SurfaceCovarianceDataPointsFilter<T>::inPlaceFilter(
 	// Reserve memory for new descriptors
 	const size_t dimCovs((featDim-1) * (featDim-1));
 
+	if (keepDensities) {
+		cloud.allocateDescriptor("densities", 1);
+	}
 
 	if (!cloud.descriptorExists("covariances")) {
 		// Reserve memory
 		cloud.allocateDescriptor("covariances", dimCovs);
 		cloud.getDescriptorViewByName("covariances").setZero();
 	}
+
+	if (keepDensities)
+		densities = cloud.getDescriptorViewByName("densities");
 
 	View covariances = cloud.getDescriptorViewByName("covariances");
 
@@ -142,6 +151,12 @@ void SurfaceCovarianceDataPointsFilter<T>::inPlaceFilter(
 		const Vector covVec = Eigen::Map<Vector>(C.data(), dimCovs);
 		// We add together the previous matrix
 		covariances.col(i) += covVec.transpose();
+
+
+		if(keepDensities)
+		{
+			(*densities)(0, i) = computeDensity<T>(NN);
+		}
 
 	}
 

@@ -192,7 +192,7 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 			if ((matches.dists(y, x) != numeric_limits<T>::infinity()) && (matches.dists(y, x) > 0))
 				tmpSortedDist.push_back(matches.dists(y, x));
 	if (tmpSortedDist.size() == 0)
-		throw ConvergenceError("no outlier to filter");
+		throw ConvergenceError("optimizeInlierRatio(): no outlier to filter");
 			
 	std::sort(tmpSortedDist.begin(), tmpSortedDist.end());
 	std::vector<T> tmpCumSumSortedDist;

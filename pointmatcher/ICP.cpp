@@ -456,14 +456,15 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		this->inspector->dumpIteration(
 			iterationCount, T_refIn_refMean * T_iter * T_refMean_dataIn, reference, stepReading, matches, outlierWeights, this->transformationCheckers
 		);
-		
+
 		//-----------------------------
 		// Error minimization
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
 			stepReading, reference, outlierWeights, matches, penalties, T_iter * T_refMean_dataIn) * T_iter	;
-		
+
+		std::cout << "T_iter:" << std::endl << T_iter << std::endl;
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(
 		//	stepReading, reference, outlierWeights, matches);
@@ -610,7 +611,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 {
 	const int dim = cloudIn.features.rows();
 	const TransformationParameters identity = TransformationParameters::Identity(dim, dim);
-	return this->compute(cloudIn, identity);
+	return this->compute(cloudIn, identity, {});
 }
 
 //! Apply ICP to cloud cloudIn, with initial guess
@@ -618,13 +619,25 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew)
 {
-	return this->compute(cloudIn, T_dataInOld_dataInNew);
+	return this->compute(cloudIn, T_dataInOld_dataInNew, {});
+}
+
+
+//! Apply ICP to cloud cloudIn, with initial guess and penalties
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
+				const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew,
+				const Penalties& penalties)
+{
+	return this->compute(cloudIn, T_dataInOld_dataInNew, penalties);
 }
 
 //! Apply ICP to cloud cloudIn, with initial guess
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::compute(
-	const DataPoints& cloudIn, const TransformationParameters& T_refIn_dataIn)
+	const DataPoints& cloudIn,
+	const TransformationParameters& T_refIn_dataIn,
+	const Penalties& penalties)
 {
 	// initial keyframe
 	if (!hasMap())
@@ -636,7 +649,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	
 	this->inspector->init();
 	
-	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn);
+	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn, penalties);
 }
 
 template struct PointMatcher<float>::ICPSequence;

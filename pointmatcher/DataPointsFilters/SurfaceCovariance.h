@@ -63,13 +63,15 @@ struct SurfaceCovarianceDataPointsFilter: public PointMatcher<T>::DataPointsFilt
 		return {
 			{"knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned>},
 			{"maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>},
-			{"epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T>}
+			{"epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T>},
+			{"keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0"},
 		};
 	}
 	
 	const unsigned knn;
 	const T maxDist;
 	const T epsilon;
+	const bool keepDensities;
 
 SurfaceCovarianceDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~SurfaceCovarianceDataPointsFilter() {};
