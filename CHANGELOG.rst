@@ -2,6 +2,23 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.1 (2019-03-04)
+------------------
+* Added documentation for people using ROS.
+* Increased libnabo minimal version to 1.0.7.
+* Added interface to inform if maximum number of iterations was reached.
+* Fixed portability issue of the FileLogger.
+* Fixed unit tests on Windows.
+* Fixed parameter-less modules having 'unknown' as class name.
+* Updated Windows compilation tutorial.
+* Fixed compilation problems on Windows.
+* Fixed PointToPlan error residual.
+* Changed DOI resolver link in documentation.
+* Added validation for the input transformation matrix in ICP.cpp.
+* Removed duplication of PointToPoint compute in PointToPointWithCov.
+* Added the RemoveSensorBias filter.
+* Splitted ErrorMinimizersImpl.cpp into multiple files.
+
 1.3.0 (2018-10-26)
 ------------------
 * Removed some boost utilities supported by c++11
