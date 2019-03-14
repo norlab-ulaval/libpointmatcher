@@ -175,7 +175,7 @@ struct InspectorsImpl
 				{"dumpDataLinks", "dump data links at each iteration", "0" },
 				{"dumpReading", "dump the reading cloud at each iteration", "0"},
 				{"dumpReference", "dump the reference cloud at each iteration", "0"},
-				{"writeBinary", "write binary VTK files", "0"}
+				{"writeBinary", "write binary VTK files", "0"},
 				{"dumpReferenceOnlyFirstIter", "dump the reference cloud only for the first iteration", "0"}
 			};
 		}
