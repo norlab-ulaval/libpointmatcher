@@ -324,7 +324,8 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	penalties_refMean.reserve(penalties.size());
 	for (auto& penalty : penalties) {
 		Matrix tf = penalty.first;
-		tf.topRows(dim-1).colwise() -= meanReference.head(dim-1);
+//		tf.topRows(dim-1).colwise() -= meanReference.head(dim-1);
+		tf.topRightCorner(dim-1, 1) -= meanReference.head(dim-1);
 		const Matrix& cov = penalty.second;
 		penalties_refMean.push_back(std::make_pair(tf, cov));
 	}
@@ -464,7 +465,6 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		T_iter = this->errorMinimizer->compute(
 			stepReading, reference, outlierWeights, matches, penalties, T_iter * T_refMean_dataIn) * T_iter	;
 
-		std::cout << "T_iter:" << std::endl << T_iter << std::endl;
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(
 		//	stepReading, reference, outlierWeights, matches);
@@ -632,7 +632,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	return this->compute(cloudIn, T_dataInOld_dataInNew, penalties);
 }
 
-//! Apply ICP to cloud cloudIn, with initial guess
+//! Apply ICP to cloud cloudIn, with initial guess and penalties
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::compute(
 	const DataPoints& cloudIn,
@@ -646,10 +646,21 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		LOG_WARNING_STREAM("Ignoring attempt to perform ICP with an empty map");
 		return Matrix::Identity(dim, dim);
 	}
+
+	const size_t dim(mapPointCloud.features.rows());
+	// The penalties must be move to the refmean frame of reference
+	Penalties penalties_refMean;
+	penalties_refMean.reserve(penalties.size());
+	for (auto& penalty : penalties) {
+		Matrix tf = penalty.first;
+		tf.topRightCorner(dim-1, 1) -= T_refIn_refMean.block(0,dim-1, dim-1, 1);
+		const Matrix& cov = penalty.second;
+		penalties_refMean.push_back(std::make_pair(tf, cov));
+	}
 	
 	this->inspector->init();
 	
-	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn, penalties);
+	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn, penalties_refMean);
 }
 
 template struct PointMatcher<float>::ICPSequence;

@@ -87,10 +87,6 @@ typename PointToGaussianErrorMinimizer<T>::ErrorElements PointToGaussianErrorMin
 	mPts.reading.conservativeResize(newSize);
 	mPts.weights.conservativeResize(Eigen::NoChange, newSize + dim * nbPenalty);
 
-
-	std::cout << "mPts.reference:" << std::endl << mPts.reference.features.block(0, 0, 4, 300) << std::endl;
-	std::cout << "mPts.reading:" << std::endl << mPts.reading.features.block(0, 0, 4, 300) << std::endl;
-
 	if (!mPts.reference.descriptorExists("normals")) {
 		Labels cloudLabels;
 		cloudLabels.push_back(Label("normals", dim));
@@ -101,9 +97,8 @@ typename PointToGaussianErrorMinimizer<T>::ErrorElements PointToGaussianErrorMin
 	View normals = mPts.reference.getDescriptorViewByName("normals");
 	ConstView eigVectors = mPts_const.reference.getDescriptorViewByName("eigVectors");
 	ConstView eigValues = mPts_const.reference.getDescriptorViewByName("eigValues");
-	std::cout << "normals:" << std::endl << normals.block(0, 0, 3, 300) << std::endl;
 
-	if ((eigValues.array() != 0.0).any()) {
+	if ((eigValues.array() < 0.0).any()) {
 		throw ConvergenceError("PointToGaussian(): Some of the eigen values are negative.");
 	}
 	for (long i = 0; i < mPts_const.reference.features.cols(); ++i) {
@@ -116,10 +111,6 @@ typename PointToGaussianErrorMinimizer<T>::ErrorElements PointToGaussianErrorMin
 
 		// A eigen value of zero will have infinite weight.
 		assert((eigValues.col(i).array() != 0.0).any());
-		for (unsigned k = 0; k < dim; ++k) {
-			if (eigValues(k, i) < 0.0)
-				std::cout << "Eigval neg: " << eigValues.col(i) << std::endl;
-		}
 		mPts.weights.block(0, dim * i, 1, dim) = eigValues.col(i).array().inverse().transpose();
 	}
 
@@ -154,26 +145,16 @@ typename PointToGaussianErrorMinimizer<T>::ErrorElements PointToGaussianErrorMin
 			penaltiesNormals.block(0, dim * i, dim, dim) = eigenVec;
 
 			// The eigen value are the variance for each eigen vector.
-			mPts.weights.bottomRightCorner(1, dim) = eigenVal.diagonal().array().inverse().transpose();
+			// Untested
+			mPts.weights.block(0, newSize + dim * i, 1, dim) = eigenVal.diagonal().array().inverse().transpose();
 		}
 		const Labels normalLabel({Label("normals", dim)});
 		const DataPoints penaltiesReference(penaltiesPtsReference, mPts_const.reference.featureLabels, penaltiesNormals, normalLabel);
 		const DataPoints penaltiesRead(penaltiesPtsRead, mPts_const.reading.featureLabels);
 
-		std::cout << "before concat normals:" << std::endl << normals.block(0, 0, 3, 300) << std::endl;
-		std::cout << "before concat penaltiesNormals:" << std::endl << penaltiesNormals.block(0, 0, 3, 300) << std::endl;
 		mPts.reference.concatenate(penaltiesReference);
 		mPts.reading.concatenate(penaltiesRead);
 	}
-	std::cout << "end not normalize mPts.weights:" << std::endl << mPts.weights.block(0, 0, 1, 300) << std::endl;
-//	mPts.weights = mPts.weights.normalized();
-	std::cout << "end mPts.weights:" << std::endl << mPts.weights.block(0, 0, 1, 300) << std::endl;
-	std::cout << "end mPts.weights max:" << std::endl << mPts.weights.maxCoeff() << std::endl;
-	std::cout << "end mPts.weights mean:" << std::endl << mPts.weights.mean() << std::endl;
-	std::cout << "end mPts.weights min:" << std::endl << mPts.weights.minCoeff() << std::endl;
-	std::cout << "end mPts.reference:" << std::endl << mPts.reference.features.block(0, 0, 4, 300) << std::endl;
-	std::cout << "end mPts.reading:" << std::endl << mPts.reading.features.block(0, 0, 4, 300) << std::endl;
-	std::cout << "end normals:" << std::endl << normals.block(0, 0, 3, 300)  << std::endl;
 	return mPts;
 }
 
