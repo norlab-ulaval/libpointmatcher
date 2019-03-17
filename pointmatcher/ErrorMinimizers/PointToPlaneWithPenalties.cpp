@@ -67,6 +67,7 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithPenaltiesErro
 	const size_t dim(mPts_const.reference.features.rows() - 1);
 	const size_t nbPenalty(mPts_const.penalties.size());
 
+	mPts.weights = mPts.weights / mPts.weights.norm();
 	mPts.weights.conservativeResize(Eigen::NoChange, nbPenalty * dim + mPts.weights.cols());
 
 	// It's hard to add points with descriptor to a Datapoints, so we create a new Datapoints for the new points and then concatenate it
@@ -121,6 +122,32 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithPenaltiesErro
 	return out;
 }
 
+
+template<typename T>
+T PointToPlaneWithPenaltiesErrorMinimizer<T>::getResidualError(
+				const DataPoints& filteredReading,
+				const DataPoints& filteredReference,
+				const OutlierWeights& outlierWeights,
+				const Matches& matches,
+				const Penalties& penalties,
+				const TransformationParameters& T_refMean_iter) const
+{
+	assert(matches.ids.rows() > 0);
+
+	// Fetch paired points
+	typename ErrorMinimizer::ErrorElements mPts(filteredReading, filteredReference, outlierWeights, matches, penalties, T_refMean_iter);
+	mPts.weights.row(0) = mPts.weights.row(0) / mPts.weights.row(0).norm();
+	T pointToPlaneErr = PointToPlaneErrorMinimizer<T>::computeResidualError(mPts, false);
+
+	// HACK FSR 2019
+	T penalitiesErr = 0.0;
+	for (const Penalty& p: penalties) {
+		Vector e = T_refMean_iter.topRightCorner(3, 1) - p.first.topRightCorner(3, 1);
+		penalitiesErr += e.transpose() * p.second.transpose() * e;
+	}
+
+	return pointToPlaneErr + penalitiesErr;
+}
 
 template struct PointToPlaneWithPenaltiesErrorMinimizer<float>;
 template struct PointToPlaneWithPenaltiesErrorMinimizer<double>;

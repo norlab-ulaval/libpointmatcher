@@ -420,7 +420,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	LOG_INFO_STREAM("PointMatcher::icp - reading pre-processing took " << t.elapsed() << " [s]");
 	this->prefilteredReadingPtsCount = reading.features.cols();
 	t.restart();
-	
+
 	// iterations
 	while (iterate)
 	{
@@ -479,6 +479,13 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 			iterate = false;
 			this->maxNumIterationsReached = true;
 		}
+
+		if (!iterate) {
+			// HACK FSR 2019
+			double pointToPlan =  this->errorMinimizer->getResidualError(stepReading, reference, outlierWeights, matches, {}, T_iter * T_refMean_dataIn);
+			double penality =  this->errorMinimizer->getResidualError(stepReading, reference, outlierWeights, matches, penalties, T_iter * T_refMean_dataIn);
+			residuals = std::make_tuple(pointToPlan, penality);
+		}
 	
 		++iterationCount;
 	}
@@ -489,6 +496,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	this->inspector->addStat("OverlapRatio", this->errorMinimizer->getWeightedPointUsedRatio());
 	this->inspector->addStat("ConvergenceDuration", t.elapsed());
 	this->inspector->finish(iterationCount);
+
 	
 	LOG_INFO_STREAM("PointMatcher::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]");
 	

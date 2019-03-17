@@ -56,6 +56,7 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     typedef typename PointMatcher<T>::Vector Vector;
 		typedef typename PointMatcher<T>::Matrix Matrix;
 		typedef typename PointMatcher<T>::ErrorMinimizer::Penalties Penalties;
+		typedef typename PointMatcher<T>::ErrorMinimizer::Penalty Penalty;
 
 	virtual inline const std::string name()
 	{

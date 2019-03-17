@@ -57,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <ostream>
 #include <memory>
+#include <tuple>
 //#include <cstdint>
 #include <boost/cstdint.hpp>
 
@@ -729,6 +730,10 @@ struct PointMatcher
 
 		//! Return the filtered point cloud reading used in the ICP chain
 		const DataPoints& getReadingFiltered() const { return readingFiltered; }
+
+	public:
+		// HACK FSR 2019
+		std::tuple<double, double> residuals;
 
 	protected:
 		TransformationParameters computeWithTransformedReference(
