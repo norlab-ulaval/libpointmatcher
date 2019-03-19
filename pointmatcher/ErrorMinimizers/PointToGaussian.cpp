@@ -120,6 +120,7 @@ typename PointToGaussianErrorMinimizer<T>::ErrorElements PointToGaussianErrorMin
 		Matrix penaltiesPtsReference(dim + 1, nbPenalty * dim);
 		Matrix penaltiesNormals(dim, nbPenalty * dim);
 
+		Matrix location, cov, offset;
 		for (size_t i = 0; i < mPts_const.penalties.size(); ++i) {
 			// To minimize both the distances from the point cloud and the penalties at the same time we convert the penalties to fake pairs of point/normal.
 			// For each penalty n fake pairs of point/normal will be created, where n is the dimensions of the covariance.
@@ -130,14 +131,14 @@ typename PointToGaussianErrorMinimizer<T>::ErrorElements PointToGaussianErrorMin
 			// where L is a diagonal matrix of the eigen value and N is a rotation matrix.
 			// n1, n2, n3 are column vectors. The fake pairs will use these vectors as normal.
 			// For the fake points of the reference and the reading the translation part of penalty tf matrix and the current transformation matrix will be used respectively.
-			const auto &penalty = mPts_const.penalties[i];
-			const Eigen::EigenSolver<Matrix> solver(penalty.second);
+			std::tie(location, cov, offset) = mPts_const.penalties[i];
+			const Eigen::EigenSolver<Matrix> solver(cov);
 			const Matrix eigenVec = solver.eigenvectors().real();
 			const Vector eigenVal = solver.eigenvalues().real();
 	//		std::cout<< "Eigen Vector" << eigenVec << std::endl;
 	//		std::cout<< "Eigen Value" << eigenVal << std::endl;
 
-			const Vector transInRef(penalty.first.col(dim));
+			const Vector transInRef(location.col(dim));
 			const Vector transInRead((mPts_const.T_refMean_iter.col(dim)));
 
 			penaltiesPtsRead.block(0, dim * i, dim + 1, dim) = transInRead.replicate(1, dim);

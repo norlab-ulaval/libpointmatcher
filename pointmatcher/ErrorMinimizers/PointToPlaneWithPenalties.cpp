@@ -66,15 +66,17 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithPenaltiesErro
 	ErrorElements mPts = mPts_const;
 	const size_t dim(mPts_const.reference.features.rows() - 1);
 	const size_t nbPenalty(mPts_const.penalties.size());
+	const size_t nbPoints = mPts.weights.cols();
 
 	mPts.weights = mPts.weights / mPts.weights.norm();
-	mPts.weights.conservativeResize(Eigen::NoChange, nbPenalty * dim + mPts.weights.cols());
+	mPts.weights.conservativeResize(Eigen::NoChange, nbPenalty * dim + nbPoints);
 
 	// It's hard to add points with descriptor to a Datapoints, so we create a new Datapoints for the new points and then concatenate it
 	Matrix penaltiesPtsRead(dim + 1, nbPenalty * dim);
 	Matrix penaltiesPtsReference(dim + 1, nbPenalty * dim);
 	Matrix penaltiesNormals(dim, nbPenalty * dim);
 
+	Matrix location, cov, offset;
 	for (size_t i = 0; i < mPts_const.penalties.size(); ++i) {
 		// To minimize both the distances from the point cloud and the penalties at the same time we convert the penalties to fake pairs of point/normal.
 		// For each penalty n fake pairs of point/normal will be created, where n is the dimensions of the covariance.
@@ -85,22 +87,22 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithPenaltiesErro
 		// where L is a diagonal matrix of the eigen value and N is a rotation matrix.
 		// n1, n2, n3 are column vectors. The fake pairs will use these vectors as normal.
 		// For the fake points of the reference and the reading the translation part of penalty tf matrix and the current transformation matrix will be used respectively.
-		const auto &penalty = mPts_const.penalties[i];
-		const Eigen::EigenSolver<Matrix> solver(penalty.second);
+		std::tie(location, cov, offset) = mPts_const.penalties[i];
+		const Eigen::EigenSolver<Matrix> solver(cov);
 		const Matrix eigenVec = solver.eigenvectors().real();
 		const Vector eigenVal = solver.eigenvalues().real();
 //		std::cout<< "Eigen Vector" << eigenVec << std::endl;
 //		std::cout<< "Eigen Value" << eigenVal << std::endl;
 
-		const Vector transInRef(penalty.first.col(dim));
-		const Vector transInRead((mPts_const.T_refMean_iter.col(dim)));
+		const Vector transInRef(location.col(dim));
+		const Vector transInRead(mPts_const.T_refMean_iter * (offset).col(dim));
 
 		penaltiesPtsRead.block(0, dim * i, dim + 1, dim) = transInRead.replicate(1, dim);
 		penaltiesPtsReference.block(0, dim * i, dim + 1, dim) = transInRef.replicate(1, dim);
 		penaltiesNormals.block(0, dim * i, dim, dim) = eigenVec;
 
 		// The eigen value are the variance for each eigen vector.
-		mPts.weights.bottomRightCorner(1, dim) = eigenVal.diagonal().array().inverse().transpose();
+		mPts.weights.block(0, nbPoints + dim * i, 1, dim) = eigenVal.diagonal().array().inverse().transpose();
 //		std::cout<< "penaltiesNormals" << std::endl << penaltiesNormals << std::endl;
 //		std::cout<< "penaltiesPtsRead" << std::endl << penaltiesPtsRead << std::endl;
 
@@ -142,8 +144,8 @@ T PointToPlaneWithPenaltiesErrorMinimizer<T>::getResidualError(
 	// HACK FSR 2019
 	T penalitiesErr = 0.0;
 	for (const Penalty& p: penalties) {
-		Vector e = T_refMean_iter.topRightCorner(3, 1) - p.first.topRightCorner(3, 1);
-		penalitiesErr += e.transpose() * p.second.transpose() * e;
+		Vector e = T_refMean_iter.topRightCorner(3, 1) - std::get<0>(p).topRightCorner(3, 1);
+		penalitiesErr += e.transpose() * std::get<1>(p).transpose() * e;
 	}
 
 	return pointToPlaneErr + penalitiesErr;

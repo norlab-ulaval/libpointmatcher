@@ -523,7 +523,8 @@ struct PointMatcher
 	{
 		typedef Matrix Location;   //!< Where the estimation should converge, in most case it should be the initial estimate
 		typedef Matrix Covariance; //!< Covariance related to the certitude in the Location
-		typedef std::pair<Location, Covariance> Penalty;
+		typedef Matrix Offset;   //!< Position of the Location inside of the reading, in most case this is identity
+		typedef std::tuple<Location, Covariance, Offset> Penalty;
 		typedef std::vector<Penalty, Eigen::aligned_allocator<Penalty> > Penalties;
 
 		//! A structure holding data ready for minimization. The data are "normalized", for instance there are no points with 0 weight, etc.

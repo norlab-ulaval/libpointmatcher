@@ -65,6 +65,7 @@ typename PointMatcher<T>::TransformationParameters PointToPointWithPenaltiesErro
 	if (nbPenalty > 0) {
 		const T pointsWeightSum = mPts_const.weights.sum();
 		T penaltiesWeightSum = 0;
+		Matrix location, cov, offset;
 		for (size_t i = 0; i < mPts_const.penalties.size(); ++i) {
 			// To minimize both the distances from the point cloud and the penalties at the same time we convert the penalties to fake points.
 			// These fake points will have a weight corresponding to a element in the covariance's diagonal.
@@ -84,9 +85,9 @@ typename PointMatcher<T>::TransformationParameters PointToPointWithPenaltiesErro
 			//            [ 0  0 tz]
 			// where [tx, ty, tz] is the translation part of the transformation matrix at the current iteration (T_refMean_iter).
 			// Note: for this hack to works the covariance matrix must be diagonal and penalties must be only in translation.
-			const auto &penalty = mPts_const.penalties[i];
+			std::tie(location, cov, offset) =  mPts_const.penalties[i];
 			// Take translation part of the penalty's transformation matrix and create a diagonal matrix with it
-			Matrix transInRef(penalty.first.col(dim).asDiagonal());
+			Matrix transInRef(location.col(dim).asDiagonal());
 
 			// We must move the reading origin [0, 0, 0], we extract the translation part of the reading's tf,
 			// since apply a tf on a zero vector is the same as extracting the translation part of the tf.
@@ -95,7 +96,7 @@ typename PointMatcher<T>::TransformationParameters PointToPointWithPenaltiesErro
 			transInRef.row(dim).setOnes();
 			transInRead.row(dim).setOnes();
 			// Convert sigma on the covariance matrix diagonal to 1/sigma
-			const Vector penaltiesWeight = penalty.second.diagonal().array().inverse().matrix();
+			const Vector penaltiesWeight = cov.diagonal().array().inverse().matrix();
 			mPts.reference.features.block(0, refSize + dim * i, dim, dim) = transInRef;
 			mPts.reading.features.block(0, readSize + dim * i, dim, dim) = transInRead;
 			mPts.weights.block(0, readSize + dim * i, 1, dim) = penaltiesWeight.transpose();

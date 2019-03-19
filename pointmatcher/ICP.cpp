@@ -323,11 +323,11 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	Penalties penalties_refMean;
 	penalties_refMean.reserve(penalties.size());
 	for (auto& penalty : penalties) {
-		Matrix tf = penalty.first;
-//		tf.topRows(dim-1).colwise() -= meanReference.head(dim-1);
+		Matrix tf = std::get<0>(penalty);
+		const Matrix& cov = std::get<1>(penalty);
+		const Matrix offset = std::get<2>(penalty);
 		tf.topRightCorner(dim-1, 1) -= meanReference.head(dim-1);
-		const Matrix& cov = penalty.second;
-		penalties_refMean.push_back(std::make_pair(tf, cov));
+		penalties_refMean.push_back(std::make_tuple(tf, cov, offset));
 	}
 	
 	// Init matcher with reference points center on its mean
@@ -373,14 +373,20 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 											  "Where N is the number of rows in the read/reference scans.");
 	}
 
+	Matrix tf, cov, offset;
 	for (auto& penalty : penalties) {
-		if (penalty.first.cols() != dim || penalty.first.rows() != dim) {
+		std::tie(tf, cov, offset) = penalty;
+		if (tf.cols() != dim || tf.rows() != dim) {
 			throw runtime_error("The transformation matrix of each penalty must must be NxN. "
 													"Where N is the number of rows in the read/reference scans.");
 		}
-		if (penalty.second.cols() != dim - 1 || penalty.second.rows() != dim - 1) {
+		if (cov.cols() != dim - 1 || cov.rows() != dim - 1) {
 			throw runtime_error("The covariance matrix of each penalty must must be NxN. "
 													"Where N+1 is the number of rows in the read/reference scans.");
+		}
+		if (offset.cols() != dim || offset.rows() != dim) {
+			throw runtime_error("The covariance matrix of each penalty must must be NxN. "
+													"Where N is the number of rows in the read/reference scans.");
 		}
 	}
 
@@ -660,10 +666,11 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 	Penalties penalties_refMean;
 	penalties_refMean.reserve(penalties.size());
 	for (auto& penalty : penalties) {
-		Matrix tf = penalty.first;
+		Matrix tf = std::get<0>(penalty);
+		const Matrix& cov = std::get<1>(penalty);
+		const Matrix offset = std::get<2>(penalty);
 		tf.topRightCorner(dim-1, 1) -= T_refIn_refMean.block(0,dim-1, dim-1, 1);
-		const Matrix& cov = penalty.second;
-		penalties_refMean.push_back(std::make_pair(tf, cov));
+		penalties_refMean.push_back(std::make_tuple(tf, cov, offset));
 	}
 	
 	this->inspector->init();
