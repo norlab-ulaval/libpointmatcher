@@ -40,22 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "utils.h"
 
-/*!
- * \class octree.h
- * \brief Octree class for DataPoints spatial representation
- *
- * \author Mathieu Labussiere (<mathieu dot labu at gmail dot com>)
- * \date 24/05/2018
- * \version 0.1
- *
- * \date 01/06/2018
- * \version 0.2
- *
+/*
  * Octree/Quadtree implementation for decomposing point cloud. 
  * The current implementation use the data structure PointMatcher<T>::DataPoints. 
- * It ensures that each node has either (8/4) or 0 childs. 
+ * It ensures that each node has either (8/4) or 0 children.
  *
- * Can create an octree with the 2 following crieterions:
+ * Can create an octree with the 2 following criteria:
  *	- max number of data by node
  *	- max size of a node (or stop when only one or zero data element is available)
  *
@@ -70,7 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Remark:
  *	- Current implementation only store the indexes of the points from the pointcloud.
  *	- Data element are exclusively contained in leaves node.
- *	- Some leaves node contains no data (to ensure (8/4) or 0 childs).
+ *	- Some leaves node contains no data (to ensure (8/4) or 0 children).
  *
  */
 
@@ -79,10 +69,10 @@ class Octree_
 {
 public:		
 	using PM = PointMatcher<T>;
-	using DP = typename PM::DataPoints; /**/
-	using Id = typename DP::Index; /**/
+	using DP = typename PM::DataPoints;
+	using Id = typename DP::Index;
 	
-	using Data = typename DP::Index; /**/
+	using Data = typename DP::Index;
 	using DataContainer = std::vector<Data>;
 	
 	using Point = Eigen::Matrix<T,dim,1>;
@@ -133,8 +123,8 @@ public:
 	bool isRoot() const;
 	bool isEmpty()const;
 	
-	inline std::size_t idx(const Point& pt) const;
-	inline std::size_t idx(const DP& pts, const Data d) const;
+	inline std::size_t childIdx(const Point& pt) const;
+	inline std::size_t childIdx(const DP& pts, const Data d) const;
 	
 	std::size_t getDepth() const;
 	
@@ -145,21 +135,20 @@ public:
 	Octree_<T, dim>* operator[](std::size_t idx);
 	
 	// Build tree from DataPoints with a specified stop parameter
-	bool build(const DP& pts, size_t maxDataByNode=1, T maxSizeByNode=T(0.), bool parallelBuild=false);
+	void build(const DP& pts, size_t maxDataByNode=1, T maxSizeByNode=T(0.), bool parallelBuild=false);
 
 protected:
 	//real build function
-	bool build(const DP& pts, DataContainer&& datas, BoundingBox&& bb, size_t maxDataByNode=1, T maxSizeByNode=T(0.), bool parallelBuild=false);
+	void build(const DP& pts, DataContainer&& ptsData, BoundingBox&& bb, size_t maxDataByNode=1, T maxSizeByNode=T(0.), bool parallelBuild=false);
 	
-	inline DataContainer toData(const DP& pts, const std::vector<Id>& ids);
+	inline DataContainer toData(const std::vector<Id>& ids);
 	
 public:	
 	template < typename Callback >
-	bool visit(Callback& cb);
+	void visit(Callback& cb);
 };
 	
 #include "octree.hpp"
 
 template<typename T> using Quadtree = Octree_<T,2>;
 template<typename T> using Octree = Octree_<T,3>;
-

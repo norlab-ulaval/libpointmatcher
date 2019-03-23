@@ -39,54 +39,51 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Define Visitor classes to apply processing
 template<typename T>
 OctreeGridDataPointsFilter<T>::FirstPtsSampler::FirstPtsSampler(DataPoints& dp) 
-	: idx{0}, pts(dp) 
+	: idx{0}, pts(dp)
 {
 }
 
 template <typename T>
 template<std::size_t dim>
-bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree_<T,dim>& oc)
+void OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
-	{			
+	{
 		auto* data = oc.getData();	
 		const auto& d = (*data)[0];
 		
 		std::size_t j = d;
 		
 		//retrieve index from lookup table if sampling in already switched element
-		if(std::size_t(d)<idx)
+		if(std::size_t(d) < idx)
+		{
 			j = mapidx[d];
-			
-		//Switch columns j and idx
+		}
+		
 		pts.swapCols(idx, j);
-				
-		//Maintain new index position	
+		
+		//Maintain new index position
 		mapidx[idx] = j;
-		//Update index
-		++idx;		
+		
+		++idx;
 	}
-	
-	return true;
 }
  
 template <typename T>
-bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::finalize()
+void OctreeGridDataPointsFilter<T>::FirstPtsSampler::finalize()
 {
-	//Resize point cloud
 	pts.conservativeResize(idx);
-	//Reset param
+	
 	idx=0;
-	return true;
 }
 
-
 template<typename T>
-OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(DataPoints& dp) 
+OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(DataPoints& dp)
 	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}, seed{1}
 {
 	std::srand(seed);
 }
+
 template<typename T>
 OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(
 	DataPoints& dp, const std::size_t seed_
@@ -94,9 +91,10 @@ OctreeGridDataPointsFilter<T>::RandomPtsSampler::RandomPtsSampler(
 {
 	std::srand(seed);
 }
+
 template<typename T>
 template<std::size_t dim>
-bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree_<T,dim>& oc)
+void OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{			
@@ -105,35 +103,32 @@ bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::operator()(Octree_<T,dim>&
 		const std::size_t randId = 
 			static_cast<std::size_t>( nbData * 
 				(static_cast<float>(std::rand()/static_cast<float>(RAND_MAX))));
-				
+		
 		const auto& d = (*data)[randId];
 		
 		std::size_t j = d;
 		
 		//retrieve index from lookup table if sampling in already switched element
-		if(std::size_t(d)<idx)
+		if(std::size_t(d) < idx)
+		{
 			j = mapidx[d];
-			
-		//Switch columns j and idx
-		pts.swapCols(idx, j);	
+		}
 		
-		//Maintain new index position	
+		pts.swapCols(idx, j);
+		
+		//Maintain new index position
 		mapidx[idx] = j;
-		//Update index
-		++idx;		
+		
+		++idx;
 	}
-	
-	return true;
 }
 	
 template<typename T>
-bool OctreeGridDataPointsFilter<T>::RandomPtsSampler::finalize()
+void OctreeGridDataPointsFilter<T>::RandomPtsSampler::finalize()
 {
-	bool ret = FirstPtsSampler::finalize();
-	//Reset seed
-	std::srand(seed);
+	FirstPtsSampler::finalize();
 	
-	return ret;			
+	std::srand(seed);
 }
 
 template<typename T>
@@ -141,13 +136,13 @@ OctreeGridDataPointsFilter<T>::CentroidSampler::CentroidSampler(DataPoints& dp)
 	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
 {
 }
-	
+
 template<typename T>
 template<std::size_t dim>
-bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& oc)
+void OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
-	{			
+	{
 		const int featDim(pts.features.rows());
 		const int descDim(pts.descriptors.rows());
 		const int timeDim(pts.times.rows());
@@ -155,133 +150,158 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 		auto* data = oc.getData();
 		const std::size_t nbData = (*data).size();
 			
-		const auto& d = (*data)[0]; //get first data
+		const auto& d = (*data)[0];
 		std::size_t j = d; //j contains real index of first point
 		
 		//retrieve index from lookup table if sampling in already switched element
-		if(std::size_t(d)<idx)
+		if(std::size_t(d) < idx)
+		{
 			j = mapidx[d];
+		}
 		
 		//We sum all the data in the first data
-		for(std::size_t id=1;id<nbData;++id)
+		for(std::size_t id = 1; id < nbData; ++id)
 		{
-			//get current idx
-			const auto& curId = (*data)[id];
-			std::size_t i = curId; //i contains real index
+			const auto& currentId = (*data)[id];
+			std::size_t i = currentId; //i contains real index
 			
 			//retrieve index from lookup table if sampling in already switched element
-			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
+			if(std::size_t(currentId) < idx)
+			{
+				i = mapidx[currentId];
+			}
 			
 			for (int f = 0; f < (featDim - 1); ++f)
-				pts.features(f,j) += pts.features(f,i);
+			{
+				pts.features(f, j) += pts.features(f, i);
+			}
 			
 			if (pts.descriptors.cols() > 0)
+			{
 				for (int d = 0; d < descDim; ++d)
-					pts.descriptors(d,j) += pts.descriptors(d,i);
+				{
+					pts.descriptors(d, j) += pts.descriptors(d, i);
+				}
+			}
 			
 			if (pts.times.cols() > 0)
+			{
 				for (int t = 0; t < timeDim; ++t)
-					pts.times(t,j) += pts.times(t,i);	
+				{
+					pts.times(t, j) += pts.times(t, i);
+				}
+			}
 		}
 		
 		// Normalize sums to get centroid (average)
 		for (int f = 0; f < (featDim - 1); ++f)
-			pts.features(f,j) /= T(nbData);
+		{
+			pts.features(f, j) /= T(nbData);
+		}
 		
 		if (pts.descriptors.cols() > 0)
+		{
 			for (int d = 0; d < descDim; ++d)
-				pts.descriptors(d,j) /= T(nbData);
+			{
+				pts.descriptors(d, j) /= T(nbData);
+			}
+		}
 		
 		if (pts.times.cols() > 0)
+		{
 			for (int t = 0; t < timeDim; ++t)
-				pts.times(t,j) /= T(nbData);	
-								
-		//Switch columns j and idx
+			{
+				pts.times(t, j) /= T(nbData);
+			}
+		}
+		
 		pts.swapCols(idx, j);
 		
-		//Maintain new index position	
+		//Maintain new index position
 		mapidx[idx] = j;
-		//Update index
-		++idx;		
+		
+		++idx;
 	}
-	
-	return true;
 }
 template<typename T>
-OctreeGridDataPointsFilter<T>::MedoidSampler::MedoidSampler(DataPoints& dp)  
+OctreeGridDataPointsFilter<T>::MedoidSampler::MedoidSampler(DataPoints& dp)
 	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
 {
 }
-	
+
 template<typename T>
 template<std::size_t dim>
-bool OctreeGridDataPointsFilter<T>::MedoidSampler::operator()(Octree_<T,dim>& oc)
+void OctreeGridDataPointsFilter<T>::MedoidSampler::operator()(Octree_<T,dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
-	{		
+	{
 		auto* data = oc.getData();
 		const std::size_t nbData = (*data).size();
-
-		auto dist = [](const typename Octree_<T,dim>::Point& p1, const typename Octree_<T,dim>::Point& p2) -> T {		
-				return (p1 - p2).norm();		
+		
+		auto dist = [](const typename Octree_<T,dim>::Point& p1, const typename Octree_<T,dim>::Point& p2) -> T {
+				return (p1 - p2).norm();
 			};
-			
+		
 		//Build centroid
 		typename Octree_<T,dim>::Point center;
-		for(std::size_t i=0;i<dim;++i) center(i)=T(0.);
-		
-		for(std::size_t id=0;id<nbData;++id)
+		for(std::size_t i = 0; i < dim; ++i)
 		{
-			//get current idx
-			const auto& curId = (*data)[id];
-			std::size_t i = curId; //i contains real index
+			center(i) = T(0.);
+		}
+		
+		for(std::size_t id = 0; id < nbData; ++id)
+		{
+			const auto& currentId = (*data)[id];
+			std::size_t i = currentId; //i contains real index
 			
 			//retrieve index from lookup table if sampling in already switched element
-			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
+			if(std::size_t(currentId) < idx)
+			{
+				i = mapidx[currentId];
+			}
 			
 			for (std::size_t f = 0; f < dim; ++f)
-				center(f) += pts.features(f,i);	
+			{
+				center(f) += pts.features(f, i);
+			}
 		}
-		for(std::size_t i=0;i<dim;++i) center(i)/=T(nbData);
+		for(std::size_t i = 0; i < dim; ++i)
+		{
+			center(i) /= T(nbData);
+		}
 		
 		//Get the closest point from the center 
 		T minDist = std::numeric_limits<T>::max();
 		std::size_t medId = 0;
 			
-		for(std::size_t id=0;id<nbData;++id)
+		for(std::size_t id = 0; id < nbData; ++id)
 		{
-			//get current idx
-			const auto curId = (*data)[id];
-			std::size_t i = curId; //i contains real index
+			const auto currentId = (*data)[id];
+			std::size_t i = currentId; //i contains real index
 			
 			//retrieve index from lookup table if sampling in already switched element
-			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
-				
-			const T curDist = dist(pts.features.col(i).head(dim), center);
-			if(curDist<minDist)
+			if(std::size_t(currentId) < idx)
 			{
-				minDist = curDist;
+				i = mapidx[currentId];
+			}
+				
+			const T currentDist = dist(pts.features.col(i).head(dim), center);
+			if(currentDist < minDist)
+			{
+				minDist = currentDist;
 				medId=i;
 			}
 		}
-				
-		//Switch columns j and idx
+		
 		pts.swapCols(idx, medId);
-	
-		//Maintain new index position	
+		
+		//Maintain new index position
 		mapidx[idx] = medId;
-	
-		//Update index
-		++idx;		
+		
+		++idx;
 	}
-
-	return true;
 }
 
-// OctreeGridDataPointsFilter
 template <typename T>
 OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& params) :
 	PointMatcher<T>::DataPointsFilter("OctreeGridDataPointsFilter", 
@@ -290,12 +310,12 @@ OctreeGridDataPointsFilter<T>::OctreeGridDataPointsFilter(const Parameters& para
 	maxPointByNode{Parametrizable::get<std::size_t>("maxPointByNode")},
 	maxSizeByNode{Parametrizable::get<T>("maxSizeByNode")}
 {
-	try 
+	try
 	{
 		const int sm = this->template get<int>("samplingMethod");
 		samplingMethod = SamplingMethod(sm);
 	}
-	catch (const InvalidParameter& e) 
+	catch (const InvalidParameter& e)
 	{
 		samplingMethod = SamplingMethod::FIRST_PTS;
 	}
@@ -317,11 +337,14 @@ void OctreeGridDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	
 	assert(featDim == 4 or featDim == 3);
 
-	if(featDim==3) //2D case
+	if(featDim == 3)
+	{
 		this->sample<2>(cloud);
-		
-	else if(featDim==4) //3D case
+	}
+	else if(featDim == 4)
+	{
 		this->sample<3>(cloud);
+	}
 }
 
 template<typename T>
@@ -343,7 +366,7 @@ void OctreeGridDataPointsFilter<T>::sample(DataPoints& cloud)
 		}
 		case SamplingMethod::RAND_PTS:
 		{
-			RandomPtsSampler sampler(cloud); //FIXME: add seed parameter
+			RandomPtsSampler sampler(cloud);
 			oc.visit(sampler);
 			sampler.finalize();
 			break;
@@ -364,7 +387,6 @@ void OctreeGridDataPointsFilter<T>::sample(DataPoints& cloud)
 		}
 	}
 }
-
 
 template struct OctreeGridDataPointsFilter<float>;
 template struct OctreeGridDataPointsFilter<double>;

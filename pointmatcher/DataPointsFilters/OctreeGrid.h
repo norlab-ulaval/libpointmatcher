@@ -39,21 +39,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_map>
 
-/*!
- * \class OctreeGridDataPointsFilter
- * \brief Data Filter based on Octree representation
- *
- * \author Mathieu Labussiere (<mathieu dot labu at gmail dot com>)
- * \date 24/05/2018
- * \version 0.1
- *
+/*
  * Processings are applyed via a Visitor through Depth-first search in the Octree (DFS)
  * i.e. for each node, the Visitor/Callback is called
  */
 template<typename T>
 struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
-  	// Type definitions
 	typedef PointMatcher<T> PM;
 	typedef typename PM::DataPoints DataPoints;
 	typedef typename PM::DataPointsFilter DataPointsFilter;
@@ -65,15 +57,13 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	typedef Parametrizable::ParametersDoc ParametersDoc;
 	typedef Parametrizable::InvalidParameter InvalidParameter;
 	
-	typedef typename DataPoints::Index Index;
-
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
-
+	
 	inline static const std::string description()
 	{
 		return "Construct an Octree grid representation of the point cloud. Constructed either by limiting the number of point in each octant or by limiting the size of the bounding box. Down-sample by taking either the first or a random point, or compute the centroid.";
 	}
-
+	
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
@@ -81,29 +71,29 @@ struct OctreeGridDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 			{"maxPointByNode", "Number of point under which the octree stop dividing.", "1", "1", "4294967295", &P::Comp<std::size_t>},
 			{"maxSizeByNode", "Size of the bounding box under which the octree stop dividing.", "0", "0", "+inf", &P::Comp<T>},
 			{"samplingMethod", "Method to sample the Octree: First Point (0), Random (1), Centroid (2) (more accurate but costly), Medoid (3) (more accurate but costly)", "0", "0", "3", &P::Comp<int>}
-		//FIXME: add seed parameter for the random sampling
 		};
 	}
-
+	
 public:
-//Visitors class to apply processing
+//Visitor classes to apply processing
 	struct FirstPtsSampler
 	{
 		std::size_t idx;
-		DataPoints&	pts;
-
+		DataPoints& pts;
+		
 		//Build map of (old index to new index), 
 		// in case we sample pts at the begining of the pointcloud
 		std::unordered_map<std::size_t, std::size_t> mapidx;
-
+		
 		FirstPtsSampler(DataPoints& dp);
 		virtual ~FirstPtsSampler(){}
 		
 		template<std::size_t dim>
-		bool operator()(Octree_<T,dim>& oc);
+		void operator()(Octree_<T,dim>& oc);
 		
-		virtual bool finalize();
+		virtual void finalize();
 	};
+	
 	struct RandomPtsSampler : public FirstPtsSampler
 	{
 		using FirstPtsSampler::idx;
@@ -111,16 +101,17 @@ public:
 		using FirstPtsSampler::mapidx;
 		
 		const std::size_t seed;
-	
+		
 		RandomPtsSampler(DataPoints& dp);
 		RandomPtsSampler(DataPoints& dp, const std::size_t seed_);
 		virtual ~RandomPtsSampler(){}
-	
-		template<std::size_t dim>
-		bool operator()(Octree_<T,dim>& oc);
 		
-		virtual bool finalize();
+		template<std::size_t dim>
+		void operator()(Octree_<T,dim>& oc);
+		
+		virtual void finalize();
 	};
+	
 	struct CentroidSampler : public FirstPtsSampler
 	{
 		using FirstPtsSampler::idx;
@@ -128,12 +119,13 @@ public:
 		using FirstPtsSampler::mapidx;
 		
 		CentroidSampler(DataPoints& dp);
-	
+		
 		virtual ~CentroidSampler(){}
-	
+		
 		template<std::size_t dim>
-		bool operator()(Octree_<T,dim>& oc);
+		void operator()(Octree_<T,dim>& oc);
 	};
+	
 	//Nearest point from the centroid (contained in the cloud)
 	struct MedoidSampler : public FirstPtsSampler
 	{
@@ -142,35 +134,29 @@ public:
 		using FirstPtsSampler::mapidx;
 		
 		MedoidSampler(DataPoints& dp);
-	
+		
 		virtual ~MedoidSampler(){}
-	
+		
 		template<std::size_t dim>
-		bool operator()(Octree_<T,dim>& oc);		
+		void operator()(Octree_<T,dim>& oc);
 	};
-
-//-------	
+	
 	enum SamplingMethod : int { FIRST_PTS=0, RAND_PTS=1, CENTROID=2, MEDOID=3 };
-
-//Atributes
+	
 	bool buildParallel;
 	
 	std::size_t maxPointByNode;
-	T           maxSizeByNode;
+	T maxSizeByNode;
 	
 	SamplingMethod samplingMethod;
-
-//Methods	
-	//Constructor, uses parameter interface
+	
 	OctreeGridDataPointsFilter(const Parameters& params = Parameters());
-
-	OctreeGridDataPointsFilter();
-	// Destr
-	virtual ~OctreeGridDataPointsFilter() {};
-
+	
+	virtual ~OctreeGridDataPointsFilter(){};
+	
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
-
+	
 private:
 	template<std::size_t dim> void sample(DataPoints& cloud);
 };
