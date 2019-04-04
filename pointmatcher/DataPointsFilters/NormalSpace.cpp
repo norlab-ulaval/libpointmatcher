@@ -49,7 +49,7 @@ NormalSpaceDataPointsFilter<T>::NormalSpaceDataPointsFilter(const Parameters& pa
 	nbSample{Parametrizable::get<std::size_t>("nbSample")},
 	seed{Parametrizable::get<std::size_t>("seed")},
 	epsilon{Parametrizable::get<T>("epsilon")},
-	nbBucket{std::size_t((2.0 * M_PI / epsilon) * (M_PI / epsilon))}
+	nbBucket{std::size_t(ceil(2.0 * M_PI / epsilon) * ceil(M_PI / epsilon))}
 {
 }
 
@@ -89,7 +89,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
 
 	//bucketed normal space
-	std::vector<std::vector<int> > idBuckets; //stock int so we can marked selected with -1
+	std::vector<std::vector<int> > idBuckets;
 	idBuckets.resize(nbBucket);
 	
 	std::vector<std::size_t> keepIndexes;
@@ -97,7 +97,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 	// Generate a random sequence of indices so that elements are placed in buckets in random order
 	std::vector<std::size_t> randIdcs(nbPoints);
-	std::iota(randIdcs.begin(), randIdcs.end(), 0); // 0-nbPoints  TODO is there a way to do this with a generator?
+	std::iota(randIdcs.begin(), randIdcs.end(), 0);
 	std::random_shuffle(randIdcs.begin(), randIdcs.end());
 
 	///(1) put all points of the data into buckets based on their normal direction
@@ -114,7 +114,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		//Phi = azimuthal angle in [0 ; 2pi]
 		const T phi = std::fmod(std::atan2(normals(1, randIdx), normals(0, randIdx)) + 2. * M_PI, 2. * M_PI);
 
-		// Catch normal space hasing errors
+		// Catch normal space hashing errors
 		assert(bucketIdx(theta, phi) < nbBucket);
 		idBuckets[bucketIdx(theta, phi)].push_back(randIdx);
 	}
@@ -168,7 +168,15 @@ template <typename T>
 std::size_t NormalSpaceDataPointsFilter<T>::bucketIdx(T theta, T phi) const
 {
 	//Theta = polar angle in [0 ; pi] and Phi = azimuthal angle in [0 ; 2pi]
-	return static_cast<std::size_t>(theta / epsilon) * static_cast<std::size_t>(2. * M_PI / epsilon) + static_cast<std::size_t>(phi / epsilon);
+	assert( (theta >= 0.0) && (theta <= static_cast<T>(M_PI)) && "Theta not in [0, Pi]");
+	assert( (phi >= 0) && (phi <= 2*static_cast<T>(M_PI)) && "Phi not in [0, 2Pi]");
+
+	// Wrap Theta at Pi
+	if (theta == static_cast<T>(M_PI)) { theta = 0.0; };
+	// Wrap Phi at 2Pi
+	if (phi == 2*static_cast<T>(M_PI)) { phi = 0.0; };
+	//                               block number           block size               element number
+	return static_cast<std::size_t>( floor(theta/epsilon) * ceil(2.0*M_PI/epsilon) + floor(phi/epsilon) );
 }
 
 template struct NormalSpaceDataPointsFilter<float>;
