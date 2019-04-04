@@ -48,7 +48,7 @@ NormalSpaceDataPointsFilter<T>::NormalSpaceDataPointsFilter(const Parameters& pa
 	nbSample{Parametrizable::get<std::size_t>("nbSample")},
 	seed{Parametrizable::get<std::size_t>("seed")},
 	epsilon{Parametrizable::get<T>("epsilon")},
-	nbBucket{std::size_t((2.0 * M_PI / epsilon) * (M_PI / epsilon))}
+	nbBucket{std::size_t(ceil(2.0 * M_PI / epsilon) * ceil(M_PI / epsilon))}
 {
 }
 
@@ -100,15 +100,20 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	///(1) put all points of the data into buckets based on their normal direction
 	for (int i = 0; i < nbPoints; ++i)
 	{
-		assert(normals.col(i).head(3).norm() > 0.99999);
-		
+		// Allow for slight approximiation errors
+		assert(normals.col(i).head(3).norm() >= 1.0-0.00001);
+		assert(normals.col(i).head(3).norm() <= 1.0+0.00001);
+		// Catch errors where theta will be NaN
+		assert((normals(2,i) <= 1.0) && (normals(2,i) >= -1.0));
+
 		//Theta = polar angle in [0 ; pi]
 		const T theta = std::acos(normals(2, i)); 
 		//Phi = azimuthal angle in [0 ; 2pi] 
 		const T phi = std::fmod(std::atan2(normals(1, i), normals(0, i)) + 2. * M_PI, 2. * M_PI);
-		
-		//assert(theta >= 0. and theta =< M_PI and phi >= 0. and phi <= 2.*M_PI);
-		
+
+		// Catch normal space hashing errors
+		assert(bucketIdx(theta, phi) < nbBucket);
+
 		idBuckets[bucketIdx(theta, phi)].push_back(i);
 	}
 	///(2) uniformly pick points from all the buckets until the desired number of points is selected
@@ -174,7 +179,15 @@ template <typename T>
 std::size_t NormalSpaceDataPointsFilter<T>::bucketIdx(T theta, T phi) const
 {
 	//Theta = polar angle in [0 ; pi] and Phi = azimuthal angle in [0 ; 2pi]
-	return static_cast<std::size_t>(theta / epsilon) * static_cast<std::size_t>(2. * M_PI / epsilon) + static_cast<std::size_t>(phi / epsilon);
+	assert( (theta >= 0.0) && (theta <= static_cast<T>(M_PI)) && "Theta not in [0, Pi]");
+	assert( (phi >= 0) && (phi <= 2*static_cast<T>(M_PI)) && "Phi not in [0, 2Pi]");
+
+	// Wrap Theta at Pi
+	if (theta == static_cast<T>(M_PI)) { theta = 0.0; };
+	// Wrap Phi at 2Pi
+	if (phi == 2*static_cast<T>(M_PI)) { phi = 0.0; };
+	//                               block number           block size               element number
+	return static_cast<std::size_t>( floor(theta/epsilon) * ceil(2.0*M_PI/epsilon) + floor(phi/epsilon) );
 }
 
 template struct NormalSpaceDataPointsFilter<float>;
