@@ -97,7 +97,7 @@ Once you have compiled libpointmatcher in step 6, you can simply open `/usr/loca
 ### 3. Installing libnabo
 libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/ethz-asl/libnabo).  Clone the source repository into a local directory of your choice.
 
-	mkdi r ~/Libraries/
+	mkdir ~/Libraries/
 	cd ~/Libraries
 	git clone git://github.com/ethz-asl/libnabo.git
 	cd libnabo
