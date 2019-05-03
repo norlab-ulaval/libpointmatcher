@@ -17,6 +17,3 @@ target_link_libraries(utest gtest pointmatcher ${CMAKE_THREAD_LIBS_INIT})
 
 add_test(utest ${CMAKE_CURRENT_BINARY_DIR}/utest --path "${CMAKE_SOURCE_DIR}/examples/data/")
 
-if (UNIX)
-	configure_file(CTestCustom.cmake ${CMAKE_BINARY_DIR})
-endif (UNIX)
