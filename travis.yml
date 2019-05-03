@@ -17,7 +17,6 @@ addons:
       - libboost-all-dev
       - libeigen3-dev
 
-
 install:
   - git clone git://github.com/ethz-asl/libnabo.git
   - cd libnabo
