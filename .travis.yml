@@ -31,4 +31,4 @@ script:
   - mkdir build && cd build
   - cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo  -DBUILD_TESTS=ON --build . ..
   - make -j2
-  - ctest
+  - ctest --verbose
