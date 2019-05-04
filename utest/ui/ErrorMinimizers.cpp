@@ -72,7 +72,7 @@ TEST_F(ErrorMinimizerTest, ErrorElements)
 	// Construct the point cloud from the generated matrices
 	DP request = DP(randFeat, featLabels, randDesc, descLabels, randTimes, timeLabels);
 	DP source =  DP(randFeat, featLabels, randDesc, descLabels, randTimes, timeLabels);
-	
+
 	// Fake Weights
 	PM::OutlierWeights weights = PM::OutlierWeights::Ones(1, nbPoints);
 
@@ -102,6 +102,7 @@ TEST_F(ErrorMinimizerTest, ErrorElements)
 	
 	// check time
 	EXPECT_EQ(mPts.reference.getTimeDim(), dimTime);
+	EXPECT_EQ(1, 0);
 
 }
 
