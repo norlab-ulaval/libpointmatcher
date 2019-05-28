@@ -25,7 +25,7 @@ To load an data filters configuration from a YAML file, use the `PointMatcher<T>
 
 ## Configuration of an ICP Chain
 
-![default config](images/default_icp_chain.png)
+![default config](images/default_icp_chain.svg)
 
 **Figure:** Modules comprising the default ICP chain
 
