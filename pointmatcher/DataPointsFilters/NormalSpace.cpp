@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <random>
 #include <ciso646>
 #include <cmath>
+#include <numeric>
 
 // NormalSpaceDataPointsFilter
 template <typename T>

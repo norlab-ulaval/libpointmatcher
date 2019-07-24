@@ -7,7 +7,7 @@ The following details the default configuration for ICP in libpointmatcher.
 
 |Figure 1: Default ICP chain configuration|
 |:------|
-|![Default ICP Chain Configuration](images/default_icp_chain.png)|
+|![Default ICP Chain Configuration](images/default_icp_chain.svg)|
 
 ## Data Filters
 Both the reference and reading clouds are processed with [random sampling](Datafilters.md#randomsamplinghead) filters.  These will sample each data point with a probability of 0.75 thus yielding smaller point clouds.
