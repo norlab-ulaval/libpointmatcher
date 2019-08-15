@@ -516,6 +516,28 @@ void PointMatcher<T>::ICPSequence::clearMap()
 	mapPointCloud = DataPoints();
 }
 
+template<typename T>
+void PointMatcher<T>::ICPSequence::setDefault()
+{
+	ICPChainBase::setDefault();
+	
+	if(mapPointCloud.getNbPoints() > 0)
+	{
+		this->matcher->init(mapPointCloud);
+	}
+}
+
+template<typename T>
+void PointMatcher<T>::ICPSequence::loadFromYaml(std::istream& in)
+{
+	ICPChainBase::loadFromYaml(in);
+	
+	if(mapPointCloud.getNbPoints() > 0)
+	{
+		this->matcher->init(mapPointCloud);
+	}
+}
+
 //! Return the map, in global coordinates (slow)
 template<typename T>
 const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getPrefilteredMap() const
