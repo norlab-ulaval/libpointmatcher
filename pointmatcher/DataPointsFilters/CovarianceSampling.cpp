@@ -55,7 +55,7 @@ CovarianceSamplingDataPointsFilter<T>::CovarianceSamplingDataPointsFilter(const 
 		const std::uint8_t tnm = this->template get<std::uint8_t>("torqueNorm");
 		normalizationMethod = TorqueNormMethod(tnm);
 	}
-	catch (const InvalidParameter& e) 
+	catch (const InvalidParameter&) 
 	{
 		normalizationMethod = TorqueNormMethod::Lavg;
 	}
