@@ -309,6 +309,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/InspectorsImpl.cpp
 #ErrorMinimizers
 	pointmatcher/ErrorMinimizers/PointToPlane.cpp
+	pointmatcher/ErrorMinimizers/PointToGaussian.cpp
 	pointmatcher/ErrorMinimizers/PointToPlaneWithCov.cpp
 	pointmatcher/ErrorMinimizers/PointToPoint.cpp
 	pointmatcher/ErrorMinimizers/PointToPointWithCov.cpp

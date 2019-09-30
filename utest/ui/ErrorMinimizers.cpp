@@ -46,6 +46,19 @@ TEST_F(ErrorMinimizerTest, PointToPlaneErrorMinimizer)
 	validate3dTransformation();
 }
 
+TEST_F(ErrorMinimizerTest, PointToGaussianErrorMinimizer)
+{
+	// The PointToGaussian required the eigen vectors and the eigen values
+	auto filter = PM::get().DataPointsFilterRegistrar.create("SamplingSurfaceNormalDataPointsFilter", 
+	                                                         {{"keepEigenValues", toParam(1)},
+	                                                          {"keepEigenVectors", toParam(1)}});
+	this->icp.referenceDataPointsFilters.clear();
+	this->icp.referenceDataPointsFilters.push_back(filter);
+	setError("PointToGaussianErrorMinimizer");
+	validate2dTransformation();
+	validate3dTransformation();
+}
+
 TEST_F(ErrorMinimizerTest, ErrorElements)
 {
 	const unsigned int nbPoints = 100;
