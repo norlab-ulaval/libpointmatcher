@@ -56,9 +56,29 @@ typedef Parametrizable::ParametersDoc ParametersDoc;
 template<typename T>
 PointToGaussianErrorMinimizer<T>::PointToGaussianErrorMinimizer(const Parameters& params):
 	PointToPlaneErrorMinimizer<T>(PointToGaussianErrorMinimizer::availableParameters(), params),
-	confidenceInPenalties(Parametrizable::get<T>("confidenceInPenalties")),
-	force2D(Parametrizable::get<bool>("force2D"))
+	//confidenceInPenalties(Parametrizable::get<T>("confidenceInPenalties")),
+	force2D(Parametrizable::get<bool>("force2D")),
+    force4DOF(Parametrizable::get<T>("force4DOF"))
 {
+	if(force2D)
+	{
+		if (force4DOF)
+		{
+			throw PointMatcherSupport::ConfigurationError("Force 2D cannot be used together with force4DOF.");
+		}
+		else
+		{
+			LOG_INFO_STREAM("PointMatcher::PointToGaussianErrorMinimizer - minimization will be in 2D.");
+		}
+	}
+	else if(force4DOF)
+	{
+		LOG_INFO_STREAM("PointMatcher::PointToGaussianErrorMinimizer - minimization will be in 4-DOF (yaw,x,y,z).");
+	}
+	else
+	{
+		LOG_INFO_STREAM("PointMatcher::PointToGaussianErrorMinimizer - minimization will be in full 6DOF.");
+	}
 }
 
 template<typename T>
