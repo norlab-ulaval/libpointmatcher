@@ -81,7 +81,8 @@ struct PointToPlaneWithCovErrorMinimizer: public PointToPlaneErrorMinimizer<T>
     PointToPlaneWithCovErrorMinimizer(const Parameters& params = Parameters());
     virtual TransformationParameters compute(const ErrorElements& mPts);
     virtual Matrix getCovariance() const;
-    Matrix estimateCovariance(const ErrorElements& mPts, const TransformationParameters& transformation);
+    Matrix estimateCovariance3d(const ErrorElements& mPts, const TransformationParameters& transformation);
+    Matrix estimateCovariance2d(const ErrorElements& mPts, const TransformationParameters& transformation);
 };
 
 #endif
