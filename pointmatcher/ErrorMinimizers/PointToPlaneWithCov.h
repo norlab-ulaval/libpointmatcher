@@ -81,6 +81,12 @@ struct PointToPlaneWithCovErrorMinimizer: public PointToPlaneErrorMinimizer<T>
     PointToPlaneWithCovErrorMinimizer(const Parameters& params = Parameters());
     virtual TransformationParameters compute(const ErrorElements& mPts);
     virtual Matrix getCovariance() const;
+
+    // Covariance has been calculated based on Censi's closed form ICP covariance
+    // This was expanded in detailed in the following work:
+    // "A Closed-form Estimate of 3D ICP Covariance" MVA2015 IAPR
+    // http://www.mva-org.jp/Proceedings/2015USB/papers/14-27.pdf
+    // https://github.com/saimanoj18/3d-icp-covariance
     Matrix estimateCovariance3d(const ErrorElements& mPts, const TransformationParameters& transformation);
     Matrix estimateCovariance2d(const ErrorElements& mPts, const TransformationParameters& transformation);
 };
