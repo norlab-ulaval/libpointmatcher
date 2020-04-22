@@ -131,25 +131,26 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 	for (int i = 0; i < pointsCount; ++i)
 	{
 	    // look at the three eigen values
-        Vector eigVec = eigValues.col(i);
+        Vector eig_vals_col = eigValues.col(i);
         // might be already sorted but sort anyway
-        std::sort(eigVec.data(),eigVec.data()+eigVec.size());
+        std::sort(eig_vals_col.data(),eig_vals_col.data()+eig_vals_col.size());
 
         // finally, evaluate the geometry
         T sphericality_val;
         T unstructureness_val;
         T structureness_val;
 
-        if (abs(eigVec(2)) < std::numeric_limits<T>::min() or
-            abs(eigVec(1)) < std::numeric_limits<T>::min())
+        //TODO: Is there a more suitable limit for considering the values almost-zero? (VK)
+        if (fabs(eig_vals_col(2)) < std::numeric_limits<T>::min() or
+            fabs(eig_vals_col(1)) < std::numeric_limits<T>::min())
         {
             sphericality_val = std::numeric_limits<T>::quiet_NaN();
             unstructureness_val = std::numeric_limits<T>::quiet_NaN();
             structureness_val = std::numeric_limits<T>::quiet_NaN();
         } else {
-            unstructureness_val = eigVec(0) / eigVec(2);
-            structureness_val =  (eigVec(1) / eigVec(2)) *
-                    ((eigVec(1) - eigVec(0)) / sqrt(eigVec(0)*eigVec(0) + eigVec(1)*eigVec(1)));
+            unstructureness_val = eig_vals_col(0) / eig_vals_col(2);
+            structureness_val =  (eig_vals_col(1) / eig_vals_col(2)) *
+                    ((eig_vals_col(1) - eig_vals_col(0)) / sqrt(eig_vals_col(0)*eig_vals_col(0) + eig_vals_col(1)*eig_vals_col(1)));
             sphericality_val = unstructureness_val - structureness_val;
         }
 
