@@ -58,40 +58,22 @@ struct GeometryDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 
 	inline static const std::string description()
 	{
-		return "This filter extracts the surface normal vector and other statistics to each point by taking the eigenvector corresponding to the smallest eigenvalue of its nearest neighbors.\n\n"
-		       "Required descriptors: none.\n"
-		       "Produced descritors:  normals(optional), densities(optional), eigValues(optional), eigVectors(optional), matchedIds (optional), meanDists(optional).\n"
+		return "This filter computes the level of ‘unstructureness’, ‘structureness’ and ’sphericality’ for each point based on the required eigen values.\n\n"
+		       "Required descriptors: eigValues (must be three).\n"
+		       "Produced descritors:  sphericality, unstructureness(optional), structureness(optional).\n"
 			   "Altered descriptors:  none.\n"
 			   "Altered features:     none.";
 	}
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
-			{"knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned>},
-			{"maxDist", "maximum distance to consider for neighbors", "inf", "0", "inf", &P::Comp<T>},
-			{"epsilon", "approximation to use for the nearest-neighbor search", "0", "0", "inf", &P::Comp<T>},
-			{"keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "1"},
-			{"keepDensities", "whether the point densities should be added as descriptors to the resulting cloud", "0"},
-			{"keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud", "0"},
-			{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud", "0"},
-			{"keepMatchedIds" , "whether the identifiers of matches points should be added as descriptors to the resulting cloud", "0"},
-			{"keepMeanDist" , "whether the distance to the nearest neighbor mean should be added as descriptors to the resulting cloud", "0"},
-			{"sortEigen" , "whether the eigenvalues and eigenvectors should be sorted (ascending) based on the eigenvalues", "0"},
-			{"smoothNormals", "whether the normal vector should be average with the nearest neighbors", "0"}
-		};
+			{"keepUnstructureness", "whether the value of the unstructureness should be added to the pointcloud", "0"},
+			{"keepStructureness", "whether the value of the structureness should be added to the pointcloud", "0"},
+			};
 	}
 	
-	const unsigned knn;
-	const T maxDist;
-	const T epsilon;
-	const bool keepNormals;
-	const bool keepDensities;
-	const bool keepEigenValues;
-	const bool keepEigenVectors;
-	const bool keepMatchedIds;
-	const bool keepMeanDist;
-	const bool sortEigen;
-	const bool smoothNormals;
+	const bool keepUnstructureness;
+	const bool keepStructureness;
 
     GeometryDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~GeometryDataPointsFilter() {};
