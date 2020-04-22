@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/format.hpp>
 
+
 #include "utils.h"
 
 // SurfaceNormalDataPointsFilter
@@ -79,13 +80,9 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 
-//	using namespace PointMatcherSupport;
-
 	const int pointsCount(cloud.features.cols());
-	//const int featDim(cloud.features.rows());
 	const int descDim(cloud.descriptors.rows());
 	const unsigned int labelDim(cloud.descriptorLabels.size());
-
 
 	// Check that the required eigenValue descriptor exists in the pointcloud
     if (!cloud.descriptorExists("eigValues"))
@@ -93,21 +90,12 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
         throw InvalidField("GeometryDataPointsFilter: Error, no eigValues found in descriptors.");
     }
 
-    // And that the dimension is correct
-    const View eigValues = cloud.getDescriptorViewByName("eigValues");
-    if (eigValues.rows() != 3)
-    {
-        throw InvalidField("GeometryDataPointsFilter: Error, the number of eigValues is not 3.");
-    }
-
-
     // Validate descriptors and labels
 	int insertDim(0);
 	for(unsigned int i = 0; i < labelDim ; ++i)
 		insertDim += cloud.descriptorLabels[i].span;
 	if (insertDim != descDim)
 		throw InvalidField("SurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
-
 
 	// Reserve memory for new descriptors
 	const int dimSphericality(1);
@@ -125,18 +113,23 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 	if (keepStructureness)
 		cloudLabels.push_back(Label("structureness", dimStructureness));
 
-	// Reserve memory
+    // Reserve memory
 	cloud.allocateDescriptors(cloudLabels);
 
 	// Get the views
+    const View eigValues = cloud.getDescriptorViewByName("eigValues");
+    if (eigValues.rows() != 3)  // And check the dimensions
+    {
+        throw InvalidField("GeometryDataPointsFilter: Error, the number of eigValues is not 3.");
+    }
+
 	sphericality = cloud.getDescriptorViewByName("sphericality");
 	if (keepUnstructureness)
 		unstructureness = cloud.getDescriptorViewByName("unstructureness");
 	if (keepStructureness)
 		structureness = cloud.getDescriptorViewByName("structureness");
 
-
-	// Iterate through the point cloud and evaluate the geometry
+    // Iterate through the point cloud and evaluate the geometry
 	for (int i = 0; i < pointsCount; ++i)
 	{
 	    // look at the three eigen values
@@ -144,12 +137,10 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
         // might be already sorted but sort anyway
         std::sort(eigVec.data(),eigVec.data()+eigVec.size());
 
-
         // finally, evaluate the geometry
         T sphericality_val;
         T unstructureness_val;
         T structureness_val;
-
 
         if (abs(eigVec(2)) < std::numeric_limits<T>::min() or
             abs(eigVec(1)) < std::numeric_limits<T>::min())
@@ -164,7 +155,6 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
             sphericality_val = unstructureness_val - structureness_val;
         }
 
-
         // store in the pointcloud
         (*sphericality)(0,i) = sphericality_val;
         if (keepUnstructureness)
@@ -173,7 +163,7 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
             (*structureness)(0,i) = structureness_val;
 
 	}
-
+	
 }
 
 template struct GeometryDataPointsFilter<float>;
