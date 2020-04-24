@@ -34,27 +34,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "Geometry.h"
 
-// Eigenvalues
-#include "Eigen/QR"
-#include "Eigen/Eigenvalues"
 
-#include "PointMatcherPrivate.h"
-#include "IO.h"
-#include "MatchersImpl.h"
-
-#include <boost/format.hpp>
-
-
-#include "utils.h"
-
-// SurfaceNormalDataPointsFilter
+// TODO: Rename properly
 // Constructor
 template<typename T>
 GeometryDataPointsFilter<T>::GeometryDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("GeometryDataPointsFilter",
-	        GeometryDataPointsFilter::availableParameters(), params),
-    keepUnstructureness(Parametrizable::get<int>("keepUnstructureness")),
-    keepStructureness(Parametrizable::get<T>("keepStructureness"))
+			GeometryDataPointsFilter::availableParameters(), params),
+			keepUnstructureness(Parametrizable::get<int>("keepUnstructureness")),
+			keepStructureness(Parametrizable::get<T>("keepStructureness"))
 {
 }
 
@@ -74,52 +62,52 @@ template<typename T>
 void GeometryDataPointsFilter<T>::inPlaceFilter(
 	DataPoints& cloud)
 {
+
 	typedef typename DataPoints::View View;
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 
-	const int pointsCount(cloud.features.cols());
-	const int descDim(cloud.descriptors.rows());
-	const unsigned int labelDim(cloud.descriptorLabels.size());
+	const size_t pointsCount(cloud.features.cols());
+	const size_t descDim(cloud.descriptors.rows());
+	const size_t labelDim(cloud.descriptorLabels.size());
 
 	// Check that the required eigenValue descriptor exists in the pointcloud
-    if (!cloud.descriptorExists("eigValues"))
-    {
-        throw InvalidField("GeometryDataPointsFilter: Error, no eigValues found in descriptors.");
-    }
+	if (!cloud.descriptorExists("eigValues"))
+	{
+		throw InvalidField("GeometryDataPointsFilter: Error, no eigValues found in descriptors.");
+	}
 
-    // Validate descriptors and labels
-	int insertDim(0);
+	// Validate descriptors and labels
+	size_t insertDim(0);
 	for(unsigned int i = 0; i < labelDim ; ++i)
 		insertDim += cloud.descriptorLabels[i].span;
 	if (insertDim != descDim)
 		throw InvalidField("SurfaceNormalDataPointsFilter: Error, descriptor labels do not match descriptor data");
 
 	// Reserve memory for new descriptors
-	const int dimSphericality(1);
-	const int dimUnstructureness(1);
-	const int dimStructureness(1);
+	const size_t unidimensionalDescriptorDimension(1);
+
 
 	boost::optional<View> sphericality;
 	boost::optional<View> unstructureness;
 	boost::optional<View> structureness;
 
 	Labels cloudLabels;
-	cloudLabels.push_back(Label("sphericality", dimSphericality));
+	cloudLabels.push_back(Label("sphericality", unidimensionalDescriptorDimension));
 	if (keepUnstructureness)
-		cloudLabels.push_back(Label("unstructureness", dimUnstructureness));
+		cloudLabels.push_back(Label("unstructureness", unidimensionalDescriptorDimension));
 	if (keepStructureness)
-		cloudLabels.push_back(Label("structureness", dimStructureness));
+		cloudLabels.push_back(Label("structureness", unidimensionalDescriptorDimension));
 
-    // Reserve memory
+	// Reserve memory
 	cloud.allocateDescriptors(cloudLabels);
 
 	// Get the views
-    const View eigValues = cloud.getDescriptorViewByName("eigValues");
-    if (eigValues.rows() != 3)  // And check the dimensions
-    {
-        throw InvalidField("GeometryDataPointsFilter: Error, the number of eigValues is not 3.");
-    }
+	const View eigValues = cloud.getDescriptorViewByName("eigValues");
+	if (eigValues.rows() != 3)  // And check the dimensions
+	{
+		throw InvalidField("GeometryDataPointsFilter: Error, the number of eigValues is not 3.");
+	}
 
 	sphericality = cloud.getDescriptorViewByName("sphericality");
 	if (keepUnstructureness)
@@ -127,44 +115,46 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 	if (keepStructureness)
 		structureness = cloud.getDescriptorViewByName("structureness");
 
-    // Iterate through the point cloud and evaluate the geometry
-	for (int i = 0; i < pointsCount; ++i)
+	// Iterate through the point cloud and evaluate the geometry
+	for (size_t i = 0; i < pointsCount; ++i)
 	{
-	    // look at the three eigen values
-        Vector eig_vals_col = eigValues.col(i);
-        // might be already sorted but sort anyway
-        std::sort(eig_vals_col.data(),eig_vals_col.data()+eig_vals_col.size());
+		// extract the three eigenvalues relevant to the current point
+		Vector eig_vals_col = eigValues.col(i);
+		// might be already sorted but sort anyway
+		std::sort(eig_vals_col.data(),eig_vals_col.data()+eig_vals_col.size());
 
-        // finally, evaluate the geometry
-        T sphericality_val;
-        T unstructureness_val;
-        T structureness_val;
+		// Finally, evaluate the geometry
+		T sphericalityVal;
+		T unstructurenessVal;
+		T structurenessVal;
 
-        //TODO: Is there a more suitable limit for considering the values almost-zero? (VK)
-        if (fabs(eig_vals_col(2)) < std::numeric_limits<T>::min() or
-            fabs(eig_vals_col(1)) < std::numeric_limits<T>::min())
-        {
-            sphericality_val = std::numeric_limits<T>::quiet_NaN();
-            unstructureness_val = std::numeric_limits<T>::quiet_NaN();
-            structureness_val = std::numeric_limits<T>::quiet_NaN();
-        } else {
-            unstructureness_val = eig_vals_col(0) / eig_vals_col(2);
-            structureness_val =  (eig_vals_col(1) / eig_vals_col(2)) *
-                    ((eig_vals_col(1) - eig_vals_col(0)) / sqrt(eig_vals_col(0)*eig_vals_col(0) + eig_vals_col(1)*eig_vals_col(1)));
-            sphericality_val = unstructureness_val - structureness_val;
-        }
+		// First, avoid division by zero
+		//TODO: Is there a more suitable limit for considering the values almost-zero? (VK)
+		if (fabs(eig_vals_col(2)) < std::numeric_limits<T>::min() or
+			fabs(eig_vals_col(1)) < std::numeric_limits<T>::min())
+		{
+			// If either the largest or the middle eigenvalue are zeros, these descriptors are not well defined (0/0)
+			sphericalityVal = std::numeric_limits<T>::quiet_NaN();
+			unstructurenessVal = std::numeric_limits<T>::quiet_NaN();
+			structurenessVal = std::numeric_limits<T>::quiet_NaN();
+		} else {
+			// Otherwise, follow eq.(1) from Kubelka V. et al., "Radio propagation models for differential GNSS based
+			// on dense point clouds", JFR, hopefully published in 2020
+			unstructurenessVal = eig_vals_col(0) / eig_vals_col(2);
+			structurenessVal =  (eig_vals_col(1) / eig_vals_col(2)) *
+				((eig_vals_col(1) - eig_vals_col(0)) / sqrt(eig_vals_col(0)*eig_vals_col(0) + eig_vals_col(1)*eig_vals_col(1)));
+			sphericalityVal = unstructurenessVal - structurenessVal;
+		}
 
-        // store in the pointcloud
-        (*sphericality)(0,i) = sphericality_val;
-        if (keepUnstructureness)
-            (*unstructureness)(0,i) = unstructureness_val;
-        if (keepStructureness)
-            (*structureness)(0,i) = structureness_val;
+		// store in the pointcloud
+		(sphericality.get())(0,i) = sphericalityVal;
+		if (keepUnstructureness)
+			(unstructureness.get())(0,i) = unstructurenessVal;
+		if (keepStructureness)
+			(structureness.get())(0,i) = structurenessVal;
 
 	}
-	
 }
 
 template struct GeometryDataPointsFilter<float>;
 template struct GeometryDataPointsFilter<double>;
-

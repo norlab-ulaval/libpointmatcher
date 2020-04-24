@@ -36,8 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
-#include <vector>
-
 //! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
 template<typename T>
 struct GeometryDataPointsFilter: public PointMatcher<T>::DataPointsFilter
