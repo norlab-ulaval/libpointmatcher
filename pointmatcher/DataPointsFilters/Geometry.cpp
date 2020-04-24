@@ -35,12 +35,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Geometry.h"
 
 
-// TODO: Rename properly
+/*
+ The SphericalityDataPointFilter estimates a heuristic value which indicates how much local geometry around
+ a given point resemble a plane or a sphere (uniform distribution). The value can lie in <-1,1> interval, -1 for
+ perfect plane, 1 for perfectly uniform distribution. The estimation is based on three eigenvalues coming from another
+ data points filter (this filter can operate only on 3D data). In the case the largest eigenvalue is zero, the filter
+ outputs NaNs. If the middle eigenvalue is zero and the largest one is non-zero, the filter outputs zeros.
+
+ Implemented by Vladimir Kubelka (kubelvla@gmail.com), NORLAB, Universite Laval, 2020
+*/
+
 // Constructor
 template<typename T>
-GeometryDataPointsFilter<T>::GeometryDataPointsFilter(const Parameters& params):
-	PointMatcher<T>::DataPointsFilter("GeometryDataPointsFilter",
-			GeometryDataPointsFilter::availableParameters(), params),
+SphericalityDataPointsFilter<T>::SphericalityDataPointsFilter(const Parameters& params):
+	PointMatcher<T>::DataPointsFilter("SphericalityDataPointsFilter",
+			SphericalityDataPointsFilter::availableParameters(), params),
 			keepUnstructureness(Parametrizable::get<int>("keepUnstructureness")),
 			keepStructureness(Parametrizable::get<T>("keepStructureness"))
 {
@@ -49,7 +58,7 @@ GeometryDataPointsFilter<T>::GeometryDataPointsFilter(const Parameters& params):
 // Compute
 template<typename T>
 typename PointMatcher<T>::DataPoints
-GeometryDataPointsFilter<T>::filter(
+SphericalityDataPointsFilter<T>::filter(
 	const DataPoints& input)
 {
 	DataPoints output(input);
@@ -59,7 +68,7 @@ GeometryDataPointsFilter<T>::filter(
 
 // In-place filter
 template<typename T>
-void GeometryDataPointsFilter<T>::inPlaceFilter(
+void SphericalityDataPointsFilter<T>::inPlaceFilter(
 	DataPoints& cloud)
 {
 
@@ -74,7 +83,7 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 	// Check that the required eigenValue descriptor exists in the pointcloud
 	if (!cloud.descriptorExists("eigValues"))
 	{
-		throw InvalidField("GeometryDataPointsFilter: Error, no eigValues found in descriptors.");
+		throw InvalidField("SphericalityDataPointsFilter: Error, no eigValues found in descriptors.");
 	}
 
 	// Validate descriptors and labels
@@ -88,8 +97,8 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 	const size_t unidimensionalDescriptorDimension(1);
 
 
-	boost::optional<View> sphericality;
-	boost::optional<View> unstructureness;
+	boost::optional<View> sphericality;         // these optionals may cause a compiler warning, but it is ok,
+	boost::optional<View> unstructureness;      // it is intended to be uninitialized
 	boost::optional<View> structureness;
 
 	Labels cloudLabels;
@@ -106,7 +115,7 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 	const View eigValues = cloud.getDescriptorViewByName("eigValues");
 	if (eigValues.rows() != 3)  // And check the dimensions
 	{
-		throw InvalidField("GeometryDataPointsFilter: Error, the number of eigValues is not 3.");
+		throw InvalidField("SphericalityDataPointsFilter: Error, the number of eigValues is not 3.");
 	}
 
 	sphericality = cloud.getDescriptorViewByName("sphericality");
@@ -115,7 +124,7 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 	if (keepStructureness)
 		structureness = cloud.getDescriptorViewByName("structureness");
 
-	// Iterate through the point cloud and evaluate the geometry
+	// Iterate through the point cloud and evaluate the Sphericality
 	for (size_t i = 0; i < pointsCount; ++i)
 	{
 		// extract the three eigenvalues relevant to the current point
@@ -123,7 +132,7 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 		// might be already sorted but sort anyway
 		std::sort(eig_vals_col.data(),eig_vals_col.data()+eig_vals_col.size());
 
-		// Finally, evaluate the geometry
+		// Finally, evaluate the Sphericality
 		T sphericalityVal;
 		T unstructurenessVal;
 		T structurenessVal;
@@ -146,15 +155,17 @@ void GeometryDataPointsFilter<T>::inPlaceFilter(
 			sphericalityVal = unstructurenessVal - structurenessVal;
 		}
 
-		// store in the pointcloud
+		// store it in the pointcloud
+		// sphericality always
 		(sphericality.get())(0,i) = sphericalityVal;
-		if (keepUnstructureness)
+		// these two only when requested by the user
+		if (unstructureness)
 			(unstructureness.get())(0,i) = unstructurenessVal;
-		if (keepStructureness)
+		if (structureness)
 			(structureness.get())(0,i) = structurenessVal;
 
 	}
 }
 
-template struct GeometryDataPointsFilter<float>;
-template struct GeometryDataPointsFilter<double>;
+template struct SphericalityDataPointsFilter<float>;
+template struct SphericalityDataPointsFilter<double>;

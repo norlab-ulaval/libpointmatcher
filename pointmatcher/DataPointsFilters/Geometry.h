@@ -36,9 +36,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PointMatcher.h"
 
-//! Surface normals estimation. Find the normal for every point using eigen-decomposition of neighbour points
+/*
+ The SphericalityDataPointFilter estimates a heuristic value which indicates how much local geometry around
+ a given point resemble a plane or a sphere (uniform distribution). The value can lie in <-1,1> interval, -1 for
+ perfect plane, 1 for perfectly uniform distribution. The estimation is based on three eigenvalues coming from another
+ data points filter (this filter can operate only on 3D data). In the case the largest eigenvalue is zero, the filter
+ outputs NaNs. If the middle eigenvalue is zero and the largest one is non-zero, the filter outputs zeros.
+
+ Implemented by Vladimir Kubelka (kubelvla@gmail.com), NORLAB, Universite Laval, 2020
+*/
+
 template<typename T>
-struct GeometryDataPointsFilter: public PointMatcher<T>::DataPointsFilter
+struct SphericalityDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 {
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef PointMatcherSupport::Parametrizable P;
@@ -71,8 +80,8 @@ struct GeometryDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	const bool keepUnstructureness;
 	const bool keepStructureness;
 
-    GeometryDataPointsFilter(const Parameters& params = Parameters());
-	virtual ~GeometryDataPointsFilter() {};
+    SphericalityDataPointsFilter(const Parameters& params = Parameters());
+	virtual ~SphericalityDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
 };

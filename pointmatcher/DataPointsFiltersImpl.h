@@ -93,7 +93,7 @@ struct DataPointsFiltersImpl
 	typedef ::CovarianceSamplingDataPointsFilter<T> CovarianceSamplingDataPointsFilter;
 	typedef ::DistanceLimitDataPointsFilter<T> DistanceLimitDataPointsFilter;
 	typedef ::RemoveSensorBiasDataPointsFilter<T> RemoveSensorBiasDataPointsFilter;
-    typedef ::GeometryDataPointsFilter<T> GeometryDataPointsFilter;
+    typedef ::SphericalityDataPointsFilter<T> SphericalityDataPointsFilter;
 
 
 
