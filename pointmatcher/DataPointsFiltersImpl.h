@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/CovarianceSampling.h"
 #include "DataPointsFilters/DistanceLimit.h"
 #include "DataPointsFilters/RemoveSensorBias.h"
-#include "DataPointsFilters/Geometry.h"
+#include "DataPointsFilters/Sphericality.h"
 
 template<typename T>
 struct DataPointsFiltersImpl

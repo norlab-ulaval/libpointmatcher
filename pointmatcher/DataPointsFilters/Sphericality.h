@@ -63,8 +63,8 @@ struct SphericalityDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 
 	inline static const std::string description()
 	{
-		return "This filter computes the level of ‘unstructureness’, ‘structureness’ and ’sphericality’ for each point based on the required eigen values.\n\n"
-		       "Required descriptors: eigValues (must be three).\n"
+		return "This filter computes the level of ’sphericality’ for each point. It describes the shape of local geometry, whether the surrounding points resemble a plane (the sphericality value goes towards -1) or a uniform distribution (the value towards +1). It is intended for 3D point clouds only. Sphericality is computed by subtracting the intermediate values of ‘unstructureness’ and ‘structureness’.\n\n"
+		       "Required descriptors: eigValues (must be three, otherwise exception).\n"
 		       "Produced descritors:  sphericality, unstructureness(optional), structureness(optional).\n"
 			   "Altered descriptors:  none.\n"
 			   "Altered features:     none.";
