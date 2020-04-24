@@ -139,13 +139,22 @@ void SphericalityDataPointsFilter<T>::inPlaceFilter(
 
 		// First, avoid division by zero
 		//TODO: Is there a more suitable limit for considering the values almost-zero? (VK)
-		if (fabs(eig_vals_col(2)) < std::numeric_limits<T>::min() or
-			fabs(eig_vals_col(1)) < std::numeric_limits<T>::min())
+		if (eig_vals_col(2) < std::numeric_limits<T>::min() or
+		    eig_vals_col(1) < 0.0 or
+		    eig_vals_col(0) < 0.0)
 		{
-			// If either the largest or the middle eigenvalue are zeros, these descriptors are not well defined (0/0)
+			// If the largest eigenvalue is zero or even worse -- any of them is negative,
+			// these descriptors are not well defined (0/0 or nonsense input) and assigned NaN
 			sphericalityVal = std::numeric_limits<T>::quiet_NaN();
 			unstructurenessVal = std::numeric_limits<T>::quiet_NaN();
 			structurenessVal = std::numeric_limits<T>::quiet_NaN();
+
+		} else if (eig_vals_col(1) < std::numeric_limits<T>::min()) {
+			// If there are two zero eigenvalues and one non-zero, we assign zeros to the heuristic
+			sphericalityVal = 0.0;
+			unstructurenessVal = 0.0;
+			structurenessVal = 0.0;
+
 		} else {
 			// Otherwise, follow eq.(1) from Kubelka V. et al., "Radio propagation models for differential GNSS based
 			// on dense point clouds", JFR, hopefully published in 2020
