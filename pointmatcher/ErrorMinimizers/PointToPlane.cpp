@@ -193,7 +193,7 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 
 		// Compute cross product of cross = cross(reading X normalRef)
 		Matrix cross;
-		Matrix Gamma(3,3);
+		Matrix matrixGamma(3,3);
 		if(!force4DOF)
 		{
 			// Compute cross product of cross = cross(reading X normalRef)
@@ -201,11 +201,12 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 		}
 		else
 		{
-		   	//VK: Instead for "cross" as in 3D, we need only a dot product with the Gamma factor for 4DOF
-			Gamma << 0,-1, 0,
+		   	//VK: Instead for "cross" as in 3D, we need only a dot product with the matrixGamma factor for 4DOF
+		   	//VK: This should be published in 2020 or 2021
+			matrixGamma << 0,-1, 0,
 			         1, 0, 0,
 			         0, 0, 0;
-			cross = ((Gamma*mPts.reading.features).transpose()*normalRef).diagonal().transpose();
+			cross = ((matrixGamma*mPts.reading.features).transpose()*normalRef).diagonal().transpose();
 		}
 
 
@@ -256,10 +257,11 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 				 * Eigen::AngleAxis<T>(x(1), Eigen::Matrix<T,1,3>::UnitY())
 				 * Eigen::AngleAxis<T>(x(2), Eigen::Matrix<T,1,3>::UnitZ());*/
 
+				// Normal 6DOF takes the whole rotation vector from the solution to construct the output quaternion
 				if (!force4DOF)
 				{
 					transform = Eigen::AngleAxis<T>(x.head(3).norm(), x.head(3).normalized()); //x=[alpha,beta,gamma,x,y,z]
-				} else
+				} else  // 4DOF needs only one number, the rotation around the Z axis
 				{
 					Vector unitZ(3,1);
 					unitZ << 0,0,1;
