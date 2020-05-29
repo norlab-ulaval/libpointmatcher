@@ -143,11 +143,19 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 #--------------------
 # DEPENDENCY: nabo
 #--------------------
-find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
-#include(libnaboConfig)
-include_directories(${libnabo_INCLUDE_DIRS})
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
-message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+if (NOT TARGET nabo)
+  # Find libnabo:
+  find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
+  #include(libnaboConfig)
+  include_directories(${libnabo_INCLUDE_DIRS})
+  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
+  message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+else()
+  # libnabo already part of this project (e.g. as a git submodule)
+  # (This, plus the use of cmake target properties in libnabo, will also
+  # introduce the required include directories, flags, etc.)
+  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} nabo)
+endif()
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
@@ -344,8 +352,6 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Sphericality.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR})
-
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 
@@ -372,9 +378,16 @@ else(APPLE OR WIN32)
 	endif(SHARED_LIBS)
 endif(APPLE OR WIN32)
 
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher)
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils)
+target_include_directories(pointmatcher PUBLIC
+  $<INSTALL_INTERFACE:>
+  $<INSTALL_INTERFACE:pointmatcher>
+  $<INSTALL_INTERFACE:pointmatcher/DataPointsFilters>
+  $<INSTALL_INTERFACE:pointmatcher/DataPointsFilters/utils>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/DataPointsFilters>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils>
+)
 
 # link all libraries to libpointmatcher
 add_definitions(-Wall)
@@ -433,9 +446,16 @@ endif(GENERATE_API_DOC)
 #=============== trigger other makefile ======================
 
 # Example programs
-add_subdirectory(examples)
+option(POINTMATCHER_BUILD_EXAMPLES "Build libpointmatcher examples" ON)
+if (POINTMATCHER_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
+
 # Evaluation programs
-add_subdirectory(evaluations)
+option(POINTMATCHER_BUILD_EVALUATIONS "Build libpointmatcher evaluations" ON)
+if (POINTMATCHER_BUILD_EVALUATIONS)
+  add_subdirectory(evaluations)
+endif()
 
 # Unit testing
 
@@ -537,10 +557,12 @@ install(FILES
 unset(LIBRARY_CC_ARGS)
 
 #====================== uninstall target ===============================
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+if (NOT TARGET uninstall)
+  configure_file(
+	  "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+	  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+	  IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+  add_custom_target(uninstall
+	  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
