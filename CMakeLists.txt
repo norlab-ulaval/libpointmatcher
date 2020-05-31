@@ -29,6 +29,10 @@ else (CMAKE_VERSION VERSION_LESS 3.0.0)
 	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
 endif (CMAKE_VERSION VERSION_LESS 3.0.0)
 
+set(LIB_NAME pointmatcher) # same than PROJECT_NAME, w/o the "lib" prefix
+
+include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
+
 # Check if 32 bit platform
 # By default, libpointmatcher is not compatible with and will not build on a
 # 32 bit system
@@ -223,9 +227,8 @@ else(USE_SYSTEM_YAML_CPP)
         #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
         #include_directories(${yaml-cpp-pm_INCLUDE})
 
-        get_property(yaml-cpp-pm_LIB TARGET yaml-cpp-pm PROPERTY LOCATION)
-        set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp-pm_LIB} )
-        set (EXTRA_DEPS ${EXTRA_DEPS} yaml-cpp-pm)
+        list(APPEND EXTERNAL_LIBS $<TARGET_FILE:yaml-cpp-pm>)
+        list(APPEND EXTRA_DEPS yaml-cpp-pm)
         set(yamlcpp_FOUND)
 
         get_property(yaml-cpp-pm_VERSION TARGET yaml-cpp-pm PROPERTY VERSION)
@@ -355,28 +358,17 @@ set(POINTMATCHER_SRC
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 
-# MacOS and Windows deal with shared/dynamic library differently. For
-# simplicity, we only authorize static library in those cases.
-if(APPLE OR WIN32)
 
-	add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
-	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+# In CMake >=3.4 we can easily build shared libraries in Mac and Windows.
+# Don't make any distinction between OSes:
 
-else(APPLE OR WIN32)
-	set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
+add_library(${LIB_NAME} ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 
-	if (SHARED_LIBS)
-		add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
-		install(TARGETS pointmatcher
-						ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
-						LIBRARY DESTINATION ${INSTALL_LIB_DIR}
-						RUNTIME DESTINATION ${INSTALL_BIN_DIR})
-		#install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-	else(SHARED_LIBS)
-		add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
-		install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
-	endif(SHARED_LIBS)
-endif(APPLE OR WIN32)
+install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-config
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 
 target_include_directories(pointmatcher PUBLIC
   $<INSTALL_INTERFACE:>
@@ -396,7 +388,7 @@ target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
 
 if(EXTRA_DEPS)
 	add_dependencies(pointmatcher ${EXTRA_DEPS})
-endif(EXTRA_DEPS)
+endif()
 set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VERSION}" SOVERSION 1)
 
 #========================= Install header ===========================
@@ -475,16 +467,21 @@ endif()
 #  target_link_libraries(executableName ${libpointmatcher_LIBRARIES})
 #  ...
 
-# 1- local build #
+# Install cmake config module
+install(EXPORT ${PROJECT_NAME}-config DESTINATION share/${PROJECT_NAME}/cmake)
 
-# Register the local build in case one doesn't use "make install"
-export(PACKAGE libpointmatcher)
+# make project importable from build_dir:
+export(
+	TARGETS ${LIB_NAME}
+	FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${LIB_NAME})
 
 # Create variable for the local build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
 # Create variable with the library location
-get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
+set(POINTMATCHER_LIB  $<TARGET_FILE:libpointmatcher>)
 
 # Configure config file for local build tree
 configure_file(libpointmatcherConfig.cmake.in
