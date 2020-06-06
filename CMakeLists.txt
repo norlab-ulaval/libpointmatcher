@@ -17,17 +17,17 @@ file(
 # If no matches found, something is wrong with PointMatcher.h
 if (NOT POINTMATCHER_PROJECT_VERSION)
 	message(SEND_ERROR "Cannot find version number in '${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/PointMatcher.h'.")
-endif (NOT POINTMATCHER_PROJECT_VERSION)
+endif ()
 # Transform '#define POINTMATCHER_VERSION "X.Y.Z"' into 'X.Y.Z'
 string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTMATCHER_PROJECT_VERSION}")
 
 # In 3.0+, project(...) should specify VERSION to satisfy CMP0048
 if (CMAKE_VERSION VERSION_LESS 3.0.0)
 	project(libpointmatcher)
-else (CMAKE_VERSION VERSION_LESS 3.0.0)
+else ()
 	cmake_policy(SET CMP0048 NEW)
 	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
-endif (CMAKE_VERSION VERSION_LESS 3.0.0)
+endif ()
 
 set(LIB_NAME pointmatcher) # same than PROJECT_NAME, w/o the "lib" prefix
 
@@ -40,14 +40,14 @@ if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
     MESSAGE(SEND_ERROR "32 bits compiler detected. Libpointmatcher is only supported in 64 bits." )
     SET( EX_PLATFORM 32 )
     SET( EX_PLATFORM_NAME "x86" )
-endif( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
+endif()
 
 ## WARNING: unsupported
 ## To force install as a 32 bit library, set BUILD_32 to true
 if( BUILD_32 )
 	MESSAGE(STATUS "Building as a 32 bit library")
 	SET(CMAKE_CXX_FLAGS "-m32")
-endif( BUILD_32 )
+endif()
 
 # Ensure proper build type
 if (NOT CMAKE_BUILD_TYPE)
@@ -55,20 +55,20 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
     FORCE)
-else (NOT CMAKE_BUILD_TYPE)
+else ()
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("\n=================================================================================")
     message("\n-- Build type: Debug. Performance will be terrible!")
     message("-- Add -DCMAKE_BUILD_TYPE=Release to the CMake command line to get an optimized build.")
     message("\n=================================================================================")
-  endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
-endif (NOT CMAKE_BUILD_TYPE)
+  endif ()
+endif ()
 
 
 #================= extra building definitions ==============================
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-O3)
-endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+endif()
 
 # For Windows
 if( MSVC )
@@ -122,7 +122,7 @@ add_subdirectory(contrib)
 find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
 if (Boost_MINOR_VERSION GREATER 47)
 	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
-endif (Boost_MINOR_VERSION GREATER 47)
+endif ()
 include_directories(${Boost_INCLUDE_DIRS})
 set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${Boost_LIBRARIES})
 
@@ -173,9 +173,9 @@ if (USE_OPEN_MP)
 		if (CMAKE_COMPILER_IS_GNUCC)
 			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
     	message("-- OpenMP found, parallel computer enabled")
-		endif(CMAKE_COMPILER_IS_GNUCC)
-	endif(OPENMP_FOUND)
-endif (USE_OPEN_MP)
+		endif()
+	endif()
+endif ()
 
 #--------------------
 # DEPENDENCY: OpenCL (optional)
@@ -186,16 +186,16 @@ if (USE_OPEN_CL)
 		find_library(OPENCL_LIBRARIES opencl64)
 		if (!OPENCL_LIBRARIES)
 			find_library(OPENCL_LIBRARIES opencl32)
-		endif (!OPENCL_LIBRARIES)
-	else (WIN32)
+		endif ()
+	else ()
 		find_library(OPENCL_LIBRARIES OpenCL ENV LD_LIBRARY_PATH)
-	endif (WIN32)
+	endif ()
 	# if found, add
 	if (OPENCL_LIBRARIES)
 		set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${OPENCL_LIBRARIES})
     message("-- openCL found, parallel computer enabled for kd-tree")
-	endif (OPENCL_LIBRARIES)
-endif(USE_OPEN_CL)
+	endif ()
+endif()
 
 
 #--------------------
@@ -244,7 +244,7 @@ endif(USE_SYSTEM_YAML_CPP)
 check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
 if (POSIX_TIMERS AND NOT APPLE)
 	set(EXTERNAL_LIBS ${EXTERNAL_LIBS} rt)
-endif (POSIX_TIMERS AND NOT APPLE)
+endif ()
 
 #============================= end dependencies =================================
 
@@ -325,7 +325,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/PointToPointWithCov.cpp
 	pointmatcher/ErrorMinimizers/PointToPointSimilarity.cpp
 	pointmatcher/ErrorMinimizers/Identity.cpp
-#DataPointsFilters	
+#DataPointsFilters
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
@@ -426,7 +426,7 @@ if(GENERATE_API_DOC)
 	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
 	if (DOXYGEN_FOUND)
 		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
-	endif (DOXYGEN_FOUND)
+	endif ()
 
 else(GENERATE_API_DOC)
 
