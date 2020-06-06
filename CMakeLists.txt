@@ -6,6 +6,8 @@ include(CheckSymbolExists)
 # Project details / setup
 #========================
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) # add -fPIC as required
+
 # Extract version from header, done first to satisfy CMP0048,
 # see `cmake --help-policy CMP0048` for more information.
 file(
