@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 include(CheckSymbolExists)
+include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 
 #========================
 # Project details / setup
 #========================
+
+set(LIB_NAME pointmatcher) # same than PROJECT_NAME, w/o the "lib" prefix
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # add -fPIC as required
 
@@ -31,9 +34,6 @@ else ()
 	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
 endif ()
 
-set(LIB_NAME pointmatcher) # same than PROJECT_NAME, w/o the "lib" prefix
-
-include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 
 # Check if 32 bit platform
 # By default, libpointmatcher is not compatible with and will not build on a
@@ -101,9 +101,6 @@ foreach(p LIB BIN INCLUDE CMAKE)
 		set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
 	endif()
 endforeach()
-
-# Install package.xml for catkin
-install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
 
 #===========================================================================
 
@@ -362,15 +359,9 @@ file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 
 
 # In CMake >=3.4 we can easily build shared libraries in Mac and Windows.
-# Don't make any distinction between OSes:
+# No need to distinguish between operating systems while building targets
 
 add_library(${LIB_NAME} ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
-
-install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-config
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
 
 target_include_directories(pointmatcher PUBLIC
   $<INSTALL_INTERFACE:>
@@ -393,7 +384,7 @@ if(EXTRA_DEPS)
 endif()
 set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VERSION}" SOVERSION 1)
 
-#========================= Install header ===========================
+#========================= Install commands ===========================
 
 install(FILES
 	pointmatcher/DeprecationWarnings.h
@@ -406,6 +397,23 @@ install(FILES
 	pointmatcher/IO.h
 	DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
 )
+
+install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-config
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+if(GENERATE_API_DOC)
+	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
+	if (DOXYGEN_FOUND)
+		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
+	endif ()
+endif()
+
+# Install package.xml for catkin
+install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
+
 
 #========================= Documentation ===========================
 
@@ -425,16 +433,9 @@ if(GENERATE_API_DOC)
 
 	add_dependencies(pointmatcher doc)
 
-	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
-	if (DOXYGEN_FOUND)
-		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
-	endif ()
-
-else(GENERATE_API_DOC)
-
+else()
 	message("-- API Documentation (doxygen): disabled")
-
-endif(GENERATE_API_DOC)
+endif()
 
 
 #=============== trigger other makefile ======================
