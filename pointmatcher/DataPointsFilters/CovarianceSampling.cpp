@@ -104,7 +104,7 @@ void CovarianceSamplingDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	for(std::size_t i = 0; i < featDim - 1; ++i) center(i) = T(0.);
 	
 	for (std::size_t i = 0; i < nbCandidates; ++i)
-		for (std::size_t f = 0; f <= 3; ++f)
+		for (std::size_t f = 0; f < 3; ++f)
 			center(f) += cloud.features(f,candidates[i]);
 	
 	for(std::size_t i = 0; i <= 3; ++i) center(i) /= T(nbCandidates);
