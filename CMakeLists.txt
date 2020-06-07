@@ -214,6 +214,8 @@ else()
         #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
         #include_directories(${yaml-cpp-pm_INCLUDE})
 
+        list(APPEND EXTERNAL_LIBS $<TARGET_FILE:yaml-cpp-pm>)
+        list(APPEND EXTRA_DEPS yaml-cpp-pm)
         set(yamlcpp_FOUND)
 
         get_property(yaml-cpp-pm_VERSION TARGET yaml-cpp-pm PROPERTY VERSION)
@@ -369,7 +371,9 @@ if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
 	target_link_libraries(pointmatcher PRIVATE ${yaml-cpp_LIBRARIES})
 	target_include_directories(pointmatcher PRIVATE ${yaml-cpp_INCLUDE_DIRS})
 else() # embedded version:
-	target_link_libraries(pointmatcher PRIVATE yaml-cpp-pm)
+	# This could be enabled if yaml-cpp-pm was in the "export set"
+	#target_link_libraries(pointmatcher PRIVATE yaml-cpp-pm)
+	# For now, let's add yaml-cpp-pm output to EXTERNAL_LIBS
 endif()
 
 target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
