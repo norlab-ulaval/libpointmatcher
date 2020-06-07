@@ -7,8 +7,6 @@ include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 # Project details / setup
 #========================
 
-set(LIB_NAME pointmatcher) # same than PROJECT_NAME, w/o the "lib" prefix
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # add -fPIC as required
 
 # Extract version from header, done first to satisfy CMP0048,
@@ -109,7 +107,6 @@ endforeach()
 
 # initially
 set(EXTERNAL_LIBS "")
-set(EXTRA_DEPS "")
 
 # compile local version of gtest and yaml-cpp
 add_subdirectory(contrib)
@@ -122,9 +119,6 @@ find_package(Boost COMPONENTS thread filesystem system program_options date_time
 if (Boost_MINOR_VERSION GREATER 47)
 	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
 endif ()
-include_directories(${Boost_INCLUDE_DIRS})
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${Boost_LIBRARIES})
-
 
 #--------------------
 # DEPENDENCY: eigen 3
@@ -149,15 +143,12 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 if (NOT TARGET nabo)
   # Find libnabo:
   find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
-  #include(libnaboConfig)
-  include_directories(${libnabo_INCLUDE_DIRS})
-  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
   message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
 else()
   # libnabo already part of this project (e.g. as a git submodule)
   # (This, plus the use of cmake target properties in libnabo, will also
   # introduce the required include directories, flags, etc.)
-  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} nabo)
+  set(libnabo_LIBRARIES nabo)
 endif()
 
 #--------------------
@@ -211,29 +202,24 @@ if(USE_SYSTEM_YAML_CPP)
             /usr/local/lib
     )
     if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-            include_directories(${yaml-cpp_INCLUDE_DIRS})
-            add_definitions(-DSYSTEM_YAML_CPP)
             set(yamlcpp_FOUND)
-            set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp_LIBRARIES} )
             message("-- yaml-cpp found, text-based configuration enabled")
-    else(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+    else()
             message("-- yaml-cpp not found, text-based configuration and related applications disabled")
-    endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-else(USE_SYSTEM_YAML_CPP)
+    endif()
+else()
         include_directories(contrib/yaml-cpp-pm/include)
 
 #note: this is not working....
         #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
         #include_directories(${yaml-cpp-pm_INCLUDE})
 
-        list(APPEND EXTERNAL_LIBS $<TARGET_FILE:yaml-cpp-pm>)
-        list(APPEND EXTRA_DEPS yaml-cpp-pm)
         set(yamlcpp_FOUND)
 
         get_property(yaml-cpp-pm_VERSION TARGET yaml-cpp-pm PROPERTY VERSION)
         message("-- using built-in yaml-cpp, version ${yaml-cpp-pm_VERSION}")
         message("   -- text-based configuration enabled")
-endif(USE_SYSTEM_YAML_CPP)
+endif()
 
 
 #--------------------
@@ -241,9 +227,6 @@ endif(USE_SYSTEM_YAML_CPP)
 #--------------------
 # link rt support if POSIX timers are used
 check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
-if (POSIX_TIMERS AND NOT APPLE)
-	set(EXTERNAL_LIBS ${EXTERNAL_LIBS} rt)
-endif ()
 
 #============================= end dependencies =================================
 
@@ -361,7 +344,7 @@ file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 # In CMake >=3.4 we can easily build shared libraries in Mac and Windows.
 # No need to distinguish between operating systems while building targets
 
-add_library(${LIB_NAME} ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
+add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 
 target_include_directories(pointmatcher PUBLIC
   $<INSTALL_INTERFACE:>
@@ -372,16 +355,31 @@ target_include_directories(pointmatcher PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/DataPointsFilters>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils>
+	$<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
 )
-
-# link all libraries to libpointmatcher
-add_definitions(-Wall)
-#target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
-target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
-
-if(EXTRA_DEPS)
-	add_dependencies(pointmatcher ${EXTRA_DEPS})
+if (libnabo_INCLUDE_DIRS)
+	include_directories(pointmatcher PUBLIC ${libnabo_INCLUDE_DIRS})
 endif()
+
+if (NOT MSVC)
+	target_compile_options(pointmatcher PRIVATE -Wall)
+endif()
+
+if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+	target_link_libraries(pointmatcher PRIVATE ${yaml-cpp_LIBRARIES})
+	target_include_directories(pointmatcher PRIVATE ${yaml-cpp_INCLUDE_DIRS})
+else() # embedded version:
+	target_link_libraries(pointmatcher PRIVATE yaml-cpp-pm)
+endif()
+
+target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(pointmatcher PRIVATE ${libnabo_LIBRARIES})
+target_link_libraries(pointmatcher PRIVATE ${EXTERNAL_LIBS})
+
+if (POSIX_TIMERS AND NOT APPLE)
+	target_link_libraries(pointmatcher PRIVATE rt)
+endif ()
+
 set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VERSION}" SOVERSION 1)
 
 #========================= Install commands ===========================
@@ -398,7 +396,7 @@ install(FILES
 	DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
 )
 
-install(TARGETS ${LIB_NAME} EXPORT ${PROJECT_NAME}-config
+install(TARGETS pointmatcher EXPORT ${PROJECT_NAME}-config
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -475,10 +473,10 @@ install(EXPORT ${PROJECT_NAME}-config DESTINATION share/${PROJECT_NAME}/cmake)
 
 # make project importable from build_dir:
 export(
-	TARGETS ${LIB_NAME}
+	TARGETS pointmatcher
 	FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config.cmake
 )
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${LIB_NAME})
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS pointmatcher)
 
 # Create variable for the local build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -499,10 +497,6 @@ set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 # gather all the includes but remove ones in the source tree
 # because we added an include for the local yaml-cpp-pm we should also remove it
 list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
-
-if(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
-  list(REMOVE_ITEM EXTERNAL_LIBS ${yaml-cpp-pm_LIB})
-endif(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
 
 # Change the library location for an install location
 get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
