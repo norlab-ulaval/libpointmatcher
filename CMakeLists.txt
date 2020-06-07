@@ -351,12 +351,8 @@ add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 target_include_directories(pointmatcher PUBLIC
   $<INSTALL_INTERFACE:>
   $<INSTALL_INTERFACE:pointmatcher>
-  $<INSTALL_INTERFACE:pointmatcher/DataPointsFilters>
-  $<INSTALL_INTERFACE:pointmatcher/DataPointsFilters/utils>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/DataPointsFilters>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils>
 	$<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
 )
 if (libnabo_INCLUDE_DIRS)
