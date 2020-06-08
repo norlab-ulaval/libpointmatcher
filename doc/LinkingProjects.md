@@ -29,7 +29,7 @@ We will demonstrate how to create an Eclipse project containing a simple executa
 
 Create a new C++ project by clicking `File > New > C++ Project`.  You can name your project "PointmatcherEclipseDemo" and in toolchains select the default toolchain for your system (most likely Linux GCC).  Click `Finish` to add your project to your Eclipse workspace.  
 
-You must then configure the project by going to `Project > Properties > C/C++Build > Settings`.  Navigate to `C++ Compiler > Includes` and add the libpointmatcher include path to the `Include paths (-I)` list.  Next, go to `C++ Linker/Libraries` and add the the following three dependencies to the "Libraries (-l)" list: 
+You must then configure the project by going to `Project > Properties > C/C++Build > Settings`.  Navigate to `C++ Compiler > Includes` and add the libpointmatcher (e.g. ~/Libraries/libpointmatcher) and eigen (e.g. /usr/include/eigen3) include path to the `Include paths (-I)` list.  Next, go to `C++ Linker/Libraries` and add the the following three dependencies to the "Libraries (-l)" list: 
 
 * pointmatcher
 * boost_system

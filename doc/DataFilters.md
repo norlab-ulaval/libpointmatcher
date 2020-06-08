@@ -56,6 +56,8 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 5. [Simple Sensor Noise Filter](#sensornoisehead)
 
+6. [Fixed Step Sampling Filter](#fixedstepsamplinghead)
+
 
 ## An Example Point Cloud View of an Appartment
 ![alt text](images/floor_plan.png "Floor plan of the apartment")
@@ -579,7 +581,7 @@ In the following image we show a side view of local point cloud 3 in the dataset
 |---|:---|
 |![samp norm after](images/hg_noise.png " Side view of a view 3 from the HG dataset") | sensorType : 1 |
 
-## Fixed Step Sampling Filter (To be completed)
+## Fixed Step Sampling Filter (To be completed) <a name="fixedstepsamplinghead"></a>
 The number of points in a point cloud can be reduced by taking random point subsamples.  The filter is parametrized so that a fixed number of points - selected uniformly at random - are 'rejected' in the filtering process.
 
 ## Where To Go From Here
