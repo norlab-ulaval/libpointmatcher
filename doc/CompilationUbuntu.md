@@ -1,7 +1,7 @@
-| [Tutorials Home](index.md)    | | [Next](Datafilters.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](index.md) | [Next](CompilationWindows.md) |
+| :--- | :---: | ---: |
 
-# Compiling and Installing libpointmatcher on your Computer
+# Compiling and Installing libpointmatcher on Ubuntu
 
 ## In short...
 If you are used to development projects, here is what you need:

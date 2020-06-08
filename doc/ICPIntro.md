@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | [Previous](ApplyingDatafilters.md) | [Next](DefaultICPConfig.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](ApplyingDataFilters.md) | [Next](DefaultICPConfig.md) |
+| :--- | :---: | ---: |
 
 # An Introduction to ICP Registration
 
@@ -160,7 +160,7 @@ We will now replace the empty configuration with something which makes more sens
 
 
 #### Data Filters
-We apply some filtering to both the reading and reference point clouds in order to reduce the number of points and thus decrease the computation time of each iteration.  Half of the reading points are sampled randomly, and points are sampled from the reference based wil extracting their surface normal. In that case, the parameter knn will reduce the number of points by a factor 10. For more information, see [here](Datafilters.md#samplingnormhead).
+We apply some filtering to both the reading and reference point clouds in order to reduce the number of points and thus decrease the computation time of each iteration.  Half of the reading points are sampled randomly, and points are sampled from the reference based wil extracting their surface normal. In that case, the parameter knn will reduce the number of points by a factor 10. For more information, see [here](DataFilters.md#samplingnormhead).
 
 #### Matcher
 Points in the filtered reading cloud are first transformed with the current transformation parameters and are then matched to their nearest neighbors in the filtered reference cloud.  The method used for matching is based on a kd-tree, which produce an optimal search at a lower computation complexity.

@@ -1,10 +1,10 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](TransformationDev.md) | [Next]() |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](TransformationDev.md) |
+| :--- | ---: |
 
 # Testing libpointmatcher Modules
 It is often good practice to accompany the development of new software features with the development of test cases which validate that these features are working correctly.  When developing for an open source project such as libpointmatcher, testing is crucial to maintain stability and avoid the introduction of erronous code.
 
-Libpointmatcher uses the [C++ testing framework developed by Google](https://code.google.com/p/googletest/).  If you are not sure if you installed libpointmatcher with GTest, go to the libpointmatcher's CMake build directory and run `make test`.  If the tests do not run, refer back to the [compilation instructions](Compilation.md) to recompile with GTest.
+Libpointmatcher uses the [C++ testing framework developed by Google](https://code.google.com/p/googletest/).  If you are not sure if you installed libpointmatcher with GTest, go to the libpointmatcher's CMake build directory and run `make test`.  If the tests do not run, refer back to the [compilation instructions](CompilationUbuntu.md) to recompile with GTest.
 
 Libpointmatcher's unit tests can be found in [utest/utest.cpp](/utest/utest.cpp).  In this tutorial, we will write a series of tests for validating the voxel grid filter developed in [this past tutorial](DataPointsFilterDev.md).  Note that this test will not cover the myriad of features that GTest provides.  Nevertheless, it is very easy to understand GTest without extensive experience.  For those who wish to have a solid introduction to GTest we recommend to start with this [this primer](http://code.google.com/p/googletest/wiki/Primer).
 

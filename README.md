@@ -30,13 +30,13 @@ The library has a light dependency list:
  * [libnabo] version 1.0.7, a fast K Nearest Neighbour library for low-dimensional spaces,
  
 and was compiled on:
-  * Ubuntu ([see how](/doc/Compilation.md))
+  * Ubuntu ([see how](/doc/CompilationUbuntu.md))
   * Mac OS X ([see how](/doc/CompilationMac.md))
   * Windows ([see how](/doc/CompilationWindows.md) - partially supported)
 
 ### Compilation & Installation 
 
-For beginner users who are not familiar with compiling and installing a library in Linux, go [here](doc/Compilation.md) for detailed instructions on how to compile libpointmatcher from the source code.  If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
+For beginner users who are not familiar with compiling and installing a library in Linux, go [here](doc/CompilationUbuntu.md) for detailed instructions on how to compile libpointmatcher from the source code.  If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
 
 ```
 mkdir build && cd build

@@ -1,5 +1,5 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](DataPointsFilterDev.md) | [Next](UnitTestDev.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](DataPointsFilterDev.md) | [Next](UnitTestDev.md) |
+| :--- | :---: | ---: |
 
 # Extending libpointmatcher Transformations
 

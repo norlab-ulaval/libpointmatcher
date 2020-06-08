@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | [Previous](Compilation.md) | [Next](ApplyingDatafilters.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](ApplicationsAndPub.md) | [Next](ApplyingDataFilters.md) |
+| :--- | :---: | ---: |
 
 # Datapoint Filters
 
@@ -582,5 +582,5 @@ In the following image we show a side view of local point cloud 3 in the dataset
 The number of points in a point cloud can be reduced by taking random point subsamples.  The filter is parametrized so that a fixed number of points - selected uniformly at random - are 'rejected' in the filtering process.
 
 ## Where To Go From Here
-This concludes the overview of data point filters.  For a tutorial on writing a simple application for applying data point filters to an input point cloud, go [here](ApplyingDatafilters.md).  To learn more about the general configuration of the ICP chain go [here](DefaultICPConfig.md).  
+This concludes the overview of data point filters.  For a tutorial on writing a simple application for applying data point filters to an input point cloud, go [here](ApplyingDataFilters.md).  To learn more about the general configuration of the ICP chain go [here](DefaultICPConfig.md).  
 

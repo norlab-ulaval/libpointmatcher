@@ -1,9 +1,9 @@
-| [Tutorials Home](index.md)    | [Previous](Configuration.md) | [Next](UsingInRos.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](ImportExport.md) | [Next](UsingInRos.md) |
+| :--- | :---: | ---: |
 
 # Linking Projects to libpointmatcher
 
-Once you have followed the [compilation instructions](Compilation.md) and installed libpointmatcher to your system, you can use libpointmatcher in your project.
+Once you have followed the [compilation instructions](CompilationUbuntu.md) and installed libpointmatcher to your system, you can use libpointmatcher in your project.
 
 ## Option 1: Using CMake (Recommended)
 Because libpointmatcher was build using CMake, it can be conveniently included in other CMake projects.  You can simply use the `find_package` functionality of CMake to locate the installation directory of libpointmatcher.  Add `$POINTMATCHER_INCLUDE_DIRS` to the list of include directories in your project and link the appropriate executables to `$POINTMATCHER_LIBRARIES`.

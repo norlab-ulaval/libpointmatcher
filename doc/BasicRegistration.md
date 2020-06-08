@@ -1,5 +1,5 @@
-| [Tutorials Home](Pointclouds.md)    | [Previous](Pointclouds.md) | [Next](Transformations.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](PointClouds.md) | [Next](Transformations.md) |
+| :--- | :---: | ---: |
 
 # Writing a program which performs ICP
 
@@ -14,7 +14,7 @@ In this example we will be performing registration between two point clouds.  On
 The ICP algorithm has the following characteristics:
 
 * The algorithm is iterative in which each iteration improves the alignment between reading and reference clouds.
-* The non-ideal nature of point clouds leads to the use of data filters and outlier filters.  These can be used to remove noisy or redundant points.  Data filters can also augment point clouds with additional descriptors which may be useful for registration.  A detailed overview of data filters can be found [here](Datafilters.md).
+* The non-ideal nature of point clouds leads to the use of data filters and outlier filters.  These can be used to remove noisy or redundant points.  Data filters can also augment point clouds with additional descriptors which may be useful for registration.  A detailed overview of data filters can be found [here](DataFilters.md).
 
 The various components which comprise the ICP registration system are shown in the following diagram.    
 

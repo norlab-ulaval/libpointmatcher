@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | | [Next](Datafilters.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](CompilationWindows.md) | [Next](Introduction.md) |
+| :--- | :---: | ---: |
 
 # Compiling and Installing libpointmatcher on your Computer (Mac OS X Instructions)
 

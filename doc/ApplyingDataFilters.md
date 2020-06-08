@@ -1,12 +1,14 @@
-| [Tutorials Home](index.md)    | [Previous](Datafilters.md) | [Next](BasicRegistration.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](DataFilters.md) | [Next](ICPIntro.md) |
+| :--- | :---: | ---: |
 
 # Applying Data Point Filters
 
 ## Overview
-The following will go through the steps needed to write a simple program which configures a chain of data filters and applies this chain to a point cloud.  For information on data filters, refer to the [data point filters tutorial](Datafilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/demo_cmake/convert.cpp](../examples/demo_cmake/convert.cpp).
+The following will go through the steps needed to write a simple program which configures a chain
+ of data filters and applies this chain to a point cloud.  For information on data filters, refer
+  to the [data point filters tutorial](DataFilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/demo_cmake/convert.cpp](../examples/demo_cmake/convert.cpp).
 
-***IMPORTANT:*** This tutorial makes use of YAML configuration files.  If you did not install yaml-cpp before installing libpointmatcher, you must do so before following these instructions.  Information on installing yaml-cpp can be found in the installation instructions for [Ubuntu](Compilation.md), [Mac OS X](CompilationMac.md), and [Windows](CompilationWindows.md).
+***IMPORTANT:*** This tutorial makes use of YAML configuration files.  If you did not install yaml-cpp before installing libpointmatcher, you must do so before following these instructions.  Information on installing yaml-cpp can be found in the installation instructions for [Ubuntu](CompilationUbuntu.md), [Windows](CompilationWindows.md) and [Mac OS X](CompilationMac.md).
 
 ## Source Description
 First, we include the libpointmatcher and standard library header files.
@@ -84,7 +86,7 @@ An example configuration file can be found at [examples/data/default-convert.yam
 
 
 ### Bounding Box Filter
-The first element is a [bounding box filter](Datafilters.md#boundingboxhead). It is configured to reject points inside a 8m x 8m x 8m cube centered at the origin. 
+The first element is a [bounding box filter](DataFilters.md#boundingboxhead). It is configured to reject points inside a 8m x 8m x 8m cube centered at the origin. 
 
 ```yaml
 - BoundingBoxDataPointsFilter:
@@ -98,7 +100,7 @@ The first element is a [bounding box filter](Datafilters.md#boundingboxhead). It
 ```
 
 ### Sampling Surface Normal Filter
-A [sampling surface normal filter](Datafilters.md#samplingnormhead) can be used in an attempt to subsample points while maintaining the shape structure of objects in the point cloud.  The point cloud is divided into boxes containing at most 10 points.  Points along flat surfaces are contained in larger boxes and are sparsely sampled while points on more complex surfaces are densely sampled. 
+A [sampling surface normal filter](DataFilters.md#samplingnormhead) can be used in an attempt to subsample points while maintaining the shape structure of objects in the point cloud.  The point cloud is divided into boxes containing at most 10 points.  Points along flat surfaces are contained in larger boxes and are sparsely sampled while points on more complex surfaces are densely sampled. 
 
 ```yaml
 - SamplingSurfaceNormalDataPointsFilter:
@@ -106,14 +108,14 @@ A [sampling surface normal filter](Datafilters.md#samplingnormhead) can be used 
 ```
 
 ### Observation Direction Filter
-The points are annotated with an observation direction pointing to the sensor location with the [observation direction filter](Datafilters.md#obsdirectionhead).
+The points are annotated with an observation direction pointing to the sensor location with the [observation direction filter](DataFilters.md#obsdirectionhead).
 
 ```yaml
 - ObservationDirectionDataPointsFilter
 ```
 
 ### Orient Normals Filter
-The [last filter](Datafilters.md#orientnormalshead) is used to reorient normal vectors so that they point in the same direction.  This filter uses the observation directions extracted by the previous filter.
+The [last filter](DataFilters.md#orientnormalshead) is used to reorient normal vectors so that they point in the same direction.  This filter uses the observation directions extracted by the previous filter.
 
 ```yaml
 - OrientNormalsDataPointsFilter

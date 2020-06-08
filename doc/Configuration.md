@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | [Previous](BasicRegistration.md) | [Next](ImportExport.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](DefaultICPConfig.md) | [Next](ImportExport.md) |
+| :--- | :---: | ---: |
 
 # Creating Custom Configurations with YAML
 
@@ -9,7 +9,7 @@ The implementation of the ICP algorithm in libpointmatcher is modular and can be
 ## Configuration of a Chain of DataPointsFilters
 The first libpointmatcher object that can be constructed by YAML files is `DataPointsFilters` which represents a chain of data filters.  The configuration is loaded by calling its constructor with a string representing the path to the configuration file as an argument.  The configuration file is structured as follows:
 
-The configuration is represented in YAML as a list.  Each filter represents a list entry and is included by preceding its name by a dash -.  The parameters for each filter are stored in a dictionary with each parameter entry taking the form `<param name>: <param value>`.  When a parameter is not specified, the default values are used.
+The configuration is represented in YAML as a list.  Each filter represents a list entry and is included by preceding its name by a dash `-`.  The parameters for each filter are stored in a dictionary with each parameter entry taking the form `<param name>: <param value>`.  When a parameter is not specified, the default values are used.
 
 ```yaml
 - DataPointsFilter1
@@ -18,7 +18,7 @@ The configuration is represented in YAML as a list.  Each filter represents a li
 - DataPointsFilter2
 ```
 
-Note that the order in which filters are included is important.  The first reason is that each filtering step alters the point cloud and the order in which each filtering step is done is important.  The second reason is that some filters require descriptors.  The filters generating these descriptors must thus be included further up the chain.  For more information on the different data filters available in libpointmatcher, their parameters and requirements, refer to the [data filters tutorial](Datafilters.md).
+Note that the order in which filters are included is important.  The first reason is that each filtering step alters the point cloud and the order in which each filtering step is done is important.  The second reason is that some filters require descriptors.  The filters generating these descriptors must thus be included further up the chain.  For more information on the different data filters available in libpointmatcher, their parameters and requirements, refer to the [data filters tutorial](DataFilters.md).
 
 ### Using a Configuration in Your Code
 To load an data filters configuration from a YAML file, use the `PointMatcher<T>::DataPointsFilters(std::istream& in)` constructor where `in` represents a `std::istream` to your YAML file.

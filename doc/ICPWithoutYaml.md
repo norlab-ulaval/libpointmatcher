@@ -1,3 +1,6 @@
+| [Tutorials Home](index.md) | [Previous](Transformations.md) | [Next](DataPointsFilterDev.md) |
+| :--- | :---: | ---: |
+
 # Example of an ICP solution without yaml
 
 See [examples/icp_customized.cpp](../examples/icp_customized.cpp) for a working example.
