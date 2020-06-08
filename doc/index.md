@@ -37,7 +37,7 @@ Advanced<a name="advanced"></a>
 - [Example: Configure an ICP solution without yaml](ICPWithoutYaml.md)
 - Measuring Hausdorff distance, Haussdorff quantile and mean residual error? [See this discussion for code examples.](https://github.com/ethz-asl/libpointmatcher/issues/125)
 - How to compute the residual error with `ErrorMinimizer::getResidualError(...)` [See the example code provided here.](https://github.com/ethz-asl/libpointmatcher/issues/193#issue-203885636)
-- How to I build a global map from a sequence of scans? [See the example align_sequence.cpp](../examples/align_sequence.cpp ).
+- How to I build a global map from a sequence of scans? [See the example align_sequence.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/align_sequence.cpp ).
 - How to minimize the error with translation, rotation and scale? [See this example.](https://github.com/ethz-asl/libpointmatcher/issues/188#issuecomment-270960696)
 - How to do a nearest neighbor search between two point clouds without an ICP object? [See the comments here.](https://github.com/ethz-asl/libpointmatcher/issues/193#issuecomment-276093785)
 - How to construct a `DataPoints` from my own point cloud? [See the unit test on `Datapoints` here.](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/ui/DataFilters.cpp#L52)

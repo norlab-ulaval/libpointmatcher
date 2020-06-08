@@ -557,7 +557,8 @@ We reuse the same apartment section to illustrate the sampling of normal vectors
 ## Simple Sensor Noise Filter <a name="sensornoisehead"></a>
 
 ### Description
-This filter is used to augment points with an estimation of position uncertainty based on sensor specifications.  So far the [SICK LMS](http://www.sick.com/group/EN/home/products/product_news/laser_measurement_systems/Pages/lms100.aspx), [Hokuyo](http://www.hokuyo-aut.jp/02sensor/index.html#scanner) URG-04LX and UTM-30LX, as well as the Microsoft [Kinect](http://www.microsoft.com/en-us/kinectforwindows/) and Asus [Xtion](http://www.asus.com/Multimedia/Xtion_PRO_LIVE/) sensors are supported.  The uncertainty or noise radius is represented in meters, and can be adjusted by varying a gain parameter which amplifies predefined uncertainty levels.
+This filter is used to augment points with an estimation of position uncertainty based on sensor
+ specifications.  So far the [SICK LMS](https://www.sick.com/us/en/detection-and-ranging-solutions/2d-lidar-sensors/lms1xx/lms100-10000/p/p109841), Hokuyo [URG-04LX](https://www.hokuyo-aut.jp/search/single.php?serial=165) and [UTM-30LX](https://www.hokuyo-aut.jp/search/single.php?serial=169), as well as the Microsoft [Kinect](https://developer.microsoft.com/en-us/windows/kinect/) and Asus [Xtion](https://www.asus.com/3D-Sensor/Xtion_PRO_LIVE/) sensors are supported.  The uncertainty or noise radius is represented in meters, and can be adjusted by varying a gain parameter which amplifies predefined uncertainty levels.
 
 __Required descriptors:__  none  
 __Output descriptor:__ `simpleSensorNoise`  

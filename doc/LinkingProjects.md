@@ -21,7 +21,7 @@ message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 add_executable(myProgram myProgram.cpp)
 target_link_libraries(myProgram ${libpointmatcher_LIBRARIES})
 ```
-A working example of how to link to an external project can be found in [./examples/demo_cmake](../examples/demo_cmake).
+A working example of how to link to an external project can be found in [./examples/demo_cmake](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_cmake).
 
 ## Option 2: Using Eclipse
 ### Using the Native Eclipse Builder
@@ -84,7 +84,7 @@ LIBS     	+= 	/usr/local/lib/libboost_thread-mt.dylib \
                         /Users/francoispomerleau/Research/Code/libpointmatcher/build/contrib/yaml-cpp-pm/libyaml-cpp-pm.a
 ```
 
-A working example of how to link to an external project can be found in [./examples/demo_Qt](../examples/demo_Qt).
+A working example of how to link to an external project can be found in [./examples/demo_Qt](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt).
 
 ## Option 4: Using Compiler Flags
 If you are compiling a very simple program without the use of a builder, simply include the libpointmatcher header files by setting the include flag in your compiler.  Example:

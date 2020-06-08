@@ -47,7 +47,7 @@ sudo make install
 
 ### Testing
 
-Libpointmatcher ships with a version of the Google testing framework [GTest](https://code.google.com/p/googletest/).  Unit tests are located in utest/ and are compiled with libpointmatcher.  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
+Libpointmatcher ships with a version of the Google testing framework [GTest](https://github.com/google/googletest).  Unit tests are located in utest/ and are compiled with libpointmatcher.  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
 ```
 cd build
 utest/utest --path ../examples/data/

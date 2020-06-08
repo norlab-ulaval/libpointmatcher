@@ -65,7 +65,7 @@ The PLY format does not prescribe labels to elements or properties, and therefor
 ## Point Cloud Library File Format (PCD) Files
 The [Point Cloud Library](http://pointclouds.org/)(PCL) is an alternative library for handling 2D and 3D point clouds.  While libpointmatcher only performs the task of and is optimized for point cloud registration, PCL is widespread in its functionality.
 
-The developers of PCL have developed their [own file format](http://pointclouds.org/documentation/tutorials/pcd_file_format.php) for storing point clouds.  libpointmatcher is compatible with this format and can import and export PCD files in the latest format (v 0.7).
+The developers of PCL have developed their [own file format](https://pcl.readthedocs.io/projects/tutorials/en/latest/pcd_file_format.html) for storing point clouds.  libpointmatcher is compatible with this format and can import and export PCD files in the latest format (v 0.7).
 
 The PCD format also exists in binary, however only the plain text (ASCII) version is supported.  Because PCD does not prescribe standards for descriptors, libpointmatcher utilizes the [same identifier mapping](#descmaptable) for identifying descriptors.   
 
@@ -97,7 +97,7 @@ While most files should contain data structured in a natural order ie ("x", "y" 
 
 ---
 ### Note For libpointmatcher Developers
-The association between descriptor properties identifiers and libpointmatcher descriptor labels is set in the `getDescAssocationMap` function in [pointmatcher/IO.cpp](/pointmatcher/IO.cpp).  To extend IO support to additional descriptors, you can modify this function.
+The association between descriptor properties identifiers and libpointmatcher descriptor labels is set in the `getDescAssocationMap` function in [pointmatcher/IO.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/IO.cpp).  To extend IO support to additional descriptors, you can modify this function.
 
 The `getDescAssocationMap` returns a map which associates a property identifier and a pair consisting of a row number and a point matcher descriptor name.  For example, the descriptor identifier *nx* maps to row 0 of the *normals* libpointmatcher descriptor. Ie:
 
@@ -105,4 +105,4 @@ The `getDescAssocationMap` returns a map which associates a property identifier 
 "ny" -> (1, "normals") <br>
 "nz" -> (2, "normals")
 
-For converting libpointmatcher descriptors back to a property identifier, you must modify the  `getColLabel` function in [pointmatcher/IO.cpp](/pointmatcher/IO.cpp).
+For converting libpointmatcher descriptors back to a property identifier, you must modify the  `getColLabel` function in [pointmatcher/IO.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/IO.cpp).
