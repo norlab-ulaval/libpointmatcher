@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | [Previous](Transformations.md) | [Next](TransformationDev.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](ICPWithoutYaml.md) | [Next](TransformationDev.md) |
+| :--- | :---: | ---: |
 
 # Creating a DataPointsFilter
 
@@ -9,7 +9,7 @@ In the following tutorials we will discuss how you can extend the functionality 
 
 For a more detailed procedure or if it's the first time developping a filter, please see the example of the [VoxelGrid filter](#voxelgridhead). Here, to implement a _Dummy_ filter we have to follow these steps:
 
-1. Create files in the [pointmatcher/DataPointsFilters/](/pointmatcher/DataPointsFilters/) folder
+1. Create files in the [pointmatcher/DataPointsFilters/](https://github.com/ethz-asl/libpointmatcher/tree/master/pointmatcher/DataPointsFilters) folder
 	- the header : `Dummy.h`
 	- the implementation file : `Dummy.cpp`
 1. Declare your filter in the header with the minimal following interface:
@@ -46,7 +46,7 @@ For a more detailed procedure or if it's the first time developping a filter, pl
 	template struct DummyDataPointsFilter<float>;
 	template struct DummyDataPointsFilter<double>;
 	```
-1. Declare the filter in [pointmatcher/DataPointsFiltersImpl.h](/pointmatcher/DataPointsFiltersImpl.h) as follow:
+1. Declare the filter in [pointmatcher/DataPointsFiltersImpl.h](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/DataPointsFiltersImpl.h) as follow:
 	```cpp
 	#include "DataPointsFilters/Dummy.h"
 	template<typename T>
@@ -56,7 +56,7 @@ For a more detailed procedure or if it's the first time developping a filter, pl
 		/* our declaraction -> */ typedef ::DummyDataPointsFilter<T> DummyDataPointsFilter;
 	};
 	```
-1. Add it to the _Registry_ [pointmatcher/Registry.cpp](/pointmatcher/Registry.cpp)
+1. Add it to the _Registry_ [pointmatcher/Registry.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/Registry.cpp)
 	- If the filter has some parameters:
 	```cpp
 	ADD_TO_REGISTRAR(DataPointsFilter, DummyDataPointsFilter, typename DataPointsFiltersImpl<T>::DummyDataPointsFilter)
@@ -65,7 +65,7 @@ For a more detailed procedure or if it's the first time developping a filter, pl
 	```cpp
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, DummyDataPointsFilter, typename DataPointsFiltersImpl<T>::DummyDataPointsFilter)
 	```
-1. Finally, add the source file in the [CMakeLists.txt](/CMakeLists.txt) in the `POINTMATCHER_SRC` variable.
+1. Finally, add the source file in the [CMakeLists.txt](https://github.com/ethz-asl/libpointmatcher/blob/master/CMakeLists.txt) in the `POINTMATCHER_SRC` variable.
 
 
 ## The Voxel Grid Filter <a name="voxelgridhead"></a>
@@ -96,7 +96,7 @@ We will now implement the voxel grid within the framework of libpointmatcher.  O
 
 ### Declaration
 
-The implementations of data point filters are declared in [pointmatcher/DataPointsFilters/](/pointmatcher/DataPointsFilters/). In this folder, we add a new header and source file to implement our filter: for instance, here we create the file [pointmatcher/DataPointsFilters/VoxelGrid.h](/pointmatcher/DataPointsFilters/VoxelGrid.h). In this file, we declare a new templated struct called `VoxelGridDataPointsFiler`. This class is derived from the general class `PointMatcher<T>::DataPointsFilter` so as to inherit pure virtual methods and functionality that are common to all data point filters.
+The implementations of data point filters are declared in [pointmatcher/DataPointsFilters/](https://github.com/ethz-asl/libpointmatcher/tree/master/pointmatcher/DataPointsFilters). In this folder, we add a new header and source file to implement our filter: for instance, here we create the file [pointmatcher/DataPointsFilters/VoxelGrid.h](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/DataPointsFilters/VoxelGrid.h). In this file, we declare a new templated struct called `VoxelGridDataPointsFiler`. This class is derived from the general class `PointMatcher<T>::DataPointsFilter` so as to inherit pure virtual methods and functionality that are common to all data point filters.
 
 **Note:** *Libpointmatcher is a templated library and supports data of either float or double types. This allows users the flexibility of selecting between two levels of precision depending on the requirements of their application. As a result, classes which are added to libpointmatcher should be templated so as to support both types.*
 
@@ -172,7 +172,7 @@ The `filter` function performs the filter operation on the input point cloud and
 
 ### Implementation of the Filter
 
-The implementation of the filter must be in the file [pointmatcher/DataPointsFilters/VoxelGrid.cpp](/pointmatcher/DataPointsFilters/VoxelGrid.cpp) that should also be added to the [CMakelists.txt](/CMakelists.txt) in the `POINTMATCHER_SRC` variable.
+The implementation of the filter must be in the file [pointmatcher/DataPointsFilters/VoxelGrid.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/DataPointsFilters/VoxelGrid.cpp) that should also be added to the [CMakelists.txt](https://github.com/ethz-asl/libpointmatcher/blob/master/CMakeLists.txt) in the `POINTMATCHER_SRC` variable.
 
 The steps performed by the filter are all contained in the `inPlaceFilter` function.  Because the voxel grid filter does not sub-sample points from the input but rather creates new points, we use the following strategy for performing in place filtering.  
 
@@ -449,7 +449,7 @@ We first sort the points voxel points by index and place them in order, at the b
 
 ## Registering the Filter as a Libpointmatcher Module
 
-First, we have to declare it in [pointmatcher/DataPointsFiltersImpl.h](/pointmatcher/DataPointsFiltersImpl.h) as follow:
+First, we have to declare it in [pointmatcher/DataPointsFiltersImpl.h](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/DataPointsFiltersImpl.h) as follow:
 
 ```cpp
 template<typename T>
@@ -460,7 +460,7 @@ struct DataPointsFiltersImpl
 };
 ```
 
-Now that we have completed the implementation of our voxel filter, we can add it to libpointmatcher as a usable DataPointsFilter.  We do so by adding the following macro function in [pointmatcher/Registry.cpp](/pointmatcher/Registry.cpp)
+Now that we have completed the implementation of our voxel filter, we can add it to libpointmatcher as a usable DataPointsFilter.  We do so by adding the following macro function in [pointmatcher/Registry.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/Registry.cpp)
 
 ```cpp
 ADD_TO_REGISTRAR(DataPointsFilter, VoxelGridDataPointsFilter, typename DataPointsFiltersImpl<T>::VoxelGridDataPointsFilter)
@@ -469,7 +469,9 @@ ADD_TO_REGISTRAR(DataPointsFilter, VoxelGridDataPointsFilter, typename DataPoint
 Now recompile the library and check that the new transformation is listed as an available module by running `pcmip -l | grep -C 10 VoxelGridDataPointsFilter`.
 
 ## Where To Go From Here
-If you are not comfortable with the material covered in this tutorial, we suggest that you attempt to re-design a very simple filter such as the `MaxDistDataPointsFilter`.  You can find its implementation in [pointmatcher/DataPointsFilters/MaxDist.h](pointmatcher/DataPointsFilters/MaxDist.h) and [pointmatcher/DataPointsFilters/MaxDist.cpp](pointmatcher/DataPointsFilters/MaxDist.cpp) with which to compare your solution.
+If you are not comfortable with the material covered in this tutorial, we suggest that you
+ attempt to re-design a very simple filter such as the `MaxDistDataPointsFilter`. You can find
+  its implementation in [pointmatcher/DataPointsFilters/MaxDist.h](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/DataPointsFilters/MaxDist.h) and [pointmatcher/DataPointsFilters/MaxDist.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/DataPointsFilters/MaxDist.cpp) with which to compare your solution.
 
 For more information on extending libpointmatcher the [next tutorial](TransformationDev.md) covers the design of a transformation class and is similar in nature to this tutorial.
 

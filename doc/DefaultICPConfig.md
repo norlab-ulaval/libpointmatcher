@@ -1,16 +1,16 @@
-| [Tutorials Home](index.md)    | [Previous](ICPIntro.md) | [Next](Configuration.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](ICPIntro.md) | [Next](Configuration.md) |
+| :--- | :---: | ---: |
 
 # Default Configuration of the ICP Chain
 
 The following details the default configuration for ICP in libpointmatcher.
 
 |Figure 1: Default ICP chain configuration|
-|:------|
+| :--- |
 |![Default ICP Chain Configuration](images/default_icp_chain.svg)|
 
 ## Data Filters
-Both the reference and reading clouds are processed with [random sampling](Datafilters.md#randomsamplinghead) filters.  These will sample each data point with a probability of 0.75 thus yielding smaller point clouds.
+Both the reference and reading clouds are processed with [random sampling](DataFilters.md#randomsamplinghead) filters.  These will sample each data point with a probability of 0.75 thus yielding smaller point clouds.
 
 ## Matcher
 The default matcher is the KD tree matcher.  Each point is matched to its closest neighbor in the reference cloud.  A KD tree with a linear heap is used.

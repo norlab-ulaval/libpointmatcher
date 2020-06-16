@@ -1,7 +1,7 @@
-| [Tutorials Home](index.md)    | | [Next](Datafilters.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](index.md) | [Next](CompilationWindows.md) |
+| :--- | :---: | ---: |
 
-# Compiling and Installing libpointmatcher on your Computer
+# Compiling and Installing libpointmatcher on Ubuntu
 
 ## In short...
 If you are used to development projects, here is what you need:
@@ -27,7 +27,7 @@ The rest of this tutorial will guide you through the different requirements step
 ### Some Basic Requirements 
 
 #### a. Installing Boost
-[Boost](www.boost.org) is a widely-used C++ library and is included in most Linux distributions.  You can quickly check if Boost is installed on your system by running
+[Boost](https://www.boost.org/) is a widely-used C++ library and is included in most Linux distributions.  You can quickly check if Boost is installed on your system by running
 
 ```
 ldconfig -p | grep libboost
@@ -115,7 +115,7 @@ The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is so
 -->
 
 ### 4. Compiling the Documentation (optional)
-Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
+Libpointmatcher is documented directly in the source-code using [Doxygen](https://www.doxygen.nl/index.html).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
 
 ```
 sudo apt-get install doxygen
