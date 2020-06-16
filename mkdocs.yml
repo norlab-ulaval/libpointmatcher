@@ -4,6 +4,10 @@ edit_uri: edit/master/doc
 site_description: An "Iterative Closest Point" library for 2-D/3-D mapping in robotic
 google_analytics: ['UA-70950258-1', 'libpointmatcher.readthedocs.org']
 docs_dir: 'doc'
+theme:
+    name: mkdocs
+    navigation_depth: 3
+    hljs_style: atom-one-light
 nav:
 - Home: 'index.md'
 - Compilation:
