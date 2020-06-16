@@ -1,0 +1,9 @@
+Pygments
+setuptools
+docutils
+mock
+pillow
+alabaster
+commonmark
+recommonmark
+mkdocs
