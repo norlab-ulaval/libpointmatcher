@@ -1,5 +1,5 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](Pointclouds.md) | [Next](DataPointsFilterDev.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](BasicRegistration.md) | [Next](ICPWithoutYaml.md) |
+| :--- | :---: | ---: |
 
 # Applying Transformations to Point Clouds
 

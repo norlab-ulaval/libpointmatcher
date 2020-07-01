@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | [Previous](LinkingProjects.md) | [Next](Pointclouds.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](LinkingProjects.md) | [Next](PointClouds.md) |
+| :--- | :---: | ---: |
 
 # Using libpointmatcher in ROS
 
