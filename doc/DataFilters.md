@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | [Previous](Compilation.md) | [Next](ApplyingDatafilters.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](ApplicationsAndPub.md) | [Next](ApplyingDataFilters.md) |
+| :--- | :---: | ---: |
 
 # Datapoint Filters
 
@@ -55,6 +55,8 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 4. [Sampling Surface Normal Filter](#samplingnormhead)
 
 5. [Simple Sensor Noise Filter](#sensornoisehead)
+
+6. [Fixed Step Sampling Filter](#fixedstepsamplinghead)
 
 
 ## An Example Point Cloud View of an Appartment
@@ -557,7 +559,8 @@ We reuse the same apartment section to illustrate the sampling of normal vectors
 ## Simple Sensor Noise Filter <a name="sensornoisehead"></a>
 
 ### Description
-This filter is used to augment points with an estimation of position uncertainty based on sensor specifications.  So far the [SICK LMS](http://www.sick.com/group/EN/home/products/product_news/laser_measurement_systems/Pages/lms100.aspx), [Hokuyo](http://www.hokuyo-aut.jp/02sensor/index.html#scanner) URG-04LX and UTM-30LX, as well as the Microsoft [Kinect](http://www.microsoft.com/en-us/kinectforwindows/) and Asus [Xtion](http://www.asus.com/Multimedia/Xtion_PRO_LIVE/) sensors are supported.  The uncertainty or noise radius is represented in meters, and can be adjusted by varying a gain parameter which amplifies predefined uncertainty levels.
+This filter is used to augment points with an estimation of position uncertainty based on sensor
+ specifications.  So far the [SICK LMS](https://www.sick.com/us/en/detection-and-ranging-solutions/2d-lidar-sensors/lms1xx/lms100-10000/p/p109841), Hokuyo [URG-04LX](https://www.hokuyo-aut.jp/search/single.php?serial=165) and [UTM-30LX](https://www.hokuyo-aut.jp/search/single.php?serial=169), as well as the Microsoft [Kinect](https://developer.microsoft.com/en-us/windows/kinect/) and Asus [Xtion](https://www.asus.com/3D-Sensor/Xtion_PRO_LIVE/) sensors are supported.  The uncertainty or noise radius is represented in meters, and can be adjusted by varying a gain parameter which amplifies predefined uncertainty levels.
 
 __Required descriptors:__  none  
 __Output descriptor:__ `simpleSensorNoise`  
@@ -578,9 +581,9 @@ In the following image we show a side view of local point cloud 3 in the dataset
 |---|:---|
 |![samp norm after](images/hg_noise.png " Side view of a view 3 from the HG dataset") | sensorType : 1 |
 
-## Fixed Step Sampling Filter (To be completed)
+## Fixed Step Sampling Filter (To be completed) <a name="fixedstepsamplinghead"></a>
 The number of points in a point cloud can be reduced by taking random point subsamples.  The filter is parametrized so that a fixed number of points - selected uniformly at random - are 'rejected' in the filtering process.
 
 ## Where To Go From Here
-This concludes the overview of data point filters.  For a tutorial on writing a simple application for applying data point filters to an input point cloud, go [here](ApplyingDatafilters.md).  To learn more about the general configuration of the ICP chain go [here](DefaultICPConfig.md).  
+This concludes the overview of data point filters.  For a tutorial on writing a simple application for applying data point filters to an input point cloud, go [here](ApplyingDataFilters.md).  To learn more about the general configuration of the ICP chain go [here](DefaultICPConfig.md).  
 

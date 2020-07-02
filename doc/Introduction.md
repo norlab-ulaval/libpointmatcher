@@ -1,3 +1,6 @@
+| [Tutorials Home](index.md) | [Previous](CompilationMac.md) | [Next](ApplicationsAndPub.md) |
+| :--- | :---: | ---: |
+
 # What is libpointmatcher about? 
 
 libpointmatcher is a library that implements the Iterative Closest
@@ -13,10 +16,10 @@ so that T * S = R.
 The [Wikipedia article on ICP](https://en.wikipedia.org/wiki/Iterative_closest_point) has more
 information.
 
-libpointmatcher implements a [set of filters](Datafilters.md) to help
+libpointmatcher implements a [set of filters](DataFilters.md) to help
 denoise and subsample the input point clouds. It supports a [variety
 of file types](ImportExport.md) and it can be configured via both
-[YAML files](Configuration.md) and an [in-memory API](icpWithoutYaml.md).
+[YAML files](Configuration.md) and an [in-memory API](ICPWithoutYaml.md).
 
 libpointmatcher is written in C++.
 

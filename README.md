@@ -12,7 +12,7 @@ libpointmatcher is a modular library implementing the Iterative Closest Point (I
 
 Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
 
-Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](http://docs.ros.org/groovy/api/libpointmatcher/html/), but it is suggested to use the one build for your version in `doc/html`. 
+Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](https://norlab.ulaval.ca/libpointmatcher-doc/), but it is suggested to use the one build for your version in `doc/html`. 
 
 libpointmatcher is being developed by [François Pomerleau](mailto:f.pomerleau@gmail.com) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 
@@ -30,13 +30,13 @@ The library has a light dependency list:
  * [libnabo] version 1.0.7, a fast K Nearest Neighbour library for low-dimensional spaces,
  
 and was compiled on:
-  * Ubuntu ([see how](/doc/Compilation.md))
+  * Ubuntu ([see how](/doc/CompilationUbuntu.md))
   * Mac OS X ([see how](/doc/CompilationMac.md))
   * Windows ([see how](/doc/CompilationWindows.md) - partially supported)
 
 ### Compilation & Installation 
 
-For beginner users who are not familiar with compiling and installing a library in Linux, go [here](doc/Compilation.md) for detailed instructions on how to compile libpointmatcher from the source code.  If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
+For beginner users who are not familiar with compiling and installing a library in Linux, go [here](doc/CompilationUbuntu.md) for detailed instructions on how to compile libpointmatcher from the source code.  If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
 
 ```
 mkdir build && cd build
@@ -47,7 +47,7 @@ sudo make install
 
 ### Testing
 
-Libpointmatcher ships with a version of the Google testing framework [GTest](https://code.google.com/p/googletest/).  Unit tests are located in utest/ and are compiled with libpointmatcher.  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
+Libpointmatcher ships with a version of the Google testing framework [GTest](https://github.com/google/googletest).  Unit tests are located in utest/ and are compiled with libpointmatcher.  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
 ```
 cd build
 utest/utest --path ../examples/data/

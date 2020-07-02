@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | [Previous](UsingInRos.md) | [Next](Transformations.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](UsingInRos.md) | [Next](BasicRegistration.md) |
+| :--- | :---: | ---: |
 
 # Point Clouds in Libpointmatcher
 
