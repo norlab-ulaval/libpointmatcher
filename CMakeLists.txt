@@ -314,7 +314,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/PointToPointWithCov.cpp
 	pointmatcher/ErrorMinimizers/PointToPointSimilarity.cpp
 	pointmatcher/ErrorMinimizers/Identity.cpp
-#DataPointsFilters	
+#DataPointsFilters
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
@@ -435,15 +435,6 @@ endif(GENERATE_API_DOC)
 add_subdirectory(examples)
 # Evaluation programs
 add_subdirectory(evaluations)
-
-# Unit testing
-
-option(BUILD_TESTS "Build all tests." OFF)
-
-if (BUILD_TESTS)
-	enable_testing()
-	add_subdirectory(utest)
-endif()
 
 #=================== allow find_package() =========================
 #
