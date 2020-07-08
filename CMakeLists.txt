@@ -111,7 +111,6 @@ set(EXTRA_DEPS "")
 # compile local version of gtest and yaml-cpp
 add_subdirectory(contrib)
 
-
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
