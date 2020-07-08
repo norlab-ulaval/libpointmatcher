@@ -437,7 +437,7 @@ add_subdirectory(evaluations)
 
 # Unit testing
 
-option(BUILD_TESTS "Build all tests." ON)
+option(BUILD_TESTS "Build all tests." OFF)
 
 if (BUILD_TESTS)
 	enable_testing()
