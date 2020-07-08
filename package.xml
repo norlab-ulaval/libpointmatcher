@@ -9,6 +9,8 @@
 	<url type="repository">https://github.com/ethz-asl/libpointmatcher</url>
 
 	<buildtool_depend>cmake</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
 
 	<build_depend>boost</build_depend>
 	<build_depend>libnabo</build_depend>

@@ -436,6 +436,15 @@ add_subdirectory(examples)
 # Evaluation programs
 add_subdirectory(evaluations)
 
+# Unit testing
+
+option(BUILD_TESTS "Build all tests." ON)
+
+if (BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(utest)
+endif()
+
 #=================== allow find_package() =========================
 #
 # the following case be used in an external project requiring libpointmatcher:
@@ -534,3 +543,7 @@ configure_file(
 
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+find_package(catkin_simple REQUIRED)
+cs_install()
+cs_export()
