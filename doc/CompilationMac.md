@@ -1,5 +1,5 @@
-| [Tutorials Home](index.md)    | | [Next](Datafilters.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](CompilationWindows.md) | [Next](Introduction.md) |
+| :--- | :---: | ---: |
 
 # Compiling and Installing libpointmatcher on your Computer (Mac OS X Instructions)
 
@@ -57,7 +57,7 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 Once the scripts finishes installing, you are good to go!
 
 #### c. Installing Boost
-[Boost](www.boost.org) is a widely-used C++ library and is included in most Linux distributions.  Mac OS X does not ship with Boost so if you have never used it before, you probably need to install it.  You can install the latest version of boost with the following homebrew command:
+[Boost](https://www.boost.org/) is a widely-used C++ library and is included in most Linux distributions.  Mac OS X does not ship with Boost so if you have never used it before, you probably need to install it.  You can install the latest version of boost with the following homebrew command:
 
 	brew install boost
 
@@ -88,7 +88,7 @@ The Eigen linear algebra is required before installing libpointmatcher and can b
 	brew install eigen
 
 ### 2. Compiling the Documentation (optional)
-Libpointmatcher is documented directly in the source-code using [Doxygen](http://www.stack.nl/~dimitri/doxygen/).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
+Libpointmatcher is documented directly in the source-code using [Doxygen](https://www.doxygen.nl/index.html).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
 
 	brew install doxygen
 

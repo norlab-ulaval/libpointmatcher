@@ -480,7 +480,7 @@ void GestaltDataPointsFilter<T>::fuseRange(
       // sort points into Gestalt bins
       const T angularBinWidth = M_PI/4;
       const T radialBinWidth = radius/4;
-      Matrix indices(2, colCount);
+      Eigen::MatrixXi indices(2, colCount);
       gestaltMeans = Matrix::Zero(4, 8);
       gestaltVariances = Matrix::Zero(4, 8);
       numOfValues = Matrix::Zero(4, 8);
