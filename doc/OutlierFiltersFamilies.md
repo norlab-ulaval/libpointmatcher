@@ -194,7 +194,7 @@ This outlier filter is also used in the ICP variant Kernel-Correlation:
 
 * R.E. Welsch, "Robust Regression Using Iteratively Reweighted Least-squares", Communications in Statistics - Theory and Methods, vol. 6, no. 9, pp.813-827, 1977.
 
-#### Andrew <a name="andrewhead"></a>
+#### Andrew <a name="andrewhead"></a>
 
 **Equations:**
 
@@ -274,7 +274,7 @@ The LMICP outlier filter overlaps with the plot of Huber.
 
 ![step family plot](images/step_family.png)
 
-#### L1 <a name="l1head"></a>
+#### L1 <a name="l1head"></a>
 
 L1 is a function which is a part of the Lp space family of functions. 
 This outlier filter is parameter-less, so no parameter needs to be tuned.
