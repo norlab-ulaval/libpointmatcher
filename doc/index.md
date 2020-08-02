@@ -22,6 +22,7 @@ Beginner<a name="beginner"></a>
 - [What can I do with libpointmatcher?](ApplicationsAndPub.md)
 - [What the different data filters do?](DataFilters.md)
 - [Example: Applying a chain of data filters](ApplyingDataFilters.md)
+- [What are the different outlier filters?](OutlierFiltersFamilies.md)
 - [Example: An introduction to ICP](ICPIntro.md)
 - [The ICP chain configuration and its variants](DefaultICPConfig.md)
 - [Configuring libpointmatcher using YAML](Configuration.md)

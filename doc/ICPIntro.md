@@ -1,4 +1,4 @@
-| [Tutorials Home](index.md) | [Previous](ApplyingDataFilters.md) | [Next](DefaultICPConfig.md) |
+| [Tutorials Home](index.md) | [Previous](OutlierFiltersFamilies.md) | [Next](DefaultICPConfig.md) |
 | :--- | :---: | ---: |
 
 # An Introduction to ICP Registration
