@@ -93,7 +93,7 @@ For this type of problem M-estimator are common outlier filters.
 The weighted linear regression was used in order to illustrate the effect of k on outlier filtering. 
 For this example, the chosen outlier filter is [Cauchy](#cauchyhead) and the problem is to have better results than an unweighted linear regression. 
 The tuning of the k parameter will determine the efficiency of the outlier filtering. 
-In the following example, a value of k which is nearly equal to the maximum error on the first iteration gives results as poor as un unweighted linear regression.
+In the following example, a value of k which is nearly equal to the maximum error gives results as poor as un unweighted linear regression.
 
 ![cauchy example](images/cauchy_weighted_linear_regression.png)
 
@@ -158,7 +158,7 @@ Therefore, Welsch and Geman-McClure are hidden under KC and FGR and can't be see
 
 * S. Geman, D.E. McClure, and D. Geman, "A nonlinear filter for film restoration and other problems in image processing", CVGIP: Graphical Models and Image Processing, vol. 54, no.4, pp.281-289, 1992.
 
-This outlier filter is also used in an ICP variant called Fast Global Registration (FGR):
+This outlier filter is also used in an registration algorithm called Fast Global Registration (FGR):
 * Q.Y. Zhou, J. Park, and V.Koltun, "Fast global registration", Lecture notes in Computer Science, vol.9906 LNCS, pp. 766-782, 2016
 
 #### Welsch <a name="welschhead"></a>
@@ -176,7 +176,7 @@ This outlier filter is also used in an ICP variant called Fast Global Registrati
 
 * R.E. Welsch, "Robust Regression Using Iteratively Reweighted Least-squares", Communications in Statistics - Theory and Methods, vol. 6, no. 9, pp.813-827, 1977.
 
-This outlier filter is also used in the ICP variant Kernel-Correlation:
+This outlier filter is also used in the registration algorithm called Kernel-Correlation (KC):
 * Y.Tsin and T.Kanade, "A Correlation-Based Approach to Robust Point Set Registration", in 8th European Conference on Computer Vision, vol.0 , 2004, pp.558-569.
 
 #### Tukey <a name="tukeyhead"></a>
@@ -447,7 +447,7 @@ This can be explained by the fact that (s) is the predominant tuning parameter f
 
 * M.A.Fischler and R.C. Bolles, "Random sample consensus: a paradigm for the model fitting with applications to image analysis and automated cartography", Communications of the ACM, vol.24, no.6, pp.381-395, 1981.
 
-### Relative motion threshold (RMT) <a name="rmthead"></a>
+#### Relative motion threshold (RMT) <a name="rmthead"></a>
 
 The relative motion threshold (RMT) uses a threshold based on translation between two transforms. 
 In our simplified case this motion threshold was the mean of the absolute values of the translation on the y axis between two iterations. 
@@ -469,7 +469,7 @@ Therefore the results of RMT are more dependent of the way dt is computed than t
 
 * F.Pomerleau, F.Colas, F.Ferland, and F.Michaud,"Relative Motion Threshold for Rejection in ICP Registration", Field and Service Robotics, vol.62 p.229-238, Jul.2015.
 
-### BiDisance <a name="bidistancehead"></a>
+#### BiDisance <a name="bidistancehead"></a>
 
 The BiDistance outlier filtering method affects an uniform weight based on the tuning parameter k and a parameter computed at each iteration noted B. 
 This computed parameter is the bidirectional correspondence between the two point sets. Since this outlier filter is a weight function with two variables, it can be plotted as a 3D graph. 
