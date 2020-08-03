@@ -88,7 +88,7 @@ For this type of problem M-estimator are common outlier filters.
  Although some outlier filters don't rely on M-estimators to perform the outlier filtering. 
  Some outlier filters use random sampling ([RANSAC](#ransachead)) or other parameters based on motions between two iterations of the algorithms ([RMT](#rmthead)).
 
-**Effect of the tuning parameter k**
+### Effect of the tuning parameter k
 
 The weighted linear regression was used in order to illustrate the effect of k on outlier filtering. 
 For this example, the chosen outlier filter is [Cauchy](#cauchyhead) and the problem is to have better results than an unweighted linear regression. 

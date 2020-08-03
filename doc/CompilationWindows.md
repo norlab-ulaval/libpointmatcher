@@ -27,10 +27,8 @@ The rest of this tutorial will guide you through the different requirements step
 1. Open a console that knows the path to the MSVC compiler command (cl). We suggest using **Windows PowerShell**. An alternative is **Developer Command Prompt**, which can be located in the Start menu in the Visual Studio section.
 1. Go to your Boost source directory, and do:
 
-    ```
-    $ .\bootstrap.bat
-    $ .\b2.exe install --prefix=build address-model=64
-    ```
+        $ .\bootstrap.bat
+        $ .\b2.exe install --prefix=build address-model=64
 
 1. It may take a while to finish.
 
@@ -67,9 +65,7 @@ You may need to install grep to build libnabo. You can get the Windows version [
 
     Alternatively, you can build the solution from the command line. In _(your libnabo folder)_/build:
 
-    ```
-    $ msbuild /m:2 libnabo.sln
-    ```
+        $ msbuild /m:2 libnabo.sln
 
     (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
 
@@ -97,9 +93,8 @@ You may need to install grep to build libnabo. You can get the Windows version [
 
     Alternatively, you can build the solution from the command line. In _(your libpointmatcher folder)_/build:
 
-    ```
-    $ msbuild /m:2 libpointmatcher.sln
-    ```
+
+        $ msbuild /m:2 libpointmatcher.sln
 
     (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
 
@@ -111,7 +106,7 @@ Currently, we don't have a developer fully supporting compilation on Windows. If
 Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side. Here are some of them:
 
 - Your directory structure need to be well organized as mention in [Issue #136](https://github.com/ethz-asl/libpointmatcher/issues/136).
-- There might be some problems related to libnabo as mention in [Issue #128](https://github.com/ethz-asl/libpointmatcher/issues/118).
+- There might be some problems related to libnabo as mention in [Issue #118](https://github.com/ethz-asl/libpointmatcher/issues/118).
 
 ## Special Thanks
 

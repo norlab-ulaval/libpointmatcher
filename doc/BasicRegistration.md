@@ -19,12 +19,13 @@ The ICP algorithm has the following characteristics:
 The various components which comprise the ICP registration system are shown in the following diagram.    
 
 |**Figure 1:** High level diagram of an ICP chain<a name="icp_chain_diagram"></a>|
-|:------|
+|:------:|
 |![Default ICP Chain Config](images/modular_cloud_matcher_icp_chain.png)|
 
 Firstly, the reading and reference clouds are processed using a combination of data filters so as to remove noise and augment data-points with descriptive information.  The matching step associates each point in the the reading cloud with one in the reference cloud.  Statistical outliers are removed by a chain of outlier filters.  Subsequently, a transformation is computed by solving the cost minimization step.  Transformations are verified to improve alignment at ever iteration and therefore that the process converges towards an optimal transformation.
 
 ## A Very Simple ICP program
+
 The program contained in `icp_simple.cpp` performs registration between point clouds using the default settings of libpointmatcher.  The point clouds should be encoded in .csv files.  Some example point clouds are located in the `examples/data/` directory.  We will now step through and explain the code.
 
 The `validateArgs` function is used to ensure that exactly two arguments are supplied: the paths to the reference and reader clouds.  Note that the first argument specifies the reference and the second the reader.
@@ -97,6 +98,7 @@ cout << "Final transformation:" << endl << T << endl;
 ```
 
 ### Car Example
+
 We run the example code with two 3D point clouds representing the same scene from the car dataset in `/examples/data/car_cloud400.csv` and `/examples/data/car_cloud401.csv`.
 
 ```
@@ -112,5 +114,5 @@ Final transformation:
 ```
 
 |**Figure 2:** Visualization of ICP on car example.  The white points correspond to the reading cloud, red to the reference, and blue to the aligned reading cloud.|
-|:-----------|
+|:-----------:|
 |![car example](images/car_example.png)|
