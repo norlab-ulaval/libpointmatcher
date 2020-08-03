@@ -4,11 +4,13 @@
 # Applying Data Point Filters
 
 ## Overview
+
 The following will go through the steps needed to write a simple program which configures a chain of data filters and applies this chain to a point cloud.  For information on data filters, refer to the [data point filters tutorial](DataFilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/demo_cmake/convert.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_cmake/convert.cpp).
 
 ***IMPORTANT:*** This tutorial makes use of YAML configuration files.  If you did not install yaml-cpp before installing libpointmatcher, you must do so before following these instructions.  Information on installing yaml-cpp can be found in the installation instructions for [Ubuntu](CompilationUbuntu.md), [Windows](CompilationWindows.md) and [Mac OS X](CompilationMac.md).
 
 ## Source Description
+
 First, we include the libpointmatcher and standard library header files.
 
 ```cpp
@@ -44,7 +46,9 @@ Now entering inside the main function of the program:  We create a logger to whi
 ```cpp
 setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
 ```
+
 We then load the input point cloud into a new `DataPoints` object `d`.
+
 ```cppp
 DP d(DP::load(argv[argc-2]));
 ```
@@ -76,14 +80,16 @@ return 0;
 ```
 
 ## Configuring the Data Filters Chain
+
 An example configuration file can be found at [examples/data/default-convert.yaml](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/data/default-convert.yaml).  A diagram of this chain is shown in Figure 1.
 
 |**Figure 1**: Default chain of data filters in `default-convert.yaml`|
-|---|
+|:---:|
 | ![Default Configuration Chain](images/DefaultConvertChain.png) |
 
 
 ### Bounding Box Filter
+
 The first element is a [bounding box filter](DataFilters.md#boundingboxhead). It is configured to reject points inside a 8m x 8m x 8m cube centered at the origin. 
 
 ```yaml
@@ -98,6 +104,7 @@ The first element is a [bounding box filter](DataFilters.md#boundingboxhead). It
 ```
 
 ### Sampling Surface Normal Filter
+
 A [sampling surface normal filter](DataFilters.md#samplingnormhead) can be used in an attempt to subsample points while maintaining the shape structure of objects in the point cloud.  The point cloud is divided into boxes containing at most 10 points.  Points along flat surfaces are contained in larger boxes and are sparsely sampled while points on more complex surfaces are densely sampled. 
 
 ```yaml
@@ -106,6 +113,7 @@ A [sampling surface normal filter](DataFilters.md#samplingnormhead) can be used 
 ```
 
 ### Observation Direction Filter
+
 The points are annotated with an observation direction pointing to the sensor location with the [observation direction filter](DataFilters.md#obsdirectionhead).
 
 ```yaml
@@ -113,6 +121,7 @@ The points are annotated with an observation direction pointing to the sensor lo
 ```
 
 ### Orient Normals Filter
+
 The [last filter](DataFilters.md#orientnormalshead) is used to reorient normal vectors so that they point in the same direction.  This filter uses the observation directions extracted by the previous filter.
 
 ```yaml
@@ -120,5 +129,6 @@ The [last filter](DataFilters.md#orientnormalshead) is used to reorient normal v
 ```
 
 ## Where To Go From Here
+
 For more information on building your own configurations, refer to the tutorial on [building yaml configurations](Configuration.md).
 

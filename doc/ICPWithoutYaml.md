@@ -6,14 +6,17 @@
 See [examples/icp_customized.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_customized.cpp) for a working example.
 
 Here are the important part of the example. First, generate an empty ICP object with some generic variables:
-```c++
+
+```cpp
 // Create the default ICP algorithm
 PM::ICP icp;
 PointMatcherSupport::Parametrizable::Parameters params;
 std::string name;
 ```
+
 Prepare the objects for the DataFilters:
-```c++
+
+```cpp
 // Prepare reading filters
 name = "MinDistDataPointsFilter";
 params["minDist"] = "1.0";
@@ -42,7 +45,8 @@ params.clear();
 ```
 
 Prepare the objects for the Matchers:
-```c++
+
+```cpp
 // Prepare matching function
 name = "KDTreeMatcher";
 params["knn"] = "1";
@@ -53,7 +57,8 @@ params.clear();
 ```
 
 Prepare the objects for the OutlierFilters:
-```c++
+
+```cpp
 // Prepare outlier filters
 name = "TrimmedDistOutlierFilter";
 params["ratio"] = "0.75";
@@ -63,7 +68,8 @@ params.clear();
 ```
 
 Prepare the object for the ErrorMinimizer:
-```c++
+
+```cpp
 // Prepare error minimization
 name = "PointToPointErrorMinimizer";
 PM::ErrorMinimizer* pointToPoint =   
@@ -71,7 +77,8 @@ PM::ErrorMinimizer* pointToPoint =
 ```
 
 Prepare the objects for the TransformationCheckers:
-```c++
+
+```cpp
 // Prepare outlier filters
 name = "CounterTransformationChecker";
 params["maxIterationCount"] = "150";
@@ -86,25 +93,27 @@ params["smoothLength"] = "4";
 PM::TransformationChecker* diff = 
 	PM::get().TransformationCheckerRegistrar.create(name, params);
 params.clear();
-
 ```
 
 Prepare the objects for the Inspector:
-```c++
+
+```cpp
 // Prepare inspector
 PM::Inspector* nullInspect =
 	PM::get().InspectorRegistrar.create("NullInspector");
-
 ```
 
 Prepare the objects for the Transformation:
-```c++	
+
+```cpp
 // Prepare transformation
 PM::Transformation* rigidTrans =
 	PM::get().TransformationRegistrar.create("RigidTransformation");
 ```
+
 Finally, build the complet solution:
-```c++
+
+```cpp
 // Build ICP solution
 icp.readingDataPointsFilters.push_back(minDist_read);
 icp.readingDataPointsFilters.push_back(rand_read);

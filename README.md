@@ -4,8 +4,8 @@
 ---
 
 
-Documentation and Tutorials
-===========================
+# Documentation and Tutorials
+
 libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
 
 **Quick link for the tutorial pages: [Tutorials](doc/index.md) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
@@ -18,8 +18,7 @@ libpointmatcher is being developed by [François Pomerleau](mailto:f.pomerleau@g
 
 You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 
-Quick Start
-==================
+# Quick Start
 
 Although we suggest to use the [tutorials](doc/index.md), here is a quick version of it:
 
@@ -38,7 +37,7 @@ and was compiled on:
 
 For beginner users who are not familiar with compiling and installing a library in Linux, go [here](doc/CompilationUbuntu.md) for detailed instructions on how to compile libpointmatcher from the source code.  If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
 
-```
+```bash
 mkdir build && cd build
 cmake ..
 make
@@ -47,13 +46,15 @@ sudo make install
 
 ### Testing
 
-Libpointmatcher ships with a version of the Google testing framework [GTest](https://github.com/google/googletest).  Unit tests are located in utest/ and are compiled with libpointmatcher.  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
-```
+Libpointmatcher ships with a version of the Google testing framework [GTest](https://github.com/google/googletest).  Unit tests are located in the `utest/` directory and are compiled with libpointmatcher (CMake variable `BUILD_TESTS` must be set to `TRUE` first).  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
+
+```bash
 cd build
 utest/utest --path ../examples/data/
 ```
 
 ### Linking to external projects.
+
 We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_Qt), which manually list all the dependencies in the file [`demo.pro`](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system.
 
 
@@ -70,8 +71,7 @@ The library support different file formats for importing or exporting data:
 
 Those functionnalities are available without increasing the list of dependencies at the expense of a limited functionality support. For more details, see the tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using those file formats from the command line can be found in `./example/` and are described [here](doc/ICPIntro.md) in more details 
 
-Citing
-======
+# Citing
 
 If you use libpointmatcher in an academic context, please cite the following publication:
 
@@ -97,16 +97,16 @@ and/or
 		year = {2011}
 	}
 
-Extra Reading
-=============
+# Extra Reading
+
 If you are interested in learning more about different registration algorithms, we recently put together a literature review surveying multiple solutions. The review is organized in the same way as the library and many examples are provided based on real deployments.
 
 F. Pomerleau, F. Colas and R. Siegwart (2015), "_A Review of Point Cloud Registration Algorithms for Mobile Robotics_", __Foundations and Trends® in Robotics__: Vol. 4: No. 1, pp 1-104.  https://doi.org/10.1561/2300000035 
 
 If you don't have access to the journal, you can download it from [here](https://www.researchgate.net/publication/277558596_A_Review_of_Point_Cloud_Registration_Algorithms_for_Mobile_Robotics).
 
-More Point Clouds
-=================
+# More Point Clouds
+
 We also produced those freely available data sets to test different registration solutions:
 
 [_Challenging data sets for point cloud registration algorithms_](http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:laserregistration)
@@ -116,8 +116,7 @@ We also produced those freely available data sets to test different registration
 You can download the files in CSV or VTK formats, which are directly supported by the library I/O module. 
 
 
-Projects and Partners
-=====================
+# Projects and Partners
 
 If you are using libpointmatcher in your project and you would like to have it listed here, please contact [François Pomerleau](mailto:f.pomerleau@gmail.com).
 
@@ -129,21 +128,20 @@ If you are using libpointmatcher in your project and you would like to have it l
 For a larger list of work realized with libpointmatcher, please see the page [Applications And Publications](/doc/ApplicationsAndPub.md).
 
 
-License
-=======
+# License
 
 libpointmatcher is released under a permissive BSD license. Enjoy!
 
 [Ubuntu]: http://www.ubuntu.com
 [CMake]: http://www.cmake.org
-[CMake documentation]: http://www.cmake.org/cmake/help/cmake2.6docs.html
+[CMake documentation]: https://cmake.org/cmake/help/v3.10/
 [git]: http://git-scm.com
 [Eigen]: http://eigen.tuxfamily.org
 [libnabo]: http://github.com/ethz-asl/libnabo
 [ROS]: http://www.ros.org/
 [Paraview]: http://www.paraview.org/
-[yaml-cpp]: http://code.google.com/p/yaml-cpp/
-[Doxygen]: http://www.stack.nl/~dimitri/doxygen/
+[yaml-cpp]: https://github.com/jbeder/yaml-cpp
+[Doxygen]: https://www.doxygen.nl/index.html
 [boost]: http://www.boost.org/
 
 
