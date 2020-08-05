@@ -58,14 +58,17 @@ struct RandomSamplingDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
-			{"prob", "probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T>}
+			{"prob", "Probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T>},
+			{"randomSamplingMethod", "Random sampling method: Direct RNG (0) (fastest), Uniform (1) (more accurate but slower)", "0", "0", "1", &P::Comp<int>}
 		};
 	}
 	
 	const double prob;
+	const int randomSamplingMethod;
 	
 	RandomSamplingDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~RandomSamplingDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
+	Eigen::VectorXf sampleRandomIndices(const int nbPoints);
 };

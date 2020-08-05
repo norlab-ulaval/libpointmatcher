@@ -34,12 +34,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "RandomSampling.h"
 
+#include <random>
+
 // RandomSamplingDataPointsFilter
 // Constructor
 template<typename T>
 RandomSamplingDataPointsFilter<T>::RandomSamplingDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("RandomSamplingDataPointsFilter", RandomSamplingDataPointsFilter::availableParameters(), params),
-	prob(Parametrizable::get<double>("prob"))
+	prob(Parametrizable::get<double>("prob")),
+	randomSamplingMethod(Parametrizable::get<int>("randomSamplingMethod"))
 {
 }
 
@@ -55,22 +58,44 @@ RandomSamplingDataPointsFilter<T>::filter(const DataPoints& input)
 
 // In-place filter
 template<typename T>
+Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const int nbPoints)
+{
+	std::random_device rd;
+	std::minstd_rand gen(rd());
+
+	switch(randomSamplingMethod)
+	{
+		default:	// Direct RNG.
+		{
+			const float randomNumberRange = gen.max() - gen.min();
+			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float dummy){return static_cast<float>(gen() / randomNumberRange);});
+		}
+		case 1:		// Uniform distribution.
+		{
+			std::uniform_real_distribution<float> dis(0, 1);
+			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float dummy){return dis(gen);});
+		}
+	}
+}
+
+// In-place filter
+template<typename T>
 void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 	DataPoints& cloud)
 {
 	const int nbPointsIn = cloud.features.cols();
+	const int nbPointsOut = nbPointsIn * prob;
 
-	int j = 0;
-	for (int i = 0; i < nbPointsIn; ++i)
+	const Eigen::VectorXf randomNumbers = sampleRandomIndices(nbPointsIn);
+	int j=0;
+	for (Eigen::Index i = 0; i < nbPointsIn && j<=nbPointsOut; i++)
 	{
-		const float r = (float)std::rand()/(float)RAND_MAX;
-		if (r < prob)
+		if (randomNumbers[i] < prob)
 		{
 			cloud.setColFrom(j, cloud, i);
 			++j;
 		}
 	}
-
 	cloud.conservativeResize(j);
 }
 
