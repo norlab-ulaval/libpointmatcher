@@ -1,3 +1,6 @@
+| [Tutorials Home](index.md) | [Previous](Introduction.md) | [Next](DataFilters.md) |
+| :--- | :---: | ---: |
+
 # Applications and Publications
 Here some applications and scientific publications using libpointmatcher.
 

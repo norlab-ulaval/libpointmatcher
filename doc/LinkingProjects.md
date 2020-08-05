@@ -1,9 +1,9 @@
-| [Tutorials Home](index.md)    | [Previous](Configuration.md) | [Next](UsingInRos.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](ImportExport.md) | [Next](UsingInRos.md) |
+| :--- | :---: | ---: |
 
 # Linking Projects to libpointmatcher
 
-Once you have followed the [compilation instructions](Compilation.md) and installed libpointmatcher to your system, you can use libpointmatcher in your project.
+Once you have followed the [compilation instructions](CompilationUbuntu.md) and installed libpointmatcher to your system, you can use libpointmatcher in your project.
 
 ## Option 1: Using CMake (Recommended)
 Because libpointmatcher was build using CMake, it can be conveniently included in other CMake projects.  You can simply use the `find_package` functionality of CMake to locate the installation directory of libpointmatcher.  Add `$POINTMATCHER_INCLUDE_DIRS` to the list of include directories in your project and link the appropriate executables to `$POINTMATCHER_LIBRARIES`.
@@ -21,7 +21,7 @@ message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 add_executable(myProgram myProgram.cpp)
 target_link_libraries(myProgram ${libpointmatcher_LIBRARIES})
 ```
-A working example of how to link to an external project can be found in [./examples/demo_cmake](../examples/demo_cmake).
+A working example of how to link to an external project can be found in [./examples/demo_cmake](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_cmake).
 
 ## Option 2: Using Eclipse
 ### Using the Native Eclipse Builder
@@ -29,7 +29,7 @@ We will demonstrate how to create an Eclipse project containing a simple executa
 
 Create a new C++ project by clicking `File > New > C++ Project`.  You can name your project "PointmatcherEclipseDemo" and in toolchains select the default toolchain for your system (most likely Linux GCC).  Click `Finish` to add your project to your Eclipse workspace.  
 
-You must then configure the project by going to `Project > Properties > C/C++Build > Settings`.  Navigate to `C++ Compiler > Includes` and add the libpointmatcher include path to the `Include paths (-I)` list.  Next, go to `C++ Linker/Libraries` and add the the following three dependencies to the "Libraries (-l)" list: 
+You must then configure the project by going to `Project > Properties > C/C++Build > Settings`.  Navigate to `C++ Compiler > Includes` and add the libpointmatcher (e.g. ~/Libraries/libpointmatcher) and eigen (e.g. /usr/include/eigen3) include path to the `Include paths (-I)` list.  Next, go to `C++ Linker/Libraries` and add the the following three dependencies to the "Libraries (-l)" list: 
 
 * pointmatcher
 * boost_system
@@ -84,7 +84,7 @@ LIBS     	+= 	/usr/local/lib/libboost_thread-mt.dylib \
                         /Users/francoispomerleau/Research/Code/libpointmatcher/build/contrib/yaml-cpp-pm/libyaml-cpp-pm.a
 ```
 
-A working example of how to link to an external project can be found in [./examples/demo_Qt](../examples/demo_Qt).
+A working example of how to link to an external project can be found in [./examples/demo_Qt](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt).
 
 ## Option 4: Using Compiler Flags
 If you are compiling a very simple program without the use of a builder, simply include the libpointmatcher header files by setting the include flag in your compiler.  Example:
