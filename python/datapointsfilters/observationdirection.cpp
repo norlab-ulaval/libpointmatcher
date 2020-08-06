@@ -1,0 +1,22 @@
+#include "observationdirection.h"
+
+namespace pointmatcher
+{
+	void pybindObservationDirection(py::module& p_module)
+	{
+		using ObservationDirectionDataPointsFilter = ObservationDirectionDataPointsFilter<double>;
+		py::class_<ObservationDirectionDataPointsFilter, std::shared_ptr<ObservationDirectionDataPointsFilter>, DataPointsFilter>
+			(p_module, "ObservationDirectionDataPointsFilter")
+			.def_static("description", &ObservationDirectionDataPointsFilter::description)
+			.def_static("availableParameters", &ObservationDirectionDataPointsFilter::availableParameters)
+
+			.def_readonly("centerX", &ObservationDirectionDataPointsFilter::centerX)
+			.def_readonly("centerY", &ObservationDirectionDataPointsFilter::centerY)
+			.def_readonly("centerZ", &ObservationDirectionDataPointsFilter::centerZ)
+
+			.def(py::init<const Parameters&>(), py::arg("params") = Parameters(), "Constructor, uses parameter interface")
+
+			.def("filter", &ObservationDirectionDataPointsFilter::filter)
+			.def("inPlaceFilter", &ObservationDirectionDataPointsFilter::inPlaceFilter);
+	}
+}
