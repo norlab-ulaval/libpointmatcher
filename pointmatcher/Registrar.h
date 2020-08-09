@@ -155,7 +155,7 @@ namespace PointMatcherSupport
 		//! Register a class by storing an instance of a descriptor helper class
 		void reg(const std::string &name, std::shared_ptr<ClassDescriptor> descriptor)
 		{
-			classes[name] = descriptor;
+			classes.insert(std::make_pair(name, descriptor));
 		}
 
 		//! Return a descriptor following a name, throw an exception if name is invalid
