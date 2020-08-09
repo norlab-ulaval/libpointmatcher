@@ -121,6 +121,17 @@ namespace PointMatcherSupport
 				{"doi", "10.1109/ROBOT.1991.132043"},
 				{"fulltext", "http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=132043"}
 			}},
+			{"Prakhya2015Point2Plane", {
+				{"type", "inproceedings"},
+				{"title", "A closed-form estimate of 3D ICP covariance"},
+				{"author", "Prakhya, S.M. and Bingbing, L. and Rui, Y. and Lin, W."},
+				{"booktitle", "2015 14th IAPR International Conference on Machine Vision Applications (MVA)"},
+				{"year", "2015"},
+				{"pages", "526--529"},
+				{"publisher", "IEEE Press"},
+				{"doi", "10.1109/MVA.2015.7153246"},
+				{"fulltext", "https://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=7153246"}
+			}},
 			{"Masuda1996Random", {
 				{"type", "inproceedings"},
 				{"title", "Registration and integration of multiple range images for 3-D model construction"},
