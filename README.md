@@ -46,7 +46,7 @@ sudo make install
 
 ### Testing
 
-Libpointmatcher ships with a version of the Google testing framework [GTest](https://github.com/google/googletest).  Unit tests are located in the `utest/` directory and are compiled with libpointmatcher (CMake variable `BUILD_TESTS` must be set to `TRUE` first).  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
+Libpointmatcher ships with a version of the Google testing framework [GTest](https://github.com/google/googletest).  Unit tests are located in the `utest/` directory and are compiled with libpointmatcher (CMake variable `BUILD_TESTS` must be set to `TRUE` before compiling).  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
 
 ```bash
 cd build
@@ -55,7 +55,7 @@ utest/utest --path ../examples/data/
 
 ### Linking to external projects.
 
-We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_Qt), which manually list all the dependencies in the file [`demo.pro`](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system.
+We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_Qt), which manually list all the dependencies in the file [`demo.pro`](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system. For a more detailled procedure, check the [Linking Projects to libpointmatcher](doc/LinkingProjects.md) section.
 
 
 ### Bug reporting
@@ -69,7 +69,7 @@ The library support different file formats for importing or exporting data:
   * ply (Polygon File Format)
   * pcd (Point Cloud Library Format)
 
-Those functionnalities are available without increasing the list of dependencies at the expense of a limited functionality support. For more details, see the tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using those file formats from the command line can be found in `./example/` and are described [here](doc/ICPIntro.md) in more details 
+Those functionnalities are available without increasing the list of dependencies at the expense of a limited functionality support. For more details, see the tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using those file formats from the command line can be found in the `/examples` directory and are described [here](doc/ICPIntro.md) in more details.
 
 # Citing
 

@@ -1,7 +1,7 @@
-| [Tutorials Home](index.md) | [Previous](CompilationUbuntu.md) | [Next](CompilationMac.md) |
+| [Tutorials Home](index.md) | [Previous](CompilationMac.md) | [Next](Introduction.md) |
 | :--- | :---: | ---: |
 
-# Compiling and Installing libpointmatcher on Windows
+# Compiling and installing libpointmatcher on Windows
 
 ## Compiling using MSVC (Microsoft Visual Studio)
 
