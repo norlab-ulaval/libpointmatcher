@@ -70,14 +70,14 @@ namespace PointMatcherSupport
 	{
 		InvalidElement(const std::string& reason);
 	};
-	
+
 	//! A factor for subclasses of Interface
 	template<typename Interface>
 	struct Registrar
 	{
 	public:
 		typedef Interface TargetType; //!< alias to recover the template parameter
-		
+
 		//! The interface for class descriptors
 		struct ClassDescriptor
 		{
@@ -90,7 +90,7 @@ namespace PointMatcherSupport
 			//! Return the available parameters for this class
 			virtual const Parametrizable::ParametersDoc availableParameters() const = 0;
 		};
-		
+
 		//! A descriptor for a class C that provides parameters
 		template<typename C>
 		struct GenericClassDescriptor: public ClassDescriptor
@@ -98,72 +98,71 @@ namespace PointMatcherSupport
 			virtual std::shared_ptr<Interface> createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
 				std::shared_ptr<C> instance = std::make_shared<C>(params);
-				
+
 				// check that all parameters were set
-				for (BOOST_AUTO(it, params.begin()); it != params.end() ;++it)
+				for (const auto& param : params)
 				{
-					if (instance->parametersUsed.find(it->first) == instance->parametersUsed.end()){
+					if (instance->parametersUsed.find(param.first) == instance->parametersUsed.end()){
 						throw Parametrizable::InvalidParameter(
-							(boost::format("Parameter %1% for module %2% was set but is not used") % it->first % className).str()
+							(boost::format("Parameter %1% for module %2% was set but is not used") % param.first % className).str()
 						);
 					}
 				}
-				
 				return instance;
 			}
+
 			virtual const std::string description() const
 			{
 				return C::description();
 			}
+
 			virtual const Parametrizable::ParametersDoc availableParameters() const
 			{
 				return C::availableParameters();
 			}
 		};
-		
+
 		//! A descriptor for a class C that does not provide any parameter
 		template<typename C>
 		struct GenericClassDescriptorNoParam: public ClassDescriptor
 		{
 			virtual std::shared_ptr<Interface> createInstance(const std::string& className, const Parametrizable::Parameters& params) const
 			{
-				for (BOOST_AUTO(it, params.begin()); it != params.end() ;++it)
+				for (const auto& param : params)
 					throw Parametrizable::InvalidParameter(
-							(boost::format("Parameter %1% was set but module %2% dos not use any parameter") % it->first % className).str()
+							(boost::format("Parameter %1% was set but module %2% dos not use any parameter") % param.first % className).str()
 						);
+
 				return std::make_shared<C>();
 			}
+
 			virtual const std::string description() const
 			{
 				return C::description();
 			}
+
 			virtual const Parametrizable::ParametersDoc availableParameters() const
 			{
 				return Parametrizable::ParametersDoc();
 			}
 		};
-		
+
 	protected:
-		typedef std::map<std::string, ClassDescriptor*> DescriptorMap; //!< descriptors for sub-classes of Interface, indexed by their names
+		typedef std::map<std::string, std::shared_ptr<ClassDescriptor>> DescriptorMap; //!< descriptors for sub-classes of Interface, indexed by their names
 		DescriptorMap classes; //!< known classes that can be constructed
-		
+
 	public:
-		//! Destructor, remove all classes descriptors 
-		~Registrar()
-		{
-			for (BOOST_AUTO(it, classes.begin()); it != classes.end(); ++it)
-				delete it->second;
-		}
 		//! Register a class by storing an instance of a descriptor helper class
-		void reg(const std::string &name, ClassDescriptor* descriptor)
+		void reg(const std::string &name, std::shared_ptr<ClassDescriptor> descriptor)
 		{
-			classes[name] = descriptor;
+			classes.insert(std::make_pair(name, descriptor));
 		}
-		
+
 		//! Return a descriptor following a name, throw an exception if name is invalid
-		const ClassDescriptor* getDescriptor(const std::string& name) const
+		std::shared_ptr<ClassDescriptor> getDescriptor(const std::string& name) const
 		{
-			BOOST_AUTO(it, classes.find(name));
+			auto it = classes.find(name);
+
 			if (it == classes.end())
 			{
 				std::cerr << "No element named " << name << " is registered. Known ones are:\n";
@@ -174,42 +173,43 @@ namespace PointMatcherSupport
 			}
 			return it->second;
 		}
-		
+
 		//! Create an instance
 		std::shared_ptr<Interface> create(const std::string& name, const Parametrizable::Parameters& params = Parametrizable::Parameters()) const
 		{
 			return getDescriptor(name)->createInstance(name, params);
 		}
-				
+
 		//! Create an instance from a YAML node
-        	std::shared_ptr<Interface> createFromYAML(const YAML::Node& module) const
+		std::shared_ptr<Interface> createFromYAML(const YAML::Node& module) const
 		{
 			std::string name;
 			Parametrizable::Parameters params;
 
 			getNameParamsFromYAML(module, name, params);
-			
+
 			return create(name, params);
 		}
-				
+
 		//! Get the description of a class
 		const std::string getDescription(const std::string& name) const
 		{
 			return getDescriptor(name)->description();
 		}
-		
+
 		//! Print the list of registered classes to stream
 		void dump(std::ostream &stream) const
 		{
-			for (BOOST_AUTO(it, classes.begin()); it != classes.end(); ++it)
-				stream << "- " << it->first << "\n";
+			for (const auto& it : classes)
+				stream << "- " << it.first << "\n";
 		}
-		
+
 		//! begin for const iterator over classes descriptions
 		typename DescriptorMap::const_iterator begin() const
-		{	
+		{
 			return classes.begin();
 		}
+
 		//! end for const iterator over classes descriptions
 		typename DescriptorMap::const_iterator end() const
 		{
@@ -222,11 +222,11 @@ namespace PointMatcherSupport
 	#define DEF_REGISTRAR_IFACE(name, ifaceName) PointMatcherSupport::Registrar< ifaceName > name##Registrar;
 	#define ADD_TO_REGISTRAR(name, elementName, element) { \
 		typedef typename PointMatcherSupport::Registrar< name >::template GenericClassDescriptor< element > Desc; \
-		name##Registrar.reg(# elementName, new Desc() ); \
+		name##Registrar.reg(# elementName, std::make_shared<Desc>() ); \
 	}
 	#define ADD_TO_REGISTRAR_NO_PARAM(name, elementName, element) { \
 		typedef typename PointMatcherSupport::Registrar< name >::template GenericClassDescriptorNoParam< element > Desc; \
-		name##Registrar.reg(# elementName, new Desc() ); \
+		name##Registrar.reg(# elementName, std::make_shared<Desc>() ); \
 	}
 } // namespace PointMatcherSupport
 
