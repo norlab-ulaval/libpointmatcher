@@ -291,7 +291,7 @@ __Output descriptor:__ none
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ reduces number of points  
 
-*IMPORTANT:* The surface normal descriptors are required in the input point cloud. 
+***IMPORTANT :*** The surface normal descriptors are required in the input point cloud.
 
 ## Voxel Grid Filter (**deprecated**) <a name="voxelgridhead"></a>
 
@@ -541,7 +541,7 @@ __Impact on the number of points:__ none
 |---------  |:---------|:----------------|:--------------|
 |towardCenter     | Orient vectors to point towards the center | 1 | 1: true, 0: false |
 
-__*IMPORTANT:*__ Both the normal vector descriptor and observation direction descriptors must be
+***IMPORTANT :*** Both the normal vector descriptor and observation direction descriptors must be
  present in the input point cloud.  Consequently, both the surface normal and observation filters should be applied prior to using this filter.
 
 ### Example
