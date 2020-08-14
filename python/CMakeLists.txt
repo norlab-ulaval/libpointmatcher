@@ -1,18 +1,15 @@
-cmake_minimum_required(VERSION 2.8.12)
+find_package(pybind11 2.5.0 REQUIRED)
 
-include_directories(${CMAKE_SOURCE_DIR}/pointmatcher)
-include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
-include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils)
-include_directories(${CMAKE_SOURCE_DIR}/pointmatcher/ErrorMinimizers)
+if ("${PYTHON_INSTALL_TARGET}" STREQUAL "")
+	message(STATUS "PYTHON_INSTALL_TARGET variable is not set, setting to a default one...")
+	execute_process(COMMAND "python3" "-c" "import site; print(site.getsitepackages()[0])"
+					OUTPUT_VARIABLE PYTHON_INSTALL_TARGET OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif ()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-foreach (file ${POINTMATCHER_SRC})
-	set(PYTHON_SRC ${PYTHON_SRC} ../${file})
-endforeach()
+message(STATUS "The Python module will be install at this location : ${PYTHON_INSTALL_TARGET}")
 
 set(PYBIND11_SOURCES
-#pointmatcher module
+	#pointmatcher module
 	pointmatcher/datapoints.cpp
 	pointmatcher/datapointsfilter.cpp
 	pointmatcher/datapointsfilters.cpp
@@ -27,6 +24,7 @@ set(PYBIND11_SOURCES
 	pointmatcher/impls/transformationcheckers_impl.cpp
 	pointmatcher/impl.cpp
 	pointmatcher/inspector.cpp
+	pointmatcher/io.cpp
 	pointmatcher/matcher.cpp
 	pointmatcher/matches.cpp
 	pointmatcher/outlierfilter.cpp
@@ -37,9 +35,7 @@ set(PYBIND11_SOURCES
 	pointmatcher/transformationchecker.cpp
 	pointmatcher/transformationcheckers.cpp
 
-	modules/pointmatcher_module.cpp
-
-#pointmatchersupport module
+	#pointmatchersupport module
 	pointmatchersupport/bibliography.cpp
 	pointmatchersupport/logger.cpp
 	pointmatchersupport/logger_impl.cpp
@@ -54,9 +50,7 @@ set(PYBIND11_SOURCES
 	pointmatchersupport/registrars/transformationchecker_registrar.cpp
 	pointmatchersupport/registrar.cpp
 
-	modules/pointmatchersupport_module.cpp
-
-#errorminimizers module
+	#errorminimizers module
 	errorminimizers/identity.cpp
 	errorminimizers/pointtoplane.cpp
 	errorminimizers/pointtoplanewithcov.cpp
@@ -64,9 +58,7 @@ set(PYBIND11_SOURCES
 	errorminimizers/pointtopointsimilarity.cpp
 	errorminimizers/pointtopointwithcov.cpp
 
-	modules/errorminimizers_module.cpp
-
-#datapointfilters module
+	#datapointfilters module
 	datapointsfilters/boundingbox.cpp
 	datapointsfilters/covariancesampling.cpp
 	datapointsfilters/cutatdescriptorthreshold.cpp
@@ -92,21 +84,34 @@ set(PYBIND11_SOURCES
 	datapointsfilters/sphericality.cpp
 	datapointsfilters/surfacenormal.cpp
 
+	modules/pointmatcher_module.cpp
+	modules/pointmatchersupport_module.cpp
 	modules/datapointsfilters_module.cpp
+	modules/errorminimizers_module.cpp
 
-# main module
+	# main module
 	pypointmatcher.cpp)
 
-find_package(pybind11 REQUIRED)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+					${CMAKE_SOURCE_DIR}/pointmatcher
+					${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
+					${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
+					${CMAKE_SOURCE_DIR}/pointmatcher/ErrorMinimizers)
 
 if (pybind11_FOUND)
-	message(STATUS "pybind11 v${pybind11_VERSION}\n")
+	message(STATUS "pybind11 v${pybind11_VERSION}")
 
-	pybind11_add_module(pypointmatcher
-		${PYTHON_SRC}
-		${PYBIND11_SOURCES})
+	pybind11_add_module(pypointmatcher ${PYBIND11_SOURCES})
 
-	target_link_libraries(pypointmatcher PRIVATE ${EXTERNAL_LIBS})
+	target_link_libraries(pypointmatcher
+						  PRIVATE
+						  pointmatcher
+						  ${EXTERNAL_LIBS})
 
-	add_dependencies(pypointmatcher ${EXTRA_DEPS})
+	add_dependencies(pypointmatcher pointmatcher)
+
+	install(TARGETS pypointmatcher LIBRARY DESTINATION ${PYTHON_INSTALL_TARGET})
+else ()
+	message(FATAL_ERROR "pybind11 version required! Please follow the \"Compiling \
+libpointmatcher's with Python\" instructions from the official libpointmatcher's documentation.")
 endif ()

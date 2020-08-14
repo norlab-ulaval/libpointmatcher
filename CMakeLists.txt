@@ -448,6 +448,7 @@ endif()
 
 # ========================= Python module =============================
 option(BUILD_PYTHON_MODULE "Build the python module for libpointmatcher" OFF)
+set(PYTHON_INSTALL_TARGET "" CACHE PATH "Target where to install the python module")
 
 if (BUILD_PYTHON_MODULE)
 	add_subdirectory(python)
