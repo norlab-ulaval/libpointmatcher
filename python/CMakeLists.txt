@@ -24,7 +24,6 @@ set(PYBIND11_SOURCES
 	pointmatcher/impls/transformationcheckers_impl.cpp
 	pointmatcher/impl.cpp
 	pointmatcher/inspector.cpp
-	pointmatcher/io.cpp
 	pointmatcher/matcher.cpp
 	pointmatcher/matches.cpp
 	pointmatcher/outlierfilter.cpp
@@ -115,3 +114,4 @@ else ()
 	message(FATAL_ERROR "pybind11 version required! Please follow the \"Compiling \
 libpointmatcher's with Python\" instructions from the official libpointmatcher's documentation.")
 endif ()
+
