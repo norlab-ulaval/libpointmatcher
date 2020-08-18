@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
 {
 	validateArgs(argc, argv);
 
-	typedef PointMatcher<float> PM;
-	typedef PointMatcherIO<float> PMIO;
+	typedef PointMatcher<double> PM;
+	typedef PointMatcherIO<double> PMIO;
 	typedef PM::Matrix Matrix;
 	typedef PM::TransformationParameters TP;
 	typedef PM::DataPoints DP;

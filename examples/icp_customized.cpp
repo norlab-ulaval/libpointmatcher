@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	bool isCSV = true;
 	validateArgs(argc, argv, isCSV);
 	
-	typedef PointMatcher<float> PM;
+	typedef PointMatcher<double> PM;
 	typedef PM::DataPoints DP;
 
 	// Load point clouds
