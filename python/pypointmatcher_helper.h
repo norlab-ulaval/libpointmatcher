@@ -63,14 +63,10 @@ using Array = PM::Array;
 using TransformationParameters = PM::TransformationParameters;
 using OutlierWeights = PM::OutlierWeights;
 
-PYBIND11_MAKE_OPAQUE(std::map<std::string, std::vector<std::string>>) // CsvElements
 PYBIND11_MAKE_OPAQUE(std::vector<Label>) // Labels
-PYBIND11_MAKE_OPAQUE(std::vector<ParameterDoc>) // ParametersDoc
-PYBIND11_MAKE_OPAQUE(std::map<std::string, Parameter>) // Parameters
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<DataPointsFilter>>) // DataPointsFilters
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<Transformation>>) // Transformations
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<OutlierFilter>>) // OutlierFilters
-PYBIND11_MAKE_OPAQUE(std::vector<std::string>) // StringVector
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<TransformationChecker>>) // TransformationCheckers
 
 #endif //PYTHON_PYPOINTMATCHER_HELPER_H

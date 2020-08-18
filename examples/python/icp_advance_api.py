@@ -1,12 +1,11 @@
 import numpy as np
 
 from math import sqrt
-from pypointmatcher import pointmatcher, pointmatchersupport
+from pypointmatcher import pointmatcher as pm
 from examples.python.utils import parse_translation, parse_rotation
 
-PM = pointmatcher.PointMatcher
+PM = pm.PointMatcher
 DP = PM.DataPoints
-Parameters = pointmatchersupport.Parametrizable.ParametersMap
 
 #  Code example for ICP taking 2 points clouds (2D or 3D) relatively close
 #  and computing the transformation between them.
@@ -67,9 +66,7 @@ icp.transformations.apply(data_out, T)
 #  data_out: aligned point cloud (using the transformation outputted by icp)
 #  icp: icp object used to aligned the point clouds
 
-params = Parameters()
-params["knn"] = "1"
-params["epsilon"] = "0"
+params = {"knn": "1", "epsilon": "0"}
 
 matcher_Hausdorff = PM.get().MatcherRegistrar.create("KDTreeMatcher", params)
 

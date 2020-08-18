@@ -1,5 +1,3 @@
-#include <set>
-
 #include "parametrizable.h"
 
 namespace pointmatcher
@@ -35,9 +33,6 @@ This class provides the parameter storage and fetching mechanism
 				oss << self;
 				return oss.str();
 			});
-
-		py::bind_vector<ParametersDoc>(pyParametrizable, "ParametersDoc", "The documentation of all parameters");
-		py::bind_map<Parameters>(pyParametrizable, "Parameters", "Parameters stored as a map of string->string");
 
 		pyParametrizable
 			.def_readonly("className", &Parametrizable::className, "name of the class")
