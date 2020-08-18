@@ -31,14 +31,12 @@ namespace pointmatcher
 			.def(py::init<const std::string&, const size_t>(), py::arg("text") = "", py::arg("span") = 0)
 			.def("__eq__", &Label::operator==, py::arg("that"));
 
-		py::bind_vector<std::vector<Label>>(pyDataPoints, "LabelsVector", py::module_local());
+		py::bind_vector<Labels>(pyDataPoints, "Labels", "A vector of Label")
+			.def(py::init<>(), "Construct empty Labels")
+			.def(py::init<const Label&>(), py::arg("label"), "Construct Labels with a single Label in it")
 
-		py::class_<Labels, std::vector<Label>>(pyDataPoints, "Labels")
-			.def(py::init<>())
-			.def(py::init<const Label&>(), py::arg("label"))
-
-			.def("contains", &Labels::contains, py::arg("text"))
-			.def("totalDim", &Labels::totalDim)
+			.def("contains", &Labels::contains, py::arg("text"), "Return whether there is a label named text")
+			.def("totalDim", &Labels::totalDim, "Return the sum of the spans of each label")
 			.def("__str__", [](const Labels& self)
 			{
 				std::ostringstream oss;
