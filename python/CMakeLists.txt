@@ -24,6 +24,7 @@ set(PYBIND11_SOURCES
 	pointmatcher/impls/transformationcheckers_impl.cpp
 	pointmatcher/impl.cpp
 	pointmatcher/inspector.cpp
+	pointmatcher/io.cpp
 	pointmatcher/matcher.cpp
 	pointmatcher/matches.cpp
 	pointmatcher/outlierfilter.cpp
