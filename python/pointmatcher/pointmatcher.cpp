@@ -57,6 +57,6 @@ namespace pointmatcher
 			.def_readwrite("TransformationCheckerRegistrar", &PM::TransformationCheckerRegistrar)
 			.def_readwrite("InspectorRegistrar", &PM::InspectorRegistrar)
 			.def_readwrite("LoggerRegistrar", &PM::LoggerRegistrar)
-			.def_static("get", &PM::get);
+			.def_static("get", &PM::get, py::return_value_policy::reference);
 	}
 }
