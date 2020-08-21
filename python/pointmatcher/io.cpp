@@ -3,6 +3,8 @@
 #include "pointmatcher/IO.h"
 
 PYBIND11_MAKE_OPAQUE(PointMatcherIO<ScalarType>::FileInfoVector)
+PYBIND11_MAKE_OPAQUE(PointMatcherIO<ScalarType>::PLYProperties)
+PYBIND11_MAKE_OPAQUE(PointMatcherIO<ScalarType>::PLYDescPropMap)
 
 namespace pointmatcher
 {
@@ -144,21 +146,21 @@ Note that the header must at least contain "reading".
 
 			.def("__eq__", &PLYProperty::operator==, "compare with other property");
 
-		using PLYDescPropMap = PMIO::PLYDescPropMap;
-		py::bind_map<PLYDescPropMap>(pyPointMatcherIO, "PLYDescPropMap", "Map from a descriptor name to a list PLY property\nex: \"normals\" -> nx, ny ,nz");
-
 		using PLYProperties = PMIO::PLYProperties;
 		py::bind_vector<PLYProperties>(pyPointMatcherIO, "PLYProperties", "Vector of properties specific to PLY files");
 
+		using PLYDescPropMap = PMIO::PLYDescPropMap;
+		py::bind_map<PLYDescPropMap>(pyPointMatcherIO, "PLYDescPropMap", "Map from a descriptor name to a list PLY property\nex: \"normals\" -> nx, ny ,nz");
+
 		using PLYElement = PMIO::PLYElement;
 		py::class_<PLYElement>(pyPointMatcherIO, "PLYElement", "Interface for all PLY elements.")
-			.def_readwrite("", &PLYElement::name)
-			.def_readwrite("", &PLYElement::num)
-			.def_readwrite("", &PLYElement::total_props)
-			.def_readwrite("", &PLYElement::offset)
-			.def_readwrite("", &PLYElement::properties)
-			.def_readwrite("", &PLYElement::nbFeatures)
-			.def_readwrite("", &PLYElement::nbDescriptors)
+			.def_readwrite("name", &PLYElement::name, "name identifying the PLY element")
+			.def_readwrite("num", &PLYElement::num, "number of occurences of the element")
+			.def_readwrite("total_props", &PLYElement::total_props, "total number of properties in PLY element")
+			.def_readwrite("offset", &PLYElement::offset, "line at which data starts")
+			.def_readwrite("properties", &PLYElement::properties, "all properties found in the header")
+			.def_readwrite("nbFeatures", &PLYElement::nbFeatures, "number of valid features found in the header")
+			.def_readwrite("nbDescriptors", &PLYElement::nbDescriptors, "number of valid descriptors found in the header")
 
 			.def(py::init<const std::string&, const unsigned, const unsigned>(), py::arg("name"), py::arg("num"), py::arg("offset"),
 					R"pbdoc(
@@ -185,7 +187,7 @@ Constructor
 Implementation of PLY element interface for the vertex element
 )pbdoc");
 
-//		FIXME : Generate undefined symbol error for "elementSupported" method when importing the module
+//		FIXME : Generate undefined symbol error for "elementSupported" or "createElement" method when importing the module
 //		using PLYElementF = PMIO::PLYElementF;
 //		py::class_<PLYElementF>(pyPointMatcherIO, "PLYElementF", "Factory for PLY elements")
 //			.def("elementSupported", &PLYElementF::elementSupported, py::arg("elem_name"), "returns true if element named elem_name is supported by this parser")
