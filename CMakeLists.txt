@@ -448,6 +448,7 @@ endif()
 
 # ========================= Python module =============================
 option(BUILD_PYTHON_MODULE "Build the python module for libpointmatcher" OFF)
+option(USE_SYSTEM_PYBIND11 "Use the system installed pybind11 rather than using a git submodule" ON)
 set(PYTHON_INSTALL_TARGET "" CACHE PATH "Target where to install the python module")
 
 if (BUILD_PYTHON_MODULE)
