@@ -35,7 +35,6 @@ Typical error minimized are point-to-point and point-to-plane.
 			.def("getResidualError", &ErrorMinimizer::getResidualError, py::arg("filteredReading"), py::arg("filteredReference"), py::arg("outlierWeights"), py::arg("matches"))
 			.def("compute", (TransformationParameters (ErrorMinimizer::*)(const DataPoints&, const DataPoints&, const OutlierWeights&, const Matches&)) &ErrorMinimizer::compute,
 				py::arg("filteredReading"), py::arg("filteredReference"), py::arg("outlierWeights"), py::arg("matches"))
-//			.def("compute", (TransformationParameters (ErrorMinimizer::*)(const ErrorElements&)) &ErrorMinimizer::compute, py::arg("matchedPoints"))
 			.def_static("crossProduct", &ErrorMinimizer::crossProduct, py::arg("A"), py::arg("B"));
 
 	}
