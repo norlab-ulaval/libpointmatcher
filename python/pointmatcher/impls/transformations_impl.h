@@ -5,11 +5,6 @@
 
 namespace pointmatcher
 {
-	using TransformationsImpl = TransformationsImpl<ScalarType>;
-	using RigidTransformation = TransformationsImpl::RigidTransformation;
-	using SimilarityTransformation = TransformationsImpl::SimilarityTransformation;
-	using PureTranslation = TransformationsImpl::PureTranslation;
-
 	void pybindTransformationsImpl(py::module& p_module);
 }
 
