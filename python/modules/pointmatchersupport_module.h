@@ -3,9 +3,6 @@
 
 #include "pypointmatcher_helper.h"
 
-namespace py = pybind11;
-namespace pms = PointMatcherSupport;
-
 namespace pointmatcher
 {
 	void pybindPointMatcherSupportModule(py::module& p_module);
