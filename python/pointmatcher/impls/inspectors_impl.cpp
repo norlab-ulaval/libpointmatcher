@@ -1,6 +1,6 @@
 #include "inspectors_impl.h"
 
-#include "InspectorsImpl.h"
+#include "pointmatcher/InspectorsImpl.h"
 
 namespace pointmatcher
 {

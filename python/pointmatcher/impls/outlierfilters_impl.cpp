@@ -1,6 +1,6 @@
 #include "outlierfilters_impl.h"
 
-#include "OutlierFiltersImpl.h"
+#include "pointmatcher/OutlierFiltersImpl.h"
 
 namespace pointmatcher
 {

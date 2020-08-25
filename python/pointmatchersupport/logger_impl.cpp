@@ -1,6 +1,6 @@
 #include "logger_impl.h"
 
-#include "LoggerImpl.h"
+#include "pointmatcher/LoggerImpl.h"
 
 namespace pointmatcher
 {

@@ -1,6 +1,6 @@
 #include "transformationcheckers_impl.h"
 
-#include "TransformationCheckersImpl.h"
+#include "pointmatcher/TransformationCheckersImpl.h"
 
 namespace pointmatcher
 {
