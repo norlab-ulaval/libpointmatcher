@@ -2,9 +2,9 @@
 
 #include "pointmatcher/IO.h"
 
-PYBIND11_MAKE_OPAQUE(PointMatcherIO<ScalarType>::FileInfoVector)
-PYBIND11_MAKE_OPAQUE(PointMatcherIO<ScalarType>::PLYProperties)
-PYBIND11_MAKE_OPAQUE(PointMatcherIO<ScalarType>::PLYDescPropMap)
+PYBIND11_MAKE_OPAQUE(std::vector<PointMatcherIO<ScalarType>::SupportedLabel>) // SupportedLabels
+PYBIND11_MAKE_OPAQUE(std::vector<PointMatcherIO<ScalarType>::FileInfo>) // FileInfoVector
+PYBIND11_MAKE_OPAQUE(std::vector<PointMatcherIO<ScalarType>::PLYProperty>) // PLYProperties
 
 namespace pointmatcher
 {

@@ -36,6 +36,7 @@ namespace pointmatcher
 									  "Throw a runtime_error exception if fileName cannot be opened");
 
 		using CsvElements = pms::CsvElements;
-		py::bind_map<CsvElements>(pointmatchersupportModule, "CsvElements");
+		py::bind_map<CsvElements>(pointmatchersupportModule, "CsvElements", "Data from a CSV file")
+			.def("clear", &CsvElements::clear);
 	}
 }

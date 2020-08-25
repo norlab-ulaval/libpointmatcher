@@ -63,10 +63,16 @@ using Array = PM::Array;
 using TransformationParameters = PM::TransformationParameters;
 using OutlierWeights = PM::OutlierWeights;
 
+PYBIND11_MAKE_OPAQUE(std::vector<std::string>) // StringVector
+PYBIND11_MAKE_OPAQUE(std::map<std::string, std::map<std::string, std::string>>) // Bibliography
+PYBIND11_MAKE_OPAQUE(std::map<std::string, unsigned>) // BibIndices
+PYBIND11_MAKE_OPAQUE(std::vector<ParameterDoc>) // ParametersDoc
+PYBIND11_MAKE_OPAQUE(std::map<std::string, std::string>) // Parameters, StringMap
+PYBIND11_MAKE_OPAQUE(std::map<std::string, std::vector<std::string>>) // CsvElements
 PYBIND11_MAKE_OPAQUE(std::vector<Label>) // Labels
-PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<DataPointsFilter>>) // DataPointsFilters
-PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<Transformation>>) // Transformations
-PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<OutlierFilter>>) // OutlierFilters
-PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<TransformationChecker>>) // TransformationCheckers
+PYBIND11_MAKE_OPAQUE(std::vector<DataPointsFilter>) // DataPointsFilters
+PYBIND11_MAKE_OPAQUE(std::vector<Transformation>) // Transformations
+PYBIND11_MAKE_OPAQUE(std::vector<OutlierFilter>) // OutlierFilters
+PYBIND11_MAKE_OPAQUE(std::vector<TransformationChecker>) // TransformationCheckers
 
 #endif //PYTHON_PYPOINT_MATCHER_HELPER_H

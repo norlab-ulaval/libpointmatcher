@@ -34,6 +34,13 @@ This class provides the parameter storage and fetching mechanism
 				return oss.str();
 			});
 
+		using ParametersDoc = Parametrizable::ParametersDoc;
+		py::bind_vector<ParametersDoc>(pyParametrizable, "ParametersDoc", "The documentation of all parameters");
+
+		using Parameters = Parametrizable::Parameters;
+		py::bind_map<Parameters>(pyParametrizable, "Parameters", "The documentation of all parameters", py::module_local())
+			.def("clear", &Parameters::clear, "Remove all items from D.");
+
 		pyParametrizable
 			.def_readonly("className", &Parametrizable::className, "name of the class")
 			.def_readonly("parametersDoc", &Parametrizable::parametersDoc, "documentation of parameters")

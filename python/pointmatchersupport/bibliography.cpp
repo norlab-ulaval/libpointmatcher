@@ -6,6 +6,14 @@ namespace pointmatcher
 {
 	void pybindBibliography(py::module& p_module)
 	{
+		py::bind_vector<pms::StringVector>(p_module, "StringVector");
+
+		py::bind_map<pms::Bibliography>(p_module, "Bibliography")
+			.def("clear", &pms::Bibliography::clear, "Remove all items from D.");
+
+		py::bind_map<pms::BibIndices>(p_module, "BibIndices")
+			.def("clear", &pms::BibIndices::clear, "Remove all items from D.");
+
 		using CurrentBibliography = pms::CurrentBibliography;
 		py::class_<pms::CurrentBibliography> pyCurrentBibliography(p_module, "CurrentBibliography");
 
