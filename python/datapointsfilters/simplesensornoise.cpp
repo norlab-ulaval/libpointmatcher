@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindSimpleSensorNoise(py::module& p_module)
 	{
-		using SimpleSensorNoiseDataPointsFilter = SimpleSensorNoiseDataPointsFilter<double>;
+		using SimpleSensorNoiseDataPointsFilter = SimpleSensorNoiseDataPointsFilter<ScalarType>;
 		py::class_<SimpleSensorNoiseDataPointsFilter, std::shared_ptr<SimpleSensorNoiseDataPointsFilter>, DataPointsFilter>
 			(p_module, "SimpleSensorNoiseDataPointsFilter", "Sick LMS-xxx noise model")
 

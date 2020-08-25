@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindPointToPlane(py::module& p_module)
 	{
-		using PointToPlaneErrorMinimizer = ErrorMinimizersImpl<double>::PointToPlaneErrorMinimizer;
+		using PointToPlaneErrorMinimizer = ErrorMinimizersImpl<ScalarType>::PointToPlaneErrorMinimizer;
 		py::class_<PointToPlaneErrorMinimizer, std::shared_ptr<PointToPlaneErrorMinimizer>, ErrorMinimizer>(p_module, "PointToPlaneErrorMinimizer")
 		    .def(py::init<const Parameters&>(), py::arg("params") = Parameters())
 		    .def(py::init<const ParametersDoc, const Parameters&>(), py::arg("paramsDoc"), py::arg("params") = Parameters())

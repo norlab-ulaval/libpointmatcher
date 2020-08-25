@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindFixStepSampling(py::module& p_module)
 	{
-		using FixStepSamplingDataPointsFilter = FixStepSamplingDataPointsFilter<double>;
+		using FixStepSamplingDataPointsFilter = FixStepSamplingDataPointsFilter<ScalarType>;
 		py::class_<FixStepSamplingDataPointsFilter, std::shared_ptr<FixStepSamplingDataPointsFilter>, DataPointsFilter>
 			(p_module, "FixStepSamplingDataPointsFilter")
 			.def_static("description", &FixStepSamplingDataPointsFilter::description)

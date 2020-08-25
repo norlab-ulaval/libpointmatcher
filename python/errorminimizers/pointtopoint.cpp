@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindPointToPoint(py::module& p_module)
 	{
-		using PointToPointErrorMinimizer = ErrorMinimizersImpl<double>::PointToPointErrorMinimizer;
+		using PointToPointErrorMinimizer = ErrorMinimizersImpl<ScalarType>::PointToPointErrorMinimizer;
 		py::class_<PointToPointErrorMinimizer, std::shared_ptr<PointToPointErrorMinimizer>, ErrorMinimizer>(p_module, "PointToPointErrorMinimizer")
 		    .def(py::init<>())
 		    .def(py::init<const std::string&, const ParametersDoc, const Parameters&>(),

@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindRemoveNaN(py::module& p_module)
 	{
-		using RemoveNaNDataPointsFilter = RemoveNaNDataPointsFilter<double>;
+		using RemoveNaNDataPointsFilter = RemoveNaNDataPointsFilter<ScalarType>;
 		py::class_<RemoveNaNDataPointsFilter, std::shared_ptr<RemoveNaNDataPointsFilter>, DataPointsFilter>
 			(p_module, "RemoveNaNDataPointsFilter", "Remove points having NaN as coordinate")
 

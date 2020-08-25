@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindSurfaceNormal(py::module& p_module)
 	{
-		using SurfaceNormalDataPointsFilter = SurfaceNormalDataPointsFilter<double>;
+		using SurfaceNormalDataPointsFilter = SurfaceNormalDataPointsFilter<ScalarType>;
 		py::class_<SurfaceNormalDataPointsFilter, std::shared_ptr<SurfaceNormalDataPointsFilter>, DataPointsFilter>
 			(p_module, "SurfaceNormalDataPointsFilter")
 

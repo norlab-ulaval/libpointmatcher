@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindIdentityDPF(py::module& p_module)
 	{
-		using IdentityDataPointsFilter = IdentityDataPointsFilter<double>;
+		using IdentityDataPointsFilter = IdentityDataPointsFilter<ScalarType>;
 		py::class_<IdentityDataPointsFilter, std::shared_ptr<IdentityDataPointsFilter>, DataPointsFilter>
 			(p_module, "IdentityDataPointsFilter")
 			.def_static("description", &IdentityDataPointsFilter::description)

@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindOctreeGrid(py::module& p_module)
 	{
-		using OctreeGridDataPointsFilter = OctreeGridDataPointsFilter<double>;
+		using OctreeGridDataPointsFilter = OctreeGridDataPointsFilter<ScalarType>;
 		py::class_<OctreeGridDataPointsFilter, std::shared_ptr<OctreeGridDataPointsFilter>, DataPointsFilter>
 			octreegridClass(p_module, "OctreeGridDataPointsFilter");
 

@@ -4,9 +4,8 @@ namespace pointmatcher
 {
 	void pybindPointToPlaneWithCov(py::module& p_module)
 	{
-		using PointToPlaneErrorMinimizer = ErrorMinimizersImpl<double>::PointToPlaneErrorMinimizer;
-		using PointToPlaneWithCovErrorMinimizer = ErrorMinimizersImpl<double>::PointToPlaneWithCovErrorMinimizer;
-
+		using PointToPlaneErrorMinimizer = ErrorMinimizersImpl<ScalarType>::PointToPlaneErrorMinimizer;
+		using PointToPlaneWithCovErrorMinimizer = ErrorMinimizersImpl<ScalarType>::PointToPlaneWithCovErrorMinimizer;
 		py::class_<PointToPlaneWithCovErrorMinimizer, std::shared_ptr<PointToPlaneWithCovErrorMinimizer>, PointToPlaneErrorMinimizer>(p_module, "PointToPlaneWithCovErrorMinimizer")
 			.def("name", &PointToPlaneWithCovErrorMinimizer::name)
 

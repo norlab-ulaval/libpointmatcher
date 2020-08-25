@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindSphericality(py::module& p_module)
 	{
-		using SphericalityDataPointsFilter = SphericalityDataPointsFilter<double>;
+		using SphericalityDataPointsFilter = SphericalityDataPointsFilter<ScalarType>;
 		py::class_<SphericalityDataPointsFilter, std::shared_ptr<SphericalityDataPointsFilter>, DataPointsFilter>
 			(p_module, "SphericalityDataPointsFilter")
 

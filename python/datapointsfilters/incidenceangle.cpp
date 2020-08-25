@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindIncidenceAngle(py::module& p_module)
 	{
-		using IncidenceAngleDataPointsFilter = IncidenceAngleDataPointsFilter<double>;
+		using IncidenceAngleDataPointsFilter = IncidenceAngleDataPointsFilter<ScalarType>;
 		py::class_<IncidenceAngleDataPointsFilter, std::shared_ptr<IncidenceAngleDataPointsFilter>, DataPointsFilter>
 			(p_module, "IncidenceAngleDataPointsFilter")
 			.def_static("description", &IncidenceAngleDataPointsFilter::description)

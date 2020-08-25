@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindGestalt(py::module& p_module)
 	{
-		using GestaltDataPointsFilter = GestaltDataPointsFilter<double>;
+		using GestaltDataPointsFilter = GestaltDataPointsFilter<ScalarType>;
 		py::class_<GestaltDataPointsFilter, std::shared_ptr<GestaltDataPointsFilter>, DataPointsFilter>
 			(p_module, "GestaltDataPointsFilter")
 			.def_static("description", &GestaltDataPointsFilter::description)

@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindRemoveSensorBias(py::module& p_module)
 	{
-		using RemoveSensorBiasDataPointsFilter = RemoveSensorBiasDataPointsFilter<double>;
+		using RemoveSensorBiasDataPointsFilter = RemoveSensorBiasDataPointsFilter<ScalarType>;
 		py::class_<RemoveSensorBiasDataPointsFilter, std::shared_ptr<RemoveSensorBiasDataPointsFilter>, DataPointsFilter>
 			(p_module, "RemoveSensorBiasDataPointsFilter")
 

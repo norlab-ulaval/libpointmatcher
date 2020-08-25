@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindMaxDensity(py::module& p_module)
 	{
-		using MaxDensityDataPointsFilter = MaxDensityDataPointsFilter<double>;
+		using MaxDensityDataPointsFilter = MaxDensityDataPointsFilter<ScalarType>;
 		py::class_<MaxDensityDataPointsFilter, std::shared_ptr<MaxDensityDataPointsFilter>, DataPointsFilter>
 			(p_module, "MaxDensityDataPointsFilter")
 			.def_static("description", &MaxDensityDataPointsFilter::description)

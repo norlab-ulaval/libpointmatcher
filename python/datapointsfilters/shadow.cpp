@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindShadow(py::module& p_module)
 	{
-		using ShadowDataPointsFilter = ShadowDataPointsFilter<double>;
+		using ShadowDataPointsFilter = ShadowDataPointsFilter<ScalarType>;
 		py::class_<ShadowDataPointsFilter, std::shared_ptr<ShadowDataPointsFilter>, DataPointsFilter>
 			(p_module, "ShadowDataPointsFilter", "Shadow filter, remove ghost points appearing on edges")
 

@@ -4,8 +4,7 @@ namespace pointmatcher
 {
 	void pybindBoundingBox(py::module& p_module)
 	{
-		using BoundingBoxDataPointsFilter = BoundingBoxDataPointsFilter<double>;
-
+		using BoundingBoxDataPointsFilter = BoundingBoxDataPointsFilter<ScalarType>;
 		py::class_<BoundingBoxDataPointsFilter, std::shared_ptr<BoundingBoxDataPointsFilter>, DataPointsFilter>
 			(p_module, "BoundingBoxDataPointsFilter")
 			.def_static("description", &BoundingBoxDataPointsFilter::description)

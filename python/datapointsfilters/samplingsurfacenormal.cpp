@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindSamplingSurfaceNormal(py::module& p_module)
 	{
-		using SamplingSurfaceNormalDataPointsFilter = SamplingSurfaceNormalDataPointsFilter<double>;
+		using SamplingSurfaceNormalDataPointsFilter = SamplingSurfaceNormalDataPointsFilter<ScalarType>;
 		py::class_<SamplingSurfaceNormalDataPointsFilter, std::shared_ptr<SamplingSurfaceNormalDataPointsFilter>, DataPointsFilter>
 			(p_module, "SamplingSurfaceNormalDataPointsFilter")
 

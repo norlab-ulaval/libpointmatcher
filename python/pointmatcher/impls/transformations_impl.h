@@ -6,7 +6,7 @@
 
 namespace pointmatcher
 {
-	using TransformationsImpl = TransformationsImpl<double>;
+	using TransformationsImpl = TransformationsImpl<ScalarType>;
 	using RigidTransformation = TransformationsImpl::RigidTransformation;
 	using SimilarityTransformation = TransformationsImpl::SimilarityTransformation;
 	using PureTranslation = TransformationsImpl::PureTranslation;

@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindMaxPointCount(py::module& p_module)
 	{
-		using MaxPointCountDataPointsFilter = MaxPointCountDataPointsFilter<double>;
+		using MaxPointCountDataPointsFilter = MaxPointCountDataPointsFilter<ScalarType>;
 		py::class_<MaxPointCountDataPointsFilter, std::shared_ptr<MaxPointCountDataPointsFilter>, DataPointsFilter>
 			(p_module, "MaxPointCountDataPointsFilter")
 			.def_static("description", &MaxPointCountDataPointsFilter::description)

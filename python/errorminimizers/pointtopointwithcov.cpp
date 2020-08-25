@@ -4,8 +4,8 @@ namespace pointmatcher
 {
 	void pybindPointToPointWithCov(py::module& p_module)
 	{
-		using PointToPointErrorMinimizer = ErrorMinimizersImpl<double>::PointToPointErrorMinimizer;
-		using PointToPointWithCovErrorMinimizer = ErrorMinimizersImpl<double>::PointToPointWithCovErrorMinimizer;
+		using PointToPointErrorMinimizer = ErrorMinimizersImpl<ScalarType>::PointToPointErrorMinimizer;
+		using PointToPointWithCovErrorMinimizer = ErrorMinimizersImpl<ScalarType>::PointToPointWithCovErrorMinimizer;
 		py::class_<PointToPointWithCovErrorMinimizer, std::shared_ptr<PointToPointWithCovErrorMinimizer>, PointToPointErrorMinimizer>(p_module, "PointToPointWithCovErrorMinimizer")
 			.def(py::init<const Parameters&>(), py::arg("params") = Parameters())
 			.def_readonly("sensorStdDev", &PointToPointWithCovErrorMinimizer::sensorStdDev)

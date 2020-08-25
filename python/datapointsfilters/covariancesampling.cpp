@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindCovarianceSampling(py::module& p_module)
 	{
-		using CovarianceSamplingDataPointsFilter = CovarianceSamplingDataPointsFilter<double>;
+		using CovarianceSamplingDataPointsFilter = CovarianceSamplingDataPointsFilter<ScalarType>;
 		py::class_<CovarianceSamplingDataPointsFilter, std::shared_ptr<CovarianceSamplingDataPointsFilter>, DataPointsFilter>
 			cosamplingClass(p_module, "CovarianceSamplingDataPointsFilter");
 

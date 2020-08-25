@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindDistanceLimit(py::module& p_module)
 	{
-		using DistanceLimitDataPointsFilter = DistanceLimitDataPointsFilter<double>;
+		using DistanceLimitDataPointsFilter = DistanceLimitDataPointsFilter<ScalarType>;
 		py::class_<DistanceLimitDataPointsFilter, std::shared_ptr<DistanceLimitDataPointsFilter>, DataPointsFilter>
 			(p_module, "DistanceLimitDataPointsFilter")
 			.def_static("description", &DistanceLimitDataPointsFilter::description)

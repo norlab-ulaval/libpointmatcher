@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindCutAtDescriptorThreshold(py::module& p_module)
 	{
-		using CutAtDescriptorThresholdDataPointsFilter = CutAtDescriptorThresholdDataPointsFilter<double>;
+		using CutAtDescriptorThresholdDataPointsFilter = CutAtDescriptorThresholdDataPointsFilter<ScalarType>;
 		py::class_<CutAtDescriptorThresholdDataPointsFilter, std::shared_ptr<CutAtDescriptorThresholdDataPointsFilter>, DataPointsFilter>
 			(p_module, "CutAtDescriptorThresholdDataPointsFilter")
 			.def_static("description", &CutAtDescriptorThresholdDataPointsFilter::description)

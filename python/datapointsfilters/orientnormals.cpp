@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindOrientNormals(py::module& p_module)
 	{
-		using OrientNormalsDataPointsFilter = OrientNormalsDataPointsFilter<double>;
+		using OrientNormalsDataPointsFilter = OrientNormalsDataPointsFilter<ScalarType>;
 		py::class_<OrientNormalsDataPointsFilter, std::shared_ptr<OrientNormalsDataPointsFilter>, DataPointsFilter>
 			(p_module, "OrientNormalsDataPointsFilter", "Reorientation of normals")
 

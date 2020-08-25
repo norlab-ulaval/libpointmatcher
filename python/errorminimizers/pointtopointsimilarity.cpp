@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindPointToPointSimilarity(py::module& p_module)
 	{
-		using PointToPointSimilarityErrorMinimizer = ErrorMinimizersImpl<double>::PointToPointSimilarityErrorMinimizer;
+		using PointToPointSimilarityErrorMinimizer = ErrorMinimizersImpl<ScalarType>::PointToPointSimilarityErrorMinimizer;
 		py::class_<PointToPointSimilarityErrorMinimizer, std::shared_ptr<PointToPointSimilarityErrorMinimizer>, ErrorMinimizer>(p_module, "PointToPointSimilarityErrorMinimizer")
 			.def(py::init<>())
 			.def_static("description", &PointToPointSimilarityErrorMinimizer::description)

@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindNormalSpace(py::module& p_module)
 	{
-		using NormalSpaceDataPointsFilter = NormalSpaceDataPointsFilter<double>;
+		using NormalSpaceDataPointsFilter = NormalSpaceDataPointsFilter<ScalarType>;
 		py::class_<NormalSpaceDataPointsFilter, std::shared_ptr<NormalSpaceDataPointsFilter>, DataPointsFilter>
 			(p_module, "NormalSpaceDataPointsFilter")
 			.def_static("description", &NormalSpaceDataPointsFilter::description)

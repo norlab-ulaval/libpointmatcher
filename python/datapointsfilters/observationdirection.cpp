@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindObservationDirection(py::module& p_module)
 	{
-		using ObservationDirectionDataPointsFilter = ObservationDirectionDataPointsFilter<double>;
+		using ObservationDirectionDataPointsFilter = ObservationDirectionDataPointsFilter<ScalarType>;
 		py::class_<ObservationDirectionDataPointsFilter, std::shared_ptr<ObservationDirectionDataPointsFilter>, DataPointsFilter>
 			(p_module, "ObservationDirectionDataPointsFilter")
 			.def_static("description", &ObservationDirectionDataPointsFilter::description)

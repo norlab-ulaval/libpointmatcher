@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindEllipsoids(py::module& p_module)
 	{
-		using ElipsoidsDataPointsFilter = ElipsoidsDataPointsFilter<double>;
+		using ElipsoidsDataPointsFilter = ElipsoidsDataPointsFilter<ScalarType>;
 		py::class_<ElipsoidsDataPointsFilter, std::shared_ptr<ElipsoidsDataPointsFilter>, DataPointsFilter>
 			ellipsoidClass(p_module, "EllipsoidsDataPointsFilter");
 

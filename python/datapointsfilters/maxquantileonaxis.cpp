@@ -4,7 +4,7 @@ namespace pointmatcher
 {
 	void pybindMaxQuantileOnAxis(py::module& p_module)
 	{
-		using MaxQuantileOnAxisDataPointsFilter = MaxQuantileOnAxisDataPointsFilter<double>;
+		using MaxQuantileOnAxisDataPointsFilter = MaxQuantileOnAxisDataPointsFilter<ScalarType>;
 		py::class_<MaxQuantileOnAxisDataPointsFilter, std::shared_ptr<MaxQuantileOnAxisDataPointsFilter>, DataPointsFilter>
 			(p_module, "MaxQuantileOnAxisDataPointsFilter")
 			.def_static("description", &MaxQuantileOnAxisDataPointsFilter::description)
