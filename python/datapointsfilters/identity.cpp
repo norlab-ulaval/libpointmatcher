@@ -1,5 +1,7 @@
 #include "identity.h"
 
+#include "DataPointsFilters/Identity.h"
+
 namespace pointmatcher
 {
 	void pybindIdentityDPF(py::module& p_module)

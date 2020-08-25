@@ -1,5 +1,7 @@
 #include "normalspace.h"
 
+#include "DataPointsFilters/NormalSpace.h"
+
 namespace pointmatcher
 {
 	void pybindNormalSpace(py::module& p_module)

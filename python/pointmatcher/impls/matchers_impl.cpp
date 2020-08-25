@@ -1,5 +1,7 @@
 #include "matchers_impl.h"
 
+#include "MatchersImpl.h"
+
 namespace pointmatcher
 {
 	void pybindMatchersImpl(py::module& p_module)

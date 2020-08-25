@@ -1,5 +1,7 @@
 #include "outlierfilters_impl.h"
 
+#include "OutlierFiltersImpl.h"
+
 namespace pointmatcher
 {
 	void pybindOutlierFiltersImpl(py::module& p_module)

@@ -1,5 +1,7 @@
 #include "octreegrid.h"
 
+#include "DataPointsFilters/OctreeGrid.h"
+
 namespace pointmatcher
 {
 	void pybindOctreeGrid(py::module& p_module)

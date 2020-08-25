@@ -1,5 +1,7 @@
 #include "identity.h"
 
+#include "pointmatcher/ErrorMinimizersImpl.h"
+
 namespace pointmatcher
 {
 	void pybindIdentityEM(py::module& p_module)

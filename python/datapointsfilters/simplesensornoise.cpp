@@ -1,5 +1,7 @@
 #include "simplesensornoise.h"
 
+#include "DataPointsFilters/SimpleSensorNoise.h"
+
 namespace pointmatcher
 {
 	void pybindSimpleSensorNoise(py::module& p_module)

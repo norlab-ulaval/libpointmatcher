@@ -1,7 +1,6 @@
 #ifndef PYTHON_DATAPOINTSFILTERS_INCIDENCEANGLE_H
 #define PYTHON_DATAPOINTSFILTERS_INCIDENCEANGLE_H
 
-#include "DataPointsFilters/IncidenceAngle.h"
 #include "pypointmatcher_helper.h"
 
 namespace pointmatcher

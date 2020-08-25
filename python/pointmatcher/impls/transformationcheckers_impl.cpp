@@ -1,5 +1,7 @@
 #include "transformationcheckers_impl.h"
 
+#include "TransformationCheckersImpl.h"
+
 namespace pointmatcher
 {
 	void pybindTransformationCheckersImpl(py::module& p_module)

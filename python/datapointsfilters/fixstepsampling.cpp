@@ -1,5 +1,7 @@
 #include "fixstepsampling.h"
 
+#include "DataPointsFilters/FixStepSampling.h"
+
 namespace pointmatcher
 {
 	void pybindFixStepSampling(py::module& p_module)

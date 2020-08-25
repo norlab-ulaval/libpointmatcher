@@ -1,5 +1,7 @@
 #include "removesensorbias.h"
 
+#include "DataPointsFilters/RemoveSensorBias.h"
+
 namespace pointmatcher
 {
 	void pybindRemoveSensorBias(py::module& p_module)

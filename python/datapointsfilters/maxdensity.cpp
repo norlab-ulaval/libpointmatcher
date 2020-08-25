@@ -1,5 +1,7 @@
 #include "maxdensity.h"
 
+#include "DataPointsFilters/MaxDensity.h"
+
 namespace pointmatcher
 {
 	void pybindMaxDensity(py::module& p_module)

@@ -1,7 +1,6 @@
-#ifndef PYTHON_ERRORMINIMIZERS_IDENTITY_H
-#define PYTHON_ERRORMINIMIZERS_IDENTITY_H
+#ifndef PYTHON_DATAPOINTSFILTERS_IDENTITY_H
+#define PYTHON_DATAPOINTSFILTERS_IDENTITY_H
 
-#include "DataPointsFilters/Identity.h"
 #include "pypointmatcher_helper.h"
 
 namespace pointmatcher
@@ -9,4 +8,4 @@ namespace pointmatcher
 	void pybindIdentityDPF(py::module& p_module);
 }
 
-#endif //PYTHON_ERRORMINIMIZERS_IDENTITY_H
+#endif //PYTHON_DATAPOINTSFILTERS_IDENTITY_H

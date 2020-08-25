@@ -1,5 +1,7 @@
 #include "orientnormals.h"
 
+#include "DataPointsFilters/OrientNormals.h"
+
 namespace pointmatcher
 {
 	void pybindOrientNormals(py::module& p_module)

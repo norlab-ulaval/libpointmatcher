@@ -1,5 +1,7 @@
 #include "distancelimit.h"
 
+#include "DataPointsFilters/DistanceLimit.h"
+
 namespace pointmatcher
 {
 	void pybindDistanceLimit(py::module& p_module)

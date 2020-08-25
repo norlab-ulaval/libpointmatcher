@@ -1,5 +1,7 @@
 #include "samplingsurfacenormal.h"
 
+#include "DataPointsFilters/SamplingSurfaceNormal.h"
+
 namespace pointmatcher
 {
 	void pybindSamplingSurfaceNormal(py::module& p_module)

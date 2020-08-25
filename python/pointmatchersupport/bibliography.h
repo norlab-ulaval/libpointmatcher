@@ -1,8 +1,6 @@
 #ifndef PYTHON_POINTMATCHERSUPPORT_BIBLIOGRAPHY_H
 #define PYTHON_POINTMATCHERSUPPORT_BIBLIOGRAPHY_H
 
-#include "Bibliography.h"
-
 #include "pypointmatcher_helper.h"
 
 namespace pointmatcher

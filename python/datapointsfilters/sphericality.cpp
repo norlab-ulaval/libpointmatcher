@@ -1,5 +1,7 @@
 #include "sphericality.h"
 
+#include "DataPointsFilters/Sphericality.h"
+
 namespace pointmatcher
 {
 	void pybindSphericality(py::module& p_module)

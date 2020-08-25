@@ -1,5 +1,7 @@
 #include "gestalt.h"
 
+#include "DataPointsFilters/Gestalt.h"
+
 namespace pointmatcher
 {
 	void pybindGestalt(py::module& p_module)

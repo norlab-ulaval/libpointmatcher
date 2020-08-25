@@ -1,7 +1,6 @@
 #ifndef PYTHON_DATAPOINTSFILTERS_MAXPOINTCOUNT_H
 #define PYTHON_DATAPOINTSFILTERS_MAXPOINTCOUNT_H
 
-#include "DataPointsFilters/MaxPointCount.h"
 #include "pypointmatcher_helper.h"
 
 namespace pointmatcher

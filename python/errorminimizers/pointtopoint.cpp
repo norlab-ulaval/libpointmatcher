@@ -1,5 +1,7 @@
 #include "pointtopoint.h"
 
+#include "pointmatcher/ErrorMinimizersImpl.h"
+
 namespace pointmatcher
 {
 	void pybindPointToPoint(py::module& p_module)

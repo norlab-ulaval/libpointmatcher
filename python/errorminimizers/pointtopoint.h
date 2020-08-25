@@ -1,7 +1,6 @@
 #ifndef PYTHON_ERRORMINIMIZERS_POINTTOPOINT_H
 #define PYTHON_ERRORMINIMIZERS_POINTTOPOINT_H
 
-#include "pointmatcher/ErrorMinimizersImpl.h"
 #include "pypointmatcher_helper.h"
 
 namespace pointmatcher

@@ -1,5 +1,7 @@
 #include "pointtopointsimilarity.h"
 
+#include "pointmatcher/ErrorMinimizersImpl.h"
+
 namespace pointmatcher
 {
 	void pybindPointToPointSimilarity(py::module& p_module)

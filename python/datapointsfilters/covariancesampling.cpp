@@ -1,5 +1,7 @@
 #include "covariancesampling.h"
 
+#include "DataPointsFilters/CovarianceSampling.h"
+
 namespace pointmatcher
 {
 	void pybindCovarianceSampling(py::module& p_module)

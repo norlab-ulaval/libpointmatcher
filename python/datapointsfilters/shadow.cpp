@@ -1,5 +1,7 @@
 #include "shadow.h"
 
+#include "DataPointsFilters/Shadow.h"
+
 namespace pointmatcher
 {
 	void pybindShadow(py::module& p_module)

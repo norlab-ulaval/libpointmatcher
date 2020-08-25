@@ -1,7 +1,6 @@
 #ifndef PYTHON_POINTMATCHER_IMPLS_TRANSFORMATIONCHECKERS_IMPL_H
 #define PYTHON_POINTMATCHER_IMPLS_TRANSFORMATIONCHECKERS_IMPL_H
 
-#include "TransformationCheckersImpl.h"
 #include "pypointmatcher_helper.h"
 
 namespace pointmatcher

@@ -1,5 +1,7 @@
 #include "pointtopointwithcov.h"
 
+#include "pointmatcher/ErrorMinimizersImpl.h"
+
 namespace pointmatcher
 {
 	void pybindPointToPointWithCov(py::module& p_module)

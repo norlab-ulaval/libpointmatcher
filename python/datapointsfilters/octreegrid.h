@@ -1,7 +1,6 @@
 #ifndef PYTHON_DATAPOINTSFILTERS_OCTREEGRID_H
 #define PYTHON_DATAPOINTSFILTERS_OCTREEGRID_H
 
-#include "DataPointsFilters/OctreeGrid.h"
 #include "pypointmatcher_helper.h"
 
 namespace pointmatcher

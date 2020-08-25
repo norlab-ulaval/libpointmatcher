@@ -1,5 +1,7 @@
 #include "maxquantileonaxis.h"
 
+#include "DataPointsFilters/MaxQuantileOnAxis.h"
+
 namespace pointmatcher
 {
 	void pybindMaxQuantileOnAxis(py::module& p_module)

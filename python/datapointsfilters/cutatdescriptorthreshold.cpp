@@ -1,5 +1,7 @@
 #include "cutatdescriptorthreshold.h"
 
+#include "DataPointsFilters/CutAtDescriptorThreshold.h"
+
 namespace pointmatcher
 {
 	void pybindCutAtDescriptorThreshold(py::module& p_module)

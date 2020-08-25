@@ -1,5 +1,7 @@
 #include "removenan.h"
 
+#include "DataPointsFilters/RemoveNaN.h"
+
 namespace pointmatcher
 {
 	void pybindRemoveNaN(py::module& p_module)

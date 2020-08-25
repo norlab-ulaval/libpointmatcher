@@ -1,5 +1,7 @@
 #include "pointtoplanewithcov.h"
 
+#include "pointmatcher/ErrorMinimizersImpl.h"
+
 namespace pointmatcher
 {
 	void pybindPointToPlaneWithCov(py::module& p_module)

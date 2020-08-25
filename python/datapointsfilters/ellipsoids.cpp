@@ -1,5 +1,7 @@
 #include "ellipsoids.h"
 
+#include "DataPointsFilters/Elipsoids.h"
+
 namespace pointmatcher
 {
 	void pybindEllipsoids(py::module& p_module)

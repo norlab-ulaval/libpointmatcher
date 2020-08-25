@@ -1,5 +1,7 @@
 #include "incidenceangle.h"
 
+#include "DataPointsFilters/IncidenceAngle.h"
+
 namespace pointmatcher
 {
 	void pybindIncidenceAngle(py::module& p_module)

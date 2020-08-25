@@ -1,5 +1,7 @@
 #include "bibliography.h"
 
+#include "Bibliography.h"
+
 namespace pointmatcher
 {
 	void pybindBibliography(py::module& p_module)

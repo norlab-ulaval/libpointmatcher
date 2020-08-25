@@ -1,5 +1,7 @@
 #include "randomsampling.h"
 
+#include "DataPointsFilters/RandomSampling.h"
+
 namespace pointmatcher
 {
 	void pybindRandomSampling(py::module& p_module)

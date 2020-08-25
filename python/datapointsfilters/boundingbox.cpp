@@ -1,5 +1,7 @@
 #include "boundingbox.h"
 
+#include "DataPointsFilters/BoundingBox.h"
+
 namespace pointmatcher
 {
 	void pybindBoundingBox(py::module& p_module)

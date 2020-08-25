@@ -1,5 +1,7 @@
 #include "observationdirection.h"
 
+#include "DataPointsFilters/ObservationDirection.h"
+
 namespace pointmatcher
 {
 	void pybindObservationDirection(py::module& p_module)

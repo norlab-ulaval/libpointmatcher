@@ -1,5 +1,7 @@
 #include "maxpointcount.h"
 
+#include "DataPointsFilters/MaxPointCount.h"
+
 namespace pointmatcher
 {
 	void pybindMaxPointCount(py::module& p_module)
