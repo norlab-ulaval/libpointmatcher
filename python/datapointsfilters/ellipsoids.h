@@ -1,7 +1,7 @@
 #ifndef PYTHON_DATAPOINTSFILTERS_ELLIPSOIDS_H
 #define PYTHON_DATAPOINTSFILTERS_ELLIPSOIDS_H
 
-#include "pypointmatcher_helper.h"
+#include "pypoint_matcher_helper.h"
 
 namespace pointmatcher
 {

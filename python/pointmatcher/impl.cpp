@@ -2,9 +2,9 @@
 
 #include "impls/inspectors_impl.h"
 #include "impls/matchers_impl.h"
-#include "impls/outlierfilters_impl.h"
+#include "impls/outlier_filters_impl.h"
 #include "impls/transformations_impl.h"
-#include "impls/transformationcheckers_impl.h"
+#include "impls/transformation_checkers_impl.h"
 
 namespace pointmatcher
 {

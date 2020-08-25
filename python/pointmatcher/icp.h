@@ -1,7 +1,7 @@
 #ifndef PYTHON_POINTMATCHER_ICP_H
 #define PYTHON_POINTMATCHER_ICP_H
 
-#include "pypointmatcher_helper.h"
+#include "pypoint_matcher_helper.h"
 
 namespace pointmatcher
 {

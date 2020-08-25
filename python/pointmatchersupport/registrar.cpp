@@ -1,12 +1,12 @@
 #include "registrar.h"
-#include "registrars/datapointsfilter_registrar.h"
-#include "registrars/errorminimizer_registrar.h"
+#include "registrars/data_points_filter_registrar.h"
+#include "registrars/error_minimizer_registrar.h"
 #include "registrars/inspector_registrar.h"
 #include "registrars/logger_registrar.h"
 #include "registrars/matcher_registrar.h"
-#include "registrars/outlierfilter_registrar.h"
+#include "registrars/outlier_filter_registrar.h"
 #include "registrars/transformation_registrar.h"
-#include "registrars/transformationchecker_registrar.h"
+#include "registrars/transformation_checker_registrar.h"
 
 namespace pointmatcher
 {

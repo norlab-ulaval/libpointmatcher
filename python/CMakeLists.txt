@@ -8,87 +8,87 @@ message(STATUS "The Python module will be install at this location : ${PYTHON_IN
 
 set(PYBIND11_SOURCES
     #pointmatcher module
-    pointmatcher/datapoints.cpp
-    pointmatcher/datapointsfilter.cpp
-    pointmatcher/datapointsfilters.cpp
-    pointmatcher/errorminimizer.cpp
+    pointmatcher/data_points.cpp
+    pointmatcher/data_points_filter.cpp
+    pointmatcher/data_points_filters.cpp
+    pointmatcher/error_minimizer.cpp
     pointmatcher/icp.cpp
-    pointmatcher/icpchainbase.cpp
-    pointmatcher/icpsequence.cpp
+    pointmatcher/icp_chain_base.cpp
+    pointmatcher/icp_sequence.cpp
     pointmatcher/impls/inspectors_impl.cpp
     pointmatcher/impls/matchers_impl.cpp
-    pointmatcher/impls/outlierfilters_impl.cpp
+    pointmatcher/impls/outlier_filters_impl.cpp
     pointmatcher/impls/transformations_impl.cpp
-    pointmatcher/impls/transformationcheckers_impl.cpp
+    pointmatcher/impls/transformation_checkers_impl.cpp
     pointmatcher/impl.cpp
     pointmatcher/inspector.cpp
     pointmatcher/io.cpp
     pointmatcher/matcher.cpp
     pointmatcher/matches.cpp
-    pointmatcher/outlierfilter.cpp
-    pointmatcher/outlierfilters.cpp
-    pointmatcher/pointmatcher.cpp
+    pointmatcher/outlier_filter.cpp
+    pointmatcher/outlier_filters.cpp
+    pointmatcher/point_matcher.cpp
     pointmatcher/transformation.cpp
     pointmatcher/transformations.cpp
-    pointmatcher/transformationchecker.cpp
-    pointmatcher/transformationcheckers.cpp
+    pointmatcher/transformation_checker.cpp
+    pointmatcher/transformation_checkers.cpp
 
     #pointmatchersupport module
     pointmatchersupport/bibliography.cpp
     pointmatchersupport/logger.cpp
     pointmatchersupport/logger_impl.cpp
     pointmatchersupport/parametrizable.cpp
-    pointmatchersupport/registrars/datapointsfilter_registrar.cpp
-    pointmatchersupport/registrars/errorminimizer_registrar.cpp
+    pointmatchersupport/registrars/data_points_filter_registrar.cpp
+    pointmatchersupport/registrars/error_minimizer_registrar.cpp
     pointmatchersupport/registrars/inspector_registrar.cpp
     pointmatchersupport/registrars/logger_registrar.cpp
     pointmatchersupport/registrars/matcher_registrar.cpp
-    pointmatchersupport/registrars/outlierfilter_registrar.cpp
+    pointmatchersupport/registrars/outlier_filter_registrar.cpp
     pointmatchersupport/registrars/transformation_registrar.cpp
-    pointmatchersupport/registrars/transformationchecker_registrar.cpp
+    pointmatchersupport/registrars/transformation_checker_registrar.cpp
     pointmatchersupport/registrar.cpp
 
     #errorminimizers module
     errorminimizers/identity.cpp
-    errorminimizers/pointtoplane.cpp
-    errorminimizers/pointtoplanewithcov.cpp
-    errorminimizers/pointtopoint.cpp
-    errorminimizers/pointtopointsimilarity.cpp
-    errorminimizers/pointtopointwithcov.cpp
+    errorminimizers/point_to_plane.cpp
+    errorminimizers/point_to_plane_with_cov.cpp
+    errorminimizers/point_to_point.cpp
+    errorminimizers/point_to_point_similarity.cpp
+    errorminimizers/point_to_point_with_cov.cpp
 
     #datapointfilters module
-    datapointsfilters/boundingbox.cpp
-    datapointsfilters/covariancesampling.cpp
-    datapointsfilters/cutatdescriptorthreshold.cpp
-    datapointsfilters/distancelimit.cpp
+    datapointsfilters/bounding_box.cpp
+    datapointsfilters/covariance_sampling.cpp
+    datapointsfilters/cut_at_descriptor_threshold.cpp
+    datapointsfilters/distance_limit.cpp
     datapointsfilters/ellipsoids.cpp
-    datapointsfilters/fixstepsampling.cpp
+    datapointsfilters/fix_step_sampling.cpp
     datapointsfilters/gestalt.cpp
     datapointsfilters/identity.cpp
-    datapointsfilters/incidenceangle.cpp
-    datapointsfilters/maxdensity.cpp
-    datapointsfilters/maxpointcount.cpp
-    datapointsfilters/maxquantileonaxis.cpp
-    datapointsfilters/normalspace.cpp
-    datapointsfilters/observationdirection.cpp
-    datapointsfilters/octreegrid.cpp
-    datapointsfilters/orientnormals.cpp
-    datapointsfilters/randomsampling.cpp
-    datapointsfilters/removenan.cpp
-    datapointsfilters/removesensorbias.cpp
-    datapointsfilters/samplingsurfacenormal.cpp
+    datapointsfilters/incidence_angle.cpp
+    datapointsfilters/max_density.cpp
+    datapointsfilters/max_pointcount.cpp
+    datapointsfilters/max_quantile_on_axis.cpp
+    datapointsfilters/normal_space.cpp
+    datapointsfilters/observation_direction.cpp
+    datapointsfilters/octree_grid.cpp
+    datapointsfilters/orient_normals.cpp
+    datapointsfilters/random_sampling.cpp
+    datapointsfilters/remove_nan.cpp
+    datapointsfilters/remove_sensor_bias.cpp
+    datapointsfilters/sampling_surface_normal.cpp
     datapointsfilters/shadow.cpp
-    datapointsfilters/simplesensornoise.cpp
+    datapointsfilters/simple_sensor_noise.cpp
     datapointsfilters/sphericality.cpp
-    datapointsfilters/surfacenormal.cpp
+    datapointsfilters/surface_normal.cpp
 
-    modules/pointmatcher_module.cpp
-    modules/pointmatchersupport_module.cpp
-    modules/datapointsfilters_module.cpp
-    modules/errorminimizers_module.cpp
+    modules/point_matcher_module.cpp
+    modules/point_matcher_support_module.cpp
+    modules/data_points_filters_module.cpp
+    modules/error_minimizers_module.cpp
 
     # main module
-    pypointmatcher.cpp)
+    pypoint_matcher.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/pointmatcher

@@ -1,7 +1,7 @@
 #ifndef PYTHON_ERRORMINIMIZERS_IDENTITY_H
 #define PYTHON_ERRORMINIMIZERS_IDENTITY_H
 
-#include "pypointmatcher_helper.h"
+#include "pypoint_matcher_helper.h"
 
 namespace pointmatcher
 {
