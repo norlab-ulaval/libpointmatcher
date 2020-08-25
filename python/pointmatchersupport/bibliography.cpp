@@ -17,9 +17,9 @@ namespace pointmatcher
 			.export_values();
 
 		pyCurrentBibliography
-			.def_readwrite("", &CurrentBibliography::mode)
-			.def_readwrite("", &CurrentBibliography::indices)
-			.def_readwrite("", &CurrentBibliography::entries)
+			.def_readwrite("mode", &CurrentBibliography::mode)
+			.def_readwrite("indices", &CurrentBibliography::indices)
+			.def_readwrite("entries", &CurrentBibliography::entries)
 
 			.def(py::init<Mode>(), py::arg("mode") = Mode::NORMAL)
 			.def("dump", [](const CurrentBibliography& self)

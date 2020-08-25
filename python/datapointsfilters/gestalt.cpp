@@ -33,7 +33,7 @@ namespace pointmatcher
 			.def("filter", &GestaltDataPointsFilter::filter, py::arg("input"))
 			.def("inPlaceFilter", &GestaltDataPointsFilter::inPlaceFilter, py::arg("cloud"))
 			.def("serializeGestaltMatrix", &GestaltDataPointsFilter::serializeGestaltMatrix, py::arg("gestaltFeatures"))
-			.def("calculateAngles", &GestaltDataPointsFilter::calculateAngles, py::arg("points"), py::arg(""))
-			.def("calculateRadii", &GestaltDataPointsFilter::calculateRadii, py::arg("points"), py::arg(""));
+			.def("calculateAngles", &GestaltDataPointsFilter::calculateAngles, py::arg("points"), py::arg("keyPoint"))
+			.def("calculateRadii", &GestaltDataPointsFilter::calculateRadii, py::arg("points"), py::arg("keyPoint"));
 	}
 }
