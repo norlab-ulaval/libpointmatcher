@@ -1,33 +1,49 @@
-from pypointmatcher.pointmatcher import PointMatcher
+# Code example for ICP taking 2 points clouds (2D or 3D) relatively close
+# and computing the transformation between them.
 
-PM = PointMatcher
+from pypointmatcher import pointmatcher as pm
+
+PM = pm.PointMatcher
 DP = PM.DataPoints
-output_base_file = "tests_output/icp_simple/"
-is_3D = True  # (toggle to switch between 2D and 3D clouds)
+
+# Path of output directory (default: tests/icp_simple/)
+# The output directory must already exist
+# Leave empty to save in the current directory
+output_base_directory = "tests/icp_simple/"
+
+# Name of output files (default: test)
+output_base_file = "test"
+
+# Toggle to switch between 2D and 3D clouds
+is_3D = True
 
 if is_3D:
-    # 3D point clouds
-    ref = DP.load('../data/car_cloud400.csv')
-    data = DP.load('../data/car_cloud401.csv')
+    # Load 3D point clouds
+    ref = DP(DP.load('../data/car_cloud400.csv'))
+    data = DP(DP.load('../data/car_cloud401.csv'))
     test_base = "3D"
 else:
-    # 2D point clouds
-    ref = DP.load('../data/2D_twoBoxes.csv')
-    data = DP.load('../data/2D_oneBox.csv')
+    # Load 2D point clouds
+    ref = DP(DP.load('../data/2D_twoBoxes.csv'))
+    data = DP(DP.load('../data/2D_oneBox.csv'))
     test_base = "2D"
 
+# Create the default ICP algorithm
 icp = PM.ICP()
 
+# See the implementation of setDefault() to create a custom ICP algorithm
 icp.setDefault()
 
-TP = icp(ref, data)
+# Compute the transformation to express data in ref
+T = icp(data, ref)
 
+# Transform data to express it in ref
 data_out = DP(data)
+icp.transformations.apply(data_out, T)
 
-icp.transformations.apply(data_out, TP)
+# Save files to see the results
+ref.save(f"{output_base_directory + test_base}_{output_base_file}_ref.vtk")
+data.save(f"{output_base_directory + test_base}_{output_base_file}_data_in.vtk")
+data_out.save(f"{output_base_directory + test_base}_{output_base_file}_data_out.vtk")
 
-ref.save(output_base_file + f"{test_base}_test_ref.vtk")
-data.save(output_base_file + f"{test_base}_test_data_in.vtk")
-data_out.save(output_base_file + f"{test_base}_data_out.vtk")
-
-print(f"Final {test_base} transformations:\n{TP}\n".replace("[", " ").replace("]", " "))
+print(f"Final {test_base} transformations:\n{T}\n".replace("[", " ").replace("]", " "))

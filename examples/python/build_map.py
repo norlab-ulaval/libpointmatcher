@@ -1,21 +1,28 @@
-import numpy as np
-
-from pypointmatcher import pointmatcher as pm, pointmatchersupport as pms
-
 # Code example for DataFilter taking a sequence of point clouds with
 # their global coordinates and build a map with a fix (manageable) number of points.
 # The example shows how to generate filters in the source code.
 # For an example generating filters using yaml configuration, see demo_cmake/convert.cpp
 # For an example with a registration solution, see icp.cpp
 
+import numpy as np
+
+from pypointmatcher import pointmatcher as pm, pointmatchersupport as pms
+
 PM = pm.PointMatcher
 PMIO = pm.PointMatcherIO
 DP = PM.DataPoints
+params = pms.Parametrizable.Parameters()
 
 # Loading the list of files
 file_info_list = PMIO.FileInfoVector("../data/carCloudList.csv", "../data/")
 total_point_count = 30000
-output_file_base = "tests_output/build_map/"  # Replace this with the path to an existing directory
+
+# Path of output directory (default: tests/build_map/)
+# The output directory must already exist
+# Leave empty to save in the current directory
+output_base_directory = "tests/build_map/"
+
+# Name of output file: file_name.{vtk,csv,ply} (default: test.vtk)
 output_file_name = "test.vtk"
 
 pms.setLogger(PM.get().LoggerRegistrar.create("FileLogger"))
@@ -30,34 +37,40 @@ T = np.identity(4)
 transformation = PM.get().TransformationRegistrar.create("RigidTransformation")
 
 # This filter will remove a sphere of 1 m radius. Easy way to remove the sensor self-scanning.
-remove_scanner = PM.get().DataPointsFilterRegistrar.create("MinDistDataPointsFilter",
-                                                           {"minDist": "1.0"})
+params["minDist"] = "1.0"
+remove_scanner = PM.get().DataPointsFilterRegistrar.create("MinDistDataPointsFilter", params)
+params.clear()
 
 # This filter will randomly remove 35% of the points.
-rand_subsample = PM.get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter",
-                                                           {"prob": "0.65"})
+params["prob"] = "0.65"
+rand_subsample = PM.get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter", params)
+params.clear()
 
 # For a complete description of filter, see
 # https://github.com/ethz-asl/libpointmatcher/blob/master/doc/Datafilters.md
-normal_filter = PM.get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter",
-                                                          {"knn": "10",
-                                                           "epsilon": "5",
-                                                           "keepNormals": "1",
-                                                           "keepDensities": "0"})
+params["knn"] = "10"
+params["epsilon"] = "5"
+params["keepNormals"] = "1"
+params["keepDensities"] = "0"
+normal_filter = PM.get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", params)
+params.clear()
 
-density_filter = PM.get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter",
-                                                           {"knn": "10",
-                                                            "epsilon": "5",
-                                                            "keepDensities": "1",
-                                                            "keepNormals": "0"})
+params["knn"] = "10"
+params["epsilon"] = "5"
+params["keepDensities"] = "1"
+params["keepNormals"] = "0"
+density_filter = PM.get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", params)
+params.clear()
 
 observation_direction_filter = PM.get().DataPointsFilterRegistrar.create("ObservationDirectionDataPointsFilter")
 
-orien_normal_filter = PM.get().DataPointsFilterRegistrar.create("OrientNormalsDataPointsFilter",
-                                                                {"towardCenter": "1"})
+params["towardCenter"] = "1"
+orien_normal_filter = PM.get().DataPointsFilterRegistrar.create("OrientNormalsDataPointsFilter", params)
+params.clear()
 
-uniform_subsample = PM.get().DataPointsFilterRegistrar.create("MaxDensityDataPointsFilter",
-                                                              {"maxDensity": "30"})
+params["maxDensity"] = "30"
+uniform_subsample = PM.get().DataPointsFilterRegistrar.create("MaxDensityDataPointsFilter", params)
+params.clear()
 
 shadow_filter = PM.get().DataPointsFilterRegistrar.create("ShadowDataPointsFilter")
 
@@ -114,7 +127,7 @@ for i in range(len(file_info_list)):
 
                 map_cloud = rand_subsample.filter(map_cloud)
 
-    map_cloud.save(f"{output_file_base + output_file_name[:-4]}_{i}.vtk")
+    map_cloud.save(f"{output_base_directory + output_file_name[:-4]}_{i}.vtk")
 
 map_cloud = density_filter.filter(map_cloud)
 map_cloud = uniform_subsample.filter(map_cloud)
@@ -123,4 +136,4 @@ map_cloud = density_filter.filter(map_cloud)
 print("\n-----------------------------"*2)
 print(f"Final number of points in the map: {map_cloud.getNbPoints()}")
 
-map_cloud.save(f"{output_file_base + output_file_name}")
+map_cloud.save(f"{output_base_directory + output_file_name}")

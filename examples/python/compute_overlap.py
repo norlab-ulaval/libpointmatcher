@@ -9,14 +9,22 @@ PM = pm.PointMatcher
 PMIO = pm.PointMatcherIO
 DP = PM.DataPoints
 Matches = PM.Matches
+params = pms.Parametrizable.Parameters()
 
-output_base_file = "tests_output/compute_overlap/"
+# Path of output directory (default: tests/compute_overlap/)
+# The output directory must already exist
+# Leave empty to save in the current directory
+output_base_directory = "tests/compute_overlap/"
 
+# Name of output files (default: test)
+output_base_file = "test"
+
+# Loading the list of files
 file_info_list = PMIO.FileInfoVector("../data/carCloudList.csv", "../data/")
 # or
 # file_info_vec = PMIO.FileInfoVector("../data/cloudList.csv", "../data/")
 
-# If True, it will inly compute the overlap of only 2 point cloud ids
+# If True, it will compute the overlap of only 2 point cloud ids
 # and dump VTK files for visual inspection
 debug_mode = False
 
@@ -77,18 +85,24 @@ for i in range(starting_I, list_size_I):
         transformations.apply(reference, Tref)
 
         #  Prepare filters
+        params["prob"] = "0.5"
         sub_sample = PM.get().DataPointsFilterRegistrar.create("RandomSamplingDataPointsFilter",
-                                                               {"prob": "0.5"})
+                                                               params)
+        params.clear()
 
         max_density = PM.get().DataPointsFilterRegistrar.create("MaxDensityDataPointsFilter")
 
+        # params["dim"] = "1"
+        # params["minDist"] = "0"
         # cut_in_half = PM.get().DataPointsFilterRegistrar.create("MinDistDataPointsFilter",
-        #                                                         {"dim": "1",
-        #                                                          "minDist": "0"})
+        #                                                         params)
+        # params.clear()
 
+        params["knn"] = "20"
+        params["keepDensities"] = "1"
         compute_density = PM.get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter",
-                                                                    {"knn": "20",
-                                                                     "keepDensities": "1"})
+                                                                    params)
+        params.clear()
 
         reading = sub_sample.filter(reading)
         reading = compute_density.filter(reading)
@@ -114,12 +128,14 @@ for i in range(starting_I, list_size_I):
             knn = 20
             knn_all = 50
 
-            matcher_self = PM.get().MatcherRegistrar.create("KDTreeMatcher",
-                                                            {"knn": f"{knn}"})
+            params["knn"] = str(knn)
+            matcher_self = PM.get().MatcherRegistrar.create("KDTreeMatcher", params)
+            params.clear()
 
-            matcher_target = PM.get().MatcherRegistrar.create("KDTreeVarDistMatcher",
-                                                              {"knn": f"{knn_all}",
-                                                               "maxDistField": "maxSearchDist"})
+            params["knn"] = str(knn_all)
+            params["maxDistField"] = "maxSearchDist"
+            matcher_target = PM.get().MatcherRegistrar.create("KDTreeVarDistMatcher", params)
+            params.clear()
 
             matcher_self.init(self)
             matcher_target.init(target)
@@ -156,10 +172,10 @@ for i in range(starting_I, list_size_I):
         overlap_results[i, j] = target_ratio
 
         if debug_mode:
-            self.save(f"{output_base_file}scan_i.vtk")
-            target.save(f"{output_base_file}scan_j.vtk")
+            self.save(f"{output_base_directory + output_base_file}_scan_i.vtk")
+            target.save(f"{output_base_directory + output_base_file}_scan_j.vtk")
 
-with open("tests_output/compute_overlap/overlap_results.csv", 'w') as out_file:
+with open(f"{output_base_directory}overlap_results.csv", 'w') as out_file:
     for x in range(overlap_results.shape[0]):
         for y in range(overlap_results.shape[1]):
             out_file.write(f"{overlap_results[x, y]:.6}, ")

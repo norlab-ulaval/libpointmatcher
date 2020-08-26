@@ -10,22 +10,31 @@ from pypointmatcher import pointmatcher as pm, pointmatchersupport as pms
 PM = pm.PointMatcher
 PMIO = pm.PointMatcherIO
 DP = PM.DataPoints
+params = pms.Parametrizable.Parameters()
 
-output_base_file = "tests_output/align_sequence/"
+# Path of output directory (default: tests/align_sequence/)
+# The output directory must already exist
+# Leave empty to save in the current directory
+output_base_directory = "tests/align_sequence/"
+
+# Name of output files (default: align_sequence)
 output_file_name = "align_sequence"
 
 # Rigid transformation
 rigid_trans = PM.get().TransformationRegistrar.create("RigidTransformation")
 
 # Create filters manually to clean the global map
-density_filter = PM.get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter",
-                                                           {"knn": "10",
-                                                            "epsilon": "5",
-                                                            "keepNormals": "0",
-                                                            "keepDensities": "1"})
+params["knn"] = "10"
+params["epsilon"] = "5"
+params["keepNormals"] = "0"
+params["keepDensities"] = "1"
+density_filter = PM.get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", params)
+params.clear()
 
+params["maxDensity"] = "30"
 max_density_subsample = PM.get().DataPointsFilterRegistrar.create("MaxDensityDataPointsFilter",
-                                                                  {"maxDensity": "30"})
+                                                                  params)
+params.clear()
 
 # Main algorithm definition
 icp = PM.ICP()
@@ -35,6 +44,7 @@ config_file = "../data/default.yaml"
 pms.validateFile(config_file)
 icp.loadFromYaml(config_file)
 
+# Loading the list of files
 # file_info_list = PMIO.FileInfoVector("../data/carCloudList.csv", "../data/")
 # or
 file_info_list = PMIO.FileInfoVector("../data/cloudList.csv", "../data/")
@@ -84,4 +94,4 @@ for i in range(len(file_info_list)):
     # Save the map at each iteration
     output_file_name_iter = f"{output_file_name}_{i}.vtk"
     print(f"outputFileName: {output_file_name_iter}")
-    map_point_cloud.save(f"{output_base_file}{output_file_name_iter}")
+    map_point_cloud.save(f"{output_base_directory}{output_file_name_iter}")
