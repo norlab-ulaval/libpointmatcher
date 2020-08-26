@@ -1,4 +1,4 @@
-| [Tutorials Home](index.md) | [Previous](ImportExport.md) | [Next](PythonModule.md) |
+| [Tutorials Home](index.md) | [Previous](UnitTestDev.md) | [Next](PythonModule.md) |
 | :--- | :---: | ---: |
 
 # Compiling libpointmatcher with *Python*
@@ -43,7 +43,7 @@ The rest of this tutorial will guide you through the necessary steps to compile 
 
 ## pybind11
 
-In order to be able to compile pypointmatcher, you must either install pybind11 on your system or add it as a git submodule in the libpointmatcher's `/contrib` directory. You must then create a symbolic link to this git submodule in the *Python* directory. Go [here](#installing-pybind11) for the installation steps or [here](#adding-pybind11) for the git sudmodule steps.
+Pybind11 is a library used to create *Python* bindings of existing *C++* code and vice versa. So, in order to be able to compile pypointmatcher, you must either install pybind11 on your system or add it as a git submodule in the libpointmatcher's `/contrib` directory. You must then create a symbolic link to this git submodule in the *Python* directory. Go [here](#installing-pybind11) for the installation steps or [here](#adding-pybind11) for the git sudmodule steps.
 
 ### Installing pybind11 (recommended) <a name="installing-pybind11"></a>
 

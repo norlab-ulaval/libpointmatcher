@@ -28,8 +28,6 @@ nav:
     - 'The ICP chain configuration and its variants': 'DefaultICPConfig.md'
     - 'Configuring libpointmatcher using YAML': 'Configuration.md'
     - 'Supported file types and importing/exporting point clouds': 'ImportExport.md'
-- Python:
-      - 'Compiling libpointmatcher with Python': 'CompilationPython.md'
 - Advanced:
     - 'How to link a project to libpointmatcher': 'LinkingProjects.md'
     - 'How to use libpointmatcher in ROS?': 'UsingInRos.md'
@@ -41,3 +39,6 @@ nav:
     - 'Creating a DataPointsFilter': 'DataPointsFilterDev.md'
     - 'Creating a Transformation': 'TransformationDev.md'
     - 'Creating unit tests': 'UnitTestDev.md'
+- Python:
+    - 'Compiling libpointmatcher with Python': 'CompilationPython.md'
+    - 'Using libpointmatcher with Python': 'PythonModule.md'
