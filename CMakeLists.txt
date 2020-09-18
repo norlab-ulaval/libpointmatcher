@@ -148,8 +148,11 @@ else()
   # libnabo already part of this project (e.g. as a git submodule)
   # (This, plus the use of cmake target properties in libnabo, will also
   # introduce the required include directories, flags, etc.)
-  set(libnabo_LIBRARIES nabo)
 endif()
+# This cmake target alias will be defined by either: 
+# a) libnabo sources if built as a git submodule in the same project than this library, or
+# b) by libnabo-targets.cmake, included by find_package(libnabo) above.
+set(libnabo_LIBRARIES libnabo::nabo)
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
