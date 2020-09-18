@@ -146,7 +146,7 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
 #include(libnaboConfig)
 include_directories(${libnabo_INCLUDE_DIRS})
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
+set(EXTERNAL_LIBS ${EXTERNAL_LIBS} libnabo::nabo)
 message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
 
 #--------------------
