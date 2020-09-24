@@ -488,7 +488,7 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS pointmatcher)
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
 # Create variable with the library location
-set(POINTMATCHER_LIB  $<TARGET_FILE:libpointmatcher>)
+set(POINTMATCHER_LIB  $<TARGET_FILE:pointmatcher>)
 
 # Configure config file for local build tree
 configure_file(libpointmatcherConfig.cmake.in
@@ -503,10 +503,6 @@ set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 # gather all the includes but remove ones in the source tree
 # because we added an include for the local yaml-cpp-pm we should also remove it
 list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
-
-# Change the library location for an install location
-get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
-set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
 
 # We put the generated file for installation in a different repository (i.e., ./CMakeFiles/)
 configure_file(libpointmatcherConfig.cmake.in
