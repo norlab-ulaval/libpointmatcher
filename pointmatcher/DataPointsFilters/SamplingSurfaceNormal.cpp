@@ -33,8 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 #include "SamplingSurfaceNormal.h"
-
-#include "utils.h"
+#include "DataPointsFilters/utils/utils.h"
 
 // Eigenvalues
 #include "Eigen/QR"
