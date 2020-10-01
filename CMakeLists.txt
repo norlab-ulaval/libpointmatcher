@@ -349,7 +349,12 @@ file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 # In CMake >=3.4 we can easily build shared libraries in Mac and Windows.
 # No need to distinguish between operating systems while building targets
 
-add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
+set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
+if (SHARED_LIBS)
+	add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
+else(SHARED_LIBS)
+	add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
+endif(SHARED_LIBS)
 
 target_include_directories(pointmatcher PUBLIC
   $<INSTALL_INTERFACE:>
