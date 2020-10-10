@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.4)
 
 include(CheckSymbolExists)
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
