@@ -908,6 +908,8 @@ TEST_F(DataFilterTest, SaliencyDataPointsFilter)
 
 TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 {
+	using DPFiltersPtr = std::shared_ptr<PM::DataPointsFilter>;
+	
 	// Test with point cloud
 	DP cloud = generateRandomDataPoints(300000);
 	
@@ -922,8 +924,9 @@ TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 		params["keepLambdas"] = "1";
 		params["keepTensors"] = "1";
 		
-	PM::DataPointsFilter* spdf = 
-			PM::get().DataPointsFilterRegistrar.create("SpectralDecompositionDataPointsFilter", params);
+	DPFiltersPtr spdf = PM::get().DataPointsFilterRegistrar.create(
+		"SpectralDecompositionDataPointsFilter", params
+	);
 
 	DP filteredCloud = spdf->filter(cloud);
 
