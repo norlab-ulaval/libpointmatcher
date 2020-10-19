@@ -77,7 +77,7 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	tv.toDescriptors();
 	addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, true /*lambdas*/, false /*tensors*/);
 	
-//--- 2. Filter iteratively on each measure (surfaceness, curveness, pointness)
+//--- 2. Filter iteratively on each measure (surfaceness, curveness, pointness) to uniformize density
 	std::size_t it = 0;
 	const std::size_t itMax_ = itMax;
 	const std::size_t k_ = k;
@@ -92,21 +92,25 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		return ret or ++it >= itMax_ or k_ >= nbPts;		
 	};
 	
+	const T xi3 = xi_expectation(3, sigma, radius);
+	const T xi2 = xi_expectation(2, sigma, radius);
+	const T xi1 = xi_expectation(1, sigma, radius);
+	
 	do 
 	{	
 	// 2.1 On pointness
-		filterPointness(cloud, xi_expectation(3, sigma, radius), k);
+		filterPointness(cloud, xi3, tv.k);
 	// 2.2 On curveness
-		filterCurveness(cloud, xi_expectation(1, sigma, radius / 2.), k);
+		filterCurveness(cloud, xi1, tv.k);
 	// 2.3 On surfaceness
-		filterSurfaceness(cloud, xi_expectation(2, sigma, radius), k);
+		filterSurfaceness(cloud, xi2, tv.k);
 
 	//Re-compute vote...
 		tv.encode(cloud, TensorVoting<T>::Encoding::BALL);
 		tv.cfvote(cloud, true);
 		tv.decompose();
 		tv.toDescriptors();
-		//std::cout << "Add descriptors..."<< std::endl;
+		
 		addDescriptor(cloud, tv, false /*normals*/, false /*labels*/, true /*lambdas*/, false /*tensors*/);
 	} 
 	while(not checkConvergence(cloud, 5 /*delta points*/));
@@ -119,7 +123,10 @@ void SpectralDecompositionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	tv.toDescriptors();
 
 //--- 4. Add descriptors
-	addDescriptor(cloud, tv, keepNormals, keepLabels, keepLambdas, keepTensors);
+	addDescriptor(cloud, tv, keepNormals, true, keepLambdas, keepTensors);//TODO: add remove not kept descriptors
+	
+//--- 5. Remove outliers
+	removeOutlier(cloud, tv);
 }
 
 
@@ -188,53 +195,52 @@ void SpectralDecompositionDataPointsFilter<T>::addDescriptor(DataPoints& pts, co
 
 }
 
+
 //------------------------------------------------------------------------------
-// Filter
+// Outlier filter
 //------------------------------------------------------------------------------
 template <typename T>
-void SpectralDecompositionDataPointsFilter<T>::reduce(DataPoints& pts, T threshold, std::string descName) const
+void SpectralDecompositionDataPointsFilter<T>::removeOutlier(DataPoints& pts, const TensorVoting<T> &tv) const
 {
-#if 1
-	constexpr std::size_t seed = 1;
-	std::mt19937 gen(seed); //Standard mersenne_twister_engine seeded with seed
-	std::uniform_real_distribution<> uni01(0., 1.);
+	static constexpr int POINT = 0;
+	static constexpr int CURVE = 1;
+	static constexpr int SURFACE = 2;
+	
+	static constexpr T th = 0.1; //threshold at 10%
 	
 	const std::size_t nbPts = pts.getNbPoints();
+		
+	const T th_p = (tv.pointness.maxCoeff() - tv.pointness.minCoeff()) * th + tv.pointness.minCoeff();
+	const T th_c = (tv.curveness.maxCoeff() - tv.curveness.minCoeff()) * th + tv.curveness.minCoeff();
+	const T th_s = (tv.surfaceness.maxCoeff() - tv.surfaceness.minCoeff()) * th + tv.surfaceness.minCoeff();
 	
-	// Check field exists
-	if (!pts.descriptorExists(descName))
-	{
-		throw InvalidField("SpectralDecomposition<T>::filter: Error, field not found in descriptors.");
-	}
 	
-	const auto& values = pts.getDescriptorViewByName(descName);
-
 	std::size_t j = 0;
 	for (std::size_t i = 0; i < nbPts; ++i)
 	{
-		const T randv = uni01(gen);	
-		const T value(values(0,i));
+		const T surfaceness = tv.surfaceness(i);
+		const T curveness = tv.curveness(i);
+		const T pointness = tv.pointness(i);
+
+		int label;
+		(Vector(3) << pointness, curveness, surfaceness).finished().maxCoeff(&label); 
+
+		bool keepPt = ((label == POINT) and  (pointness >= th_p)) 
+			or ((label == CURVE) and  (curveness >= th_c)) 
+			or ((label == SURFACE) and  (surfaceness >= th_s));
 		
-		if (value < threshold or randv < 0.2)
+		if (keepPt)
 		{
 			pts.setColFrom(j, pts, i);
 			++j;
 		}
 	}
 	pts.conservativeResize(j);	
-#else
-	PointMatcherSupport::Parametrizable::Parameters params; 
-		params["descName"] = descName;
-		params["useLargerThan"] = "1";
-		params["threshold"] = std::to_string(threshold);
-		
-	PM::DataPointsFilter* trimDesc = 
-		PM::get().DataPointsFilterRegistrar.create("CutAtDescriptorThresholdDataPointsFilter", params);
-
-	trimDesc->inPlaceFilter(pts);
-#endif
 }
 
+//------------------------------------------------------------------------------
+// Filter
+//------------------------------------------------------------------------------
 template <typename T>
 void SpectralDecompositionDataPointsFilter<T>::filterSurfaceness(DataPoints& pts, T xi, std::size_t k) const
 {

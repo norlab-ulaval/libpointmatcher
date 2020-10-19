@@ -113,7 +113,7 @@ private:
 	
 	void addDescriptor(DataPoints& pts, const TensorVoting<T> &tv, bool keepNormals_, bool keepLabels_, bool keepLambdas_, bool keepTensors_) const;
 	
-	void reduce(DataPoints& pts, T threshold, std::string descName) const;
+	void removeOutlier(DataPoints& pts, const TensorVoting<T> &tv) const;
 	
 	void filterSurfaceness(DataPoints& pts, T xi, std::size_t k) const;
 	void filterCurveness(DataPoints& pts, T xi, std::size_t k) const;
