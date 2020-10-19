@@ -37,6 +37,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 #include "utils/sparsetv.h"
 
+/**
+ * Spectral Decomposition Filter (SpDF) is a sampling algorithm based on spectral decomposition analysis to derive local density measures for each geometric primitive.
+ * First, we identify the geometric primitives along with their saliencies using the tensor voting framework. 
+ * Then, we derive density measures from saliencies: if the density for each geometric primitive is less than the desired density, we stop; else we sub-sample each over-represented geometric primitive, and re-iterate.
+ * As output, we have a uniform sampled point cloud enhanced with geometric information.
+ *
+ * Implemented by Mathieu Labussiere <mathieu dot labu at gmail dot com>, Institut Pascal, Université Clermont Auvergne, 2020
+ **/
 template<typename T>
 struct SpectralDecompositionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
@@ -62,7 +70,7 @@ struct SpectralDecompositionDataPointsFilter : public PointMatcher<T>::DataPoint
 
 	inline static const std::string description()
 	{
-		return "Point cloud sampling and enhancement: compute geometric features saliencies throught Tensor Voting framework and use them to sample the point cloud.";
+		return "Point cloud sampling and enhancement: compute geometric features saliencies throught Tensor Voting framework and use them to sample the point cloud. \\cite{Labussiere2020}";
 	}
 
 	inline static const ParametersDoc availableParameters()
@@ -70,7 +78,7 @@ struct SpectralDecompositionDataPointsFilter : public PointMatcher<T>::DataPoint
 		return {
 			{"k", "Number of neighbors to consider", "50", "6", "4294967295", &P::Comp<std::size_t>},
 			{"sigma", "Scale of the vote in TensorVoting.", "0.2", "0.", "+inf", &P::Comp<T>},
-			{"radius", "Radius to control scale od uniform distribution.", "0.4", "0.", "+inf", &P::Comp<T>},
+			{"radius", "Radius to control the scale of the uniform distribution.", "0.4", "0.", "+inf", &P::Comp<T>},
 			{"itMax", "Number max of iterations to do", "10", "1", "4294967295", &P::Comp<std::size_t>},
 			{"keepNormals", "Flag to keep normals computed by TV.", "1", "0", "1", P::Comp<bool>},
 			{"keepLabels", "Flag to keep labels computed by TV.", "1", "0", "1", P::Comp<bool>},
