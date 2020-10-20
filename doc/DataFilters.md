@@ -474,10 +474,11 @@ Spectral Decomposition Filter (SpDF) is a sampling algorithm based on spectral d
 - Then, we derive density measures from saliencies: if the density for each geometric primitive is less than the desired density, we stop; else we sub-sample each over-represented geometric primitive, and re-iterate.
 - As output, we have a uniform sampled point cloud enhanced with geometric information.
 
-__Required descriptors:__ none
-__Output descriptor:__ `normals`, `tangents`, `surfaceness`, `curveness`, `pointness`, `lambda1`, `lambda2`, `lambda3`, `sticks`, `plate`, `balls` and `labels` (see [SaliencyDataPointsFilter](#saliencyhead))
+__Required descriptors:__ none  
+__Output descriptor:__ `normals`, `tangents`, `surfaceness`, `curveness`, `pointness`, `lambda1`, `lambda2`, `lambda3`, `sticks`, `plate`, `balls` and `labels` (see [SaliencyDataPointsFilter](#saliencyhead))  
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ make the density uniform, remove outliers, reduces number of points  
+
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -503,7 +504,7 @@ The bottom-histogram shows the resulting distribution after making the density u
 
 |Figure: Applying the SpDF Filter on a structured point cloud | Parameters used |
 |---|:---|  
-|![spdf after](images/spdf-method "Applying the SpDF Filter on a structured point cloud") | k : 50 <br> sigma : 0.2 <br> radius : 0.2 |
+|![spdf after](images/spdf-method.jpg "Applying the SpDF Filter on a structured point cloud") | k : 50 <br> sigma : 0.2 <br> radius : 0.2 |
 
 
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
@@ -651,7 +652,7 @@ This filter is used to augment points with an estimation of position uncertainty
 __Required descriptors:__  none  
 __Output descriptor:__ `simpleSensorNoise`  
 __Sensor assumed to be at the origin:__ yes  
-__Impact on the number of points:__ none
+__Impact on the number of points:__ none  
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
@@ -676,8 +677,8 @@ In the following image we show a side view of local point cloud 3 in the dataset
 This filter enhances the point cloud by computing geometric features saliencies throught the tensor voting framework. 
 The implementation of the tensor voting is based on the closed-form solution of _Wu, T.-P., Yeung, S.-K., Jia, J., Tang, C.-K., & Medioni, G. (2012). A Closed-Form Solution to Tensor Voting: Theory and Applications. IEEE Transactions on Pattern Analysis and Machine Intelligence, 34(8), 1482–1495. [https://doi.org/10.1109/TPAMI.2011.250](https://doi.org/10.1109/TPAMI.2011.250)_.
 
-__Required descriptors:__ none
-__Output descriptor:__ `normals`, `tangents`, `surfaceness`, `curveness`, `pointness`, `sticks`, `plate`, `balls` and `labels`
+__Required descriptors:__ none  
+__Output descriptor:__ `normals`, `tangents`, `surfaceness`, `curveness`, `pointness`, `sticks`, `plate`, `balls` and `labels`  
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ none  
 
