@@ -47,6 +47,8 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 14. [Covariance Sampling (CovS) Filter](#covshead)
 
+15. [Spectral Decomposition Filter (SpDF)](#spdfhead)
+
 ### Descriptor Augmenting
 
 1. [Observation Direction Filter](#obsdirectionhead)
@@ -59,7 +61,9 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 5. [Simple Sensor Noise Filter](#sensornoisehead)
 
-6. [Fixed Step Sampling Filter](#fixedstepsamplinghead)
+6. [Saliency Filter](#saliencyhead)
+
+7. [Fixed Step Sampling Filter](#fixedstepsamplinghead)
 
 
 ## An Example Point Cloud View of an Appartment
@@ -460,6 +464,48 @@ The following example uses a structured point cloud from the apartment dataset. 
 
 **Remark:** the filter is not very well suited for large scan with uneven density, it is preferably to use it for computer vision applications, or small scan.
 
+## Spectral Decomposition Filter (SpDF) <a name="spdfhead"></a>
+
+### Description
+
+Spectral Decomposition Filter (SpDF) is a sampling algorithm based on spectral decomposition analysis to derive local density measures for each geometric primitive. It is based on the reference _Labussière, M., Laconte, J., & Pomerleau, F. (2020). Geometry Preserving Sampling Method Based on Spectral Decomposition for Large-Scale Environments. Frontiers in Robotics and AI, 7(September), 1–15. [https://doi.org/10.3389/frobt.2020.572054](https://doi.org/10.3389/frobt.2020.572054)_
+
+- First, we identify the geometric primitives along with their saliencies using the tensor voting framework. 
+- Then, we derive density measures from saliencies: if the density for each geometric primitive is less than the desired density, we stop; else we sub-sample each over-represented geometric primitive, and re-iterate.
+- As output, we have a uniform sampled point cloud enhanced with geometric information.
+
+__Required descriptors:__ none
+__Output descriptor:__ `normals`, `tangents`, `surfaceness`, `curveness`, `pointness`, `lambda1`, `lambda2`, `lambda3`, `sticks`, `plate`, `balls` and `labels` (see [SaliencyDataPointsFilter](#saliencyhead))
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ make the density uniform, remove outliers, reduces number of points  
+
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|k	| Number of neighbors to consider | 50 | min: 6, max: 4294967295|
+|sigma	| Scale of the vote (in m) for the Tensor Voting framework | 0.2 | min: 0, max: +inf |
+|radius	| Radius to control the scale of the uniform distribution | 0.4 | min: 0, max: +inf |
+|itMax	|Number max of iterations to do | 10 | min: 1, max: 4294967295|
+|keepNormals       | Add the normal and tangent vectors to descriptors | 1 | 1: true, 0: false |
+|keepLabels       | Add the labels (Surface = 3, Curve = 2, Junction = 1) to descriptors | 1 | 1: true, 0: false |
+|keepLambdas       | Add the lambdas (saliencies of the tensor voting) to descriptors | 1 | 1: true, 0: false |
+|keepTensors       | Add the tensors (stick, plate and ball tensors of the tensor voting) to descriptors | 1 | 1: true, 0: false |
+
+### Example
+
+The figure bellow illustrates that **SpDF** is able to make the density uniform while preserving each geometric primitive, from an original point cloud of 370k points where most points are concentrated  in a small area, to a uniform point cloud of 40k points, i.e., a compression ratio of 89%.
+Edges and corners have been preserved, while dense surfaces have been made uniform.
+
+**(A)** shows the convergence of the saliencies below their expected values, represented by the vertical dashed lines, implying a uniform density on each geometric primitive. 
+The top-histogram represents the initial saliencies distribution obtained from the tensor voting framework.
+The bottom-histogram shows the resulting distribution after making the density uniform.
+
+**(B)** illustrates the process of reducing and making uniform a structured point cloud from 370k **(B1)** to 40k points **(B2)**, i.e., a compression ratio of 89%.	The resulting point cloud have uniform density, and geometric primitives, such as corners, edges and surfaces, are preserved.
+
+|Figure: Applying the SpDF Filter on a structured point cloud | Parameters used |
+|---|:---|  
+|![spdf after](images/spdf-method "Applying the SpDF Filter on a structured point cloud") | k : 50 <br> sigma : 0.2 <br> radius : 0.2 |
+
+
 ## Observation Direction Filter <a name="obsdirectionhead"></a>
 
 ### Description
@@ -621,6 +667,28 @@ In the following image we show a side view of local point cloud 3 in the dataset
 |Figure:  Side view of a view 3 from the HG dataset augmented with sensor noise <br>estimations   |Parameters used   |
 |---|:---|
 |![samp norm after](images/hg_noise.png " Side view of a view 3 from the HG dataset") | sensorType : 1 |
+
+
+## Saliency Filter <a name="saliencyhead"></a>
+
+### Description
+
+This filter enhances the point cloud by computing geometric features saliencies throught the tensor voting framework. 
+The implementation of the tensor voting is based on the closed-form solution of _Wu, T.-P., Yeung, S.-K., Jia, J., Tang, C.-K., & Medioni, G. (2012). A Closed-Form Solution to Tensor Voting: Theory and Applications. IEEE Transactions on Pattern Analysis and Machine Intelligence, 34(8), 1482–1495. [https://doi.org/10.1109/TPAMI.2011.250](https://doi.org/10.1109/TPAMI.2011.250)_.
+
+__Required descriptors:__ none
+__Output descriptor:__ `normals`, `tangents`, `surfaceness`, `curveness`, `pointness`, `sticks`, `plate`, `balls` and `labels`
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ none  
+
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:--------------|
+|k	| Number of neighbors to consider | 50 | min: 6, max: 4294967295|
+|sigma	| Scale of the vote (in m) for the Tensor Voting framework | 0.2 | min: 0, max: +inf |
+|keepNormals       | Add the normal and tangent vectors to descriptors | 1 | 1: true, 0: false |
+|keepLabels       | Add the labels (Surface = 3, Curve = 2, Junction = 1) to descriptors | 1 | 1: true, 0: false |
+|keepTensors       | Add the tensors (stick, plate and ball tensors of the tensor voting) to descriptors | 1 | 1: true, 0: false |
+
 
 ## Fixed Step Sampling Filter (To be completed) <a name="fixedstepsamplinghead"></a>
 
