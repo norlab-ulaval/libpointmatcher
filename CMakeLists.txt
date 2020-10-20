@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8.12)
 
 include(CheckSymbolExists)
+include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 
 #========================
 # Project details / setup
 #========================
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) # add -fPIC as required
 
 # Extract version from header, done first to satisfy CMP0048,
 # see `cmake --help-policy CMP0048` for more information.
@@ -17,17 +20,18 @@ file(
 # If no matches found, something is wrong with PointMatcher.h
 if (NOT POINTMATCHER_PROJECT_VERSION)
 	message(SEND_ERROR "Cannot find version number in '${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/PointMatcher.h'.")
-endif (NOT POINTMATCHER_PROJECT_VERSION)
+endif ()
 # Transform '#define POINTMATCHER_VERSION "X.Y.Z"' into 'X.Y.Z'
 string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTMATCHER_PROJECT_VERSION}")
 
 # In 3.0+, project(...) should specify VERSION to satisfy CMP0048
 if (CMAKE_VERSION VERSION_LESS 3.0.0)
 	project(libpointmatcher)
-else (CMAKE_VERSION VERSION_LESS 3.0.0)
+else ()
 	cmake_policy(SET CMP0048 NEW)
 	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
-endif (CMAKE_VERSION VERSION_LESS 3.0.0)
+endif ()
+
 
 # Check if 32 bit platform
 # By default, libpointmatcher is not compatible with and will not build on a
@@ -36,14 +40,14 @@ if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
     MESSAGE(SEND_ERROR "32 bits compiler detected. Libpointmatcher is only supported in 64 bits." )
     SET( EX_PLATFORM 32 )
     SET( EX_PLATFORM_NAME "x86" )
-endif( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
+endif()
 
 ## WARNING: unsupported
 ## To force install as a 32 bit library, set BUILD_32 to true
 if( BUILD_32 )
 	MESSAGE(STATUS "Building as a 32 bit library")
 	SET(CMAKE_CXX_FLAGS "-m32")
-endif( BUILD_32 )
+endif()
 
 # Ensure proper build type
 if (NOT CMAKE_BUILD_TYPE)
@@ -51,20 +55,20 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
     FORCE)
-else (NOT CMAKE_BUILD_TYPE)
+else ()
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("\n=================================================================================")
     message("\n-- Build type: Debug. Performance will be terrible!")
     message("-- Add -DCMAKE_BUILD_TYPE=Release to the CMake command line to get an optimized build.")
     message("\n=================================================================================")
-  endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
-endif (NOT CMAKE_BUILD_TYPE)
+  endif ()
+endif ()
 
 
 #================= extra building definitions ==============================
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-O3)
-endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+endif()
 
 # For Windows
 if( MSVC )
@@ -96,9 +100,6 @@ foreach(p LIB BIN INCLUDE CMAKE)
 	endif()
 endforeach()
 
-# Install package.xml for catkin
-install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
-
 #===========================================================================
 
 
@@ -106,7 +107,6 @@ install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
 
 # initially
 set(EXTERNAL_LIBS "")
-set(EXTRA_DEPS "")
 
 # compile local version of gtest and yaml-cpp
 add_subdirectory(contrib)
@@ -118,10 +118,7 @@ add_subdirectory(contrib)
 find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
 if (Boost_MINOR_VERSION GREATER 47)
 	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
-endif (Boost_MINOR_VERSION GREATER 47)
-include_directories(${Boost_INCLUDE_DIRS})
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${Boost_LIBRARIES})
-
+endif ()
 
 #--------------------
 # DEPENDENCY: eigen 3
@@ -143,11 +140,19 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 #--------------------
 # DEPENDENCY: nabo
 #--------------------
-find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
-#include(libnaboConfig)
-include_directories(${libnabo_INCLUDE_DIRS})
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
-message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+if (NOT TARGET nabo)
+  # Find libnabo:
+  find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
+  message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+else()
+  # libnabo already part of this project (e.g. as a git submodule)
+  # (This, plus the use of cmake target properties in libnabo, will also
+  # introduce the required include directories, flags, etc.)
+endif()
+# This cmake target alias will be defined by either: 
+# a) libnabo sources if built as a git submodule in the same project than this library, or
+# b) by libnabo-targets.cmake, included by find_package(libnabo) above.
+set(libnabo_LIBRARIES libnabo::nabo)
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
@@ -161,9 +166,9 @@ if (USE_OPEN_MP)
 		if (CMAKE_COMPILER_IS_GNUCC)
 			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
     	message("-- OpenMP found, parallel computer enabled")
-		endif(CMAKE_COMPILER_IS_GNUCC)
-	endif(OPENMP_FOUND)
-endif (USE_OPEN_MP)
+		endif()
+	endif()
+endif ()
 
 #--------------------
 # DEPENDENCY: OpenCL (optional)
@@ -174,16 +179,16 @@ if (USE_OPEN_CL)
 		find_library(OPENCL_LIBRARIES opencl64)
 		if (!OPENCL_LIBRARIES)
 			find_library(OPENCL_LIBRARIES opencl32)
-		endif (!OPENCL_LIBRARIES)
-	else (WIN32)
+		endif ()
+	else ()
 		find_library(OPENCL_LIBRARIES OpenCL ENV LD_LIBRARY_PATH)
-	endif (WIN32)
+	endif ()
 	# if found, add
 	if (OPENCL_LIBRARIES)
 		set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${OPENCL_LIBRARIES})
     message("-- openCL found, parallel computer enabled for kd-tree")
-	endif (OPENCL_LIBRARIES)
-endif(USE_OPEN_CL)
+	endif ()
+endif()
 
 
 #--------------------
@@ -200,30 +205,26 @@ if(USE_SYSTEM_YAML_CPP)
             /usr/local/lib
     )
     if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-            include_directories(${yaml-cpp_INCLUDE_DIRS})
-            add_definitions(-DSYSTEM_YAML_CPP)
             set(yamlcpp_FOUND)
-            set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp_LIBRARIES} )
             message("-- yaml-cpp found, text-based configuration enabled")
-    else(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+    else()
             message("-- yaml-cpp not found, text-based configuration and related applications disabled")
-    endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-else(USE_SYSTEM_YAML_CPP)
+    endif()
+else()
         include_directories(contrib/yaml-cpp-pm/include)
 
 #note: this is not working....
         #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
         #include_directories(${yaml-cpp-pm_INCLUDE})
 
-        get_property(yaml-cpp-pm_LIB TARGET yaml-cpp-pm PROPERTY LOCATION)
-        set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp-pm_LIB} )
-        set (EXTRA_DEPS ${EXTRA_DEPS} yaml-cpp-pm)
+        list(APPEND EXTERNAL_LIBS $<TARGET_FILE:yaml-cpp-pm>)
+        list(APPEND EXTRA_DEPS yaml-cpp-pm)
         set(yamlcpp_FOUND)
 
         get_property(yaml-cpp-pm_VERSION TARGET yaml-cpp-pm PROPERTY VERSION)
         message("-- using built-in yaml-cpp, version ${yaml-cpp-pm_VERSION}")
         message("   -- text-based configuration enabled")
-endif(USE_SYSTEM_YAML_CPP)
+endif()
 
 
 #--------------------
@@ -231,9 +232,6 @@ endif(USE_SYSTEM_YAML_CPP)
 #--------------------
 # link rt support if POSIX timers are used
 check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
-if (POSIX_TIMERS AND NOT APPLE)
-	set(EXTERNAL_LIBS ${EXTERNAL_LIBS} rt)
-endif (POSIX_TIMERS AND NOT APPLE)
 
 #============================= end dependencies =================================
 
@@ -314,7 +312,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/PointToPointWithCov.cpp
 	pointmatcher/ErrorMinimizers/PointToPointSimilarity.cpp
 	pointmatcher/ErrorMinimizers/Identity.cpp
-#DataPointsFilters	
+#DataPointsFilters
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
@@ -344,49 +342,53 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Sphericality.cpp
 )
 
-include_directories(${CMAKE_SOURCE_DIR})
-
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 
-# MacOS and Windows deal with shared/dynamic library differently. For
-# simplicity, we only authorize static library in those cases.
-if(APPLE OR WIN32)
 
-	add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
-	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+# In CMake >=3.4 we can easily build shared libraries in Mac and Windows.
+# No need to distinguish between operating systems while building targets
 
-else(APPLE OR WIN32)
-	set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
+add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 
-	if (SHARED_LIBS)
-		add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
-		install(TARGETS pointmatcher
-						ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
-						LIBRARY DESTINATION ${INSTALL_LIB_DIR}
-						RUNTIME DESTINATION ${INSTALL_BIN_DIR})
-		#install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-	else(SHARED_LIBS)
-		add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
-		install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
-	endif(SHARED_LIBS)
-endif(APPLE OR WIN32)
+target_include_directories(pointmatcher PUBLIC
+  $<INSTALL_INTERFACE:>
+  $<INSTALL_INTERFACE:pointmatcher>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher>
+	$<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
+)
+if (libnabo_INCLUDE_DIRS)
+	include_directories(pointmatcher PUBLIC ${libnabo_INCLUDE_DIRS})
+endif()
 
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher)
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils)
+if (NOT MSVC)
+	target_compile_options(pointmatcher PRIVATE -Wall)
+endif()
 
-# link all libraries to libpointmatcher
-add_definitions(-Wall)
-#target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
-target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
+if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
+	target_link_libraries(pointmatcher PRIVATE ${yaml-cpp_LIBRARIES})
+	target_include_directories(pointmatcher PRIVATE ${yaml-cpp_INCLUDE_DIRS})
+else() # embedded version:
+	# This could be enabled if yaml-cpp-pm was in the "export set"
+	#target_link_libraries(pointmatcher PRIVATE yaml-cpp-pm)
+	# For now, let's add yaml-cpp-pm output to EXTERNAL_LIBS
+endif()
 
-if(EXTRA_DEPS)
+target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(pointmatcher PRIVATE ${libnabo_LIBRARIES})
+target_link_libraries(pointmatcher PRIVATE ${EXTERNAL_LIBS})
+if (EXTRA_DEPS)
 	add_dependencies(pointmatcher ${EXTRA_DEPS})
-endif(EXTRA_DEPS)
+endif()
+
+if (POSIX_TIMERS AND NOT APPLE)
+	target_link_libraries(pointmatcher PRIVATE rt)
+endif ()
+
 set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VERSION}" SOVERSION 1)
 
-#========================= Install header ===========================
+#========================= Install commands ===========================
 
 install(FILES
 	pointmatcher/DeprecationWarnings.h
@@ -399,6 +401,23 @@ install(FILES
 	pointmatcher/IO.h
 	DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
 )
+
+install(TARGETS pointmatcher EXPORT ${PROJECT_NAME}-config
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+if(GENERATE_API_DOC)
+	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
+	if (DOXYGEN_FOUND)
+		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
+	endif ()
+endif()
+
+# Install package.xml for catkin
+install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
+
 
 #========================= Documentation ===========================
 
@@ -418,24 +437,24 @@ if(GENERATE_API_DOC)
 
 	add_dependencies(pointmatcher doc)
 
-	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
-	if (DOXYGEN_FOUND)
-		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
-	endif (DOXYGEN_FOUND)
-
-else(GENERATE_API_DOC)
-
+else()
 	message("-- API Documentation (doxygen): disabled")
-
-endif(GENERATE_API_DOC)
+endif()
 
 
 #=============== trigger other makefile ======================
 
 # Example programs
-add_subdirectory(examples)
+option(POINTMATCHER_BUILD_EXAMPLES "Build libpointmatcher examples" ON)
+if (POINTMATCHER_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
+
 # Evaluation programs
-add_subdirectory(evaluations)
+option(POINTMATCHER_BUILD_EVALUATIONS "Build libpointmatcher evaluations" ON)
+if (POINTMATCHER_BUILD_EVALUATIONS)
+  add_subdirectory(evaluations)
+endif()
 
 # Unit testing
 
@@ -464,16 +483,21 @@ endif()
 #  target_link_libraries(executableName ${libpointmatcher_LIBRARIES})
 #  ...
 
-# 1- local build #
+# Install cmake config module
+install(EXPORT ${PROJECT_NAME}-config DESTINATION share/${PROJECT_NAME}/cmake)
 
-# Register the local build in case one doesn't use "make install"
-export(PACKAGE libpointmatcher)
+# make project importable from build_dir:
+export(
+	TARGETS pointmatcher
+	FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS pointmatcher)
 
 # Create variable for the local build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
 # Create variable with the library location
-get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
+set(POINTMATCHER_LIB  $<TARGET_FILE:pointmatcher>)
 
 # Configure config file for local build tree
 configure_file(libpointmatcherConfig.cmake.in
@@ -488,14 +512,6 @@ set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 # gather all the includes but remove ones in the source tree
 # because we added an include for the local yaml-cpp-pm we should also remove it
 list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
-
-if(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
-  list(REMOVE_ITEM EXTERNAL_LIBS ${yaml-cpp-pm_LIB})
-endif(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
-
-# Change the library location for an install location
-get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
-set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
 
 # We put the generated file for installation in a different repository (i.e., ./CMakeFiles/)
 configure_file(libpointmatcherConfig.cmake.in
@@ -546,10 +562,12 @@ install(FILES
 unset(LIBRARY_CC_ARGS)
 
 #====================== uninstall target ===============================
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+if (NOT TARGET uninstall)
+  configure_file(
+	  "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+	  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+	  IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+  add_custom_target(uninstall
+	  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()

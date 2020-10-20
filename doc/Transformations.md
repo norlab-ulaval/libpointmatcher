@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "Transformation Matrix: " << std::endl << T << std::endl;
 
-	PM::Transformation* rigidTrans;
+	std::shared_ptr<PM::Transformation> rigidTrans;
 	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
 
 	if (!rigidTrans->checkParameters(T)) {
