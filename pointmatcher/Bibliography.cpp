@@ -217,6 +217,19 @@ namespace PointMatcherSupport
 				{"pages", "260--267"},
 				{"doi", "10.1109/IM.2003.1240258"},
 				{"publisher", "IEEE Computer Society"}
+			}},
+			{"Labussiere2020", {
+				{"type", "article"},
+				{"author", "Labussière, Mathieu and Laconte, Johann and Pomerleau, François"},
+				{"title", "Geometry Preserving Sampling Method Based on Spectral Decomposition for Large-Scale Environments"},
+				{"journal", "Frontiers in Robotics and AI"},
+				{"month", "sep"},
+				{"year", "2020"},
+				{"volume", "7"},
+				{"isbn", "2296-9144"},
+				{"pages", "134--148"},
+				{"doi", "10.3389/frobt.2020.572054"},
+				{"fulltext", "https://www.frontiersin.org/article/10.3389/frobt.2020.572054"}
 			}}
 		};
 	}

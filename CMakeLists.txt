@@ -165,7 +165,7 @@ if (USE_OPEN_MP)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 		if (CMAKE_COMPILER_IS_GNUCC)
 			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
-    	message("-- OpenMP found, parallel computer enabled")
+    		message("-- OpenMP found, parallel computer enabled")
 		endif()
 	endif()
 endif ()
@@ -186,7 +186,7 @@ if (USE_OPEN_CL)
 	# if found, add
 	if (OPENCL_LIBRARIES)
 		set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${OPENCL_LIBRARIES})
-    message("-- openCL found, parallel computer enabled for kd-tree")
+    	message("-- openCL found, parallel computer enabled for kd-tree")
 	endif ()
 endif()
 
@@ -340,6 +340,8 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/DistanceLimit.cpp
 	pointmatcher/DataPointsFilters/RemoveSensorBias.cpp
 	pointmatcher/DataPointsFilters/Sphericality.cpp
+	pointmatcher/DataPointsFilters/Saliency.cpp	
+	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp	
 )
 
 
