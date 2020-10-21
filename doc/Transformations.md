@@ -40,8 +40,8 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "Transformation Matrix: " << std::endl << T << std::endl;
 
-	PM::Transformation* rigidTrans;
-	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation").get();
+	std::shared_ptr<PM::Transformation> rigidTrans;
+	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
 
 	if (!rigidTrans->checkParameters(T)) {
 		std::cout << "WARNING: T does not represent a valid rigid transformation\nProjecting onto an orthogonal basis"
