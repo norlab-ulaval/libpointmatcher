@@ -8,7 +8,7 @@
 	<license>BSD</license>
 	<url type="repository">https://github.com/ethz-asl/libpointmatcher</url>
 
-	<buildtool_depend>cmake</buildtool_depend>
+	<buildtool_depend>catkin</buildtool_depend>
 
 	<build_depend>boost</build_depend>
 	<build_depend>libnabo</build_depend>
@@ -19,7 +19,13 @@
 	<run_depend>eigen</run_depend>
 	<run_depend>catkin</run_depend>
 
+	<test_depend>gtest</test_depend>
+
+	<!-- For a pure-cmake build the package must be exported explicitly -->
+	<!-- Thus the following block of code must be un-commented -->
+	<!--
 	<export>
 		<build_type>cmake</build_type>
 	</export>
+	-->
 </package>

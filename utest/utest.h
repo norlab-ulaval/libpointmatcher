@@ -3,10 +3,10 @@
 
 #include "pointmatcher/PointMatcher.h"
 #include "pointmatcher/IO.h"
-#include "../contrib/gtest/gtest.h"
 
 #include <string>
 #include <fstream>
+#include <gtest/gtest.h>
 
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/path.hpp"

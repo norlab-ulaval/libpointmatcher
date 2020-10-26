@@ -324,6 +324,9 @@ TEST_F(GenericTest, ICP_default)
 //---------------------------
 int main(int argc, char **argv)
 {
+#ifdef UTEST_TEST_DATA_PATH
+	dataPath = UTEST_TEST_DATA_PATH;
+#else
 	dataPath = "";
 	for(int i=1; i < argc; i++)
 	{
@@ -336,6 +339,7 @@ int main(int argc, char **argv)
 		cerr << "Missing the flag --path ./path/to/examples/data\n Please give the path to the test data folder which should be included with the source code. The folder is named 'examples/data'." << endl;
 		return -1;
 	}
+#endif
 
 	// Load point cloud for all test
 	ref2D =  DP::load(dataPath + "2D_oneBox.csv");
