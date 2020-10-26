@@ -8,6 +8,7 @@
 	<license>BSD</license>
 	<url type="repository">https://github.com/ethz-asl/libpointmatcher</url>
 
+	<!-- If a pure-cmake build is desired, the buildtool should be switched to 'cmake' -->
 	<buildtool_depend>catkin</buildtool_depend>
 
 	<build_depend>boost</build_depend>
