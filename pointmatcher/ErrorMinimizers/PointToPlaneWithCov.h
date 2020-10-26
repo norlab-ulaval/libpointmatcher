@@ -64,7 +64,7 @@ struct PointToPlaneWithCovErrorMinimizer: public PointToPlaneErrorMinimizer<T>
 
     inline static const std::string description()
     {
-        return "Point-to-plane error (or point-to-line in 2D). Based on \\cite{Chen1991Point2Plane}. Covariance estimation based on \\cite{Censi2007ICPCovariance}.";
+        return "Point-to-plane error (or point-to-line in 2D). Based on \\cite{Chen1991Point2Plane}. Covariance estimation based on \\cite{Censi2007ICPCovariance}. Implementation based on \\cite{Prakhya2015Point2Plane}.";
     }
 
     static inline const ParametersDoc availableParameters()

@@ -1,7 +1,7 @@
-| [Tutorials Home](index.md) | [Previous](index.md) | [Next](CompilationWindows.md) |
+| [Tutorials Home](index.md) | [Previous](index.md) | [Next](CompilationMac.md) |
 | :--- | :---: | ---: |
 
-# Compiling and Installing libpointmatcher on Ubuntu
+# Compiling and installing libpointmatcher on Ubuntu
 
 ## In short...
 
@@ -38,7 +38,7 @@ ldconfig -p | grep libboost
 
 If you see a list of results then you can skip to the next section.  If not, you most likely have to install Boost.
 
-Instructions for downloading and installing boost to Unix systems can be found [here](http://www.boost.org/doc/libs/1_55_0/more/getting_started/unix-variants.html).  Boost can also be installed as a package by running
+Instructions for downloading and installing boost to Unix systems can be found [here](https://www.boost.org/doc/libs/1_65_1/more/getting_started/unix-variants.html).  Boost can also be installed as a package by running
 
 ```bash
 sudo apt-get install libboost-all-dev
@@ -56,7 +56,7 @@ git --version
 
 If Git is installed, you should see a message of the form
 
-```bash
+```text
 git version 2.17.1
 ```
 
@@ -105,14 +105,27 @@ BUILD_DIR=${SRC_DIR}/build
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
 make
+```
+
+This will compile libnabo into a `/build` directory.
+
+To make sure that everything is working properly, you can run the unit tests:
+
+```bash
+make test
+```
+
+This will run multiple nearest-neighbor searches performances and may take some minutes.
+
+Then, install the library on your system by running the following command :
+
+```bash
 sudo make install
 ```
 
-This will compile libnabo in a `/build` directory and install it on your system.
+*Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags. Go [here](#possible-caveats) to see how it can be achieve.
 
-*Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags.
-
-<!--
+<!---
 ### 3. Installing yaml-cpp 0.3.0 (Optional)
 Configuration files can be managed using YAML in libpointmatcher.  This allows users to edit configuration files in a readable format.  To support this, you need to install [yaml-cpp](https://github.com/jbeder/yaml-cpp).  **It is important that you install the older version (0.3.0) of lib-yaml or you will not be able to install Pointmatcher.**  If you are using versions of Ubuntu newer than 12.04, see the warning below. Either compile and install from the source or install package by running:
 
@@ -124,25 +137,9 @@ sudo apt-get install libyaml-cpp0.3-dev
 The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is so far only compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
 -->
 
-### 4. Compiling the Documentation (optional)
+### 3. Installing libpointmatcher
 
-Libpointmatcher is documented directly in the source-code using [Doxygen](https://www.doxygen.nl/index.html).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen on Ubuntu, run:
-
-```bash
-sudo apt-get install doxygen
-```
-
-Once you have compiled libpointmatcher in step 5, you can simply open `/usr/local/share/doc/libpointmatcher/api/html/index.html` in a browser to view the API documentation.
-
-You will also need LaTeX for the rendering of equations:
-
-```bash
-sudo apt-get install texlive-full
-```
-
-### 5. Installing libpointmatcher
-
-Clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
+First, you need to clone the source repository into a local directory.  As an example, we reuse the Libraries directory that was created to contain the libnabo sources.
 
 ```bash
 cd ~/Libraries/
@@ -150,35 +147,62 @@ git clone git://github.com/ethz-asl/libpointmatcher.git
 cd libpointmatcher
 ```
 
-Now, to compile libpointmatcher into a `/build` directory, run the following commands.
+But, before compiling libpointmatcher, a `/build` directory must be created. Just like with libnabo, run the following commands :
 
 ```bash
 SRC_DIR=${PWD}
 BUILD_DIR=${SRC_DIR}/build
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
 cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
-make
 ```
 
-#### Compiling documentation and unit tests (optionnal)
+Before moving on to the compilation and installation steps, here are some optional features that you can enable.
 
-If you have Doxygen and LaTeX installed, you can enable the documentation using the CMake variable `GENERATE_API_DOC` to `TRUE`. This can be achieved through CMake GUI or by the command line:
+#### Compiling the documentation (optional)
+
+Libpointmatcher is documented directly in the source-code using [Doxygen](https://www.doxygen.nl/index.html).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen on Ubuntu, run:
+
+```bash
+sudo apt-get install doxygen
+```
+
+You will also need LaTeX for the equations rendering :
+
+```bash
+sudo apt-get install texlive-full
+```
+
+After you have installed Doxygen and LaTeX, you can enable the documentation by setting the CMake variable `GENERATE_API_DOC` to `TRUE`. This can be achieved through CMake-GUI or by the command line:
 
 ```bash
 cmake -D GENERATE_API_DOC=TRUE ${SRC_DIR}
 ```
 
-If you want to verify that the version of libpointmatcher you have compiled is stable, you can enable them by setting the CMake variable `BUILD_TESTS` to `TRUE`. It can be done with CMake GUI or via the command line:
+Compiling libpointmatcher will generate the documentation, which you can simply open the `/usr/local/share/doc/libpointmatcher/api/html/index.html` file to view the API documentation in a browser.
+
+#### Compiling unit tests (optionnal)
+
+If you want to verify that the version of libpointmatcher you have compiled is stable, you can enable them by setting the CMake variable `BUILD_TESTS` to `TRUE`. It can be done with CMake-GUI or via the command line:
 
 ```bash
 cmake -D BUILD_TESTS=TRUE ${SRC_DIR}
 ```
 
-Then by running the unit tests with the following command line:
+Then, once the compilation process is completed, the unit tests can be run with the following command line:
 
 ```bash
 utest/utest --path ${SRC_DIR}/examples/data/
 ```
+
+#### Compilation
+
+Now, to compile libpointmatcher into the `/build` directory, run the following command:
+
+```bash
+make -j N
+```
+
+*Note:* It is highly recommended to add the `-j N` optionnal argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time. 
 
 #### Installation
 
@@ -188,18 +212,18 @@ Finally, to install libpointmatcher on your system, run the following command:
 sudo make install
 ```
 
-#### Possible Caveats
+### 4. Possible Caveats
 
-If Eigen, libnabo, yaml-cpp are not found during the installation, you will have to manually supply their installation locations by setting the CMake flags.  You can do so using the CMake GUI.
+If Eigen, libnabo, yaml-cpp, or GTest are not found during the installation, you will have to manually supply their installation locations by setting the CMake flags. You can do so using the CMake-GUI.
 
 ```bash
 cd build
 cmake-gui .
 ```
 
-![alt text](images/cmake_screenshot.png "Screenshot of CMake GUI")
+![alt text](images/cmake_screenshot.png "Screenshot of CMake-GUI")
 
-<!--
+<!---
 If yaml-cpp was installed using apt-get as described above, it will not be found by the default CMake configuration.  You should set the `yaml-cpp_INCLUDE_DIRS` and `yaml-cpp_LIBRARIES` to `/usr/include/yaml-cpp` and `/usr/lib/x86_64-linux-gnu/` respectively.  These locations could be different on your machine.  You can find them by the files installed by the libyaml package:
 
 ```bash

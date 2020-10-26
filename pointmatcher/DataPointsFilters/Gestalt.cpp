@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "Gestalt.h"
 
-#include "utils.h"
+#include "DataPointsFilters/utils/utils.h"
 
 #include <cmath>
 

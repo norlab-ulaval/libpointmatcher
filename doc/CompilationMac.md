@@ -1,7 +1,7 @@
-| [Tutorials Home](index.md) | [Previous](CompilationWindows.md) | [Next](Introduction.md) |
+| [Tutorials Home](index.md) | [Previous](CompilationUbuntu.md) | [Next](CompilationWindows.md) |
 | :--- | :---: | ---: |
 
-# Compiling and Installing libpointmatcher on Mac OS X
+# Compiling and installing libpointmatcher on Mac OS X
 
 ## In short...
 
@@ -26,6 +26,8 @@ If you are used to development project, here is what you need:
 __Note:__ Other versions will most probably work but you'll have to try yourself to know for sure.
 
 The rest of this tutorial will guide you through the different requirements step by step.
+
+## Detailed Installation Instructions
 
 ### Some Basic Requirements
 
@@ -83,8 +85,8 @@ git --version
 
 If Git is installed, you should see a message of the form
 
-```bash
-git version 1.8.3.2
+```text
+git version 1.9.3
 ```
 
 If not refer to the Git homepage for installation instructions or install via homebrew by running
@@ -109,17 +111,7 @@ The Eigen linear algebra is required before installing libpointmatcher and can b
 brew install eigen
 ```
 
-### 2. Compiling the Documentation (optional)
-
-Libpointmatcher is documented directly in the source-code using [Doxygen](https://www.doxygen.nl/index.html).  If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`.  To install Doxygen in Ubuntu, run:
-
-```bash
-brew install doxygen
-```
-
-Once you have compiled libpointmatcher in step 4, you can simply open `/usr/local/share/doc/libpointmatcher/api/html/index.html` in a browser to view the API documentation.
-
-### 3. Installing libnabo
+### 2. Installing libnabo
 
 libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/ethz-asl/libnabo).  Clone the source repository into a local directory of your choice.
 
@@ -133,34 +125,34 @@ cd libnabo
 Now you can compile libnabo by entering the following commands
 
 ```bash
-SRC_DIR=${PWD}
+SRC_DIR=$PWD
 BUILD_DIR=${SRC_DIR}/build
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
 make
 ```
 
-To make sure that everything is working properly, run the unit tests:
+This will compile libnabo into a `/build` directory.
+
+To make sure that everything is working properly, you can run the unit tests:
 
 ```bash
 make test
 ```
 
-This will run multiple nearest-neighbor searches performances and may take some minutes. 
+This will run multiple nearest-neighbor searches performances and may take some minutes.
+
+Then, install the library on your system by running the following command :
 
 ```bash
 sudo make install
 ```
 
-*Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags. You can use the following command to default flags:
+*Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags. You can use the following command to default flags: Go [here](#possible-caveats) to see how it can be achieve.
 
-```bash
-ccmake .
-```
+### 3. Installing libpointmatcher
 
-### 4. Installing libpointmatcher
-
-Clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
+First, you need to clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
 
 ```bash
 cd ~/Libraries/
@@ -168,35 +160,55 @@ git clone git://github.com/ethz-asl/libpointmatcher.git
 cd libpointmatcher
 ```
 
-Now, to compile libpointmatcher into a `/build` directory, run the following commands.
+But, before compiling libpointmatcher, a `/build` directory must be created. Just like with libnabo, run the following commands :
 
 ```bash
 SRC_DIR=$PWD
 BUILD_DIR=${SRC_DIR}/build
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
 cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo ${SRC_DIR}
-make
 ```
 
-#### Compiling documentation and unit tests (optionnal)
+Before moving on to the compilation and installation steps, here are some optional features that can be enable.
 
-If you have Doxygen and LaTeX installed, you can enable the documentation using the CMake variable `GENERATE_API_DOC` to `TRUE`. This can be achieved through CMake GUI or by the command line:
+#### Compiling the documentation (optional)
+
+Libpointmatcher is documented directly in the source-code using [Doxygen](https://www.doxygen.nl/index.html). If Doxygen is installed on your system, an html version of the documentation will be compiled in `/usr/local/share/doc/libpointmatcher/`. To install Doxygen on Mac OS X, run:
+
+```bash
+brew install doxygen
+```
+
+After you have installed Doxygen, you can enable the documentation by setting the CMake variable `GENERATE_API_DOC` to `TRUE`. This can be achieved by the command line:
 
 ```bash
 cmake -D GENERATE_API_DOC=TRUE ${SRC_DIR}
 ```
 
-If you want to verify that the version of libpointmatcher you have compiled is stable, you can enable them by setting the CMake variable `BUILD_TESTS` to `TRUE`. It can be done with CMake GUI or via the command line:
+Compiling libpointmatcher will generate the documentation, which you can simply open the `/usr/local/share/doc/libpointmatcher/api/html/index.html` file to view the API documentation in a browser.
+
+#### Compiling unit tests (optionnal)
+
+If you want to verify that the version of libpointmatcher you have compiled is stable, you can enable them by setting the CMake variable `BUILD_TESTS` to `TRUE`. It can be done via the command line:
 
 ```bash
 cmake -D BUILD_TESTS=TRUE ${SRC_DIR}
 ```
 
-Then by running the unit tests with the following command line:
+Then, once the compilation process is completed, the unit tests can be run with the following command line:
 
 ```bash
 utest/utest --path ${SRC_DIR}/examples/data/
 ```
+
+#### Compilation
+
+Now, to compile libpointmatcher into the `/build` directory, run the following commands.
+
+```bash
+make -j N
+```
+*Note:* It is highly recommended to add the `-j N` optionnal argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time.
 
 #### Installation
 
@@ -206,16 +218,16 @@ Finally, to install libpointmatcher on your system, run the following command:
 sudo make install
 ```
 
-#### Possible Caveats
+### 4. Possible Caveats
 
 If Eigen, libnabo, yaml-cpp, or GTest are not found during the installation, you will have to manually supply their installation locations by setting the CMake flags.  You can do so using the ccmake tool.
 
 ```bash
 cd build
-ccmake ..
+ccmake .
 ```
 
-You can then set `EIGEN_INCLUDE_DIR`, `NABO_INCLUDE_DIR`, `NABO_LIBRARY`, `yaml-cpp_INCLUDE_DIRS`, `yaml-cpp_LIBRARIES` to point to your installation directories as shown in the screenshot above.  Then, generate the make files by clicking generate and rerun the following inside `/build`:
+You can then set `EIGEN_INCLUDE_DIR`, `NABO_INCLUDE_DIR`, `NABO_LIBRARY`, `yaml-cpp_INCLUDE_DIRS`, `yaml-cpp_LIBRARIES` to point to your installation directories.  Then, configure the make files by pressing `c`, then `g` to generate and rerun the following commands inside `/build`:
 
 ```bash
 make
