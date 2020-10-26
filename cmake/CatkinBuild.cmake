@@ -18,6 +18,11 @@ find_package(catkin REQUIRED
 )
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS chrono date_time filesystem program_options system thread timer)
+find_package(OpenMP REQUIRED)
+if (OpenMP_FOUND)
+  add_compile_options("${OpenMP_CXX_FLAGS}")
+  add_definitions(-DHAVE_OPENMP=${OpenMP_FOUND})
+endif()
 
 # Catkin package macro
 catkin_package(
@@ -66,6 +71,7 @@ target_include_directories(pointmatcher
   SYSTEM
     ${EIGEN3_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
+    ${OpenMP_CXX_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     ${yaml_cpp_pm_INCLUDE_DIRS}
 )
@@ -79,6 +85,7 @@ target_link_libraries(pointmatcher
   Boost::thread
   Boost::timer
   Boost::system
+  ${OpenMP_CXX_LIBRARIES}
   yaml_cpp_pm
 )
 
