@@ -111,6 +111,10 @@ set(EXTERNAL_LIBS "")
 # compile local version of gtest and yaml-cpp
 add_subdirectory(contrib)
 
+#---------------------------
+# DEPENDENCY:  POSIX Threads
+#---------------------------
+set(EXTERNAL_LIBS ${EXTERNAL_LIBS} pthread)
 
 #--------------------
 # DEPENDENCY:  boost
