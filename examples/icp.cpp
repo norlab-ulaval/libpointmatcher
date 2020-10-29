@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 
-typedef PointMatcher<double> PM;
+typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
 typedef PM::Parameters Parameters;
 typedef PointMatcherSupport::CurrentBibliography CurrentBibliography;

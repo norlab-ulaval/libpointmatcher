@@ -15,7 +15,7 @@ using namespace PointMatcherSupport;
 using namespace std;
 using namespace boost;
 
-typedef PointMatcher<double> PM;
+typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
 typedef PM::Parameters Parameters;
 
