@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindSphericality(py::module& p_module);
+	namespace datapointsfilters
+	{
+		void pybindSphericality(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_DATAPOINTSFILTERS_SPHERICALITY_H

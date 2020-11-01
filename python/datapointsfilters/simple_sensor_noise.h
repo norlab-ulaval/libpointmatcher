@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindSimpleSensorNoise(py::module& p_module);
+	namespace datapointsfilters
+	{
+		void pybindSimpleSensorNoise(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_DATAPOINTSFILTERS_SIMPLE_SENSOR_NOISE_H

@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindFixStepSampling(py::module& p_module);
+	namespace datapointsfilters
+	{
+		void pybindFixStepSampling(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_DATAPOINTSFILTERS_FIX_STEP_SAMPLING_H

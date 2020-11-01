@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindErrorMinimizersModule(py::module& p_module);
+	namespace modules
+	{
+		void pybindErrorMinimizersModule(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_MODULES_ERROR_MINIMIZERS_MODULE_H

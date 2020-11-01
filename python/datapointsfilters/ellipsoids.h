@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindEllipsoids(py::module& p_module);
+	namespace datapointsfilters
+	{
+		void pybindEllipsoids(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_DATAPOINTSFILTERS_ELLIPSOIDS_H

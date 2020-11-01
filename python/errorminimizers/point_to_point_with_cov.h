@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindPointToPointWithCov(py::module& p_module);
+	namespace errorminimizers
+	{
+		void pybindPointToPointWithCov(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_ERRORMINIMIZERS_POINT_TO_POINT_WITH_COV_H

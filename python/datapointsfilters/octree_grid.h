@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindOctreeGrid(py::module& p_module);
+	namespace datapointsfilters
+	{
+		void pybindOctreeGrid(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_DATAPOINTSFILTERS_OCTREE_GRID_H

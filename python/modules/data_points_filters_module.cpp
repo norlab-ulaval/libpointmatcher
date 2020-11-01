@@ -25,35 +25,38 @@
 #include "datapointsfilters/sphericality.h"
 #include "datapointsfilters/surface_normal.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindDataPointsFiltersModule(py::module& p_module)
+	namespace modules
 	{
-		py::module datapointsfilterModule = p_module.def_submodule("datapointsfilters");
+		void pybindDataPointsFiltersModule(py::module& p_module)
+		{
+			py::module datapointsfilterModule = p_module.def_submodule("datapointsfilters");
 
-		pybindBoundingBox(datapointsfilterModule);
-		pybindCovarianceSampling(datapointsfilterModule);
-		pybindCutAtDescriptorThreshold(datapointsfilterModule);
-		pybindDistanceLimit(datapointsfilterModule);
-		pybindEllipsoids(datapointsfilterModule);
-		pybindFixStepSampling(datapointsfilterModule);
-		pybindGestalt(datapointsfilterModule);
-		pybindIdentityDPF(datapointsfilterModule);
-		pybindIncidenceAngle(datapointsfilterModule);
-		pybindMaxDensity(datapointsfilterModule);
-		pybindMaxPointCount(datapointsfilterModule);
-		pybindMaxQuantileOnAxis(datapointsfilterModule);
-		pybindNormalSpace(datapointsfilterModule);
-		pybindObservationDirection(datapointsfilterModule);
-		pybindOctreeGrid(datapointsfilterModule);
-		pybindOrientNormals(datapointsfilterModule);
-		pybindRandomSampling(datapointsfilterModule);
-		pybindRemoveNaN(datapointsfilterModule);
-		pybindRemoveSensorBias(datapointsfilterModule);
-		pybindSamplingSurfaceNormal(datapointsfilterModule);
-		pybindShadow(datapointsfilterModule);
-		pybindSimpleSensorNoise(datapointsfilterModule);
-		pybindSphericality(datapointsfilterModule);
-		pybindSurfaceNormal(datapointsfilterModule);
+			datapointsfilters::pybindBoundingBox(datapointsfilterModule);
+			datapointsfilters::pybindCovarianceSampling(datapointsfilterModule);
+			datapointsfilters::pybindCutAtDescriptorThreshold(datapointsfilterModule);
+			datapointsfilters::pybindDistanceLimit(datapointsfilterModule);
+			datapointsfilters::pybindEllipsoids(datapointsfilterModule);
+			datapointsfilters::pybindFixStepSampling(datapointsfilterModule);
+			datapointsfilters::pybindGestalt(datapointsfilterModule);
+			datapointsfilters::pybindIdentity(datapointsfilterModule);
+			datapointsfilters::pybindIncidenceAngle(datapointsfilterModule);
+			datapointsfilters::pybindMaxDensity(datapointsfilterModule);
+			datapointsfilters::pybindMaxPointCount(datapointsfilterModule);
+			datapointsfilters::pybindMaxQuantileOnAxis(datapointsfilterModule);
+			datapointsfilters::pybindNormalSpace(datapointsfilterModule);
+			datapointsfilters::pybindObservationDirection(datapointsfilterModule);
+			datapointsfilters::pybindOctreeGrid(datapointsfilterModule);
+			datapointsfilters::pybindOrientNormals(datapointsfilterModule);
+			datapointsfilters::pybindRandomSampling(datapointsfilterModule);
+			datapointsfilters::pybindRemoveNaN(datapointsfilterModule);
+			datapointsfilters::pybindRemoveSensorBias(datapointsfilterModule);
+			datapointsfilters::pybindSamplingSurfaceNormal(datapointsfilterModule);
+			datapointsfilters::pybindShadow(datapointsfilterModule);
+			datapointsfilters::pybindSimpleSensorNoise(datapointsfilterModule);
+			datapointsfilters::pybindSphericality(datapointsfilterModule);
+			datapointsfilters::pybindSurfaceNormal(datapointsfilterModule);
+		}
 	}
 }

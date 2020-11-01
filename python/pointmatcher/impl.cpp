@@ -6,14 +6,17 @@
 #include "impls/transformations_impl.h"
 #include "impls/transformation_checkers_impl.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindImpl(py::module& p_module)
+	namespace pointmatcher
 	{
-		pybindInspectorsImpl(p_module);
-		pybindMatchersImpl(p_module);
-		pybindOutlierFiltersImpl(p_module);
-		pybindTransformationsImpl(p_module);
-		pybindTransformationCheckersImpl(p_module);
+		void pybindImpl(py::module& p_module)
+		{
+			impls::pybindInspectorsImpl(p_module);
+			impls::pybindMatchersImpl(p_module);
+			impls::pybindOutlierFiltersImpl(p_module);
+			impls::pybindTransformationsImpl(p_module);
+			impls::pybindTransformationCheckersImpl(p_module);
+		}
 	}
 }

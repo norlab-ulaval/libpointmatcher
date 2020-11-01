@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindOutlierFilters(py::class_<PM>& p_class);
+	namespace pointmatcher
+	{
+		void pybindOutlierFilters(py::class_<PM>& p_class);
+	}
 }
 
 #endif //PYTHON_POINTMATCHER_OUTLIER_FILTERS_H

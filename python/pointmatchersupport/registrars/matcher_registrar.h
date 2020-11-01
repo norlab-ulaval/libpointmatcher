@@ -3,8 +3,14 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindMatcherRegistrar(py::module& p_module);
+	namespace pointmatchersupport
+	{
+		namespace registrars
+		{
+			void pybindMatcherRegistrar(py::module& p_module);
+		}
+	}
 }
 #endif //PYTHON_POINTMATCHERSUPPORT_REGISTRARS_MATCHER_REGISTRAR_H

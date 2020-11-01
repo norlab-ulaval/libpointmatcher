@@ -8,17 +8,20 @@
 #include "registrars/transformation_registrar.h"
 #include "registrars/transformation_checker_registrar.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindRegistrar(py::module& p_module)
+	namespace pointmatchersupport
 	{
-		pybindDataPointsFilterRegistrar(p_module);
-		pybindErrorMinimizerRegistrar(p_module);
-		pybindInspectorRegistrar(p_module);
-		pybindLoggerRegistrar(p_module);
-		pybindOutlierFilterRegistrar(p_module);
-		pybindMatcherRegistrar(p_module);
-		pybindTransformationRegistrar(p_module);
-		pybindTransformationCheckerRegistrar(p_module);
+		void pybindRegistrar(py::module& p_module)
+		{
+			registrars::pybindDataPointsFilterRegistrar(p_module);
+			registrars::pybindErrorMinimizerRegistrar(p_module);
+			registrars::pybindInspectorRegistrar(p_module);
+			registrars::pybindLoggerRegistrar(p_module);
+			registrars::pybindOutlierFilterRegistrar(p_module);
+			registrars::pybindMatcherRegistrar(p_module);
+			registrars::pybindTransformationRegistrar(p_module);
+			registrars::pybindTransformationCheckerRegistrar(p_module);
+		}
 	}
 }

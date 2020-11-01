@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindDistanceLimit(py::module& p_module);
+	namespace datapointsfilters
+	{
+		void pybindDistanceLimit(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_DATAPOINTSFILTERS_DISTANCE_LIMIT_H

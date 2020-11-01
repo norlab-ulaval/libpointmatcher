@@ -7,17 +7,20 @@
 #include "errorminimizers/point_to_point_similarity.h"
 #include "errorminimizers/point_to_point_with_cov.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindErrorMinimizersModule(py::module& p_module)
+	namespace modules
 	{
-		py::module errorminizersModule = p_module.def_submodule("errorminimizers");
+		void pybindErrorMinimizersModule(py::module& p_module)
+		{
+			py::module errorminizersModule = p_module.def_submodule("errorminimizers");
 
-		pybindIdentityEM(errorminizersModule);
-		pybindPointToPlane(errorminizersModule);
-		pybindPointToPlaneWithCov(errorminizersModule);
-		pybindPointToPoint(errorminizersModule);
-		pybindPointToPointSimilarity(errorminizersModule);
-		pybindPointToPointWithCov(errorminizersModule);
+			errorminimizers::pybindIdentity(errorminizersModule);
+			errorminimizers::pybindPointToPlane(errorminizersModule);
+			errorminimizers::pybindPointToPlaneWithCov(errorminizersModule);
+			errorminimizers::pybindPointToPoint(errorminizersModule);
+			errorminimizers::pybindPointToPointSimilarity(errorminizersModule);
+			errorminimizers::pybindPointToPointWithCov(errorminizersModule);
+		}
 	}
 }

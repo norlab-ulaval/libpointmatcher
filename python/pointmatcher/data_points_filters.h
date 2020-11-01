@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindDataPointsFilters(py::class_<PM>& p_class);
+	namespace pointmatcher
+	{
+		void pybindDataPointsFilters(py::class_<PM>& p_class);
+	}
 }
 
 #endif //PYTHON_MODULES_DATA_POINTS_FILTERS_MODULE_H

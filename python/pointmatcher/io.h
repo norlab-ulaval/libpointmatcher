@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindIO(py::module& p_module);
+	namespace pointmatcher
+	{
+		void pybindIO(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_POINTMATCHER_IO_H

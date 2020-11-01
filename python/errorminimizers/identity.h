@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindIdentityEM(py::module& p_module);
+	namespace errorminimizers
+	{
+		void pybindIdentity(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_ERRORMINIMIZERS_IDENTITY_H

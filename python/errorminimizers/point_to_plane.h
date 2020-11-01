@@ -3,9 +3,12 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindPointToPlane(py::module& p_module);
+	namespace errorminimizers
+	{
+		void pybindPointToPlane(py::module& p_module);
+	}
 }
 
 #endif //PYTHON_ERRORMINIMIZERS_POINT_TO_PLANE_H

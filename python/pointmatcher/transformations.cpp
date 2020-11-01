@@ -1,12 +1,13 @@
 #include "transformations.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindTranformations(py::class_<PM>& p_class)
+	namespace pointmatcher
 	{
-		py::bind_vector<Transformations>(p_class, "Transformations", "A chain of Transformation")
-			.def(py::init<>())
-			.def("apply", &Transformations::apply, py::arg("cloud"), py::arg("parameters"),
-				 "Apply this chain to cloud, using parameters, mutates cloud");
+		void pybindTranformations(py::class_<PM>& p_class)
+		{
+			py::bind_vector<Transformations>(p_class, "Transformations", "A chain of Transformation").def(py::init<>())
+				.def("apply", &Transformations::apply, py::arg("cloud"), py::arg("parameters"), "Apply this chain to cloud, using parameters, mutates cloud");
+		}
 	}
 }

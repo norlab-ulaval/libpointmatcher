@@ -3,9 +3,15 @@
 
 #include "pypoint_matcher_helper.h"
 
-namespace pointmatcher
+namespace python
 {
-	void pybindDataPointsFilterRegistrar(py::module& p_module);
+	namespace pointmatchersupport
+	{
+		namespace registrars
+		{
+			void pybindDataPointsFilterRegistrar(py::module& p_module);
+		}
+	}
 }
 
 #endif //PYTHON_POINTMATCHERSUPPORT_REGISTRARS_DATA_POINTS_FILTER_REGISTRAR_H
