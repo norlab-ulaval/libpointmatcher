@@ -1780,9 +1780,9 @@ template
 class PointMatcherIO<double>::PLYElement;
 
 template
-class PointMatcherIO<float>::PLYProperty;
+struct PointMatcherIO<float>::PLYProperty;
 template
-class PointMatcherIO<double>::PLYProperty;
+struct PointMatcherIO<double>::PLYProperty;
 
 
 template <typename T>
