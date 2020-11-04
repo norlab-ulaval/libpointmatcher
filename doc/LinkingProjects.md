@@ -7,7 +7,7 @@ Once you have followed the [compilation instructions](CompilationUbuntu.md) and 
 
 ## Option 1: Using CMake (Recommended)
 
-Because libpointmatcher was build using CMake, it can be conveniently included in other CMake projects.  You can simply use the `find_package` functionality of CMake to locate the installation directory of libpointmatcher.  Add `$POINTMATCHER_INCLUDE_DIRS` to the list of include directories in your project and link the appropriate executables to `$POINTMATCHER_LIBRARIES`.
+Because libpointmatcher was build using CMake, it can be conveniently included in other CMake projects.  You can simply use the `find_package` functionality of CMake to locate the installation directory of libpointmatcher.  Add `libpointmatcher_INCLUDE_DIRS` to the list of include directories in your project and link the appropriate executables to `libpointmatcher_LIBRARIES`.
 
 In this following example, we build a very simple CMake project containing one executable in `myProgram.cpp` which depends on libpointmatcher.
 
@@ -25,8 +25,6 @@ target_link_libraries(myProgram ${libpointmatcher_LIBRARIES})
 A working example of how to link to an external project can be found in [./examples/demo_cmake](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_cmake).
 
 ## Option 2: Using Eclipse
-
-### Using the Native Eclipse Builder
 
 We will demonstrate how to create an Eclipse project containing a simple executable which depends on libpointmatcher.  You must have [Eclipse CDT](http://www.eclipse.org/cdt/) installed to develop with libpointmatcher in Eclipse.  
 
@@ -55,9 +53,10 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 ```
-The program will create an ICP chain, configure it to the default settings and exit subsequently.  Click on `Project > Build Project` and check that the project compiles successfully.  Finally run the program by clicking `Run > Run`. The message "ICP configured to default." should be displayed in the console.       
 
-## Option 3: Using Eclipse
+The program will create an ICP chain, configure it to the default settings and exit subsequently.  Click on `Project > Build Project` and check that the project compiles successfully.  Finally run the program by clicking `Run > Run`. The message `"ICP configured to default."` should be displayed in the console.
+
+## Option 3: Using QtCreator
 
 You will need to generate a `.pro` file containing your project information. This file would look like this:
 

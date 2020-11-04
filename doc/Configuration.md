@@ -71,8 +71,8 @@ Below find a list of modules and their possible configurations:
 
 | Module Name | Possible Components | Default Components | Is a List |
 |:------------|:--------------------|:-------------------|:----------|
-|readingDataPointsFilters| [BoundingBoxDataPointsFilter](DataFilters.md#boundingboxhead)<br>[FixStepSamplingDataPointsFilter](DataFilters.md#fixedstepsamplinghead)<br>[MaxDensityDataPointsFilter](DataFilters.md#maxdensityhead) <br>[MaxDistDataPointsFilter](DataFilters.md#maxdistancehead)<br>[MaxPointCountDataPointsFilter](DataFilters.md#maxpointcounthead)<br>[MaxQuantileOnAxisDataPointsFilter](DataFilters.md#maxquantilehead)<br>[MinDistDataPointsFilter](DataFilters.md#mindistancehead)<br>[ObservationDirectionDataPointsFilter](DataFilters.md#obsdirectionhead)<br>[OrientNormalsDataPointsFilter](DataFilters.md#orientnormalshead)<br>[RandomSamplingDataPointsFilter](DataFilters.md#randomsamplinghead)<br>[RemoveNaNDataPointsFilter](DataFilters.md#removenanhead)<br>[SamplingSurfaceNormalDataPointsFilter](DataFilters.md#samplingnormhead)<br>[ShadowDataPointsFilter](DataFilters.md#shadowpointhead)<br>[SimpleSensorNoiseDataPointsFilter](DataFilters.md#sensornoisehead)<br>[SurfaceNormalDataPointsFilter](DataFilters.md#surfacenormalhead) | [RandomSamplingDataPointsFilter](DataFilters.md#randomsamplinghead) | Yes |
-|referenceDataPointsFilters| [BoundingBoxDataPointsFilter](DataFilters.md#boundingboxhead)<br>[FixStepSamplingDataPointsFilter](DataFilters.md#fixedstepsamplinghead)<br>[MaxDensityDataPointsFilter](DataFilters.md#maxdensityhead) <br>[MaxDistDataPointsFilter](DataFilters.md#maxdistancehead)<br>[MaxPointCountDataPointsFilter](DataFilters.md#maxpointcounthead)<br>[MaxQuantileOnAxisDataPointsFilter](DataFilters.md#maxquantilehead)<br>[MinDistDataPointsFilter](DataFilters.md#mindistancehead)<br>[ObservationDirectionDataPointsFilter](DataFilters.md#obsdirectionhead)<br>[OrientNormalsDataPointsFilter](DataFilters.md#orientnormalshead)<br>[RandomSamplingDataPointsFilter](DataFilters.md#randomsamplinghead)<br>[RemoveNaNDataPointsFilter](DataFilters.md#removenanhead)<br>[SamplingSurfaceNormalDataPointsFilter](DataFilters.md#samplingnormhead)<br>[ShadowDataPointsFilter](DataFilters.md#shadowpointhead)<br>[SimpleSensorNoiseDataPointsFilter](DataFilters.md#sensornoisehead)<br>[SurfaceNormalDataPointsFilter](DataFilters.md#surfacenormalhead) | [SamplingSurfaceNormalDataPointsFilter](DataFilters.md#samplingnormhead) | Yes |
+|readingDataPointsFilters| [BoundingBoxDataPointsFilter]<br>[FixStepSamplingDataPointsFilter]<br>[MaxDensityDataPointsFilter]<br>[MaxDistDataPointsFilter]<br>[MaxPointCountDataPointsFilter]<br>[MaxQuantileOnAxisDataPointsFilter]<br>[MinDistDataPointsFilter]<br>[ObservationDirectionDataPointsFilter]<br>[OrientNormalsDataPointsFilter]<br>[RandomSamplingDataPointsFilter]<br>[RemoveNaNDataPointsFilter]<br>[SamplingSurfaceNormalDataPointsFilter]<br>[ShadowDataPointsFilter]<br>[SimpleSensorNoiseDataPointsFilter]<br>[SurfaceNormalDataPointsFilter] | [RandomSamplingDataPointsFilter] | Yes |
+|referenceDataPointsFilters| [BoundingBoxDataPointsFilter]<br>[FixStepSamplingDataPointsFilter]<br>[MaxDensityDataPointsFilter] <br>[MaxDistDataPointsFilter]<br>[MaxPointCountDataPointsFilter]<br>[MaxQuantileOnAxisDataPointsFilter]<br>[MinDistDataPointsFilter]<br>[ObservationDirectionDataPointsFilter]<br>[OrientNormalsDataPointsFilter]<br>[RandomSamplingDataPointsFilter]<br>[RemoveNaNDataPointsFilter]<br>[SamplingSurfaceNormalDataPointsFilter]<br>[ShadowDataPointsFilter]<br>[SimpleSensorNoiseDataPointsFilter]<br>[SurfaceNormalDataPointsFilter] | [SamplingSurfaceNormalDataPointsFilter] | Yes |
 |matcher | KDTreeMatcher<br>KDTreeVarDistMatcher | KDTreeMatcher | No |
 | outlierFilters | MaxDistOutlierFilter<br>MedianDistOutlierFilter<br>MinDistOutlierFilter<br>SurfaceNormalOutlierFilter<br>TrimmedDistOutlierFilter<br>VarTrimmedDistOutlierFilter | TrimmedDistOutlierFilter | Yes |
 | errorMinimizer | IdentityErrorMinimizer<br>PointToPlaneErrorMinimizer<br>PointToPointErrorMinimizer | PointToPlaneErrorMinimizer | No |
@@ -92,4 +92,18 @@ Now that you have the tools to configure your own ICP chain, we recommend that y
 
 You can now make changes to the configuration in `my_config.yaml` and experiment with various ICP chain configurations.  Refer back to the [basic registration tutorial](BasicRegistration.md) for more information on loading a configuration file and performing basic registration. 
 
-  
+[BoundingBoxDataPointsFilter]: DataFilters.md#boundingboxhead
+[FixStepSamplingDataPointsFilter]: DataFilters.md#fixedstepsamplinghead
+[MaxDensityDataPointsFilter]: DataFilters.md#maxdensityhead
+[MaxDistDataPointsFilter]: DataFilters.md#maxdistancehead
+[MaxPointCountDataPointsFilter]: DataFilters.md#maxpointcounthead
+[MaxQuantileOnAxisDataPointsFilter]: DataFilters.md#maxquantilehead
+[MinDistDataPointsFilter]: DataFilters.md#mindistancehead
+[ObservationDirectionDataPointsFilter]: DataFilters.md#obsdirectionhead
+[OrientNormalsDataPointsFilter]: DataFilters.md#orientnormalshead
+[RandomSamplingDataPointsFilter]: DataFilters.md#randomsamplinghead
+[RemoveNaNDataPointsFilter]: DataFilters.md#removenanhead
+[SamplingSurfaceNormalDataPointsFilter]: DataFilters.md#samplingnormhead
+[ShadowDataPointsFilter]: DataFilters.md#shadowpointhead
+[SimpleSensorNoiseDataPointsFilter]: DataFilters.md#sensornoisehead
+[SurfaceNormalDataPointsFilter]: DataFilters.md#surfacenormalhead

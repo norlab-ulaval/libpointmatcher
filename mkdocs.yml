@@ -6,15 +6,19 @@ google_analytics: ['UA-70950258-1', 'libpointmatcher.readthedocs.org']
 docs_dir: 'doc'
 theme:
     name: mkdocs
-    navigation_depth: 2
     hljs_style: atom-one-light
+    hljs_languages:
+        - bash
+        - cmake
+        - cpp
+        - yaml
 nav:
 - Home: 'index.md'
 - Compilation:
   - 'Ubuntu': 'CompilationUbuntu.md'
-  - 'Windows': 'CompilationWindows.md'
   - 'Mac OS X': 'CompilationMac.md'
-- Introduction:
+  - 'Windows': 'CompilationWindows.md'
+- Beginner:
     - 'What is libpointmatcher about?': 'Introduction.md'
     - 'What can I do with libpointmatcher': 'ApplicationsAndPub.md'
     - 'What the different data filters do?': 'DataFilters.md'
@@ -35,3 +39,6 @@ nav:
     - 'Creating a DataPointsFilter': 'DataPointsFilterDev.md'
     - 'Creating a Transformation': 'TransformationDev.md'
     - 'Creating unit tests': 'UnitTestDev.md'
+- Python:
+    - 'Compiling libpointmatcher with Python': 'CompilationPython.md'
+    - 'Using libpointmatcher with Python': 'PythonModule.md'
