@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 
 include(CheckSymbolExists)
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
@@ -469,6 +469,15 @@ option(BUILD_TESTS "Build all tests." OFF)
 if (BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(utest)
+endif()
+
+# ========================= Python module =============================
+option(BUILD_PYTHON_MODULE "Build the python module for libpointmatcher" OFF)
+option(USE_SYSTEM_PYBIND11 "Use the system installed pybind11 rather than using a git submodule" ON)
+set(PYTHON_INSTALL_TARGET "" CACHE PATH "Target where to install the python module")
+
+if (BUILD_PYTHON_MODULE)
+	add_subdirectory(python)
 endif()
 
 #=================== allow find_package() =========================
