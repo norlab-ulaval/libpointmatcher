@@ -129,3 +129,56 @@ TEST(Transformation, RigidTransformation)
 
 	EXPECT_THROW(rigidTrans->correctParameters(T_2D_reflection), TransformationError);
 }
+
+TEST(Transformation, InPlaceRigidTransformation)
+{
+	std::shared_ptr<PM::Transformation> rigidTrans;
+	rigidTrans = PM::get().REG(Transformation).create("RigidTransformation");
+
+	//-------------------------------------
+	// Construct a 3D non-orthogonal matrix
+	PM::Matrix T_3D = PM::Matrix::Identity(4,4);
+	//T_3D(0,0) = 2.3;
+	//T_3D(0,1) = 0.03;
+	T_3D << 0.99935116,  0.13669771,  0.03436585,  1.71138524,
+	       -0.02633967,  0.99326295, -0.04907545, -0.10860933,
+				 -0.03615132,  0.04400287,  0.99820427, -0.04454497,
+				  0.        ,  0.        ,  0.        ,  1.;
+
+	EXPECT_FALSE(rigidTrans->checkParameters(T_3D));
+
+	EXPECT_THROW(rigidTrans->inPlaceCompute(T_3D, data3D), TransformationError);
+
+	// Check stability over iterations
+	for(int i = 0; i < 10; i++)
+	{
+		T_3D = rigidTrans->correctParameters(T_3D);
+		ASSERT_TRUE(rigidTrans->checkParameters(T_3D));
+	}
+
+	//-------------------------------------
+	// Construct a 2D non-orthogonal matrix
+	PM::Matrix T_2D_non_ortho = PM::Matrix::Identity(3,3);
+	T_2D_non_ortho(0,0) = 0.8;
+	T_2D_non_ortho(0,1) = -0.5;
+	T_2D_non_ortho(1,0) = 0.5;
+	T_2D_non_ortho(1,1) = 0.8;
+
+	EXPECT_FALSE(rigidTrans->checkParameters(T_2D_non_ortho));
+
+	EXPECT_THROW(rigidTrans->inPlaceCompute(T_2D_non_ortho, data2D), TransformationError);
+
+	// Check stability over iterations
+	for(int i = 0; i < 10; i++)
+	{
+		T_2D_non_ortho = rigidTrans->correctParameters(T_2D_non_ortho);
+		EXPECT_TRUE(rigidTrans->checkParameters(T_2D_non_ortho));
+	}
+
+	//-------------------------------------
+	// Construct a 2D reflection matrix
+	PM::Matrix T_2D_reflection = PM::Matrix::Identity(3,3);
+	T_2D_reflection(1,1) = -1;
+
+	EXPECT_THROW(rigidTrans->correctParameters(T_2D_reflection), TransformationError);
+}

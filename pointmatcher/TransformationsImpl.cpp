@@ -51,7 +51,18 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
-	assert(input.features.rows() == parameters.rows());
+	DataPoints transformedCloud = input;
+	inPlaceCompute(parameters, transformedCloud);
+	return transformedCloud;
+}
+
+//! RigidTransformation
+template<typename T>
+void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
+	const TransformationParameters& parameters,
+	DataPoints& cloud) const
+{
+	assert(cloud.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
 	const unsigned int nbRows = parameters.rows()-1;
@@ -62,28 +73,25 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::RigidTransformation
 	if(this->checkParameters(parameters) == false)	
 		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
 	
-	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.timeLabels, input.features.cols());
-	DataPoints transformedCloud = input;
-	
 	// Apply the transformation to features
-	transformedCloud.features = parameters * input.features;
-	
+	cloud.features.applyOnTheLeft(parameters);
+
 	// Apply the transformation to descriptors
 	int row(0);
-	const int descCols(input.descriptors.cols());
-	for (size_t i = 0; i < input.descriptorLabels.size(); ++i)
+	const int descCols(cloud.descriptors.cols());
+	for (size_t i = 0; i < cloud.descriptorLabels.size(); ++i)
 	{
-		const int span(input.descriptorLabels[i].span);
-		const std::string& name(input.descriptorLabels[i].text);
-		const BOOST_AUTO(inputDesc, input.descriptors.block(row, 0, span, descCols));
-		BOOST_AUTO(outputDesc, transformedCloud.descriptors.block(row, 0, span, descCols));
+		const int span(cloud.descriptorLabels[i].span);
+		const std::string& name(cloud.descriptorLabels[i].text);
 		if (name == "normals" || name == "observationDirections")
+		{
+			const BOOST_AUTO(inputDesc, cloud.descriptors.block(row, 0, span, descCols));
+			BOOST_AUTO(outputDesc, cloud.descriptors.block(row, 0, span, descCols));
 			outputDesc = R * inputDesc;
+		}
 		
 		row += span;
 	}
-
-	return transformedCloud;
 }
 
 //! Ensure orthogonality of the rotation matrix
@@ -159,6 +167,17 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::SimilarityTransform
 	const DataPoints& input,
 	const TransformationParameters& parameters) const
 {
+	DataPoints transformedCloud = input;
+	inPlaceCompute(parameters, transformedCloud);
+	return transformedCloud;
+}
+
+//! SimilarityTransformation
+template<typename T>
+void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
+	const TransformationParameters& parameters,
+	DataPoints& cloud) const
+{
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
@@ -170,28 +189,25 @@ typename PointMatcher<T>::DataPoints TransformationsImpl<T>::SimilarityTransform
 	if(this->checkParameters(parameters) == false)
 		throw TransformationError("SimilarityTransformation: Error, invalid similarity transform.");
 	
-	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.timeLabels, input.features.cols());
-	DataPoints transformedCloud = input;
-	
 	// Apply the transformation to features
-	transformedCloud.features = parameters * input.features;
+	cloud.features.applyOnTheLeft(parameters);
 	
 	// Apply the transformation to descriptors
 	int row(0);
-	const int descCols(input.descriptors.cols());
-	for (size_t i = 0; i < input.descriptorLabels.size(); ++i)
+	const int descCols(cloud.descriptors.cols());
+	for (size_t i = 0; i < cloud.descriptorLabels.size(); ++i)
 	{
-		const int span(input.descriptorLabels[i].span);
-		const std::string& name(input.descriptorLabels[i].text);
-		const BOOST_AUTO(inputDesc, input.descriptors.block(row, 0, span, descCols));
-		BOOST_AUTO(outputDesc, transformedCloud.descriptors.block(row, 0, span, descCols));
+		const int span(cloud.descriptorLabels[i].span);
+		const std::string& name(cloud.descriptorLabels[i].text);
 		if (name == "normals" || name == "observationDirections")
+		{
+			const BOOST_AUTO(inputDesc, cloud.descriptors.block(row, 0, span, descCols));
+			BOOST_AUTO(outputDesc, cloud.descriptors.block(row, 0, span, descCols));
 			outputDesc = R * inputDesc;
+		}
 		
 		row += span;
 	}
-
-	return transformedCloud;
 }
 
 //! Nothing to check for a similarity transform
@@ -215,19 +231,23 @@ template struct TransformationsImpl<double>::SimilarityTransformation;
 template<typename T>
 typename PointMatcher<T>::DataPoints TransformationsImpl<T>::PureTranslation::compute(const DataPoints& input,
 		const TransformationParameters& parameters) const {
+	DataPoints transformedCloud = input;
+	inPlaceCompute(parameters, transformedCloud);
+	return transformedCloud;
+}
+
+template<typename T>
+void TransformationsImpl<T>::PureTranslation::inPlaceCompute(
+	const TransformationParameters& parameters,
+	DataPoints& cloud) const {
 	assert(input.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
 	if(this->checkParameters(parameters) == false)
 		throw PointMatcherSupport::TransformationError("PureTranslation: Error, left part  not identity.");
 
-	//DataPoints transformedCloud(input.featureLabels, input.descriptorLabels, input.features.cols());
-	DataPoints transformedCloud = input;
-
 	// Apply the transformation to features
-	transformedCloud.features = parameters * input.features;
-
-	return transformedCloud;
+	cloud.features.applyOnTheLeft(parameters);
 }
 
 template<typename T>

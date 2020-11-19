@@ -410,6 +410,9 @@ struct PointMatcher
 		//! Transform input using the transformation matrix
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0; 
 
+		//! Transform point cloud in-place using the transformation matrix
+		virtual void inPlaceCompute(const TransformationParameters& parameters, DataPoints& cloud) const = 0;
+
 		//! Return whether the given parameters respect the expected constraints
 		virtual bool checkParameters(const TransformationParameters& parameters) const = 0;
 
