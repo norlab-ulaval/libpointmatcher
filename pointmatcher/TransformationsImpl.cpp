@@ -178,7 +178,7 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 	const TransformationParameters& parameters,
 	DataPoints& cloud) const
 {
-	assert(input.features.rows() == parameters.rows());
+	assert(cloud.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
 	const unsigned int nbRows = parameters.rows()-1;
@@ -240,7 +240,7 @@ template<typename T>
 void TransformationsImpl<T>::PureTranslation::inPlaceCompute(
 	const TransformationParameters& parameters,
 	DataPoints& cloud) const {
-	assert(input.features.rows() == parameters.rows());
+	assert(cloud.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
 	if(this->checkParameters(parameters) == false)
