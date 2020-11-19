@@ -85,9 +85,7 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		const std::string& name(cloud.descriptorLabels[i].text);
 		if (name == "normals" || name == "observationDirections")
 		{
-			const BOOST_AUTO(inputDesc, cloud.descriptors.block(row, 0, span, descCols));
-			BOOST_AUTO(outputDesc, cloud.descriptors.block(row, 0, span, descCols));
-			outputDesc = R * inputDesc;
+			cloud.descriptors.block(row, 0, span, descCols).applyOnTheLeft(R);
 		}
 		
 		row += span;
@@ -201,9 +199,7 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 		const std::string& name(cloud.descriptorLabels[i].text);
 		if (name == "normals" || name == "observationDirections")
 		{
-			const BOOST_AUTO(inputDesc, cloud.descriptors.block(row, 0, span, descCols));
-			BOOST_AUTO(outputDesc, cloud.descriptors.block(row, 0, span, descCols));
-			outputDesc = R * inputDesc;
+			cloud.descriptors.block(row, 0, span, descCols).applyOnTheLeft(R);
 		}
 		
 		row += span;
