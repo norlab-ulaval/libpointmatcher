@@ -27,7 +27,7 @@ endif()
 # Catkin package macro
 catkin_package(
   INCLUDE_DIRS
-    pointmatcher
+    ${CMAKE_SOURCE_DIR}
     ${EIGEN3_INCLUDE_DIR}
   LIBRARIES
     yaml_cpp_pm
