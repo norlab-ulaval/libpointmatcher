@@ -19,10 +19,10 @@ find_package(catkin REQUIRED
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS chrono date_time filesystem program_options system thread timer)
 find_package(OpenMP REQUIRED)
-if (OpenMP_FOUND)
-  add_compile_options("${OpenMP_CXX_FLAGS}")
-  add_definitions(-DHAVE_OPENMP=${OpenMP_FOUND})
+if (NOT OpenMP_FOUND)
+  message("OpenMP was not found. It is highly recommended to build libpointmatcher with OpenMP support.")
 endif()
+
 
 # Catkin package macro
 catkin_package(
@@ -48,7 +48,6 @@ add_library(yaml_cpp_pm
   ${YAML_SOURCES}
   ${YAML_PRIVATE_HEADERS}
 )
-
 target_include_directories(yaml_cpp_pm
   PUBLIC
     contrib/yaml-cpp-pm/include
@@ -61,22 +60,20 @@ add_library(pointmatcher
   ${POINTMATCHER_SRC}
   ${POINTMATCHER_HEADERS}
 )
-
-target_include_directories(pointmatcher
-  PUBLIC
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/pointmatcher
-    ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
-    ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
-  SYSTEM
-    ${EIGEN3_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
-    ${OpenMP_CXX_INCLUDE_DIRS}
-    ${catkin_INCLUDE_DIRS}
-    ${yaml_cpp_pm_INCLUDE_DIRS}
+target_include_directories(pointmatcher PUBLIC
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/pointmatcher
+  ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
+  ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
 )
-
-target_link_libraries(pointmatcher
+target_include_directories(pointmatcher SYSTEM PRIVATE
+  ${EIGEN3_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
+  ${OpenMP_CXX_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+  ${yaml_cpp_pm_INCLUDE_DIRS}
+)
+target_link_libraries(pointmatcher PRIVATE
   ${catkin_LIBRARIES}
   Boost::chrono
   Boost::date_time
@@ -87,6 +84,12 @@ target_link_libraries(pointmatcher
   Boost::system
   ${OpenMP_CXX_LIBRARIES}
   yaml_cpp_pm
+)
+target_compile_options(pointmatcher PRIVATE
+  "${OpenMP_CXX_FLAGS}"
+)
+target_compile_definitions(pointmatcher PRIVATE
+  -DHAVE_OPENMP=${OpenMP_FOUND}
 )
 
 #############
@@ -105,6 +108,9 @@ install(
   DIRECTORY
     ${CMAKE_SOURCE_DIR}/pointmatcher/
   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/pointmatcher
+  FILES_MATCHING
+    PATTERN "*.h"
+    PATTERN "*.hpp"
 )
 
 ##########
@@ -113,37 +119,37 @@ install(
 # TODO(ynava) Currently unit tests are only enabled if the build type is NOT debug.
 # When the CI pipeline supports optimized unit test runs, we should remove this extra condition.
 if(CATKIN_ENABLE_TESTING)
+  set(TEST_DATA_FOLDER "${CMAKE_SOURCE_DIR}/examples/data/")
+
   catkin_add_gtest(test_pointmatcher
-      utest/utest.cpp
-      utest/ui/DataFilters.cpp
-      utest/ui/DataPoints.cpp
-      utest/ui/ErrorMinimizers.cpp
-      utest/ui/Inspectors.cpp
-      utest/ui/IO.cpp
-      utest/ui/Loggers.cpp
-      utest/ui/Matcher.cpp
-      utest/ui/Outliers.cpp
-      utest/ui/Transformations.cpp
+    utest/utest.cpp
+    utest/ui/DataFilters.cpp
+    utest/ui/DataPoints.cpp
+    utest/ui/ErrorMinimizers.cpp
+    utest/ui/Inspectors.cpp
+    utest/ui/IO.cpp
+    utest/ui/Loggers.cpp
+    utest/ui/Matcher.cpp
+    utest/ui/Outliers.cpp
+    utest/ui/Transformations.cpp
   )
-
-  target_include_directories(test_pointmatcher PRIVATE
-    PRIVATE
-      ${CMAKE_SOURCE_DIR}
-      ${CMAKE_SOURCE_DIR}/pointmatcher
-      ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
-      ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
-    SYSTEM
-      ${EIGEN3_INCLUDE_DIR}
-      ${Boost_INCLUDE_DIRS}
-      ${catkin_INCLUDE_DIRS}
+  target_include_directories(test_pointmatcher PUBLIC
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/pointmatcher
+    ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters
+    ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
   )
-
+  target_include_directories(test_pointmatcher SYSTEM PRIVATE
+    ${EIGEN3_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+  )
   target_link_libraries(test_pointmatcher
     pointmatcher
     yaml_cpp_pm
     ${catkin_LIBRARIES}
   )
-
-  set(TEST_DATA_FOLDER "${CMAKE_SOURCE_DIR}/examples/data/")
-  add_definitions(-DUTEST_TEST_DATA_PATH="${TEST_DATA_FOLDER}/")
+  target_compile_definitions(test_pointmatcher PRIVATE
+    -DUTEST_TEST_DATA_PATH="${TEST_DATA_FOLDER}/"
+  )
 endif(CATKIN_ENABLE_TESTING)
