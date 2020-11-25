@@ -1,28 +1,44 @@
 site_name: libpointmatcher
 repo_url: https://github.com/ethz-asl/libpointmatcher
+edit_uri: edit/master/doc
 site_description: An "Iterative Closest Point" library for 2-D/3-D mapping in robotic
 google_analytics: ['UA-70950258-1', 'libpointmatcher.readthedocs.org']
-pages:
+docs_dir: 'doc'
+theme:
+    name: mkdocs
+    hljs_style: atom-one-light
+    hljs_languages:
+        - bash
+        - cmake
+        - cpp
+        - yaml
+nav:
 - Home: 'index.md'
-- Introduction:
+- Compilation:
+  - 'Ubuntu': 'CompilationUbuntu.md'
+  - 'Mac OS X': 'CompilationMac.md'
+  - 'Windows': 'CompilationWindows.md'
+- Beginner:
     - 'What is libpointmatcher about?': 'Introduction.md'
     - 'What can I do with libpointmatcher': 'ApplicationsAndPub.md'
-    - 'What the different data filters do?': 'Datafilters.md'
-    - 'Example: applying a chain of data filters': 'ApplyingDatafilters.md'
+    - 'What the different data filters do?': 'DataFilters.md'
+    - 'Example: applying a chain of data filters': 'ApplyingDataFilters.md'
+    - 'What are the different outlier filters?' : 'OutlierFiltersFamilies.md'
     - 'Example: An introduction to ICP': 'ICPIntro.md'
     - 'The ICP chain configuration and its variants': 'DefaultICPConfig.md'
     - 'Configuring libpointmatcher using YAML': 'Configuration.md'
     - 'Supported file types and importing/exporting point clouds': 'ImportExport.md'
-- Compilation:
-    - 'Ubuntu': 'Compilation.md'
-    - 'Windows': 'CompilationWindows.md'
-    - 'Mac OS X': 'CompilationMac.md'
 - Advanced:
     - 'How to link a project to libpointmatcher': 'LinkingProjects.md'
-    - 'How are point clouds represented?': 'Pointclouds.md'
+    - 'How to use libpointmatcher in ROS?': 'UsingInRos.md'
+    - 'How are point clouds represented?': 'PointClouds.md'
     - 'Example: Writing a program which performs ICP': 'BasicRegistration.md'
     - 'How to move a point cloud using a rigid transformation?': 'Transformations.md'
+    - 'Example: Configure an ICP solution without yaml': 'ICPWithoutYaml.md'
 - Developer:
     - 'Creating a DataPointsFilter': 'DataPointsFilterDev.md'
     - 'Creating a Transformation': 'TransformationDev.md'
     - 'Creating unit tests': 'UnitTestDev.md'
+- Python:
+    - 'Compiling libpointmatcher with Python': 'CompilationPython.md'
+    - 'Using libpointmatcher with Python': 'PythonModule.md'

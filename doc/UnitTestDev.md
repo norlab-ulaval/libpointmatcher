@@ -1,12 +1,13 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](TransformationDev.md) | [Next]() |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](TransformationDev.md) | [Next](CompilationPython.md) |
+| :--- | :---: | ---: |
 
 # Testing libpointmatcher Modules
+
 It is often good practice to accompany the development of new software features with the development of test cases which validate that these features are working correctly.  When developing for an open source project such as libpointmatcher, testing is crucial to maintain stability and avoid the introduction of erronous code.
 
-Libpointmatcher uses the [C++ testing framework developed by Google](https://code.google.com/p/googletest/).  If you are not sure if you installed libpointmatcher with GTest, go to the libpointmatcher's CMake build directory and run `make test`.  If the tests do not run, refer back to the [compilation instructions](Compilation.md) to recompile with GTest.
+Libpointmatcher uses the [C++ testing framework developed by Google](https://github.com/google/googletest).  If you are not sure if you installed libpointmatcher with GTest, go to the libpointmatcher's CMake build directory and run `make test`.  If the tests do not run, refer back to the [compilation instructions](CompilationUbuntu.md) to recompile with GTest.
 
-Libpointmatcher's unit tests can be found in [utest/utest.cpp](/utest/utest.cpp).  In this tutorial, we will write a series of tests for validating the voxel grid filter developed in [this past tutorial](DataPointsFilterDev.md).  Note that this test will not cover the myriad of features that GTest provides.  Nevertheless, it is very easy to understand GTest without extensive experience.  For those who wish to have a solid introduction to GTest we recommend to start with this [this primer](http://code.google.com/p/googletest/wiki/Primer).
+Libpointmatcher's unit tests can be found in [utest/utest.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/utest.cpp).  In this tutorial, we will write a series of tests for validating the voxel grid filter developed in [this past tutorial](DataPointsFilterDev.md).  Note that this test will not cover the myriad of features that GTest provides.  Nevertheless, it is very easy to understand GTest without extensive experience.  For those who wish to have a solid introduction to GTest we recommend to start with this [this primer](https://github.com/google/googletest/blob/master/googletest/docs/primer.md).
 
 
 ## A Unit Test for the Voxel Grid Filter
@@ -25,14 +26,16 @@ In the following test, we create a 2D point cloud point cloud where each voxel c
 |![2dvoxeltest](images/2dtestgrid.png)|
 
 The points are placed such that each voxel centroid should be in the middle of the voxel.  The validation point cloud to which we compare results will thus consist of the voxel centers.  After performing filtering on the test cloud, we first check that the number of points obtained is indeed equal to the number of voxels with the following line:
+
 ```cpp
 ASSERT_EQ(testResults.features.cols(), numDivs(0) * numDivs(1) );
 ```
+
 We then check that the output point cloud is what we expected by using Eigen's `isApprox` function.
+
 ```cpp
 EXPECT_TRUE(testResults.features.isApprox(valCloudP))
 ```
-
 
 Code:
 
@@ -164,6 +167,7 @@ EXPECT_TRUE(testResults.features.isApprox(valCloudP));
 ```
 
 ### Test 3: Averaging Descriptors
+
 To make sure that descriptors are averaged correctly, we use the same 2D point cloud as in Test 1.  For each voxel, we make each descriptor in the left half equal to a vector containing the value 1.  We make descriptors in the right half equal to a vector containing the value -1.  We expect to obtain a zero vector when averaging these vectors.
 
 After filtering, we check that the number of descriptors is equal to the number of voxels:
@@ -178,7 +182,8 @@ We check that the descriptors in the output cloud are all zero using Eigen's `is
 EXPECT_TRUE(testResults.descriptors.isZero());
 ```
 
-code: 
+code:
+
 ```cpp
 // Number of divisions in each dimension that form the Voxel Grid
 const Vector2i numDivs = (Vector2i() << 10, 10).finished();
@@ -238,26 +243,38 @@ EXPECT_TRUE(testResults.descriptors.isZero());
 ```
 
 ### Running the Tests
+
 You can check that these tests are run succesfully by executing the following command from libpointmatcher's build directory
-```
+
+```bash
 ./utest/utest --path ../examples/data/ --gtest_filter=DataFilterTest.VoxelGridDataPointsFilter
 ```
 
 ## Generic tests
 
-To avoid writting the same basic test for a given combination of solution, a generic test uses a list of yaml files and executes them to verify that the solution is the same as before. This list can be found here: [examples/data/icp_data/](../examples/data/icp_data/)
+To avoid writting the same basic test for a given combination of solution, a generic test uses a
+ list of yaml files and executes them to verify that the solution is the same as before. This
+  list can be found here: [examples/data/icp_data/](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/data/icp_data/)
 
-There are two types of files with the same name, but with a different extension. The first one is the `.yaml` which contains the solution to be tested (see [Configurations with YAML](../doc/Configuration.md)). The second one is the `.ref_trans`, which contains the 4 by 4 matrix used as the valid output.
+There are two types of files with the same name, but with a different extension. The first one is the `.yaml` which contains the solution to be tested (see [Configurations with YAML](Configuration.md)). The second one is the `.ref_trans`, which contains the 4 by 4 matrix used as the valid output.
 
 The steps to add a new test is the following:
 
  1. Add a yaml file in `examples/data/icp_data/` with the desired configuration to test.
+ 
  1. In this configuration, add a `VTKFileInspector` as in [this tutorial](https://github.com/ethz-asl/libpointmatcher/blob/master/doc/ICPIntro.md#a-real-icp-configuration).
+ 
  1. Run the unit tests (the test will fail, it's normal): `./utest/utest --path ../examples/data/ --gtest_filter=icpTest.icpTest`
+ 
  1. Use Paraview to manually validate that the final transformation is correct using the files generated by the `VTKFileInspector`.
+ 
  1. If everything is fine, remove the `VTKFileInspector` from the yaml file. If not, fix it.
+ 
  1. Clean your folder from any files generated by the `VTKFileInspector`.
  1. There will be a file with the same name as your yaml file with the extension `.cur_trans`. Change the extension to `.ref_trans`.
+ 
  1. Run the unit test again, this time it should pass.
+ 
  1. Add your new files with the extension `.yaml` and `.ref_trans` to your branch.
+ 
  1. Ask for a pull request.

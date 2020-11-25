@@ -121,6 +121,17 @@ namespace PointMatcherSupport
 				{"doi", "10.1109/ROBOT.1991.132043"},
 				{"fulltext", "http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=132043"}
 			}},
+			{"Prakhya2015Point2Plane", {
+				{"type", "inproceedings"},
+				{"title", "A closed-form estimate of 3D ICP covariance"},
+				{"author", "Prakhya, S.M. and Bingbing, L. and Rui, Y. and Lin, W."},
+				{"booktitle", "2015 14th IAPR International Conference on Machine Vision Applications (MVA)"},
+				{"year", "2015"},
+				{"pages", "526--529"},
+				{"publisher", "IEEE Press"},
+				{"doi", "10.1109/MVA.2015.7153246"},
+				{"fulltext", "https://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=7153246"}
+			}},
 			{"Masuda1996Random", {
 				{"type", "inproceedings"},
 				{"title", "Registration and integration of multiple range images for 3-D model construction"},
@@ -206,6 +217,19 @@ namespace PointMatcherSupport
 				{"pages", "260--267"},
 				{"doi", "10.1109/IM.2003.1240258"},
 				{"publisher", "IEEE Computer Society"}
+			}},
+			{"Labussiere2020", {
+				{"type", "article"},
+				{"author", "Labussière, Mathieu and Laconte, Johann and Pomerleau, François"},
+				{"title", "Geometry Preserving Sampling Method Based on Spectral Decomposition for Large-Scale Environments"},
+				{"journal", "Frontiers in Robotics and AI"},
+				{"month", "sep"},
+				{"year", "2020"},
+				{"volume", "7"},
+				{"isbn", "2296-9144"},
+				{"pages", "134--148"},
+				{"doi", "10.3389/frobt.2020.572054"},
+				{"fulltext", "https://www.frontiersin.org/article/10.3389/frobt.2020.572054"}
 			}}
 		};
 	}
