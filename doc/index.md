@@ -38,7 +38,7 @@ This page lists the available tutorials for libpointmatcher. The [Beginner](#beg
 - How to minimize the error with translation, rotation and scale? [See this example.](https://github.com/ethz-asl/libpointmatcher/issues/188#issuecomment-270960696)
 - How to do a nearest neighbor search between two point clouds without an ICP object? [See the comments here.](https://github.com/ethz-asl/libpointmatcher/issues/193#issuecomment-276093785)
 - How to construct a `DataPoints` from my own point cloud? [See the unit test on `Datapoints` here.](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/ui/DataFilters.cpp#L52)
-- How to link against [PLC](https://pointclouds.org/)? [See the comments here.](https://github.com/ethz-asl/libpointmatcher/issues/176#issuecomment-734067786)
+- How to link against [PCL](https://pointclouds.org/)? [See the comments here.](https://github.com/ethz-asl/libpointmatcher/issues/176#issuecomment-734067786)
 
 ## Developer <a name="developer"></a>
 
