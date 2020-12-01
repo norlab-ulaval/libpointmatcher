@@ -420,7 +420,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		{
 			this->transformationCheckers.check(T_iter, iterate);
 		}
-		catch(const typename TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached & e)
+		catch(const typename TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached &)
 		{
 			iterate = false;
 			this->maxNumIterationsReached = true;
@@ -514,6 +514,28 @@ void PointMatcher<T>::ICPSequence::clearMap()
 	const int dim(mapPointCloud.features.rows());
 	T_refIn_refMean = Matrix::Identity(dim, dim);
 	mapPointCloud = DataPoints();
+}
+
+template<typename T>
+void PointMatcher<T>::ICPSequence::setDefault()
+{
+	ICPChainBase::setDefault();
+	
+	if(mapPointCloud.getNbPoints() > 0)
+	{
+		this->matcher->init(mapPointCloud);
+	}
+}
+
+template<typename T>
+void PointMatcher<T>::ICPSequence::loadFromYaml(std::istream& in)
+{
+	ICPChainBase::loadFromYaml(in);
+	
+	if(mapPointCloud.getNbPoints() > 0)
+	{
+		this->matcher->init(mapPointCloud);
+	}
 }
 
 //! Return the map, in global coordinates (slow)

@@ -120,3 +120,10 @@ set_target_properties(yaml-cpp-pm PROPERTIES
 	PROJECT_LABEL "yaml-cpp ${LABEL_SUFFIX}"
 )
 
+install(TARGETS yaml-cpp-pm EXPORT yaml-cpp-pm-targets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(EXPORT yaml-cpp-pm-targets DESTINATION share/${PROJECT_NAME}/cmake)

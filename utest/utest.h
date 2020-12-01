@@ -12,7 +12,8 @@
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 
-typedef PointMatcher<float> PM;
+typedef float NumericType;
+typedef PointMatcher<NumericType> PM;
 typedef PM::DataPoints DP;
 
 extern std::string dataPath;

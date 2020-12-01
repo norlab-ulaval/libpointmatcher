@@ -123,11 +123,11 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 		cloud.assertDescriptorConsistency();
 
 		const int nbPointsOut(cloud.features.cols());
-		LOG_INFO_STREAM("* " << (*it)->className << " - " << nbPointsOut << " points out (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "\%)");
+		LOG_INFO_STREAM("* " << (*it)->className << " - " << nbPointsOut << " points out (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "%)");
 	}
 	
 	const int nbPointsAfterFilters(cloud.features.cols());
-	LOG_INFO_STREAM("Applied " << this->size() << " filters - " << nbPointsAfterFilters << " points out (-" << (100 - double(nbPointsAfterFilters*100.)/nbPointsBeforeFilters) << "\%)");
+	LOG_INFO_STREAM("Applied " << this->size() << " filters - " << nbPointsAfterFilters << " points out (-" << (100 - double(nbPointsAfterFilters*100.)/nbPointsBeforeFilters) << "%)");
 }
 
 template struct PointMatcher<float>::DataPointsFilters;
