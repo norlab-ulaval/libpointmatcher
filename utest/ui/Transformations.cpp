@@ -24,7 +24,7 @@ static inline Eigen::Transform<NumericType, 3, Eigen::Affine> buildUpTransformat
 
 static inline void assertOnDataPointsTransformation(const PM::DataPoints& cloud, const PM::TransformationParameters& transformation,
                                                     std::shared_ptr<PM::Transformation>& transformator,
-                                                    const NumericType kEpsilonNumericalError = 0)
+                                                    const NumericType kEpsilonNumericalError = 1e-13)
 {
     // Transform point cloud.
     auto transformedCloud = cloud;
