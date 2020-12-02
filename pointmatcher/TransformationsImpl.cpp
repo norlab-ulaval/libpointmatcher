@@ -73,7 +73,7 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 	if(this->checkParameters(parameters) == false)	
 		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
 	
-	// Apply the transformation to features
+	// Apply the transformation to features.
 	// B = A * B translates to B.transpose *= A.transpose()
 	cloud.features.transpose().applyOnTheRight(parameters.transpose());
 
@@ -86,6 +86,7 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		const std::string& name(cloud.descriptorLabels[i].text);
 		if (name == "normals" || name == "observationDirections")
 		{
+			// Rotate descriptors.
 			// B = A * B translates to B.transpose *= A.transpose()
 			cloud.descriptors.block(row, 0, span, descCols).transpose() *= R.transpose();
 		}
@@ -202,6 +203,7 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 		const std::string& name(cloud.descriptorLabels[i].text);
 		if (name == "normals" || name == "observationDirections")
 		{
+			// Rotate descriptors.
 			// B = A * B translates to B.transpose *= A.transpose()
 			cloud.descriptors.block(row, 0, span, descCols).transpose() *= R.transpose();
 		}
@@ -246,8 +248,8 @@ void TransformationsImpl<T>::PureTranslation::inPlaceCompute(
 	if(this->checkParameters(parameters) == false)
 		throw PointMatcherSupport::TransformationError("PureTranslation: Error, left part  not identity.");
 
-	// Apply the transformation to features
-	// B = A * B translates to B.transpose *= A.transpose()
+	// Apply the transformation to features.
+	// B = A * B translates to B.transpose() *= A.transpose()
 	cloud.features.transpose().applyOnTheRight(parameters.transpose());
 }
 
