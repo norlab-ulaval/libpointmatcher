@@ -114,7 +114,8 @@ add_subdirectory(contrib)
 #---------------------------
 # DEPENDENCY:  POSIX Threads
 #---------------------------
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} pthread)
+find_library(pthread_LIB_DIR  NAMES pthread pthreadVC2)
+set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${pthread_LIB_DIR})
 
 #--------------------
 # DEPENDENCY:  boost
