@@ -46,7 +46,7 @@ MaxPointCountDataPointsFilter<T>::MaxPointCountDataPointsFilter(const Parameters
 	{
 		seed = this->template get<size_t>("seed");
 	} 
-	catch (const InvalidParameter& e) 
+	catch (const InvalidParameter&) 
 	{
 		seed = static_cast<size_t>(1); // rand default seed number
 	}

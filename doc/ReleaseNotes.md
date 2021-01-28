@@ -1,8 +1,6 @@
-Release Notes
-=============
+# Release Notes
 
-Wish list for next release
---------------------------
+## Wish list for next release
 
  * Change the API to allow only on kind of transformation, not a list of transformations. See issue [#164](https://github.com/ethz-asl/libpointmatcher/issues/164).
  * Migrate ffrom yaml-cpp 0.3 to 0.5
