@@ -1,14 +1,15 @@
-| [Tutorials Home](Tutorials.md)    | [Previous](DataPointsFilterDev.md) | [Next](UnitTestDev.md) |
-| ------------- |:-------------:| -----:|
+| [Tutorials Home](index.md) | [Previous](DataPointsFilterDev.md) | [Next](UnitTestDev.md) |
+| :--- | :---: | ---: |
 
 # Extending libpointmatcher Transformations
 
 ## Defining your own Transformation Class
+
 While rigid transformations cover most of the geometric transformations that are used in point cloud registration, we may be interested in defining our own transformations.  In that case we will have to define our own class to represent it and derive this class from the `Transformation` interface class.  
 
 Suppose we are interested in defining a transformation type that only includes 3D translations.  For that, we require that the transformation matrix have the following form.
 
-|**Figure 4:** A 3D transformation matrix representing a pure translation |
+|**Figure 4:** A 3D transformation matrix representing a pure translation|
 |:---|
 |![2d translation matrix](images/3dTransMatrix.gif)|
 
@@ -74,7 +75,8 @@ inline typename PureTranslation<T>::TransformationParameters PureTranslation<T>:
 
 	return correctedParameters;
 }
-``` 
+```
+
 Now that we have properly defined our transformation object representing pure translations, we can use it in our code.  We modify the code from the previous example to use our `PureTranslation` object.  Running this code should produce the same results as in the previous case.
 
 ```cpp
@@ -114,19 +116,21 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 ```
+
 ## Making a Custom Transformation a libpointmatcher Module
+
 Suppose we have defined a useful transformation that we wish to add to libpointmatcher for future use.  We can as an example make a new libpointmatcher module out of the `PureTranslation` transformation class we just designed.
 
 Transformation modules live in the `pointmatcher/TransformationsImpl.h` and implemented in the cpp file of the same name.  Before copying in our `PureTranslation` class declaration, we will add to it an additional function. The `description` function should return some useful information about the transformation such as its name, requirements, and possible parameters that are used in the transformation.
 
 ```cpp
 inline static const std::string description()
-	{
-		return "Pure translation transformation\nA rigid transformation with no rotation.";
-	}
+{
+    return "Pure translation transformation\nA rigid transformation with no rotation.";
+}
 ```
 
-After adding the class to `TransformationsImpl`, we will add it to the registry as a libpointmatcher module.  We do so by adding the following macro in [pointmatcher/Registry.cpp](/pointmatcher/Registry.cpp)
+After adding the class to `TransformationsImpl`, we will add it to the registry as a libpointmatcher module.  We do so by adding the following macro in [pointmatcher/Registry.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/Registry.cpp)
 
 ```cpp
 ADD_TO_REGISTRAR_NO_PARAM(Transformation, PureTranslation, typename TransformationsImpl<T>::PureTranslation)
@@ -135,4 +139,5 @@ ADD_TO_REGISTRAR_NO_PARAM(Transformation, PureTranslation, typename Transformati
 Now recompile the library and check that the new transformation is listed as an available module by running `pcmip -l | grep -C 10 PureTranslation`.
 
 ## Where To Go From Here
+
 We recommend you try to build your own class of transformations and register it to libpointmatcher.  The [next tutorial](UnitTestDev.md) covers how to write test cases to validate your classes.  While the tutorial covers test cases for a data filter, you should also write test cases to verify that your transformations function correctly.
