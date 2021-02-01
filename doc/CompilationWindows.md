@@ -79,9 +79,9 @@ You may need to install grep to build libnabo. You can get the Windows version [
 
 1. Add the following PATH variable and set it to _(your Boost folder)_/build: **BOOST_ROOT**
 
-1. Add the following PATH variable and set it to _(your libnabo source folder)_: **NABO_INCLUDE_DIR**
+1. Add the following PATH variable and set it to _(your libnabo source folder)_: **libnabo_INCLUDE_DIRS**
 
-1. Add the following FILEPATH variable and set it to _(your libnabo source folder)_/build/RelWithDebInfo/nabo.lib: **NABO_LIBRARY**
+1. Add the following FILEPATH variable and set it to _(your libnabo source folder)_/build/RelWithDebInfo/nabo.lib: **libnabo_LIBRARIES**
 
 1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
 
