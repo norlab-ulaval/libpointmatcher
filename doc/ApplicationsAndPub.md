@@ -1,11 +1,16 @@
+| [Tutorials Home](index.md) | [Previous](Introduction.md) | [Next](DataFilters.md) |
+| :--- | :---: | ---: |
+
 # Applications and Publications
+
 Here some applications and scientific publications using libpointmatcher.
 
 ## Youtube Videos
+
 Click on the image to play.
 
-
 #### Mapping A Campus
+
 - Sensor: Velodyne HDL-64E
 - Application: Indoor and outdoor 3D mapping and localization
 
@@ -14,6 +19,7 @@ Click on the image to play.
 alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 #### ARTOR: Long-term 3D map maintenance in dynamic environments
+
 - Sensor: Velodyne HDL-32E
 - Application: 3D mapping and localization
 
@@ -23,6 +29,7 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 </a>
 
 #### NIFTi: railyard mapping
+
 - Sensor: Sick LMS-151
 - Application: 3D mapping and localization
 
@@ -33,6 +40,7 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 
 #### NIFTi: multi-floor mapping: 
+
 - Sensor: Sick LMS-151
 - Application: 3D mapping and localization
 
@@ -43,6 +51,7 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 
 #### ARTOR: Navigation in urban scene
+
 - Sensor: Velodyne HDL-32E
 - Application: Navigation
 
@@ -54,6 +63,7 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 
 #### ARTOR: Mapping rough terrain
+
 - Sensor: Velodyne HDL-32E
 - Application: 3D mapping and localization
 
@@ -64,6 +74,7 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 
 #### Lizhbeth: Shore mapping around lake Zurich
+
 - Sensor: Velodyne HDL-32E
 - Application: 3D mapping and localization
 
@@ -71,7 +82,6 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 <img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/g8l-Xq4qYeE.jpg" 
  width="240" height="180" border="10" />
 </a>
-
 
 
 #### BBQ modeling
@@ -86,6 +96,7 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 
 #### Kinect tracker
+
 - Sensor: Kinect
 - Application: 3D mapping and localization
 
@@ -97,6 +108,7 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 
 ## Publications using libpointmatcher
+
 1. F. Pomerleau, F. Colas and R. Siegwart (2015), "A Review of Point Cloud Registration Algorithms for Mobile Robotics", Foundations and Trends® in Robotics: Vol. 4: No. 1, pp 1-104. https://doi.org/10.1561/2300000035 or [Research Gate link](https://www.researchgate.net/publication/277558596_A_Review_of_Point_Cloud_Registration_Algorithms_for_Mobile_Robotics)
 
 1. G. Hitz, F. Pomerleau, F. Colas, and R. Siegwart. "State Estimation for Shore Monitoring Using an Autonomous Surface Vessel." International Symposium on Experimental Robotics (ISER), 2014, 2014.
@@ -116,4 +128,5 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 4.	F. Pomerleau, S. Magnenat, F. Colas, M. Liu, and R. Siegwart, “Tracking a depth camera: Parameter exploration for fast ICP,” presented at the Intelligent Robots and Systems, 2011. Proceedings of the IEEE/RSJ International Conference on, 2011, pp. 3824–3829.
 
 
-**Note**: Your application or publication is not here, just fill an issue through GitHub and we will be happy to add your utilization of the library to this page!
+**Note**: Your application or publication is not here? Just fill an issue through GitHub and we
+ will be happy to add your utilization of the library to this page!

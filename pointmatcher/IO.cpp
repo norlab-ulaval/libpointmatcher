@@ -1401,7 +1401,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			{
 				elem_num = boost::lexical_cast<unsigned>(elem_num_s);
 			}
-			catch (boost::bad_lexical_cast& e)
+			catch (boost::bad_lexical_cast&)
 			{
 				throw runtime_error(string("PLY parse error: bad number of elements ") + elem_num_s + string(" for element ") + elem_name);
 			}
@@ -1780,9 +1780,9 @@ template
 class PointMatcherIO<double>::PLYElement;
 
 template
-class PointMatcherIO<float>::PLYProperty;
+struct PointMatcherIO<float>::PLYProperty;
 template
-class PointMatcherIO<double>::PLYProperty;
+struct PointMatcherIO<double>::PLYProperty;
 
 
 template <typename T>
@@ -1983,7 +1983,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			{
 				header.width = boost::lexical_cast<unsigned int >(tokens[1]);
 			} 
-			catch (boost::bad_lexical_cast& e)
+			catch (boost::bad_lexical_cast&)
 			{
 				throw runtime_error("PCD Parse Error: invalid WIDTH");
 			}
@@ -1996,7 +1996,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			{
 				header.height= boost::lexical_cast<unsigned int >(tokens[1]);
 			} 
-			catch (boost::bad_lexical_cast& e)
+			catch (boost::bad_lexical_cast&)
 			{
 				throw runtime_error("PCD Parse Error: invalid HEIGHT");
 			}
@@ -2014,7 +2014,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 				{
 					header.viewPoint(i-1, 0) = boost::lexical_cast<T>(tokens[i]);
 				}
-				catch (boost::bad_lexical_cast& e)
+				catch (boost::bad_lexical_cast&)
 				{
 					stringstream ss;
 					ss << "PCD Parse Error: invalid value(" << tokens[i] << ") of VIEWPOINT";
@@ -2030,7 +2030,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			{
 				header.nbPoints = boost::lexical_cast<unsigned int>(tokens[1]);
 			}
-			catch (boost::bad_lexical_cast& e)
+			catch (boost::bad_lexical_cast&)
 			{
 				stringstream ss;
 				ss << "PCD Parse Error: the value in the element POINTS (" << tokens[1] << ") could not be cast as unsigned int";
