@@ -1,103 +1,150 @@
 | [Tutorials Home](index.md) | [Previous](CompilationMac.md) | [Next](Introduction.md) |
 | :--- | :---: | ---: |
 
-# Compiling and installing libpointmatcher on Windows
+# Installation of CGAL on Windows using MSVC
 
-## Compiling using MSVC (Microsoft Visual Studio)
+This tutorial will guide you through the different steps to install libpointmatcher and its dependencies.
 
-### In Short...
+-----  
 
-If you are used to development project, here is what you need:
+This tutorial is divided up like this:
 
+- Introduction
+  - [Ressources](#ressources) (Libraries version & Download links)
+  - [Notes](#notes)
+- Installation
+  - [Prerequisites](#prerequisites)
+  - [Boost](#install-boost)
+  - [Eigen3](#install-eigen3)
+  - [Grep](#install-grep)
+  - [libnabo](#install-libnabo)
+  - [libpointmatcher](#install-libpointmatcher)
 
-| Name   | Link | Version <br> (Tested December 29, 2018)|
-| ------ | ---- | ------------- |
-| Windows |  | 10 |
-|  git | <https://git-scm.com/> | v2.20.1 |
-|  libpointmatcher sources | <https://github.com/ethz-asl/libpointmatcher> |  |
-| libnabo sources | <https://github.com/ethz-asl/libnabo> |  |
-| Visual Studio |  <https://visualstudio.microsoft.com/>  | Visual Studio 2017 15.9.4 |
-| CMake | <https://cmake.org/> | v3.13.2 |
-| Eigen 3 | <http://eigen.tuxfamily.org/index.php> | v3.3.7 |
-| Boost | <https://www.boost.org/> | v1.69.0 |
+## Introduction  
 
-The rest of this tutorial will guide you through the different requirements step by step.
+### Ressources  
 
-### Building Boost
-1. Open a console that knows the path to the MSVC compiler command (cl). We suggest using **Windows PowerShell**. An alternative is **Developer Command Prompt**, which can be located in the Start menu in the Visual Studio section.
-1. Go to your Boost source directory, and do:
+| Name            | Download Link                                           | Version <br> (Tested February 11, 2021) |
+| ------          | ----                                                    | -------------  |
+| Windows         |                                                         | 10 v1909 64bit |
+| Visual Studio   | <https://visualstudio.microsoft.com/>                   | 2019 16.8.5    |
+| MSVC++ Compiler | _(with Visual Studio)_                                  | 14.2           |
+| Git             | <https://git-scm.com/downloads/>                        | 2.30.1         |
+| CMake           | <https://cmake.org/>                                    | 3.19.0         |
+| CGAL            | <https://github.com/CGAL/cgal/releases>                 | 5.2            |
+| Boost           | <https://www.boost.org/users/download/>                 | 1.75.0         |
+| Eigen3          | <http://eigen.tuxfamily.org/index.php>                  | 3.3.9          |
+| Qt5             | <https://www.qt.io/download-qt-installer>               | 5.15.2         |
+| zlib            | <https://www.zlib.net/>                                 | 1.2.11         |
+| METIS           | <http://glaros.dtc.umn.edu/gkhome/metis/metis/download> | 5.1.0          |
+| grep            | <http://gnuwin32.sourceforge.net/packages/grep.htm>     | 2.5.4          |
+| libnabo         | <https://github.com/ethz-asl/libnabo>                   | Commit 16250bf |
+| libpointmatcher | <https://github.com/ethz-asl/libpointmatcher>           | Commit e9a832d |
+| OpenGR          | <https://github.com/STORM-IRIT/OpenGR>                  | Commit c129638 |
+| VTK             | <https://vtk.org/download/>                             | 9.0.1          |
+| LAStools        | <https://github.com/CGAL/LAStools>                      | Commit 654f84e |
 
-        $ .\bootstrap.bat
-        $ .\b2.exe install --prefix=build address-model=64
+### Notes  
 
-1. It may take a while to finish.
+- It's recommended to use **Windows PowerShell** with administrator privileges as your CLI
+- All necessary environment variables will be configured so that CMake automatically finds all libraries and you don't have to specify the libraries' paths each time to CMake.  
+- When adding any environnement variable, add for All users (system variables)
+- Environement variables are case unsensitive (PATH = Path)
+- Add new environement variables in PATH on top of the list (to avoid conflicts)
+- You must **restart** your CLI and CMake for  new environment variables to take effect
+- In this tutorial, `C:\dev` will be used as root directory for all installations. The folder can be wherever you want, but it is strongly recommended that the path **has no spaces**.
 
+## Installation  
 
-### Build libnabo
-You may need to install grep to build libnabo. You can get the Windows version [here](http://gnuwin32.sourceforge.net/packages/grep.htm).
+### Prerequisites  
 
-1. Start **CMake GUI**
+- C++ compiler (get MSVC compiler by insatalling Visual Studio)
+- Git
+- CMake
 
-1. Add the path of your libnabo source folder in the field _Where is the source code_.
-1. Add a folder named build in the field _Where to build the binary_. This will allow you to do out-of-source compilation.
-1. Click on the button Configure
-    1. Select the generator for the project (Visual Studio 15 2017 Win64)
-    1. Typically you will select "Use default native compilers" for the generator
-    1. Click "Finish"
-    1. An error will be reported, because CMake does not know yet where to find the libraries. The next steps will tell it where to find them.
+### Install Boost  
 
-1. Locate _your eigen folder_ in the field **EIGEN_INCLUDE_DIR**
+1. Download `boost_<version>.zip`
+1. Extract `boost_<version>` in `C:\dev`
+1. Go to your Boost source directory with your CLI, and do:
 
-1. Add the following boolean variable and set it to `true`: **Boost_USE_STATIC_LIBS**
+    ```bash
+    .\bootstrap.bat
+    .\b2.exe
+    ```
 
-1. Add the following PATH variable and set it to _(your boost folder)_/build: **BOOST_ROOT**
+1. Set the following three environment variables:  
+     `BOOST_LIBRARYDIR = C:\dev\boost_<version>\stage\lib`  
+     `BOOST_INCLUDEDIR = C:\dev\boost_<version>`  
+     `BOOST_DIR = C:\dev\boost_<version>\stage\lib\cmake\Boost-<version>`  
+1. Add `C:\dev\boost_<version>\stage\lib` to `Path` environement variable
 
-1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
+### Install Eigen3  
 
-1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
+> Eigen is header only (see Eigen's ["Getting stated" page](http://eigen.tuxfamily.org/dox/GettingStarted.html)) and don't need to be build.
 
-	![alt text](images/win_cmake_libnabo.png "CMake libnabo")
+1. Download `eigen-<version>.zip`
+1. Extract `eigen-<version>` in `C:\dev`
+1. Set `EIGEN3_INC_DIR` environment variable to `C:\dev\eigen-<version>` (folder with `signature_of_eigen3_matrix_library` file)
 
+### Install Grep
 
-1. Locate the Microsoft Visual Studio Solution file (libnabo.sln) in your build folder and open it. Visual Studio should open.
+1. Download the last Setup "Complete package" of Grep for Windows
+1. Execute the Setup and extract the `GnuWin32` folder in `C:\dev`
+1. Add the path to the Grep .exe (`C:\dev\GnuWin32\bin`) files to the `Path` environment variable.
 
-1. Build the solution: BUILD -> Build Solution
+### Install libnabo  
 
-    Alternatively, you can build the solution from the command line. In _(your libnabo folder)_/build:
+> You need to install [Eigen3](#install-eigen3) and [Grep](#install-grep) before installing libnabo !
 
-        $ msbuild /m:2 libnabo.sln
+1. Go to your desired directory with your CLI (here `C:\dir`)
+1. Do the folowing commands
 
-    (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
+    ```bash
+    git clone https://github.com/ethz-asl/libnabo
+    mkdir .\libnabo\build
+    cd .\libnabo\build\
+    cmake-gui ..
+    ```
 
+    CMake-Gui will open up
+1. Click on the button **Configure** and specify the generator for the project (Visual Studio 16 2019)
+    > An error will be reported, because CMake does not know yet where to find the libraries. The next steps will tell it where to find them.
+1. Set the CMake variable `EIGEN_INCLUDE_DIR` to `C:\dev\eigen-<version>`
+1. Click on the button Configure, Generate and then Open Project
+    Visual Studio will open up
+    > Maybe you will have messages about Doxygen, OpenCL, ANN, FLANN and Python missing. They are not necessary to install libnano.
+1. Put your "Solution Configuration" in `Release` mode
+1. Build the `ALL_BUILD` project
+1. Rebuild for each configuration mode you will use, i.e. Release/Debug/RelWithDebInfo/MinSizeRel  
+    (Libnabo build a different .lib for each configuration mode)
 
-### Build libpointmatcher
-1. Start **CMake GUI**, follow the same steps to configure the source and build folders for _libpointmatcher_, then click the Configure button.
+### Install libpointmatcher  
 
-1. Locate _your eigen folder_ in the field **EIGEN_INCLUDE_DIR**
+> You need to install [libnabo](#install-libnabo) before installing libpointmatcher !
 
-1. Add the following boolean variable and set it to `true`: **Boost_USE_STATIC_LIBS**
+1. Go to your desired directory with your CLI (here `C:\dir`)
+1. Do the folowing commands
 
-1. Add the following PATH variable and set it to _(your Boost folder)_/build: **BOOST_ROOT**
+    ```bash
+    git clone https://github.com/ethz-asl/libpointmatcher
+    mkdir .\libpointmatcher\build
+    mkdir .\libpointmatcher\build\install
+    cd .\libpointmatcher\build\
+    cmake-gui ..
+    ```
 
-1. Add the following PATH variable and set it to _(your libnabo source folder)_: **libnabo_INCLUDE_DIRS**
-
-1. Add the following FILEPATH variable and set it to _(your libnabo source folder)_/build/RelWithDebInfo/nabo.lib: **libnabo_LIBRARIES**
-
-1. Change the variable **CMAKE_CONFIGURATION_TYPES** to `RelWithDebInfo`
-
-1. Click on the button Configure, then on Generate. Here is an example of what your CMake should look like:
-
-	![alt text](images/win_cmake_libpointmatcher.png "CMake libpointmatcher")
-
-1. In Visual Studio, build the solution: BUILD -> Build Solution
-
-    Alternatively, you can build the solution from the command line. In _(your libpointmatcher folder)_/build:
-
-
-        $ msbuild /m:2 libpointmatcher.sln
-
-    (Note that the flag /m:X defines the number of cores msbuild will use while building the solution.)
-
+    CMake-Gui will open up
+1. Click on the button **Configure** and specify the generator for the project (Visual Studio 16 2019)
+1. Set the CMake variable `EIGEN_INCLUDE_DIR` to `C:\dev\eigen-<version>`
+1. Set the CMake variable `CMAKE_INSTALL_PREFIX` to `C:/dev/libpointmatcher/build/install`
+    > **CAUTION !** Use forward slash `/`
+1. Click on the button Configure, Generate and then Open Project  
+    Visual Studio will open up
+1. Put your "Solution Configuration" in `Release` mode
+1. Build the `INSTALL` project
+    > We have to install the library and not only build it, because otherwise all CMake files won't be able to be found by programs using libpointmatcher)
+1. Set `libpointmatcher_DIR` environement variable to `C:\dev\libpointmatcher\build\install\share\libpointmatcher\cmake`
 
 ## Reporting Issues
 
@@ -114,5 +161,3 @@ Special thanks to the following users in helping us with the Windows support:
 
 - [kwill](https://github.com/kwill) for keeping the documentation up-to-date and investing time to make libpointmatcher compiling on Windows.
 - [braddodson](https://github.com/braddodson) for porting a version of libpointmacher in `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
-
-
