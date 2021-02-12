@@ -74,7 +74,7 @@ T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 		}
 	}
 	if (values.size() == 0)
-		throw ConvergenceError("no outlier to filter");
+		throw ConvergenceError("[getDistQuantile] no outlier to filter");
 
 	if (quantile < 0.0 || quantile > 1.0)
 		throw ConvergenceError("quantile must be between 0 and 1");
@@ -105,7 +105,7 @@ T PointMatcher<T>::Matches::getMedianAbsDeviation() const
 		}
 	}
 	if (values.size() == 0)
-		throw ConvergenceError("no outlier to filter");
+		throw ConvergenceError("[getMedianAbsDeviation] no outlier to filter");
 
 	nth_element(values.begin(), values.begin() + (values.size() / 2), values.end());
 	const T median =  values[values.size() / 2];
