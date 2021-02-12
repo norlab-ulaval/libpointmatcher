@@ -1,7 +1,7 @@
 | [Tutorials Home](index.md) | [Previous](CompilationMac.md) | [Next](Introduction.md) |
 | :--- | :---: | ---: |
 
-# Installation of CGAL on Windows using MSVC
+# Installation of libpointmatcher on Windows using MSVC
 
 This tutorial will guide you through the different steps to install libpointmatcher and its dependencies.
 
@@ -31,23 +31,16 @@ This tutorial is divided up like this:
 | MSVC++ Compiler | _(with Visual Studio)_                                  | 14.2           |
 | Git             | <https://git-scm.com/downloads/>                        | 2.30.1         |
 | CMake           | <https://cmake.org/>                                    | 3.19.0         |
-| CGAL            | <https://github.com/CGAL/cgal/releases>                 | 5.2            |
 | Boost           | <https://www.boost.org/users/download/>                 | 1.75.0         |
 | Eigen3          | <http://eigen.tuxfamily.org/index.php>                  | 3.3.9          |
-| Qt5             | <https://www.qt.io/download-qt-installer>               | 5.15.2         |
-| zlib            | <https://www.zlib.net/>                                 | 1.2.11         |
-| METIS           | <http://glaros.dtc.umn.edu/gkhome/metis/metis/download> | 5.1.0          |
 | grep            | <http://gnuwin32.sourceforge.net/packages/grep.htm>     | 2.5.4          |
 | libnabo         | <https://github.com/ethz-asl/libnabo>                   | Commit 16250bf |
 | libpointmatcher | <https://github.com/ethz-asl/libpointmatcher>           | Commit e9a832d |
-| OpenGR          | <https://github.com/STORM-IRIT/OpenGR>                  | Commit c129638 |
-| VTK             | <https://vtk.org/download/>                             | 9.0.1          |
-| LAStools        | <https://github.com/CGAL/LAStools>                      | Commit 654f84e |
 
 ### Notes  
 
 - It's recommended to use **Windows PowerShell** with administrator privileges as your CLI
-- All necessary environment variables will be configured so that CMake automatically finds all libraries and you don't have to specify the libraries' paths each time to CMake.  
+- All necessary environment variables will be configured so that **CMake automatically finds all libraries** and you don't have to specify the libraries' paths to CMake each time you use it  
 - When adding any environnement variable, add for All users (system variables)
 - Environement variables are case unsensitive (PATH = Path)
 - Add new environement variables in PATH on top of the list (to avoid conflicts)
@@ -143,7 +136,7 @@ This tutorial is divided up like this:
     Visual Studio will open up
 1. Put your "Solution Configuration" in `Release` mode
 1. Build the `INSTALL` project
-    > We have to install the library and not only build it, because otherwise all CMake files won't be able to be found by programs using libpointmatcher)
+    > We have to install the library and not only build it, because otherwise all CMake files won't be able to be found by programs using libpointmatcher
 1. Set `libpointmatcher_DIR` environement variable to `C:\dev\libpointmatcher\build\install\share\libpointmatcher\cmake`
 
 ## Reporting Issues
