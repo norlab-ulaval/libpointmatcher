@@ -139,8 +139,8 @@ void SphericalityDataPointsFilter<T>::inPlaceFilter(
 
 		// First, avoid division by zero
 		//TODO: Is there a more suitable limit for considering the values almost-zero? (VK)
-		if (eig_vals_col(2) < std::numeric_limits<T>::min() or
-		    eig_vals_col(1) < 0.0 or
+		if (eig_vals_col(2) < std::numeric_limits<T>::min() ||
+		    eig_vals_col(1) < 0.0 ||
 		    eig_vals_col(0) < 0.0)
 		{
 			// If the largest eigenvalue is zero or even worse -- any of them is negative,

@@ -114,7 +114,12 @@ add_subdirectory(contrib)
 #---------------------------
 # DEPENDENCY:  POSIX Threads
 #---------------------------
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} pthread)
+find_package(Threads REQUIRED)
+if (CMAKE_VERSION VERSION_LESS 3.1.0)
+  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+else()
+  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} Threads::Threads)
+endif()
 
 #--------------------
 # DEPENDENCY:  boost
