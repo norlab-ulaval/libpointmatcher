@@ -73,7 +73,7 @@ Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const int
 		case 1:		// Uniform distribution.
 		{
 			std::uniform_real_distribution<float> dis(0, 1);
-			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float dummy){return dis(gen);});
+			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return dis(gen);});
 		}
 	}
 }
