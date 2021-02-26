@@ -88,7 +88,7 @@ void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 
 	const Eigen::VectorXf randomNumbers = sampleRandomIndices(nbPointsIn);
 	size_t j=0;
-	for (Eigen::Index i = 0; i < nbPointsIn && j<=nbPointsOut; i++)
+	for (size_t i = 0; i < nbPointsIn && j<=nbPointsOut; i++)
 	{
 		if (randomNumbers[i] < prob)
 		{
@@ -101,4 +101,3 @@ void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 
 template struct RandomSamplingDataPointsFilter<float>;
 template struct RandomSamplingDataPointsFilter<double>;
-
