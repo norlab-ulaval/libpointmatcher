@@ -83,7 +83,7 @@ template<typename T>
 void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 	DataPoints& cloud)
 {
-	const int nbPointsIn = cloud.features.cols();
+	const size_t nbPointsIn = cloud.features.cols();
 	const int nbPointsOut = nbPointsIn * prob;
 
 	const Eigen::VectorXf randomNumbers = sampleRandomIndices(nbPointsIn);
