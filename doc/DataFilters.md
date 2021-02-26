@@ -264,6 +264,7 @@ __Impact on the number of points:__ reduces number of points
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
 |prob        | Probability that a point is kept (1/decimation factor) | 0.75 | min: 0, max: 1 |
+|randomSamplingMethod | Random sampling method: Direct RNG (0) (fastest), Uniform (1) (more accurate but slower) | 0 | min: 0, max: 1 |
 
 ### Example
 

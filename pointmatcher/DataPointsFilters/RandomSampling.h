@@ -70,5 +70,5 @@ struct RandomSamplingDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	virtual ~RandomSamplingDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
-	Eigen::VectorXf sampleRandomIndices(const int nbPoints);
+	Eigen::VectorXf sampleRandomIndices(const size_t nbPoints);
 };

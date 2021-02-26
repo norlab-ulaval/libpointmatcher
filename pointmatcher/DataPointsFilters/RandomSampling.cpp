@@ -58,22 +58,22 @@ RandomSamplingDataPointsFilter<T>::filter(const DataPoints& input)
 
 // In-place filter
 template<typename T>
-Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const int nbPoints)
+Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const size_t nbPoints)
 {
-	std::random_device rd;
-	std::minstd_rand gen(rd());
+	std::random_device randomDevice;
+	std::minstd_rand randomNumberGenerator(randomDevice());
 
 	switch(randomSamplingMethod)
 	{
 		default:	// Direct RNG.
 		{
-			const float randomNumberRange = gen.max() - gen.min();
-			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return static_cast<float>(gen() / randomNumberRange);});
+			const float randomNumberRange{static_cast<float>(randomNumberGenerator.max() - randomNumberGenerator.min())};
+			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return static_cast<float>(randomNumberGenerator() / randomNumberRange);});
 		}
 		case 1:		// Uniform distribution.
 		{
-			std::uniform_real_distribution<float> dis(0, 1);
-			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return dis(gen);});
+			std::uniform_real_distribution<float> distribution(0, 1);
+			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return distribution(randomNumberGenerator);});
 		}
 	}
 }
@@ -86,11 +86,11 @@ void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 	const size_t nbPointsIn = cloud.features.cols();
 	const size_t nbPointsOut = nbPointsIn * prob;
 
-	const Eigen::VectorXf randomNumbers = sampleRandomIndices(nbPointsIn);
-	size_t j=0;
-	for (size_t i = 0; i < nbPointsIn && j<=nbPointsOut; i++)
+	const Eigen::VectorXf randomNumbers{sampleRandomIndices(nbPointsIn)};
+	size_t j{0u};
+	for (size_t i{0u}; i < nbPointsIn && j<=nbPointsOut; ++i)
 	{
-		if (randomNumbers[i] < prob)
+		if (randomNumbers(i) < prob)
 		{
 			cloud.setColFrom(j, cloud, i);
 			++j;
@@ -101,3 +101,5 @@ void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 
 template struct RandomSamplingDataPointsFilter<float>;
 template struct RandomSamplingDataPointsFilter<double>;
+
+
