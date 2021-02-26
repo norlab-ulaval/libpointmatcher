@@ -51,18 +51,20 @@ struct MaxQuantileOnAxisDataPointsFilter: public PointMatcher<T>::DataPointsFilt
 	
 	inline static const std::string description()
 	{
-		return "Subsampling. Filter points beyond a maximum quantile measured on a specific axis.";
+		return "Subsampling. Filter points under or beyond a maximum quantile measured on a specific axis.";
 	}
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
 			{"dim", "dimension on which the filter will be applied. x=0, y=1, z=2", "0", "0", "2", &P::Comp<unsigned>},
-			{"ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "0.9999999", &P::Comp<T>}
+			{"ratio", "maximum quantile authorized. All points beyond that will be filtered.", "0.5", "0.0000001", "0.9999999", &P::Comp<T>},
+			{"removeBeyond", "If set to true (1), remove points beyond the quantile ratio; else (0), remove points under the quantile ratio", "1", "0", "1", P::Comp<bool>}
 		};
 	}
 	
 	const unsigned dim;
 	const T ratio;
+	const bool removeBeyond;
 	
 	//! Constructor, uses parameter interface
 	MaxQuantileOnAxisDataPointsFilter(const Parameters& params = Parameters());
