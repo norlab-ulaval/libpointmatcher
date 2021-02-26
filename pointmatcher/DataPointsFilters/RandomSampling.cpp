@@ -68,7 +68,7 @@ Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const int
 		default:	// Direct RNG.
 		{
 			const float randomNumberRange = gen.max() - gen.min();
-			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float dummy){return static_cast<float>(gen() / randomNumberRange);});
+			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return static_cast<float>(gen() / randomNumberRange);});
 		}
 		case 1:		// Uniform distribution.
 		{
