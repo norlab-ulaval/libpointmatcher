@@ -230,7 +230,7 @@ No example available.
 
 ### Description
 
-Points are filtered according to where they lie on a distribution of their positions along a given axis.  The entire distance range is divided into quantiles which lie between 0 and 1.  One can specify the distance quantile above which points are rejected by the filter.
+Points are filtered according to where they lie on a distribution of their positions along a given axis.  The entire distance range is divided into quantiles which lie between 0 and 1.  One can specify the distance quantile above or beneath which points are rejected by the filter.
 
 __Required descriptors:__ none   
 __Output descriptor:__ none  
@@ -240,15 +240,15 @@ __Impact on the number of points:__ reduces number of points
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
 |dim        | Dimension over which the distance (from the center) is thresholded | 0 | x:0 y:1 z:2 |
-|ratio |Quantile threshold.  Points whose distance exceed this threshold are rejected by the filter | 0.5 | min: 0.0000001, max: 0.9999999 | 
-
+|ratio |Quantile threshold.  The threshold at which the points are rejected by the filter | 0.5 | min: 0.0000001, max: 0.9999999 | 
+|removeBeyond |If 1 the points beyond the quantile threshold are rejected, else (0) the points under the quantile threshold are rejected | 1 | 1 or 0 | 
 ### Example
 
-In the following example, maximum quantile filtering is performed over the x-axis with a quantile threshold of 0.5.  Therefore, points which have an x-value which exceeds the 50% quantile are rejected.  The output of the filter is displayed in white and overlaid with the input point cloud in the image below.  A sampling region centered at the origin and extending in both directions of the x-axis is clearly visible.
+In the following example, maximum quantile filtering is performed over the x-axis with a quantile threshold of 0.5 and with the option to removeBeyond set to 1.  Therefore, points which have an x-value which exceeds the 50% quantile are removed.  The output of the filter is displayed in white and overlaid with the input point cloud in the image below.  A sampling region centered at the origin and extending in both directions of the x-axis is clearly visible.
 
-|Figure: Maximum quantile on axis filter in the x-direction with a maximum quantile <br>of 0.5.   | Parameters used |
+|Figure: Maximum quantile on axis filter in the x-direction with a maximum quantile <br>of 0.5 and removeBeyond set to 1.   | Parameters used |
 |---|:---|  
-|![max quant after](images/max_quant.png "After applying maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5") | dim : 0 <br> ratio : 0.5 |
+|![max quant after](images/max_quant.png "After applying maximum quantile on axis filter in the x-direction with a maximum quantile of 0.5 and removeByond set to 1") | dim : 0 <br> ratio : 0.5 <br> removeBeyond : 1 |
 
 ## Random Sampling Filter <a name="randomsamplinghead"></a>
 
