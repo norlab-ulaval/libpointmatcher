@@ -84,7 +84,7 @@ void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 	DataPoints& cloud)
 {
 	const size_t nbPointsIn = cloud.features.cols();
-	const int nbPointsOut = nbPointsIn * prob;
+	const size_t nbPointsOut = nbPointsIn * prob;
 
 	const Eigen::VectorXf randomNumbers = sampleRandomIndices(nbPointsIn);
 	size_t j=0;
