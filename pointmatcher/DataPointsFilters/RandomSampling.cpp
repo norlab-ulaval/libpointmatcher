@@ -34,12 +34,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "RandomSampling.h"
 
+#include <random>
+
 // RandomSamplingDataPointsFilter
 // Constructor
 template<typename T>
 RandomSamplingDataPointsFilter<T>::RandomSamplingDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("RandomSamplingDataPointsFilter", RandomSamplingDataPointsFilter::availableParameters(), params),
-	prob(Parametrizable::get<double>("prob"))
+	prob(Parametrizable::get<double>("prob")),
+	randomSamplingMethod(Parametrizable::get<int>("randomSamplingMethod"))
 {
 }
 
@@ -55,22 +58,44 @@ RandomSamplingDataPointsFilter<T>::filter(const DataPoints& input)
 
 // In-place filter
 template<typename T>
+Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const size_t nbPoints)
+{
+	std::random_device randomDevice;
+	std::minstd_rand randomNumberGenerator(randomDevice());
+
+	switch(randomSamplingMethod)
+	{
+		default:	// Direct RNG.
+		{
+			const float randomNumberRange{static_cast<float>(randomNumberGenerator.max() - randomNumberGenerator.min())};
+			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return static_cast<float>(randomNumberGenerator() / randomNumberRange);});
+		}
+		case 1:		// Uniform distribution.
+		{
+			std::uniform_real_distribution<float> distribution(0, 1);
+			return Eigen::VectorXf::NullaryExpr(nbPoints, [&](float){return distribution(randomNumberGenerator);});
+		}
+	}
+}
+
+// In-place filter
+template<typename T>
 void RandomSamplingDataPointsFilter<T>::inPlaceFilter(
 	DataPoints& cloud)
 {
-	const int nbPointsIn = cloud.features.cols();
+	const size_t nbPointsIn = cloud.features.cols();
+	const size_t nbPointsOut = nbPointsIn * prob;
 
-	int j = 0;
-	for (int i = 0; i < nbPointsIn; ++i)
+	const Eigen::VectorXf randomNumbers{sampleRandomIndices(nbPointsIn)};
+	size_t j{0u};
+	for (size_t i{0u}; i < nbPointsIn && j<=nbPointsOut; ++i)
 	{
-		const float r = (float)std::rand()/(float)RAND_MAX;
-		if (r < prob)
+		if (randomNumbers(i) < prob)
 		{
 			cloud.setColFrom(j, cloud, i);
 			++j;
 		}
 	}
-
 	cloud.conservativeResize(j);
 }
 
