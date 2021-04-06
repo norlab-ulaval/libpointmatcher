@@ -73,11 +73,11 @@ T PointMatcher<T>::Matches::getDistsQuantile(const T quantile) const
 			}
 		}
 	}
-	if (values.size() == 0)
-		throw ConvergenceError("[getDistQuantile] no outlier to filter");
+	if (values.empty())
+		throw ConvergenceError("No matches available for computing distance quantiles");
 
 	if (quantile < 0.0 || quantile > 1.0)
-		throw ConvergenceError("quantile must be between 0 and 1");
+		throw ConvergenceError("Distance quantile of matches must lie in the range [0,1]");
 
 	// get quantile
 	if (quantile == 1.0)

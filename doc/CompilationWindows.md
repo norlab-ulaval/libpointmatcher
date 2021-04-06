@@ -10,7 +10,7 @@ This tutorial will guide you through the different steps to install libpointmatc
 This tutorial is divided up like this:
 
 - Introduction
-  - [Ressources](#ressources) (Libraries version & Download links)
+  - [Resources](#resources) (Library versions & Download links)
   - [Notes](#notes)
 - Installation
   - [Prerequisites](#prerequisites)
@@ -22,7 +22,7 @@ This tutorial is divided up like this:
 
 ## Introduction  
 
-### Ressources  
+### Resources  
 
 | Name            | Download Link                                           | Version <br> (Tested February 11, 2021) |
 | ------          | ----                                                    | -------------  |
@@ -41,9 +41,9 @@ This tutorial is divided up like this:
 
 - It's recommended to use **Windows PowerShell** with administrator privileges as your CLI
 - All necessary environment variables will be configured so that **CMake automatically finds all libraries** and you don't have to specify the libraries' paths to CMake each time you use it  
-- When adding any environnement variable, add for All users (system variables)
-- Environement variables are case unsensitive (PATH = Path)
-- Add new environement variables in PATH on top of the list (to avoid conflicts)
+- When adding any environment variable, add for All users (system variables)
+- Environment variables are case-insensitive (PATH = Path)
+- Add new environment variables in PATH on top of the list (to avoid conflicts)
 - You must **restart** your CLI and CMake for  new environment variables to take effect
 - In this tutorial, `C:\dev` will be used as root directory for all installations. The folder can be wherever you want, but it is strongly recommended that the path **has no spaces**.
 
@@ -51,7 +51,7 @@ This tutorial is divided up like this:
 
 ### Prerequisites  
 
-- C++ compiler (get MSVC compiler by insatalling Visual Studio)
+- C++ compiler (get MSVC compiler by installing Visual Studio)
 - Git
 - CMake
 
@@ -70,7 +70,7 @@ This tutorial is divided up like this:
      `BOOST_LIBRARYDIR = C:\dev\boost_<version>\stage\lib`  
      `BOOST_INCLUDEDIR = C:\dev\boost_<version>`  
      `BOOST_DIR = C:\dev\boost_<version>\stage\lib\cmake\Boost-<version>`  
-1. Add `C:\dev\boost_<version>\stage\lib` to `Path` environement variable
+1. Add `C:\dev\boost_<version>\stage\lib` to `Path` environment variable
 
 ### Install Eigen3  
 
@@ -91,7 +91,7 @@ This tutorial is divided up like this:
 > You need to install [Eigen3](#install-eigen3) and [Grep](#install-grep) before installing libnabo !
 
 1. Go to your desired directory with your CLI (here `C:\dir`)
-1. Do the folowing commands
+1. Do the following commands
 
     ```bash
     git clone https://github.com/ethz-asl/libnabo
@@ -117,7 +117,7 @@ This tutorial is divided up like this:
 > You need to install [libnabo](#install-libnabo) before installing libpointmatcher !
 
 1. Go to your desired directory with your CLI (here `C:\dir`)
-1. Do the folowing commands
+1. Do the following commands
 
     ```bash
     git clone https://github.com/ethz-asl/libpointmatcher
@@ -137,20 +137,20 @@ This tutorial is divided up like this:
 1. Put your "Solution Configuration" in `Release` mode
 1. Build the `INSTALL` project
     > We have to install the library and not only build it, because otherwise all CMake files won't be able to be found by programs using libpointmatcher
-1. Set `libpointmatcher_DIR` environement variable to `C:\dev\libpointmatcher\build\install\share\libpointmatcher\cmake`
+1. Set `libpointmatcher_DIR` environment variable to `C:\dev\libpointmatcher\build\install\share\libpointmatcher\cmake`
 
 ## Reporting Issues
 
 Currently, we don't have a developer fully supporting compilation on Windows. If you can help refreshing this documentation, your help is more than welcome.
 
-Before reporting new building issues, have a look in the current/past list of issues. Add as much details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side. Here are some of them:
+Before reporting new building issues, have a look in the current/past list of issues. Add as many details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side. Here are some of them:
 
-- Your directory structure need to be well organized as mention in [Issue #136](https://github.com/ethz-asl/libpointmatcher/issues/136).
-- There might be some problems related to libnabo as mention in [Issue #118](https://github.com/ethz-asl/libpointmatcher/issues/118).
+- Your directory structure need to be well organized as mentioned in [Issue #136](https://github.com/ethz-asl/libpointmatcher/issues/136).
+- There might be some problems related to libnabo as mentioned in [Issue #118](https://github.com/ethz-asl/libpointmatcher/issues/118).
 
 ## Special Thanks
 
 Special thanks to the following users in helping us with the Windows support:
 
-- [kwill](https://github.com/kwill) for keeping the documentation up-to-date and investing time to make libpointmatcher compiling on Windows.
-- [braddodson](https://github.com/braddodson) for porting a version of libpointmacher in `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
+- [kwill](https://github.com/kwill) for keeping the documentation up-to-date and investing the time to get libpointmatcher compiling on Windows.
+- [braddodson](https://github.com/braddodson) for porting a version of libpointmatcher to `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
