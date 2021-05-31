@@ -33,20 +33,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 #include "MaxPointCount.h"
+#include <random>
 
 // MaxPointCountDataPointsFilter
 // Constructor
 template<typename T>
 MaxPointCountDataPointsFilter<T>::MaxPointCountDataPointsFilter(const Parameters& params):
-	PointMatcher<T>::DataPointsFilter("MaxPointCountDataPointsFilter", 
+	PointMatcher<T>::DataPointsFilter("MaxPointCountDataPointsFilter",
 		MaxPointCountDataPointsFilter::availableParameters(), params),
 	maxCount(Parametrizable::get<size_t>("maxCount"))
 {
-	try 
+	try
 	{
 		seed = this->template get<size_t>("seed");
-	} 
-	catch (const InvalidParameter&) 
+	}
+	catch (const InvalidParameter&)
 	{
 		seed = static_cast<size_t>(1); // rand default seed number
 	}
@@ -54,7 +55,7 @@ MaxPointCountDataPointsFilter<T>::MaxPointCountDataPointsFilter(const Parameters
 
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints 
+typename PointMatcher<T>::DataPoints
 MaxPointCountDataPointsFilter<T>::filter(const DataPoints& input)
 {
 	DataPoints output(input);
@@ -66,35 +67,20 @@ MaxPointCountDataPointsFilter<T>::filter(const DataPoints& input)
 template<typename T>
 void MaxPointCountDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	const size_t N = static_cast<size_t> (cloud.features.cols() - 1);
-	
-	if (maxCount <= N) 
+	const auto N = static_cast<size_t>(cloud.features.cols() - 1);
+
+	if (maxCount <= N)
 	{
-		//Re-init seed at each call, to ensure same results
-		std::srand(seed);
-		
-		for(size_t j=0; j<maxCount; ++j)
+		std::default_random_engine randomNumberGenerator(seed);
+
+		for(size_t j = 0; j < maxCount; ++j)
 		{
 			//Get a random index in [j; N]
-			const size_t idx = j + static_cast<size_t>((N-j)*(static_cast<float>(std::rand()/static_cast<float>(RAND_MAX))));
-			
-			//Switch columns j and idx
-			const auto feat = cloud.features.col(j);
-			cloud.features.col(j) = cloud.features.col(idx);
-			cloud.features.col(idx) = feat;
-			
-			if (cloud.descriptors.cols() > 0)
-			{
-				const auto desc = cloud.descriptors.col(j);
-				cloud.descriptors.col(j) = cloud.descriptors.col(idx);
-				cloud.descriptors.col(idx) = desc;
-			}
-			if (cloud.times.cols() > 0)
-			{
-				const auto time = cloud.times.col(j);
-				cloud.times.col(j) = cloud.times.col(idx);
-				cloud.times.col(idx) = time;
-			}	
+			std::uniform_int_distribution<size_t> distribution(j, N);
+			const size_t index = distribution(randomNumberGenerator);
+
+			//Switch columns j and index
+			cloud.swapCols(j, index);
 		}
 		//Resize the cloud
 		cloud.conservativeResize(maxCount);
@@ -103,4 +89,3 @@ void MaxPointCountDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 template struct MaxPointCountDataPointsFilter<float>;
 template struct MaxPointCountDataPointsFilter<double>;
-
