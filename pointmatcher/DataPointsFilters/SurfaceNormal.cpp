@@ -184,7 +184,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 		const Vector mean = d.rowwise().sum() / T(realKnn);
 		const Matrix NN = d.colwise() - mean;
 
-		const Matrix C(NN * NN.transpose());
+		const Matrix C((NN * NN.transpose()) / T(realKnn));
 		Vector eigenVa = Vector::Zero(featDim-1, 1);
 		Matrix eigenVe = Matrix::Zero(featDim-1, featDim-1);
 		// Ensure that the matrix is suited for eigenvalues calculation
