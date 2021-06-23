@@ -73,8 +73,9 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 	if(this->checkParameters(parameters) == false)	
 		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
 	
-	// Apply the transformation to features
-	cloud.features.applyOnTheLeft(parameters);
+	// Apply the transformation to features.
+	// B = A * B translates to B.transpose *= A.transpose()
+	cloud.features.transpose().applyOnTheRight(parameters.transpose());
 
 	// Apply the transformation to descriptors
 	int row(0);
@@ -85,7 +86,9 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		const std::string& name(cloud.descriptorLabels[i].text);
 		if (name == "normals" || name == "observationDirections")
 		{
-			cloud.descriptors.block(row, 0, span, descCols).applyOnTheLeft(R);
+			// Rotate descriptors.
+			// B = A * B translates to B.transpose *= A.transpose()
+			cloud.descriptors.block(row, 0, span, descCols).transpose() *= R.transpose();
 		}
 		
 		row += span;
@@ -188,7 +191,8 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 		throw TransformationError("SimilarityTransformation: Error, invalid similarity transform.");
 	
 	// Apply the transformation to features
-	cloud.features.applyOnTheLeft(parameters);
+	// B = A * B translates to B.transpose *= A.transpose()
+	cloud.features.transpose().applyOnTheRight(parameters.transpose());
 	
 	// Apply the transformation to descriptors
 	int row(0);
@@ -199,7 +203,9 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 		const std::string& name(cloud.descriptorLabels[i].text);
 		if (name == "normals" || name == "observationDirections")
 		{
-			cloud.descriptors.block(row, 0, span, descCols).applyOnTheLeft(R);
+			// Rotate descriptors.
+			// B = A * B translates to B.transpose *= A.transpose()
+			cloud.descriptors.block(row, 0, span, descCols).transpose() *= R.transpose();
 		}
 		
 		row += span;
@@ -242,8 +248,9 @@ void TransformationsImpl<T>::PureTranslation::inPlaceCompute(
 	if(this->checkParameters(parameters) == false)
 		throw PointMatcherSupport::TransformationError("PureTranslation: Error, left part  not identity.");
 
-	// Apply the transformation to features
-	cloud.features.applyOnTheLeft(parameters);
+	// Apply the transformation to features.
+	// B = A * B translates to B.transpose() *= A.transpose()
+	cloud.features.transpose().applyOnTheRight(parameters.transpose());
 }
 
 template<typename T>
