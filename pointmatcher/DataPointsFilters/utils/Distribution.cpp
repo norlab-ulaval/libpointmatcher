@@ -72,7 +72,16 @@ typename Distribution<T>::PM::Vector Distribution<T>::getMean()
 template<typename T>
 typename Distribution<T>::PM::Matrix Distribution<T>::getCovariance()
 {
-	return omega.inverse() * weightSum;
+	typename PM::Matrix covariance;
+	if(weightSum.isZero())
+	{
+		covariance = omega.inverse();
+	}
+	else
+	{
+		covariance = omega.inverse() * weightSum;
+	}
+	return covariance;
 }
 
 template<typename T>
