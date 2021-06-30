@@ -28,7 +28,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	int nbDim = cloud.getEuclideanDim();
 
 	std::vector<Distribution<T>> distributions;
-	if(!cloud.descriptorExists("eigVectors") || !cloud.descriptorExists("weightSum"))
+	if(!cloud.descriptorExists("covariance") || !cloud.descriptorExists("weightSum"))
 	{
 		for(int i = 0; i < cloud.getNbPoints(); ++i)
 		{
@@ -37,18 +37,18 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	}
 	else
 	{
-		const auto& eigVectors = cloud.getDescriptorViewByName("eigVectors");
-		const auto& weightSum = cloud.getDescriptorViewByName("weightSum");
+		const auto& covarianceVectors = cloud.getDescriptorViewByName("covariance");
+		const auto& weightSumVectors = cloud.getDescriptorViewByName("weightSum");
 		for(int i = 0; i < cloud.getNbPoints(); ++i)
 		{
-			typename PM::Matrix covarianceMatrix = PM::Matrix::Zero(nbDim, nbDim);
-			typename PM::Matrix weightSumMatrix = PM::Matrix::Zero(nbDim, nbDim);
+			typename PM::Matrix covariance = PM::Matrix::Zero(nbDim, nbDim);
+			typename PM::Matrix weightSum = PM::Matrix::Zero(nbDim, nbDim);
 			for(int j = 0; j < nbDim; ++j)
 			{
-				covarianceMatrix.col(j) = eigVectors.block(j * nbDim, i, nbDim, 1);
-				weightSumMatrix.col(j) = weightSum.block(j * nbDim, i, nbDim, 1);
+				covariance.col(j) = covarianceVectors.block(j * nbDim, i, nbDim, 1);
+				weightSum.col(j) = weightSumVectors.block(j * nbDim, i, nbDim, 1);
 			}
-			distributions.emplace_back(Distribution<T>(cloud.features.col(i).topRows(nbDim), covarianceMatrix, weightSumMatrix));
+			distributions.emplace_back(Distribution<T>(cloud.features.col(i).topRows(nbDim), covariance, weightSum));
 		}
 	}
 
@@ -101,15 +101,34 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 		}
 	}
 
-	int j = 0;
+	if(!cloud.descriptorExists("covariance"))
+	{
+		cloud.addDescriptor("covariance", PM::Matrix::Zero(std::pow(nbDim, 2), cloud.getNbPoints()));
+	}
+	if(!cloud.descriptorExists("weightSum"))
+	{
+		cloud.addDescriptor("weightSum", PM::Matrix::Zero(std::pow(nbDim, 2), cloud.getNbPoints()));
+	}
+
+	auto covarianceVectors = cloud.getDescriptorViewByName("covariance");
+	auto weightSumVectors = cloud.getDescriptorViewByName("weightSum");
+	int nbPoints = 0;
 	for(int i = 0; i < cloud.getNbPoints(); ++i)
 	{
 		if(masks(0, i))
 		{
-			cloud.setColFrom(j++, cloud, i);
+			typename PM::Matrix covariance = distributions[i].getCovariance();
+			typename PM::Matrix weightSum = distributions[i].getWeightSum();
+			for(int j = 0; j < nbDim; ++j)
+			{
+				covarianceVectors.block(j * nbDim, i, nbDim, 1) = covariance.col(j);
+				weightSumVectors.block(j * nbDim, i, nbDim, 1) = weightSum.col(j);
+			}
+
+			cloud.setColFrom(nbPoints++, cloud, i);
 		}
 	}
-	cloud.conservativeResize(j);
+	cloud.conservativeResize(nbPoints);
 }
 
 template
