@@ -5,7 +5,7 @@
 template<typename T>
 CompressionDataPointsFilter<T>::CompressionDataPointsFilter(const Parameters& params) :
 		PointMatcher<T>::DataPointsFilter("CompressionDataPointsFilter", CompressionDataPointsFilter::availableParameters(), params),
-		knn(Parametrizable::get<int>("knn")),
+		knn(Parametrizable::get<unsigned>("knn")),
 		maxDist(Parametrizable::get<T>("maxDist")),
 		epsilon(Parametrizable::get<T>("epsilon")),
 		initialVariance(Parametrizable::get<T>("initialVariance")),
@@ -26,25 +26,25 @@ typename PointMatcher<T>::DataPoints CompressionDataPointsFilter<T>::filter(cons
 template<typename T>
 void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& cloud)
 {
-	int nbDim = cloud.getEuclideanDim();
+	unsigned nbDim = cloud.getEuclideanDim();
 
 	std::vector<Distribution<T>> distributions;
 	if(!cloud.descriptorExists("covariance") || !cloud.descriptorExists("weightSum"))
 	{
-		for(int i = 0; i < cloud.getNbPoints(); ++i)
+		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
-			distributions.emplace_back(Distribution<T>(cloud.features.col(i).topRows(nbDim), initialVariance * PM::Matrix::Identity(nbDim, nbDim)));
+			distributions.emplace_back(cloud.features.col(i).topRows(nbDim), initialVariance * PM::Matrix::Identity(nbDim, nbDim));
 		}
 	}
 	else
 	{
 		const auto& covarianceVectors = cloud.getDescriptorViewByName("covariance");
 		const auto& weightSumVectors = cloud.getDescriptorViewByName("weightSum");
-		for(int i = 0; i < cloud.getNbPoints(); ++i)
+		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
 			typename PM::Matrix covariance = PM::Matrix::Zero(nbDim, nbDim);
 			typename PM::Matrix weightSum = PM::Matrix::Zero(nbDim, nbDim);
-			for(int j = 0; j < nbDim; ++j)
+			for(unsigned j = 0; j < nbDim; ++j)
 			{
 				covariance.col(j) = covarianceVectors.block(j * nbDim, i, nbDim, 1);
 				weightSum.col(j) = weightSumVectors.block(j * nbDim, i, nbDim, 1);
@@ -63,11 +63,11 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	matches = matcher.findClosests(cloud);
 
 	Eigen::Matrix<bool, 1, Eigen::Dynamic> masks = Eigen::Matrix<bool, 1, Eigen::Dynamic>::Constant(1, cloud.getNbPoints(), true);
-	int lastNbPoints = -1, currentNbPoints = cloud.getNbPoints();
+	unsigned lastNbPoints = 0, currentNbPoints = cloud.getNbPoints();
 	while(currentNbPoints != lastNbPoints)
 	{
 		lastNbPoints = currentNbPoints;
-		for(int i = 0; i < cloud.getNbPoints(); ++i)
+		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
 			if(!masks(0, i))
 			{
@@ -75,7 +75,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 			}
 
 			Distribution<T> neighborhoodDistribution = distributions[matches.ids(0, i)];
-			for(int j = 1; j < knn; ++j)
+			for(unsigned j = 1; j < knn; ++j)
 			{
 				if(!masks(0, matches.ids(j, i)))
 				{
@@ -84,13 +84,13 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				neighborhoodDistribution = neighborhoodDistribution.combine(distributions[matches.ids(j, i)]);
 			}
 			typename PM::Vector delta = neighborhoodDistribution.getMean() - cloud.features.col(i).topRows(nbDim);
-			float mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
+			T mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
 
 			if(mahalanobisDistance <= maxDeviation)
 			{
 				cloud.features.col(i).topRows(nbDim) = neighborhoodDistribution.getMean();
 				distributions[i] = neighborhoodDistribution;
-				for(int j = 1; j < knn; ++j)
+				for(unsigned j = 1; j < knn; ++j)
 				{
 					if(masks(0, matches.ids(j, i)))
 					{
@@ -113,14 +113,14 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 	auto covarianceVectors = cloud.getDescriptorViewByName("covariance");
 	auto weightSumVectors = cloud.getDescriptorViewByName("weightSum");
-	int nbPoints = 0;
-	for(int i = 0; i < cloud.getNbPoints(); ++i)
+	unsigned nbPoints = 0;
+	for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 	{
 		if(masks(0, i))
 		{
 			typename PM::Matrix covariance = distributions[i].getCovariance();
 			typename PM::Matrix weightSum = distributions[i].getWeightSum();
-			for(int j = 0; j < nbDim; ++j)
+			for(unsigned j = 0; j < nbDim; ++j)
 			{
 				covarianceVectors.block(j * nbDim, i, nbDim, 1) = covariance.col(j);
 				weightSumVectors.block(j * nbDim, i, nbDim, 1) = weightSum.col(j);

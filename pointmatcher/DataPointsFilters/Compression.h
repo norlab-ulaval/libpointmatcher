@@ -36,7 +36,7 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 		};
 	}
 
-	const int knn;
+	const unsigned knn;
 	const T maxDist;
 	const T epsilon;
 	const T initialVariance;
