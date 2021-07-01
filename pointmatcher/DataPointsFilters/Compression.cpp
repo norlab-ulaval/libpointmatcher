@@ -8,6 +8,7 @@ CompressionDataPointsFilter<T>::CompressionDataPointsFilter(const Parameters& pa
 		knn(Parametrizable::get<int>("knn")),
 		maxDist(Parametrizable::get<T>("maxDist")),
 		epsilon(Parametrizable::get<T>("epsilon")),
+		initialVariance(Parametrizable::get<T>("initialVariance")),
 		maxDeviation(Parametrizable::get<T>("maxDeviation"))
 {
 }
@@ -32,7 +33,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	{
 		for(int i = 0; i < cloud.getNbPoints(); ++i)
 		{
-			distributions.emplace_back(Distribution<T>(cloud.features.col(i).topRows(nbDim)));
+			distributions.emplace_back(Distribution<T>(cloud.features.col(i).topRows(nbDim), initialVariance * PM::Matrix::Identity(nbDim, nbDim)));
 		}
 	}
 	else
