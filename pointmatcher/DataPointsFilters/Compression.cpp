@@ -29,12 +29,14 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	unsigned nbDim = cloud.getEuclideanDim();
 
 	std::vector<Distribution<T>> distributions;
-	if(!cloud.descriptorExists("covariance") || !cloud.descriptorExists("weightSum"))
+	typename PM::Matrix nbPoints;
+	if(!cloud.descriptorExists("covariance") || !cloud.descriptorExists("weightSum") || !cloud.descriptorExists("nbPoints"))
 	{
 		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
 			distributions.emplace_back(cloud.features.col(i).topRows(nbDim), initialVariance * PM::Matrix::Identity(nbDim, nbDim));
 		}
+		nbPoints = PM::Matrix::Ones(1, cloud.getNbPoints());
 	}
 	else
 	{
@@ -51,6 +53,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 			}
 			distributions.emplace_back(Distribution<T>(cloud.features.col(i).topRows(nbDim), covariance, weightSum));
 		}
+		nbPoints = cloud.getDescriptorViewByName("nbPoints");
 	}
 
 	Parameters params;
@@ -94,6 +97,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				{
 					if(masks(0, matches.ids(j, i)))
 					{
+						nbPoints(0, i) += nbPoints(0, matches.ids(j, i));
 						masks(0, matches.ids(j, i)) = false;
 						--currentNbPoints;
 					}
@@ -110,10 +114,18 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	{
 		cloud.addDescriptor("weightSum", PM::Matrix::Zero(std::pow(nbDim, 2), cloud.getNbPoints()));
 	}
+	if(!cloud.descriptorExists("nbPoints"))
+	{
+		cloud.addDescriptor("nbPoints", nbPoints);
+	}
+	else
+	{
+		cloud.getDescriptorViewByName("nbPoints") = nbPoints;
+	}
 
 	auto covarianceVectors = cloud.getDescriptorViewByName("covariance");
 	auto weightSumVectors = cloud.getDescriptorViewByName("weightSum");
-	unsigned nbPoints = 0;
+	unsigned totalNbPoints = 0;
 	for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 	{
 		if(masks(0, i))
@@ -126,10 +138,10 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				weightSumVectors.block(j * nbDim, i, nbDim, 1) = weightSum.col(j);
 			}
 
-			cloud.setColFrom(nbPoints++, cloud, i);
+			cloud.setColFrom(totalNbPoints++, cloud, i);
 		}
 	}
-	cloud.conservativeResize(nbPoints);
+	cloud.conservativeResize(totalNbPoints);
 }
 
 template
