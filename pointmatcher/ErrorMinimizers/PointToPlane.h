@@ -48,6 +48,10 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     typedef Parametrizable::ParametersDoc ParametersDoc;
 
     typedef typename PointMatcher<T>::DataPoints DataPoints;
+	typedef typename PointMatcher<T>::DataPoints::Labels Labels;
+	typedef typename PointMatcher<T>::DataPoints::Label Label;
+    typedef typename DataPoints::View View;
+    typedef typename DataPoints::ConstView ConstView;
     typedef typename PointMatcher<T>::Matches Matches;
     typedef typename PointMatcher<T>::OutlierWeights OutlierWeights;
     typedef typename PointMatcher<T>::ErrorMinimizer ErrorMinimizer;
@@ -55,6 +59,8 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     typedef typename PointMatcher<T>::TransformationParameters TransformationParameters;
     typedef typename PointMatcher<T>::Vector Vector;
     typedef typename PointMatcher<T>::Matrix Matrix;
+    typedef typename PointMatcher<T>::ErrorMinimizer::Penalties Penalties;
+    typedef typename PointMatcher<T>::ErrorMinimizer::Penalty Penalty;
 
 	virtual inline const std::string name()
 	{
@@ -69,21 +75,26 @@ struct PointToPlaneErrorMinimizer: public PointMatcher<T>::ErrorMinimizer
     inline static const ParametersDoc availableParameters()
     {
         return {
-                {"force2D", "If set to true(1), the minimization will be forced to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>},
-                {"force4DOF", "If set to true(1), the minimization will optimize only yaw and translation, pitch and roll will follow the prior.", "0", "0", "1", &P::Comp<bool>}
-
-        };
+        	{"force2D", "If set to true(1), the minimization will be force to give a solution in 2D (i.e., on the XY-plane) even with 3D inputs.", "0", "0", "1", &P::Comp<bool>},
+            {"force4DOF", "If set to true(1), the minimization will optimize only yaw and translation, pitch and roll will follow the prior.", "0", "0", "1", &P::Comp<bool>},
+			{"forceXYZOnly", "If set to true(1), the minimization will optimize translation only, attitude will follow the prior.", "0", "0", "1", &P::Comp<bool>},
+			{"LiePenalty", "If set to true(1), the minimization will optimize translation and rotation by adding a penalty compute with the Lie Algebra", "0", "0", "1", &P::Comp<bool>},
+			{"priorCovariance", "Set the prior covariance for the Lie Penalty rotation", "1", "0", "1000", &P::Comp<double>}
+            };
     }
 
     const bool force2D;
-    const bool force4DOF;
+	const bool force4DOF;
+	const bool forceXYZOnly;
+	const bool LiePenalty;
+	const double priorCovariance;
 
     PointToPlaneErrorMinimizer(const Parameters& params = Parameters());
     PointToPlaneErrorMinimizer(const ParametersDoc paramsDoc, const Parameters& params);
     //virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
     virtual TransformationParameters compute(const ErrorElements& mPts);
 	TransformationParameters compute_in_place(ErrorElements& mPts);
-    virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
+    virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter, const TransformationParameters& T_prior) const;
     virtual T getOverlap() const;
 
     static T computeResidualError(ErrorElements mPts, const bool& force2D);

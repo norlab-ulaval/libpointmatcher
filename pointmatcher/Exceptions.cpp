@@ -44,8 +44,9 @@ PointMatcher<T>::ConvergenceError::ConvergenceError(const std::string& reason):
 {}
 
 PointMatcherSupport::ConfigurationError::ConfigurationError(const std::string& reason):
-	runtime_error(reason)
+		runtime_error(reason)
 {}
+
 
 template struct PointMatcher<float>::ConvergenceError;
 template struct PointMatcher<double>::ConvergenceError;

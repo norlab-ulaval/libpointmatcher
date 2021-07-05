@@ -247,7 +247,17 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operato
 {
 	const int dim = readingIn.features.rows();
 	const TransformationParameters identity = TransformationParameters::Identity(dim, dim);
-	return this->compute(readingIn, referenceIn, identity);
+	return this->compute(readingIn, referenceIn, identity, Penalties());
+}
+
+//! Perform ICP from initial guess and return optimised transformation matrix
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operator ()(
+				const DataPoints& readingIn,
+				const DataPoints& referenceIn,
+				const TransformationParameters& initialTransformationParameters)
+{
+	return this->compute(readingIn, referenceIn, initialTransformationParameters, Penalties());
 }
 
 //! Perform ICP from initial guess and return optimised transformation matrix
@@ -255,9 +265,20 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::operator ()(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn,
-	const TransformationParameters& initialTransformationParameters)
+	const TransformationParameters& initialTransformationParameters,
+	const Penalties& penalties)
 {
-	return this->compute(readingIn, referenceIn, initialTransformationParameters);
+	return this->compute(readingIn, referenceIn, initialTransformationParameters, penalties);
+}
+
+//! Perform ICP from initial guess and return optimised transformation matrix
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute(
+				const DataPoints& readingIn,
+				const DataPoints& referenceIn,
+				const TransformationParameters& initialTransformationParameters)
+{
+	return this->compute(readingIn, referenceIn, initialTransformationParameters, Penalties());
 }
 
 //! Perform ICP from initial guess and return optimised transformation matrix
@@ -265,7 +286,8 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute(
 	const DataPoints& readingIn,
 	const DataPoints& referenceIn,
-	const TransformationParameters& T_refIn_dataIn)
+	const TransformationParameters& T_refIn_dataIn,
+	const Penalties& penalties)
 {
 	// Ensuring minimum definition of components
 	if (!this->matcher)
@@ -297,6 +319,16 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// from here reference is express in frame <refMean>
 	// Shortcut to do T_refIn_refMean.inverse() * reference
 	reference.features.topRows(dim-1).colwise() -= meanReference.head(dim-1);
+
+	Penalties penalties_refMean;
+	penalties_refMean.reserve(penalties.size());
+	for (auto& penalty : penalties) {
+		Matrix tf = std::get<0>(penalty);
+		const Matrix& cov = std::get<1>(penalty);
+		const Matrix offset = std::get<2>(penalty);
+		tf.topRightCorner(dim-1, 1) -= meanReference.head(dim-1);
+		penalties_refMean.push_back(std::make_tuple(tf, cov, offset));
+	}
 	
 	// Init matcher with reference points center on its mean
 	this->matcher->init(reference);
@@ -308,26 +340,54 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	LOG_INFO_STREAM("PointMatcher::icp - reference pre-processing took " << t.elapsed() << " [s]");
 	this->prefilteredReferencePtsCount = reference.features.cols();
 	
-	return computeWithTransformedReference(readingIn, reference, T_refIn_refMean, T_refIn_dataIn);
+	return computeWithTransformedReference(readingIn, reference, T_refIn_refMean, T_refIn_dataIn, penalties_refMean);
 	
 }
-
-//! Perferm ICP using an already-transformed reference and with an already-initialized matcher
+//! Perform ICP using an already-transformed reference and with an already-initialized matcher
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::computeWithTransformedReference(
+				const DataPoints& readingIn,
+				const DataPoints& reference,
+				const TransformationParameters& T_refIn_refMean,
+				const TransformationParameters& T_refIn_dataIn)
+{
+	return computeWithTransformedReference(readingIn, reference, T_refIn_refMean, T_refIn_dataIn, Penalties());
+}
+//! Perform ICP using an already-transformed reference and with an already-initialized matcher
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::computeWithTransformedReference(
 	const DataPoints& readingIn, 
 	const DataPoints& reference, 
 	const TransformationParameters& T_refIn_refMean,
-	const TransformationParameters& T_refIn_dataIn)
+	const TransformationParameters& T_refIn_dataIn,
+	const Penalties& penalties)
 {
 	const int dim(reference.features.rows());
 
+	// Validate input's shapes
 	if (T_refIn_dataIn.cols() != T_refIn_dataIn.rows()) {
 		throw runtime_error("The initial transformation matrix must be squared.");
 	}
 	if (dim != T_refIn_dataIn.cols()) {
 		throw runtime_error("The shape of initial transformation matrix must be NxN. "
 											  "Where N is the number of rows in the read/reference scans.");
+	}
+
+	Matrix tf, cov, offset;
+	for (auto& penalty : penalties) {
+		std::tie(tf, cov, offset) = penalty;
+		if (tf.cols() != dim || tf.rows() != dim) {
+			throw runtime_error("The transformation matrix of each penalty must must be NxN. "
+													"Where N is the number of rows in the read/reference scans.");
+		}
+		if (cov.cols() != dim - 1 || cov.rows() != dim - 1) {
+			throw runtime_error("The covariance matrix of each penalty must must be NxN. "
+													"Where N+1 is the number of rows in the read/reference scans.");
+		}
+		if (offset.cols() != dim || offset.rows() != dim) {
+			throw runtime_error("The covariance matrix of each penalty must must be NxN. "
+													"Where N is the number of rows in the read/reference scans.");
+		}
 	}
 
 	timer t; // Print how long take the algo
@@ -344,7 +404,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// from here reading is express in frame <refMean>
 	TransformationParameters 
 		T_refMean_dataIn = T_refIn_refMean.inverse() * T_refIn_dataIn;
-	this->transformations.apply(reading, T_refMean_dataIn);
+    this->transformations.apply(reading, T_refMean_dataIn);
 	
 	// Prepare reading filters used in the loop 
 	this->readingStepDataPointsFilters.init();
@@ -366,7 +426,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	LOG_INFO_STREAM("PointMatcher::icp - reading pre-processing took " << t.elapsed() << " [s]");
 	this->prefilteredReadingPtsCount = reading.features.cols();
 	t.restart();
-	
+
 	// iterations
 	while (iterate)
 	{
@@ -401,16 +461,16 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		//-----------------------------
 		// Dump
 		this->inspector->dumpIteration(
-			iterationCount, T_iter, reference, stepReading, matches, outlierWeights, this->transformationCheckers
+			iterationCount, T_refIn_refMean * T_iter * T_refMean_dataIn, reference, stepReading, matches, outlierWeights, this->transformationCheckers
 		);
-		
+
 		//-----------------------------
 		// Error minimization
 		// equivalent to: 
 		//   T_iter(i+1)_iter(0) = T_iter(i+1)_iter(i) * T_iter(i)_iter(0)
 		T_iter = this->errorMinimizer->compute(
-			stepReading, reference, outlierWeights, matches) * T_iter;
-		
+			stepReading, reference, outlierWeights, matches, penalties, T_iter * T_refMean_dataIn, T_refMean_dataIn) * T_iter	;    //add prior to save it during loop
+
 		// Old version
 		//T_iter = T_iter * this->errorMinimizer->compute(
 		//	stepReading, reference, outlierWeights, matches);
@@ -420,10 +480,17 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		{
 			this->transformationCheckers.check(T_iter, iterate);
 		}
-		catch(const typename TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached &)
+		catch(const typename TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached & e)
 		{
 			iterate = false;
 			this->maxNumIterationsReached = true;
+		}
+
+		if (!iterate) {
+			// HACK FSR 2019
+			double pointToPlan =  this->errorMinimizer->getResidualError(stepReading, reference, outlierWeights, matches, {}, T_iter * T_refMean_dataIn);
+			double penality =  this->errorMinimizer->getResidualError(stepReading, reference, outlierWeights, matches, penalties, T_iter * T_refMean_dataIn);
+			residuals = std::make_tuple(pointToPlan, penality);
 		}
 	
 		++iterationCount;
@@ -435,6 +502,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	this->inspector->addStat("OverlapRatio", this->errorMinimizer->getWeightedPointUsedRatio());
 	this->inspector->addStat("ConvergenceDuration", t.elapsed());
 	this->inspector->finish(iterationCount);
+
 	
 	LOG_INFO_STREAM("PointMatcher::icp - " << iterationCount << " iterations took " << t.elapsed() << " [s]");
 	
@@ -444,7 +512,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 	// so we have: 
 	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_refMean_dataIn
 	//   T_iter(i+1)_dataIn = T_iter(i+1)_iter(0) * T_iter(0)_dataIn
-	// T_refIn_refMean remove the temperary frame added during initialization
+	// T_refIn_refMean remove the temporary frame added during initialization
 	return (T_refIn_refMean * T_iter * T_refMean_dataIn);
 }
 
@@ -516,28 +584,6 @@ void PointMatcher<T>::ICPSequence::clearMap()
 	mapPointCloud = DataPoints();
 }
 
-template<typename T>
-void PointMatcher<T>::ICPSequence::setDefault()
-{
-	ICPChainBase::setDefault();
-	
-	if(mapPointCloud.getNbPoints() > 0)
-	{
-		this->matcher->init(mapPointCloud);
-	}
-}
-
-template<typename T>
-void PointMatcher<T>::ICPSequence::loadFromYaml(std::istream& in)
-{
-	ICPChainBase::loadFromYaml(in);
-	
-	if(mapPointCloud.getNbPoints() > 0)
-	{
-		this->matcher->init(mapPointCloud);
-	}
-}
-
 //! Return the map, in global coordinates (slow)
 template<typename T>
 const typename PointMatcher<T>::DataPoints PointMatcher<T>::ICPSequence::getPrefilteredMap() const
@@ -579,7 +625,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 {
 	const int dim = cloudIn.features.rows();
 	const TransformationParameters identity = TransformationParameters::Identity(dim, dim);
-	return this->compute(cloudIn, identity);
+	return this->compute(cloudIn, identity, {});
 }
 
 //! Apply ICP to cloud cloudIn, with initial guess
@@ -587,13 +633,25 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
 	const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew)
 {
-	return this->compute(cloudIn, T_dataInOld_dataInNew);
+	return this->compute(cloudIn, T_dataInOld_dataInNew, {});
 }
 
-//! Apply ICP to cloud cloudIn, with initial guess
+
+//! Apply ICP to cloud cloudIn, with initial guess and penalties
+template<typename T>
+typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::operator ()(
+				const DataPoints& cloudIn, const TransformationParameters& T_dataInOld_dataInNew,
+				const Penalties& penalties)
+{
+	return this->compute(cloudIn, T_dataInOld_dataInNew, penalties);
+}
+
+//! Apply ICP to cloud cloudIn, with initial guess and penalties
 template<typename T>
 typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence::compute(
-	const DataPoints& cloudIn, const TransformationParameters& T_refIn_dataIn)
+	const DataPoints& cloudIn,
+	const TransformationParameters& T_refIn_dataIn,
+	const Penalties& penalties)
 {
 	// initial keyframe
 	if (!hasMap())
@@ -602,10 +660,22 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICPSequence:
 		LOG_WARNING_STREAM("Ignoring attempt to perform ICP with an empty map");
 		return Matrix::Identity(dim, dim);
 	}
+
+	const size_t dim(mapPointCloud.features.rows());
+	// The penalties must be move to the refmean frame of reference
+	Penalties penalties_refMean;
+	penalties_refMean.reserve(penalties.size());
+	for (auto& penalty : penalties) {
+		Matrix tf = std::get<0>(penalty);
+		const Matrix& cov = std::get<1>(penalty);
+		const Matrix offset = std::get<2>(penalty);
+		tf.topRightCorner(dim-1, 1) -= T_refIn_refMean.block(0,dim-1, dim-1, 1);
+		penalties_refMean.push_back(std::make_tuple(tf, cov, offset));
+	}
 	
 	this->inspector->init();
 	
-	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn);
+	return this->computeWithTransformedReference(cloudIn, mapPointCloud, T_refIn_refMean, T_refIn_dataIn, penalties_refMean);
 }
 
 template struct PointMatcher<float>::ICPSequence;

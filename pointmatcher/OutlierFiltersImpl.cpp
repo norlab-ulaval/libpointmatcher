@@ -181,9 +181,9 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 {
 	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
 	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
-
+	
 	const int points_nbr = matches.dists.rows() * matches.dists.cols();
-
+	
 	// vector containing the squared distances of the matches
 	std::vector<T> tmpSortedDist;
 	tmpSortedDist.reserve(points_nbr);
@@ -191,9 +191,9 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 		for (int y = 0; y < matches.dists.rows(); ++y)
 			if ((matches.dists(y, x) != numeric_limits<T>::infinity()) && (matches.dists(y, x) > 0))
 				tmpSortedDist.push_back(matches.dists(y, x));
-	if (tmpSortedDist.empty())
-		throw ConvergenceError("Inlier ratio optimization failed due to absence of matches");
-
+	if (tmpSortedDist.size() == 0)
+		throw ConvergenceError("optimizeInlierRatio(): no outlier to filter");
+			
 	std::sort(tmpSortedDist.begin(), tmpSortedDist.end());
 	std::vector<T> tmpCumSumSortedDist;
 	tmpCumSumSortedDist.reserve(points_nbr);
@@ -215,7 +215,7 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	int minIndex(0);// = FRMS.minCoeff();
 	FRMS.minCoeff(&minIndex);
 	const T optRatio = (float)(minIndex + minEl)/ (float)points_nbr;
-
+	
 	return optRatio;
 }
 
@@ -240,7 +240,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 {
 	const BOOST_AUTO(normalsReading, filteredReading.getDescriptorViewByName("normals"));
 	const BOOST_AUTO(normalsReference, filteredReference.getDescriptorViewByName("normals"));
-
+	
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
 
@@ -250,7 +250,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 		{
 			const Vector normalRead = normalsReading.col(x).normalized();
 
-			for (int y = 0; y < w.rows(); ++y) // knn
+			for (int y = 0; y < w.rows(); ++y) // knn 
 			{
 				const int idRef = input.ids(y, x);
 
@@ -287,6 +287,56 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 template struct OutlierFiltersImpl<float>::SurfaceNormalOutlierFilter;
 template struct OutlierFiltersImpl<double>::SurfaceNormalOutlierFilter;
 
+
+// GenericDescriptorOutlierFilter
+template<typename T>
+OutlierFiltersImpl<T>::SensorNoiseOutlierFilter::SensorNoiseOutlierFilter(const Parameters& params):
+				OutlierFilter("SensorNoiseOutlierFilter", SensorNoiseOutlierFilter::availableParameters(), params)
+{
+}
+
+template<typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SensorNoiseOutlierFilter::compute(
+				const DataPoints& filteredReading,
+				const DataPoints& filteredReference,
+				const Matches& input)
+{
+	typedef typename DataPoints::ConstView ConstView;
+
+	const int knn = input.dists.rows();
+	const int readPtsCount = input.dists.cols();
+
+	OutlierWeights w(knn, readPtsCount);
+
+	ConstView descRefe(filteredReference.getDescriptorViewByName("simpleSensorNoise"));
+	ConstView descRead(filteredReading.getDescriptorViewByName("simpleSensorNoise"));
+
+	if(descRefe.rows() != 1)
+	{
+		throw InvalidParameter(
+						(boost::format("SensorNoiseOutlierFilter: Error, the descriptor 'simpleSensorNoise' must be a 1D descriptor but it is %2%D") % descRefe.rows()).str());
+	}
+
+	for(int k=0; k < knn; k++)
+	{
+		for(int i=0; i < readPtsCount; i++)
+		{
+			const int idRef = input.ids(k, i);
+			if (idRef == MatchersImpl<T>::NNS::InvalidIndex){
+				w(k,i) = 0;
+				continue;
+			}
+			// We add the square of the variance together
+			w(k,i) = 1.0 / (descRefe(0, idRef)*descRefe(0, idRef) + descRead(0, i)*descRead(0, i));
+		}
+	}
+
+	return w;
+}
+
+template struct OutlierFiltersImpl<float>::SensorNoiseOutlierFilter;
+template struct OutlierFiltersImpl<double>::SensorNoiseOutlierFilter;
+
 // GenericDescriptorOutlierFilter
 template<typename T>
 OutlierFiltersImpl<T>::GenericDescriptorOutlierFilter::GenericDescriptorOutlierFilter(const Parameters& params):
@@ -314,7 +364,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 
 	const int knn = input.dists.rows();
 	const int readPtsCount = input.dists.cols();
-
+	
 	OutlierWeights w(knn, readPtsCount);
 
 	const DataPoints *cloud;
@@ -322,7 +372,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	if(source == "reference")
 		cloud = &filteredReference;
 	else
-		cloud = &filteredReading;
+		cloud = &filteredReference;
 
 	ConstView desc(cloud->getDescriptorViewByName(descName));
 
@@ -336,31 +386,23 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	{
 		for(int i=0; i < readPtsCount; i++)
 		{
-			int point_id;
-			if (source == "reference") {
-				point_id = input.ids(k, i);
-				if (point_id == MatchersImpl<T>::NNS::InvalidIndex){
-					LOG_INFO_STREAM("Invalid Index in GenericOutlierFilter, setting weight to 0.");
-					w(k,i) = 0;
-					continue;
-				}
-			} else {
-				// We don't need to look up corresponding points in the reference
-				//, we index into the reading PC directly.
-				point_id = i;
+			const int idRead = input.ids(k, i);
+			if (idRead == MatchersImpl<T>::NNS::InvalidIndex){
+				w(k,i) = 0;
+				continue;
 			}
 			if(useSoftThreshold == false)
 			{
 				if(useLargerThan == true)
 				{
-					if (desc(0, point_id) > threshold)
+					if (desc(0, idRead) > threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
 				}
 				else
 				{
-					if (desc(0, point_id) < threshold)
+					if (desc(0, idRead) < threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
@@ -369,7 +411,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 			else
 			{
 				// use soft threshold by assigning the weight using the descriptor
-				w(k,i) = desc(0, point_id);
+				w(k,i) = desc(0, idRead);
 			}
 		}
 	}

@@ -33,8 +33,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef __POINTMATCHER_CORE_H
-#define __POINTMATCHER_CORE_H
+//#ifndef __POINTMATCHER_CORE_H
+//#define __POINTMATCHER_CORE_H
+#pragma once
 
 #ifndef EIGEN_USE_NEW_STDVECTOR
 #define EIGEN_USE_NEW_STDVECTOR
@@ -56,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <ostream>
 #include <memory>
+#include <tuple>
 //#include <cstdint>
 #include <boost/cstdint.hpp>
 
@@ -151,6 +153,8 @@ struct PointMatcher
 	};
 
 
+
+
 	// ---------------------------------
 	// eigen and nabo-based types
 	// ---------------------------------
@@ -187,6 +191,7 @@ struct PointMatcher
 	typedef Parametrizable::ParameterDoc ParameterDoc; //!< alias
 	typedef Parametrizable::ParametersDoc ParametersDoc; //!< alias
 	typedef Parametrizable::InvalidParameter InvalidParameter; //!< alias
+
 	
 	// ---------------------------------
 	// input types
@@ -410,9 +415,6 @@ struct PointMatcher
 		//! Transform input using the transformation matrix
 		virtual DataPoints compute(const DataPoints& input, const TransformationParameters& parameters) const = 0; 
 
-		//! Transform point cloud in-place using the transformation matrix
-		virtual void inPlaceCompute(const TransformationParameters& parameters, DataPoints& cloud) const = 0;
-
 		//! Return whether the given parameters respect the expected constraints
 		virtual bool checkParameters(const TransformationParameters& parameters) const = 0;
 
@@ -529,6 +531,12 @@ struct PointMatcher
 	*/
 	struct ErrorMinimizer: public Parametrizable
 	{
+		typedef Matrix Location;   //!< Where the estimation should converge, in most case it should be the initial estimate
+		typedef Matrix Covariance; //!< Covariance related to the certitude in the Location
+		typedef Matrix Offset;   //!< Position of the Location inside of the reading, in most case this is identity
+		typedef std::tuple<Location, Covariance, Offset> Penalty;
+		typedef std::vector<Penalty, Eigen::aligned_allocator<Penalty> > Penalties;
+
 		//! A structure holding data ready for minimization. The data are "normalized", for instance there are no points with 0 weight, etc.
 		struct ErrorElements
 		{
@@ -539,10 +547,13 @@ struct PointMatcher
 			int nbRejectedMatches; //!< number of matches with zero weights
 			int nbRejectedPoints; //!< number of points with all matches set to zero weights
 			T pointUsedRatio;  //!< the ratio of how many points were used for error minimization
-			T weightedPointUsedRatio;//!< the ratio of how many points were used (with weight) for error minimization
+			T weightedPointUsedRatio; //!< the ratio of how many points were used (with weight) for error minimization
+			Penalties penalties; //!< Additional constraints for the minimization
+			TransformationParameters T_refMean_iter;
+            TransformationParameters T_prior_save;
 
 			ErrorElements();
-			ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches);
+			ErrorElements(const DataPoints& requestedPts, const DataPoints& sourcePts, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter, const TransformationParameters& T_prior);
 		};
 		
 		ErrorMinimizer();
@@ -554,10 +565,10 @@ struct PointMatcher
 		ErrorElements getErrorElements() const; //TODO: ensure that is return a usable value
 		virtual T getOverlap() const;
 		virtual Matrix getCovariance() const;
-		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches) const;
+		virtual T getResidualError(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter) const;
 		
 		//! Find the transformation that minimizes the error
-		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches);
+		virtual TransformationParameters compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const OutlierWeights& outlierWeights, const Matches& matches, const Penalties& penalties, const TransformationParameters& T_refMean_iter, const TransformationParameters& T_prior);
 		//! Find the transformation that minimizes the error given matched pair of points. This function most be defined for all new instances of ErrorMinimizer.
 		virtual TransformationParameters compute(const ErrorElements& matchedPoints) = 0;
 		
@@ -669,7 +680,7 @@ struct PointMatcher
 
 		virtual void setDefault();
 		
-		virtual void loadFromYaml(std::istream& in);
+		void loadFromYaml(std::istream& in);
 		unsigned getPrefilteredReadingPtsCount() const;
 		unsigned getPrefilteredReferencePtsCount() const;
 
@@ -701,6 +712,8 @@ struct PointMatcher
 	//! ICP algorithm
 	struct ICP: ICPChainBase
 	{
+		typedef typename ErrorMinimizer::Penalties Penalties;
+
 		TransformationParameters operator()(
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn);
@@ -709,21 +722,44 @@ struct PointMatcher
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
-		
+
+		TransformationParameters operator()(
+			const DataPoints& readingIn,
+			const DataPoints& referenceIn,
+			const TransformationParameters& initialTransformationParameters,
+			const Penalties& penalties);
+
 		TransformationParameters compute(
 			const DataPoints& readingIn,
 			const DataPoints& referenceIn,
 			const TransformationParameters& initialTransformationParameters);
 
+		TransformationParameters compute(
+			const DataPoints& readingIn,
+			const DataPoints& referenceIn,
+			const TransformationParameters& initialTransformationParameters,
+			const Penalties& penalties);
+
 		//! Return the filtered point cloud reading used in the ICP chain
 		const DataPoints& getReadingFiltered() const { return readingFiltered; }
 
+	public:
+		// HACK FSR 2019
+		std::tuple<double, double> residuals;
+
 	protected:
+		TransformationParameters computeWithTransformedReference(
+			const DataPoints& readingIn,
+			const DataPoints& reference,
+			const TransformationParameters& T_refIn_refMean,
+			const TransformationParameters& initialTransformationParameters);
+
 		TransformationParameters computeWithTransformedReference(
 			const DataPoints& readingIn, 
 			const DataPoints& reference, 
 			const TransformationParameters& T_refIn_refMean,
-			const TransformationParameters& initialTransformationParameters);
+			const TransformationParameters& initialTransformationParameters,
+			const Penalties& penalties);
 
 		DataPoints readingFiltered; //!< reading point cloud after the filters were applied
 	};
@@ -732,20 +768,25 @@ struct PointMatcher
 	//! Warning: used with caution, you need to set the map manually.
 	struct ICPSequence: public ICP
 	{
+		typedef typename ErrorMinimizer::Penalties Penalties;
+
 		TransformationParameters operator()(
 			const DataPoints& cloudIn);
 		TransformationParameters operator()(
 			const DataPoints& cloudIn,
 			const TransformationParameters& initialTransformationParameters);
+		TransformationParameters operator()(
+						const DataPoints& cloudIn,
+						const TransformationParameters& initialTransformationParameters,
+						const Penalties& penalties);
 		TransformationParameters compute(
 			const DataPoints& cloudIn,
-			const TransformationParameters& initialTransformationParameters);
+			const TransformationParameters& initialTransformationParameters,
+			const Penalties& penalties);
 		
 		bool hasMap() const;
 		bool setMap(const DataPoints& map);
 		void clearMap();
-		virtual void setDefault();
-		virtual void loadFromYaml(std::istream& in);
 		PM_DEPRECATED("Use getPrefilteredInternalMap instead. "
 			            "Function now always returns map with filter chain applied. "
 			            "This may have altered your program behavior."
@@ -777,5 +818,5 @@ struct PointMatcher
 	
 }; // PointMatcher<T>
 
-#endif // __POINTMATCHER_CORE_H
+//#endif // __POINTMATCHER_CORE_H
 

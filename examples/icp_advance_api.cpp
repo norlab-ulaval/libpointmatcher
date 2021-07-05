@@ -202,9 +202,13 @@ int main(int argc, const char *argv[])
 
 	// weight paired points
 	const PM::OutlierWeights outlierWeights = icp.outlierFilters.compute(data_out, ref, matches);
-	
+
+	const PM::ErrorMinimizer::Penalties penalties;
+	const PM::TransformationParameters tf;
+    const PM::TransformationParameters tf_prior;
+
 	// generate tuples of matched points and remove pairs with zero weight
-	const PM::ErrorMinimizer::ErrorElements matchedPoints( data_out, ref, outlierWeights, matches);
+	const PM::ErrorMinimizer::ErrorElements matchedPoints( data_out, ref, outlierWeights, matches, penalties, tf, tf_prior);
 
 	// extract relevant information for convenience
 	const int dim = matchedPoints.reading.getEuclideanDim();
