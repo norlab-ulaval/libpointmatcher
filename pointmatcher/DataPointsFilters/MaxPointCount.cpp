@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<typename T>
 MaxPointCountDataPointsFilter<T>::MaxPointCountDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("MaxPointCountDataPointsFilter",
-		MaxPointCountDataPointsFilter::availableParameters(), params),
+									  MaxPointCountDataPointsFilter::availableParameters(), params),
 	maxCount(Parametrizable::get<size_t>("maxCount"))
 {
 	try
@@ -55,8 +55,7 @@ MaxPointCountDataPointsFilter<T>::MaxPointCountDataPointsFilter(const Parameters
 
 // Compute
 template<typename T>
-typename PointMatcher<T>::DataPoints
-MaxPointCountDataPointsFilter<T>::filter(const DataPoints& input)
+typename PointMatcher<T>::DataPoints MaxPointCountDataPointsFilter<T>::filter(const DataPoints& input)
 {
 	DataPoints output(input);
 	inPlaceFilter(output);
@@ -67,17 +66,17 @@ MaxPointCountDataPointsFilter<T>::filter(const DataPoints& input)
 template<typename T>
 void MaxPointCountDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	const auto N = static_cast<size_t>(cloud.features.cols() - 1);
+	const size_t N{static_cast<size_t>(cloud.getNbPoints() - 1)};
 
 	if (maxCount <= N)
 	{
-		std::default_random_engine randomNumberGenerator(seed);
+		std::minstd_rand randomNumberGenerator{seed};
+		std::uniform_real_distribution<float> distribution{0, 1};
 
-		for(size_t j = 0; j < maxCount; ++j)
+		for (size_t j{0u}; j < maxCount; ++j)
 		{
 			//Get a random index in [j; N]
-			std::uniform_int_distribution<size_t> distribution(j, N);
-			const size_t index = distribution(randomNumberGenerator);
+			const size_t index{j + static_cast<size_t>((N - j) * distribution(randomNumberGenerator))};
 
 			//Switch columns j and index
 			cloud.swapCols(j, index);
