@@ -94,6 +94,7 @@ PointMatcher<T>::PointMatcher()
 	ADD_TO_REGISTRAR(DataPointsFilter, SaliencyDataPointsFilter, typename DataPointsFiltersImpl<T>::SaliencyDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, SpectralDecompositionDataPointsFilter, typename DataPointsFiltersImpl<T>::SpectralDecompositionDataPointsFilter)
 	ADD_TO_REGISTRAR(DataPointsFilter, CompressionDataPointsFilter, typename DataPointsFiltersImpl<T>::CompressionDataPointsFilter)
+	ADD_TO_REGISTRAR(DataPointsFilter, UncompressionDataPointsFilter, typename DataPointsFiltersImpl<T>::UncompressionDataPointsFilter)
 
 	ADD_TO_REGISTRAR_NO_PARAM(Matcher, NullMatcher, typename MatchersImpl<T>::NullMatcher)
 	ADD_TO_REGISTRAR(Matcher, KDTreeMatcher, typename MatchersImpl<T>::KDTreeMatcher)

@@ -24,6 +24,8 @@
 #include "datapointsfilters/simple_sensor_noise.h"
 #include "datapointsfilters/sphericality.h"
 #include "datapointsfilters/surface_normal.h"
+#include "datapointsfilters/compression.h"
+#include "datapointsfilters/uncompression.h"
 
 namespace python
 {
@@ -57,6 +59,8 @@ namespace python
 			datapointsfilters::pybindSimpleSensorNoise(datapointsfilterModule);
 			datapointsfilters::pybindSphericality(datapointsfilterModule);
 			datapointsfilters::pybindSurfaceNormal(datapointsfilterModule);
+			datapointsfilters::pybindCompression(datapointsfilterModule);
+			datapointsfilters::pybindUncompression(datapointsfilterModule);
 		}
 	}
 }

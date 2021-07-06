@@ -975,3 +975,35 @@ TEST_F(DataFilterTest, CompressionDataPointsFilter)
 	DP filteredCloud = filter->filter(cloud);
 	ASSERT_EQ(3, filteredCloud.getNbPoints());
 }
+
+TEST_F(DataFilterTest, UncompressionDataPointsFilter)
+{
+	PM::Matrix points = (PM::Matrix(4,5) << 1, 2, 5, 8, 9,
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0,
+			1, 1, 1, 1, 1).finished();
+	DP::Labels pointsLabels;
+	pointsLabels.push_back(DP::Label("x", 1));
+	pointsLabels.push_back(DP::Label("y", 1));
+	pointsLabels.push_back(DP::Label("z", 1));
+	pointsLabels.push_back(DP::Label("pad", 1));
+
+	DP cloud = DP(points, pointsLabels);
+
+	params = PM::Parameters();
+	params["knn"] = "5";
+	params["maxDist"] = "2";
+	params["epsilon"] = "0.05";
+	params["maxDeviation"] = "0.5";
+	std::shared_ptr<PM::DataPointsFilter> compressionFilter = PM::get().DataPointsFilterRegistrar.create("CompressionDataPointsFilter", params);
+
+	DP compressedCloud = compressionFilter->filter(cloud);
+
+	params.clear();
+	params["seed"] = std::to_string(time(0));
+	std::shared_ptr<PM::DataPointsFilter> uncompressionFilter = PM::get().DataPointsFilterRegistrar.create("UncompressionDataPointsFilter", params);
+
+	DP uncompressedCloud = uncompressionFilter->filter(compressedCloud);
+
+	ASSERT_EQ(cloud.getNbPoints(), uncompressedCloud.getNbPoints());
+}

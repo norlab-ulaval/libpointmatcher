@@ -357,6 +357,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Saliency.cpp
 	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp
 	pointmatcher/DataPointsFilters/Compression.cpp
+	pointmatcher/DataPointsFilters/Uncompression.cpp
 	pointmatcher/DataPointsFilters/utils/Distribution.cpp
 )
 
