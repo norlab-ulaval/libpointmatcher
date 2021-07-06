@@ -16,6 +16,7 @@ namespace python
 					.def_readonly("knn", &CompressionDataPointsFilter::knn)
 					.def_readonly("maxDist", &CompressionDataPointsFilter::maxDist)
 					.def_readonly("epsilon", &CompressionDataPointsFilter::epsilon)
+					.def_readonly("maxIterationCount", &CompressionDataPointsFilter::maxIterationCount)
 					.def_readonly("initialVariance", &CompressionDataPointsFilter::initialVariance)
 					.def_readonly("maxDeviation", &CompressionDataPointsFilter::maxDeviation)
 

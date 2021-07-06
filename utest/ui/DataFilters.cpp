@@ -978,10 +978,10 @@ TEST_F(DataFilterTest, CompressionDataPointsFilter)
 
 TEST_F(DataFilterTest, UncompressionDataPointsFilter)
 {
-	PM::Matrix points = (PM::Matrix(4,5) << 1, 2, 5, 8, 9,
-			0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0,
-			1, 1, 1, 1, 1).finished();
+	PM::Matrix points = (PM::Matrix(4,5) << 8, 5, 1, 9, 2,
+												  0, 0, 0, 0, 0,
+												  0, 0, 0, 0, 0,
+												  1, 1, 1, 1, 1).finished();
 	DP::Labels pointsLabels;
 	pointsLabels.push_back(DP::Label("x", 1));
 	pointsLabels.push_back(DP::Label("y", 1));
@@ -992,7 +992,7 @@ TEST_F(DataFilterTest, UncompressionDataPointsFilter)
 
 	params = PM::Parameters();
 	params["knn"] = "3";
-	params["maxDist"] = "2";
+	params["maxDist"] = "1";
 	params["epsilon"] = "0.05";
 	params["maxDeviation"] = "0.5";
 	std::shared_ptr<PM::DataPointsFilter> compressionFilter = PM::get().DataPointsFilterRegistrar.create("CompressionDataPointsFilter", params);

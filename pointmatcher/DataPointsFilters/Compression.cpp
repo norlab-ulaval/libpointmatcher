@@ -8,6 +8,7 @@ CompressionDataPointsFilter<T>::CompressionDataPointsFilter(const Parameters& pa
 		knn(Parametrizable::get<unsigned>("knn")),
 		maxDist(Parametrizable::get<T>("maxDist")),
 		epsilon(Parametrizable::get<T>("epsilon")),
+		maxIterationCount(Parametrizable::get<unsigned>("maxIterationCount")),
 		initialVariance(Parametrizable::get<T>("initialVariance")),
 		maxDeviation(Parametrizable::get<T>("maxDeviation"))
 {
@@ -73,9 +74,10 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	params["epsilon"] = PointMatcherSupport::toParam(epsilon);
 	typename MatchersImpl<T>::KDTreeMatcher matcher(params);
 
-	int currentNbPoints = cloud.getNbPoints();
+	unsigned currentNbPoints = cloud.getNbPoints();
+	unsigned iterationCount = 0;
 	typename PM::DataPoints tempCloud;
-	while(tempCloud.getNbPoints() != cloud.getNbPoints())
+	while(tempCloud.getNbPoints() != cloud.getNbPoints() && iterationCount++ < maxIterationCount)
 	{
 		tempCloud = cloud;
 		Eigen::Matrix<bool, 1, Eigen::Dynamic> masks = Eigen::Matrix<bool, 1, Eigen::Dynamic>::Constant(1, tempCloud.getNbPoints(), true);
