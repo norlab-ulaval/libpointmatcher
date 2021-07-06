@@ -245,7 +245,7 @@ void SamplingSurfaceNormalDataPointsFilter<T>::fuseRange(
 	const Matrix NN = (d.colwise() - mean);
 
 	// compute covariance
-	const Matrix C(NN * NN.transpose());
+	const Matrix C((NN * NN.transpose()) / T(colCount));
 	Vector eigenVa = Vector::Identity(featDim-1, 1);
 	Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
 	// Ensure that the matrix is suited for eigenvalues calculation
