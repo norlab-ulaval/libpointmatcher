@@ -65,30 +65,46 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 	assert(cloud.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
-	const unsigned int nbRows = parameters.rows()-1;
-	const unsigned int nbCols = parameters.cols()-1;
+	if(this->checkParameters(parameters) == false)
+		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");
 
-	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
-
-	if(this->checkParameters(parameters) == false)	
-		throw TransformationError("RigidTransformation: Error, rotation matrix is not orthogonal.");	
-	
 	// Apply the transformation to features
 	cloud.features.applyOnTheLeft(parameters);
 
-	// Apply the transformation to descriptors
-	int row(0);
+	// Apply the rotation to descriptors
+	const unsigned int nbRows = parameters.rows()-1;
+	const unsigned int nbCols = parameters.cols()-1;
+	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
+
+	int descStartingRow(0);
 	const int descCols(cloud.descriptors.cols());
+
 	for (size_t i = 0; i < cloud.descriptorLabels.size(); ++i)
 	{
-		const int span(cloud.descriptorLabels[i].span);
-		const std::string& name(cloud.descriptorLabels[i].text);
-		if (name == "normals" || name == "observationDirections")
+		const int descSpan(cloud.descriptorLabels[i].span);
+		const std::string& descName(cloud.descriptorLabels[i].text);
+
+		if (descName == "normals" || descName == "observationDirections")
 		{
-			cloud.descriptors.block(row, 0, span, descCols).applyOnTheLeft(R);
+			cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).applyOnTheLeft(R);
 		}
-		
-		row += span;
+		else if (descName == "eigVectors")
+		{
+			int vectorSpan = std::sqrt(descSpan);
+			int vectorStartingRow = descStartingRow;
+
+			cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
+			vectorStartingRow += vectorSpan;
+			cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
+
+			if (vectorSpan == 3)
+			{
+				vectorStartingRow += vectorSpan;
+				cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
+			}
+		}
+
+		descStartingRow += descSpan;
 	}
 }
 
@@ -102,7 +118,7 @@ bool TransformationsImpl<T>::RigidTransformation::checkParameters(const Transfor
 	const unsigned int nbCols = parameters.cols()-1;
 
 	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
-	
+
 	if(anyabs(1 - R.determinant()) > epsilon)
 		return false;
 	else
@@ -139,9 +155,9 @@ typename PointMatcher<T>::TransformationParameters TransformationsImpl<T>::Rigid
 		{
 			throw TransformationError("RigidTransformation: Error, only proper rigid transformations are supported.");
 		}
-		
+
 		// mean of a and b
-		T a = (parameters(0,0) + parameters(1,1))/2; 	
+		T a = (parameters(0,0) + parameters(1,1))/2;
 		T b = (-parameters(1,0) + parameters(0,1))/2;
 		T sum = sqrt(pow(a,2) + pow(b,2));
 
@@ -179,30 +195,46 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 	assert(cloud.features.rows() == parameters.rows());
 	assert(parameters.rows() == parameters.cols());
 
-	const unsigned int nbRows = parameters.rows()-1;
-	const unsigned int nbCols = parameters.cols()-1;
-
-	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
-
 	if(this->checkParameters(parameters) == false)
 		throw TransformationError("SimilarityTransformation: Error, invalid similarity transform.");
-	
+
 	// Apply the transformation to features
 	cloud.features.applyOnTheLeft(parameters);
-	
-	// Apply the transformation to descriptors
-	int row(0);
+
+	// Apply the rotation to descriptors
+	const unsigned int nbRows = parameters.rows() - 1;
+	const unsigned int nbCols = parameters.cols() - 1;
+	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
+
+	int descStartingRow(0);
 	const int descCols(cloud.descriptors.cols());
+
 	for (size_t i = 0; i < cloud.descriptorLabels.size(); ++i)
 	{
-		const int span(cloud.descriptorLabels[i].span);
-		const std::string& name(cloud.descriptorLabels[i].text);
-		if (name == "normals" || name == "observationDirections")
+		const int descSpan(cloud.descriptorLabels[i].span);
+		const std::string& descName(cloud.descriptorLabels[i].text);
+
+		if (descName == "normals" || descName == "observationDirections")
 		{
-			cloud.descriptors.block(row, 0, span, descCols).applyOnTheLeft(R);
+			cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).applyOnTheLeft(R);
 		}
-		
-		row += span;
+		else if (descName == "eigVectors")
+		{
+			int vectorSpan = std::sqrt(descSpan);
+			int vectorStartingRow = descStartingRow;
+
+			cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
+			vectorStartingRow += vectorSpan;
+			cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
+
+			if (vectorSpan == 3)
+			{
+				vectorStartingRow += vectorSpan;
+				cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
+			}
+		}
+
+		descStartingRow += descSpan;
 	}
 }
 
