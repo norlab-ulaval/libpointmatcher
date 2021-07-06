@@ -63,7 +63,7 @@ void UncompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& cl
 
 		const Eigen::EigenSolver<typename PM::Matrix> solver(covariance);
 		typename PM::Vector eigenValues = solver.eigenvalues().real().unaryExpr([](T element)
-																				{ return PointMatcherSupport::anyabs(element) < 1e-6 ? T(0) : element; });
+																				{ return PointMatcherSupport::anyabs(element) < T(1e-6) ? T(0) : element; });
 		typename PM::Matrix eigenVectors = solver.eigenvectors().real();
 
 		for(unsigned j = 0; j < nbPoints(0, i); ++j)

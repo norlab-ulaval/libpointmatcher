@@ -966,7 +966,7 @@ TEST_F(DataFilterTest, CompressionDataPointsFilter)
 	DP cloud = DP(points, pointsLabels);
 
 	params = PM::Parameters();
-	params["knn"] = "5";
+	params["knn"] = "3";
 	params["maxDist"] = "1";
 	params["epsilon"] = "0.05";
 	params["maxDeviation"] = "0.5";
@@ -991,7 +991,7 @@ TEST_F(DataFilterTest, UncompressionDataPointsFilter)
 	DP cloud = DP(points, pointsLabels);
 
 	params = PM::Parameters();
-	params["knn"] = "5";
+	params["knn"] = "3";
 	params["maxDist"] = "2";
 	params["epsilon"] = "0.05";
 	params["maxDeviation"] = "0.5";
