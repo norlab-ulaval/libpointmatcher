@@ -218,7 +218,7 @@ __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
-|seed        | srand seed | 0 | min: 0 max: 2147483647 |
+|seed        | srand seed | 1 | min: 0 max: 2147483647 |
 |maxCount |number of points beyond which subsampling occurs | 1000 | min: 0, max: 2147483647|
 
 ### Example
@@ -699,4 +699,3 @@ The number of points in a point cloud can be reduced by taking random point subs
 ## Where To Go From Here
 
 This concludes the overview of data point filters.  For a tutorial on writing a simple application for applying data point filters to an input point cloud, go [here](ApplyingDataFilters.md).  To learn more about the general configuration of the ICP chain go [here](DefaultICPConfig.md).  
-
