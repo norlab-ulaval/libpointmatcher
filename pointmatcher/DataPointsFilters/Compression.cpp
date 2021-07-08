@@ -58,7 +58,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				covariance.col(j) = covarianceVectors.block(j * nbDim, i, nbDim, 1);
 				weightSum.col(j) = weightSumVectors.block(j * nbDim, i, nbDim, 1);
 			}
-			distributions.emplace_back(Distribution<T>(cloud.features.col(i).topRows(nbDim), covariance, weightSum));
+			distributions.emplace_back(cloud.features.col(i).topRows(nbDim), covariance, weightSum);
 		}
 	}
 
@@ -75,10 +75,10 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 		cloud.addDescriptor("nbPoints", PM::Matrix::Ones(1, cloud.getNbPoints()));
 	}
 
-	Parameters params;
-	params["knn"] = PointMatcherSupport::toParam(knn);
-	params["maxDist"] = PointMatcherSupport::toParam(maxDist);
-	params["epsilon"] = PointMatcherSupport::toParam(epsilon);
+	Parameters params{{"knn", PointMatcherSupport::toParam(knn)},
+					  {"maxDist", PointMatcherSupport::toParam(maxDist)},
+					  {"epsilon", PointMatcherSupport::toParam(epsilon)}};
+
 	typename MatchersImpl<T>::KDTreeMatcher matcher(params);
 
 	unsigned currentNbPoints = cloud.getNbPoints();
