@@ -1,6 +1,10 @@
 #include "Compression.h"
 #include "MatchersImpl.h"
 #include "utils/Distribution.h"
+#include "utils/utils.h"
+
+#include <Eigen/QR>
+#include <Eigen/Eigenvalues>
 
 template<typename T>
 CompressionDataPointsFilter<T>::CompressionDataPointsFilter(const Parameters& params) :
@@ -10,7 +14,10 @@ CompressionDataPointsFilter<T>::CompressionDataPointsFilter(const Parameters& pa
 		epsilon(Parametrizable::get<T>("epsilon")),
 		maxIterationCount(Parametrizable::get<unsigned>("maxIterationCount")),
 		initialVariance(Parametrizable::get<T>("initialVariance")),
-		maxDeviation(Parametrizable::get<T>("maxDeviation"))
+		maxDeviation(Parametrizable::get<T>("maxDeviation")),
+		keepNormals(Parametrizable::get<bool>("keepNormals")),
+		keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
+		keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors"))
 {
 }
 
@@ -138,6 +145,73 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 			{
 				distributions.erase(distributions.begin() + addedElements);
 			}
+		}
+	}
+
+	if (keepNormals || keepEigenValues || keepEigenVectors)
+	{
+		const int featDim(cloud.getEuclideanDim());
+		const int descDim(cloud.getDescriptorDim());
+		const unsigned int labelsDim(cloud.getNbGroupedDescriptors());
+
+		// Validate descriptors and labels
+		int insertDim(0);
+		for (unsigned i = 0; i < labelsDim; ++i)
+			insertDim += cloud.descriptorLabels[i].span;
+
+		if (insertDim != descDim)
+			throw InvalidField(
+				"CompressionDataPointsFilter: Error, descriptor labels do not match descriptor data");
+
+		const int dimNormals(featDim);
+		const int dimEigValues(featDim);
+		const int dimEigVectors(featDim * featDim);
+
+		boost::optional<View> normals;
+		boost::optional<View> eigenValues;
+		boost::optional<View> eigenVectors;
+
+		Labels cloudLabels;
+
+		if (keepNormals)
+			cloudLabels.emplace_back("normals", dimNormals);
+		if (keepEigenValues)
+			cloudLabels.emplace_back("eigValues", dimEigValues);
+		if (keepEigenVectors)
+			cloudLabels.emplace_back("eigVectors", dimEigVectors);
+
+		if (!cloudLabels.empty())
+			cloud.allocateDescriptors(cloudLabels);
+
+		if (keepNormals)
+			normals = cloud.getDescriptorViewByName("normals");
+		if (keepEigenValues)
+			eigenValues = cloud.getDescriptorViewByName("eigValues");
+		if (keepEigenVectors)
+			eigenVectors = cloud.getDescriptorViewByName("eigVectors");
+
+		for (unsigned i = 0; i < cloud.getNbPoints(); ++i)
+		{
+			const Matrix C(distributions[i].getCovariance());
+			Vector eigenVa = Vector::Zero(featDim);
+			Matrix eigenVe = Matrix::Zero(featDim, featDim);
+
+			if (C.fullPivHouseholderQr().rank() >= featDim)
+			{
+				const Eigen::EigenSolver<Matrix> solver(C);
+				eigenVa = solver.eigenvalues().real();
+				eigenVe = solver.eigenvectors().real();
+			}
+
+			if (keepNormals)
+				normals->col(i) = PointMatcherSupport::computeNormal<T>(eigenVa, eigenVe)
+					.cwiseMax(-1.0).cwiseMin(1.0);
+
+			if (keepEigenValues)
+				eigenValues->col(i) = eigenVa;
+
+			if (keepEigenVectors)
+				eigenVectors->col(i) = PointMatcherSupport::serializeEigVec<T>(eigenVe);
 		}
 	}
 }

@@ -6,6 +6,13 @@ template<typename T>
 struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
 	typedef PointMatcher<T> PM;
+	typedef typename PM::Matrix Matrix;
+	typedef typename PM::Vector Vector;
+	typedef typename PM::DataPoints DataPoints;
+	typedef typename DataPoints::View View;
+	typedef typename DataPoints::Labels Labels;
+	typedef typename PM::DataPoints::InvalidField InvalidField;
+
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
@@ -15,7 +22,7 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	{
 		return "Lossy point cloud compression using descriptive statistics."
 			   "Required descriptors: none.\n"
-			   "Produced descritors:  covariance, weightSum, nbPoints.\n"
+			   "Produced descritors:  covariance, weightSum, nbPoints, normals, eigValues, eigVectors.\n"
 			   "Altered descriptors:  all.\n"
 			   "Altered features:     points coordinates and number of points.";
 	}
@@ -34,7 +41,10 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 				{"initialVariance",   "Variance on individual point positions (isotropic)",                      "9e-4",                      "1e-6",                      "inf",
 						&P::Comp < T > },
 				{"maxDeviation",      "Maximum distance from the mean for a point to represent a distribution.", "0.3",                       "0.0",                       "inf",
-						&P::Comp < T > }
+						&P::Comp < T > },
+				{"keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "0"},
+				{"keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud","0"},
+				{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud","0"}
 		};
 	}
 
@@ -44,6 +54,9 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	const unsigned maxIterationCount;
 	const T initialVariance;
 	const T maxDeviation;
+	const bool keepNormals;
+	const bool keepEigenValues;
+	const bool keepEigenVectors;
 
 	CompressionDataPointsFilter(const Parameters& params = Parameters());
 	virtual typename PM::DataPoints filter(const typename PM::DataPoints& input);

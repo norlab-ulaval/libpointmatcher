@@ -88,7 +88,7 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		{
 			cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).applyOnTheLeft(R);
 		}
-		else if (descName == "eigVectors")
+		else if (descName == "eigVectors" || descName == "covariance")
 		{
 			int vectorSpan = std::sqrt(descSpan);
 			int vectorStartingRow = descStartingRow;
