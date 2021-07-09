@@ -70,7 +70,7 @@ void MaxPointCountDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 	if (maxCount <= N)
 	{
-		std::minstd_rand randomNumberGenerator{seed};
+		std::minstd_rand randomNumberGenerator(static_cast<std::uint_fast32_t>(seed));
 		std::uniform_real_distribution<float> distribution{0, 1};
 
 		for (size_t j{0u}; j < maxCount; ++j)
