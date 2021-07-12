@@ -34,7 +34,7 @@ typename PointMatcher<T>::DataPoints CompressionDataPointsFilter<T>::filter(cons
 template<typename T>
 void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& cloud)
 {
-	unsigned nbDim = cloud.getEuclideanDim();
+	unsigned featDim = cloud.getEuclideanDim();
 
 	std::vector<Distribution<T>> distributions;
 	distributions.reserve(cloud.getNbPoints());
@@ -42,7 +42,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	{
 		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
-			distributions.emplace_back(cloud.features.col(i).topRows(nbDim), initialVariance * PM::Matrix::Identity(nbDim, nbDim));
+			distributions.emplace_back(cloud.features.col(i).topRows(featDim), initialVariance * PM::Matrix::Identity(featDim, featDim));
 		}
 	}
 	else
@@ -51,24 +51,24 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 		const auto& weightSumVectors = cloud.getDescriptorViewByName("weightSum");
 		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
-			typename PM::Matrix covariance = PM::Matrix::Zero(nbDim, nbDim);
-			typename PM::Matrix weightSum = PM::Matrix::Zero(nbDim, nbDim);
-			for(unsigned j = 0; j < nbDim; ++j)
+			typename PM::Matrix covariance = PM::Matrix::Zero(featDim, featDim);
+			typename PM::Matrix weightSum = PM::Matrix::Zero(featDim, featDim);
+			for(unsigned j = 0; j < featDim; ++j)
 			{
-				covariance.col(j) = covarianceVectors.block(j * nbDim, i, nbDim, 1);
-				weightSum.col(j) = weightSumVectors.block(j * nbDim, i, nbDim, 1);
+				covariance.col(j) = covarianceVectors.block(j * featDim, i, featDim, 1);
+				weightSum.col(j) = weightSumVectors.block(j * featDim, i, featDim, 1);
 			}
-			distributions.emplace_back(cloud.features.col(i).topRows(nbDim), covariance, weightSum);
+			distributions.emplace_back(cloud.features.col(i).topRows(featDim), covariance, weightSum);
 		}
 	}
 
 	if(!cloud.descriptorExists("covariance"))
 	{
-		cloud.addDescriptor("covariance", PM::Matrix::Zero(std::pow(nbDim, 2), cloud.getNbPoints()));
+		cloud.addDescriptor("covariance", PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints()));
 	}
 	if(!cloud.descriptorExists("weightSum"))
 	{
-		cloud.addDescriptor("weightSum", PM::Matrix::Zero(std::pow(nbDim, 2), cloud.getNbPoints()));
+		cloud.addDescriptor("weightSum", PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints()));
 	}
 	if(!cloud.descriptorExists("nbPoints"))
 	{
@@ -109,17 +109,17 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				}
 				neighborhoodDistribution = neighborhoodDistribution.combine(distributions[matches.ids(j, i)]);
 			}
-			typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.features.col(i).topRows(nbDim);
+			typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.features.col(i).topRows(featDim);
 			T mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
 
 			if(mahalanobisDistance <= maxDeviation)
 			{
-				tempCloud.features.col(i).topRows(nbDim) = neighborhoodDistribution.getMean();
+				tempCloud.features.col(i).topRows(featDim) = neighborhoodDistribution.getMean();
 				distributions[i] = neighborhoodDistribution;
-				for(unsigned j = 0; j < nbDim; ++j)
+				for(unsigned j = 0; j < featDim; ++j)
 				{
-					tempCloud.getDescriptorViewByName("covariance").block(j * nbDim, i, nbDim, 1) = neighborhoodDistribution.getCovariance().col(j);
-					tempCloud.getDescriptorViewByName("weightSum").block(j * nbDim, i, nbDim, 1) = neighborhoodDistribution.getWeightSum().col(j);
+					tempCloud.getDescriptorViewByName("covariance").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getCovariance().col(j);
+					tempCloud.getDescriptorViewByName("weightSum").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getWeightSum().col(j);
 				}
 				for(unsigned j = 1; j < knn; ++j)
 				{
@@ -150,45 +150,26 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 	if (keepNormals || keepEigenValues || keepEigenVectors)
 	{
-		const int featDim(cloud.getEuclideanDim());
-		const int descDim(cloud.getDescriptorDim());
-		const unsigned int labelsDim(cloud.getNbGroupedDescriptors());
-
-		// Validate descriptors and labels
-		int insertDim(0);
-		for (unsigned i = 0; i < labelsDim; ++i)
-			insertDim += cloud.descriptorLabels[i].span;
-
-		if (insertDim != descDim)
-			throw InvalidField(
-				"CompressionDataPointsFilter: Error, descriptor labels do not match descriptor data");
-
-		const int dimNormals(featDim);
-		const int dimEigValues(featDim);
-		const int dimEigVectors(featDim * featDim);
-
 		boost::optional<View> normals;
-		boost::optional<View> eigenValues;
-		boost::optional<View> eigenVectors;
-
-		Labels cloudLabels;
-
 		if (keepNormals)
-			cloudLabels.emplace_back("normals", dimNormals);
-		if (keepEigenValues)
-			cloudLabels.emplace_back("eigValues", dimEigValues);
-		if (keepEigenVectors)
-			cloudLabels.emplace_back("eigVectors", dimEigVectors);
-
-		if (!cloudLabels.empty())
-			cloud.allocateDescriptors(cloudLabels);
-
-		if (keepNormals)
+		{
+			cloud.addDescriptor("normals", PM::Matrix::Zero(featDim, cloud.getNbPoints()));
 			normals = cloud.getDescriptorViewByName("normals");
+		}
+
+		boost::optional<View> eigenValues;
 		if (keepEigenValues)
+		{
+			cloud.addDescriptor("eigValues", PM::Matrix::Zero(featDim, cloud.getNbPoints()));
 			eigenValues = cloud.getDescriptorViewByName("eigValues");
+		}
+		
+		boost::optional<View> eigenVectors;
 		if (keepEigenVectors)
+		{
+			cloud.addDescriptor("eigVectors", PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints()));
 			eigenVectors = cloud.getDescriptorViewByName("eigVectors");
+		}
 
 		for (unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
