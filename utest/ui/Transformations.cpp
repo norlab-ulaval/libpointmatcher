@@ -1,3 +1,4 @@
+#include <DataPointsFilters/utils/utils.h>
 #include "../utest.h"
 
 using namespace std;
@@ -297,6 +298,68 @@ TEST(Transformation, ComputeRigidTransformDataPoints3D)
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator, kEpsilonNumericalError);
     }
+}
+
+TEST(Transformation, RigidTransformationDescriptors)
+{
+	const float PRECISION = 5e-3;
+
+	std::shared_ptr<PM::Transformation> transformator = PM::get().TransformationRegistrar.create("RigidTransformation");
+	PM::TransformationParameters transformation = (PM::TransformationParameters(4, 4) << std::cos(1.2), -std::sin(1.2), 0, 0,
+																							   std::sin(1.2),  std::cos(1.2), 0, 0,
+																							   0, 				  0,			 	1, 0,
+																							   0,				  0, 				0, 1).finished();
+
+	// normals
+	std::shared_ptr<PM::DataPointsFilter> normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter");
+	PM::Matrix expectedNormals = (normalFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("normals");
+	PM::Matrix actualNormals = transformator->compute(normalFilter->filter(data3D), transformation).getDescriptorViewByName("normals");
+	for(unsigned i = 0; i < actualNormals.cols(); ++i)
+	{
+		// some normals are flipped depending on which point cloud the filter is applied on
+		ASSERT_TRUE(actualNormals.col(i).isApprox(expectedNormals.col(i), PRECISION) || actualNormals.col(i).isApprox(-expectedNormals.col(i), PRECISION));
+	}
+
+	// observationDirections
+	std::shared_ptr<PM::DataPointsFilter> observationDirectionFilter = PM::get().DataPointsFilterRegistrar.create("ObservationDirectionDataPointsFilter");
+	PM::Matrix expectedObservationDirections = (observationDirectionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("observationDirections");
+	PM::Matrix actualObservationDirections = transformator->compute(observationDirectionFilter->filter(data3D), transformation).getDescriptorViewByName("observationDirections");
+	ASSERT_TRUE(actualObservationDirections.isApprox(expectedObservationDirections, PRECISION));
+
+	// eigVectors
+	PM::Parameters eigVectorFilterParams;
+	eigVectorFilterParams["keepEigenVectors"] = "1";
+	eigVectorFilterParams["keepEigenValues"] = "1";
+	std::shared_ptr<PM::DataPointsFilter> eigVectorFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", eigVectorFilterParams);
+	PM::Matrix expectedEigVectors = (eigVectorFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("eigVectors");
+	PM::Matrix expectedEigValues = (eigVectorFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("eigValues");
+	PM::Matrix actualEigVectors = transformator->compute(eigVectorFilter->filter(data3D), transformation).getDescriptorViewByName("eigVectors");
+	PM::Matrix actualEigValues = transformator->compute(eigVectorFilter->filter(data3D), transformation).getDescriptorViewByName("eigValues");
+	for(unsigned i = 0; i < actualEigValues.cols(); ++i)
+	{
+		const std::vector<size_t> expectedIdx = sortIndexes<NumericType>(expectedEigValues.col(i));
+		const std::vector<size_t> actualIdx = sortIndexes<NumericType>(actualEigValues.col(i));
+		for(unsigned j = 0; j < actualEigValues.rows(); ++j)
+		{
+			PM::Vector expectedEigVector = expectedEigVectors.block(3 * expectedIdx[j], i, 3, 1);
+			PM::Vector actualEigVector = actualEigVectors.block(3 * actualIdx[j], i, 3, 1);
+			// some eigen vectors are flipped depending on which point cloud the filter is applied on
+			ASSERT_TRUE(actualEigVector.isApprox(expectedEigVector, PRECISION) || actualEigVector.isApprox(-expectedEigVector, PRECISION));
+		}
+	}
+
+	// covariance
+	PM::Parameters compressionFilterParams;
+	compressionFilterParams["epsilon"] = "0";
+	std::shared_ptr<PM::DataPointsFilter> compressionFilter = PM::get().DataPointsFilterRegistrar.create("CompressionDataPointsFilter", compressionFilterParams);
+	PM::Matrix expectedCovariances = (compressionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("covariance");
+	PM::Matrix actualCovariances = transformator->compute(compressionFilter->filter(data3D), transformation).getDescriptorViewByName("covariance");
+	ASSERT_TRUE(actualCovariances.isApprox(expectedCovariances, PRECISION));
+
+	// weightSum
+	PM::Matrix expectedWeightSums = (compressionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("weightSum");
+	PM::Matrix actualWeightSums = transformator->compute(compressionFilter->filter(data3D), transformation).getDescriptorViewByName("weightSum");
+	ASSERT_TRUE(actualWeightSums.isApprox(expectedWeightSums, PRECISION));
 }
 
 TEST(Transformation, ComputeSimilarityTransformDataPoints2D)

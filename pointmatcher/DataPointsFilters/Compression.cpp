@@ -103,7 +103,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 			Distribution<T> neighborhoodDistribution = distributions[matches.ids(0, i)];
 			for(unsigned j = 1; j < knn; ++j)
 			{
-				if(!masks(0, matches.ids(j, i)))
+				if(matches.ids(j, i) == PM::Matches::InvalidId || !masks(0, matches.ids(j, i)))
 				{
 					continue;
 				}
@@ -123,7 +123,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				}
 				for(unsigned j = 1; j < knn; ++j)
 				{
-					if(masks(0, matches.ids(j, i)))
+					if(matches.ids(j, i) != PM::Matches::InvalidId && masks(0, matches.ids(j, i)))
 					{
 						tempCloud.getDescriptorViewByName("nbPoints")(0, i) += tempCloud.getDescriptorViewByName("nbPoints")(0, matches.ids(j, i));
 						masks(0, matches.ids(j, i)) = false;

@@ -88,7 +88,7 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		{
 			cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).applyOnTheLeft(R);
 		}
-		else if (descName == "eigVectors" || descName == "covariance")
+		else if (descName == "eigVectors")
 		{
 			int vectorSpan = std::sqrt(descSpan);
 			int vectorStartingRow = descStartingRow;
@@ -101,6 +101,24 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 			{
 				vectorStartingRow += vectorSpan;
 				cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
+			}
+		}
+		else if(descName == "covariance" || descName == "weightSum")
+		{
+			int vectorSpan = std::sqrt(descSpan);
+
+			for(size_t j = 0; j < cloud.getNbPoints(); ++j)
+			{
+				typename PointMatcher<T>::Matrix descriptorMatrix = PointMatcher<T>::Matrix::Zero(vectorSpan, vectorSpan);
+				for(size_t k = 0; k < vectorSpan; ++k)
+				{
+					descriptorMatrix.col(k) = cloud.descriptors.block(descStartingRow + k * vectorSpan, j, vectorSpan, 1);
+				}
+				descriptorMatrix = R * descriptorMatrix * R.transpose();
+				for(size_t k = 0; k < vectorSpan; ++k)
+				{
+					cloud.descriptors.block(descStartingRow + k * vectorSpan, j, vectorSpan, 1) = descriptorMatrix.col(k);
+				}
 			}
 		}
 

@@ -30,21 +30,21 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
-				{"knn",               "number of nearest neighbors to consider in the reference",                "1",                         "1",                         "2147483647",
+				{"knn",               "number of nearest neighbors to consider in the reference",                        "10",                        "1",    "2147483647",
 						&P::Comp < unsigned > },
-				{"maxDist",           "maximum distance to consider for neighbors",                              "inf",                       "0",                         "inf",
+				{"maxDist",           "maximum distance to consider for neighbors",                                      "inf",                       "0",    "inf",
 						&P::Comp < T > },
-				{"epsilon",           "Step of discretization for the angle spaces",                             "0.09817477042" /* PI/32 */, "0.04908738521" /* PI/64 */, "3.14159265359" /* PI */,
+				{"epsilon",           "Step of discretization for the angle spaces",                                     "0.09817477042" /* PI/32 */, "0",    "3.14159265359" /* PI */,
 						&P::Comp < T > },
-				{"maxIterationCount", "Maximum number of iterations",                                            "5",                        "0",                         "2147483647",
+				{"maxIterationCount", "Maximum number of iterations",                                                    "5",                         "0",    "2147483647",
 						&P::Comp < unsigned > },
-				{"initialVariance",   "Variance on individual point positions (isotropic)",                      "9e-4",                      "1e-6",                      "inf",
+				{"initialVariance",   "Variance on individual point positions (isotropic)",                              "9e-4",                      "1e-6", "inf",
 						&P::Comp < T > },
-				{"maxDeviation",      "Maximum distance from the mean for a point to represent a distribution.", "0.3",                       "0.0",                       "inf",
+				{"maxDeviation",      "Maximum distance from the mean for a point to represent a distribution.",         "0.3",                       "0.0",  "inf",
 						&P::Comp < T > },
-				{"keepNormals", "whether the normals should be added as descriptors to the resulting cloud", "0"},
-				{"keepEigenValues", "whether the eigen values should be added as descriptors to the resulting cloud","0"},
-				{"keepEigenVectors", "whether the eigen vectors should be added as descriptors to the resulting cloud","0"}
+				{"keepNormals",       "whether the normals should be added as descriptors to the resulting cloud",       "0"},
+				{"keepEigenValues",   "whether the eigen values should be added as descriptors to the resulting cloud",  "0"},
+				{"keepEigenVectors",  "whether the eigen vectors should be added as descriptors to the resulting cloud", "0"}
 		};
 	}
 
