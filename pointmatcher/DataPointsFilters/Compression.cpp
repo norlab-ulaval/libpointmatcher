@@ -150,26 +150,17 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 	if (keepNormals || keepEigenValues || keepEigenVectors)
 	{
-		boost::optional<View> normals;
+		Matrix normals;
 		if (keepNormals)
-		{
-			cloud.addDescriptor("normals", PM::Matrix::Zero(featDim, cloud.getNbPoints()));
-			normals = cloud.getDescriptorViewByName("normals");
-		}
+			normals = PM::Matrix::Zero(featDim, cloud.getNbPoints());
 
-		boost::optional<View> eigenValues;
+		Matrix eigenValues;
 		if (keepEigenValues)
-		{
-			cloud.addDescriptor("eigValues", PM::Matrix::Zero(featDim, cloud.getNbPoints()));
-			eigenValues = cloud.getDescriptorViewByName("eigValues");
-		}
+			eigenValues = PM::Matrix::Zero(featDim, cloud.getNbPoints());
 		
-		boost::optional<View> eigenVectors;
+		Matrix eigenVectors;
 		if (keepEigenVectors)
-		{
-			cloud.addDescriptor("eigVectors", PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints()));
-			eigenVectors = cloud.getDescriptorViewByName("eigVectors");
-		}
+			eigenVectors = PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints());
 
 		for (unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
@@ -185,15 +176,23 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 			}
 
 			if (keepNormals)
-				normals->col(i) = PointMatcherSupport::computeNormal<T>(eigenVa, eigenVe)
-					.cwiseMax(-1.0).cwiseMin(1.0);
+				normals.col(i) = PointMatcherSupport::computeNormal<T>(eigenVa, eigenVe).cwiseMax(-1.0).cwiseMin(1.0);
 
 			if (keepEigenValues)
-				eigenValues->col(i) = eigenVa;
+				eigenValues.col(i) = eigenVa;
 
 			if (keepEigenVectors)
-				eigenVectors->col(i) = PointMatcherSupport::serializeEigVec<T>(eigenVe);
+				eigenVectors.col(i) = PointMatcherSupport::serializeEigVec<T>(eigenVe);
 		}
+
+		if (keepNormals)
+			cloud.addDescriptor("normals", normals);
+
+		if (keepEigenValues)
+			cloud.addDescriptor("eigValues", eigenValues);
+
+		if (keepEigenVectors)
+			cloud.addDescriptor("eigVectors", eigenVectors);
 	}
 }
 
