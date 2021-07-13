@@ -62,7 +62,7 @@ struct IdxCompare
 
 
 template<typename T>
-std::vector<size_t> 
+std::vector<size_t>
 sortIndexes(const typename PointMatcher<T>::Vector& v)
 {
 	// initialize original index locations
@@ -87,17 +87,15 @@ sortEigenValues(const typename PointMatcher<T>::Vector& eigenVa)
 }
 
 template<typename T>
-typename PointMatcher<T>::Vector 
+typename PointMatcher<T>::Vector
 serializeEigVec(const typename PointMatcher<T>::Matrix& eigenVe)
 {
-	// serialize row major
+	// Serialize the eigen vectors column major
 	const int eigenVeDim = eigenVe.cols();
 	typename PointMatcher<T>::Vector output(eigenVeDim*eigenVeDim);
-	for(int k=0; k < eigenVeDim; ++k)
-	{
-		output.segment(k*eigenVeDim, eigenVeDim) = 
-			eigenVe.row(k).transpose();
-	}
+
+	for (int k = 0; k < eigenVeDim; ++k)
+		output.segment(k * eigenVeDim, eigenVeDim) = eigenVe.col(k);
 
 	return output;
 }
