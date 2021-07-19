@@ -168,7 +168,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 			Vector eigenVa = Vector::Zero(featDim);
 			Matrix eigenVe = Matrix::Zero(featDim, featDim);
 
-			if (C.fullPivHouseholderQr().rank() >= featDim)
+			if (C.fullPivHouseholderQr().rank() + 1 >= featDim)
 			{
 				const Eigen::EigenSolver<Matrix> solver(C);
 				eigenVa = solver.eigenvalues().real();
