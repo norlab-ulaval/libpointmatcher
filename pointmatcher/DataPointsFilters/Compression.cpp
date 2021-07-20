@@ -3,6 +3,7 @@
 #include "utils/Distribution.h"
 #include "utils/utils.h"
 
+#include <boost/optional.hpp>
 #include <Eigen/QR>
 #include <Eigen/Eigenvalues>
 
@@ -150,17 +151,26 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 	if (keepNormals || keepEigenValues || keepEigenVectors)
 	{
-		Matrix normals;
-		if (keepNormals)
-			normals = PM::Matrix::Zero(featDim, cloud.getNbPoints());
+		boost::optional<View> normals;
+		boost::optional<View> eigenValues;
+		boost::optional<View> eigenVectors;
 
-		Matrix eigenValues;
+		Labels cloudLabels;
+		if (keepNormals)
+			cloudLabels.emplace_back("normals", featDim);
 		if (keepEigenValues)
-			eigenValues = PM::Matrix::Zero(featDim, cloud.getNbPoints());
-		
-		Matrix eigenVectors;
+			cloudLabels.emplace_back("eigValues", featDim);
 		if (keepEigenVectors)
-			eigenVectors = PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints());
+			cloudLabels.emplace_back("eigVectors", featDim * featDim);
+
+		cloud.allocateDescriptors(cloudLabels);
+
+		if (keepNormals)
+			normals = cloud.getDescriptorViewByName("normals");
+		if (keepEigenValues)
+			eigenValues = cloud.getDescriptorViewByName("eigValues");
+		if (keepEigenVectors)
+			eigenVectors = cloud.getDescriptorViewByName("eigVectors");
 
 		for (unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
@@ -176,23 +186,14 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 			}
 
 			if (keepNormals)
-				normals.col(i) = PointMatcherSupport::computeNormal<T>(eigenVa, eigenVe).cwiseMax(-1.0).cwiseMin(1.0);
+				normals->col(i) = PointMatcherSupport::computeNormal<T>(eigenVa, eigenVe).cwiseMax(-1.0).cwiseMin(1.0);
 
 			if (keepEigenValues)
-				eigenValues.col(i) = eigenVa;
+				eigenValues->col(i) = eigenVa;
 
 			if (keepEigenVectors)
-				eigenVectors.col(i) = PointMatcherSupport::serializeEigVec<T>(eigenVe);
+				eigenVectors->col(i) = PointMatcherSupport::serializeEigVec<T>(eigenVe);
 		}
-
-		if (keepNormals)
-			cloud.addDescriptor("normals", normals);
-
-		if (keepEigenValues)
-			cloud.addDescriptor("eigValues", eigenValues);
-
-		if (keepEigenVectors)
-			cloud.addDescriptor("eigVectors", eigenVectors);
 	}
 }
 

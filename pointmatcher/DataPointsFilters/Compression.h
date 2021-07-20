@@ -8,6 +8,11 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	typedef PointMatcher<T> PM;
 	typedef typename PM::Matrix Matrix;
 	typedef typename PM::Vector Vector;
+	typedef typename PM::DataPoints DataPoints;
+	typedef typename PM::DataPoints::Label Label;
+	typedef typename PM::DataPoints::Labels Labels;
+	typedef typename PM::DataPoints::InvalidField InvalidField;
+	typedef typename PM::DataPoints::View View;
 
 	typedef PointMatcherSupport::Parametrizable Parametrizable;
 	typedef Parametrizable P;
