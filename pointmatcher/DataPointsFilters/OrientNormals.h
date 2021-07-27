@@ -50,10 +50,16 @@ struct OrientNormalsDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
+	typedef typename PointMatcher<T>::DataPoints::View View;
 	
 	inline static const std::string description()
 	{
-		return "Normals. Reorient normals so that they all point in the same direction, with respect to the observation points.";
+		return "Reorient normals so that they all point in the same direction, with respect to the observation points. If eigVectors is present, it will reorient the eigen vectors with the minimal eigen value. In that case, the eigValues is required."
+			   "Required descriptors: normals, observationDirections.\n"
+			   "Optional descriptors: eigValues, eigVectors.\n"
+			   "Produced descritors:  none.\n"
+			   "Altered descriptors:  normals, eigVectors.\n"
+			   "Altered features:     none.";
 	}
 	
 	inline static const ParametersDoc availableParameters()

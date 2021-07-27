@@ -34,6 +34,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "OrientNormals.h"
 
+#include <boost/optional.hpp>
+
 // OrientNormalsDataPointsFilter
 // Constructor
 template<typename T>
@@ -57,38 +59,70 @@ OrientNormalsDataPointsFilter<T>::filter(const DataPoints& input)
 
 // In-place filter
 template<typename T>
-void OrientNormalsDataPointsFilter<T>::inPlaceFilter(
-	DataPoints& cloud)
+void OrientNormalsDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
 	if (!cloud.descriptorExists("normals"))
 		throw InvalidField("OrientNormalsDataPointsFilter: Error, cannot find normals in descriptors.");
 	if (!cloud.descriptorExists("observationDirections"))
 		throw InvalidField("OrientNormalsDataPointsFilter: Error, cannot find observation directions in descriptors.");
 
-	BOOST_AUTO(normals, cloud.getDescriptorViewByName("normals"));
-	const BOOST_AUTO(observationDirections, cloud.getDescriptorViewByName("observationDirections"));
-	assert(normals.rows() == observationDirections.rows());
-	const int featDim(cloud.features.cols());
-	for (int i = 0; i < featDim; ++i)
+	assert(cloud.getDescriptorDimension("normals") == cloud.getDescriptorDimension("observationDirections"));
+	auto normals(cloud.getDescriptorViewByName("normals"));
+	const auto observationDirections(cloud.getDescriptorViewByName("observationDirections"));
+	const unsigned nbPoints(cloud.getNbPoints());
+
+	boost::optional<View> eigenValues;
+	boost::optional<View> eigenVectors;
+	const bool orientEigenVectors(cloud.descriptorExists("eigVectors"));
+
+	if (orientEigenVectors)
+	{
+		if (!cloud.descriptorExists("eigValues"))
+			throw InvalidField("OrientNormalsDataPointsFilter: Error, eigVectors is present, but cannot find eigValues in descriptors.");
+
+		eigenValues = cloud.getDescriptorViewByName("eigValues");
+		eigenVectors = cloud.getDescriptorViewByName("eigVectors");
+	}
+
+	for (int i = 0; i < nbPoints; ++i)
 	{
 		// Check normal orientation
-		const Vector vecP = observationDirections.col(i);
-		const Vector vecN = normals.col(i);
-		const double scalar = vecP.dot(vecN);
+		const Vector observationDirection(observationDirections.col(i));
+		const Vector normal(normals.col(i));
+		const double scalar(observationDirection.dot(normal));
 
 		// Swap normal
-		if(towardCenter)
+		if (towardCenter)
 		{
 			if (scalar < 0)
-				normals.col(i) = -vecN;
+			{
+				normals.col(i) = -normal;
+
+				if (orientEigenVectors)
+				{
+					unsigned index;
+					eigenValues->col(i).minCoeff(&index);
+					unsigned descDim(cloud.getDescriptorDimension("eigValues"));
+					eigenVectors->block(index * descDim, i, descDim, 1) *= -1;
+				}
+			}
 		}
 		else
 		{
 			if (scalar > 0)
-				normals.col(i) = -vecN;
+			{
+				normals.col(i) = -normal;
+
+				if (orientEigenVectors)
+				{
+					unsigned index;
+					eigenValues->col(i).minCoeff(&index);
+					unsigned descDim(cloud.getDescriptorDimension("eigValues"));
+					eigenVectors->block(index * descDim, i, descDim, 1) *= -1;
+				}
+			}
 		}
 	}
-
 }
 
 template struct OrientNormalsDataPointsFilter<float>;
