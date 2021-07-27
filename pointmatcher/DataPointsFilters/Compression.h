@@ -43,9 +43,10 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 						&P::Comp < T > },
 				{"maxDeviation",      "Maximum distance from the mean for a point to represent a distribution.",         "0.3",           "0.0",  "inf",
 						&P::Comp < T > },
-				{"keepNormals",       "whether the normals should be added as descriptors to the resulting cloud",       "0"},
-				{"keepEigenValues",   "whether the eigen values should be added as descriptors to the resulting cloud",  "0"},
-				{"keepEigenVectors",  "whether the eigen vectors should be added as descriptors to the resulting cloud", "0"}
+				{"keepNormals",       "whether the normals should be added as descriptors to the resulting cloud",                      "0"},
+				{"keepEigenValues",   "whether the eigen values should be added as descriptors to the resulting cloud",                 "0"},
+				{"keepEigenVectors",  "whether the eigen vectors should be added as descriptors to the resulting cloud",                "0"},
+				{"sortEigen" ,        "whether the eigenvalues and eigenvectors should be sorted (ascending) based on the eigenvalues", "0"}
 		};
 	}
 
@@ -58,6 +59,7 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	const bool keepNormals;
 	const bool keepEigenValues;
 	const bool keepEigenVectors;
+	const bool sortEigen;
 
 	CompressionDataPointsFilter(const Parameters& params = Parameters());
 	virtual typename PM::DataPoints filter(const typename PM::DataPoints& input);

@@ -18,7 +18,8 @@ CompressionDataPointsFilter<T>::CompressionDataPointsFilter(const Parameters& pa
 		maxDeviation(Parametrizable::get<T>("maxDeviation")),
 		keepNormals(Parametrizable::get<bool>("keepNormals")),
 		keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
-		keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors"))
+		keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors")),
+		sortEigen(Parametrizable::get<bool>("sortEigen"))
 {
 }
 
@@ -175,24 +176,43 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 		for (unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
 			const Matrix C(distributions[i].getCovariance());
-			Vector eigenVa = Vector::Zero(featDim);
-			Matrix eigenVe = Matrix::Zero(featDim, featDim);
+			Vector eigenValues_ = Vector::Zero(featDim);
+			Matrix eigenVectors_ = Matrix::Zero(featDim, featDim);
 
 			if (C.fullPivHouseholderQr().rank() + 1 >= featDim)
 			{
 				const Eigen::EigenSolver<Matrix> solver(C);
-				eigenVa = solver.eigenvalues().real();
-				eigenVe = solver.eigenvectors().real();
+				eigenValues_ = solver.eigenvalues().real();
+				eigenVectors_ = solver.eigenvectors().real();
+
+				if (sortEigen)
+				{
+					const std::vector<size_t> sortedIndexes = PointMatcherSupport::sortIndexes<T>(eigenValues_);
+					const unsigned sortedIndexesSize = sortedIndexes.size();
+					eigenValues_ = PointMatcherSupport::sortEigenValues<T>(eigenValues_);
+					Matrix eigenVectorsCopy = eigenVectors_;
+
+					for (auto k = 0; k < sortedIndexesSize; ++k)
+						eigenVectors_.col(k) = eigenVectorsCopy.col(sortedIndexes[k]);
+				}
 			}
 
 			if (keepNormals)
-				normals->col(i) = PointMatcherSupport::computeNormal<T>(eigenVa, eigenVe).cwiseMax(-1.0).cwiseMin(1.0);
+			{
+				if (sortEigen)
+					normals->col(i) = eigenVectors_.col(0);
+				else
+					normals->col(i) = PointMatcherSupport::computeNormal<T>(eigenValues_, eigenVectors_);
+
+				// clamp normals to [-1,1] to handle approximation errors
+				normals->col(i) = normals->col(i).cwiseMax(-1.0).cwiseMin(1.0);
+			}
 
 			if (keepEigenValues)
-				eigenValues->col(i) = eigenVa;
+				eigenValues->col(i) = eigenValues_;
 
 			if (keepEigenVectors)
-				eigenVectors->col(i) = PointMatcherSupport::serializeEigVec<T>(eigenVe);
+				eigenVectors->col(i) = PointMatcherSupport::serializeEigVec<T>(eigenVectors_);
 		}
 	}
 }
