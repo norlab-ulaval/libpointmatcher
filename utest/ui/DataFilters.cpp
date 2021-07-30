@@ -1001,9 +1001,14 @@ TEST_F(DataFilterTest, UncompressionDataPointsFilter)
 
 	params.clear();
 	params["seed"] = std::to_string(time(0));
+	params["maxDensity"] = "inf";
 	std::shared_ptr<PM::DataPointsFilter> uncompressionFilter = PM::get().DataPointsFilterRegistrar.create("UncompressionDataPointsFilter", params);
 
 	DP uncompressedCloud = uncompressionFilter->filter(compressedCloud);
 
 	ASSERT_EQ(cloud.getNbPoints(), uncompressedCloud.getNbPoints());
+	ASSERT_LE(compressedCloud.getNbPoints(), uncompressedCloud.getNbPoints());
+	ASSERT_FALSE(uncompressedCloud.descriptorExists("covariance"));
+	ASSERT_FALSE(uncompressedCloud.descriptorExists("weightSum"));
+	ASSERT_FALSE(uncompressedCloud.descriptorExists("nbPoints"));
 }
