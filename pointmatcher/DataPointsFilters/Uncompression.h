@@ -10,6 +10,11 @@ struct UncompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	typedef Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
+	
+	typedef typename PM::DataPoints DataPoints;
+	typedef typename PM::DataPoints::InvalidField InvalidField;
+	typedef typename PM::Matrix Matrix;
+	typedef typename PM::Vector Vector;
 
 	inline static const std::string description()
 	{
@@ -23,10 +28,12 @@ struct UncompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
-				{"seed", "srand seed", "1", "0", "2147483647", &P::Comp < size_t > }
+				{"seed", "srand seed", "1", "0", "2147483647", &P::Comp < size_t > },
+				{"maxDensity", "Maximum density of points to target. Unit: number of points per m³.", "1000", "1000", "inf", &P::Comp<T>}
 		};
 	}
 
+	const T maxDensity;
 	size_t seed;
 
 	UncompressionDataPointsFilter(const Parameters& params = Parameters());
