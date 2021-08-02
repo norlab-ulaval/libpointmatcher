@@ -77,7 +77,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 		cloud.addDescriptor("nbPoints", PM::Matrix::Ones(1, cloud.getNbPoints()));
 	}
 
-	Parameters params{{"knn", PointMatcherSupport::toParam(knn)},
+	Parameters params{{"knn",     PointMatcherSupport::toParam(knn)},
 					  {"maxDist", PointMatcherSupport::toParam(maxDist)},
 					  {"epsilon", PointMatcherSupport::toParam(epsilon)}};
 
@@ -97,39 +97,36 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 		for(unsigned i = 0; i < tempCloud.getNbPoints(); ++i)
 		{
-			if(!masks(0, i))
+			if(masks(0, i))
 			{
-				continue;
-			}
-
-			Distribution<T> neighborhoodDistribution = distributions[matches.ids(0, i)];
-			for(unsigned j = 1; j < knn; ++j)
-			{
-				if(matches.ids(j, i) == PM::Matches::InvalidId || !masks(0, matches.ids(j, i)))
-				{
-					continue;
-				}
-				neighborhoodDistribution = neighborhoodDistribution.combine(distributions[matches.ids(j, i)]);
-			}
-			typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.features.col(i).topRows(featDim);
-			T mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
-
-			if(mahalanobisDistance <= maxDeviation)
-			{
-				tempCloud.features.col(i).topRows(featDim) = neighborhoodDistribution.getMean();
-				distributions[i] = neighborhoodDistribution;
-				for(unsigned j = 0; j < featDim; ++j)
-				{
-					tempCloud.getDescriptorViewByName("covariance").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getCovariance().col(j);
-					tempCloud.getDescriptorViewByName("weightSum").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getWeightSum().col(j);
-				}
+				Distribution<T> neighborhoodDistribution = distributions[matches.ids(0, i)];
 				for(unsigned j = 1; j < knn; ++j)
 				{
 					if(matches.ids(j, i) != PM::Matches::InvalidId && masks(0, matches.ids(j, i)))
 					{
-						tempCloud.getDescriptorViewByName("nbPoints")(0, i) += tempCloud.getDescriptorViewByName("nbPoints")(0, matches.ids(j, i));
-						masks(0, matches.ids(j, i)) = false;
-						--currentNbPoints;
+						neighborhoodDistribution = neighborhoodDistribution.combine(distributions[matches.ids(j, i)]);
+					}
+				}
+				typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.features.col(i).topRows(featDim);
+				T mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
+
+				if(mahalanobisDistance <= maxDeviation)
+				{
+					tempCloud.features.col(i).topRows(featDim) = neighborhoodDistribution.getMean();
+					distributions[i] = neighborhoodDistribution;
+					for(unsigned j = 0; j < featDim; ++j)
+					{
+						tempCloud.getDescriptorViewByName("covariance").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getCovariance().col(j);
+						tempCloud.getDescriptorViewByName("weightSum").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getWeightSum().col(j);
+					}
+					for(unsigned j = 1; j < knn; ++j)
+					{
+						if(matches.ids(j, i) != PM::Matches::InvalidId && masks(0, matches.ids(j, i)))
+						{
+							tempCloud.getDescriptorViewByName("nbPoints")(0, i) += tempCloud.getDescriptorViewByName("nbPoints")(0, matches.ids(j, i));
+							masks(0, matches.ids(j, i)) = false;
+							--currentNbPoints;
+						}
 					}
 				}
 			}
@@ -150,69 +147,69 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 		}
 	}
 
-	if (keepNormals || keepEigenValues || keepEigenVectors)
+	if(keepNormals || keepEigenValues || keepEigenVectors)
 	{
 		boost::optional<View> normals;
 		boost::optional<View> eigenValues;
 		boost::optional<View> eigenVectors;
 
 		Labels cloudLabels;
-		if (keepNormals)
+		if(keepNormals)
 			cloudLabels.emplace_back("normals", featDim);
-		if (keepEigenValues)
+		if(keepEigenValues)
 			cloudLabels.emplace_back("eigValues", featDim);
-		if (keepEigenVectors)
+		if(keepEigenVectors)
 			cloudLabels.emplace_back("eigVectors", featDim * featDim);
 
 		cloud.allocateDescriptors(cloudLabels);
 
-		if (keepNormals)
+		if(keepNormals)
 			normals = cloud.getDescriptorViewByName("normals");
-		if (keepEigenValues)
+		if(keepEigenValues)
 			eigenValues = cloud.getDescriptorViewByName("eigValues");
-		if (keepEigenVectors)
+		if(keepEigenVectors)
 			eigenVectors = cloud.getDescriptorViewByName("eigVectors");
 
-		for (unsigned i = 0; i < cloud.getNbPoints(); ++i)
+		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
-			const Matrix C(distributions[i].getCovariance());
-			Vector eigenValues_ = Vector::Zero(featDim);
-			Matrix eigenVectors_ = Matrix::Zero(featDim, featDim);
+			const Matrix covariance(distributions[i].getCovariance());
+			Vector covarianceEigenValues = Vector::Zero(featDim);
+			Matrix covarianceEigenVectors = Matrix::Zero(featDim, featDim);
 
-			if (C.fullPivHouseholderQr().rank() + 1 >= featDim)
+			if(covariance.fullPivHouseholderQr().rank() + 1 >= featDim)
 			{
-				const Eigen::EigenSolver<Matrix> solver(C);
-				eigenValues_ = solver.eigenvalues().real();
-				eigenVectors_ = solver.eigenvectors().real();
+				const Eigen::EigenSolver<Matrix> solver(covariance);
+				covarianceEigenValues = solver.eigenvalues().real();
+				covarianceEigenVectors = solver.eigenvectors().real();
 
-				if (sortEigen)
+				if(sortEigen)
 				{
-					const std::vector<size_t> sortedIndexes = PointMatcherSupport::sortIndexes<T>(eigenValues_);
+					const std::vector<size_t> sortedIndexes = PointMatcherSupport::sortIndexes<T>(covarianceEigenValues);
 					const unsigned sortedIndexesSize = sortedIndexes.size();
-					eigenValues_ = PointMatcherSupport::sortEigenValues<T>(eigenValues_);
-					Matrix eigenVectorsCopy = eigenVectors_;
+					covarianceEigenValues = PointMatcherSupport::sortEigenValues<T>(covarianceEigenValues);
+					Matrix eigenVectorsCopy = covarianceEigenVectors;
 
-					for (auto k = 0; k < sortedIndexesSize; ++k)
-						eigenVectors_.col(k) = eigenVectorsCopy.col(sortedIndexes[k]);
+					for(auto k = 0; k < sortedIndexesSize; ++k)
+						covarianceEigenVectors.col(k) = eigenVectorsCopy.col(sortedIndexes[k]);
 				}
 			}
 
-			if (keepNormals)
+			if(keepNormals)
 			{
-				if (sortEigen)
-					normals->col(i) = eigenVectors_.col(0);
+				if(sortEigen)
+					normals->col(i) = covarianceEigenVectors.col(0);
 				else
-					normals->col(i) = PointMatcherSupport::computeNormal<T>(eigenValues_, eigenVectors_);
+					normals->col(i) = PointMatcherSupport::computeNormal<T>(covarianceEigenValues, covarianceEigenVectors);
 
 				// clamp normals to [-1,1] to handle approximation errors
 				normals->col(i) = normals->col(i).cwiseMax(-1.0).cwiseMin(1.0);
 			}
 
-			if (keepEigenValues)
-				eigenValues->col(i) = eigenValues_;
+			if(keepEigenValues)
+				eigenValues->col(i) = covarianceEigenValues;
 
-			if (keepEigenVectors)
-				eigenVectors->col(i) = PointMatcherSupport::serializeEigVec<T>(eigenVectors_);
+			if(keepEigenVectors)
+				eigenVectors->col(i) = PointMatcherSupport::serializeEigVec<T>(covarianceEigenVectors);
 		}
 	}
 }

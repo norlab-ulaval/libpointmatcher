@@ -92,5 +92,6 @@ typename Distribution<T>::PM::Matrix Distribution<T>::getWeightSum()
 
 template
 class Distribution<float>;
+
 template
 class Distribution<double>;
