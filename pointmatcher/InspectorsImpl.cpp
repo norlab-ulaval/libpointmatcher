@@ -207,6 +207,14 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		{
 			buildTensorStream(stream, "eigVectors", data);
 		}
+		else if(it->text == "covariance")
+		{
+			buildTensorStream(stream, "covariance", data);
+		}
+		else if(it->text == "weightSum")
+		{
+			buildTensorStream(stream, "weightSum", data);
+		}
 		else if(it->text == "color")
 		{
 			buildColorStream(stream, "color", data);
