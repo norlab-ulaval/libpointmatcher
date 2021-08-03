@@ -10,7 +10,7 @@ struct UncompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	typedef Parametrizable P;
 	typedef Parametrizable::Parameters Parameters;
 	typedef Parametrizable::ParametersDoc ParametersDoc;
-	
+
 	typedef typename PM::DataPoints DataPoints;
 	typedef typename PM::DataPoints::InvalidField InvalidField;
 	typedef typename PM::Matrix Matrix;
@@ -19,7 +19,7 @@ struct UncompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	inline static const std::string description()
 	{
 		return "Lossy point cloud uncompression using descriptive statistics."
-			   "Required descriptors: covariance, nbPoints.\n"
+			   "Required descriptors: mean, covariance, nbPoints.\n"
 			   "Produced descritors:  none.\n"
 			   "Altered descriptors:  all.\n"
 			   "Altered features:     points coordinates and number of points.";
@@ -28,8 +28,8 @@ struct UncompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	inline static const ParametersDoc availableParameters()
 	{
 		return {
-				{"seed", "srand seed", "1", "0", "2147483647", &P::Comp < size_t > },
-				{"maxDensity", "Maximum density of points to target. Unit: number of points per m³.", "1000", "1000", "inf", &P::Comp<T>}
+				{"seed",       "srand seed",                                                          "1",    "0",    "2147483647", &P::Comp < size_t > },
+				{"maxDensity", "Maximum density of points to target. Unit: number of points per m³.", "1000", "1000", "inf",        &P::Comp < T > }
 		};
 	}
 
