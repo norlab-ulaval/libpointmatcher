@@ -1,4 +1,5 @@
 #include "Distribution.h"
+#include "utils.h"
 
 template<typename T>
 Distribution<T>::Distribution(const typename PM::Vector& point):
@@ -11,7 +12,7 @@ Distribution<T>::Distribution(const typename PM::Vector& point):
 template<typename T>
 Distribution<T>::Distribution(const typename PM::Vector& point, const typename PM::Matrix& covariance):
 		mean(point),
-		omega(covariance.inverse()),
+		omega(PointMatcherSupport::inverseCovariance<T>(covariance)),
 		weightSum(PM::Matrix::Zero(point.rows(), point.rows()))
 {
 }
@@ -25,11 +26,11 @@ Distribution<T>::Distribution(const typename PM::Vector& mean, const typename PM
 
 	if(weightSum.isZero())
 	{
-		omega = covariance.inverse();
+		omega = PointMatcherSupport::inverseCovariance<T>(covariance);
 	}
 	else
 	{
-		omega = weightSum * covariance.inverse();
+		omega = weightSum * PointMatcherSupport::inverseCovariance<T>(covariance);
 	}
 }
 

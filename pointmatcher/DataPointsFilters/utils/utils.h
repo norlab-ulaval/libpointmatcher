@@ -154,4 +154,10 @@ size_t argMax(const typename PointMatcher<T>::Vector& v)
 	return maxIdx;
 }
 
+template<typename T>
+typename PointMatcher<T>::Matrix inverseCovariance(const typename PointMatcher<T>::Matrix& covariance)
+{
+	const T epsilon = 1e-3;
+	return (covariance + epsilon * PointMatcher<T>::Matrix::Identity(covariance.rows(), covariance.cols())).inverse();
+}
 };
