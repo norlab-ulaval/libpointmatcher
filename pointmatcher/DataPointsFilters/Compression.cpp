@@ -67,11 +67,23 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 	if(!cloud.descriptorExists("mean"))
 	{
-		cloud.addDescriptor("mean", PM::Matrix::Zero(featDim, cloud.getNbPoints()));
+		cloud.addDescriptor("mean", cloud.features.topRows(featDim));
 	}
 	if(!cloud.descriptorExists("covariance"))
 	{
-		cloud.addDescriptor("covariance", PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints()));
+		typename PM::Matrix covariances = PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints());
+		if (featDim == 2)
+		{
+			covariances.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+			covariances.row(3) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+		}
+		else
+		{
+			covariances.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+			covariances.row(4) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+			covariances.row(8) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+		}
+		cloud.addDescriptor("covariance", covariances);
 	}
 	if(!cloud.descriptorExists("weightSum"))
 	{
