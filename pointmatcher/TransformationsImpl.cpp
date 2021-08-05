@@ -76,12 +76,12 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 	const unsigned int nbCols = parameters.cols()-1;
 	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
 
-	int descStartingRow(0);
-	const int descCols(cloud.descriptors.cols());
+	unsigned descStartingRow(0);
+	const unsigned descCols(cloud.descriptors.cols());
 
 	for (size_t i = 0; i < cloud.descriptorLabels.size(); ++i)
 	{
-		const int descSpan(cloud.descriptorLabels[i].span);
+		const unsigned descSpan(cloud.descriptorLabels[i].span);
 		const std::string& descName(cloud.descriptorLabels[i].text);
 
 		if (descName == "normals" || descName == "observationDirections" || descName == "initialPosition")
@@ -94,8 +94,8 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		}
 		else if (descName == "eigVectors")
 		{
-			int vectorSpan = std::sqrt(descSpan);
-			int vectorStartingRow = descStartingRow;
+			const unsigned vectorSpan = std::sqrt(descSpan);
+			unsigned vectorStartingRow = descStartingRow;
 
 			cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
 			vectorStartingRow += vectorSpan;
@@ -109,7 +109,7 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		}
 		else if(descName == "covariance" || descName == "weightSum")
 		{
-			int vectorSpan = std::sqrt(descSpan);
+			const unsigned vectorSpan = std::sqrt(descSpan);
 
 			for(size_t j = 0; j < cloud.getNbPoints(); ++j)
 			{
@@ -228,22 +228,26 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 	const unsigned int nbCols = parameters.cols() - 1;
 	const TransformationParameters R(parameters.topLeftCorner(nbRows, nbCols));
 
-	int descStartingRow(0);
-	const int descCols(cloud.descriptors.cols());
+	unsigned descStartingRow(0);
+	const unsigned descCols(cloud.descriptors.cols());
 
 	for (size_t i = 0; i < cloud.descriptorLabels.size(); ++i)
 	{
-		const int descSpan(cloud.descriptorLabels[i].span);
+		const unsigned descSpan(cloud.descriptorLabels[i].span);
 		const std::string& descName(cloud.descriptorLabels[i].text);
 
-		if (descName == "normals" || descName == "observationDirections")
+		if (descName == "normals" || descName == "observationDirections" || descName == "initialPosition")
 		{
 			cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).applyOnTheLeft(R);
+			if (descName == "initialPosition")
+			{
+				cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).colwise() += parameters.topRightCorner(nbRows, 1).col(0);
+			}
 		}
 		else if (descName == "eigVectors")
 		{
-			int vectorSpan = std::sqrt(descSpan);
-			int vectorStartingRow = descStartingRow;
+			const unsigned vectorSpan = std::sqrt(descSpan);
+			unsigned vectorStartingRow = descStartingRow;
 
 			cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
 			vectorStartingRow += vectorSpan;
@@ -257,7 +261,7 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 		}
 		else if(descName == "covariance" || descName == "weightSum")
 		{
-			int vectorSpan = std::sqrt(descSpan);
+			const unsigned vectorSpan = std::sqrt(descSpan);
 
 			for(size_t j = 0; j < cloud.getNbPoints(); ++j)
 			{

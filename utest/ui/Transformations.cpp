@@ -305,9 +305,13 @@ TEST(Transformation, RigidTransformationDescriptors)
 	const float PRECISION = 5e-3;
 
 	std::shared_ptr<PM::Transformation> transformator = PM::get().TransformationRegistrar.create("RigidTransformation");
-	PM::TransformationParameters transformation = (PM::TransformationParameters(4, 4) << std::cos(1.2), -std::sin(1.2), 0, 0,
-																							   std::sin(1.2),  std::cos(1.2), 0, 0,
-																							   0, 				  0,			 	1, 0,
+	PM::TransformationParameters rotation = (PM::TransformationParameters(4, 4) << std::cos(1.2), -std::sin(1.2), 0, 0,
+																						 std::sin(1.2),  std::cos(1.2), 0, 0,
+																						 0,					0,				  1, 0,
+																						 0,					0,				  0, 1).finished();
+	PM::TransformationParameters transformation = (PM::TransformationParameters(4, 4) << std::cos(1.2), -std::sin(1.2), 0, 1,
+																							   std::sin(1.2),  std::cos(1.2), 0, 2,
+																							   0, 				  0,			 	1, 3,
 																							   0,				  0, 				0, 1).finished();
 
 	// normals
@@ -322,8 +326,8 @@ TEST(Transformation, RigidTransformationDescriptors)
 
 	// observationDirections
 	std::shared_ptr<PM::DataPointsFilter> observationDirectionFilter = PM::get().DataPointsFilterRegistrar.create("ObservationDirectionDataPointsFilter");
-	PM::Matrix expectedObservationDirections = (observationDirectionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("observationDirections");
-	PM::Matrix actualObservationDirections = transformator->compute(observationDirectionFilter->filter(data3D), transformation).getDescriptorViewByName("observationDirections");
+	PM::Matrix expectedObservationDirections = (observationDirectionFilter->filter(transformator->compute(data3D, rotation))).getDescriptorViewByName("observationDirections");
+	PM::Matrix actualObservationDirections = transformator->compute(observationDirectionFilter->filter(data3D), rotation).getDescriptorViewByName("observationDirections");
 	ASSERT_TRUE(actualObservationDirections.isApprox(expectedObservationDirections, PRECISION));
 
 	// eigVectors
