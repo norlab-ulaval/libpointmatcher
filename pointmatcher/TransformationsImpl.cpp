@@ -84,7 +84,7 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		const int descSpan(cloud.descriptorLabels[i].span);
 		const std::string& descName(cloud.descriptorLabels[i].text);
 
-		if (descName == "normals" || descName == "observationDirections")
+		if (descName == "normals" || descName == "observationDirections" || descName == "initialPosition")
 		{
 			cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).applyOnTheLeft(R);
 		}

@@ -348,10 +348,15 @@ TEST(Transformation, RigidTransformationDescriptors)
 		}
 	}
 
-	// covariance
+	// initialPosition
 	PM::Parameters compressionFilterParams;
 	compressionFilterParams["epsilon"] = "0";
 	std::shared_ptr<PM::DataPointsFilter> compressionFilter = PM::get().DataPointsFilterRegistrar.create("CompressionDataPointsFilter", compressionFilterParams);
+	PM::Matrix expectedInitialPositions = (compressionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("initialPosition");
+	PM::Matrix actualInitialPositions = transformator->compute(compressionFilter->filter(data3D), transformation).getDescriptorViewByName("initialPosition");
+	ASSERT_TRUE(actualInitialPositions.isApprox(expectedInitialPositions, PRECISION));
+
+	// covariance
 	PM::Matrix expectedCovariances = (compressionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("covariance");
 	PM::Matrix actualCovariances = transformator->compute(compressionFilter->filter(data3D), transformation).getDescriptorViewByName("covariance");
 	ASSERT_TRUE(actualCovariances.isApprox(expectedCovariances, PRECISION));

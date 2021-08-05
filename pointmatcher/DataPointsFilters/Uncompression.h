@@ -19,7 +19,7 @@ struct UncompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	inline static const std::string description()
 	{
 		return "Lossy point cloud uncompression using descriptive statistics."
-			   "Required descriptors: mean, covariance, nbPoints.\n"
+			   "Required descriptors: covariance, nbPoints.\n"
 			   "Produced descritors:  none.\n"
 			   "Altered descriptors:  all.\n"
 			   "Altered features:     points coordinates and number of points.";

@@ -40,7 +40,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 	std::vector<Distribution<T>> distributions;
 	distributions.reserve(cloud.getNbPoints());
-	if(!cloud.descriptorExists("mean") || !cloud.descriptorExists("covariance") || !cloud.descriptorExists("weightSum") || !cloud.descriptorExists("nbPoints"))
+	if(!cloud.descriptorExists("initialPosition") || !cloud.descriptorExists("covariance") || !cloud.descriptorExists("weightSum") || !cloud.descriptorExists("nbPoints"))
 	{
 		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
@@ -49,7 +49,6 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	}
 	else
 	{
-		const auto& means = cloud.getDescriptorViewByName("mean");
 		const auto& covarianceVectors = cloud.getDescriptorViewByName("covariance");
 		const auto& weightSumVectors = cloud.getDescriptorViewByName("weightSum");
 		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
@@ -61,13 +60,13 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				covariance.col(j) = covarianceVectors.block(j * featDim, i, featDim, 1);
 				weightSum.col(j) = weightSumVectors.block(j * featDim, i, featDim, 1);
 			}
-			distributions.emplace_back(means.col(i), covariance, weightSum);
+			distributions.emplace_back(cloud.features.col(i).topRows(featDim), covariance, weightSum);
 		}
 	}
 
-	if(!cloud.descriptorExists("mean"))
+	if(!cloud.descriptorExists("initialPosition"))
 	{
-		cloud.addDescriptor("mean", cloud.features.topRows(featDim));
+		cloud.addDescriptor("initialPosition", cloud.features.topRows(featDim));
 	}
 	if(!cloud.descriptorExists("covariance"))
 	{
@@ -124,13 +123,13 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 						neighborhoodDistribution = neighborhoodDistribution.combine(distributions[matches.ids(j, i)]);
 					}
 				}
-				typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.features.col(i).topRows(featDim);
+				typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.getDescriptorViewByName("initialPosition").col(i);
 				T mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
 
 				if(mahalanobisDistance <= maxDeviation)
 				{
 					distributions[i] = neighborhoodDistribution;
-					tempCloud.getDescriptorViewByName("mean").col(i) = neighborhoodDistribution.getMean();
+					tempCloud.features.col(i).topRows(featDim) = neighborhoodDistribution.getMean();
 					for(unsigned j = 0; j < featDim; ++j)
 					{
 						tempCloud.getDescriptorViewByName("covariance").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getCovariance().col(j);

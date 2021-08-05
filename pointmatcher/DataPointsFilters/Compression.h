@@ -23,7 +23,7 @@ struct CompressionDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	{
 		return "Lossy point cloud compression using descriptive statistics."
 			   "Required descriptors: none.\n"
-			   "Produced descritors:  mean, covariance, weightSum, nbPoints, normals(optional), eigValues(optional), eigVectors(optional).\n"
+			   "Produced descritors:  initialPosition, covariance, weightSum, nbPoints, normals(optional), eigValues(optional), eigVectors(optional).\n"
 			   "Altered descriptors:  all.\n"
 			   "Altered features:     points coordinates and number of points.";
 	}

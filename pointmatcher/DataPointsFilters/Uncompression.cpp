@@ -31,10 +31,6 @@ typename PointMatcher<T>::DataPoints UncompressionDataPointsFilter<T>::filter(co
 template<typename T>
 void UncompressionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 {
-	if(!cloud.descriptorExists("mean"))
-	{
-		throw InvalidField("UncompressionDataPointsFilter: Error, cannot find mean in descriptors.");
-	}
 	if(!cloud.descriptorExists("covariance"))
 	{
 		throw InvalidField("UncompressionDataPointsFilter: Error, cannot find covariance in descriptors.");
@@ -46,6 +42,11 @@ void UncompressionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 
 	std::srand(seed);
 
+	if(cloud.descriptorExists("initialPosition"))
+	{
+		cloud.removeDescriptor("initialPosition");
+	}
+
 	if(cloud.descriptorExists("weightSum"))
 	{
 		cloud.removeDescriptor("weightSum");
@@ -54,7 +55,6 @@ void UncompressionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	unsigned nbDim = cloud.getEuclideanDim();
 	DataPoints compressedCloud = cloud;
 
-	const auto& means = compressedCloud.getDescriptorViewByName("mean");
 	const auto& covarianceVectors = compressedCloud.getDescriptorViewByName("covariance");
 	const auto& nbPoints = compressedCloud.getDescriptorViewByName("nbPoints");
 
@@ -76,10 +76,10 @@ void UncompressionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 																   { return element < T(1e-6) ? T(1e-6) : element; });
 		Matrix eigenVectors = solver.eigenvectors().real();
 
-		T currentVolume = 1.;
+		T currentVolume = 1.0;
 		for(unsigned j = 0; j < nbDim; ++j)
 		{
-			currentVolume *= 2 * std::sqrt(3 * eigenValues(j));
+			currentVolume *= 2.0 * std::sqrt(3.0 * eigenValues(j));
 		}
 
 		unsigned nbPointsToUncompress = std::min(nbPoints(0, i), maxDensity * currentVolume);
@@ -88,7 +88,7 @@ void UncompressionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		{
 			cloud.setColFrom(processedPoints, compressedCloud, i);
 			Vector sampledPoint = std::sqrt(3) * eigenValues.array().sqrt() * Vector::Random(nbDim).array();
-			cloud.features.col(processedPoints).topRows(nbDim) = means.col(i) + (eigenVectors * sampledPoint);
+			cloud.features.col(processedPoints).topRows(nbDim) = compressedCloud.features.col(i).topRows(nbDim) + (eigenVectors * sampledPoint);
 			++processedPoints;
 		}
 	}
