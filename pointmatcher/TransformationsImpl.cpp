@@ -87,6 +87,10 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 		if (descName == "normals" || descName == "observationDirections" || descName == "initialPosition")
 		{
 			cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).applyOnTheLeft(R);
+			if (descName == "initialPosition")
+			{
+				cloud.descriptors.block(descStartingRow, 0, descSpan, descCols).colwise() += parameters.topRightCorner(nbRows, 1).col(0);
+			}
 		}
 		else if (descName == "eigVectors")
 		{
