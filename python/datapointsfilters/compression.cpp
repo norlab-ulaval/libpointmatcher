@@ -19,6 +19,11 @@ namespace python
 					.def_readonly("maxIterationCount", &CompressionDataPointsFilter::maxIterationCount)
 					.def_readonly("initialVariance", &CompressionDataPointsFilter::initialVariance)
 					.def_readonly("maxDeviation", &CompressionDataPointsFilter::maxDeviation)
+					.def_readonly("maxVolumeRatio", &CompressionDataPointsFilter::maxVolumeRatio)
+					.def_readonly("keepNormals", &CompressionDataPointsFilter::keepNormals)
+					.def_readonly("keepEigenValues", &CompressionDataPointsFilter::keepEigenValues)
+					.def_readonly("keepEigenVectors", &CompressionDataPointsFilter::keepEigenVectors)
+					.def_readonly("sortEigen", &CompressionDataPointsFilter::sortEigen)
 
 					.def(py::init<const Parameters&>(), py::arg("params") = Parameters(), "Constructor, uses parameter interface")
 

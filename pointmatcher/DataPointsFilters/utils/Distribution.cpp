@@ -1,49 +1,51 @@
+#include <Eigen/Eigenvalues>
 #include "Distribution.h"
 #include "utils.h"
 
 template<typename T>
 Distribution<T>::Distribution(const typename PM::Vector& point):
 		mean(point),
+		weightSum(PM::Matrix::Zero(point.rows(), point.rows())),
 		omega(PM::Matrix::Identity(point.rows(), point.rows())),
-		weightSum(PM::Matrix::Zero(point.rows(), point.rows()))
+		isCovarianceCached(false),
+		isEigenDecompositionCached(false)
 {
 }
 
 template<typename T>
 Distribution<T>::Distribution(const typename PM::Vector& point, const typename PM::Matrix& covariance):
 		mean(point),
+		weightSum(PM::Matrix::Zero(point.rows(), point.rows())),
 		omega(PointMatcherSupport::inverseCovariance<T>(covariance)),
-		weightSum(PM::Matrix::Zero(point.rows(), point.rows()))
+		covariance(covariance),
+		isCovarianceCached(true),
+		isEigenDecompositionCached(false)
 {
 }
 
 template<typename T>
-Distribution<T>::Distribution(const typename PM::Vector& mean, const typename PM::Matrix& covariance, const typename PM::Matrix& weightSum)
+Distribution<T>::Distribution(const typename PM::Vector& mean, const typename PM::Matrix& covariance, const typename PM::Matrix& weightSum):
+		mean(mean),
+		weightSum(weightSum),
+		omega(weightSum.isZero() ? PointMatcherSupport::inverseCovariance<T>(covariance) : weightSum * PointMatcherSupport::inverseCovariance<T>(covariance)),
+		covariance(covariance),
+		isCovarianceCached(true),
+		isEigenDecompositionCached(false)
 {
-	this->mean = mean;
-
-	this->weightSum = weightSum;
-
-	if(weightSum.isZero())
-	{
-		omega = PointMatcherSupport::inverseCovariance<T>(covariance);
-	}
-	else
-	{
-		omega = weightSum * PointMatcherSupport::inverseCovariance<T>(covariance);
-	}
 }
 
 template<typename T>
 Distribution<T>::Distribution(const typename PM::Matrix& omega, const typename PM::Matrix& weightSum, const typename PM::Vector& mean):
 		mean(mean),
+		weightSum(weightSum),
 		omega(omega),
-		weightSum(weightSum)
+		isCovarianceCached(false),
+		isEigenDecompositionCached(false)
 {
 }
 
 template<typename T>
-Distribution<T> Distribution<T>::combine(const Distribution& otherDistribution)
+Distribution<T> Distribution<T>::combine(const Distribution& otherDistribution) const
 {
 	typename PM::Vector mu_A = mean;
 	typename PM::Matrix omega_A = omega;
@@ -65,7 +67,7 @@ Distribution<T> Distribution<T>::combine(const Distribution& otherDistribution)
 }
 
 template<typename T>
-typename Distribution<T>::PM::Vector Distribution<T>::getMean()
+typename Distribution<T>::PM::Vector Distribution<T>::getMean() const
 {
 	return mean;
 }
@@ -73,22 +75,54 @@ typename Distribution<T>::PM::Vector Distribution<T>::getMean()
 template<typename T>
 typename Distribution<T>::PM::Matrix Distribution<T>::getCovariance()
 {
-	typename PM::Matrix covariance;
-	if(weightSum.isZero())
+	if(!isCovarianceCached)
 	{
-		covariance = omega.inverse();
+		if(weightSum.isZero())
+		{
+			covariance = omega.inverse();
+		}
+		else
+		{
+			covariance = omega.inverse() * weightSum;
+		}
+		isCovarianceCached = true;
 	}
-	else
-	{
-		covariance = omega.inverse() * weightSum;
-	}
+
 	return covariance;
 }
 
 template<typename T>
-typename Distribution<T>::PM::Matrix Distribution<T>::getWeightSum()
+typename Distribution<T>::PM::Matrix Distribution<T>::getWeightSum() const
 {
 	return weightSum;
+}
+
+template<typename T>
+typename Distribution<T>::PM::Vector Distribution<T>::getCovarianceEigenValues()
+{
+	if(!isEigenDecompositionCached)
+	{
+		const Eigen::EigenSolver<typename PM::Matrix> eigenSolver(getCovariance());
+		covarianceEigenValues = eigenSolver.eigenvalues().real();
+		covarianceEigenVectors = eigenSolver.eigenvectors().real();
+		isEigenDecompositionCached = true;
+	}
+
+	return covarianceEigenValues;
+}
+
+template<typename T>
+typename Distribution<T>::PM::Matrix Distribution<T>::getCovarianceEigenVectors()
+{
+	if(!isEigenDecompositionCached)
+	{
+		const Eigen::EigenSolver<typename PM::Matrix> eigenSolver(getCovariance());
+		covarianceEigenValues = eigenSolver.eigenvalues().real();
+		covarianceEigenVectors = eigenSolver.eigenvectors().real();
+		isEigenDecompositionCached = true;
+	}
+
+	return covarianceEigenVectors;
 }
 
 template

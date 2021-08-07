@@ -2,10 +2,7 @@
 #include "MatchersImpl.h"
 #include "utils/Distribution.h"
 #include "utils/utils.h"
-
 #include <boost/optional.hpp>
-#include <Eigen/QR>
-#include <Eigen/Eigenvalues>
 
 template<typename T>
 CompressionDataPointsFilter<T>::CompressionDataPointsFilter(const Parameters& params) :
@@ -16,6 +13,7 @@ CompressionDataPointsFilter<T>::CompressionDataPointsFilter(const Parameters& pa
 		maxIterationCount(Parametrizable::get<unsigned>("maxIterationCount")),
 		initialVariance(Parametrizable::get<T>("initialVariance")),
 		maxDeviation(Parametrizable::get<T>("maxDeviation")),
+		maxVolumeRatio(Parametrizable::get<T>("maxVolumeRatio")),
 		keepNormals(Parametrizable::get<bool>("keepNormals")),
 		keepEigenValues(Parametrizable::get<bool>("keepEigenValues")),
 		keepEigenVectors(Parametrizable::get<bool>("keepEigenVectors")),
@@ -71,7 +69,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	if(!cloud.descriptorExists("covariance"))
 	{
 		typename PM::Matrix covariances = PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints());
-		if (featDim == 2)
+		if(featDim == 2)
 		{
 			covariances.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
 			covariances.row(3) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
@@ -93,12 +91,6 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 		cloud.addDescriptor("nbPoints", PM::Matrix::Ones(1, cloud.getNbPoints()));
 	}
 
-	Parameters params{{"knn",     PointMatcherSupport::toParam(knn)},
-					  {"maxDist", PointMatcherSupport::toParam(maxDist)},
-					  {"epsilon", PointMatcherSupport::toParam(epsilon)}};
-
-	typename MatchersImpl<T>::KDTreeMatcher matcher(params);
-
 	unsigned currentNbPoints = cloud.getNbPoints();
 	unsigned iterationCount = 0;
 	typename PM::DataPoints tempCloud;
@@ -107,26 +99,45 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 		tempCloud = cloud;
 		Eigen::Matrix<bool, 1, Eigen::Dynamic> masks = Eigen::Matrix<bool, 1, Eigen::Dynamic>::Constant(1, tempCloud.getNbPoints(), true);
 
+		unsigned nbNeighbors = std::min(knn, tempCloud.getNbPoints());
+		Parameters params{{"knn",     PointMatcherSupport::toParam(nbNeighbors)},
+						  {"maxDist", PointMatcherSupport::toParam(maxDist)},
+						  {"epsilon", PointMatcherSupport::toParam(epsilon)}};
+		typename MatchersImpl<T>::KDTreeMatcher matcher(params);
 		matcher.init(tempCloud);
-		typename PM::Matches matches(typename PM::Matches::Dists(knn, tempCloud.getNbPoints()), typename PM::Matches::Ids(knn, tempCloud.getNbPoints()));
+		typename PM::Matches matches(typename PM::Matches::Dists(nbNeighbors, tempCloud.getNbPoints()), typename PM::Matches::Ids(nbNeighbors, tempCloud.getNbPoints()));
 		matches = matcher.findClosests(tempCloud);
 
 		for(unsigned i = 0; i < tempCloud.getNbPoints(); ++i)
 		{
 			if(masks(0, i))
 			{
-				Distribution<T> neighborhoodDistribution = distributions[matches.ids(0, i)];
-				for(unsigned j = 1; j < knn; ++j)
+				Distribution<T> neighborhoodDistribution(distributions[matches.ids(0, i)]);
+
+				Vector eigenValues = distributions[matches.ids(0, i)].getCovarianceEigenValues().cwiseAbs().unaryExpr([](T element)
+																													  { return element < T(1e-6) ? T(1e-6) : element; });
+				T sumOfVolumes = (2.0 * std::sqrt(3.0) * eigenValues.cwiseSqrt()).prod();
+				for(unsigned j = 1; j < nbNeighbors; ++j)
 				{
 					if(matches.ids(j, i) != PM::Matches::InvalidId && masks(0, matches.ids(j, i)))
 					{
 						neighborhoodDistribution = neighborhoodDistribution.combine(distributions[matches.ids(j, i)]);
+
+						eigenValues = distributions[matches.ids(j, i)].getCovarianceEigenValues().cwiseAbs().unaryExpr([](T element)
+																													   { return element < T(1e-6) ? T(1e-6) : element; });
+						sumOfVolumes += (2.0 * std::sqrt(3.0) * eigenValues.cwiseSqrt()).prod();
 					}
 				}
+
 				typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.getDescriptorViewByName("initialPosition").col(i);
 				T mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
 
-				if(mahalanobisDistance <= maxDeviation)
+				eigenValues = distributions[i].getCovarianceEigenValues().cwiseAbs().unaryExpr([](T element)
+																							   { return element < T(1e-6) ? T(1e-6) : element; });
+				const T neighborhoodDistributionVolume = (2.0 * std::sqrt(3.0) * eigenValues.cwiseSqrt()).prod();
+				const T volumeRatio = neighborhoodDistributionVolume / sumOfVolumes;
+
+				if(mahalanobisDistance <= maxDeviation && volumeRatio <= maxVolumeRatio)
 				{
 					distributions[i] = neighborhoodDistribution;
 					tempCloud.features.col(i).topRows(featDim) = neighborhoodDistribution.getMean();
@@ -135,7 +146,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 						tempCloud.getDescriptorViewByName("covariance").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getCovariance().col(j);
 						tempCloud.getDescriptorViewByName("weightSum").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getWeightSum().col(j);
 					}
-					for(unsigned j = 1; j < knn; ++j)
+					for(unsigned j = 1; j < nbNeighbors; ++j)
 					{
 						if(matches.ids(j, i) != PM::Matches::InvalidId && masks(0, matches.ids(j, i)))
 						{
@@ -194,9 +205,8 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 			if(pointCovariance.fullPivHouseholderQr().rank() + 1 >= featDim)
 			{
-				const Eigen::EigenSolver<Matrix> solver(pointCovariance);
-				pointEigenValues = solver.eigenvalues().real();
-				pointEigenVectors = solver.eigenvectors().real();
+				pointEigenValues = distributions[i].getCovarianceEigenValues();
+				pointEigenVectors = distributions[i].getCovarianceEigenVectors();
 
 				if(sortEigen)
 				{

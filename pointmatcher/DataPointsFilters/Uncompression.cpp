@@ -72,15 +72,11 @@ void UncompressionDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		}
 
 		const Eigen::EigenSolver<Matrix> solver(covariance);
-		Vector eigenValues = solver.eigenvalues().real().unaryExpr([](T element)
-																   { return element < T(1e-6) ? T(1e-6) : element; });
+		Vector eigenValues = solver.eigenvalues().real().cwiseAbs().unaryExpr([](T element)
+																			  { return element < T(1e-6) ? T(1e-6) : element; });
 		Matrix eigenVectors = solver.eigenvectors().real();
 
-		T currentVolume = 1.0;
-		for(unsigned j = 0; j < nbDim; ++j)
-		{
-			currentVolume *= 2.0 * std::sqrt(3.0 * eigenValues(j));
-		}
+		const T currentVolume = (2.0 * std::sqrt(3.0) * eigenValues.cwiseSqrt()).prod();
 
 		unsigned nbPointsToUncompress = std::min(nbPoints(0, i), maxDensity * currentVolume);
 
