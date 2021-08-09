@@ -132,8 +132,8 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.getDescriptorViewByName("initialPosition").col(i);
 				T mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
 
-				eigenValues = distributions[i].getCovarianceEigenValues().cwiseAbs().unaryExpr([](T element)
-																							   { return element < T(1e-6) ? T(1e-6) : element; });
+				eigenValues = neighborhoodDistribution.getCovarianceEigenValues().cwiseAbs().unaryExpr([](T element)
+																									   { return element < T(1e-6) ? T(1e-6) : element; });
 				const T neighborhoodDistributionVolume = (2.0 * std::sqrt(3.0) * eigenValues.cwiseSqrt()).prod();
 				const T volumeRatio = neighborhoodDistributionVolume / sumOfVolumes;
 
