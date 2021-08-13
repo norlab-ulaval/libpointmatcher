@@ -98,6 +98,12 @@ typename Distribution<T>::PM::Matrix Distribution<T>::getWeightSum() const
 }
 
 template<typename T>
+typename Distribution<T>::PM::Matrix Distribution<T>::getOmega() const
+{
+	return omega;
+}
+
+template<typename T>
 typename Distribution<T>::PM::Vector Distribution<T>::getCovarianceEigenValues()
 {
 	if(!isEigenDecompositionCached)

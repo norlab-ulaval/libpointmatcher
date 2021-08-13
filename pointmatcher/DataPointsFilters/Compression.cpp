@@ -38,7 +38,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 
 	std::vector<Distribution<T>> distributions;
 	distributions.reserve(cloud.getNbPoints());
-	if(!cloud.descriptorExists("initialPosition") || !cloud.descriptorExists("covariance") || !cloud.descriptorExists("weightSum") || !cloud.descriptorExists("nbPoints"))
+	if(!cloud.descriptorExists("initialPosition") || !cloud.descriptorExists("omega") || !cloud.descriptorExists("weightSum") || !cloud.descriptorExists("nbPoints"))
 	{
 		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
@@ -47,18 +47,18 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	}
 	else
 	{
-		const auto& covarianceVectors = cloud.getDescriptorViewByName("covariance");
+		const auto& omegaVectors = cloud.getDescriptorViewByName("omega");
 		const auto& weightSumVectors = cloud.getDescriptorViewByName("weightSum");
 		for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
 		{
-			typename PM::Matrix covariance = PM::Matrix::Zero(featDim, featDim);
+			typename PM::Matrix omega = PM::Matrix::Zero(featDim, featDim);
 			typename PM::Matrix weightSum = PM::Matrix::Zero(featDim, featDim);
 			for(unsigned j = 0; j < featDim; ++j)
 			{
-				covariance.col(j) = covarianceVectors.block(j * featDim, i, featDim, 1);
+				omega.col(j) = omegaVectors.block(j * featDim, i, featDim, 1);
 				weightSum.col(j) = weightSumVectors.block(j * featDim, i, featDim, 1);
 			}
-			distributions.emplace_back(cloud.features.col(i).topRows(featDim), covariance, weightSum);
+			distributions.emplace_back(omega, weightSum, cloud.features.col(i).topRows(featDim));
 		}
 	}
 
@@ -66,21 +66,21 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 	{
 		cloud.addDescriptor("initialPosition", cloud.features.topRows(featDim));
 	}
-	if(!cloud.descriptorExists("covariance"))
+	if(!cloud.descriptorExists("omega"))
 	{
-		typename PM::Matrix covariances = PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints());
+		typename PM::Matrix omegas = PM::Matrix::Zero(std::pow(featDim, 2), cloud.getNbPoints());
 		if(featDim == 2)
 		{
-			covariances.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
-			covariances.row(3) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+			omegas.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), 1.0 / initialVariance);
+			omegas.row(3) = PM::Matrix::Constant(1, cloud.getNbPoints(), 1.0 / initialVariance);
 		}
 		else
 		{
-			covariances.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
-			covariances.row(4) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
-			covariances.row(8) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+			omegas.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), 1.0 / initialVariance);
+			omegas.row(4) = PM::Matrix::Constant(1, cloud.getNbPoints(), 1.0 / initialVariance);
+			omegas.row(8) = PM::Matrix::Constant(1, cloud.getNbPoints(), 1.0 / initialVariance);
 		}
-		cloud.addDescriptor("covariance", covariances);
+		cloud.addDescriptor("omega", omegas);
 	}
 	if(!cloud.descriptorExists("weightSum"))
 	{
@@ -143,7 +143,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 					tempCloud.features.col(i).topRows(featDim) = neighborhoodDistribution.getMean();
 					for(unsigned j = 0; j < featDim; ++j)
 					{
-						tempCloud.getDescriptorViewByName("covariance").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getCovariance().col(j);
+						tempCloud.getDescriptorViewByName("omega").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getOmega().col(j);
 						tempCloud.getDescriptorViewByName("weightSum").block(j * featDim, i, featDim, 1) = neighborhoodDistribution.getWeightSum().col(j);
 					}
 					for(unsigned j = 1; j < nbNeighbors; ++j)
