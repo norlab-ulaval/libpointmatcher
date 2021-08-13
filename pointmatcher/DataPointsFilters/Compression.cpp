@@ -130,7 +130,7 @@ void CompressionDataPointsFilter<T>::inPlaceFilter(typename PM::DataPoints& clou
 				}
 
 				typename PM::Vector delta = neighborhoodDistribution.getMean() - tempCloud.getDescriptorViewByName("initialPosition").col(i);
-				T mahalanobisDistance = std::sqrt(delta.transpose() * distributions[i].getCovariance() * delta);
+				T mahalanobisDistance = std::sqrt(delta.transpose() * PointMatcherSupport::inverseCovariance<T>(distributions[i].getCovariance()) * delta);
 
 				eigenValues = neighborhoodDistribution.getCovarianceEigenValues().cwiseAbs().unaryExpr([](T element)
 																									   { return element < T(1e-6) ? T(1e-6) : element; });
