@@ -968,8 +968,10 @@ TEST_F(DataFilterTest, CompressionDataPointsFilter)
 	params = PM::Parameters();
 	params["knn"] = "3";
 	params["maxDist"] = "1";
-	params["epsilon"] = "0.05";
-	params["maxDeviation"] = "0.5";
+	params["epsilon"] = "0";
+	params["maxIterationCount"] = "100";
+	params["maxDeviation"] = "100";
+	params["maxVolumeRatio"] = "1000";
 	std::shared_ptr<PM::DataPointsFilter> filter = PM::get().DataPointsFilterRegistrar.create("CompressionDataPointsFilter", params);
 
 	DP filteredCloud = filter->filter(cloud);

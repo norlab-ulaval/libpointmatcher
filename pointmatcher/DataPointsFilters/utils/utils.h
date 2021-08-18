@@ -155,16 +155,16 @@ size_t argMax(const typename PointMatcher<T>::Vector& v)
 }
 
 template<typename T>
-typename PointMatcher<T>::Matrix inverseCovariance(const typename PointMatcher<T>::Matrix& covariance)
+typename PointMatcher<T>::Matrix inverseCovariance(typename PointMatcher<T>::Matrix covariance, const typename PointMatcher<T>::Vector& eigenValues)
 {
-	const T epsilon = 1e-3;
-	if(covariance.norm() >= epsilon)
+	const T epsilon = 1e-6;
+	for(unsigned i = 0; i < eigenValues.size(); ++i)
 	{
-		return covariance.inverse();
+		if(eigenValues(i) < epsilon)
+		{
+			covariance(i, i) += epsilon;
+		}
 	}
-	else
-	{
-		return (covariance + epsilon * PointMatcher<T>::Matrix::Identity(covariance.rows(), covariance.cols())).inverse();
-	}
+	return covariance.inverse();
 }
 };

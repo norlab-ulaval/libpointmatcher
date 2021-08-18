@@ -360,10 +360,10 @@ TEST(Transformation, RigidTransformationDescriptors)
 	PM::Matrix actualInitialPositions = transformator->compute(compressionFilter->filter(data3D), transformation).getDescriptorViewByName("initialPosition");
 	ASSERT_TRUE(actualInitialPositions.isApprox(expectedInitialPositions, PRECISION));
 
-	// covariance
-	PM::Matrix expectedCovariances = (compressionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("covariance");
-	PM::Matrix actualCovariances = transformator->compute(compressionFilter->filter(data3D), transformation).getDescriptorViewByName("covariance");
-	ASSERT_TRUE(actualCovariances.isApprox(expectedCovariances, PRECISION));
+	// omega
+	PM::Matrix expectedOmegas = (compressionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("omega");
+	PM::Matrix actualOmegas = transformator->compute(compressionFilter->filter(data3D), transformation).getDescriptorViewByName("omega");
+	ASSERT_TRUE(actualOmegas.isApprox(expectedOmegas, PRECISION));
 
 	// weightSum
 	PM::Matrix expectedWeightSums = (compressionFilter->filter(transformator->compute(data3D, transformation))).getDescriptorViewByName("weightSum");

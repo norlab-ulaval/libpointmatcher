@@ -16,22 +16,22 @@ template<typename T>
 Distribution<T>::Distribution(const typename PM::Vector& point, const typename PM::Matrix& covariance):
 		mean(point),
 		weightSum(PM::Matrix::Zero(point.rows(), point.rows())),
-		omega(PointMatcherSupport::inverseCovariance<T>(covariance)),
 		covariance(covariance),
 		isCovarianceCached(true),
 		isEigenDecompositionCached(false)
 {
+	omega = PointMatcherSupport::inverseCovariance<T>(covariance, getCovarianceEigenValues());
 }
 
 template<typename T>
 Distribution<T>::Distribution(const typename PM::Vector& mean, const typename PM::Matrix& covariance, const typename PM::Matrix& weightSum):
 		mean(mean),
 		weightSum(weightSum),
-		omega(weightSum.isZero() ? PointMatcherSupport::inverseCovariance<T>(covariance) : weightSum * PointMatcherSupport::inverseCovariance<T>(covariance)),
 		covariance(covariance),
 		isCovarianceCached(true),
 		isEigenDecompositionCached(false)
 {
+	omega = PointMatcherSupport::inverseCovariance<T>(covariance, getCovarianceEigenValues());
 }
 
 template<typename T>

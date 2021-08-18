@@ -107,7 +107,7 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 				cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
 			}
 		}
-		else if(descName == "covariance" || descName == "weightSum")
+		else if(descName == "weightSum")
 		{
 			const unsigned vectorSpan = std::sqrt(descSpan);
 
@@ -259,7 +259,7 @@ void TransformationsImpl<T>::SimilarityTransformation::inPlaceCompute(
 				cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
 			}
 		}
-		else if(descName == "covariance" || descName == "weightSum")
+		else if(descName == "weightSum")
 		{
 			const unsigned vectorSpan = std::sqrt(descSpan);
 
