@@ -127,6 +127,7 @@ If you are using libpointmatcher in your project and you would like to have it l
  * Swiss National Science Foundation - [Limnobotics](http://www.limnobotics.ch/): Robotic solution for toxic algae monitoring in lacs. Result: [video of 3D shore reconstruction](http://www.youtube.com/watch?v=g8l-Xq4qYeE) with real-time computation.
  * [CGAL](https://www.cgal.org/) includes our library for their registration pipeline.
  * [Norlab](https://norlab.ulaval.ca/) is maintaining and using the library for their research on autonomous navigation in harsh environments.
+ * [ANYbotics AG](https://www.anybotics.com) is investigating autonomous navigation algorithms using this library.
 
 For a larger list of work realized with libpointmatcher, please see the page [Applications And Publications](/doc/ApplicationsAndPub.md).
 
