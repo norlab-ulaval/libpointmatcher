@@ -146,14 +146,15 @@ namespace PointMatcherSupport
 			}
 			varV /= T(this->size());
 			// median
-			const Iterator lowQtIt(this->begin() + (this->size() / 4));
-			const Iterator medianIt(this->begin() + (this->size() / 2));
-			const Iterator highQtIt(this->begin() + (3*this->size() / 4));
-			std::nth_element(this->begin(), medianIt, this->end());
+			std::vector<T> hystCpy((*this));
+			const Iterator lowQtIt(hystCpy.begin() + (hystCpy.size() / 4));
+			const Iterator medianIt(hystCpy.begin() + (hystCpy.size() / 2));
+			const Iterator highQtIt(hystCpy.begin() + (3*hystCpy.size() / 4));
+			std::nth_element(hystCpy.begin(), medianIt, hystCpy.end());
 			medianV = *medianIt;
-			std::nth_element(this->begin(), lowQtIt, this->end());
+			std::nth_element(hystCpy.begin(), lowQtIt, hystCpy.end());
 			lowQt = *lowQtIt;
-			std::nth_element(this->begin(), highQtIt, this->end());
+			std::nth_element(hystCpy.begin(), highQtIt, hystCpy.end());
 			highQt = *highQtIt;
 		}
 		else
