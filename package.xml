@@ -17,7 +17,6 @@
 	<run_depend>boost</run_depend>
 	<run_depend>libnabo</run_depend>
 	<run_depend>eigen</run_depend>
-	<run_depend>catkin</run_depend>
 
 	<export>
 		<build_type>cmake</build_type>
