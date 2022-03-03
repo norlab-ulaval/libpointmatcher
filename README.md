@@ -128,6 +128,7 @@ If you are using libpointmatcher in your project and you would like to have it l
  * [CGAL](https://www.cgal.org/) includes our library for their registration pipeline.
  * [Norlab](https://norlab.ulaval.ca/) is maintaining and using the library for their research on autonomous navigation in harsh environments.
  * [ANYbotics AG](https://www.anybotics.com) is investigating autonomous navigation algorithms using this library.
+ * [Point Laz Mining LiDAR Expert](https://www.pointlaz.com/) is scanning mine shafts to ensure infrastructure safety.
 
 For a larger list of work realized with libpointmatcher, please see the page [Applications And Publications](/doc/ApplicationsAndPub.md).
 
