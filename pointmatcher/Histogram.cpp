@@ -68,13 +68,13 @@ namespace PointMatcherSupport
 		
 		if (!filePrefix.empty())
 		{
-			std::cerr << "writing to " << (filePrefix + name + "Stats.csv") << std::endl;
+			LOG_INFO_STREAM("writing to " << (filePrefix + name + "Stats.csv"));
 			std::ofstream ofs_stats((filePrefix + name + "Stats.csv").c_str());
 			dumpStatsHeader(ofs_stats);
 			ofs_stats << endl;
 			dumpStats(ofs_stats);
 
-			std::cerr << "writing to " << (filePrefix + name + ".csv") << std::endl;
+			LOG_INFO_STREAM("writing to " << (filePrefix + name + ".csv"));
 			std::ofstream ofs((filePrefix + name + ".csv").c_str());
 			for (size_t i = 0; i < this->size(); ++i)
 				ofs << ((*this)[i]) << "\n";
