@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 
 include(CheckSymbolExists)
-include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
+
 
 #========================
 # Project details / setup
@@ -32,6 +32,7 @@ else ()
 	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
 endif ()
 
+include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 
 # Check if 32 bit platform
 # By default, libpointmatcher is not compatible with and will not build on a
@@ -166,7 +167,7 @@ endif()
 # This cmake target alias will be defined by either: 
 # a) libnabo sources if built as a git submodule in the same project than this library, or
 # b) by libnabo-targets.cmake, included by find_package(libnabo) above.
-set(libnabo_LIBRARIES libnabo::nabo)
+# set(libnabo_LIBRARIES libnabo::nabo)
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
