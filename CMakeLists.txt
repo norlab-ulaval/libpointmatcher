@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 include(CheckSymbolExists)
 
 
@@ -125,6 +127,8 @@ endif()
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
+set(Boost_USE_STATIC_LIBS  ON)
+
 find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
 if (Boost_MINOR_VERSION GREATER 47)
 	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)

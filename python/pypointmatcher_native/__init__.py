@@ -1,1 +1,1 @@
-# empty package as wrapper around native module
+from . import pypointmatcher_ext as pypointmatcher
