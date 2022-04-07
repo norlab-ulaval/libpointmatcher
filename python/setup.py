@@ -6,7 +6,7 @@ class BinaryDistribution(Distribution):
     def has_ext_modules(self):
         return True
 
-setup(packages=find_packages(include=["pypointmatcher_native*"]),
+setup(packages=find_packages(include=["pypointmatcher*"]),
     install_requires=["numpy>=1.20"],
     package_data={"": ["*.so"]},
     distclass=BinaryDistribution

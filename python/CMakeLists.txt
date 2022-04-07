@@ -105,15 +105,15 @@ else()
 endif()
 
 if(pybind11_FOUND)
-	pybind11_add_module(pypointmatcher_ext ${PYBIND11_SOURCES})
+	pybind11_add_module(pypointmatcher_native ${PYBIND11_SOURCES})
 
-	target_link_libraries(pypointmatcher_ext
+	target_link_libraries(pypointmatcher_native
 	                      PUBLIC
 	                      pointmatcher)
 
-	add_dependencies(pypointmatcher_ext pointmatcher)
+	add_dependencies(pypointmatcher_native pointmatcher)
 
-	install(TARGETS pypointmatcher_ext LIBRARY DESTINATION ${PYTHON_INSTALL_TARGET})
+	install(TARGETS pypointmatcher_native LIBRARY DESTINATION ${PYTHON_INSTALL_TARGET})
 else()
 	message(FATAL_ERROR "pybind11 is required! Please follow the \"Compiling \
 libpointmatcher's with Python\" instructions from the official libpointmatcher's documentation.")
