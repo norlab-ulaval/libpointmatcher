@@ -23,6 +23,9 @@ To get started, you will need the same prerequisites as libpointmatcher, but als
 
 ```bash
 pip3 install pytest
+
+# If you have multiple installed versions of python3 :
+# python3.6 -m pip install pytest
 ```
 
 But `catch` and `python3-dev` need to be installed with a package manager:
@@ -61,6 +64,10 @@ Once this is done, run the following commands:
 ```bash
 mkdir build && cd build
 cmake ..
+
+# With multiple versions of python3
+# cmake -DPYTHON_EXECUTABLE=$(python3.6 -c "import sys; print(sys.executable)") ..
+
 make check -j 4
 ```
 
@@ -116,6 +123,7 @@ It is a good practice to create a virtual environment to install and configure `
 
 ```sh
 # In <libpointmatcher-repository-path> :
+python3 -m venv venv
 python3 -m venv venv
 
 # Or, it you have multiple python3 versions :
