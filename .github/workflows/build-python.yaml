@@ -1,0 +1,132 @@
+name: Compile python package
+
+on:
+  push:
+    branches: [master, feature/github-release]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  BOOST_MAJOR_VERSION: 1
+  BOOST_MINOR_VERSION: 70
+  BOOST_PATCH_VERSION: 0
+  LIBNABO_VERSION: 1.0.7
+  PYBIND11_VERSION: v2.5.0
+  BOOST_INSTALL_PATH: ${{ github.workspace }}/.tmp/boost/install
+  BOOST_SRC_DIR: ${{ github.workspace }}/.tmp/boost
+  LIBNABO_INSTALL_PATH: ${{ github.workspace }}/.tmp/libnabo-build/install
+  LIBNABO_SRC_DIR: ${{ github.workspace }}/.tmp/libnabo
+  PYBIND11_INSTALL_PATH: ${{ github.workspace }}/.tmp/pybind11-build/install
+  PYBIND11_SRC_DIR: ${{ github.workspace }}/.tmp/pybind11
+
+jobs:
+  compile-python-package:
+    runs-on: ubuntu-20.04
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Make temp dir
+        run: mkdir ${{ github.workspace }}/.tmp
+
+      - name: Init base env variable
+        run: |
+          echo "BOOST_DIR=boost_${{ env.BOOST_MAJOR_VERSION }}_${{ env.BOOST_MINOR_VERSION }}_${{ env.BOOST_PATCH_VERSION }}" >> $GITHUB_ENV
+          echo "BOOST_VERSION=${{ env.BOOST_MAJOR_VERSION }}.${{ env.BOOST_MINOR_VERSION }}.${{ env.BOOST_PATCH_VERSION }}" >> $GITHUB_ENV
+ 
+      - name: Init env variable
+        run: | 
+          echo "BOOST_ARCHIVE_NAME=${{ env.BOOST_DIR }}.tar.bz2" >> $GITHUB_ENV
+
+      - name: Cache boost
+        id: cache-boost
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.BOOST_INSTALL_PATH }}
+          key: ${{ runner.os }}-boost-${{ env.BOOST_VERSION }}
+
+      - name: Cache libnabo
+        id: cache-libnabo
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.LIBNABO_INSTALL_PATH }}
+          key: ${{ runner.os }}-libnabo-${{ env.LIBNABO_VERSION }}
+
+      - name: Cache pybind11
+        id: cache-pybind11
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PYBIND11_INSTALL_PATH }}
+          key: ${{ runner.os }}-pybind11-${{ env.PYBIND11_VERSION }}
+      
+      - name: Make dirs
+        run:
+          mkdir -p ${{ env.BOOST_SRC_DIR }}
+          mkdir -p ${{ env.LIBNABO_SRC_DIR }}
+          mkdir -p ${{ env.PYBIND11_SRC_DIR }}
+          mkdir -p ${{ env.BOOST_INSTALL_PATH }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends g++ \
+            gcc \
+            make \
+            libeigen3-dev \
+            ninja-build \
+            catch \
+            libomp-dev \
+            wget
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install numpy
+        run: pip install numpy>=1.20
+
+      - name: Download boost ${{ env.BOOST_VERSION }}
+        if: steps.cache-boost.outputs.cache-hit != 'true'
+        working-directory: ${{ env.BOOST_SRC_DIR }}
+        run: |
+          wget --no-verbose https://boostorg.jfrog.io/artifactory/main/release/${{ env.BOOST_VERSION }}/source/${{ env.BOOST_ARCHIVE_NAME }}
+          tar -xf ${{ env.BOOST_ARCHIVE_NAME }}
+          rm ${{ env.BOOST_ARCHIVE_NAME }}
+
+      - name: Compile static boost
+        if: steps.cache-boost.outputs.cache-hit != 'true'
+        working-directory: ${{ env.BOOST_SRC_DIR }}/${{ env.BOOST_DIR }}
+        run: |
+          ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --with-python=python --prefix=${{ github.workspace }}/boost/install
+          ./b2 cxxflags=-fPIC cflags=-fPIC link=static install
+
+      - name: Install libnabo ${{ env.LIBNABO_VERSION }}
+        if: steps.cache-libnabo.outputs.cache-hit != 'true'
+        working-directory: ${{ env.LIBNABO_SRC_DIR }}
+        run: |
+          git clone -b ${{ env.LIBNABO_VERSION }} --single-branch https://github.com/ethz-asl/libnabo.git
+          mkdir -p ${{ env.LIBNABO_INSTALL_PATH }}
+          cd libnabo
+          cmake -GNinja -DBOOST_ROOT=${{ env.BOOST_INSTALL_PATH }} -DCMAKE_INSTALL_PREFIX=${{ env.LIBNABO_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_OPEN_MP:BOOL=ON -S . -B ./build
+          cmake --build ./build --target install --parallel $(nproc)
+          cd -
+          rm -r ./libnabo/build
+
+      - name: Install pybind11 ${{ env.PYBIND11_VERSION }}
+        working-directory:  ${{ env.PYBIND11_SRC_DIR }}
+        if: steps.cache-pybind11.outputs.cache-hit != 'true'
+        run: |
+          git clone -b v2.5.0 --single-branch https://github.com/pybind/pybind11.git
+          mkdir -p ${{ env.PYBIND11_INSTALL_PATH }}
+          cd pybind11
+          cmake -GNinja -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPYBIND11_TEST:BOOL=OFF -S . -B ./build
+          cmake --build ./build --target install --parallel $(nproc)
+
+      - name: Compile libpointmatcher
+        env:
+          PYTHON_PACKAGE_NAME: pypointmatcher
+        run: |
+          cmake -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 -DBUILD_PYTHON_MODULE:BOOL=ON -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} -DUSE_OPEN_MP:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B ./build
+          sudo cmake --build ./build --target install --parallel $(nproc)
