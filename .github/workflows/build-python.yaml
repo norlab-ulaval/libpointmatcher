@@ -19,9 +19,14 @@ env:
   LIBNABO_SRC_DIR: ${{ github.workspace }}/.tmp/libnabo
   PYBIND11_INSTALL_PATH: ${{ github.workspace }}/.tmp/pybind11-build/install
   PYBIND11_SRC_DIR: ${{ github.workspace }}/.tmp/pybind11
+  PYTHON_WHEEL_DIR: ${{ github.workspace }}/.tmp/python-wheel
 
 jobs:
   compile-python-package:
+    strategy:
+      matrix:
+        python_version: [3.8, 3.9]
+    
     runs-on: ubuntu-20.04
     
     steps:
@@ -44,21 +49,21 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.BOOST_INSTALL_PATH }}
-          key: ${{ runner.os }}-boost-${{ env.BOOST_VERSION }}
+          key: ${{ runner.os }}-boost-cache-python-${{ matrix.python_version }}-${{ env.BOOST_VERSION }}
 
       - name: Cache libnabo
         id: cache-libnabo
         uses: actions/cache@v3
         with:
           path: ${{ env.LIBNABO_INSTALL_PATH }}
-          key: ${{ runner.os }}-libnabo-${{ env.LIBNABO_VERSION }}
+          key: ${{ runner.os }}-libnabo-cache-python-${{ matrix.python_version }}-${{ env.LIBNABO_VERSION }}
 
       - name: Cache pybind11
         id: cache-pybind11
         uses: actions/cache@v3
         with:
           path: ${{ env.PYBIND11_INSTALL_PATH }}
-          key: ${{ runner.os }}-pybind11-${{ env.PYBIND11_VERSION }}
+          key: ${{ runner.os }}-pybind11-cache-python-${{ matrix.python_version }}-${{ env.PYBIND11_VERSION }}
       
       - name: Make dirs
         run:
@@ -79,13 +84,13 @@ jobs:
             libomp-dev \
             wget
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python_version }}
 
       - name: Install numpy
-        run: pip install numpy>=1.20
+        run: pip install numpy>=1.20 wheel
 
       - name: Download boost ${{ env.BOOST_VERSION }}
         if: steps.cache-boost.outputs.cache-hit != 'true'
@@ -99,7 +104,7 @@ jobs:
         if: steps.cache-boost.outputs.cache-hit != 'true'
         working-directory: ${{ env.BOOST_SRC_DIR }}/${{ env.BOOST_DIR }}
         run: |
-          ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --with-python=python --prefix=${{ github.workspace }}/boost/install
+          ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --with-python=python --prefix=${{ env.BOOST_INSTALL_PATH }}
           ./b2 cxxflags=-fPIC cflags=-fPIC link=static install
 
       - name: Install libnabo ${{ env.LIBNABO_VERSION }}
@@ -118,7 +123,7 @@ jobs:
         working-directory:  ${{ env.PYBIND11_SRC_DIR }}
         if: steps.cache-pybind11.outputs.cache-hit != 'true'
         run: |
-          git clone -b v2.5.0 --single-branch https://github.com/pybind/pybind11.git
+          git clone -b ${{ env.PYBIND11_VERSION }} --single-branch https://github.com/pybind/pybind11.git
           mkdir -p ${{ env.PYBIND11_INSTALL_PATH }}
           cd pybind11
           cmake -GNinja -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPYBIND11_TEST:BOOL=OFF -S . -B ./build
@@ -130,3 +135,16 @@ jobs:
         run: |
           cmake -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 -DBUILD_PYTHON_MODULE:BOOL=ON -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} -DUSE_OPEN_MP:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B ./build
           sudo cmake --build ./build --target install --parallel $(nproc)
+      
+      - name: Build python wheel
+        working-directory: ./python
+        run: |
+          python ./setup.py bdist_wheel -d ${{ env.PYTHON_WHEEL_DIR }}
+
+      - name: Upload python wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: Python ${{ matrix.python_version }} wheel
+          path: ${{ env.PYTHON_WHEEL_DIR }}/*.whl
+          if-no-files-found: error
+          retention-days: 1
