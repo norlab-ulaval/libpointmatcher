@@ -25,9 +25,10 @@ jobs:
   compile-python-package:
     strategy:
       matrix:
-        python_version: [3.8, 3.9]
+        python_version: [3.8]
+        os: [windows-2022]
     
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
     
     steps:
       - uses: actions/checkout@v3
@@ -42,37 +43,52 @@ jobs:
  
       - name: Init env variable
         run: | 
-          echo "BOOST_ARCHIVE_NAME=${{ env.BOOST_DIR }}.tar.bz2" >> $GITHUB_ENV
-
+          echo "BOOST_ARCHIVE_NAME=${{ env.BOOST_DIR }}.7z" >> $GITHUB_ENV
+      
       - name: Cache boost
         id: cache-boost
         uses: actions/cache@v3
         with:
           path: ${{ env.BOOST_INSTALL_PATH }}
-          key: ${{ runner.os }}-boost-cache-python-${{ matrix.python_version }}-${{ env.BOOST_VERSION }}
+          key: ${{ runner.os }}-boost-cache--${{ env.BOOST_VERSION }}-python-${{ matrix.python_version }}
 
       - name: Cache libnabo
         id: cache-libnabo
         uses: actions/cache@v3
         with:
           path: ${{ env.LIBNABO_INSTALL_PATH }}
-          key: ${{ runner.os }}-libnabo-cache-python-${{ matrix.python_version }}-${{ env.LIBNABO_VERSION }}
+          key: ${{ runner.os }}-libnabo-cache-${{ env.LIBNABO_VERSION }}-python-${{ matrix.python_version }}
 
       - name: Cache pybind11
         id: cache-pybind11
         uses: actions/cache@v3
         with:
           path: ${{ env.PYBIND11_INSTALL_PATH }}
-          key: ${{ runner.os }}-pybind11-cache-python-${{ matrix.python_version }}-${{ env.PYBIND11_VERSION }}
+          key: ${{ runner.os }}-pybind11-cache-${{ env.PYBIND11_VERSION }}-python-${{ matrix.python_version }}
       
       - name: Make dirs
+        if: ${{ runner.os }} == 'Linux'
         run:
           mkdir -p ${{ env.BOOST_SRC_DIR }}
           mkdir -p ${{ env.LIBNABO_SRC_DIR }}
           mkdir -p ${{ env.PYBIND11_SRC_DIR }}
           mkdir -p ${{ env.BOOST_INSTALL_PATH }}
+          mkdir -p ${{ env.PYBIND11_INSTALL_PATH }}
+          mkdir -p ${{ env.LIBNABO_INSTALL_PATH }}
+      
+      - name: Make dirs
+        if: ${{ runner.os }} == 'Windows'
+        run:
+          mkdir ${{ env.BOOST_SRC_DIR }}
+          mkdir ${{ env.LIBNABO_SRC_DIR }}
+          mkdir ${{ env.PYBIND11_SRC_DIR }}
+          mkdir ${{ env.BOOST_INSTALL_PATH }}
+          mkdir ${{ env.PYBIND11_INSTALL_PATH }}
+          mkdir ${{ env.LIBNABO_INSTALL_PATH }}
+
 
       - name: Install dependencies
+        if: ${{ runner.os }} == 'Linux'
         run: |
           sudo apt update
           sudo apt install -y --no-install-recommends g++ \
@@ -83,21 +99,37 @@ jobs:
             catch \
             libomp-dev \
             wget
+      
+      - name: Install dependencies
+        if: ${{ runner.os }} == 'Windows'
+        run: |
+          vcpkg install eigen3 libopenmpt
 
       - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install numpy
+      - name: Install numpy and wheel
         run: pip install numpy>=1.20 wheel
 
       - name: Download boost ${{ env.BOOST_VERSION }}
-        if: steps.cache-boost.outputs.cache-hit != 'true'
+        if: steps.cache-boost.outputs.cache-hit != 'true' && ${{ runner.os }} == 'Linux'
         working-directory: ${{ env.BOOST_SRC_DIR }}
         run: |
           wget --no-verbose https://boostorg.jfrog.io/artifactory/main/release/${{ env.BOOST_VERSION }}/source/${{ env.BOOST_ARCHIVE_NAME }}
-          tar -xf ${{ env.BOOST_ARCHIVE_NAME }}
+      
+      - name: Download boost ${{ env.BOOST_VERSION }}
+        if: steps.cache-boost.outputs.cache-hit != 'true' && ${{ runner.os }} == 'Windows'
+        working-directory: ${{ env.BOOST_SRC_DIR }}
+        run: |
+          (New-Object System.Net.WebClient).DownloadFile("https://boostorg.jfrog.io/artifactory/main/release/${{ env.BOOST_VERSION }}/source/${{ env.BOOST_ARCHIVE_NAME }}", "${{ env.BOOST_ARCHIVE_NAME }}")
+
+      - name: Extract boost sources from archive
+        if: steps.cache-boost.outputs.cache-hit != 'true'
+        working-directory: ${{ env.BOOST_SRC_DIR }}
+        run: |
+          7z e ${{ env.BOOST_ARCHIVE_NAME }}
           rm ${{ env.BOOST_ARCHIVE_NAME }}
 
       - name: Compile static boost
@@ -112,7 +144,6 @@ jobs:
         working-directory: ${{ env.LIBNABO_SRC_DIR }}
         run: |
           git clone -b ${{ env.LIBNABO_VERSION }} --single-branch https://github.com/ethz-asl/libnabo.git
-          mkdir -p ${{ env.LIBNABO_INSTALL_PATH }}
           cd libnabo
           cmake -GNinja -DBOOST_ROOT=${{ env.BOOST_INSTALL_PATH }} -DCMAKE_INSTALL_PREFIX=${{ env.LIBNABO_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_OPEN_MP:BOOL=ON -S . -B ./build
           cmake --build ./build --target install --parallel $(nproc)
@@ -124,27 +155,26 @@ jobs:
         if: steps.cache-pybind11.outputs.cache-hit != 'true'
         run: |
           git clone -b ${{ env.PYBIND11_VERSION }} --single-branch https://github.com/pybind/pybind11.git
-          mkdir -p ${{ env.PYBIND11_INSTALL_PATH }}
           cd pybind11
           cmake -GNinja -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPYBIND11_TEST:BOOL=OFF -S . -B ./build
           cmake --build ./build --target install --parallel $(nproc)
 
-      - name: Compile libpointmatcher
-        env:
-          PYTHON_PACKAGE_NAME: pypointmatcher
-        run: |
-          cmake -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 -DBUILD_PYTHON_MODULE:BOOL=ON -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} -DUSE_OPEN_MP:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B ./build
-          sudo cmake --build ./build --target install --parallel $(nproc)
+      # - name: Compile libpointmatcher
+      #   env:
+      #     PYTHON_PACKAGE_NAME: pypointmatcher
+      #   run: |
+      #     cmake -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 -DBUILD_PYTHON_MODULE:BOOL=ON -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} -DUSE_OPEN_MP:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B ./build
+      #     sudo cmake --build ./build --target install --parallel $(nproc)
       
-      - name: Build python wheel
-        working-directory: ./python
-        run: |
-          python ./setup.py bdist_wheel -d ${{ env.PYTHON_WHEEL_DIR }}
+      # - name: Build python wheel
+      #   working-directory: ./python
+      #   run: |
+      #     python ./setup.py bdist_wheel -d ${{ env.PYTHON_WHEEL_DIR }}
 
-      - name: Upload python wheel
-        uses: actions/upload-artifact@v3
-        with:
-          name: Python ${{ matrix.python_version }} wheel
-          path: ${{ env.PYTHON_WHEEL_DIR }}/*.whl
-          if-no-files-found: error
-          retention-days: 1
+      # - name: Upload python wheel
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: libpointmatcher python ${{ matrix.python_version }} wheel
+      #     path: ${{ env.PYTHON_WHEEL_DIR }}/*.whl
+      #     if-no-files-found: error
+      #     retention-days: 1
