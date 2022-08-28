@@ -29,7 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         python_version: [3.8]
-        os: [windows-2022] #ubuntu-20.04]
+        os: [windows-2019, ubuntu-20.04]
     
     runs-on: ${{ matrix.os }}
 
@@ -145,7 +145,7 @@ jobs:
       - name: Install dependencies on Windows
         if: ${{ runner.os == 'Windows' }}
         run: |
-          vcpkg install eigen3:x64-windows libopenmpt:x64-windows boost-mpi:x64-windows-static boost-thread:x64-windows-static boost-filesystem:x64-windows-static boost-system:x64-windows-static boost-program-options:x64-windows-static boost-date-time:x64-windows-static boost-chrono:x64-windows-static boost-regex[icu]:x64-windows-static boost-python:x64-windows-static --clean-after-build
+          vcpkg install eigen3:x64-windows-static libopenmpt:x64-windows boost-mpi:x64-windows-static boost-thread:x64-windows-static boost-filesystem:x64-windows-static boost-system:x64-windows-static boost-program-options:x64-windows-static boost-date-time:x64-windows-static boost-chrono:x64-windows-static boost-regex[icu]:x64-windows-static boost-assign:x64-windows-static boost-timer:x64-windows-static --clean-after-build
 
       - name: Download boost ${{ env.BOOST_VERSION }} on Linux
         if: ${{ steps.cache-boost.outputs.cache-hit != 'true' &&  runner.os == 'Linux' }}
@@ -233,7 +233,7 @@ jobs:
         env:
           PYTHON_PACKAGE_NAME: pypointmatcher
         run: |
-          cmake -A x64 -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 -DBUILD_PYTHON_MODULE:BOOL=ON -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} -DUSE_OPEN_MP:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B ./build
+          cmake -A x64 -DCMAKE_TOOLCHAIN_FILE:FILEPATH="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DLIBNABO_INSTALL_DIR:PATH="${{ env.LIBNABO_INSTALL_PATH }}" -Dpybind11_DIR:PATH="${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11" -DBUILD_PYTHON_MODULE:BOOL=ON -DPYTHON_INSTALL_TARGET:PATH="./python/${{ env.PYTHON_PACKAGE_NAME }}" -DVCPKG_TARGET_TRIPLET="x64-windows-static" -DUSE_OPEN_MP:BOOL=ON -DCMAKE_BUILD_TYPE="RelWithDebInfo" -S . -B ./build
           cmake --build ./build --target install
           rm -r ./build
       

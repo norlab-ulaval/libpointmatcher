@@ -129,9 +129,9 @@ endif()
 #--------------------
 set(Boost_USE_STATIC_LIBS  ON)
 
-find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
+find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time)
 if (Boost_MINOR_VERSION GREATER 47)
-	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
+	find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time chrono)
 endif ()
 
 #--------------------
@@ -180,7 +180,9 @@ set(USE_OPEN_MP FALSE CACHE BOOL "Set to TRUE to use OpenMP")
 if (USE_OPEN_MP)
 	find_package(OpenMP)
 	if (OPENMP_FOUND)
-		add_definitions(-fopenmp -DHAVE_OPENMP)
+		if(NOT MSVC)
+			add_definitions(-fopenmp -DHAVE_OPENMP)
+		endif()
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 		if (CMAKE_COMPILER_IS_GNUCC)
 			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
@@ -385,6 +387,8 @@ endif()
 
 if (NOT MSVC)
 	target_compile_options(pointmatcher PRIVATE -Wall)
+else()
+	target_compile_options(pointmatcher PRIVATE /bigobj)
 endif()
 
 if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
