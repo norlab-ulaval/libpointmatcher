@@ -38,6 +38,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-libointmatcher--cache-python-${{ matrix.python_version }}
+
       - name: Make temp dir
         run: mkdir ${{ github.workspace }}/.tmp
 
@@ -265,6 +270,8 @@ jobs:
             -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} \
             -DUSE_OPEN_MP:BOOL=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -S . -B ./build
           sudo cmake --build ./build --target install
           rm -r ./build
