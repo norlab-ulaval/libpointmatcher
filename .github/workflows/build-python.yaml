@@ -193,7 +193,12 @@ jobs:
         working-directory: ${{ env.LIBNABO_SRC_DIR }}
         run: |
           cd libnabo
-          cmake -A x64 -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=${{ env.LIBNABO_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_OPEN_MP:BOOL=ON -S . -B ./build
+          cmake -A x64 `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            -DCMAKE_INSTALL_PREFIX=${{ env.LIBNABO_INSTALL_PATH }} `
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+            -DUSE_OPEN_MP:BOOL=ON `
+            -S . -B ./build
           cmake --build ./build --target install
           cd -
           rm -r ./libnabo/build
@@ -203,7 +208,12 @@ jobs:
         working-directory: ${{ env.LIBNABO_SRC_DIR }}
         run: |
           cd libnabo
-          cmake -GNinja -DBOOST_ROOT=${{ env.BOOST_INSTALL_PATH }} -DCMAKE_INSTALL_PREFIX=${{ env.LIBNABO_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_OPEN_MP:BOOL=ON -S . -B ./build
+          cmake -GNinja \
+            -DBOOST_ROOT=${{ env.BOOST_INSTALL_PATH }} \
+            -DCMAKE_INSTALL_PREFIX=${{ env.LIBNABO_INSTALL_PATH }} \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DUSE_OPEN_MP:BOOL=ON \
+            -S . -B ./build
           cmake --build ./build --target install
           cd -
           rm -r ./libnabo/build
@@ -220,7 +230,11 @@ jobs:
         if: ${{ steps.cache-pybind11.outputs.cache-hit != 'true' && runner.os == 'Linux' }}
         run: |
           cd pybind11
-          cmake -GNinja -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPYBIND11_TEST:BOOL=OFF -S . -B ./build
+          cmake -GNinja \
+            -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DPYBIND11_TEST:BOOL=OFF \
+            -S . -B ./build
           cmake --build ./build --target install
           rm -r ./build
       
@@ -229,7 +243,12 @@ jobs:
         if: ${{ steps.cache-pybind11.outputs.cache-hit != 'true' && runner.os == 'Windows' }}
         run: |
           cd pybind11
-          cmake -A x64 -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPYBIND11_TEST:BOOL=OFF -S . -B ./build
+          cmake -A x64 `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} `
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+            -DPYBIND11_TEST:BOOL=OFF `
+            -S . -B ./build
           cmake --build ./build --target install
           rm -r ./build
 
@@ -238,7 +257,15 @@ jobs:
         env:
           PYTHON_PACKAGE_NAME: pypointmatcher
         run: |
-          cmake -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 -DBUILD_PYTHON_MODULE:BOOL=ON -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} -DUSE_OPEN_MP:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -S . -B ./build
+          cmake \
+            -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} \
+            -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} \
+            -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 \
+            -DBUILD_PYTHON_MODULE:BOOL=ON \
+            -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} \
+            -DUSE_OPEN_MP:BOOL=ON \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -S . -B ./build
           sudo cmake --build ./build --target install
           rm -r ./build
 
@@ -247,7 +274,16 @@ jobs:
         env:
           PYTHON_PACKAGE_NAME: pypointmatcher
         run: |
-          cmake -A x64 -DCMAKE_TOOLCHAIN_FILE:FILEPATH="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DLIBNABO_INSTALL_DIR:PATH="${{ env.LIBNABO_INSTALL_PATH }}" -Dpybind11_DIR:PATH="${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11" -DBUILD_PYTHON_MODULE:BOOL=ON -DPYTHON_INSTALL_TARGET:PATH="./python/${{ env.PYTHON_PACKAGE_NAME }}" -DVCPKG_TARGET_TRIPLET="x64-windows-static" -DUSE_OPEN_MP:BOOL=ON -DCMAKE_BUILD_TYPE="RelWithDebInfo" -S . -B ./build
+          cmake -A x64 `
+            -DCMAKE_TOOLCHAIN_FILE:FILEPATH="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            -DLIBNABO_INSTALL_DIR:PATH="${{ env.LIBNABO_INSTALL_PATH }}" `
+            -Dpybind11_DIR:PATH="${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11" `
+            -DBUILD_PYTHON_MODULE:BOOL=ON `
+            -DPYTHON_INSTALL_TARGET:PATH="./python/${{ env.PYTHON_PACKAGE_NAME }}" `
+            -DVCPKG_TARGET_TRIPLET="x64-windows-static" `
+            -DUSE_OPEN_MP:BOOL=ON `
+            -DCMAKE_BUILD_TYPE="RelWithDebInfo" `
+            -S . -B ./build
           cmake --build ./build --target install
           rm -r ./build
       
@@ -256,10 +292,22 @@ jobs:
         run: |
           python ./setup.py bdist_wheel -d ${{ env.PYTHON_WHEEL_DIR }}
 
-      - name: Upload python wheel
-        uses: actions/upload-artifact@v3
+      - name: Test package
+        working-directory: ./python
+        run: |
+          pip install ${{ env.PYTHON_WHEEL_DIR }}/*.whl
+          python -c "from pypointmatcher import *"
+
+      # - name: Upload python wheel
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: libpointmatcher python ${{ matrix.python_version }} wheel
+      #     path: ${{ env.PYTHON_WHEEL_DIR }}/*.whl
+      #     if-no-files-found: error
+      #     retention-days: 1
+
+      - uses: ncipollo/release-action@v1
         with:
-          name: libpointmatcher python ${{ matrix.python_version }} wheel
-          path: ${{ env.PYTHON_WHEEL_DIR }}/*.whl
-          if-no-files-found: error
-          retention-days: 1
+          artifacts: "${{ env.PYTHON_WHEEL_DIR }}/*.whl"
+          prerelease: true
+          allowUpdates: true
