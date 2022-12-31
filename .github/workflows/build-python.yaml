@@ -3,6 +3,8 @@ name: Compile python package
 on:
   push:
     branches: [master, feature/github-release]
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
   pull_request:
     branches: [master]
   workflow_dispatch:
@@ -22,6 +24,7 @@ env:
   PYTHON_WHEEL_DIR: ${{ github.workspace }}/.tmp/python-wheel
   VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/.tmp/bin-cache'
   CMAKE_BUILD_PARALLEL_LEVEL: 2
+  BUILD_DIR: ${{ github.workspace }}/build
 
 jobs:
   compile-python-package:
@@ -32,16 +35,14 @@ jobs:
         os: 
           # - windows-2019 Cannot compile on the Windows
           - ubuntu-20.04
+      
+    permissions:
+      contents: write
     
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ runner.os }}-libointmatcher--cache-python-${{ matrix.python_version }}
 
       - name: Make temp dir
         run: mkdir ${{ github.workspace }}/.tmp
@@ -75,6 +76,13 @@ jobs:
         with:
           path: ${{ env.BOOST_INSTALL_PATH }}
           key: ${{ runner.os }}-boost-cache-${{ env.BOOST_VERSION }}-python-${{ matrix.python_version }}
+
+      - name: Cache compiled libpointmatcher
+        id: cache-libpointmatcher
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.BUILD_DIR }}
+          key: ${{ runner.os }}-libpointmatcher-cache-python-${{ matrix.python_version }}
 
       - name: Cache libnabo
         id: cache-libnabo
@@ -270,11 +278,8 @@ jobs:
             -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} \
             -DUSE_OPEN_MP:BOOL=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -S . -B ./build
-          sudo cmake --build ./build --target install
-          rm -r ./build
+            -S . -B ${{ env.BUILD_DIR }}
+          sudo cmake --build ${{ env.BUILD_DIR }} --target install
 
       - name: Compile libpointmatcher on Windows
         if: runner.os == 'Windows'
@@ -290,9 +295,8 @@ jobs:
             -DVCPKG_TARGET_TRIPLET="x64-windows-static" `
             -DUSE_OPEN_MP:BOOL=ON `
             -DCMAKE_BUILD_TYPE="RelWithDebInfo" `
-            -S . -B ./build
-          cmake --build ./build --target install
-          rm -r ./build
+            -S . -B ${{ env.BUILD_DIR }}
+          cmake --build ${{ env.BUILD_DIR }} --target install
       
       - name: Build python wheel
         working-directory: ./python
@@ -305,16 +309,20 @@ jobs:
           pip install ${{ env.PYTHON_WHEEL_DIR }}/*.whl
           python -c "from pypointmatcher import *"
 
-      # - name: Upload python wheel
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: libpointmatcher python ${{ matrix.python_version }} wheel
-      #     path: ${{ env.PYTHON_WHEEL_DIR }}/*.whl
-      #     if-no-files-found: error
-      #     retention-days: 1
+      - name: Upload python wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: libpointmatcher python ${{ matrix.python_version }} wheel
+          path: ${{ env.PYTHON_WHEEL_DIR }}/*.whl
+          if-no-files-found: error
+          retention-days: 10
 
       - uses: ncipollo/release-action@v1
+        if: github.ref_type == 'tag'
         with:
           artifacts: "${{ env.PYTHON_WHEEL_DIR }}/*.whl"
           prerelease: true
           allowUpdates: true
+          generateReleaseNotes: true
+          tag: test
+  
