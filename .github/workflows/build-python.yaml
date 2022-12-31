@@ -44,6 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+
       - name: Make temp dir
         run: mkdir ${{ github.workspace }}/.tmp
 
@@ -77,12 +80,12 @@ jobs:
           path: ${{ env.BOOST_INSTALL_PATH }}
           key: ${{ runner.os }}-boost-cache-${{ env.BOOST_VERSION }}-python-${{ matrix.python_version }}
 
-      - name: Cache compiled libpointmatcher
+      - name: Cache ccache for libpointmatcher
         id: cache-libpointmatcher
         uses: actions/cache@v3
         with:
-          path: ${{ env.BUILD_DIR }}
-          key: ${{ runner.os }}-libpointmatcher-cache-python-${{ matrix.python_version }}
+          path: ${{ github.workspace }}/.ccache
+          key: ${{ runner.os }}-libpointmatcher-ccache-python-${{ matrix.python_version }}
 
       - name: Cache libnabo
         id: cache-libnabo
@@ -153,7 +156,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python_version }}
-      
+          cache: 'pip'
+
       - name: Install numpy and wheel
         run: pip install numpy>=1.20 wheel
       
@@ -278,6 +282,8 @@ jobs:
             -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} \
             -DUSE_OPEN_MP:BOOL=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -S . -B ${{ env.BUILD_DIR }}
           sudo cmake --build ${{ env.BUILD_DIR }} --target install
 
