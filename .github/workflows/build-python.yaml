@@ -92,7 +92,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.LIBNABO_INSTALL_PATH }}
-          key: ${{ runner.os }}-libnabo-cache--${{ env.LIBNABO_VERSION }}-python-${{ matrix.python_version }}
+          key: ${{ runner.os }}-libnabo-cache-${{ env.LIBNABO_VERSION }}
 
       - name: Cache binary vcpkg
         if: ${{ runner.os  == 'Windows' }}
@@ -100,7 +100,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: ${{ runner.os }}-vcpkg-cache--python-${{ matrix.python_version }}
+          key: ${{ runner.os }}-vcpkg-cache-python-${{ matrix.python_version }}
 
       - name: Cache pybind11
         id: cache-pybind11
