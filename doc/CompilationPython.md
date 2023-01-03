@@ -22,7 +22,7 @@ To get started, you will need the same prerequisites as libpointmatcher, but als
 `pytest` needs to be installed with `pip`:
 
 ```bash
-pip3 install pytest
+pip3 install pytest wheel
 ```
 
 But `catch` and `python3-dev` need to be installed with a package manager:
@@ -112,47 +112,12 @@ You're now ready to proceed to the [configuration step](#configuration).
 
 > ***Note:*** *It is recommended to create a virtual environment before proceeding with the next steps. For this, you can use the [virtualenv tool](https://virtualenv.pypa.io/en/stable/). If you are not familiar with Python virtual environments, you can [read this tutorial](https://realpython.com/python-virtual-environments-a-primer/), which explains very well the reasons for using a virtual environment, or [watch this video tutorial](https://youtu.be/nnhjvHYRsmM)*
 
-#### Specifying the path
-
-First, you need to specify where you want the module to be installed. To do so, you must provide the path by setting the CMake variable `PYTHON_INSTALL_TARGET` with an absolute path to your Python environment `site-packages` location. This can be achieve manually or automatically.
-
-##### The manual way:
-
-Launch the Python interpreter and run the following commands to find the path to the `site-packages/` directory of your current Python environment:
-
-```bash
->>> import site
->>> site.getsitepackages()
-```
-
-> ***Note:*** If you are using the system's Python environment, replace the `getsitepackages()` function call by `getusersitepackages()`.
-
-This will output a list of installation paths for your current Python environment. Now, choose the one that is located in the `python_env_path/lib/python3.x/` directory. The command to run should look like this:
-
-```bash
-cmake -D PYTHON_INSTALL_TARGET=python_env_path/lib/python3.x/site-packages ..
-```
-
-> ***NOTE:*** Replace the `x` with your Python minor version number.
-
-##### The automatic way:
-
-If you don't want to set the path manually, here's a command that should automatically pick the right one for you:
-
-```bash
-cmake -D PYTHON_INSTALL_TARGET=$(python3 -c "import site; print(site.getsitepackages()[0])") ..
-```
-
-> ***Note:*** If you are using the system's Python environment, replace the `site.getsitepackages()[0]` by `site.getusersitepackages()`.
-
-> ***IMPORTANT:*** *This last example is the default behavior if no path has been set before compiling the module.* ***Please, make sure that this corresponds to a valid location or the module will be installed in a wrong location and this will lead to an import error.***
-
 #### Enabling the compilation
 
-By default, pypointmatcher compilation is disabled. In order to compile it, you must set the CMake variable `BUILD_PYTHON_MODULE` to `ON`:
+By default, pypointmatcher compilation is disabled. In order to compile it, you must set the CMake variable `BUILD_PYTHON_MODULE` to `ON` and `PYTHON_INSTALL_TARGET`:
  
 ```bash
-cmake -D BUILD_PYTHON_MODULE=ON ..
+cmake -DBUILD_PYTHON_MODULE=ON -DPYTHON_INSTALL_TARGET:PATH="./python/pypointmatcher" ..
 ```
 
 Everything is now set up to proceed to the compilation and the installation.
@@ -162,10 +127,10 @@ Everything is now set up to proceed to the compilation and the installation.
 Now, to compile pypointmatcher into the `build/` directory, run the following command:
 
 ```bash
-make pypointmatcher -j N
+cmake --build . -j N --target install
 ```
 
-where `N` is the number of jobs (or threads) you allow at once on your computer for the compilation. If no argument is passed after `-j`, there will be no limit to the number of jobs.
+where `N` is the number of jobs (or threads) you allow at once on your computer for the compilation. If `-j` is omitted the native build tool's default number is used.
 
 > ***Note:*** *Depending on your system, the compilation can take quite some time, so consider leaving the `-j` command with no argument in order to speed up this step.*
 
@@ -173,7 +138,6 @@ where `N` is the number of jobs (or threads) you allow at once on your computer 
 
 And finally, to install the module on your system, run the following command:
 
-```bash
-sudo make install
+```console
+pip3 install ./python/pypointmatcher/*.whl
 ```
-
