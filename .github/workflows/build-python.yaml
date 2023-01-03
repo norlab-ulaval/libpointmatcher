@@ -33,7 +33,7 @@ jobs:
       matrix:
         python_version: ['3.8', '3.9', '3.10', '3.11']
         os: 
-          # - windows-2019 Cannot compile on the Windows
+          - windows-2019
           - ubuntu-20.04
       
     permissions:
@@ -90,7 +90,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          key: ${{ runner.os }}-vcpkg-cache-python-${{ matrix.python_version }}
+          key: ${{ runner.os }}-vcpkg-cache-${{ matrix.python_version }}
 
       - name: Cache pybind11
         id: cache-pybind11
@@ -160,10 +160,10 @@ jobs:
                 boost-thread:x64-windows-static `
                 boost-filesystem:x64-windows-static `
                 boost-system:x64-windows-static `
-                boost-program-options:x64-windows-static ` 
-                boost-date-time:x64-windows-static ` 
-                boost-chrono:x64-windows-static ` 
-                boost-regex[icu]:x64-windows-static ` 
+                boost-program-options:x64-windows-static `
+                boost-date-time:x64-windows-static `
+                boost-chrono:x64-windows-static `
+                boost-regex[icu]:x64-windows-static `
                 boost-assign:x64-windows-static `
                 boost-timer:x64-windows-static `
                 --clean-after-build
