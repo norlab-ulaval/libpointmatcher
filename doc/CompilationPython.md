@@ -114,10 +114,10 @@ You're now ready to proceed to the [configuration step](#configuration).
 
 #### Enabling the compilation
 
-By default, pypointmatcher compilation is disabled. In order to compile it, you must set the CMake variable `BUILD_PYTHON_MODULE` to `ON` and `PYTHON_INSTALL_TARGET`:
+By default, pypointmatcher compilation is disabled. In order to compile it, you must set the CMake variable `BUILD_PYTHON_MODULE` to `ON`:
  
 ```bash
-cmake -DBUILD_PYTHON_MODULE=ON -DPYTHON_INSTALL_TARGET:PATH="./python/pypointmatcher" ..
+cmake -DBUILD_PYTHON_MODULE=ON ..
 ```
 
 Everything is now set up to proceed to the compilation and the installation.
@@ -138,6 +138,7 @@ where `N` is the number of jobs (or threads) you allow at once on your computer 
 
 And finally, to install the module on your system, run the following command:
 
+Return to the `python` directory:
 ```console
-pip3 install ./python/pypointmatcher/*.whl
+python ./setup.py install
 ```

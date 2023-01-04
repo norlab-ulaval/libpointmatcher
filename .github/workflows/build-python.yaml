@@ -33,7 +33,7 @@ jobs:
       matrix:
         python_version: ['3.8', '3.9', '3.10', '3.11']
         os: 
-          - windows-2019
+          # - windows-2019 cannot compile on Windows
           - ubuntu-20.04
       
     permissions:
@@ -261,15 +261,12 @@ jobs:
 
       - name: Compile libpointmatcher on Linux
         if: runner.os == 'Linux'
-        env:
-          PYTHON_PACKAGE_NAME: pypointmatcher
         run: |
           cmake \
             -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} \
             -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} \
             -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 \
             -DBUILD_PYTHON_MODULE:BOOL=ON \
-            -DPYTHON_INSTALL_TARGET=./python/${{ env.PYTHON_PACKAGE_NAME }} \
             -DUSE_OPEN_MP:BOOL=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -S . -B ${{ env.BUILD_DIR }}

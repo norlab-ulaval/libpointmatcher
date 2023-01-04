@@ -1,7 +1,5 @@
 if("${PYTHON_INSTALL_TARGET}" STREQUAL "")
-	message(STATUS "PYTHON_INSTALL_TARGET variable is not set, setting a default value...")
-	execute_process(COMMAND "python3" "-c" "import site; print(site.getsitepackages()[0])"
-	                OUTPUT_VARIABLE PYTHON_INSTALL_TARGET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(PYTHON_INSTALL_TARGET ${CMAKE_CURRENT_SOURCE_DIR}/pypointmatcher)
 endif()
 
 message(STATUS "The Python module will be install at this location : ${PYTHON_INSTALL_TARGET}")
