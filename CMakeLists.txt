@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 
 include(CheckSymbolExists)
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
@@ -111,6 +111,15 @@ set(EXTERNAL_LIBS "")
 # compile local version of gtest and yaml-cpp
 add_subdirectory(contrib)
 
+#---------------------------
+# DEPENDENCY:  POSIX Threads
+#---------------------------
+find_package(Threads REQUIRED)
+if (CMAKE_VERSION VERSION_LESS 3.1.0)
+  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+else()
+  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} Threads::Threads)
+endif()
 
 #--------------------
 # DEPENDENCY:  boost
@@ -123,9 +132,14 @@ endif ()
 #--------------------
 # DEPENDENCY: eigen 3
 #--------------------
-find_path(EIGEN_INCLUDE_DIR Eigen/Core
-	/usr/local/include/eigen3
-	/usr/include/eigen3
+find_path(EIGEN_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
+  HINTS  ENV EIGEN3_INC_DIR
+         ENV EIGEN3_DIR
+  PATHS  Eigen/Core
+         /usr/local/include
+         /usr/include
+  PATH_SUFFIXES include eigen3 eigen
+  DOC "Directory containing the Eigen3 header files"
 )
 
 # Suppress Eigen's warning by adding it to the system's library
@@ -465,6 +479,15 @@ option(BUILD_TESTS "Build all tests." OFF)
 if (BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(utest)
+endif()
+
+# ========================= Python module =============================
+option(BUILD_PYTHON_MODULE "Build the python module for libpointmatcher" OFF)
+option(USE_SYSTEM_PYBIND11 "Use the system installed pybind11 rather than using a git submodule" ON)
+set(PYTHON_INSTALL_TARGET "" CACHE PATH "Target where to install the python module")
+
+if (BUILD_PYTHON_MODULE)
+	add_subdirectory(python)
 endif()
 
 #=================== allow find_package() =========================

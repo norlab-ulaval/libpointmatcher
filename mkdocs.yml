@@ -39,3 +39,6 @@ nav:
     - 'Creating a DataPointsFilter': 'DataPointsFilterDev.md'
     - 'Creating a Transformation': 'TransformationDev.md'
     - 'Creating unit tests': 'UnitTestDev.md'
+- Python:
+    - 'Compiling libpointmatcher with Python': 'CompilationPython.md'
+    - 'Using libpointmatcher with Python': 'PythonModule.md'

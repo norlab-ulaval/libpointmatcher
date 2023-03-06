@@ -1,4 +1,5 @@
-![alt tag](doc/images/banner_light.jpeg)
+[![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms) Awesome LIDAR; [![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping) Awesome Robotics Libraries; [![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds) Awesome Robotics
+![banner](doc/images/banner_light.jpeg)
 
 
 ---
@@ -7,6 +8,7 @@
 # Documentation and Tutorials
 
 libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
+The library is written in C++ for effeciency with [bindings in Python](https://github.com/ethz-asl/libpointmatcher/blob/master/doc/index.md#python-).
 
 **Quick link for the tutorial pages: [Tutorials](doc/index.md) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
 
@@ -124,6 +126,10 @@ If you are using libpointmatcher in your project and you would like to have it l
  * NASA Ames [Stereo Pipeline](https://ti.arc.nasa.gov/tech/asr/groups/intelligent-robotics/ngt/stereo/): Planetary reconstruction from satellite observations. Results: used for Mars, Moon and Earth point clouds.
  * Armasuisse S+T UGV research program [ARTOR](http://www.artor.ethz.ch/): Development of techniques for reliable autonomous navigation of a wheeled robot in rough, outdoor terrain. Results: [video of urban and dynamic 3D reconstruction](http://www.youtube.com/watch?v=UCCAUf64tD0) and [video of open space 3D reconstruction](http://www.youtube.com/watch?v=M5Y99o7um88) with real-time computation.
  * Swiss National Science Foundation - [Limnobotics](http://www.limnobotics.ch/): Robotic solution for toxic algae monitoring in lacs. Result: [video of 3D shore reconstruction](http://www.youtube.com/watch?v=g8l-Xq4qYeE) with real-time computation.
+ * [CGAL](https://www.cgal.org/) includes our library for their registration pipeline.
+ * [Norlab](https://norlab.ulaval.ca/) is maintaining and using the library for their research on autonomous navigation in harsh environments.
+ * [ANYbotics AG](https://www.anybotics.com) is investigating autonomous navigation algorithms using this library.
+ * [Point Laz Mining LiDAR Expert](https://www.pointlaz.com/) is scanning mine shafts to ensure infrastructure safety.
 
 For a larger list of work realized with libpointmatcher, please see the page [Applications And Publications](/doc/ApplicationsAndPub.md).
 

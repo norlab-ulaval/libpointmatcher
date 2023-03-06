@@ -181,9 +181,9 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 {
 	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
 	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
-	
+
 	const int points_nbr = matches.dists.rows() * matches.dists.cols();
-	
+
 	// vector containing the squared distances of the matches
 	std::vector<T> tmpSortedDist;
 	tmpSortedDist.reserve(points_nbr);
@@ -191,9 +191,9 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 		for (int y = 0; y < matches.dists.rows(); ++y)
 			if ((matches.dists(y, x) != numeric_limits<T>::infinity()) && (matches.dists(y, x) > 0))
 				tmpSortedDist.push_back(matches.dists(y, x));
-	if (tmpSortedDist.size() == 0)
-		throw ConvergenceError("no outlier to filter");
-			
+	if (tmpSortedDist.empty())
+		throw ConvergenceError("Inlier ratio optimization failed due to absence of matches");
+
 	std::sort(tmpSortedDist.begin(), tmpSortedDist.end());
 	std::vector<T> tmpCumSumSortedDist;
 	tmpCumSumSortedDist.reserve(points_nbr);
@@ -215,7 +215,7 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	int minIndex(0);// = FRMS.minCoeff();
 	FRMS.minCoeff(&minIndex);
 	const T optRatio = (float)(minIndex + minEl)/ (float)points_nbr;
-	
+
 	return optRatio;
 }
 
@@ -240,7 +240,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 {
 	const BOOST_AUTO(normalsReading, filteredReading.getDescriptorViewByName("normals"));
 	const BOOST_AUTO(normalsReference, filteredReference.getDescriptorViewByName("normals"));
-	
+
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
 
@@ -250,7 +250,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 		{
 			const Vector normalRead = normalsReading.col(x).normalized();
 
-			for (int y = 0; y < w.rows(); ++y) // knn 
+			for (int y = 0; y < w.rows(); ++y) // knn
 			{
 				const int idRef = input.ids(y, x);
 
@@ -261,7 +261,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 
 				const Vector normalRef = normalsReference.col(idRef).normalized();
 
-				const T value = anyabs(normalRead.dot(normalRef));
+				const T value = normalRead.dot(normalRef);
 
 				if(value < eps) // test to keep the points
 					w(y, x) = 0;
@@ -314,7 +314,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 
 	const int knn = input.dists.rows();
 	const int readPtsCount = input.dists.cols();
-	
+
 	OutlierWeights w(knn, readPtsCount);
 
 	const DataPoints *cloud;
@@ -322,7 +322,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	if(source == "reference")
 		cloud = &filteredReference;
 	else
-		cloud = &filteredReference;
+		cloud = &filteredReading;
 
 	ConstView desc(cloud->getDescriptorViewByName(descName));
 
@@ -336,23 +336,31 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	{
 		for(int i=0; i < readPtsCount; i++)
 		{
-			const int idRead = input.ids(k, i);
-			if (idRead == MatchersImpl<T>::NNS::InvalidIndex){
-				w(k,i) = 0;
-				continue;
+			int point_id;
+			if (source == "reference") {
+				point_id = input.ids(k, i);
+				if (point_id == MatchersImpl<T>::NNS::InvalidIndex){
+					LOG_INFO_STREAM("Invalid Index in GenericOutlierFilter, setting weight to 0.");
+					w(k,i) = 0;
+					continue;
+				}
+			} else {
+				// We don't need to look up corresponding points in the reference
+				//, we index into the reading PC directly.
+				point_id = i;
 			}
 			if(useSoftThreshold == false)
 			{
 				if(useLargerThan == true)
 				{
-					if (desc(0, idRead) > threshold)
+					if (desc(0, point_id) > threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
 				}
 				else
 				{
-					if (desc(0, idRead) < threshold)
+					if (desc(0, point_id) < threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
@@ -361,7 +369,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 			else
 			{
 				// use soft threshold by assigning the weight using the descriptor
-				w(k,i) = desc(0, idRead);
+				w(k,i) = desc(0, point_id);
 			}
 		}
 	}

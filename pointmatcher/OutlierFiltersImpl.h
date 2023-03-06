@@ -177,7 +177,7 @@ struct OutlierFiltersImpl
 	{
 		inline static const std::string description()
 		{
-			return "Hard rejection threshold using the angle between the surface normal vector of the reading and the reference. If normal vectors or not in the descriptor for both of the point clouds, does nothing.";
+			return "Hard rejection threshold using the angle between the surface normal vector of the reading and the reference. Usually used in combination with `OrientNormalDataPointsFilter`. If normal vectors are not in the descriptor for both of the point clouds, does nothing.";
 		}
 		inline static const ParametersDoc availableParameters()
 		{

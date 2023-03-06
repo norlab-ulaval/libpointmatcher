@@ -62,6 +62,7 @@ PointMatcher<T>::PointMatcher()
 {
 	ADD_TO_REGISTRAR_NO_PARAM(Transformation, RigidTransformation, typename TransformationsImpl<T>::RigidTransformation)
 	ADD_TO_REGISTRAR_NO_PARAM(Transformation, PureTranslation, typename TransformationsImpl<T>::PureTranslation)
+	ADD_TO_REGISTRAR_NO_PARAM(Transformation, SimilarityTransformation, typename TransformationsImpl<T>::SimilarityTransformation)	
 	
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, IdentityDataPointsFilter, typename DataPointsFiltersImpl<T>::IdentityDataPointsFilter)
 	ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, RemoveNaNDataPointsFilter, typename DataPointsFiltersImpl<T>::RemoveNaNDataPointsFilter)

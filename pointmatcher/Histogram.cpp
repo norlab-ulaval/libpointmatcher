@@ -32,6 +32,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+#include "PointMatcherPrivate.h"
 
 #include "Histogram.h"
 
@@ -68,13 +69,13 @@ namespace PointMatcherSupport
 		
 		if (!filePrefix.empty())
 		{
-			std::cerr << "writing to " << (filePrefix + name + "Stats.csv") << std::endl;
+			LOG_INFO_STREAM("writing to " << (filePrefix + name + "Stats.csv"));
 			std::ofstream ofs_stats((filePrefix + name + "Stats.csv").c_str());
 			dumpStatsHeader(ofs_stats);
 			ofs_stats << endl;
 			dumpStats(ofs_stats);
 
-			std::cerr << "writing to " << (filePrefix + name + ".csv") << std::endl;
+			LOG_INFO_STREAM("writing to " << (filePrefix + name + ".csv"));
 			std::ofstream ofs((filePrefix + name + ".csv").c_str());
 			for (size_t i = 0; i < this->size(); ++i)
 				ofs << ((*this)[i]) << "\n";
@@ -146,14 +147,15 @@ namespace PointMatcherSupport
 			}
 			varV /= T(this->size());
 			// median
-			const Iterator lowQtIt(this->begin() + (this->size() / 4));
-			const Iterator medianIt(this->begin() + (this->size() / 2));
-			const Iterator highQtIt(this->begin() + (3*this->size() / 4));
-			std::nth_element(this->begin(), medianIt, this->end());
+			std::vector<T> hystCpy((*this));
+			const Iterator lowQtIt(hystCpy.begin() + (hystCpy.size() / 4));
+			const Iterator medianIt(hystCpy.begin() + (hystCpy.size() / 2));
+			const Iterator highQtIt(hystCpy.begin() + (3*hystCpy.size() / 4));
+			std::nth_element(hystCpy.begin(), medianIt, hystCpy.end());
 			medianV = *medianIt;
-			std::nth_element(this->begin(), lowQtIt, this->end());
+			std::nth_element(hystCpy.begin(), lowQtIt, hystCpy.end());
 			lowQt = *lowQtIt;
-			std::nth_element(this->begin(), highQtIt, this->end());
+			std::nth_element(hystCpy.begin(), highQtIt, hystCpy.end());
 			highQt = *highQtIt;
 		}
 		else

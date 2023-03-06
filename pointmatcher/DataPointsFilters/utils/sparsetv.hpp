@@ -29,6 +29,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+
+//Import "and", "or", "not" macros
+#include <iso646.h>
+
 //--ctor
 template <typename T>
 TensorVoting<T>::TensorVoting(T sigma_, std::size_t k_) : sigma{sigma_}, k{k_}
