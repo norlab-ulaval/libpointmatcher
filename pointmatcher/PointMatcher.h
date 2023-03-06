@@ -155,8 +155,12 @@ struct PointMatcher
 	// eigen and nabo-based types
 	// ---------------------------------
 	
+	//! The dimension of the point clouds that libpointmatcher will process
+	static constexpr Eigen::Index kPointDimension{ 3 };
 	//! The scalar type
 	typedef T ScalarType;
+	//! A vector over ScalarType
+	typedef typename Eigen::Matrix<T, kPointDimension, 1> StaticCoordVector;
 	//! A vector over ScalarType
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
 	//! A vector of vector over ScalarType, not a matrix
@@ -173,6 +177,8 @@ struct PointMatcher
 	typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	//! A dense array over ScalarType
 	typedef typename Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> Array;
+	//! An affine transform over ScalarType
+	typedef typename Eigen::Transform<T, kPointDimension, Eigen::Affine> AffineTransform;
 
 
 	//! A matrix holding the parameters a transformation.
@@ -766,6 +772,98 @@ struct PointMatcher
 		TransformationParameters T_refIn_refMean; //!< offset for centered map
 	};
 	
+    //
+    // This class contains methods to generate point clouds in the shape of geometric primitives.
+    //
+    struct PointCloudGenerator
+    {
+        using Index = typename DataPoints::Index;
+
+        //! @brief Builds a 3D affine transformation with a given translation and rotation.
+        //!
+        //! @param translation       Translation. [m]
+        //! @param rotation          Rotation quaternion.
+        //! @return AffineTransform  Resulting transformation.
+        static AffineTransform buildUpTransformation(const StaticCoordVector& translation, const Quaternion& rotation);
+
+        //! @brief Adds 3D coordinates and normals fields to a point cloud.
+        //!
+        //! @param numberOfPoints[in]  Number of points to add to the point cloud.
+        //! @param pointCloud[out]      Point cloud.
+        static void addEmpty3dPointFields(const Index numberOfPoints, DataPoints& pointCloud);
+
+        //! @brief Transforms a point cloud by translating and rotating it a given amount.
+        //!
+        //! @param translation[in]   Translation.
+        //! @param rotation[in]      Rotation.
+        //! @param pointCloud[out]   Point cloud to transform.
+        static void applyTransformation(const StaticCoordVector& translation, const Quaternion& rotation, DataPoints& pointCloud);
+
+        //! @brief Computes a normal vector from a vector that contains the dimensions of a 2D shape in at-most 2 directions.
+        //!
+        //! @param axisAlignedPlaneDimensions[in]  Dimensions vector.
+        //! @return StaticCoordVector                Normal vector.
+        static StaticCoordVector computeNormalOfAxisAlignedPlane(const StaticCoordVector& axisAlignedPlaneDimensions);
+
+        //! @brief Generates a uniformly sampled sphere (with no filling), with a given number of points and pose.
+        //!
+        //! @param radius[in]          Radius of the sphere. [m]
+        //! @param numberOfPoints[in]  Number of points.
+        //! @param translation[in]     Translation with respect to the sphere origin, to be used for positioning the sphere.
+        //! @param rotation[in]        Rotation with respect to the sphere origin, to be used for positioning the sphere.
+        //! @return DataPoints  Sphere's point cloud.
+        static DataPoints generateUniformlySampledSphere(const ScalarType radius, const Index numberOfPoints,
+                                                         const StaticCoordVector& translation, const Quaternion& rotation);
+
+        //! @brief Generates a uniformly sampled circle, with a given number of points and pose.
+        //!
+        //! @param radius[in]          Radius of the circle. [m]
+        //! @param numberOfPoints[in]  Number of points.
+        //! @param translation[in]     Translation with respect to the circle origin, to be used for positioning the circle.
+        //! @param rotation[in]        Rotation with respect to the circle origin, to be used for positioning the circle.
+        //! @return DataPoints  Circle's point cloud.
+        static DataPoints generateUniformlySampledCircle(const ScalarType radius, const Index numberOfPoints,
+                                                         const StaticCoordVector& translation, const Quaternion& rotation);
+
+        //! @brief Generates a uniformly sampled cylinder (with no filling), with a given number of points and pose.
+        //!
+        //! @param radius[in]          Radius of the cylinder. [m]
+        //! @param height[in]          Height of the cylinder. [m]
+        //! @param numberOfPoints[in]  Number of points.
+        //! @param translation[in]     Translation with respect to the cylinder origin, to be used for positioning the cylinder.
+        //! @param rotation[in]        Rotation with respect to the cylinder origin, to be used for positioning the cylinder.
+        //! @return DataPoints  Circle's point cloud.
+        static DataPoints generateUniformlySampledCylinder(const ScalarType radius, const ScalarType height, const Index numberOfPoints,
+                                                           const StaticCoordVector& translation, const Quaternion& rotation);
+
+
+        //! @brief Generates a uniformly sampled plane, with a given number of points and pose.
+        //!
+        //! @param dimensions[in]      Dimensions of the plane (length, width, height). [m]
+        //! @param numberOfPoints[in]  Number of points.
+        //! @param translation[in]     Translation with respect to the plane origin, to be used for positioning the plane.
+        //! @param rotation[in]        Rotation with respect to the plane origin, to be used for positioning the plane.
+        //! @return DataPoints  Plane's point cloud.
+        static DataPoints generateUniformlySampledPlane(const StaticCoordVector& dimensions, const Index numberOfPoints,
+                                                        const StaticCoordVector& translation, const Quaternion& rotation);
+
+        //! @brief Generates a uniformly sampled box (with no filling), with a given number of points and pose.
+        //!
+        //! @param length[in]          Length of the box. [m]
+        //! @param width[in]           Width of the box. [m]
+        //! @param height[in]          Height of the box. [m]
+        //! @param numberOfPoints[in]  Number of points.
+        //! @param translation[in]     Translation with respect to the box origin, to be used for positioning the box.
+        //! @param rotation[in]        Rotation with respect to the box origin, to be used for positioning the box.
+        //! @return DataPoints  Box's point cloud.
+        static DataPoints generateUniformlySampledBox(const ScalarType length, const ScalarType width, const ScalarType height,
+                                                      const Index numberOfPoints, const StaticCoordVector& translation,
+                                                      const Quaternion& rotation);
+
+        //! Pi.
+        static constexpr ScalarType pi{ static_cast<ScalarType>(M_PI) };
+    };
+
 	// ---------------------------------
 	// Instance-related functions
 	// ---------------------------------
