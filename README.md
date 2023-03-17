@@ -1,4 +1,5 @@
-![alt tag](doc/images/banner_light.jpeg)
+[![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms) Awesome LIDAR; [![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping) Awesome Robotics Libraries; [![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds) Awesome Robotics
+![banner](doc/images/banner_light.jpeg)
 
 
 ---
