@@ -42,7 +42,8 @@ template<typename T>
 RandomSamplingDataPointsFilter<T>::RandomSamplingDataPointsFilter(const Parameters& params):
 	PointMatcher<T>::DataPointsFilter("RandomSamplingDataPointsFilter", RandomSamplingDataPointsFilter::availableParameters(), params),
 	prob(Parametrizable::get<double>("prob")),
-	randomSamplingMethod(Parametrizable::get<int>("randomSamplingMethod"))
+	randomSamplingMethod(Parametrizable::get<int>("randomSamplingMethod")),
+	seed(Parametrizable::get<int>("seed"))
 {
 }
 
@@ -60,8 +61,16 @@ RandomSamplingDataPointsFilter<T>::filter(const DataPoints& input)
 template<typename T>
 Eigen::VectorXf RandomSamplingDataPointsFilter<T>::sampleRandomIndices(const size_t nbPoints)
 {
-	std::random_device randomDevice;
-	std::minstd_rand randomNumberGenerator(randomDevice());
+	std::minstd_rand randomNumberGenerator;
+	if (seed == -1)
+	{
+		std::random_device randomDevice;
+		randomNumberGenerator = std::minstd_rand(randomDevice());
+	}
+	else
+	{
+		randomNumberGenerator = std::minstd_rand(seed);
+	}
 
 	switch(randomSamplingMethod)
 	{
