@@ -59,13 +59,15 @@ struct RandomSamplingDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 	{
 		return {
 			{"prob", "Probability to keep a point, one over decimation factor ", "0.75", "0", "1", &P::Comp<T>},
-			{"randomSamplingMethod", "Random sampling method: Direct RNG (0) (fastest), Uniform (1) (more accurate but slower)", "0", "0", "1", &P::Comp<int>}
+			{"randomSamplingMethod", "Random sampling method: Direct RNG (0) (fastest), Uniform (1) (more accurate but slower)", "0", "0", "1", &P::Comp<int>},
+			{"seed", "Seed for random sampling (-1 means no seed is used)", "-1", "-1", "2147483647", &P::Comp<int>}
 		};
 	}
 	
 	const double prob;
 	const int randomSamplingMethod;
-	
+	const int seed;
+
 	RandomSamplingDataPointsFilter(const Parameters& params = Parameters());
 	virtual ~RandomSamplingDataPointsFilter() {};
 	virtual DataPoints filter(const DataPoints& input);
