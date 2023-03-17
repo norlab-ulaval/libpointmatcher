@@ -1,5 +1,5 @@
 | [Tutorials Home](index.md) | [Previous](UnitTestDev.md) | [Next](PythonModule.md) |
-| :--- | :---: | ---: |
+| :------------------------- | :------------------------: | ----------------------: |
 
 # Compiling libpointmatcher with Python
 
@@ -9,20 +9,23 @@ This tutorial presents the different steps of compiling *pypointmatcher*, the li
 
 To get started, you will need the same prerequisites as libpointmatcher, but also some additional dependencies as listed here:
 
-| Name | Version <br> (Tested August 2020 on Ubuntu 18.04) |
-| :--- | :---: |
-| pybind11 | 2.5.0 |
-| Python3 | 3.6.9 |
-|||
-| **Dependencies** | |
-| python3-dev | 3.6.7 |
-| catch | 1.10.0 |
-| pytest | 5.4.3 |
+| Name             | Version <br> (Tested August 2020 on Ubuntu 18.04) |
+| :--------------- | :-----------------------------------------------: |
+| pybind11         |                       2.5.0                       |
+| Python3          |                       3.6.9                       |
+|                  |                                                   |
+| **Dependencies** |                                                   |
+| python3-dev      |                       3.6.7                       |
+| catch            |                      1.10.0                       |
+| pytest           |                       5.4.3                       |
 
 `pytest` needs to be installed with `pip`:
 
 ```bash
 pip3 install pytest
+
+# If you have multiple installed versions of python3 :
+# python3.6 -m pip install pytest
 ```
 
 But `catch` and `python3-dev` need to be installed with a package manager:
@@ -48,19 +51,23 @@ pybind11 is a library used to create Python bindings of existing C++ code and vi
 ### Installing pybind11 (recommended) <a name="installing-pybind11"></a>
 
 The very first step is to clone [pybind11](https://github.com/pybind/pybind11) into a directory of your choice.
- 
+
 At the moment, pypointmatcher can only be compiled with **version 2.5.0** of pybind11. To install the right version, run the following commands:
- 
+
 ```bash
 cd pybind11
 git checkout v2.5.0
 ```
- 
+
 Once this is done, run the following commands:
 
 ```bash
 mkdir build && cd build
 cmake ..
+
+# With multiple versions of python3
+# cmake -DPYTHON_EXECUTABLE=$(python3.6 -c "import sys; print(sys.executable)") ..
+
 make check -j 4
 ```
 
@@ -112,6 +119,22 @@ You're now ready to proceed to the [configuration step](#configuration).
 
 > ***Note:*** *It is recommended to create a virtual environment before proceeding with the next steps. For this, you can use the [virtualenv tool](https://virtualenv.pypa.io/en/stable/). If you are not familiar with Python virtual environments, you can [read this tutorial](https://realpython.com/python-virtual-environments-a-primer/), which explains very well the reasons for using a virtual environment, or [watch this video tutorial](https://youtu.be/nnhjvHYRsmM)*
 
+It is a good practice to create a virtual environment to install and configure `pypointmatcher`, `libpointmatcher`'s Python module :
+
+```sh
+# In <libpointmatcher-repository-path> :
+python3 -m venv venv
+python3 -m venv venv
+
+# Or, it you have multiple python3 versions :
+# python3.6 -m venv venv
+
+source venv/bin/activate
+
+# We can then return to <libpointmatcher-repository-path>/build
+cd build/
+```
+
 #### Specifying the path
 
 First, you need to specify where you want the module to be installed. To do so, you must provide the path by setting the CMake variable `PYTHON_INSTALL_TARGET` with an absolute path to your Python environment `site-packages` location. This can be achieve manually or automatically.
@@ -150,7 +173,7 @@ cmake -D PYTHON_INSTALL_TARGET=$(python3 -c "import site; print(site.getsitepack
 #### Enabling the compilation
 
 By default, pypointmatcher compilation is disabled. In order to compile it, you must set the CMake variable `BUILD_PYTHON_MODULE` to `ON`:
- 
+
 ```bash
 cmake -D BUILD_PYTHON_MODULE=ON ..
 ```
