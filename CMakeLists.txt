@@ -32,6 +32,7 @@ else ()
 	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
 endif ()
 
+set(CMAKE_DEBUG_POSTFIX "d")
 
 # Check if 32 bit platform
 # By default, libpointmatcher is not compatible with and will not build on a
@@ -75,6 +76,7 @@ if( MSVC )
 	add_definitions( /D _VARIADIC_MAX=10 ) # VS2012 does not support tuples correctly yet
 	add_definitions( /D _USE_MATH_DEFINES) # defines M_PI for Visual Studio
 	add_definitions( /D _ENABLE_EXTENDED_ALIGNED_STORAGE) # this variable must be defined with VS2017 to acknowledge alignment changes of aligned_storage
+	add_definitions(/bigobj)
 endif()
 
 #======================= installation =====================================
