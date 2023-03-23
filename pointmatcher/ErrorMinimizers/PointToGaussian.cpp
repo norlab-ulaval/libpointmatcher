@@ -131,7 +131,7 @@ typename PointToGaussianErrorMinimizer<T>::ErrorElements PointToGaussianErrorMin
 
         normals.block(0, dim * i, dim, dim) = matEigVectors.transpose();
 
-        // A eigen value of zero will have infinite weight, that's why we add a noise constant for the weight
+        // An eigen value of zero will have infinite weight in the cost function, that's why we add a noise constant for the weight
         // Same solution as Bosse did with his Zebedee platefrom
         mPts.weights.block(0, dim * i, 1, dim) = (pow(eigValues.col(i).array()+noiseSensor*noiseSensor,1/2)).inverse().transpose();
     }
