@@ -14,7 +14,7 @@ version = None
 with open(path_to_file, "r", encoding="utf-8") as f:
     for line in map(str.strip, f):
         if line.startswith("#define POINTMATCHER_VERSION"):
-            version = line.split()[2]
+            version = line.split()[2].replace("\"", "")
             break
 
 if version is None:
