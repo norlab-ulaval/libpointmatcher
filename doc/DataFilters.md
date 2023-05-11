@@ -261,10 +261,11 @@ __Output descriptor:__ none
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ reduces number of points  
 
-|Parameter  |Description  |Default value    |Allowable range|
-|---------  |:---------|:----------------|:--------------|
-|prob        | Probability that a point is kept (1/decimation factor) | 0.75 | min: 0, max: 1 |
-|randomSamplingMethod | Random sampling method: Direct RNG (0) (fastest), Uniform (1) (more accurate but slower) | 0 | min: 0, max: 1 |
+| Parameter            | Description                                                                              | Default value | Allowable range          |
+|----------------------|:-----------------------------------------------------------------------------------------|:--------------|:-------------------------|
+| prob                 | Probability that a point is kept (1/decimation factor)                                   | 0.75          | min: 0, max: 1           |
+| randomSamplingMethod | Random sampling method: Direct RNG (0) (fastest), Uniform (1) (more accurate but slower) | 0             | min: 0, max: 1           |
+| seed                 | Seed for the random generator (-1 means no seed is used)                                 | -1            | min: -1, max: 2147483647 |
 
 ### Example
 

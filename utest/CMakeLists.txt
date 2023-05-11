@@ -10,7 +10,8 @@ add_executable(utest
                 ui/Transformations.cpp 
                 ui/DataPoints.cpp 
                 ui/Inspectors.cpp 
-                ui/Loggers.cpp)
+                ui/Loggers.cpp
+                ui/icp/GeneralTests.cpp)
 
 find_package (Threads)
 target_link_libraries(utest gtest pointmatcher ${CMAKE_THREAD_LIBS_INIT})
