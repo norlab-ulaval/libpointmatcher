@@ -185,12 +185,6 @@ jobs:
           ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --with-python=python --prefix=${{ env.BOOST_INSTALL_PATH }}
           ./b2 cxxflags=-fPIC cflags=-fPIC link=static install
 
-      - name: Set up Visual Studio shell
-        if: runner.os == 'Windows'
-        uses: egor-tensin/vs-shell@v2
-        with:
-          arch: x64
-
       - name: Download source code libnabo ${{ env.LIBNABO_VERSION }}
         if: steps.cache-libnabo.outputs.cache-hit != 'true'
         working-directory: ${{ env.LIBNABO_SRC_DIR }}
