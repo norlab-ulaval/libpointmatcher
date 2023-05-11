@@ -25,7 +25,7 @@ try:
                 version = line.split()[2].replace("\"", "")
                 break
 except FileNotFoundError:
-    print(f"Cannot find: '{path_to_file}'. Probably reason is you run 'python -m build', but not 'python -m build --wheel'", file=sys.stderr)
+    print(f"Cannot find: '{path_to_file}'. Probably reason is you run 'python -m build', but not 'python -m build --no-isolation --wheel'", file=sys.stderr)
     raise
 
 if version is None:

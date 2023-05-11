@@ -289,7 +289,7 @@ jobs:
         working-directory: ./python
         run: |
           pip install build
-          python -m build --wheel --outdir ${{ env.PYTHON_WHEEL_DIR }}
+          python -m build --wheel --no-isolation --outdir ${{ env.PYTHON_WHEEL_DIR }}
 
       - name: Test package
         working-directory: ./python

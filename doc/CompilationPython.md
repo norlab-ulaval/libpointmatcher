@@ -152,7 +152,7 @@ pip install build
 Return to the `python` directory:
 ```console
 cd  <my-project-folder>/libpointmatcher/python
-python -m build --wheel --outdir  ./dist
+python -m build --wheel --no-isolation --outdir  ./dist
 
 pip install ./dist/pypointmatcher-*.whl
 ```
