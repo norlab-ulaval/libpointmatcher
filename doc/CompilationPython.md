@@ -145,7 +145,21 @@ where `N` is the number of jobs (or threads) you allow at once on your computer 
 
 And finally, to install the module on your system, run the following command:
 
+```console
+pip install build
+```
+
 Return to the `python` directory:
 ```console
-python ./setup.py install
+cd  <my-project-folder>/libpointmatcher/python
+python -m build --wheel --outdir  ./dist
+
+pip install ./dist/pypointmatcher-*.whl
+```
+
+**`python -m build` will lead to error**
+
+Check that all working:
+```
+python -c "from pypointmatcher import *"
 ```

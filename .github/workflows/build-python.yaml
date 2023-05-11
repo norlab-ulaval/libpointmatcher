@@ -34,6 +34,8 @@ jobs:
         python_version: ['3.8', '3.9', '3.10', '3.11']
         os: 
           # - windows-2019 cannot compile on Windows
+          # (!) TODO: The workflow contains code for Windows building, but we cannot compile it with MS MPI. Changes in the source code are needed.
+
           - ubuntu-20.04
       
     permissions:
@@ -183,11 +185,11 @@ jobs:
           ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --with-python=python --prefix=${{ env.BOOST_INSTALL_PATH }}
           ./b2 cxxflags=-fPIC cflags=-fPIC link=static install
 
-      # - name: Set up Visual Studio shell
-      #   if: runner.os == 'Windows'
-      #   uses: egor-tensin/vs-shell@v2
-      #   with:
-      #     arch: x64
+      - name: Set up Visual Studio shell
+        if: runner.os == 'Windows'
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
 
       - name: Download source code libnabo ${{ env.LIBNABO_VERSION }}
         if: steps.cache-libnabo.outputs.cache-hit != 'true'
@@ -292,7 +294,8 @@ jobs:
       - name: Build python wheel
         working-directory: ./python
         run: |
-          python ./setup.py bdist_wheel -d ${{ env.PYTHON_WHEEL_DIR }}
+          pip install build
+          python -m build --wheel --outdir ${{ env.PYTHON_WHEEL_DIR }}
 
       - name: Test package
         working-directory: ./python
