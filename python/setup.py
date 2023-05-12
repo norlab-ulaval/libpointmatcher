@@ -9,7 +9,7 @@ class BinaryDistribution(Distribution):
     def has_ext_modules(self):
         return True
 
-path_to_file = os.path.relpath(os.path.join("pointmatcher", "PointMatcher.h"))
+path_to_file = os.path.relpath(os.path.join("..", "pointmatcher", "PointMatcher.h"))
 
 
 version = None
