@@ -151,7 +151,7 @@ jobs:
           cache: 'pip'
 
       - name: Install numpy and wheel
-        run: pip install numpy>=1.20 wheel
+        run: pip install numpy>=1.20 wheel setuptools>=61.0 build
       
       - name: Install dependencies on Windows
         if: ${{ runner.os == 'Windows' }}
@@ -288,7 +288,6 @@ jobs:
       - name: Build python wheel
         working-directory: ./python
         run: |
-          pip install build
           python -m build --wheel --no-isolation --outdir ${{ env.PYTHON_WHEEL_DIR }}
 
       - name: Test package
