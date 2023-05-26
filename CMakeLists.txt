@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-include(CheckSymbolExists)
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
+include(CheckSymbolExists)
+
 
 #========================
 # Project details / setup
@@ -126,9 +127,11 @@ endif()
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
-find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
+set(Boost_USE_STATIC_LIBS  ON)
+
+find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time)
 if (Boost_MINOR_VERSION GREATER 47)
-	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
+	find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time chrono)
 endif ()
 
 #--------------------
@@ -168,7 +171,7 @@ endif()
 # This cmake target alias will be defined by either: 
 # a) libnabo sources if built as a git submodule in the same project than this library, or
 # b) by libnabo-targets.cmake, included by find_package(libnabo) above.
-set(libnabo_LIBRARIES libnabo::nabo)
+# set(libnabo_LIBRARIES libnabo::nabo)
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
@@ -177,7 +180,9 @@ set(USE_OPEN_MP FALSE CACHE BOOL "Set to TRUE to use OpenMP")
 if (USE_OPEN_MP)
 	find_package(OpenMP)
 	if (OPENMP_FOUND)
-		add_definitions(-fopenmp -DHAVE_OPENMP)
+		if(NOT MSVC)
+			add_definitions(-fopenmp -DHAVE_OPENMP)
+		endif()
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 		if (CMAKE_COMPILER_IS_GNUCC)
 			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
@@ -382,6 +387,8 @@ endif()
 
 if (NOT MSVC)
 	target_compile_options(pointmatcher PRIVATE -Wall)
+else()
+	target_compile_options(pointmatcher PRIVATE /bigobj)
 endif()
 
 if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)

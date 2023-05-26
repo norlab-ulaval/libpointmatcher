@@ -3,7 +3,7 @@
 #include "modules/error_minimizers_module.h"
 #include "modules/data_points_filters_module.h"
 
-PYBIND11_MODULE(pypointmatcher, module)
+PYBIND11_MODULE(pypointmatcher_native, module)
 {
 	module.doc() = "Python bindings of libpointmatcher";
 
