@@ -1,0 +1,14 @@
+ARG BASE_IMAGE_TAG=ubuntu.20.04
+ARG BASE_IMAGE=libpointmatcher_dependencies
+FROM ${BASE_IMAGE}:${BASE_IMAGE_TAG} AS libpointmatcher-dependencies
+
+LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
+
+# ====Install Libpointmatcher=======================================================================================
+WORKDIR "/"
+COPY install_libpointmatcher_ubuntu.bash "/"
+
+RUN /bin/bash -c "chmod +x /install_libpointmatcher_ubuntu.bash"
+RUN /bin/bash -c "/install_libpointmatcher_ubuntu.bash"
+
+CMD ["bash"]

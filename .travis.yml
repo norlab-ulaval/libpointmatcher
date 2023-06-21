@@ -1,3 +1,6 @@
+
+# ToDo: remove this file when NorLab-CI/CD migration is done
+
 language: cpp
 
 compiler:

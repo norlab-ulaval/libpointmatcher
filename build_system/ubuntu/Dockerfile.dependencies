@@ -1,0 +1,42 @@
+ARG BASE_IMAGE_TAG=20.04
+ARG BASE_IMAGE=ubuntu
+FROM ${BASE_IMAGE}:${BASE_IMAGE_TAG} AS base-image
+
+LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
+
+#RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
+#USER docker
+
+# ====Install development utilities=================================================================================
+WORKDIR "/"
+
+RUN apt-get update && \
+    apt-get install --assume-yes --no-install-recommends \
+        sudo \
+        bash-completion \
+        git \
+        vim \
+        tree \
+        curl \
+        wget \
+        gnupg2 \
+        zip gzip tar unzip \
+        net-tools && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# ====Install TeamCity and CI/CD utilities==========================================================================
+RUN pip3 install --no-cache-dir --verbose --upgrade pip
+RUN pip3 install --no-cache-dir --verbose --upgrade pytest
+RUN pip3 install --no-cache-dir --verbose teamcity-messages
+
+
+# ====Install Libpointmatcher dependencies==========================================================================
+FROM base-image AS libpointmatcher-dependencies
+
+COPY install_dependencies_ubuntu.bash "/"
+
+RUN /bin/bash -c "chmod +x /install_dependencies_ubuntu.bash"
+RUN /bin/bash -c "/install_dependencies_ubuntu.bash"
+
+CMD ["bash"]
