@@ -15,8 +15,8 @@ set -o allexport; source ../.env; set +o allexport
 export DEBIAN_FRONTEND=noninteractive
 
 # .... Create required dir structure ...................................................................................
-mkdir -p "${INSTALLED_LIBRARIES_PATH}"
-cd "${INSTALLED_LIBRARIES_PATH}"
+mkdir -p "${LPM_INSTALLED_LIBRARIES_PATH}"
+cd "${LPM_INSTALLED_LIBRARIES_PATH}"
 
 # ==== Install tools ===================================================================================================
 
@@ -75,7 +75,7 @@ sudo apt-get update &&
 ## Note:ANN was not mentionned in doc --> probably because it's only used in benchmark test
 ## ANN is a library written in C++, which supports data structures and algorithms for both exact and approximate nearest neighbor searching in arbitrarily high dimensions.
 ## https://www.cs.umd.edu/~mount/ANN/
-#cd "${INSTALLED_LIBRARIES_PATH}"
+#cd "${LPM_INSTALLED_LIBRARIES_PATH}"
 #wget https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
 #tar xzf ann_1.1.2.tar.gz
 #cd ann_1.1.2/
@@ -95,7 +95,7 @@ sudo apt-get update &&
 #        libflann-dev \
 #    && sudo rm -rf /var/lib/apt/lists/*
 
-cd "${INSTALLED_LIBRARIES_PATH}"
+cd "${LPM_INSTALLED_LIBRARIES_PATH}"
 git clone https://github.com/ethz-asl/libnabo.git &&
   cd libnabo &&
   mkdir build && cd build &&

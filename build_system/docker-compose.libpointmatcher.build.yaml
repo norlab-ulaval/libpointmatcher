@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  dependencies:
+    image: ${LPM_PROJECT_HUB}/libpointmatcher-dependencies:${OS_TAG}-${LPM_IMAGE_ARCHITECTURE}-${LIBPOINTMATCHER_TAG}
+      # LPM_IMAGE_ARCHITECTURE: x86, arm64, arm64-l4t, arm64-darwin
+    build:
+      context: ./ubuntu
+      dockerfile: ./Dockerfile.dependencies
+      args:
+        BASE_IMAGE: ${DEPENDENCIES_BASE_IMAGE}
+        BASE_IMAGE_TAG: ${DEPENDENCIES_BASE_IMAGE_TAG}
+  libpointmatcher:
+    image: ${LPM_PROJECT_HUB}/libpointmatcher:${OS_TAG}-${LPM_IMAGE_ARCHITECTURE}-${LIBPOINTMATCHER_TAG}
+    build:
+      context: ./ubuntu
+      dockerfile: ./Dockerfile.libpointmatcher
+      args:
+        PROJECT_HUB: ${LPM_PROJECT_HUB}
+        BASE_IMAGE: libpointmatcher-dependencies
+        BASE_IMAGE_TAG: ${OS_TAG}-${LPM_IMAGE_ARCHITECTURE}-${LIBPOINTMATCHER_TAG}
+    depends_on:
+      - dependencies
+
+
+
+
+
+
+
+
