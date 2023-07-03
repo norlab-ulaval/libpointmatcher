@@ -215,6 +215,10 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		{
 			buildTensorStream(stream, "weightSum", data);
 		}
+		else if(it->text == "omega")
+		{
+			buildTensorStream(stream, "omega", data);
+		}
 		else if(it->text == "color")
 		{
 			buildColorStream(stream, "color", data);
