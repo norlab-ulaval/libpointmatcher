@@ -1,26 +1,43 @@
 #!/bin/bash -i
-
+#
 # Note on unit test:
-#    $ docker pull --platform linux/arm64 ubuntu:20.04
-#    $ docker build --platform linux/arm64 -f Dockerfile.dependencies -t test-libpointmatcher-dependencies:ubuntu.20.04 .
-#    $ docker run -a --name iAmTestLibpointmatcherDependenciesContainer -t -i test-libpointmatcher-dependencies:ubuntu.20.04
-
+#   $ docker pull --platform linux/arm64 ubuntu:20.04
+#   $ docker build --platform linux/arm64 -f Dockerfile.dependencies -t test-libpointmatcher-dependencies:ubuntu.20.04 .
+#   $ docker run -a --name iAmTestLibpointmatcherDependenciesContainer -t -i test-libpointmatcher-dependencies:ubuntu.20.04
+#
 set -e
 
-# Load environment variable from file
-set -o allexport; source ../.env; set +o allexport
 
+# ....Load environment variables from file.........................................................................
+set -o allexport
+source ../.env
+source ../.env.prompt
+set +o allexport
 
 # skip GUI dialog by setting everything to default
 export DEBIAN_FRONTEND=noninteractive
 
-# .... Create required dir structure ...................................................................................
+# ....Helper function..............................................................................................
+# import shell functions from Libpointmatcher-build-system utilities library
+source ./function_library/prompt_utilities.bash
+
+# ....Project root logic...........................................................................................
+TMP_CWD=$(pwd)
+
+# ====Begin========================================================================================================
+print_formated_script_header 'lpm_install_dependencies_ubuntu.bash' =
+
+# ................................................................................................................
+print_msg "Create required dir structure"
 mkdir -p "${LPM_INSTALLED_LIBRARIES_PATH}"
 cd "${LPM_INSTALLED_LIBRARIES_PATH}"
 
-# ==== Install tools ===================================================================================================
 
-# ... install development utilities ....................................................................................
+# ................................................................................................................
+echo
+print_msg "Install development utilities"
+echo
+
 sudo apt-get update &&
   sudo apt-get install --assume-yes \
     lsb-release \
@@ -53,23 +70,34 @@ python3 -m pip install --upgrade pip
 #        python3-vcstool \
 #    && sudo rm -rf /var/lib/apt/lists/*;
 
-# ==== Install Libpointmatcher dependencies ============================================================================
-# . . Install boost. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+# ................................................................................................................
+echo
+print_msg "Install Libpointmatcher dependencies › 'Boost'"
+echo
 # https://www.boost.org/doc/libs/1_79_0/more/getting_started/unix-variants.html
+
 sudo apt-get update &&
   sudo apt-get install --assume-yes \
     libboost-all-dev &&
   sudo rm -rf /var/lib/apt/lists/*
 
-# . . Install eigen . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+# ................................................................................................................
+echo
+print_msg "Install Libpointmatcher dependencies › 'Eigen'"
+echo
 # https://eigen.tuxfamily.org/index.php
+
 sudo apt-get update &&
   sudo apt-get install --assume-yes \
     libeigen3-dev &&
   sudo rm -rf /var/lib/apt/lists/*
 
-# . . Install libnabo . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..
+# ................................................................................................................
+echo
+print_msg "Install Libpointmatcher dependencies › 'Libnabo'"
+echo
 # https://github.com/ethz-asl/libnabo
+
 # ToDo: assessment >> ANN and FLANN should be required only for `make test` benchmarks
 
 ## Note:ANN was not mentionned in doc --> probably because it's only used in benchmark test
@@ -108,3 +136,9 @@ git clone https://github.com/ethz-asl/libnabo.git &&
 
 # ToDo:on task end >> next bloc ↓↓
 #pwd && tree -L 3
+
+print_msg_done "Libpointmatcher dependencies installed"
+draw_horizontal_line_across_the_terminal_window =
+# ====Teardown=====================================================================================================
+cd "${TMP_CWD}"
+

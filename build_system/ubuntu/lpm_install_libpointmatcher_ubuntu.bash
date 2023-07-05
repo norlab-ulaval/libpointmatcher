@@ -3,57 +3,58 @@
 # Note:
 #   - this script required package: g++, make, cmake, build-essential, git and all libpointmatcher dependencies
 #   - execute `lpm_install_dependencies_ubuntu.bash` first
-
+#
 # Note on unit test:
 #    $ docker pull --platform linux/arm64 test-libpointmatcher-dependencies:ubuntu.20.04
 #    $ docker build --platform linux/arm64 -f Dockerfile.libpointmatcher -t test-libpointmatcher:ubuntu.20.04 .
 #    $ docker run -a --name iAmTestLibpointmatcherContainer -t -i test-libpointmatcher:ubuntu.20.04
-
+#
 set -e
 
-# Load environment variable from file
-set -o allexport; source ../.env; set +o allexport
-
+# ....Load environment variables from file.........................................................................
+set -o allexport
+source ../.env
+source ../.env.prompt
+set +o allexport
 
 # skip GUI dialog by setting everything to default
 export DEBIAN_FRONTEND=noninteractive
 
-# .... Create required dir structure .............................................................................
-
-mkdir -p "${LPM_INSTALLED_LIBRARIES_PATH}"
-cd "${LPM_INSTALLED_LIBRARIES_PATH}"
-
-
-# ....helper function..............................................................................................
-SP="    "
+# ....Helper function..............................................................................................
+# import shell functions from Libpointmatcher-build-system utilities library
+source ./function_library/prompt_utilities.bash
 
 function print_help_in_terminal() {
-
   echo -e "\$ ${0} [<optional argument>]
 
-${SP}
-${SP}\033[1m<optional argument>:\033[0m
-${SP}  -h, --help         Get help
-${SP}  --compile-test     Compile the libpointmatcher unit-test in ${LPM_INSTALLED_LIBRARIES_PATH}/libpointmatcher/build
-${SP}  --generate-doc     Generate the libpointmatcher doc in /usr/local/share/doc/libpointmatcher/api/html/index.html
+  \033[1m<optional argument>:\033[0m
+    -h, --help                 Get help
+    --compile-test             Compile the libpointmatcher unit-test in ${LPM_INSTALLED_LIBRARIES_PATH}/libpointmatcher/build
+    --generate-doc             Generate the libpointmatcher doc in /usr/local/share/doc/libpointmatcher/api/html/index.html
+    --build-system-install     Skip the git clone install step and assume the script is runned from a container in the build system
 
-"
+  "
 }
 
-# ....Script command line flags....................................................................................
+# ....Project root logic...........................................................................................
+TMP_CWD=$(pwd)
 
+# ====Begin========================================================================================================
+print_formated_script_header 'lpm_install_libpointmatcher_ubuntu.bash' =
+
+
+# ....Script command line flags....................................................................................
 ## todo: on task end >> comment next dev bloc ↓↓
 #echo "${0}: all arg >>" \
 #  && echo "${@}"
 
 BUILD_TESTS_FLAG=FALSE
 GENERATE_API_DOC_FLAG=FALSE
-
-USER_ARG=""
+BUILD_SYSTEM_INSTALL=FALSE
 
 for arg in "$@"; do
   case $arg in
-  -h|--help)
+  -h | --help)
     print_help_in_terminal
     exit
     ;;
@@ -65,11 +66,15 @@ for arg in "$@"; do
     GENERATE_API_DOC_FLAG=TRUE
     shift
     ;;
+  --build-system-install)
+    BUILD_SYSTEM_INSTALL=TRUE
+    shift
+    ;;
   --) # no more option
     shift
     break
     ;;
-  -?* | --?*)
+  --?* | -?*)
     echo "$0: $1: unrecognized option" >&2 # Note: '>&2' = print to stderr
     ;;
   *) # Default case
@@ -81,7 +86,15 @@ for arg in "$@"; do
 done
 
 
-# ==== Install tools =============================================================================================
+# ................................................................................................................
+print_msg "Create required dir structure"
+
+mkdir -p "${LPM_INSTALLED_LIBRARIES_PATH}"
+cd "${LPM_INSTALLED_LIBRARIES_PATH}"
+
+# ................................................................................................................
+print_msg "Install tools"
+
 sudo apt-get update &&
   sudo apt-get install --assume-yes \
     libyaml-cpp-dev &&
@@ -95,33 +108,29 @@ if [ ${GENERATE_API_DOC_FLAG} == 'TRUE' ]; then
     sudo rm -rf /var/lib/apt/lists/*
 fi
 
-# ==== Install libpointmatcher ====================================================================================
+# ................................................................................................................
+print_msg "Install Libpointmatcher"
 # https://github.com/ethz-asl/libpointmatcher/tree/master
 
-#git clone https://github.com/ethz-asl/libpointmatcher.git &&
-git clone https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO}.git &&
-  cd libpointmatcher &&
-  mkdir build && cd build &&
-  cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo \
-    -D BUILD_TESTS=${BUILD_TESTS_FLAG} \
-    -D GENERATE_API_DOC=${GENERATE_API_DOC_FLAG} \
-    .. &&
-  make -j $(nproc) &&
-  sudo make install
-
-#   -DCMAKE_INSTALL_PREFIX=/usr/local/ \
-#    && git checkout 1.3.1 \
-
-# ==== Execute libpointmatcher unit-test===========================================================================
-if [ ${BUILD_TESTS_FLAG} == 'TRUE' ]; then
-  cd "${LPM_INSTALLED_LIBRARIES_PATH}/libpointmatcher/build"
-  utest/utest --path "${LPM_INSTALLED_LIBRARIES_PATH}/libpointmatcher/examples/data/"
+if [ ${BUILD_SYSTEM_INSTALL} == 'FALSE' ]; then
+  #git clone https://github.com/ethz-asl/libpointmatcher.git
+  git clone https://github.com/"${LPM_LIBPOINTMATCHER_SRC_DOMAIN}"/"${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}".git
+  #   && git checkout 1.3.1
 fi
 
-## ToDo: assessment >> dont think it should be part of the libpointmatcher install script
-#cd "${LPM_INSTALLED_LIBRARIES_PATH}"
-#git clone https://github.com/norlab-ulaval/norlab_icp_mapper.git \
-#    && mkdir -p norlab_icp_mapper/build && cd norlab_icp_mapper/build \
-#    && cmake -DCMAKE_BUILD_TYPE=Release .. \
-#    && make -j $(nproc) \
-#    && sudo make install
+cd "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+mkdir build && cd build
+
+cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+  -D BUILD_TESTS=${BUILD_TESTS_FLAG} \
+  -D GENERATE_API_DOC=${GENERATE_API_DOC_FLAG} \
+  ..
+#   -DCMAKE_INSTALL_PREFIX=/usr/local/ \
+
+make -j $(nproc)
+sudo make install
+
+print_msg_done "Libpointmatcher installed"
+draw_horizontal_line_across_the_terminal_window =
+# ====Teardown=====================================================================================================
+cd "${TMP_CWD}"

@@ -1,0 +1,19 @@
+
+# Graphic/image related
+*.svg
+*.svgz
+*.png
+*.drawio
+
+# Text related
+*.pdf
+*.md
+
+# Directories
+drawio/*
+visual/*
+.run/*
+
+# Files
+**/docker-compose.*
+**/Dockerfile.*
