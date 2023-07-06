@@ -1,0 +1,83 @@
+ARG BASE_IMAGE=ubuntu
+ARG BASE_IMAGE_TAG=20.04
+FROM ${BASE_IMAGE}:${BASE_IMAGE_TAG} AS base-image
+
+LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
+
+SHELL ["/bin/bash", "-e", "-c"]
+ARG DEBIAN_FRONTEND=noninteractive
+WORKDIR /
+
+# ....Setup timezone and localization..............................................................................
+# change the locale from POSIX to UTF-8
+RUN apt-get update && \
+    apt-get install --assume-yes --no-install-recommends \
+        locales && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV PYTHONIOENCODING=utf-8
+
+# ====Begin install=================================================================================================
+
+# ....Install development utilities................................................................................
+RUN apt-get update \
+    && apt-get install --assume-yes --no-install-recommends \
+        sudo \
+        gnupg2 \
+        lsb-release \
+        cmake \
+        build-essential \
+        curl \
+        wget \
+        ca-certificates \
+        git \
+        vim \
+        tree \
+        less \
+        apt-utils \
+        zip gzip tar unzip \
+        fontconfig \
+        software-properties-common \
+        bash-completion \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# ....Install docker tools.........................................................................................
+# Copy all files from the checkout branch in the repository (except those in the .dockerignore)
+WORKDIR /libpointmatcher-build-system/build_system
+
+COPY ./build_system/.env ./.env
+COPY ./build_system/.env.prompt ./.env.prompt
+COPY ./build_system/lpm_utility_script/lpm_install_docker_tools.bash ./lpm_utility_script/lpm_install_docker_tools.bash
+COPY ./build_system/function_library/prompt_utilities.bash ./function_library/prompt_utilities.bash
+
+RUN chmod +x ./lpm_utility_script/lpm_install_docker_tools.bash
+
+RUN bash ./lpm_utility_script/lpm_install_docker_tools.bash
+
+
+# ....Copy and prep libpointmatcher repository main files..........................................................
+WORKDIR /libpointmatcher-build-system
+
+COPY . /libpointmatcher-build-system/
+
+# Note: Build context must be at repository root
+RUN /bin/bash -c " \
+if [[ ! -f LICENSE ]]; then \
+  echo -e \"\nBuild context must be at repository root.\nProject root not reached! Current workdir: $(pwd).\nAborting build now!\n\"; \
+  exit 1; \
+fi"
+
+
+RUN chmod +x --recursive /libpointmatcher-build-system/
+
+# ====End==========================================================================================================
+WORKDIR ./build_system
+
+## Trick to validate the output of the file created with COPY <<EOF ...
+#ENTRYPOINT [ "more", "./test/entrypoint.bash" ]
+
+ENTRYPOINT [ "./test/entrypoint.bash" ]
+CMD [ "bash" ]

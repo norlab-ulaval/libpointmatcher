@@ -4,12 +4,36 @@ FROM ${BASE_IMAGE}:${BASE_IMAGE_TAG} AS base-image
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
 
-#RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
-#USER docker
+ARG LPM_INSTALLED_LIBRARIES_PATH
+ARG LPM_LIBPOINTMATCHER_SRC_REPO_NAME
+ENV LPM_INSTALLED_LIBRARIES_PATH=${LPM_INSTALLED_LIBRARIES_PATH:?'Build argument needs to be set and non-empty.'}
+ENV LPM_LIBPOINTMATCHER_SRC_REPO_NAME=${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?'Build argument needs to be set and non-empty.'}
 
-# ====Install development utilities=================================================================================
-WORKDIR "/"
+SHELL ["/bin/bash", "-c"]
+ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
+ENV TZ=Etc/UTC
 
+#ENV TERM="xterm"
+ENV TERM=${TERM:-"xterm-color"}
+#ENV TERM="xterm-256color"
+
+# ....Setup timezone and localization..............................................................................
+# change the locale from POSIX to UTF-8
+RUN apt-get update && \
+    apt-get install --assume-yes --no-install-recommends \
+        locales \
+        tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV PYTHONIOENCODING=utf-8
+
+
+# ====Begin install=================================================================================================
+
+# ....Install development utilities................................................................................
 RUN apt-get update && \
     apt-get install --assume-yes --no-install-recommends \
         sudo \
@@ -24,11 +48,19 @@ RUN apt-get update && \
         net-tools && \
     rm -rf /var/lib/apt/lists/*
 
+# ====Begin========================================================================================================
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build_system"
 
-# ====Install TeamCity and CI/CD utilities==========================================================================
-RUN pip3 install --no-cache-dir --verbose --upgrade pip
-RUN pip3 install --no-cache-dir --verbose --upgrade pytest
-RUN pip3 install --no-cache-dir --verbose teamcity-messages
+COPY ./build_system/ubuntu/lpm_install_python_dev_tools.bash ./ubuntu/
+
+RUN chmod +x ./ubuntu/lpm_install_python_dev_tools.bash
+RUN bash ./ubuntu/lpm_install_python_dev_tools.bash
+
+
+# ....Install TeamCity and CI/CD utilities..........................................................................
+RUN pip install --no-cache-dir --verbose --upgrade pip
+RUN pip install --no-cache-dir --verbose --upgrade pytest
+RUN pip install --no-cache-dir --verbose teamcity-messages
 
 
 # ====Install Libpointmatcher dependencies==========================================================================
@@ -36,15 +68,18 @@ FROM base-image AS libpointmatcher-dependencies
 
 WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build_system"
 
-COPY build_system/.env.prompt .
-COPY build_system/.env .
+COPY ./build_system/.env.prompt .
+COPY ./build_system/.env .
 
-WORKDIR "./ubuntu"
+COPY ./build_system/ubuntu/lpm_install_dependencies_ubuntu.bash ./ubuntu/
+COPY ./build_system/ubuntu/lpm_install_python_dev_tools.bash ./ubuntu/
+COPY ./build_system/function_library/prompt_utilities.bash ./function_library/
 
-COPY build_system/ubuntu/lpm_install_dependencies_ubuntu.bash .
+WORKDIR ./ubuntu
 
-RUN /bin/bash -c "chmod +x lpm_install_dependencies_ubuntu.bash"
-RUN /bin/bash -c "lpm_install_dependencies_ubuntu.bash"
+RUN chmod +x ./lpm_install_dependencies_ubuntu.bash
+RUN source ./lpm_install_dependencies_ubuntu.bash
 
-WORKDIR "/"
+# ====End==========================================================================================================
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/"
 CMD [ "bash" ]

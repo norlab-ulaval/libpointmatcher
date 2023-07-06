@@ -1,4 +1,8 @@
 
+# Note:
+#   - libpointmatch cmake install require that the README.md file exist in the docker image
+#   - libpointmatcher-CI doc related step require that .svg, .png and .md be copied in the docker image
+
 # Graphic/image related
 *.svg
 *.svgz
@@ -7,13 +11,13 @@
 
 # Text related
 *.pdf
-*.md
+
+# Files
+
 
 # Directories
 drawio/*
 visual/*
-.run/*
 
-# Files
-**/docker-compose.*
-**/Dockerfile.*
+# IDE
+.run/*

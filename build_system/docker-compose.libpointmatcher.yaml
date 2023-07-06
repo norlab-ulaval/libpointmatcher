@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  dependencies:
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies:${LPM_IMAGE_TAG:?err}
+    build:
+      context: ..
+      dockerfile: ./build_system/ubuntu/Dockerfile.dependencies
+      args:
+        BASE_IMAGE: ${DEPENDENCIES_BASE_IMAGE:?err}
+        BASE_IMAGE_TAG: ${DEPENDENCIES_BASE_IMAGE_TAG:?err}
+        LPM_INSTALLED_LIBRARIES_PATH: ${LPM_INSTALLED_LIBRARIES_PATH:?err}
+        LPM_LIBPOINTMATCHER_SRC_REPO_NAME: ${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?err}
+  libpointmatcher-CI:
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher:${LPM_IMAGE_TAG:?err}-CI-${LPM_JOB_ID:?err}
+    container_name: libpointmatcher-${LPM_IMAGE_TAG}-CI-${LPM_JOB_ID}
+    build:
+      context: ..
+      dockerfile: ./build_system/ubuntu/Dockerfile.libpointmatcher
+      args:
+        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        BASE_IMAGE: libpointmatcher-dependencies
+        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+        LPM_VERSION: ${LPM_VERSION:?err}
+    tty: true
+    stdin_open: true
+#    entrypoint: ./entrypoint_execute_lpm_unittest.bash
+    depends_on:
+      - dependencies

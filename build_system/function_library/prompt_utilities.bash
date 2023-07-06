@@ -1,9 +1,19 @@
 #!/bin/bash
 #
+# Library of function related to console formatting
+#
+# Requirement: This script must be sourced from directory 'build_system'
+#
 # Usage:
 #   $ source ./function_library/prompt_utilities.bash
 #
 set -e
+
+# ....Pre-condition................................................................................................
+if [[ "$(basename $(pwd))" != "build_system" ]]; then
+  echo -e "\nERROR: This script must be sourced from directory 'build_system'!\n cwd: $(pwd)"
+  exit 1
+fi
 
 # ....Load environment variables from file.........................................................................
 set -o allexport
@@ -31,14 +41,14 @@ function _print_msg_formater() {
   local MSG=${2}
 
 
-  if [ "${MSG_TYPE}" == "BASE" ]; then
-      MSG_TYPE=${NTSI_MSG_BASE}
-  elif [ "${MSG_TYPE}" == "DONE" ]; then
-      MSG_TYPE=${NTSI_MSG_DONE}
-  elif [ "${MSG_TYPE}" == "WARNING" ]; then
-    MSG_TYPE=${NTSI_MSG_WARNING}
-  elif [ "${MSG_TYPE}" == "AWAITING_INPUT" ]; then
-    MSG_TYPE=${NTSI_MSG_AWAITING_INPUT}
+  if [[ "${MSG_TYPE}" == "BASE" ]]; then
+      MSG_TYPE=${MSG_BASE}
+  elif [[ "${MSG_TYPE}" == "DONE" ]]; then
+      MSG_TYPE=${MSG_DONE}
+  elif [[ "${MSG_TYPE}" == "WARNING" ]]; then
+    MSG_TYPE=${MSG_WARNING}
+  elif [[ "${MSG_TYPE}" == "AWAITING_INPUT" ]]; then
+    MSG_TYPE=${MSG_AWAITING_INPUT}
   else
     echo "from ${FUNCNAME[1]} › ${FUNCNAME[0]}: Unrecognized msg type '${MSG_TYPE}' (!)"
     exit 1
@@ -85,7 +95,7 @@ function print_msg_error_and_exit() {
   local ERROR_MSG=$1
 
   echo ""
-  echo -e "${NTSI_MSG_ERROR}: ${ERROR_MSG}" >&2
+  echo -e "${MSG_ERROR}: ${ERROR_MSG}" >&2
   echo "Exiting now."
   echo ""
   cd "${TMP_CWD}"
@@ -109,14 +119,24 @@ function print_msg_error_and_exit() {
 # =================================================================================================================
 function draw_horizontal_line_across_the_terminal_window() {
   local SYMBOL="${1:-=}"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' "${SYMBOL}"
+
+  # (NICE TO HAVE) ToDo: validate >> var TERM is setup in Dockerfile.dependencies instead. Erase TPUT_FLAG logic.
+#  if [[ ${TERM} == '' ]]; then
+#      TPUT_FLAG='-T xterm'
+##      TPUT_FLAG='-T xterm-256color'
+#  fi
+#  TPUT_FLAG='-T xterm'
+  TPUT_FLAG=''
+
+  printf '%*s\n' "${COLUMNS:-$(tput ${TPUT_FLAG} cols)}" '' | tr ' ' "${SYMBOL}"
 }
 
 # =================================================================================================================
-# Print a formated script header
+# Print a formatted script header or footer
 #
 # Usage:
 #   $ print_formated_script_header "<script name>" [<SYMBOL>]
+#   $ print_formated_script_footer "<script name>" [<SYMBOL>]
 #
 # Arguments:
 #   <script name>   The name of the script that is executing the function. Will be print in the header
@@ -131,7 +151,16 @@ function print_formated_script_header() {
   local SYMBOL="${2:-=}"
   echo
   draw_horizontal_line_across_the_terminal_window "${SYMBOL}"
-  echo -e "Starting ${NTSI_MSG_DIMMED_FORMAT}${SCRIPT_NAME}${NTSI_MSG_END_FORMAT}"
+  echo -e "Starting ${MSG_DIMMED_FORMAT}${SCRIPT_NAME}${MSG_END_FORMAT}"
+  echo
+}
+
+function print_formated_script_footer() {
+  local SCRIPT_NAME="${1}"
+  local SYMBOL="${2:-=}"
+  echo
+  echo -e "Completed ${MSG_DIMMED_FORMAT}${SCRIPT_NAME}${MSG_END_FORMAT}"
+  draw_horizontal_line_across_the_terminal_window "${SYMBOL}"
   echo
 }
 
@@ -155,12 +184,12 @@ function print_formated_back_to_script_msg() {
   local SYMBOL="${2:-=}"
   echo
   draw_horizontal_line_across_the_terminal_window -
-  echo -e "Back to ${NTSI_MSG_DIMMED_FORMAT}configure_teamcity_server.bash${NTSI_MSG_END_FORMAT}"
+  echo -e "Back to ${MSG_DIMMED_FORMAT}configure_teamcity_server.bash${MSG_END_FORMAT}"
   echo
 }
 
 # =================================================================================================================
-# Print formated file preview
+# Print formatted file preview
 #
 # Usage:
 #   $ print_formated_file_preview_begin "<file name>"
@@ -177,7 +206,7 @@ function print_formated_back_to_script_msg() {
 function print_formated_file_preview_begin() {
   local FILE_NAME="${1}"
   echo
-  echo -e "${NTSI_MSG_DIMMED_FORMAT}"
+  echo -e "${MSG_DIMMED_FORMAT}"
   draw_horizontal_line_across_the_terminal_window .
   echo "${FILE_NAME} <<< EOF"
 }
@@ -185,6 +214,7 @@ function print_formated_file_preview_begin() {
 function print_formated_file_preview_end() {
   echo "EOF"
   draw_horizontal_line_across_the_terminal_window .
-  echo -e "${NTSI_MSG_END_FORMAT}"
+  echo -e "${MSG_END_FORMAT}"
   echo
 }
+
