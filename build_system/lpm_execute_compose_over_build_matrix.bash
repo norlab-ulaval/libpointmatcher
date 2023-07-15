@@ -6,7 +6,7 @@
 #   $ bash lpm_execute_compose_over_build_matrix.bash [<optional flag>] [-- <any docker cmd+arg>]
 #
 # Arguments:
-#   [--libpointmatcher version build matrix override latest]
+#   [--libpointmatcher-version-build-matrix-override head]
 #                     The libpointmatcher release tag. Override must be a single value
 #                     (default to array sequence specified in .env.build_matrix)
 #   [--os-name-build-matrix-override ubuntu]
@@ -25,6 +25,7 @@ set -e
 #set -x
 
 # ....Default......................................................................................................
+#LPM_JOB_ID='0'
 DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'
 
 # ....Project root logic...........................................................................................
@@ -48,7 +49,7 @@ function print_help_in_terminal() {
   \033[1m
     <optional argument>:\033[0m
       -h, --help          Get help
-      --libpointmatcher-version-build-matrix-override latest
+      --libpointmatcher-version-build-matrix-override head
                           The libpointmatcher release tag. Override must be a single value
                           (default to array sequence specified in .env.build_matrix)
       --os-name-build-matrix-override ubuntu
@@ -99,11 +100,11 @@ while [ $# -gt 0 ]; do
     shift # Remove argument (--osx-version-build-matrix-override)
     shift # Remove argument value
     ;;
-  --job-id)
-      LPM_JOB_ID="${2}"
-      shift # Remove argument (--job-id)
-      shift # Remove argument value
-      ;;
+#  --job-id)
+#      LPM_JOB_ID="${2}"
+#      shift # Remove argument (--job-id)
+#      shift # Remove argument value
+#      ;;
   -h | --help)
     print_help_in_terminal
     exit
@@ -167,12 +168,12 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_LIBPOINTMATCHER_VERSIONS[@]}"; do
 
     for EACH_OS_VERSION in "${CRAWL_OS_VERSIONS[@]}"; do
 
-      export LPM_JOB_ID=666
+#      export LPM_JOB_ID=${LPM_JOB_ID}
 
       source ./lpm_execute_compose.bash --libpointmatcher-version "${EACH_LPM_VERSION}" \
                                         --os-name "${EACH_OS_NAME}" \
                                         --os-version "${EACH_OS_VERSION}" \
-                                        --job-id "${LPM_JOB_ID}" \
+#                                        --job-id "${LPM_JOB_ID}" \
                                         -- "${DOCKER_COMPOSE_CMD_ARGS}"
 
       # Collect image tags exported by lpm_execute_compose.bash

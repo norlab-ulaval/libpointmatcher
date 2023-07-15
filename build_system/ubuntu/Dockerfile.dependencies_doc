@@ -1,0 +1,31 @@
+ARG PROJECT_HUB=norlabulaval
+ARG BASE_IMAGE=libpointmatcher-dependencies
+ARG BASE_IMAGE_TAG
+FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-dependencies-full
+
+LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
+
+SHELL ["/bin/bash", "-c"]
+ARG DEBIAN_FRONTEND=noninteractive
+
+
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build_system"
+
+COPY ./build_system/.env.prompt .
+COPY ./build_system/.env .
+
+COPY ./build_system/ubuntu/lpm_install_doc_dependencies_ubuntu.bash ./ubuntu/
+COPY ./build_system/function_library/prompt_utilities.bash ./function_library/
+
+# ====Install Libpointmatcher documentation related dependencies====================================================
+WORKDIR ./ubuntu
+
+RUN chmod +x lpm_install_doc_dependencies_ubuntu.bash
+RUN bash lpm_install_doc_dependencies_ubuntu.bash
+
+# ====End==========================================================================================================
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/"
+RUN rm -r -f "./${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+
+FROM libpointmatcher-dependencies-full AS final
+CMD [ "bash" ]

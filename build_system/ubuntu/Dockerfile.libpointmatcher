@@ -1,44 +1,50 @@
 ARG PROJECT_HUB=norlabulaval
-ARG BASE_IMAGE=libpointmatcher-dependencies
-ARG BASE_IMAGE_TAG=ubuntu.20.04
-FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG} AS libpointmatcher-dependencies
+ARG BASE_IMAGE=libpointmatcher-dependencies-doc
+ARG BASE_IMAGE_TAG
+FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-dependencies
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
 
-ARG LPM_VERSION
-ENV LPM_VERSION=${LPM_VERSION:?'Build argument needs to be set and non-empty.'}
-LABEL libpointmatcher.version="${LPM_VERSION}"
+ARG LIBPOINTMATCHER_VERSION
+ENV LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION:?'Build argument needs to be set and non-empty.'}
+LABEL libpointmatcher.version="${LIBPOINTMATCHER_VERSION}"
+
+ARG LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG="--compile-test"
 
 ARG LPM_INSTALLED_LIBRARIES_PATH
 ARG LPM_LIBPOINTMATCHER_SRC_REPO_NAME
 ENV LPM_INSTALLED_LIBRARIES_PATH=${LPM_INSTALLED_LIBRARIES_PATH:?'Build argument needs to be set and non-empty.'}
 ENV LPM_LIBPOINTMATCHER_SRC_REPO_NAME=${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?'Build argument needs to be set and non-empty.'}
 
-# (Priority) ToDo: implement case (ref task NMO-264 LPM build case › generate doc)
-ARG LPM_GENERATE_DOC
-# (Priority) ToDo: implement case (ref task NMO-263 LPM build case › compile python binding)
-ARG LPM_COMPILE_PYTHON_BINDING
-
 SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 
-# ====Install Libpointmatcher=======================================================================================
-WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+# ====Build system related setup====================================================================================
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}-CICD"
 
 # Copy all files from the checkout branch in the repository (except those in the .dockerignore)
-COPY . .
+COPY ./build_system/ ./build_system/
 
 WORKDIR ./build_system/ubuntu
 
 RUN chmod +x lpm_install_libpointmatcher_ubuntu.bash
-
-# (Priority) ToDo: implement case (ref task NMO-264 LPM build case › generate doc)
-RUN #bash lpm_install_libpointmatcher_ubuntu.bash --compile-test --generate-doc --build-system-install
-RUN bash lpm_install_libpointmatcher_ubuntu.bash --compile-test --build-system-install
-
-RUN chmod +x entrypoint_execute_lpm_unittest.bash
 RUN chmod +x entrypoint.bash
 
-#ENTRYPOINT [ "./entrypoint_execute_lpm_unittest.bash" ]
-ENTRYPOINT [ "./entrypoint.bash" ]
+## ToDo: on task end >> delete next bloc ↓↓
+#RUN chmod +x lpm_install_doc_dependencies_ubuntu.bash
+#RUN bash lpm_install_doc_dependencies_ubuntu.bash
+
+# ====Install Libpointmatcher=======================================================================================
+
+RUN bash lpm_install_libpointmatcher_ubuntu.bash \
+    --libpointmatcher-version ${LIBPOINTMATCHER_VERSION} \
+    ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
+
+
+# ====End==========================================================================================================
+FROM libpointmatcher-dependencies AS libpointmatcher-release
+
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}-CICD"
+
+ENTRYPOINT [ "./build_system/ubuntu/entrypoint.bash" ]
 CMD [ "bash" ]

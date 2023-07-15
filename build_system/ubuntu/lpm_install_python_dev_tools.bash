@@ -17,6 +17,7 @@ if [[ $(uname) == 'Linux' ]]; then
       sudo apt-get update \
           && sudo apt-get install --assume-yes \
               python-dev \
+              python-numpy \
           && sudo rm -rf /var/lib/apt/lists/*;
 
       # Work around to install pip in python2
@@ -29,8 +30,11 @@ if [[ $(uname) == 'Linux' ]]; then
           && sudo apt-get install --assume-yes \
               python3-dev \
               python3-pip \
+              python3-numpy \
+#              python3-opengl \
               python-is-python3 \
           && sudo rm -rf /var/lib/apt/lists/*;
+
 
       python3 -m pip install --upgrade pip
 

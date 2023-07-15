@@ -10,19 +10,48 @@ services:
         BASE_IMAGE_TAG: ${DEPENDENCIES_BASE_IMAGE_TAG:?err}
         LPM_INSTALLED_LIBRARIES_PATH: ${LPM_INSTALLED_LIBRARIES_PATH:?err}
         LPM_LIBPOINTMATCHER_SRC_REPO_NAME: ${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?err}
-  libpointmatcher-CI:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher:${LPM_IMAGE_TAG:?err}-CI-${LPM_JOB_ID:?err}
-    container_name: libpointmatcher-${LPM_IMAGE_TAG}-CI-${LPM_JOB_ID}
+  dependencies-doc:
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies-doc:${LPM_IMAGE_TAG:?err}
+    build:
+      context: ..
+      dockerfile: ./build_system/ubuntu/Dockerfile.dependencies_doc
+      args:
+        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        BASE_IMAGE: libpointmatcher-dependencies
+        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+    depends_on:
+      - dependencies
+  ci:
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci:${LPM_IMAGE_TAG:?err}
+    build:
+      context: ..
+      dockerfile: ./build_system/ubuntu/Dockerfile.libpointmatcher_ci
+      args:
+        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        BASE_IMAGE: libpointmatcher-dependencies
+        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+        LIBPOINTMATCHER_VERSION: 'head'
+        LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--build-system-CI-install --compile-test'
+        # (Priority) ToDo: implement case (ref task NMO-263 LPM build case › compile python binding)
+    tty: true
+    stdin_open: true
+    depends_on:
+      - dependencies
+  release:
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher:${LPM_IMAGE_TAG:?err}
+    container_name: libpointmatcher
     build:
       context: ..
       dockerfile: ./build_system/ubuntu/Dockerfile.libpointmatcher
       args:
         PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
-        BASE_IMAGE: libpointmatcher-dependencies
+        BASE_IMAGE: libpointmatcher-dependencies-doc
         BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
-        LPM_VERSION: ${LPM_VERSION:?err}
+        LIBPOINTMATCHER_VERSION: ${LIBPOINTMATCHER_VERSION:?err}
+        LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--compile-test --generate-doc'
+        # (Priority) ToDo: implement case (ref task NMO-263 LPM build case › compile python binding)
     tty: true
     stdin_open: true
-#    entrypoint: ./entrypoint_execute_lpm_unittest.bash
     depends_on:
       - dependencies
+      - dependencies-doc

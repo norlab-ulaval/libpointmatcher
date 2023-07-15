@@ -1,9 +1,5 @@
 #!/bin/bash -i
 #
-# Note on unit test:
-#   $ docker pull --platform linux/arm64 ubuntu:20.04
-#   $ docker build --platform linux/arm64 -f Dockerfile.dependencies -t test-libpointmatcher-dependencies:ubuntu.20.04 .
-#   $ docker run -a --name iAmTestLibpointmatcherDependenciesContainer -t -i test-libpointmatcher-dependencies:ubuntu.20.04
 #
 set -e
 #set -v
@@ -143,19 +139,13 @@ git clone https://github.com/ethz-asl/libnabo.git &&
 #pwd && tree -L 3
 
 # ................................................................................................................
-print_msg "Install tools libpointmatchaer dev tools"
+print_msg "Install libpointmatchaer dev tools"
 
 sudo apt-get update &&
   sudo apt-get install --assume-yes \
     libyaml-cpp-dev &&
   sudo rm -rf /var/lib/apt/lists/*
 
-# Package required when GENERATE_API_DOC flag is set to true
-sudo apt-get update &&
-  sudo apt-get install --assume-yes \
-    doxygen \
-    texlive-full &&
-  sudo rm -rf /var/lib/apt/lists/*
 
 print_msg_done "Libpointmatcher dependencies installed"
 print_formated_script_footer 'lpm_install_dependencies_ubuntu.bash' =

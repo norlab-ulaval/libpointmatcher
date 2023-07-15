@@ -6,11 +6,10 @@
 #   $ bash lpm_execute_compose.bash [<optional flag>] [-- <any docker cmd+arg>]
 #
 # Arguments:
-#   [--libpointmatcher-version latest]    The libpointmatcher release tag (default: see LPM_VERSION)
+#   [--libpointmatcher-version v1.3.1]     The libpointmatcher release tag (default: see LIBPOINTMATCHER_VERSION)
 #   [--os-name ubuntu]                    The operating system name. Either 'ubuntu' or 'osx' (default: see OS_NAME)
 #   [--os-version jammy]                  Name named operating system version, see .env for supported version
 #                                           (default: see OS_VERSION)
-#   [--job-id 666]
 #   [-- <any docker cmd+arg>]             Any argument passed after '--' will be passed to docker compose
 #                                           as docker command and arguments
 #                                           (default: see DOCKER_COMPOSE_CMD_ARGS)
@@ -21,10 +20,10 @@ set -e
 
 
 # ....Default......................................................................................................
-LPM_VERSION='latest'
+LIBPOINTMATCHER_VERSION='head'
 OS_NAME='ubuntu'
 OS_VERSION='20.04'
-LPM_JOB_ID='0'
+#LPM_JOB_ID='0'
 DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'
 
 # ....Project root logic...........................................................................................
@@ -48,11 +47,10 @@ function print_help_in_terminal() {
   \033[1m
     <optional argument>:\033[0m
       -h, --help                              Get help
-      --libpointmatcher-version latest        The libpointmatcher release tag (default to latest 'latest')
+      --libpointmatcher-version v1.3.1         The libpointmatcher release tag (default to master branch head)
       --os-name ubuntu                        The operating system name. Either 'ubuntu' or 'osx' (default to 'ubuntu')
       --os-version jammy                      Name named operating system version, see .env for supported version
                                               (default to 'jammy')
-      --job-id 1
       --debug
   \033[1m
     [-- <any docker cmd+arg>]\033[0m                 Any argument passed after '--' will be passed to docker compose as docker
@@ -73,7 +71,7 @@ while [ $# -gt 0 ]; do
 
   case $1 in
   --libpointmatcher-version)
-    LPM_VERSION="${2}"
+    LIBPOINTMATCHER_VERSION="${2}"
     shift # Remove argument (--libpointmatcher-version)
     shift # Remove argument value
     ;;
@@ -87,11 +85,11 @@ while [ $# -gt 0 ]; do
     shift # Remove argument (--os-version)
     shift # Remove argument value
     ;;
-  --job-id)
-    LPM_JOB_ID="${2}"
-    shift # Remove argument (--job-id)
-    shift # Remove argument value
-    ;;
+#  --job-id)
+#    LPM_JOB_ID="${2}"
+#    shift # Remove argument (--job-id)
+#    shift # Remove argument value
+#    ;;
   --debug)
 #    set -v
 #    set -x
@@ -122,7 +120,7 @@ done
 
 ## ToDo: on task end >> delete next bloc ↓↓
 #echo -e " ${MSG_DIMMED_FORMAT}
-#LPM_VERSION=${LPM_VERSION}
+#LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION}
 #OS_NAME=${OS_NAME}
 #OS_VERSION=${OS_VERSION}
 #DOCKER_COMPOSE_CMD_ARGS=${DOCKER_COMPOSE_CMD_ARGS}
@@ -136,12 +134,12 @@ source ./lpm_utility_script/lpm_export_which_architecture.bash
 # ..................................................................................................................
 print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}docker-compose.libpointmatcher.yaml${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
 
-# Note: LPM_VERSION will be used to fetch the repo at release tag (ref task NMO-252)
-export LPM_VERSION="${LPM_VERSION}"
-export LPM_JOB_ID="${LPM_JOB_ID}"
+# Note: LIBPOINTMATCHER_VERSION will be used to fetch the repo at release tag (ref task NMO-252)
+export LIBPOINTMATCHER_VERSION="${LIBPOINTMATCHER_VERSION}"
+#export LPM_JOB_ID="${LPM_JOB_ID}"
 export DEPENDENCIES_BASE_IMAGE="${OS_NAME}"
 export DEPENDENCIES_BASE_IMAGE_TAG="${OS_VERSION}"
-export LPM_IMAGE_TAG="${LPM_VERSION}-${DEPENDENCIES_BASE_IMAGE}${DEPENDENCIES_BASE_IMAGE_TAG}-${LPM_IMAGE_ARCHITECTURE:?'err: variable not set'}"
+export LPM_IMAGE_TAG="${LIBPOINTMATCHER_VERSION}-${DEPENDENCIES_BASE_IMAGE}${DEPENDENCIES_BASE_IMAGE_TAG}-${LPM_IMAGE_ARCHITECTURE:?'err: variable not set'}"
 
 print_msg "Image tag ${MSG_DIMMED_FORMAT}${LPM_IMAGE_TAG}${MSG_END_FORMAT}"
 print_msg "Environment variables set for this build run:\n\n${MSG_DIMMED_FORMAT}$(printenv | grep -i -e LPM_ -e DEPENDENCIES_BASE_IMAGE -e BUILDKIT)${MSG_END_FORMAT}\n"

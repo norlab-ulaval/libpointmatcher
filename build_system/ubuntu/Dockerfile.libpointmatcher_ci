@@ -1,0 +1,37 @@
+ARG PROJECT_HUB=norlabulaval
+ARG BASE_IMAGE=libpointmatcher-dependencies
+ARG BASE_IMAGE_TAG
+FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-dependencies
+
+LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
+
+ARG LIBPOINTMATCHER_VERSION='head'
+ENV LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION}
+LABEL libpointmatcher.version="${LIBPOINTMATCHER_VERSION}"
+
+ARG LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG='--build-system-CI-install --compile-test'
+
+ARG LPM_INSTALLED_LIBRARIES_PATH
+ARG LPM_LIBPOINTMATCHER_SRC_REPO_NAME
+ENV LPM_INSTALLED_LIBRARIES_PATH=${LPM_INSTALLED_LIBRARIES_PATH:?'Build argument needs to be set and non-empty.'}
+ENV LPM_LIBPOINTMATCHER_SRC_REPO_NAME=${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?'Build argument needs to be set and non-empty.'}
+
+
+SHELL ["/bin/bash", "-c"]
+ARG DEBIAN_FRONTEND=noninteractive
+
+# ====Install Libpointmatcher=======================================================================================
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+
+# Copy all files from the checkout branch in the repository (except those in the .dockerignore)
+COPY . .
+
+WORKDIR ./build_system/ubuntu
+
+RUN chmod +x entrypoint_build_and_test_libpointmatcher_checkout_branch.bash
+
+# ====End==========================================================================================================
+ENV LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG=${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
+
+ENTRYPOINT [ "./entrypoint_build_and_test_libpointmatcher_checkout_branch.bash" ]
+CMD [ "bash" ]
