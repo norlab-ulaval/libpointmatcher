@@ -26,7 +26,7 @@ set +o allexport
 source ./function_library/prompt_utilities.bash
 
 # ====Begin========================================================================================================
-print_formated_script_header 'lpm_install_doc_dependencies_ubuntu.bash' =
+print_formated_script_header 'lpm_install_doc_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 
 
 # ................................................................................................................
@@ -43,7 +43,7 @@ sudo apt-get update &&
 
 
 print_msg_done "Libpointmatcher documentation related dependencies installed"
-print_formated_script_footer 'lpm_install_doc_dependencies_ubuntu.bash' =
+print_formated_script_footer 'lpm_install_doc_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"
 

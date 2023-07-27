@@ -26,7 +26,7 @@ export DEBIAN_FRONTEND=noninteractive
 source ./function_library/prompt_utilities.bash
 
 # ====Begin========================================================================================================
-print_formated_script_header 'lpm_install_dependencies_ubuntu.bash' =
+print_formated_script_header 'lpm_install_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 
 
 # ................................................................................................................
@@ -139,7 +139,7 @@ git clone https://github.com/ethz-asl/libnabo.git &&
 #pwd && tree -L 3
 
 # ................................................................................................................
-print_msg "Install libpointmatchaer dev tools"
+print_msg "Install libpointmatcher dev tools"
 
 sudo apt-get update &&
   sudo apt-get install --assume-yes \
@@ -148,7 +148,7 @@ sudo apt-get update &&
 
 
 print_msg_done "Libpointmatcher dependencies installed"
-print_formated_script_footer 'lpm_install_dependencies_ubuntu.bash' =
+print_formated_script_footer 'lpm_install_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"
 

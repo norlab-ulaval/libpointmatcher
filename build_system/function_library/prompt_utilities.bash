@@ -111,24 +111,32 @@ function print_msg_error_and_exit() {
 #   $ draw_horizontal_line_across_the_terminal_window [<SYMBOL>]
 #
 # Arguments:
-#   [<SYMBOL>] Symbole for the line, default to '='
+#   [<SYMBOL>] Symbol (a single character) for the line, default to '='
 # Outputs:
 #   The screen wide line
 # Returns:
 #   none
 # =================================================================================================================
 function draw_horizontal_line_across_the_terminal_window() {
-  local SYMBOL="${1:-=}"
+#  local SYMBOL="${1:-=}"
+#
+#  # (NICE TO HAVE) ToDo: validate >> var TERM is setup in Dockerfile.dependencies instead. Erase TPUT_FLAG logic.
+##  if [[ ${TERM} == '' ]]; then
+##      TPUT_FLAG='-T xterm'
+###      TPUT_FLAG='-T xterm-256color'
+##  fi
+##  TPUT_FLAG='-T xterm'
+#  TPUT_FLAG=''
+#  printf '%*s\n' "${COLUMNS:-$(tput ${TPUT_FLAG} cols)}" '' | tr ' ' "${SYMBOL}"
 
-  # (NICE TO HAVE) ToDo: validate >> var TERM is setup in Dockerfile.dependencies instead. Erase TPUT_FLAG logic.
-#  if [[ ${TERM} == '' ]]; then
-#      TPUT_FLAG='-T xterm'
-##      TPUT_FLAG='-T xterm-256color'
-#  fi
-#  TPUT_FLAG='-T xterm'
-  TPUT_FLAG=''
-
-  printf '%*s\n' "${COLUMNS:-$(tput ${TPUT_FLAG} cols)}" '' | tr ' ' "${SYMBOL}"
+  local the_pad_cha="${1:-"="}"
+  local the_style="${2:-""}"
+  local terminal_width
+  TPUT_FLAG='-T xterm'
+#  TPUT_FLAG=''
+  terminal_width=$(tput ${TPUT_FLAG} cols)
+  pad=$(printf "$the_pad_cha%.0s" $(seq $terminal_width))
+  printf "${the_style}${pad}\033[0m\n"                        # <-- Quick hack
 }
 
 # =================================================================================================================
@@ -183,7 +191,7 @@ function print_formated_back_to_script_msg() {
   local SCRIPT_NAME="${1}"
   local SYMBOL="${2:-=}"
   echo
-  draw_horizontal_line_across_the_terminal_window -
+  draw_horizontal_line_across_the_terminal_window "${SYMBOL}"
   echo -e "Back to ${MSG_DIMMED_FORMAT}configure_teamcity_server.bash${MSG_END_FORMAT}"
   echo
 }

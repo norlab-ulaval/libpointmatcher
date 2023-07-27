@@ -47,7 +47,7 @@ sudo apt-get update &&
 
 # .................................................................................................................
 echo
-print_msg "Install Docker tools"
+print_msg "Install Docker tools" "${LPM_LINE_CHAR_UTIL}"
 
 # . . Add Docker’s official GPG key:. . . . . . . . . . . . . . . . . . . . . . . . . . .
 sudo mkdir -m 0755 -p /etc/apt/keyrings
@@ -86,6 +86,6 @@ sudo usermod -a -G docker "$(whoami)"
 
 print_msg "${NTSI_ADMIN_USER} added to docker group"
 
-print_formated_script_footer 'lpm_install_docker_tools.bash'
+print_formated_script_footer 'lpm_install_docker_tools.bash' "${LPM_LINE_CHAR_UTIL}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

@@ -40,7 +40,7 @@ fi
 
 
 # ====Begin========================================================================================================
-print_formated_script_header 'test_build_and_run_IamBuildSystemTester.bash' '/'
+print_formated_script_header 'test_build_and_run_IamBuildSystemTester.bash' "${LPM_LINE_CHAR_TEST}"
 
 # ....Build image..................................................................................................
 echo
@@ -58,6 +58,6 @@ fi
 
 show_and_execute_docker "run --name IamBuildSystemTester -t -i --rm lpm.ubuntu20.buildsystem.test ${DOCKER_CMD_ARGS}"
 
-print_formated_script_footer 'test_build_and_run_IamBuildSystemTester.bash' '/'
+print_formated_script_footer 'test_build_and_run_IamBuildSystemTester.bash' "${LPM_LINE_CHAR_TEST}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

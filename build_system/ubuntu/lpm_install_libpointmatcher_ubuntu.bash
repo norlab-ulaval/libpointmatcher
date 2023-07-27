@@ -70,7 +70,7 @@ function print_help_in_terminal() {
 }
 
 # ====Begin========================================================================================================
-print_formated_script_header 'lpm_install_libpointmatcher_ubuntu.bash' =
+print_formated_script_header 'lpm_install_libpointmatcher_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 
 # ....Script command line flags....................................................................................
 
@@ -186,6 +186,6 @@ make -j $(nproc)
 sudo make install
 
 print_msg_done "Libpointmatcher installed at ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT}"
-print_formated_script_footer 'lpm_install_libpointmatcher_ubuntu.bash' =
+print_formated_script_footer 'lpm_install_libpointmatcher_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

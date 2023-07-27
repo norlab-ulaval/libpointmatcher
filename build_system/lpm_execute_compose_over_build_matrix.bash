@@ -42,6 +42,7 @@ set +o allexport
 # import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
+source ./function_library/terminal_splash.bash
 
 function print_help_in_terminal() {
   echo -e "\n
@@ -66,7 +67,9 @@ function print_help_in_terminal() {
 }
 
 # ====Begin========================================================================================================
-print_formated_script_header 'lpm_execute_compose_over_build_matrix.bash' =
+norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+
+print_formated_script_header 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
 
 # ....Script command line flags....................................................................................
 
@@ -170,11 +173,13 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_LIBPOINTMATCHER_VERSIONS[@]}"; do
 
 #      export LPM_JOB_ID=${LPM_JOB_ID}
 
+      SHOW_SPLASH_EC='false'
+
       source ./lpm_execute_compose.bash --libpointmatcher-version "${EACH_LPM_VERSION}" \
                                         --os-name "${EACH_OS_NAME}" \
                                         --os-version "${EACH_OS_VERSION}" \
-#                                        --job-id "${LPM_JOB_ID}" \
                                         -- "${DOCKER_COMPOSE_CMD_ARGS}"
+#                                        --job-id "${LPM_JOB_ID}" \
 
       # Collect image tags exported by lpm_execute_compose.bash
       IMAGE_TAG_CRAWLED=("${IMAGE_TAG_CRAWLED[@]}" "${LPM_IMAGE_TAG}")
@@ -205,6 +210,6 @@ for tag in "${IMAGE_TAG_CRAWLED[@]}" ; do
 done
 echo -e "${MSG_END_FORMAT}"
 
-print_formated_script_footer 'lpm_execute_compose_over_build_matrix.bash' =
+print_formated_script_footer 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

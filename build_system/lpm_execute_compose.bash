@@ -40,6 +40,7 @@ set +o allexport
 # import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
+source ./function_library/terminal_splash.bash
 
 function print_help_in_terminal() {
   echo -e "\n
@@ -60,10 +61,16 @@ function print_help_in_terminal() {
 
 
 # ====Begin========================================================================================================
-print_formated_script_header 'lpm_execute_compose.bash' =
+SHOW_SPLASH_EC="${SHOW_SPLASH_EC:-'true'}"
+
+if [[ "${SHOW_SPLASH_EC}" == 'true' ]]; then
+  norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+fi
+
+
+print_formated_script_header 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
 
 # ....Script command line flags....................................................................................
-
 while [ $# -gt 0 ]; do
 
 #  echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
@@ -151,7 +158,7 @@ print_msg "Environment variables set for this build run:\n\n${MSG_DIMMED_FORMAT}
 
 show_and_execute_docker "compose -f docker-compose.libpointmatcher.yaml ${DOCKER_COMPOSE_CMD_ARGS}"
 
-print_formated_script_footer 'lpm_execute_compose.bash' =
+print_formated_script_footer 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"
 

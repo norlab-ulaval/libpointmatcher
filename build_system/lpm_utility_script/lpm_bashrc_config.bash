@@ -26,7 +26,7 @@ else
 fi
 
 # ====Begin========================================================================================================
-print_formated_script_header 'lpm_bashrc_config.bash' .
+print_formated_script_header 'lpm_bashrc_config.bash' "${LPM_LINE_CHAR_UTIL}"
 
 # ....Config bashrc................................................................................................
 # Add the following lines to .bashsrc if no alias prefixed with `lpm_` exist
@@ -44,7 +44,7 @@ fi
 
 print_msg_done "New aliases with prefix 'lpm' added to .bashrc"
 
-print_formated_script_footer 'lpm_bashrc_config.bash' .
+print_formated_script_footer 'lpm_bashrc_config.bash' "${LPM_LINE_CHAR_UTIL}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"
 
