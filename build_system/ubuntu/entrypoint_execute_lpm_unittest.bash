@@ -21,3 +21,4 @@ utest/utest --path "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_RE
 
 # ====Continue=====================================================================================================
 exec "${@}"
+#exit "$(echo $?)"

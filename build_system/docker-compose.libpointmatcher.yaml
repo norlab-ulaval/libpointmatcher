@@ -35,6 +35,7 @@ services:
         # (Priority) ToDo: implement case (ref task NMO-263 LPM build case › compile python binding)
     tty: true
     stdin_open: true
+#    init: true  # Ref post https://ddanilov.me/how-to-contain-a-crashed-container/
     depends_on:
       - dependencies
   release:

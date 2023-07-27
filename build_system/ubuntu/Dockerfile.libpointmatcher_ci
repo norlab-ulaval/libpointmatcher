@@ -29,9 +29,12 @@ COPY . .
 WORKDIR ./build_system/ubuntu
 
 RUN chmod +x entrypoint_build_and_test_libpointmatcher_checkout_branch.bash
+RUN chmod +x entrypoint_build_libpointmatcher_checkout_branch.bash
+RUN chmod +x entrypoint_execute_lpm_unittest.bash
 
 # ====End==========================================================================================================
 ENV LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG=${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
 
-ENTRYPOINT [ "./entrypoint_build_and_test_libpointmatcher_checkout_branch.bash" ]
-CMD [ "bash" ]
+#ENTRYPOINT [ "./entrypoint_build_and_test_libpointmatcher_checkout_branch.bash" ]
+ENTRYPOINT [ "./entrypoint_build_libpointmatcher_checkout_branch.bash" ]
+CMD [ "bash", "entrypoint_execute_lpm_unittest.bash" ]
