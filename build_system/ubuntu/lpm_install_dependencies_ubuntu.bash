@@ -35,7 +35,6 @@ fi
 
 print_formated_script_header 'lpm_install_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 
-
 # ................................................................................................................
 echo
 print_msg "Install development utilities"
