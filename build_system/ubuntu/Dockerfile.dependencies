@@ -73,7 +73,7 @@ COPY ./build_system/.env .
 
 COPY ./build_system/ubuntu/lpm_install_dependencies_ubuntu.bash ./ubuntu/
 COPY ./build_system/ubuntu/lpm_install_python_dev_tools.bash ./ubuntu/
-COPY ./build_system/function_library/prompt_utilities.bash ./function_library/
+COPY ./build_system/function_library/ ./function_library/
 
 WORKDIR ./ubuntu
 

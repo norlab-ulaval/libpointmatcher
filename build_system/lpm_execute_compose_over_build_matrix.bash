@@ -67,7 +67,7 @@ function print_help_in_terminal() {
 }
 
 # ====Begin========================================================================================================
-norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+norlab_splash "${LPM_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 
 print_formated_script_header 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
 

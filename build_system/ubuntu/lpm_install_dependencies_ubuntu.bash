@@ -1,4 +1,4 @@
-#!/bin/bash -i
+#!/bin/bash
 #
 #
 set -e
@@ -24,8 +24,15 @@ export DEBIAN_FRONTEND=noninteractive
 # ....Helper function..............................................................................................
 # import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
+source ./function_library/terminal_splash.bash
 
 # ====Begin========================================================================================================
+SHOW_SPLASH_IDU="${SHOW_SPLASH_IDU:-true}"
+
+if [[ "${SHOW_SPLASH_IDU}" == 'true' ]]; then
+  norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+fi
+
 print_formated_script_header 'lpm_install_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 
 

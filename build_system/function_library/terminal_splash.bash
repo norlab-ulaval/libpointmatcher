@@ -1,4 +1,18 @@
-#!/bin/bash -i
+#!/bin/bash
+#
+# Requirement: This script must be executed from project root 'NorLab-TeamCity-Server-infrastructure'
+#
+# Usage:
+#   $ source function_library/terminal_splash.bash
+#
+set -e
+
+# ....Pre-condition................................................................................................
+if [[ "$(basename $(pwd))" != "build_system" ]]; then
+  echo -e "\nERROR: This script must be sourced from directory 'build_system'!\n cwd: $(pwd)"
+  exit 1
+fi
+
 
 # =================================================================================================================
 # Dynamic printf centering tool. Centering based on the terminal screen width at runtime.
@@ -26,7 +40,8 @@ function echo_centering_str() {
   the_pad_cha="${3:-" "}"
   local str_len=${#the_str}
   local terminal_width
-  terminal_width=$(tput cols)
+  TPUT_FLAG='-T xterm'
+  terminal_width=$(tput ${TPUT_FLAG} cols)
   local total_padding_len=$(( $terminal_width - $str_len ))
   local single_side_padding_len=$(( $total_padding_len / 2 ))
   pad=$(printf "$the_pad_cha%.0s" $(seq $single_side_padding_len))

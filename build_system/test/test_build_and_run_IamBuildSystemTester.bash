@@ -1,4 +1,4 @@
-#!/bin/bash -i
+#!/bin/bash
 #
 # Build and run docker container for testing build system user script.
 #   - Image:      lpm.ubuntu20.buildsystem.test

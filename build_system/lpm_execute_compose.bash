@@ -1,4 +1,4 @@
-#!/bin/bash -i
+#!/bin/bash
 #
 # Build and run a single container based on docker compose docker-compose.libpointmatcher.yaml
 #
@@ -61,10 +61,11 @@ function print_help_in_terminal() {
 
 
 # ====Begin========================================================================================================
-SHOW_SPLASH_EC="${SHOW_SPLASH_EC:-'true'}"
+SHOW_SPLASH_EC="${SHOW_SPLASH_EC:-true}"
+#echo "\$SHOW_SPLASH_EC=${SHOW_SPLASH_EC}"
 
 if [[ "${SHOW_SPLASH_EC}" == 'true' ]]; then
-  norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+  norlab_splash "${LPM_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 fi
 
 

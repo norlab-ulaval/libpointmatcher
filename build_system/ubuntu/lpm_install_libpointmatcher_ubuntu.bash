@@ -1,4 +1,4 @@
-#!/bin/bash -i
+#!/bin/bash
 #
 # Install libpointmatcher
 #
@@ -49,6 +49,7 @@ set +o allexport
 # ....Helper function..............................................................................................
 # import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
+source ./function_library/terminal_splash.bash
 
 function print_help_in_terminal() {
   echo -e "\$ ${0} [<optional argument>]
@@ -70,6 +71,12 @@ function print_help_in_terminal() {
 }
 
 # ====Begin========================================================================================================
+SHOW_SPLASH_ILU="${SHOW_SPLASH_ILU:-true}"
+
+if [[ "${SHOW_SPLASH_ILU}" == 'true' ]]; then
+  norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+fi
+
 print_formated_script_header 'lpm_install_libpointmatcher_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
 
 # ....Script command line flags....................................................................................
