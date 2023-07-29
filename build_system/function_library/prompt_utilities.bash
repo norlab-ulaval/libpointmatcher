@@ -118,25 +118,16 @@ function print_msg_error_and_exit() {
 #   none
 # =================================================================================================================
 function draw_horizontal_line_across_the_terminal_window() {
-#  local SYMBOL="${1:-=}"
-#
-#  # (NICE TO HAVE) ToDo: validate >> var TERM is setup in Dockerfile.dependencies instead. Erase TPUT_FLAG logic.
-##  if [[ ${TERM} == '' ]]; then
-##      TPUT_FLAG='-T xterm'
-###      TPUT_FLAG='-T xterm-256color'
-##  fi
-##  TPUT_FLAG='-T xterm'
-#  TPUT_FLAG=''
-#  printf '%*s\n' "${COLUMNS:-$(tput ${TPUT_FLAG} cols)}" '' | tr ' ' "${SYMBOL}"
+  local SYMBOL="${1:-=}"
 
-  local the_pad_cha="${1:-"="}"
-  local the_style="${2:-""}"
-  local terminal_width
-  TPUT_FLAG='-T xterm'
-#  TPUT_FLAG=''
-  terminal_width=$(tput ${TPUT_FLAG} cols)
-  pad=$(printf "$the_pad_cha%.0s" $(seq $terminal_width))
-  printf "${the_style}${pad}\033[0m\n"                        # <-- Quick hack
+  if [[ -z ${TERM} ]]; then
+#    TPUT_FLAG=''
+#    TPUT_FLAG='-T xterm'
+    TPUT_FLAG='-T xterm-256color'
+  fi
+
+  printf '%*s\n' "${COLUMNS:-$(tput ${TPUT_FLAG} cols)}" '' | tr ' ' "${SYMBOL}"
+
 }
 
 # =================================================================================================================

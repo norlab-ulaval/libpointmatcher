@@ -26,6 +26,9 @@ set +o allexport
 source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
 
+# Set environment variable LPM_IMAGE_ARCHITECTURE
+source ./lpm_utility_script/lpm_export_which_architecture.bash
+
 # ====Begin========================================================================================================
 SHOW_SPLASH_IDDU="${SHOW_SPLASH_IDDU:-true}"
 
@@ -33,7 +36,7 @@ if [[ "${SHOW_SPLASH_IDDU}" == 'true' ]]; then
   norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 fi
 
-print_formated_script_header 'lpm_install_doc_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
+print_formated_script_header "lpm_install_doc_dependencies_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 
 
 # ................................................................................................................
@@ -50,7 +53,7 @@ sudo apt-get update &&
 
 
 print_msg_done "Libpointmatcher documentation related dependencies installed"
-print_formated_script_footer 'lpm_install_doc_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
+print_formated_script_footer "lpm_install_doc_dependencies_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"
 

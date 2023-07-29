@@ -12,7 +12,7 @@
 #                                           (default: see OS_VERSION)
 #   [-- <any docker cmd+arg>]             Any argument passed after '--' will be passed to docker compose
 #                                           as docker command and arguments
-#                                           (default: see DOCKER_COMPOSE_CMD_ARGS)
+#                                           (default: 'up --build --force-recreate')
 #   [-h, --help]                          Get help
 #   [--debug]
 #
@@ -135,9 +135,9 @@ done
 #${MSG_END_FORMAT} "
 
 
-# ..................................................................................................................
-# Set environment variable LPM_IMAGE_ARCHITECTURE
-source ./lpm_utility_script/lpm_export_which_architecture.bash
+## ..................................................................................................................
+## Set environment variable LPM_IMAGE_ARCHITECTURE
+#source ./lpm_utility_script/lpm_export_which_architecture.bash
 
 # ..................................................................................................................
 print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}docker-compose.libpointmatcher.yaml${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
@@ -147,7 +147,10 @@ export LIBPOINTMATCHER_VERSION="${LIBPOINTMATCHER_VERSION}"
 #export LPM_JOB_ID="${LPM_JOB_ID}"
 export DEPENDENCIES_BASE_IMAGE="${OS_NAME}"
 export DEPENDENCIES_BASE_IMAGE_TAG="${OS_VERSION}"
-export LPM_IMAGE_TAG="${LIBPOINTMATCHER_VERSION}-${DEPENDENCIES_BASE_IMAGE}${DEPENDENCIES_BASE_IMAGE_TAG}-${LPM_IMAGE_ARCHITECTURE:?'err: variable not set'}"
+
+# ToDo: implement case (ref task NMO-225 ⚒︎ → Docker image multi-arch support) >> remove the target arch from the tag. L4T will be used in the OS tag
+#export LPM_IMAGE_TAG="${LIBPOINTMATCHER_VERSION}-${DEPENDENCIES_BASE_IMAGE}${DEPENDENCIES_BASE_IMAGE_TAG}-${LPM_IMAGE_ARCHITECTURE:?'err: variable not set'}"
+export LPM_IMAGE_TAG="${LIBPOINTMATCHER_VERSION}-${DEPENDENCIES_BASE_IMAGE}${DEPENDENCIES_BASE_IMAGE_TAG}"
 
 print_msg "Image tag ${MSG_DIMMED_FORMAT}${LPM_IMAGE_TAG}${MSG_END_FORMAT}"
 print_msg "Environment variables set for this build run:\n\n${MSG_DIMMED_FORMAT}$(printenv | grep -i -e LPM_ -e DEPENDENCIES_BASE_IMAGE -e BUILDKIT)${MSG_END_FORMAT}\n"

@@ -35,6 +35,12 @@ RUN chmod +x entrypoint_execute_lpm_unittest.bash
 # ====End==========================================================================================================
 ENV LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG=${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
 
+
+# (Priority) ToDo: on task end >> unmute next bloc ↓↓
 #ENTRYPOINT [ "./entrypoint_build_and_test_libpointmatcher_checkout_branch.bash" ]
 ENTRYPOINT [ "./entrypoint_build_libpointmatcher_checkout_branch.bash" ]
 CMD [ "bash", "entrypoint_execute_lpm_unittest.bash" ]
+
+## (Priority) ToDo: on task end >> mute next bloc ↓↓
+#ENTRYPOINT [ "./entrypoint.bash" ]
+#CMD [ "bash" ]

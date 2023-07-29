@@ -26,6 +26,9 @@ export DEBIAN_FRONTEND=noninteractive
 source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
 
+# Set environment variable LPM_IMAGE_ARCHITECTURE
+source ./lpm_utility_script/lpm_export_which_architecture.bash
+
 # ====Begin========================================================================================================
 SHOW_SPLASH_IDU="${SHOW_SPLASH_IDU:-true}"
 
@@ -33,7 +36,7 @@ if [[ "${SHOW_SPLASH_IDU}" == 'true' ]]; then
   norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 fi
 
-print_formated_script_header 'lpm_install_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
+print_formated_script_header "lpm_install_dependencies_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 
 # ................................................................................................................
 echo
@@ -136,7 +139,7 @@ git clone https://github.com/ethz-asl/libnabo.git &&
   mkdir build && cd build &&
   cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo .. &&
   make -j $(nproc) &&
-  make test &&
+#  make test &&              # (CRITICAL) ToDo: on task end >> unmute this line ←
   sudo make install
 
 #    && git checkout 1.0.7 \
@@ -154,7 +157,7 @@ sudo apt-get update &&
 
 
 print_msg_done "Libpointmatcher dependencies installed"
-print_formated_script_footer 'lpm_install_dependencies_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
+print_formated_script_footer "lpm_install_dependencies_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"
 

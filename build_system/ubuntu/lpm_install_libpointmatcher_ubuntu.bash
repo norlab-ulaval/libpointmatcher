@@ -51,6 +51,9 @@ set +o allexport
 source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
 
+# Set environment variable LPM_IMAGE_ARCHITECTURE
+source ./lpm_utility_script/lpm_export_which_architecture.bash
+
 function print_help_in_terminal() {
   echo -e "\$ ${0} [<optional argument>]
 
@@ -77,7 +80,9 @@ if [[ "${SHOW_SPLASH_ILU}" == 'true' ]]; then
   norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 fi
 
-print_formated_script_header 'lpm_install_libpointmatcher_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
+echo "TEST: ${LPM_IMAGE_ARCHITECTURE}" # ToDo: on task end >> delete this line ←
+
+print_formated_script_header "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 
 # ....Script command line flags....................................................................................
 
@@ -194,6 +199,6 @@ sudo make install
 
 
 print_msg_done "Libpointmatcher installed at ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT}"
-print_formated_script_footer 'lpm_install_libpointmatcher_ubuntu.bash' "${LPM_LINE_CHAR_INSTALLER}"
+print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

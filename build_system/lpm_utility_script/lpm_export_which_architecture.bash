@@ -2,14 +2,32 @@
 #
 # Tools to export the LPM_IMAGE_ARCHITECTURE environment variable with the host architecture and OS type.
 #
-# LPM_IMAGE_ARCHITECTURE will be exported either as 'arm64-l4t', 'arm64-darwin', 'arm64-linux' or 'x86-linux'
-# depending on which architecture and OS type the script is running:
-#   - ARCH: aarch64, arm64, x86_64
-#   - OS: Linux, Darwin, Window
+# Usage:
+#   $ source ./lpm_utility_script/lpm_export_which_architecture.bash
 #
-# Usage;
-#   $ bash ./lpm_utility_script/lpm_export_which_architecture.bash
+# Globals:
+#   Read LPM_LINE_CHAR_UTIL
+# Arguments:
+#   none
+# Outputs:
+#   environment variable LPM_IMAGE_ARCHITECTURE will be exported either as
+#       - LPM_IMAGE_ARCHITECTURE=x86-linux
+#       - LPM_IMAGE_ARCHITECTURE=arm64-linux
+#       - LPM_IMAGE_ARCHITECTURE=arm64-l4t
+#       - LPM_IMAGE_ARCHITECTURE=arm64-darwin
+#   depending on which architecture and OS type the script is running:
+#     - ARCH: aarch64, arm64, x86_64
+#     - OS: Linux, Darwin, Window
 #
+# (NICE TO HAVE) ToDo: assessment >> check the convention used by docker >> os[/arch[/variant]]
+#       linux/arm64/v8
+#       darwin/arm64/v8
+#       l4t/arm64/v8
+#     ref: https://docs.docker.com/compose/compose-file/05-services/#platform
+#
+# Returns:
+#   exit 1 in case of unsupported processor architecture
+# =================================================================================================================
 set -e
 
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
