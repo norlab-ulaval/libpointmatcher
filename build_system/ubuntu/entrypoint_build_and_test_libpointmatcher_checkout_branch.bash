@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 #
 # Usage:
 #   $ bash entrypoint_execute_lpm_unittest.bash [<any cmd>]
@@ -14,7 +14,7 @@ source ../.env
 set +o allexport
 
 # ==== Build libpointmatcher checkout branch ======================================================================
-bash lpm_install_libpointmatcher_ubuntu.bash \
+source lpm_install_libpointmatcher_ubuntu.bash \
   --libpointmatcher-version ${LIBPOINTMATCHER_VERSION:?'err variable not set'} \
   ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
 
@@ -22,7 +22,5 @@ bash lpm_install_libpointmatcher_ubuntu.bash \
 cd "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build"
 utest/utest --path "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/examples/data/"
 
-# (Priority) ToDo: implement (ref task NMO-266 LPM unit-test › gtest feedback for TC build step pass/fail status)
-
 # ====Continue=====================================================================================================
-exec "${@}"
+exec "$@"

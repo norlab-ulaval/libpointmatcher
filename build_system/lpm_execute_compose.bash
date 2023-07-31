@@ -5,6 +5,8 @@
 # Usage:
 #   $ bash lpm_execute_compose.bash [<optional flag>] [-- <any docker cmd+arg>]
 #
+#   $ bash lpm_execute_compose.bash -- run --rm ci
+#
 # Arguments:
 #   [--libpointmatcher-version v1.3.1]     The libpointmatcher release tag (default: see LIBPOINTMATCHER_VERSION)
 #   [--os-name ubuntu]                    The operating system name. Either 'ubuntu' or 'osx' (default: see OS_NAME)
@@ -57,6 +59,7 @@ function print_help_in_terminal() {
     [-- <any docker cmd+arg>]\033[0m                 Any argument passed after '--' will be passed to docker compose as docker
                                               command and arguments (default to '${DOCKER_COMPOSE_CMD_ARGS}')
 "
+#      --job-id                                Append job ID for CI test image
 }
 
 

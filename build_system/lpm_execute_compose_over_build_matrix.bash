@@ -5,6 +5,8 @@
 # Usage:
 #   $ bash lpm_execute_compose_over_build_matrix.bash [<optional flag>] [-- <any docker cmd+arg>]
 #
+#   $ bash lpm_execute_compose_over_build_matrix.bash -- up --build --force-recreate
+#
 # Arguments:
 #   [--libpointmatcher-version-build-matrix-override head]
 #                     The libpointmatcher release tag. Override must be a single value

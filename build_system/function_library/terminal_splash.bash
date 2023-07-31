@@ -5,7 +5,8 @@
 # Usage:
 #   $ source function_library/terminal_splash.bash
 #
-set -e
+#set -e # (NICE TO HAVE) ToDo: fixme!! >> script exit if "set -e" is enable
+#set -v
 
 # ....Pre-condition................................................................................................
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
@@ -35,23 +36,36 @@ fi
 #   none
 # =================================================================================================================
 function echo_centering_str() {
-  the_str=${1:?'Missing a mandatory parameter error'}
-  the_style="${2:-""}"
-  the_pad_cha="${3:-" "}"
+  local the_str=${1:?'Missing a mandatory parameter error'}
+  local the_style="${2:-""}"
+  local the_pad_cha="${3:-" "}"
   local str_len=${#the_str}
-  local terminal_width
 
+  ## ToDo: on task end >> mute next bloc ↓↓
+  #echo "\$TERM=${TERM}"
+  #echo "\$COLUMNS=${COLUMNS}"
+
+  # Ref https://bash.cyberciti.biz/guide/$TERM_variable
+  TPUT_FLAG=''
   if [[ -z ${TERM} ]]; then
-#    TPUT_FLAG=''
-#    TPUT_FLAG='-T xterm'
+    TPUT_FLAG='-T xterm-256color'
+  elif [[ ${TERM} == dumb ]]; then
+    # "dumb" is the one set on TeamCity Agent
     TPUT_FLAG='-T xterm-256color'
   fi
 
-  terminal_width=$(tput ${TPUT_FLAG} cols)
+  # (NICE TO HAVE) ToDo:
+  #     - var TERM should be setup in Dockerfile.dependencies.
+  #     - print a warning message if TERM is not set
+
+  local terminal_width
+#  terminal_width=$(tput ${TPUT_FLAG} cols)
+  terminal_width="${COLUMNS:-$(tput ${TPUT_FLAG} cols)}"
   local total_padding_len=$(( $terminal_width - $str_len ))
   local single_side_padding_len=$(( $total_padding_len / 2 ))
-  pad=$(printf "$the_pad_cha%.0s" $(seq $single_side_padding_len))
-  printf "${pad}${the_style}${the_str}\033[0m${pad}\n"                        # <-- Quick hack
+  local pad
+  pad=$(printf -- "$the_pad_cha%.0s" $(seq $single_side_padding_len))
+  printf -- "${pad}${the_style}${the_str}\033[0m${pad}\n"                        # <-- Quick hack
 }
 
 
@@ -106,12 +120,12 @@ function norlab_splash() {
   #   - 1=Bold/bright
   #   - 2=Dim
   #   - 4=underline
-  SNOW_FG=97
-  TITLE_FG=97
-  URL_FG=37
-  SNOW_FORMATTING=2
-  TITLE_FORMATTING=1
-  URL_FORMATTING=2
+  local SNOW_FG=97
+  local TITLE_FG=97
+  local URL_FG=37
+  local SNOW_FORMATTING=2
+  local TITLE_FORMATTING=1
+  local URL_FORMATTING=2
 
   echo " "
   echo " "

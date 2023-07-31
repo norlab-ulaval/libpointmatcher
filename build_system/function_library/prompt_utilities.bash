@@ -119,15 +119,29 @@ function print_msg_error_and_exit() {
 # =================================================================================================================
 function draw_horizontal_line_across_the_terminal_window() {
   local SYMBOL="${1:-=}"
+  local terminal_width
+  local pad
 
+  # Ref https://bash.cyberciti.biz/guide/$TERM_variable
+  TPUT_FLAG=''
   if [[ -z ${TERM} ]]; then
-#    TPUT_FLAG=''
-#    TPUT_FLAG='-T xterm'
+    TPUT_FLAG='-T xterm-256color'
+  elif [[ ${TERM} == dumb ]]; then
+    # "dumb" is the one set on TeamCity Agent
     TPUT_FLAG='-T xterm-256color'
   fi
 
-  printf '%*s\n' "${COLUMNS:-$(tput ${TPUT_FLAG} cols)}" '' | tr ' ' "${SYMBOL}"
+  # (NICE TO HAVE) ToDo:
+  #     - var TERM should be setup in Dockerfile.dependencies
+  #     - print a warning message if TERM is not set
 
+  ## Original version
+  #printf '%*s\n' "${COLUMNS:-$(tput ${TPUT_FLAG} cols)}" '' | tr ' ' "${SYMBOL}"
+
+  # Alt version
+  terminal_width="${COLUMNS:-$(tput ${TPUT_FLAG} cols)}"
+  pad=$(printf -- "${SYMBOL}%.0s" $(seq $terminal_width))
+  printf -- "${pad}\n"
 }
 
 # =================================================================================================================

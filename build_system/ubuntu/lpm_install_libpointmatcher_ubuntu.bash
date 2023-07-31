@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 #
 # Install libpointmatcher
 #
@@ -80,7 +80,6 @@ if [[ "${SHOW_SPLASH_ILU}" == 'true' ]]; then
   norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 fi
 
-echo "TEST: ${LPM_IMAGE_ARCHITECTURE}" # ToDo: on task end >> delete this line ←
 
 print_formated_script_header "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 

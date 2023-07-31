@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 #
 # Usage:
 #   $ bash entrypoint_execute_lpm_unittest.bash [<any cmd>]
@@ -14,9 +14,10 @@ source ../.env
 set +o allexport
 
 # ==== Build libpointmatcher checkout branch ======================================================================
-bash lpm_install_libpointmatcher_ubuntu.bash \
+source lpm_install_libpointmatcher_ubuntu.bash \
   --libpointmatcher-version ${LIBPOINTMATCHER_VERSION:?'err variable not set'} \
   ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
 
 # ====Continue=====================================================================================================
-exec "${@}"
+#exec "${@}"
+exec "$@"
