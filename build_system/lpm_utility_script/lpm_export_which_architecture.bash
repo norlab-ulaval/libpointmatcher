@@ -44,7 +44,7 @@ set +o allexport
 source ./function_library/prompt_utilities.bash
 
 # ====Begin========================================================================================================
-print_formated_script_header 'lpm_export_which_architecture.bash' "${LPM_LINE_CHAR_UTIL}"
+#print_formated_script_header 'lpm_export_which_architecture.bash' "${LPM_LINE_CHAR_UTIL}"
 
 
 if [[ $(uname -m) == "aarch64" ]]; then
@@ -64,5 +64,5 @@ else
 fi
 
 print_msg "Setting LPM_IMAGE_ARCHITECTURE=${LPM_IMAGE_ARCHITECTURE}"
-print_formated_script_footer 'lpm_export_which_architecture.bash' "${LPM_LINE_CHAR_UTIL}"
+#print_formated_script_footer 'lpm_export_which_architecture.bash' "${LPM_LINE_CHAR_UTIL}"
 # ====Done=========================================================================================================

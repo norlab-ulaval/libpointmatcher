@@ -12,6 +12,13 @@ services:
         BASE_IMAGE_TAG: ${DEPENDENCIES_BASE_IMAGE_TAG:?err}
         LPM_INSTALLED_LIBRARIES_PATH: ${LPM_INSTALLED_LIBRARIES_PATH:?err}
         LPM_LIBPOINTMATCHER_SRC_REPO_NAME: ${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?err}
+        IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
+#  dependencies-amd64:
+#    extends: dependencies
+#    platform: "linux/amd64"
+#  dependencies-arm64v8:
+#    extends: dependencies
+#    platform: "linux/arm64/v8"
   dependencies-doc:
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies-doc:${LPM_IMAGE_TAG:?err}
     build:
@@ -24,8 +31,6 @@ services:
         PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
         BASE_IMAGE: libpointmatcher-dependencies
         BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
-    depends_on:
-      - dependencies
   ci_build_and_test:
 #    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-build-and-test:${LPM_IMAGE_TAG:?err}-job${LPM_JOB_ID}
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-build-and-test:${LPM_IMAGE_TAG:?err}

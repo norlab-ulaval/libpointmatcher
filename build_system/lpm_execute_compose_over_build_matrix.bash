@@ -14,7 +14,8 @@
 #   [--os-name-build-matrix-override ubuntu]
 #                     The operating system name. Override must be a single value
 #                     (default to array sequence specified in .env.build_matrix)
-#   [--os-version-build-matrix-override jammy]
+#   [--ubuntu-version-build-matrix-override jammy]
+#   [--osx-version-build-matrix-override ventura]
 #                     Named operating system version. Override must be a single value
 #                     (default to array sequence specified in .env.build_matrix)
 #   [-- <any docker cmd+arg>]
@@ -58,7 +59,8 @@ function print_help_in_terminal() {
       --os-name-build-matrix-override ubuntu
                           The operating system name. Override must be a single value
                           (default to array sequence specified in .env.build_matrix)
-      --os-version-build-matrix-override jammy
+      --ubuntu-version-build-matrix-override jammy
+      --osx-version-build-matrix-override ventura
                           Named operating system version. Override must be a single value
                           (default to array sequence specified in .env.build_matrix)
 
@@ -77,8 +79,8 @@ print_formated_script_header 'lpm_execute_compose_over_build_matrix.bash' "${LPM
 
 while [ $# -gt 0 ]; do
 
-    echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-    echo -e "\$1: ${1}    \$2: ${2}" # ToDo: on task end >> delete this line ←
+#    echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
+#    echo -e "\$1: ${1}    \$2: ${2}" # ToDo: on task end >> delete this line ←
 
   case $1 in
   --libpointmatcher-version-build-matrix-override)
@@ -156,8 +158,16 @@ FREEZED_LPM_SUPPORTED_OS=("${LPM_SUPPORTED_OS[@]}")
 FREEZED_LPM_UBUNTU_SUPPORTED_VERSIONS=("${LPM_UBUNTU_SUPPORTED_VERSIONS[@]}")
 FREEZED_LPM_OSX_SUPPORTED_VERSIONS=("${LPM_OSX_SUPPORTED_VERSIONS[@]}")
 
+
+print_msg "Environment variables ${MSG_EMPH_FORMAT}(build matrix)${MSG_END_FORMAT} set for compose:\n
+${MSG_DIMMED_FORMAT}    LPM_LIBPOINTMATCHER_VERSIONS=(${FREEZED_LPM_LIBPOINTMATCHER_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LPM_SUPPORTED_OS=(${FREEZED_LPM_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LPM_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_LPM_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LPM_OSX_SUPPORTED_VERSIONS=(${FREEZED_LPM_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+"
+
 # Note: EACH_LPM_VERSION is used for container labeling and to fetch the repo at release tag (todo ref task NMO-252)
-# (Priority) ToDo: implement other OS support (ref task NMO-213 OsX arm64-Darwin and NMO-210 OsX x86 CD components)
+# iceboxed: implement other OS support (ref task NMO-213 OsX arm64-Darwin and NMO-210 OsX x86 CD components)
 for EACH_LPM_VERSION in "${FREEZED_LPM_LIBPOINTMATCHER_VERSIONS[@]}"; do
 
   for EACH_OS_NAME in "${FREEZED_LPM_SUPPORTED_OS[@]}"; do
@@ -174,8 +184,12 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_LIBPOINTMATCHER_VERSIONS[@]}"; do
     for EACH_OS_VERSION in "${CRAWL_OS_VERSIONS[@]}"; do
 
 #      export LPM_JOB_ID=${LPM_JOB_ID}
-
       SHOW_SPLASH_EC='false'
+
+      if [[ ${TEAMCITY_VERSION} ]]; then
+        echo "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} execute lpm_execute_compose.bash' description='${MSG_DIMMED_FORMAT_TEAMCITY} --libpointmatcher-version ${EACH_LPM_VERSION} --os-name ${EACH_OS_NAME} --os-version ${EACH_OS_VERSION} -- ${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT_TEAMCITY}|n']"
+        echo " "
+      fi
 
       source ./lpm_execute_compose.bash --libpointmatcher-version "${EACH_LPM_VERSION}" \
                                         --os-name "${EACH_OS_NAME}" \
@@ -186,32 +200,40 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_LIBPOINTMATCHER_VERSIONS[@]}"; do
       # Collect image tags exported by lpm_execute_compose.bash
       IMAGE_TAG_CRAWLED=("${IMAGE_TAG_CRAWLED[@]}" "${LPM_IMAGE_TAG}")
 
+      if [[ ${TEAMCITY_VERSION} ]]; then
+        echo "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} execute lpm_execute_compose.bash']"
+      fi
+
     done
   done
 done
 
-
-# ToDo: on task end >> delete next bloc ↓↓
-echo -e " ${MSG_DIMMED_FORMAT}
-FREEZED_LPM_LIBPOINTMATCHER_VERSIONS=(${FREEZED_LPM_LIBPOINTMATCHER_VERSIONS[*]})
-FREEZED_LPM_SUPPORTED_OS=(${FREEZED_LPM_SUPPORTED_OS[*]})
-FREEZED_LPM_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_LPM_UBUNTU_SUPPORTED_VERSIONS[*]})
-FREEZED_LPM_OSX_SUPPORTED_VERSIONS=(${FREEZED_LPM_OSX_SUPPORTED_VERSIONS[*]})
-${MSG_END_FORMAT} "
-
-
+echo " "
+print_msg "Environment variables ${MSG_EMPH_FORMAT}(build matrix)${MSG_END_FORMAT} used by compose:\n
+${MSG_DIMMED_FORMAT}    LPM_LIBPOINTMATCHER_VERSIONS=(${FREEZED_LPM_LIBPOINTMATCHER_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LPM_SUPPORTED_OS=(${FREEZED_LPM_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LPM_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_LPM_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LPM_OSX_SUPPORTED_VERSIONS=(${FREEZED_LPM_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+"
 
 print_msg_done "FINAL › Build matrix completed with command
-${MSG_DIMMED_FORMAT}
-      $ docker compose -f docker-compose.libpointmatcher.yaml ${DOCKER_COMPOSE_CMD_ARGS}
-${MSG_END_FORMAT}
+
+${MSG_DIMMED_FORMAT}    $ docker compose -f docker-compose.libpointmatcher.yaml ${DOCKER_COMPOSE_CMD_ARGS} ${MSG_END_FORMAT}
+
 Tag crawled:
-${MSG_DIMMED_FORMAT}"
+"
 for tag in "${IMAGE_TAG_CRAWLED[@]}" ; do
-    echo -e "   ${tag}"
+    echo -e "${MSG_DIMMED_FORMAT}   ${tag}${MSG_END_FORMAT}"
 done
-echo -e "${MSG_END_FORMAT}"
 
 print_formated_script_footer 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
+
+# ====TeamCity service message=====================================================================================
+if [[ ${TEAMCITY_VERSION} ]]; then
+  # Tag added to the TeamCity build via a service message
+  for tag in "${IMAGE_TAG_CRAWLED[@]}" ; do
+      echo "##teamcity[addBuildTag '${tag}']"
+  done
+fi
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

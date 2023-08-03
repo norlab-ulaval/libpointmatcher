@@ -1,5 +1,5 @@
 ARG BASE_IMAGE=ubuntu
-ARG BASE_IMAGE_TAG=20.04
+ARG BASE_IMAGE_TAG=focal
 FROM ${BASE_IMAGE}:${BASE_IMAGE_TAG} AS base-image
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
@@ -9,14 +9,19 @@ ARG LPM_LIBPOINTMATCHER_SRC_REPO_NAME
 ENV LPM_INSTALLED_LIBRARIES_PATH=${LPM_INSTALLED_LIBRARIES_PATH:?'Build argument needs to be set and non-empty.'}
 ENV LPM_LIBPOINTMATCHER_SRC_REPO_NAME=${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?'Build argument needs to be set and non-empty.'}
 
+ARG IS_TEAMCITY_RUN
+ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
+
 SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
 ENV TZ=Etc/UTC
 
 #ENV TERM="xterm"
-ENV TERM=${TERM:-"xterm-color"}
+#ENV TERM=${TERM:-"xterm-color"}
+ENV TERM=${TERM:-"xterm-256color"}
 #ENV TERM="xterm-256color"
+
 
 # ....Setup timezone and localization..............................................................................
 # change the locale from POSIX to UTF-8
