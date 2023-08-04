@@ -9,19 +9,23 @@ ARG LIBPOINTMATCHER_VERSION
 ENV LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION:?'Build argument needs to be set and non-empty.'}
 LABEL libpointmatcher.version="${LIBPOINTMATCHER_VERSION}"
 
-ARG LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG="--compile-test"
 
 ARG LPM_INSTALLED_LIBRARIES_PATH
 ARG LPM_LIBPOINTMATCHER_SRC_REPO_NAME
 ENV LPM_INSTALLED_LIBRARIES_PATH=${LPM_INSTALLED_LIBRARIES_PATH:?'Build argument needs to be set and non-empty.'}
 ENV LPM_LIBPOINTMATCHER_SRC_REPO_NAME=${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?'Build argument needs to be set and non-empty.'}
 
+ARG LIBPOINTMATCHER_CMAKE_BUILD_TYPE=Release
+ARG LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG=""
+# Note: Those env variable are used in the entrypoint build version
+ENV LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}
+ENV LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG=${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
+
 ARG IS_TEAMCITY_RUN
 ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
 
 SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
-
 
 # ====Build system related setup====================================================================================
 WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}-CICD"
@@ -32,17 +36,23 @@ COPY ./build_system/ ./build_system/
 WORKDIR ./build_system/ubuntu
 
 RUN chmod +x lpm_install_libpointmatcher_ubuntu.bash
+RUN chmod +x entrypoint_execute_lpm_unittest.bash
 RUN chmod +x entrypoint.bash
 
-## ToDo: on task end >> delete next bloc ↓↓
+## (CRITICAL) ToDo: on task end >> delete next bloc ↓↓
 #RUN chmod +x lpm_install_doc_dependencies_ubuntu.bash
 #RUN bash lpm_install_doc_dependencies_ubuntu.bash
 
 # ====Install Libpointmatcher=======================================================================================
 
-RUN bash lpm_install_libpointmatcher_ubuntu.bash \
+# (CRITICAL) ToDo: validate effect on teamcity build log (source vs bash)
+RUN source lpm_install_libpointmatcher_ubuntu.bash \
     --libpointmatcher-version ${LIBPOINTMATCHER_VERSION} \
+    --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
     ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
+
+# Conditional execution if build/utest/ directory is present
+RUN source entrypoint_execute_lpm_unittest.bash
 
 
 # ====End==========================================================================================================

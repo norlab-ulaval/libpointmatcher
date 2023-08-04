@@ -9,19 +9,22 @@
 #
 # Arguments:
 #   [--libpointmatcher-version-build-matrix-override head]
-#                     The libpointmatcher release tag. Override must be a single value
-#                     (default to array sequence specified in .env.build_matrix)
+#                               The libpointmatcher release tag. Override must be a single value
+#                               (default to array sequence specified in .env.build_matrix)
 #   [--os-name-build-matrix-override ubuntu]
-#                     The operating system name. Override must be a single value
-#                     (default to array sequence specified in .env.build_matrix)
+#                               The operating system name. Override must be a single value
+#                               (default to array sequence specified in .env.build_matrix)
 #   [--ubuntu-version-build-matrix-override jammy]
 #   [--osx-version-build-matrix-override ventura]
-#                     Named operating system version. Override must be a single value
-#                     (default to array sequence specified in .env.build_matrix)
+#                               Named operating system version. Override must be a single value
+#                               (default to array sequence specified in .env.build_matrix)
 #   [-- <any docker cmd+arg>]
-#                     Any argument passed after '--' will be passed to docker compose as docker command and arguments
-#                       (default: see DOCKER_COMPOSE_CMD_ARGS)
-#   [-h, --help]      Get help
+#                               Any argument passed after '--' will be passed to docker compose
+#                                as docker command and arguments (default: 'up --build --force-recreate')
+#                               Note: passing script flag via docker --build-arg can be tricky,
+#                                     pass them in the docker-compose.yaml if you experience problem.
+#   [--debug]                   Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
+#   [-h, --help]                Get help
 #
 set -e
 #set -v
@@ -42,7 +45,7 @@ source .env.prompt
 set +o allexport
 
 # ....Helper function..............................................................................................
-# import shell functions from Libpointmatcher-build-system utilities library
+## import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
 source ./function_library/terminal_splash.bash
@@ -112,6 +115,12 @@ while [ $# -gt 0 ]; do
 #      shift # Remove argument (--job-id)
 #      shift # Remove argument value
 #      ;;
+  --debug)
+#    set -v
+#    set -x
+    export BUILDKIT_PROGRESS=plain
+    shift # Remove argument (--debug)
+    ;;
   -h | --help)
     print_help_in_terminal
     exit

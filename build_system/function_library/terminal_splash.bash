@@ -127,20 +127,26 @@ function norlab_splash() {
   local TITLE_FORMATTING=1
   local URL_FORMATTING=2
 
+  # ToDo: validate
+  local SS='  '
+  if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
+    SS=''
+  fi
+
   echo " "
   echo " "
   echo " "
-  echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⣷⣼⣿⣤⣿⡗⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "⠀⠀⠀⢀⣤⡀⣿⣿⠀⠀⠉⣿⣿⡿⠁⠀⠀⣿⡟⣀⣤⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "⠀⠀⠀⠀⠙⣻⣿⣿⣧⠀⠀⢸⣿⠀⠀⢀⣿⣿⣿⣟⠉⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "⠀⠀⠀⠘⠛⠛⠉⠉⠙⠿⣿⣾⣿⣷⣿⠟⠉⠉⠙⠛⠛⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⠀⠀⠀⠀⠀⠀⢿⣷⣼⣿⣤⣿⡗⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⢀⣤⡀⣿⣿⠀⠀⠉⣿⣿⡿⠁⠀⠀⣿⡟⣀⣤⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⠀⠙⣻⣿⣿⣧⠀⠀⢸⣿⠀⠀⢀⣿⣿⣿⣟⠉⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⠘⠛⠛⠉⠉⠙⠿⣿⣾⣿⣷⣿⠟⠉⠉⠙⠛⠛⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
   echo_centering_str "···•· ${TITLE} ··•••" "\033[${TITLE_FORMATTING};${TITLE_FG}m" "\033[0m·"
-  echo_centering_str "⠀⠀⠀⢠⣶⣤⣄⣀⣤⣶⣿⢿⣿⢿⣿⣶⣄⣀⣤⣤⣶⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "⠀⠀⠀⠀⣨⣿⣿⣿⡟⠁⠀⢸⣿⠀⠀⠉⣿⣿⣿⣯⣀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "⠀⠀⠀⠈⠛⠁⣿⣿⢀⠀⣠⣿⣿⣷⡀⠀⠈⣿⣧⠉⠛⢀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⡿⢻⣿⠙⣿⡷⠀⠈⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠛⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⢠⣶⣤⣄⣀⣤⣶⣿⢿⣿⢿⣿⣶⣄⣀⣤⣤⣶⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⠀⣨⣿⣿⣿⡟⠁⠀⢸⣿⠀⠀⠉⣿⣿⣿⣯⣀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⠈⠛⠁⣿⣿⢀⠀⣠⣿⣿⣷⡀⠀⠈⣿⣧⠉⠛⢀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⠀⠀⠀⠀⠀⠀⣾⡿⢻⣿⠙⣿⡷⠀⠈⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
+  echo_centering_str "${SS}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠛⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
   echo " "
   echo_centering_str "https://norlab.ulaval.ca" "\033[${URL_FORMATTING};${URL_FG}m" " "
   echo_centering_str "${OPTIONAL_URL}" "\033[${URL_FORMATTING};${URL_FG}m" " "

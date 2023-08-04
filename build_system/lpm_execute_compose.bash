@@ -13,10 +13,11 @@
 #   [--os-version jammy]                  Name named operating system version, see .env for supported version
 #                                           (default: see OS_VERSION)
 #   [-- <any docker cmd+arg>]             Any argument passed after '--' will be passed to docker compose
-#                                           as docker command and arguments
-#                                           (default: 'up --build --force-recreate')
+#                                           as docker command and arguments (default: 'up --build --force-recreate')
+#                                         Note: passing script flag via docker --build-arg can be tricky,
+#                                               pass them in the docker-compose.yaml if you experience problem.
+#   [--debug]                             Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
 #   [-h, --help]                          Get help
-#   [--debug]
 #
 set -e
 
@@ -39,7 +40,7 @@ source .env.prompt
 set +o allexport
 
 # ....Helper function..............................................................................................
-# import shell functions from Libpointmatcher-build-system utilities library
+## import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
 source ./function_library/terminal_splash.bash
@@ -53,11 +54,13 @@ function print_help_in_terminal() {
       --libpointmatcher-version v1.3.1         The libpointmatcher release tag (default to master branch head)
       --os-name ubuntu                        The operating system name. Either 'ubuntu' or 'osx' (default to 'ubuntu')
       --os-version jammy                      Name named operating system version, see .env for supported version
-                                              (default to 'jammy')
-      --debug
+                                                (default to 'jammy')
+      --debug                                 Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
   \033[1m
     [-- <any docker cmd+arg>]\033[0m                 Any argument passed after '--' will be passed to docker compose as docker
-                                              command and arguments (default to '${DOCKER_COMPOSE_CMD_ARGS}')
+                                              command and arguments (default to '${DOCKER_COMPOSE_CMD_ARGS}').
+                                              Note: passing script flag via docker --build-arg can be tricky,
+                                                    pass them in the docker-compose.yaml if you experience problem.
 "
 #      --job-id                                Append job ID for CI test image
 }

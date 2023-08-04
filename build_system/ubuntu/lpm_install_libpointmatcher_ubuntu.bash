@@ -15,6 +15,8 @@
 #   [--build-system-CI-install]           Set special configuration for CI/CD build system:
 #                                           skip the git clone install step and assume the repository is already
 #                                           pulled and checkout on the desired branch
+#   [--cmake-build-type RelWithDebInfo]         The type of cmake build: None Debug Release RelWithDebInfo MinSizeRel
+#                                           (default to RelWithDebInfo)
 #   [-h, --help]                          Get help
 #
 # Note:
@@ -29,6 +31,7 @@ LIBPOINTMATCHER_VERSION='head'
 BUILD_TESTS_FLAG=FALSE
 GENERATE_API_DOC_FLAG=FALSE
 BUILD_SYSTEM_CI_INSTALL=FALSE
+CMAKE_BUILD_TYPE=RelWithDebInfo
 
 # ....Project root logic...........................................................................................
 TMP_CWD=$(pwd)
@@ -47,11 +50,12 @@ set +o allexport
 #export DEBIAN_FRONTEND=noninteractive
 
 # ....Helper function..............................................................................................
-# import shell functions from Libpointmatcher-build-system utilities library
+## import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
+source ./function_library/general_utilities.bash
 
-# Set environment variable LPM_IMAGE_ARCHITECTURE
+## Set environment variable LPM_IMAGE_ARCHITECTURE
 source ./lpm_utility_script/lpm_export_which_architecture.bash
 
 function print_help_in_terminal() {
@@ -68,6 +72,7 @@ function print_help_in_terminal() {
     --build-system-CI-install             Set special configuration for CI/CD build system:
                                             skip the git clone install step and assume the repository is already
                                             pulled and checkout on the desired branch
+    --cmake-build-type RelWithDebInfo           The type of cmake build: None Debug Release RelWithDebInfo MinSizeRel
     -h, --help                            Get help
 
   "
@@ -87,9 +92,9 @@ print_formated_script_header "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMA
 
 while [ $# -gt 0 ]; do
 
-#    echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-#    echo -e "\$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
-#  #  echo -e "\$arg: ${arg}" # ToDo: on task end >> delete this line ←
+    echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
+    echo -e "\$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
+  #  echo -e "\$arg: ${arg}" # ToDo: on task end >> delete this line ←
 
   case $1 in
   # ToDo: unit-test
@@ -103,6 +108,12 @@ while [ $# -gt 0 ]; do
   --libpointmatcher-version)
     LIBPOINTMATCHER_VERSION="${2}"
     shift # Remove argument (--libpointmatcher-version)
+    shift # Remove argument value
+    ;;
+  # ToDo: unit-test
+  --cmake-build-type)
+    CMAKE_BUILD_TYPE="${2}"
+    shift # Remove argument (--cmake-build-type)
     shift # Remove argument value
     ;;
   # ToDo: unit-test
@@ -137,9 +148,9 @@ while [ $# -gt 0 ]; do
     ;;
   esac
 
-  #  echo -e "'\$*' after: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-  #  echo -e "after \$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
-  #  echo
+    echo -e "'\$*' after: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
+    echo -e "after \$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
+    echo
 
 done
 
@@ -152,18 +163,16 @@ done
 #GENERATE_API_DOC_FLAG=${GENERATE_API_DOC_FLAG}
 #BUILD_SYSTEM_CI_INSTALL=${BUILD_SYSTEM_CI_INSTALL}
 #${MSG_END_FORMAT}"
-##
-##echo "printenv" && printenv # ToDo: on task end >> delete this line ←
+#print_msg_warning "TMP_CWD=${TMP_CWD}"
+#echo -e "${MSG_DIMMED_FORMAT} " && printenv | grep -i -e LPM_ && echo -e "${MSG_END_FORMAT} "
+
 
 # ................................................................................................................
-print_msg "Create required dir structure"
+teamcity_service_msg_blockOpened "Install Libpointmatcher"
+# https://github.com/ethz-asl/libpointmatcher/tree/master
 
 mkdir -p "${LPM_INSTALLED_LIBRARIES_PATH}"
 cd "${LPM_INSTALLED_LIBRARIES_PATH}"
-
-# ................................................................................................................
-print_msg "Install Libpointmatcher"
-# https://github.com/ethz-asl/libpointmatcher/tree/master
 
 if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
 
@@ -180,13 +189,16 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
   fi
 fi
 
-cd "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+cd "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"/
 REPO_ABS_PATH=$(pwd)
-mkdir build && cd build
+mkdir -p build && cd build
 
+teamcity_service_msg_compilationStarted "cmake"
 # (CRITICAL) ToDo: validate >> REPO_ABS_PATH
 # (CRITICAL) ToDo: validate >> GENERATE_API_DOC install dir
-cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+
+
+cmake -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D BUILD_TESTS=${BUILD_TESTS_FLAG} \
   -D GENERATE_API_DOC=${GENERATE_API_DOC_FLAG} \
   ${REPO_ABS_PATH}
@@ -196,10 +208,10 @@ cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo \
 make -j $(nproc)
 sudo make install
 
-## Tag added to the TeamCity build via a service message?
-#echo "##teamcity[addBuildTag '${LPM_IMAGE_ARCHITECTURE}']"
+teamcity_service_msg_compilationFinished
+teamcity_service_msg_blockClosed
 
-print_msg_done "Libpointmatcher installed at ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT}"
+echo " " && print_msg_done "Libpointmatcher installed at ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT}"
 print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

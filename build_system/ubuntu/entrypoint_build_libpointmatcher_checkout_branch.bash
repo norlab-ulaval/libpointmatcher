@@ -16,6 +16,7 @@ set +o allexport
 # ==== Build libpointmatcher checkout branch ======================================================================
 source lpm_install_libpointmatcher_ubuntu.bash \
   --libpointmatcher-version ${LIBPOINTMATCHER_VERSION:?'err variable not set'} \
+  --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
   ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
 
 # ====Continue=====================================================================================================
