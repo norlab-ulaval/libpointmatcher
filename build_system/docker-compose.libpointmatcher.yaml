@@ -15,6 +15,7 @@ services:
         LPM_LIBPOINTMATCHER_SRC_REPO_NAME: ${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?err}
     tty: true
     stdin_open: true
+    init: true  # Propagate exit code (See remark in task NMO-266)
   dependencies-doc:
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies-doc:${LPM_IMAGE_TAG:?err}
     build:
@@ -31,7 +32,7 @@ services:
     tty: true
     stdin_open: true
   ci_PR:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-PR:${LPM_IMAGE_TAG:?err}
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-pr:${LPM_IMAGE_TAG:?err}
     pull_policy: build
     build:
       context: ..
@@ -45,9 +46,9 @@ services:
         LIBPOINTMATCHER_VERSION: 'head'
         LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
         LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--build-system-CI-install --compile-test'
-    init: true  # Ref post https://ddanilov.me/how-to-contain-a-crashed-container/
     tty: true
     stdin_open: true
+    init: true  # Propagate exit code (See remark in task NMO-266)
   ci_PR_amd64:
     extends: ci_PR
     platform: "linux/amd64"
@@ -69,9 +70,9 @@ services:
         LIBPOINTMATCHER_VERSION: ${LIBPOINTMATCHER_VERSION:?err}
         LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
         LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--compile-test'
-    init: true  # Ref post https://ddanilov.me/how-to-contain-a-crashed-container/
     tty: true
     stdin_open: true
+    init: true  # Propagate exit code (See remark in task NMO-266)
   ci_SITREP_matrix_amd64:
     extends: ci_SITREP_matrix
     platform: "linux/amd64"
@@ -98,6 +99,7 @@ services:
         LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--compile-test --generate-doc'
     tty: true
     stdin_open: true
+    init: true  # Propagate exit code (See remark in task NMO-266)
     depends_on:
       - dependencies
       - dependencies-doc

@@ -27,6 +27,9 @@ source ./function_library/prompt_utilities.bash
 # ====Begin========================================================================================================
 print_formated_script_header 'lpm_execute_libpointmatcher_unittest.bash' ':'
 
+# (CRITICAL) ToDo: on task end >> delete next bloc ↓↓
+print_msg_warning "DEBUG\n${MSG_WARNING_FORMAT}$(tree -L 2 ${LPM_INSTALLED_LIBRARIES_PATH})${MSG_END_FORMAT}"
+
 cd "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build"
 
 if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then

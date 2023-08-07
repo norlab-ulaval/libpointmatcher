@@ -138,11 +138,14 @@ git clone https://github.com/ethz-asl/libnabo.git &&
 
 # git checkout 1.0.7
 
+
 teamcity_service_msg_compilationStarted "cmake"
 
-cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo .. &&
+cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+ -D CMAKE_INSTALL_PREFIX=${LPM_INSTALLED_LIBRARIES_PATH} \
+ "${LPM_INSTALLED_LIBRARIES_PATH}/libnabo" &&
   make -j $(nproc) &&
-  #  make test &&        # ToDo: leave commented for now
+  make test &&
   sudo make install
 
 teamcity_service_msg_compilationFinished

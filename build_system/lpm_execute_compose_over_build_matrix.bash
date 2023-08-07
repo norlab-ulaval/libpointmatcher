@@ -273,8 +273,10 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}"; do
           MSG_STATUS_TC_TAG="Fail ›"
           BUILD_STATUS_PASS=$DOCKER_EXIT_CODE
 
-          # Fail the build › Appear on the Build Results page
-          echo -e "##teamcity[buildProblem description='BUILD FAIL with docker exit code: ${BUILD_STATUS_PASS}']"
+          if [[ ${TEAMCITY_VERSION} ]]; then
+            # Fail the build › Appear on the Build Results page
+            echo -e "##teamcity[buildProblem description='BUILD FAIL with docker exit code: ${BUILD_STATUS_PASS}']"
+          fi
         fi
 
         # Collect image tags exported by lpm_execute_compose.bash

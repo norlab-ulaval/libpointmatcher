@@ -259,7 +259,7 @@ TEST(Transformation, ComputeRigidTransformDataPoints2D)
     }
 }
 
-// (CRITICAL) ToDo: investigate unit-test failure (ref task NMO-301)
+//// (CRITICAL) ToDo: investigate unit-test failure (ref task NMO-301)
 //TEST(Transformation, ComputeRigidTransformDataPoints3D)
 //{
 //    std::shared_ptr<PM::Transformation> transformator = PM::get().REG(Transformation).create("RigidTransformation");
@@ -360,7 +360,7 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints2D)
     }
 }
 
-// (CRITICAL) ToDo: investigate unit-test failure (ref task NMO-301)
+//// (CRITICAL) ToDo: investigate unit-test failure (ref task NMO-301)
 //TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
 //{
 //    std::shared_ptr<PM::Transformation> transformator = PM::get().REG(Transformation).create("SimilarityTransformation");

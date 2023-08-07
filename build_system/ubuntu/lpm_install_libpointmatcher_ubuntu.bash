@@ -165,7 +165,10 @@ done
 teamcity_service_msg_blockOpened "Install Libpointmatcher"
 # https://github.com/ethz-asl/libpointmatcher/tree/master
 
-print_msg_warning "DEBUG\n${MSG_WARNING_FORMAT}$(tree -L 2 ${LPM_INSTALLED_LIBRARIES_PATH}/libpointmatcher-build-system)${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
+# (CRITICAL) ToDo: on task end >> delete next bloc ↓↓
+print_msg_warning "DEBUG\n${MSG_WARNING_FORMAT}$(tree -L 2 ${LPM_INSTALLED_LIBRARIES_PATH})${MSG_END_FORMAT}"
+#LPM_LIBPOINTMATCHER_SRC_DOMAIN=ethz-asl
+#LPM_LIBPOINTMATCHER_SRC_REPO_NAME=libpointmatcher
 
 mkdir -p "${LPM_INSTALLED_LIBRARIES_PATH}"
 cd "${LPM_INSTALLED_LIBRARIES_PATH}"
@@ -181,25 +184,32 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
 
   # (CRITICAL) ToDo: validate (ref task NMO-252 ⚒︎ → Implement pull repo release tag version logic)
   if [[ "${LIBPOINTMATCHER_VERSION}" != 'head' ]]; then
-    git checkout "${LIBPOINTMATCHER_VERSION}"
+    cd "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"/
+
+    git fetch --tags
+    git tag --list
+
+    # Remove prefix 'v' from version tag
+    GITHUB_TAG="${LIBPOINTMATCHER_VERSION/v/}"
+    print_msg "GITHUB_TAG=${GITHUB_TAG}"
+
+    git checkout tags/"${GITHUB_TAG}"
   fi
 fi
 
 cd "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"/
-REPO_ABS_PATH=$(pwd)
 mkdir -p build && cd build
 
 teamcity_service_msg_compilationStarted "cmake"
-# (CRITICAL) ToDo: validate >> REPO_ABS_PATH
 # (CRITICAL) ToDo: validate >> GENERATE_API_DOC install dir
 
 
 cmake -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D BUILD_TESTS=${BUILD_TESTS_FLAG} \
   -D GENERATE_API_DOC=${GENERATE_API_DOC_FLAG} \
-  ${REPO_ABS_PATH}
-
-#   -DCMAKE_INSTALL_PREFIX=/usr/local/ \
+  -D LIBNABO_INSTALL_DIR="${LPM_INSTALLED_LIBRARIES_PATH}/libnabo" \
+  -D CMAKE_INSTALL_PREFIX="${LPM_INSTALLED_LIBRARIES_PATH}" \
+  "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 
 BUILD_EXIT_CODE=$?
 
@@ -207,6 +217,10 @@ make -j $(nproc)
 sudo make install
 
 INSTALL_EXIT_CODE=$?
+
+### List all CMake build options and their default values
+###   ref: https://stackoverflow.com/questions/16851084/how-to-list-all-cmake-build-options-and-their-default-values
+#cmake -LAH
 
 teamcity_service_msg_compilationFinished
 teamcity_service_msg_blockClosed

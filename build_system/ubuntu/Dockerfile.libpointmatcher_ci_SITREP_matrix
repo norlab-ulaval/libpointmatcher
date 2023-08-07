@@ -30,10 +30,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TERM=${TERM:-"xterm-256color"}
 
 # ====Checkout libpointmatcher repository===========================================================================
-# Overide LPM_INSTALLED_LIBRARIES_PATH
-ENV LPM_INSTALLED_LIBRARIES_PATH="${LPM_INSTALLED_LIBRARIES_PATH}/checkout"
-
-WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}-CICD/"
 
 # Copy only the build system file
 # files from the checkout branch will be copied by the lpm_install_libpointmatcher_ubuntu.bash script
@@ -47,6 +44,7 @@ RUN chmod +x lpm_execute_libpointmatcher_unittest.bash
 RUN chmod +x entrypoint.bash
 
 # (NICE TO HAVE) ToDo: validate effect on teamcity build log (source vs bash)
+# Note: Logic for cd into ${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME} is the responsablitiy of lpm_install_libpointmatcher_ubuntu.bash
 RUN source lpm_install_libpointmatcher_ubuntu.bash \
     --libpointmatcher-version ${LIBPOINTMATCHER_VERSION} \
     --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
