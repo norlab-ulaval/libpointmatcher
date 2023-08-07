@@ -7,7 +7,7 @@
 # Usage:
 #   $ source ./function_library/prompt_utilities.bash
 #
-set -e
+#set -e
 
 # ....Pre-condition................................................................................................
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
@@ -23,7 +23,7 @@ set +o allexport
 
 
 # =================================================================================================================
-# Print formated message to prompt
+# Print formatted message to prompt
 #
 # Usage:
 #   $ _print_msg "<mesageType>" "<the message string>"
@@ -77,17 +77,19 @@ function print_msg_awaiting_input() {
 }
 
 # =================================================================================================================
-# Print formated error message to prompt
+# Print formatted error message to prompt
 #
 # Usage:
-#   $ print_msg_error_and_exit "<error msg string>"
+#     $ print_msg_error_and_exit "<error msg string>"
+#   or
+#     $ print_msg_error "<error msg string>"
 #
 # Globals:
 #   Read 'TMP_CWD': Required to be set prior to function usage. eg: TMP_CWD=$(pwd)
 # Arguments:
 #   <error msg string>  The error message to print
 # Outputs:
-#   The formated error message to to stderr
+#   The formatted error message to to stderr
 # Returns:
 #   none
 # =================================================================================================================
@@ -96,10 +98,19 @@ function print_msg_error_and_exit() {
 
   echo ""
   echo -e "${MSG_ERROR}: ${ERROR_MSG}" >&2
+  # Note: The >&2 sends the echo output to standard error
   echo "Exiting now."
   echo ""
   cd "${TMP_CWD}"
   exit 1
+}
+
+function print_msg_error() {
+  local ERROR_MSG=$1
+
+  echo ""
+  echo -e "${MSG_ERROR}: ${ERROR_MSG}" >&2
+  echo ""
 }
 
 

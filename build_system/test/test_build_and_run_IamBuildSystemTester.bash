@@ -47,6 +47,7 @@ echo
 print_msg "Building 'lpm.ubuntu20.buildsystem.test'"
 # Note: Build context must be at repository root
 
+#--no-cache
 show_and_execute_docker "build -f build_system/test/Dockerfile.build_system_test -t lpm.ubuntu20.buildsystem.test ."
 
 # ....Run container................................................................................................

@@ -5,7 +5,7 @@
 # usage:
 #   $ bash ./lpm_utility_script/lpm_install_docker_tools.bash
 #
-set -e
+#set -e
 
 # ....Project root logic...........................................................................................
 TMP_CWD=$(pwd)

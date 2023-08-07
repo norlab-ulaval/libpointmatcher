@@ -28,7 +28,7 @@
 # Returns:
 #   exit 1 in case of unsupported processor architecture
 # =================================================================================================================
-set -e
+#set -e
 
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
   cd ../

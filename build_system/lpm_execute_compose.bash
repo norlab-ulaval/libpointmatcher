@@ -8,7 +8,10 @@
 #   $ bash lpm_execute_compose.bash -- run --rm ci
 #
 # Arguments:
-#   [--libpointmatcher-version v1.3.1]     The libpointmatcher release tag (default: see LIBPOINTMATCHER_VERSION)
+#   [--libpointmatcher-version v1.3.1]    The libpointmatcher release tag (default: see LIBPOINTMATCHER_VERSION)
+#   [--libpointmatcher-cmake-build-type RelWithDebInfo]
+#                                         Change the libpointmatcher compilation mode.
+#                                         Either 'None' 'Debug' 'Release' 'RelWithDebInfo' or 'MinSizeRel'
 #   [--os-name ubuntu]                    The operating system name. Either 'ubuntu' or 'osx' (default: see OS_NAME)
 #   [--os-version jammy]                  Name named operating system version, see .env for supported version
 #                                           (default: see OS_VERSION)
@@ -16,14 +19,16 @@
 #                                           as docker command and arguments (default: 'up --build --force-recreate')
 #                                         Note: passing script flag via docker --build-arg can be tricky,
 #                                               pass them in the docker-compose.yaml if you experience problem.
-#   [--debug]                             Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
+#   [--docker-debug-logs]                 Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
+#   [--fail-fast]                         Exit script at first encountered error
 #   [-h, --help]                          Get help
 #
-set -e
+## set -e   # Note: use the --fail-fast flag instead
 
 
 # ....Default......................................................................................................
 LIBPOINTMATCHER_VERSION='head'
+LIBPOINTMATCHER_CMAKE_BUILD_TYPE='RelWithDebInfo'
 OS_NAME='ubuntu'
 OS_VERSION='focal'
 #LPM_JOB_ID='0'
@@ -51,11 +56,15 @@ function print_help_in_terminal() {
   \033[1m
     <optional argument>:\033[0m
       -h, --help                              Get help
-      --libpointmatcher-version v1.3.1         The libpointmatcher release tag (default to master branch head)
+      --libpointmatcher-version v1.3.1        The libpointmatcher release tag (default to master branch head)
+      --libpointmatcher-cmake-build-type RelWithDebInfo
+                                              Change the libpointmatcher compilation mode.
+                                              Either 'None' 'Debug' 'Release' 'RelWithDebInfo' or 'MinSizeRel'
       --os-name ubuntu                        The operating system name. Either 'ubuntu' or 'osx' (default to 'ubuntu')
       --os-version jammy                      Name named operating system version, see .env for supported version
                                                 (default to 'jammy')
-      --debug                                 Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
+      --docker-debug-logs                     Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
+      --fail-fast                             Exit script at first encountered error
   \033[1m
     [-- <any docker cmd+arg>]\033[0m                 Any argument passed after '--' will be passed to docker compose as docker
                                               command and arguments (default to '${DOCKER_COMPOSE_CMD_ARGS}').
@@ -96,6 +105,11 @@ while [ $# -gt 0 ]; do
     shift # Remove argument (--libpointmatcher-version)
     shift # Remove argument value
     ;;
+  --libpointmatcher-cmake-build-type)
+    LIBPOINTMATCHER_CMAKE_BUILD_TYPE="${2}"
+    shift # Remove argument (--libpointmatcher-cmake-build-type)
+    shift # Remove argument value
+    ;;
   --os-name)
     OS_NAME="${2}"
     shift # Remove argument (--os-name)
@@ -111,11 +125,15 @@ while [ $# -gt 0 ]; do
 #    shift # Remove argument (--job-id)
 #    shift # Remove argument value
 #    ;;
-  --debug)
+  --docker-debug-logs)
 #    set -v
 #    set -x
     export BUILDKIT_PROGRESS=plain
-    shift # Remove argument (--debug)
+    shift # Remove argument (--docker-debug-logs)
+    ;;
+  --fail-fast)
+    set -e
+    shift # Remove argument (--fail-fast)
     ;;
   -h | --help)
     print_help_in_terminal
@@ -142,6 +160,7 @@ done
 ## ToDo: on task end >> delete next bloc ↓↓
 #echo -e " ${MSG_DIMMED_FORMAT}
 #LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION}
+#LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}
 #OS_NAME=${OS_NAME}
 #OS_VERSION=${OS_VERSION}
 #DOCKER_COMPOSE_CMD_ARGS=${DOCKER_COMPOSE_CMD_ARGS}
@@ -150,6 +169,7 @@ done
 # ..................................................................................................................
 # Note: LIBPOINTMATCHER_VERSION will be used to fetch the repo at release tag (ref task NMO-252)
 export LIBPOINTMATCHER_VERSION="${LIBPOINTMATCHER_VERSION}"
+export LIBPOINTMATCHER_CMAKE_BUILD_TYPE="${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}"
 export DEPENDENCIES_BASE_IMAGE="${OS_NAME}"
 export DEPENDENCIES_BASE_IMAGE_TAG="${OS_VERSION}"
 #export LPM_JOB_ID="${LPM_JOB_ID}"
@@ -159,9 +179,10 @@ export DEPENDENCIES_BASE_IMAGE_TAG="${OS_VERSION}"
 export LPM_IMAGE_TAG="${LIBPOINTMATCHER_VERSION}-${DEPENDENCIES_BASE_IMAGE}-${DEPENDENCIES_BASE_IMAGE_TAG}"
 
 print_msg "Environment variables set for compose:\n
-${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION}          ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE}          ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG}  ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG} ${MSG_END_FORMAT}
 "
 
 print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}docker-compose.libpointmatcher.yaml${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
@@ -174,12 +195,13 @@ print_msg "Image tag ${MSG_DIMMED_FORMAT}${LPM_IMAGE_TAG}${MSG_END_FORMAT}"
 ## docker compose run [OPTIONS] SERVICE [COMMAND] [ARGS...]
 
 show_and_execute_docker "compose -f docker-compose.libpointmatcher.yaml ${DOCKER_COMPOSE_CMD_ARGS}"
-print_msg "Image tag ${MSG_DIMMED_FORMAT}${LPM_IMAGE_TAG}${MSG_END_FORMAT}"
+
 
 print_msg "Environment variables used by compose:\n
-${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION}          ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE}          ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG}  ${MSG_END_FORMAT}"
+${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG} ${MSG_END_FORMAT}"
 
 print_formated_script_footer 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
 # ====Teardown=====================================================================================================

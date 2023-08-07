@@ -65,7 +65,7 @@ COPY ./build_system/ubuntu/lpm_install_python_dev_tools.bash ./ubuntu/
 
 RUN chmod +x ./ubuntu/lpm_install_python_dev_tools.bash
 
-# (CRITICAL) ToDo: validate effect on teamcity build log (source vs bash)
+# (NICE TO HAVE) ToDo: validate effect on teamcity build log (source vs bash)
 RUN source ./ubuntu/lpm_install_python_dev_tools.bash
 
 

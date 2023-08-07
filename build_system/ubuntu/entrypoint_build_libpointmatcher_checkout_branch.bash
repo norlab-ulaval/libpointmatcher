@@ -6,7 +6,7 @@
 # Parameter
 #   <any cmd> (Optional) Command executed in a subprocess at the end of the entrypoint script.
 #
-set -e # ToDo: on task end >> unmute this line ←
+#set -e # ToDo: on task end >> unmute this line ←
 
 # ....Load environment variables from file.........................................................................
 set -o allexport

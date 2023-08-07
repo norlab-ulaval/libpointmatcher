@@ -92,41 +92,35 @@ print_formated_script_header "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMA
 
 while [ $# -gt 0 ]; do
 
-    echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-    echo -e "\$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
-  #  echo -e "\$arg: ${arg}" # ToDo: on task end >> delete this line ←
+#    echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
+#    echo -e "\$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
+#  #  echo -e "\$arg: ${arg}" # ToDo: on task end >> delete this line ←
 
   case $1 in
-  # ToDo: unit-test
   --install-path)
     unset LPM_INSTALLED_LIBRARIES_PATH
     LPM_INSTALLED_LIBRARIES_PATH="${2}"
     shift # Remove argument (--install-path)
     shift # Remove argument value
     ;;
-  # ToDo: unit-test
   --libpointmatcher-version)
     LIBPOINTMATCHER_VERSION="${2}"
     shift # Remove argument (--libpointmatcher-version)
     shift # Remove argument value
     ;;
-  # ToDo: unit-test
   --cmake-build-type)
     CMAKE_BUILD_TYPE="${2}"
     shift # Remove argument (--cmake-build-type)
     shift # Remove argument value
     ;;
-  # ToDo: unit-test
   --compile-test)
     BUILD_TESTS_FLAG=TRUE
     shift
     ;;
-  # ToDo: unit-test
   --generate-doc)
     GENERATE_API_DOC_FLAG=TRUE
     shift
     ;;
-  # ToDo: unit-test
   --build-system-CI-install)
     BUILD_SYSTEM_CI_INSTALL=TRUE
     shift
@@ -148,9 +142,9 @@ while [ $# -gt 0 ]; do
     ;;
   esac
 
-    echo -e "'\$*' after: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-    echo -e "after \$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
-    echo
+#    echo -e "'\$*' after: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
+#    echo -e "after \$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
+#    echo
 
 done
 
@@ -171,13 +165,15 @@ done
 teamcity_service_msg_blockOpened "Install Libpointmatcher"
 # https://github.com/ethz-asl/libpointmatcher/tree/master
 
+print_msg_warning "DEBUG\n${MSG_WARNING_FORMAT}$(tree -L 2 ${LPM_INSTALLED_LIBRARIES_PATH}/libpointmatcher-build-system)${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
+
 mkdir -p "${LPM_INSTALLED_LIBRARIES_PATH}"
 cd "${LPM_INSTALLED_LIBRARIES_PATH}"
 
 if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
 
-  if [[ -d ${LPM_LIBPOINTMATCHER_SRC_REPO_NAME} ]]; then
-    print_msg_error_and_exit "The specified install directory ${MSG_DIMMED_FORMAT}${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT} at ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${MSG_END_FORMAT} already exist, specify an other one using ${MSG_DIMMED_FORMAT}--install-path </install/dir/path/>${MSG_END_FORMAT}."
+  if [[ -d ${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/pointmatcher ]]; then
+    print_msg_error_and_exit "${MSG_DIMMED_FORMAT}${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT} source code was already checkout in the specified install directory ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${MSG_END_FORMAT}, specify an other one using ${MSG_DIMMED_FORMAT}--install-path </install/dir/path/>${MSG_END_FORMAT}."
   fi
 
   # #git clone https://github.com/ethz-asl/libpointmatcher.git
@@ -205,13 +201,48 @@ cmake -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
 
 #   -DCMAKE_INSTALL_PREFIX=/usr/local/ \
 
+BUILD_EXIT_CODE=$?
+
 make -j $(nproc)
 sudo make install
+
+INSTALL_EXIT_CODE=$?
 
 teamcity_service_msg_compilationFinished
 teamcity_service_msg_blockClosed
 
-echo " " && print_msg_done "Libpointmatcher installed at ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT}"
+SUCCESS_MSG="Libpointmatcher installed successfully at ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT}"
+FAILURE_MSG="Libpointmatcher installer exited with error"
+
+if [[ ${IS_TEAMCITY_RUN} == true ]]; then
+  # Report message to build log
+  if [[ ${BUILD_EXIT_CODE} == 0 ]] && [[ ${INSTALL_EXIT_CODE} == 0 ]]; then
+    echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${SUCCESS_MSG}' status='NORMAL']"
+  else
+    if [[ ${BUILD_EXIT_CODE} != 0 ]]; then
+      echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$BUILD_EXIT_CODE' status='ERROR']"
+      print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
+      exit $BUILD_EXIT_CODE
+    else
+      echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$INSTALL_EXIT_CODE' status='ERROR']"
+      print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
+      exit $INSTALL_EXIT_CODE
+    fi
+  fi
+else
+  if [[ ${BUILD_EXIT_CODE} == 0 ]] && [[ ${INSTALL_EXIT_CODE} == 0 ]]; then
+    echo " " && print_msg_done "${SUCCESS_MSG}"
+  else
+    print_msg_error "${FAILURE_MSG}"
+    print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
+    if [[ ${BUILD_EXIT_CODE} != 0 ]]; then
+      exit $BUILD_EXIT_CODE
+    else
+      exit $INSTALL_EXIT_CODE
+    fi
+  fi
+fi
+
 print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

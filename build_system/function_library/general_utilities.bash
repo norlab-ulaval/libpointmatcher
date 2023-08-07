@@ -7,7 +7,6 @@
 # usage:
 #   $ source ./function_library/general_utilities.bash
 #
-set -e
 
 # ....Pre-condition................................................................................................
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
@@ -37,20 +36,12 @@ source ./function_library/prompt_utilities.bash
 #   Example usage:
 #   $ show_and_execute_docker "run --name IamBuildSystemTester -t -i --rm lpm.ubuntu20.buildsystem.test"
 #
+# Returns:
+#   Return docker command exit code
 # =================================================================================================================
 function show_and_execute_docker() {
   local FULL_DOCKER_COMMAND=$1
-#  local FULL_DOCKER_COMMAND=("$@")
-#  local FULL_DOCKER_COMMAND="$*"
-  #    local MSG_DIMMED_FORMAT="\033[1;2m"
-  #    local MSG_END_FORMAT="\033[0m"
-
-#  # (Priority) ToDo: on task end >> delete next bloc ↓↓
-#  SCRIPT_ARG=("$@")
-#  SCRIPT_ARG_ALT="$*"
-#  print_msg_warning "show_and_execute_docker:"
-#  echo -e ${SCRIPT_ARG[*]}
-#  echo -e ${FULL_DOCKER_COMMAND}
+  unset DOCKER_EXIT_CODE
 
   if [ -f /.dockerenv ]; then
     echo
@@ -59,10 +50,32 @@ function show_and_execute_docker() {
   else
     print_msg "Execute command ${MSG_DIMMED_FORMAT}$ docker ${FULL_DOCKER_COMMAND}${MSG_END_FORMAT}"
 
+
+
     # shellcheck disable=SC2086
     docker ${FULL_DOCKER_COMMAND}
+    DOCKER_EXIT_CODE=$?
+    export DOCKER_EXIT_CODE
 
-    print_msg_done "Command ${MSG_DIMMED_FORMAT}$ docker ${FULL_DOCKER_COMMAND}${MSG_END_FORMAT} completed and exited docker."
+    SUCCESS_MSG="Command ${MSG_DIMMED_FORMAT}$ docker ${FULL_DOCKER_COMMAND}${MSG_END_FORMAT} completed successfully and exited docker."
+    FAILURE_MSG="Command ${MSG_DIMMED_FORMAT}$ docker ${FULL_DOCKER_COMMAND}${MSG_END_FORMAT} exited with error (DOCKER_EXIT_CODE=${DOCKER_EXIT_CODE})!"
+
+    if [[ ${DOCKER_EXIT_CODE} == 0 ]]; then
+      if [[ ${IS_TEAMCITY_RUN} == true ]]; then
+        # Report message to build log
+        echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${SUCCESS_MSG}' status='NORMAL']"
+      else
+        print_msg_done "${SUCCESS_MSG}"
+      fi
+    else
+      if [[ ${IS_TEAMCITY_RUN} == true ]]; then
+        # Report message to build log
+        echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$DOCKER_EXIT_CODE' status='ERROR']"
+      else
+        print_msg_error "${FAILURE_MSG}"
+      fi
+    fi
+
   fi
 }
 
@@ -97,7 +110,7 @@ function teamcity_service_msg_blockOpened() {
   fi
 
   if [[ ${IS_TEAMCITY_RUN} == true ]]; then
-    echo "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${THE_MSG}']"
+    echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${THE_MSG}']"
   else
     echo && print_msg "${THE_MSG}" && echo
   fi
@@ -105,7 +118,7 @@ function teamcity_service_msg_blockOpened() {
 
 function teamcity_service_msg_blockClosed() {
   if [[ ${IS_TEAMCITY_RUN} == true ]]; then
-    echo "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} ${CURRENT_BLOCK_SERVICE_MSG}']"
+    echo -e "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} ${CURRENT_BLOCK_SERVICE_MSG}']"
   fi
   # Reset the variable since the bloc is closed
   unset CURRENT_BLOCK_SERVICE_MSG
@@ -142,7 +155,7 @@ function teamcity_service_msg_compilationStarted() {
   fi
 
   if [[ ${IS_TEAMCITY_RUN} == true ]]; then
-    echo "##teamcity[compilationStarted compiler='${MSG_BASE_TEAMCITY} ${THE_MSG}']"
+    echo -e "##teamcity[compilationStarted compiler='${MSG_BASE_TEAMCITY} ${THE_MSG}']"
   else
     echo && print_msg "${THE_MSG}" && echo
   fi
@@ -150,7 +163,7 @@ function teamcity_service_msg_compilationStarted() {
 
 function teamcity_service_msg_compilationFinished() {
   if [[ ${IS_TEAMCITY_RUN} == true ]]; then
-    echo "##teamcity[compilationFinished compiler='${MSG_BASE_TEAMCITY} ${CURRENT_COMPILATION_SERVICE_MSG_COMPILER}']"
+    echo -e "##teamcity[compilationFinished compiler='${MSG_BASE_TEAMCITY} ${CURRENT_COMPILATION_SERVICE_MSG_COMPILER}']"
   fi
   # Reset the variable since the bloc is closed
   unset CURRENT_COMPILATION_SERVICE_MSG_COMPILER

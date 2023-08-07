@@ -1,22 +1,21 @@
 ARG PROJECT_HUB=norlabulaval
-ARG BASE_IMAGE=libpointmatcher-dependencies-doc
+ARG BASE_IMAGE=libpointmatcher-dependencies
 ARG BASE_IMAGE_TAG
 FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-dependencies
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
 
-ARG LIBPOINTMATCHER_VERSION
-ENV LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION:?'Build argument needs to be set and non-empty.'}
+ARG LIBPOINTMATCHER_VERSION='head'
+ENV LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION}
 LABEL libpointmatcher.version="${LIBPOINTMATCHER_VERSION}"
-
 
 ARG LPM_INSTALLED_LIBRARIES_PATH
 ARG LPM_LIBPOINTMATCHER_SRC_REPO_NAME
 ENV LPM_INSTALLED_LIBRARIES_PATH=${LPM_INSTALLED_LIBRARIES_PATH:?'Build argument needs to be set and non-empty.'}
 ENV LPM_LIBPOINTMATCHER_SRC_REPO_NAME=${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?'Build argument needs to be set and non-empty.'}
 
-ARG LIBPOINTMATCHER_CMAKE_BUILD_TYPE=Release
-ARG LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG=""
+ARG LIBPOINTMATCHER_CMAKE_BUILD_TYPE=RelWithDebInfo
+ARG LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG='--build-system-CI-install --compile-test'
 # Note: Those env variable are used in the entrypoint build version
 ENV LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}
 ENV LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG=${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
@@ -27,43 +26,46 @@ ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
 SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 
-# ====Build system related setup====================================================================================
-# Overide LPM_INSTALLED_LIBRARIES_PATH
-ENV LPM_INSTALLED_LIBRARIES_PATH="${LPM_INSTALLED_LIBRARIES_PATH}/checkout"
+# ToDo: validate
+ENV TERM=${TERM:-"xterm-256color"}
 
+# ====Checkout libpointmatcher repository===========================================================================
 WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 
 # Copy all files from the checkout branch in the repository (except those in the .dockerignore)
-COPY ./build_system/ ./build_system/
+COPY . .
+
+# ====Check Libpointmatcher dependencies installed versions========================================================
+WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+RUN chmod +x ./utest/listVersionsUbuntu.sh
+RUN utest/listVersionsUbuntu.sh
 
 # ==== Build libpointmatcher checkout branch ======================================================================
 WORKDIR ./build_system/ubuntu
 
 RUN chmod +x lpm_install_libpointmatcher_ubuntu.bash
-RUN chmod +x entrypoint_execute_lpm_unittest.bash
+RUN chmod +x lpm_execute_libpointmatcher_unittest.bash
 RUN chmod +x entrypoint.bash
 
-## (CRITICAL) ToDo: on task end >> delete next bloc ↓↓
-#RUN chmod +x lpm_install_doc_dependencies_ubuntu.bash
-#RUN bash lpm_install_doc_dependencies_ubuntu.bash
-
-# ====Install Libpointmatcher=======================================================================================
-
-# (CRITICAL) ToDo: validate effect on teamcity build log (source vs bash)
+# (NICE TO HAVE) ToDo: validate effect on teamcity build log (source vs bash)
 RUN source lpm_install_libpointmatcher_ubuntu.bash \
     --libpointmatcher-version ${LIBPOINTMATCHER_VERSION} \
     --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
     ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
 
 # ==== Execute libpointmatcher unit-test===========================================================================
-# Conditional execution if build/utest/ directory is present
-RUN source entrypoint_execute_lpm_unittest.bash
+#WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build"
+#RUN chmod +x utest/utest
+#RUN utest/utest --path "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/examples/data/"
+RUN source lpm_execute_libpointmatcher_unittest.bash
 
+# ................................................................................................................
+## Alternate version
+#RUN chmod +x entrypoint_build_and_test_libpointmatcher_checkout_branch.bash
+#RUN chmod +x entrypoint_build_libpointmatcher_checkout_branch.bash
+#RUN source entrypoint_build_and_test_libpointmatcher_checkout_branch.bash
+#RUN source entrypoint_build_libpointmatcher_checkout_branch.bash
 
 # ====End==========================================================================================================
-FROM libpointmatcher-dependencies AS libpointmatcher-release
-
-WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
-
-ENTRYPOINT [ "./build_system/ubuntu/entrypoint.bash" ]
+ENTRYPOINT [ "./entrypoint.bash" ]
 CMD [ "bash" ]
