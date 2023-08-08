@@ -7,7 +7,6 @@
 # Usage:
 #   $ source ./function_library/prompt_utilities.bash
 #
-#set -e
 
 # ....Pre-condition................................................................................................
 if [[ "$(basename $(pwd))" != "build_system" ]]; then

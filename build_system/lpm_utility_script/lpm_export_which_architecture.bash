@@ -28,7 +28,6 @@
 # Returns:
 #   exit 1 in case of unsupported processor architecture
 # =================================================================================================================
-#set -e
 
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
   cd ../
@@ -45,7 +44,6 @@ source ./function_library/prompt_utilities.bash
 
 # ====Begin========================================================================================================
 #print_formated_script_header 'lpm_export_which_architecture.bash' "${LPM_LINE_CHAR_UTIL}"
-
 
 if [[ $(uname -m) == "aarch64" ]]; then
   if [[ -n $(uname -r | grep tegra) ]]; then

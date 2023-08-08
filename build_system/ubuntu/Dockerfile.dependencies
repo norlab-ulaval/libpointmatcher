@@ -17,11 +17,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
 ENV TZ=Etc/UTC
 
-#ENV TERM="xterm"
-#ENV TERM=${TERM:-"xterm-color"}
 ENV TERM=${TERM:-"xterm-256color"}
-#ENV TERM="xterm-256color"
-
 
 # ....Setup timezone and localization..............................................................................
 # change the locale from POSIX to UTF-8
@@ -65,7 +61,7 @@ COPY ./build_system/ubuntu/lpm_install_python_dev_tools.bash ./ubuntu/
 
 RUN chmod +x ./ubuntu/lpm_install_python_dev_tools.bash
 
-# (NICE TO HAVE) ToDo: validate effect on teamcity build log (source vs bash)
+
 RUN source ./ubuntu/lpm_install_python_dev_tools.bash
 
 

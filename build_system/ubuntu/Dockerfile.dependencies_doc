@@ -26,7 +26,6 @@ WORKDIR ./ubuntu
 
 RUN chmod +x lpm_install_doc_dependencies_ubuntu.bash
 
-# (NICE TO HAVE) ToDo: validate effect on teamcity build log (source vs bash)
 RUN source lpm_install_doc_dependencies_ubuntu.bash
 
 # ====End==========================================================================================================

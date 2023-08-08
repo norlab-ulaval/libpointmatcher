@@ -33,12 +33,15 @@
 #                                 LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS with there respective _SITREP version
 #   [-h, --help]                Get help
 #
-## set -e   # Note: use the --fail-fast flag instead
+# Note:
+#   Dont use "set -e" in this script as it will affect the build system policy, use the --fail-fast flag instead
+#
+
+## Debug flags
 #set -v
 #set -x
 
 # ....Default......................................................................................................
-#LPM_JOB_ID='0'
 DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'
 BUILD_STATUS_PASS=0
 
@@ -96,11 +99,7 @@ norlab_splash "${LPM_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOI
 print_formated_script_header 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
 
 # ....Script command line flags....................................................................................
-
 while [ $# -gt 0 ]; do
-
-#    echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-#    echo -e "\$1: ${1}    \$2: ${2}" # ToDo: on task end >> delete this line ←
 
   case $1 in
   --libpointmatcher-version-build-matrix-override)
@@ -133,11 +132,6 @@ while [ $# -gt 0 ]; do
     shift # Remove argument (--osx-version-build-matrix-override)
     shift # Remove argument value
     ;;
-#  --job-id)
-#      LPM_JOB_ID="${2}"
-#      shift # Remove argument (--job-id)
-#      shift # Remove argument value
-#      ;;
   --docker-debug-logs)
 #    set -v
 #    set -x
@@ -172,33 +166,13 @@ while [ $# -gt 0 ]; do
     ;;
   esac
 
-  #  echo -e "'\$*' after: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-  #  echo -e "after \$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
-  #  echo
-
 done
-
-#echo -e "'\$*' on DONE: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-#
-## ToDo: on task end >> delete next bloc ↓↓
-#echo -e " ${MSG_DIMMED_FORMAT}
-#LPM_MATRIX_LIBPOINTMATCHER_VERSIONS=${LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[*]}
-#LPM_MATRIX_SUPPORTED_OS=${LPM_MATRIX_SUPPORTED_OS[*]}
-#LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=${LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}
-#LPM_MATRIX_OSX_SUPPORTED_VERSIONS=${LPM_MATRIX_OSX_SUPPORTED_VERSIONS[*]}
-#DOCKER_COMPOSE_CMD_ARGS=${DOCKER_COMPOSE_CMD_ARGS}
-#${MSG_END_FORMAT} "
-
-
-## ..................................................................................................................
-## Set environment variable LPM_IMAGE_ARCHITECTURE
-#source ./lpm_utility_script/lpm_export_which_architecture.bash
 
 
 # ..................................................................................................................
 print_msg "Build images specified in ${MSG_DIMMED_FORMAT}'docker-compose.libpointmatcher.yaml'${MSG_END_FORMAT} following ${MSG_DIMMED_FORMAT}.env.build_matrix${MSG_END_FORMAT}"
 
-# Freeze build matrix env variable to prevent override by lpm_execute_compose.bash when reloading .env/build_matrix
+## Freeze build matrix env variable to prevent override by lpm_execute_compose.bash when reloading .env/build_matrix
 FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS=("${LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}")
 FREEZED_LPM_MATRIX_SUPPORTED_OS=("${LPM_MATRIX_SUPPORTED_OS[@]}")
 FREEZED_LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("${LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
@@ -214,8 +188,7 @@ ${MSG_DIMMED_FORMAT}    LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_LPM_MATR
 ${MSG_DIMMED_FORMAT}    LPM_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_LPM_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
 "
 
-# Note: EACH_LPM_VERSION is used for container labeling and to fetch the repo at release tag (todo ref task NMO-252)
-# iceboxed: implement other OS support (ref task NMO-213 OsX arm64-Darwin and NMO-210 OsX x86 CD components)
+# Note: EACH_LPM_VERSION is used for container labeling and to fetch the repo at release tag
 for EACH_LPM_VERSION in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}"; do
   if [[ ${TEAMCITY_VERSION} ]]; then
     echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_LPM_VERSION}']"
@@ -264,7 +237,7 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}"; do
                                           -- "${DOCKER_COMPOSE_CMD_ARGS}"
 
         # ....Collect image tags exported by lpm_execute_compose.bash..............................................
-        # Global: Read DOCKER_EXIT_CODE env variable exported by function show_and_execute_docker
+        # Global: Read 'DOCKER_EXIT_CODE' env variable exported by function show_and_execute_docker
         if [[ ${DOCKER_EXIT_CODE} == 0 ]]; then
           MSG_STATUS="${MSG_DONE_FORMAT}Pass ${MSG_DIMMED_FORMAT}›"
           MSG_STATUS_TC_TAG="Pass ›"
@@ -274,13 +247,13 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}"; do
           BUILD_STATUS_PASS=$DOCKER_EXIT_CODE
 
           if [[ ${TEAMCITY_VERSION} ]]; then
-            # Fail the build › Appear on the Build Results page
+            # Fail the build › Will appear on the TeamCity Build Results page
             echo -e "##teamcity[buildProblem description='BUILD FAIL with docker exit code: ${BUILD_STATUS_PASS}']"
           fi
         fi
 
         # Collect image tags exported by lpm_execute_compose.bash
-        # Global: Read LPM_IMAGE_TAG env variable exported by lpm_execute_compose.bash
+        # Global: Read 'LPM_IMAGE_TAG' env variable exported by lpm_execute_compose.bash
         if [[ ${EACH_CMAKE_BUILD_TYPE} == 'None' ]] || [[ -z ${EACH_CMAKE_BUILD_TYPE} ]]; then
           IMAGE_TAG_CRAWLED=("${IMAGE_TAG_CRAWLED[@]}" "${MSG_STATUS} ${LPM_IMAGE_TAG}")
           IMAGE_TAG_CRAWLED_TC=("${IMAGE_TAG_CRAWLED_TC[@]}" "${MSG_STATUS_TC_TAG} ${LPM_IMAGE_TAG}")
@@ -334,7 +307,6 @@ done
 print_formated_script_footer 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
 
 # ====TeamCity service message=====================================================================================
-
 if [[ ${TEAMCITY_VERSION} ]]; then
   # Tag added to the TeamCity build via a service message
   for tc_build_tag in "${IMAGE_TAG_CRAWLED_TC[@]}" ; do

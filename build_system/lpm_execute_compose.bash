@@ -23,8 +23,10 @@
 #   [--fail-fast]                         Exit script at first encountered error
 #   [-h, --help]                          Get help
 #
-## set -e   # Note: use the --fail-fast flag instead
-
+#
+# Note:
+#   Dont use "set -e" in this script as it will affect the build system policy, use the --fail-fast flag instead
+#
 
 # ....Default......................................................................................................
 LIBPOINTMATCHER_VERSION='head'
@@ -32,7 +34,7 @@ LIBPOINTMATCHER_CMAKE_BUILD_TYPE='RelWithDebInfo'
 OS_NAME='ubuntu'
 OS_VERSION='focal'
 #LPM_JOB_ID='0'
-DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'
+DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'  # alt: build --no-cache --push
 
 # ....Project root logic...........................................................................................
 TMP_CWD=$(pwd)
@@ -71,7 +73,6 @@ function print_help_in_terminal() {
                                               Note: passing script flag via docker --build-arg can be tricky,
                                                     pass them in the docker-compose.yaml if you experience problem.
 "
-#      --job-id                                Append job ID for CI test image
 }
 
 # ....TeamCity service message logic................................................................................
@@ -85,7 +86,6 @@ print_msg "IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN} ${TC_VERSION}"
 
 # ====Begin========================================================================================================
 SHOW_SPLASH_EC="${SHOW_SPLASH_EC:-true}"
-#echo "\$SHOW_SPLASH_EC=${SHOW_SPLASH_EC}"
 
 if [[ "${SHOW_SPLASH_EC}" == 'true' ]]; then
   norlab_splash "${LPM_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
@@ -95,9 +95,6 @@ print_formated_script_header 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER
 
 # ....Script command line flags....................................................................................
 while [ $# -gt 0 ]; do
-
-#  echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-#  echo -e "\$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
 
   case $1 in
   --libpointmatcher-version)
@@ -149,22 +146,7 @@ while [ $# -gt 0 ]; do
     ;;
   esac
 
-#  echo -e "'\$*' after: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-#  echo -e "after \$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
-#  echo
-
 done
-
-#echo -e "'\$*' on DONE: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-
-## ToDo: on task end >> delete next bloc ↓↓
-#echo -e " ${MSG_DIMMED_FORMAT}
-#LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION}
-#LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}
-#OS_NAME=${OS_NAME}
-#OS_VERSION=${OS_VERSION}
-#DOCKER_COMPOSE_CMD_ARGS=${DOCKER_COMPOSE_CMD_ARGS}
-#${MSG_END_FORMAT} "
 
 # ..................................................................................................................
 # Note: LIBPOINTMATCHER_VERSION will be used to fetch the repo at release tag (ref task NMO-252)
@@ -172,10 +154,7 @@ export LIBPOINTMATCHER_VERSION="${LIBPOINTMATCHER_VERSION}"
 export LIBPOINTMATCHER_CMAKE_BUILD_TYPE="${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}"
 export DEPENDENCIES_BASE_IMAGE="${OS_NAME}"
 export DEPENDENCIES_BASE_IMAGE_TAG="${OS_VERSION}"
-#export LPM_JOB_ID="${LPM_JOB_ID}"
 
-# ToDo: implement case (ref task NMO-225 ⚒︎ → Docker image multi-arch support) >> remove the target arch from the tag. L4T will be used in the OS tag
-#export LPM_IMAGE_TAG="${LIBPOINTMATCHER_VERSION}-${DEPENDENCIES_BASE_IMAGE}${DEPENDENCIES_BASE_IMAGE_TAG}-${LPM_IMAGE_ARCHITECTURE:?'err: variable not set'}"
 export LPM_IMAGE_TAG="${LIBPOINTMATCHER_VERSION}-${DEPENDENCIES_BASE_IMAGE}-${DEPENDENCIES_BASE_IMAGE_TAG}"
 
 print_msg "Environment variables set for compose:\n
@@ -190,7 +169,6 @@ print_msg "Image tag ${MSG_DIMMED_FORMAT}${LPM_IMAGE_TAG}${MSG_END_FORMAT}"
 #${MSG_DIMMED_FORMAT}$(printenv | grep -i -e LPM_ -e DEPENDENCIES_BASE_IMAGE -e BUILDKIT)${MSG_END_FORMAT}
 
 ## docker compose [-f <theComposeFile> ...] [options] [COMMAND] [ARGS...]
-## docker compose [-f <theComposeFile> ...] build --no-cache --push
 ## docker compose build [OPTIONS] [SERVICE...]
 ## docker compose run [OPTIONS] SERVICE [COMMAND] [ARGS...]
 

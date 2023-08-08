@@ -55,7 +55,7 @@ COPY ./build_system/function_library/prompt_utilities.bash ./function_library/pr
 
 RUN chmod +x ./lpm_utility_script/lpm_install_docker_tools.bash
 
-# (NICE TO HAVE) ToDo: validate effect on teamcity build log (source vs bash)
+
 RUN source ./lpm_utility_script/lpm_install_docker_tools.bash
 
 

@@ -1,4 +1,6 @@
 services:
+
+  # ====Dependency related services===================================================================================
   dependencies:
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies:${LPM_IMAGE_TAG:?err}
     build:
@@ -31,6 +33,8 @@ services:
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
     tty: true
     stdin_open: true
+
+  # ====Pull-request related services================================================================================
   ci_PR:
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-pr:${LPM_IMAGE_TAG:?err}
     pull_policy: build
@@ -55,6 +59,8 @@ services:
   ci_PR_arm64v8:
     extends: ci_PR
     platform: "linux/arm64/v8"
+
+  # ====Build system assessment services==============================================================================
   ci_SITREP_matrix:
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-sitrep-matrix:${LPM_IMAGE_TAG:?err}
     pull_policy: build
@@ -79,6 +85,8 @@ services:
   ci_SITREP_matrix_arm64v8:
     extends: ci_SITREP_matrix
     platform: "linux/arm64/v8"
+
+  # ====Dockerhub release image======================================================================================
   release:
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher:${LPM_IMAGE_TAG:?err}
     container_name: libpointmatcher

@@ -1,12 +1,13 @@
 #!/bin/bash -i
 #
+# Docker entrypoint for running libpointmatcher installer and unit-test
+#
 # Usage:
-#   $ bash entrypoint_execute_lpm_unittest.bash [<any cmd>]
+#   $ bash entrypoint_execute_lpm_unittest.bash [<any-cmd>]
 #
 # Parameter
-#   <any cmd> (Optional) Command executed in a subprocess at the end of the entrypoint script.
+#   <any-cmd>      Optional command executed in a subprocess at the end of the entrypoint script.
 #
-#set -e # ToDo: on task end >> unmute this line ←
 
 # ....Load environment variables from file.........................................................................
 set -o allexport

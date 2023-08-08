@@ -1,5 +1,7 @@
 #!/bin/bash -i
 #
+# Docker entrypoint for running libpointmatcher unit-test
+#
 # Usage:
 #   $ bash entrypoint_execute_lpm_unittest.bash [<any>]
 #

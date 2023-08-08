@@ -1,9 +1,17 @@
 #!/bin/bash
+#
+# Docker entrypoint for development task
+#
+# Usage:
+#   $ bash entrypoint.bash [<any-cmd>]
+#
+# Parameter
+#   <any-cmd>      Optional command executed in a subprocess at the end of the entrypoint script.
+#
 
 ifconfig
 
 cd "${LPM_INSTALLED_LIBRARIES_PATH}"
-#cd "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 
 pwd
 tree -L 1
@@ -13,5 +21,5 @@ du -h --max-depth=2
 echo
 
 # ====Continue=====================================================================================================
-exec "${@}"
+exec "$@"
 

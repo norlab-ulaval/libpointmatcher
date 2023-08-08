@@ -23,8 +23,7 @@
 #   - this script required package: g++, make, cmake, build-essential, git and all libpointmatcher dependencies
 #   - execute `lpm_install_dependencies_ubuntu.bash` first
 #
-set -e
-#set -v
+set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
 # ....Default......................................................................................................
 LIBPOINTMATCHER_VERSION='head'
@@ -47,7 +46,7 @@ source ./.env.prompt
 set +o allexport
 
 ## skip GUI dialog by setting everything to default
-#export DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive
 
 # ....Helper function..............................................................................................
 ## import shell functions from Libpointmatcher-build-system utilities library
@@ -91,10 +90,6 @@ print_formated_script_header "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMA
 # ....Script command line flags....................................................................................
 
 while [ $# -gt 0 ]; do
-
-#    echo -e "'\$*' before: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-#    echo -e "\$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
-#  #  echo -e "\$arg: ${arg}" # ToDo: on task end >> delete this line ←
 
   case $1 in
   --install-path)
@@ -142,33 +137,13 @@ while [ $# -gt 0 ]; do
     ;;
   esac
 
-#    echo -e "'\$*' after: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-#    echo -e "after \$1: ${1}    \$2: $2" # ToDo: on task end >> delete this line ←
-#    echo
-
 done
-
-##echo -e "'\$*' on DONE: ${MSG_DIMMED_FORMAT}$*${MSG_END_FORMAT}" # ToDo: on task end >> delete this line ←
-##
-## ToDo: on task end >> delete next bloc ↓↓
-#echo -e "${MSG_DIMMED_FORMAT}
-#LPM_INSTALLED_LIBRARIES_PATH=${LPM_INSTALLED_LIBRARIES_PATH}
-#BUILD_TESTS_FLAG=${BUILD_TESTS_FLAG}
-#GENERATE_API_DOC_FLAG=${GENERATE_API_DOC_FLAG}
-#BUILD_SYSTEM_CI_INSTALL=${BUILD_SYSTEM_CI_INSTALL}
-#${MSG_END_FORMAT}"
-#print_msg_warning "TMP_CWD=${TMP_CWD}"
-#echo -e "${MSG_DIMMED_FORMAT} " && printenv | grep -i -e LPM_ && echo -e "${MSG_END_FORMAT} "
-
 
 # ................................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher"
 # https://github.com/ethz-asl/libpointmatcher/tree/master
 
-# (CRITICAL) ToDo: on task end >> delete next bloc ↓↓
-print_msg_warning "DEBUG\n${MSG_WARNING_FORMAT}$(tree -L 2 ${LPM_INSTALLED_LIBRARIES_PATH})${MSG_END_FORMAT}"
-#LPM_LIBPOINTMATCHER_SRC_DOMAIN=ethz-asl
-#LPM_LIBPOINTMATCHER_SRC_REPO_NAME=libpointmatcher
+print_msg "Directories (pre libpointmatcher install)$(tree -L 2 ${LPM_INSTALLED_LIBRARIES_PATH})"
 
 mkdir -p "${LPM_INSTALLED_LIBRARIES_PATH}"
 cd "${LPM_INSTALLED_LIBRARIES_PATH}"
@@ -179,10 +154,8 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
     print_msg_error_and_exit "${MSG_DIMMED_FORMAT}${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT} source code was already checkout in the specified install directory ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/${MSG_END_FORMAT}, specify an other one using ${MSG_DIMMED_FORMAT}--install-path </install/dir/path/>${MSG_END_FORMAT}."
   fi
 
-  # #git clone https://github.com/ethz-asl/libpointmatcher.git
   git clone https://github.com/"${LPM_LIBPOINTMATCHER_SRC_DOMAIN}"/"${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}".git
 
-  # (CRITICAL) ToDo: validate (ref task NMO-252 ⚒︎ → Implement pull repo release tag version logic)
   if [[ "${LIBPOINTMATCHER_VERSION}" != 'head' ]]; then
     cd "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"/
 
@@ -201,6 +174,7 @@ cd "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"/
 mkdir -p build && cd build
 
 teamcity_service_msg_compilationStarted "cmake"
+
 # (CRITICAL) ToDo: validate >> GENERATE_API_DOC install dir
 
 
@@ -221,6 +195,8 @@ INSTALL_EXIT_CODE=$?
 ### List all CMake build options and their default values
 ###   ref: https://stackoverflow.com/questions/16851084/how-to-list-all-cmake-build-options-and-their-default-values
 #cmake -LAH
+
+print_msg "Directories (post libpointmatcher install)$(tree -L 2 ${LPM_INSTALLED_LIBRARIES_PATH})"
 
 teamcity_service_msg_compilationFinished
 teamcity_service_msg_blockClosed

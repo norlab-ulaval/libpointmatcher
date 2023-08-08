@@ -2,7 +2,6 @@
 #
 # (Optional) .bashrc config script
 #
-set -e
 
 # ....Load environment variables from file.........................................................................
 set -o allexport

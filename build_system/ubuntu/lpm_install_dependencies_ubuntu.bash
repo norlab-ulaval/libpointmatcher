@@ -1,7 +1,11 @@
 #!/bin/bash -i
 #
-set -e
-#set -v
+# Libpointmatcher dependencies installer
+#
+# Usage:
+#   $ bash lpm_install_dependencies_ubuntu.bash
+#
+set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
 # ....Project root logic...........................................................................................
 TMP_CWD=$(pwd)
@@ -67,15 +71,6 @@ else
   print_msg "The install script is executed in stand alone mode"
   source ./ubuntu/lpm_install_python_dev_tools.bash
 fi
-
-## ToDo: assessment >> check if next bloc ↓↓ is needed
-#sudo apt-get update \
-#    && sudo apt-get install --assume-yes \
-#        python3-opengl \
-#        python3-numpy \
-#        python-is-python3 \
-#        python3-vcstool \
-#    && sudo rm -rf /var/lib/apt/lists/*;
 
 # ................................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Boost"

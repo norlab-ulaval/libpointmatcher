@@ -1,8 +1,11 @@
 #!/bin/bash -i
 #
+# Libpointmatcher documentation dependencies installer
 #
-set -e
-#set -v
+# Usage:
+#   $ bash lpm_install_doc_dependencies_ubuntu.bash
+#
+set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
 # ....Project root logic...........................................................................................
 TMP_CWD=$(pwd)
@@ -19,7 +22,7 @@ source ./.env.prompt
 set +o allexport
 
 ## skip GUI dialog by setting everything to default
-#export DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive
 
 # ....Helper function..............................................................................................
 ## import shell functions from Libpointmatcher-build-system utilities library
@@ -27,7 +30,7 @@ source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
 source ./function_library/general_utilities.bash
 
-## Set environment variable LPM_IMAGE_ARCHITECTURE
+## Set environment variable 'LPM_IMAGE_ARCHITECTURE'
 source ./lpm_utility_script/lpm_export_which_architecture.bash
 
 # ====Begin========================================================================================================

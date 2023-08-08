@@ -43,8 +43,6 @@ if [[ $(uname) == 'Linux' ]]; then
     curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py &&
       sudo python2 get-pip.py
 
-    #      pip install --upgrade pip
-
     teamcity_service_msg_blockClosed
   else
     teamcity_service_msg_blockOpened "Install python development tools for Ubuntu distro (python 3)"
@@ -59,8 +57,6 @@ if [[ $(uname) == 'Linux' ]]; then
           python-is-python3 &&
         sudo rm -rf /var/lib/apt/lists/*
 
-      #        pip install --upgrade pip
-
     else
       # ....Case › python 3 is Ubuntu default python version......................................................
       sudo apt-get update &&
@@ -70,8 +66,6 @@ if [[ $(uname) == 'Linux' ]]; then
           python3-numpy &&
         sudo rm -rf /var/lib/apt/lists/*
 
-      #        pip install --upgrade pip
-
     fi
 
     teamcity_service_msg_blockClosed
@@ -80,8 +74,6 @@ fi
 
 # ====Universal python install step (common to all OS version)======================================================
 teamcity_service_msg_blockOpened "Pip install python packages"
-
-# python3 -m pip install --upgrade pip
 
 # Note: 2X "--quiet" correspond to ERROR logging level
 pip install --no-cache-dir --quiet --quiet --upgrade pip &&

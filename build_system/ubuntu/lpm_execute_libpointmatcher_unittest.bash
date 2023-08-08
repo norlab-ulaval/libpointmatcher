@@ -1,11 +1,12 @@
 #!/bin/bash
 #
+# Run Libpointmatcher unit test
 #
+# Usage:
+#   $ bash lpm_execute_libpointmatcher_unittest.bash
 #
-# usage:
-#   $ bash ./ubuntu/lpm_execute_libpointmatcher_unittest.bash
-#
-#set -e
+# Notes:
+#   The script propagate the utest exit code on exit
 
 # ....Project root logic...........................................................................................
 TMP_CWD=$(pwd)
@@ -27,9 +28,6 @@ source ./function_library/prompt_utilities.bash
 # ====Begin========================================================================================================
 print_formated_script_header 'lpm_execute_libpointmatcher_unittest.bash' ':'
 
-# (CRITICAL) ToDo: on task end >> delete next bloc ↓↓
-print_msg_warning "DEBUG\n${MSG_WARNING_FORMAT}$(tree -L 2 ${LPM_INSTALLED_LIBRARIES_PATH})${MSG_END_FORMAT}"
-
 cd "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build"
 
 if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
@@ -43,7 +41,6 @@ fi
 sudo chmod +x utest/utest
 utest/utest --path "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/examples/data/"
 UTEST_EXIT_CODE=$?
-#export UTEST_EXIT_CODE
 # .................................................................................................................
 
 SUCCESS_MSG="Libpointmatcher GoogleTest unit-test completed successfully"
