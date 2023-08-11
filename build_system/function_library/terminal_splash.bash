@@ -36,10 +36,20 @@ fi
 #   none
 # =================================================================================================================
 function echo_centering_str() {
-  local the_str=${1:?'Missing a mandatory parameter error'}
-  local the_style="${2:-""}"
-  local the_pad_cha="${3:-" "}"
+  local the_str_pre=${1:?'Missing a mandatory parameter error'}
+#  local the_str=${1:?'Missing a mandatory parameter error'}
+  printf -v the_str -- "%b" "${the_str_pre}"
+  local the_style="${2:?'Missing a mandatory parameter error'}"
+  local the_pad_cha="${3:?'Missing a mandatory parameter error'}"
+  local fill_left="${4:-""}"
+  local fill_right="${5:-""}"
   local str_len=${#the_str}
+
+  if [[ ${TEAMCITY_VERSION} ]] || [[ ${IS_TEAMCITY_RUN} == true ]] ; then
+    local the_style_off="[0m"
+  else
+    local the_style_off="\033[0m"
+  fi
 
   ## ToDo: on task end >> mute next bloc ↓↓
   #echo "\$TERM=${TERM}"
@@ -65,21 +75,21 @@ function echo_centering_str() {
   local single_side_padding_len=$(( $total_padding_len / 2 ))
   local pad
   pad=$(printf -- "$the_pad_cha%.0s" $(seq $single_side_padding_len))
-  printf -- "${pad}${the_style}${the_str}\033[0m${pad}\n"                        # <-- Quick hack
+  LC_ALL='' LC_CTYPE=en_US.UTF-8 printf -- "%b%b%s%b%s%b%b\n" "${the_style}" "${fill_left}" "${pad}" "${the_str}" "${pad}" "${fill_right}" "${the_style_off}"
 }
 
 
 # =================================================================================================================
-# Terminal splash screen
+# SNOW terminal splash screen
 #
 # Credit: ASCII art generated using image generator at https://asciiart.club
 #
 # Usage:
 #
 #   $ source function_library/terminal_splash.bash
-#   $ norlab_splash [title [url]]
+#   $ snow_splash [title [url]]
 #
-#   $ norlab_splash "NorLab" "https://github.com/norlab-ulaval"
+#   $ snow_splash "NorLab" "https://github.com/norlab-ulaval"
 #
 # Globals:
 #   none
@@ -95,6 +105,89 @@ function echo_centering_str() {
 #   - Bash tips: Colors and formatting (ANSI/VT100 Control sequences):
 #     https://misc.flogisoft.com/bash/tip_colors_and_formatting#bash_tipscolors_and_formatting_ansivt100_control_sequences
 #   - ASCII art generated using image generator at https://asciiart.club
+#   - https://lachlanarthur.github.io/Braille-ASCII-Art/
+#
+# Dev workflow: run the following command
+#
+#   $ source build_system/function_library/terminal_splash.bash \
+#      && snow_splash "NorLab" "https://github.com/norlab-ulaval"
+#
+# =================================================================================================================
+function snow_splash() {
+  local TITLE=${1:-'NorLab'}
+  local OPTIONAL_URL=${2:-'https://github.com/norlab-ulaval'}
+
+  local FILL_T=''
+  local FILL_U=''
+  if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
+    local FILL_T='······'
+    local FILL_U='      '
+  fi
+
+  # Formatting
+  #   - 1=Bold/bright
+  #   - 2=Dim
+  #   - 4=underline
+  if [[ ${TEAMCITY_VERSION} ]] || [[ ${IS_TEAMCITY_RUN} == true ]] ; then
+    local TITLE_FORMATTING="[1m"
+    local SNOW_FORMATTING="[2m"
+    local URL_FORMATTING="[2m"
+  else
+    local TITLE_FORMATTING="\033[1m"
+    local SNOW_FORMATTING="\033[2m"
+    local URL_FORMATTING="\033[2m"
+  fi
+
+  echo " "
+  echo " "
+  echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠀⠀⠀⠀⠀⠀⢿⣷⣼⣿⣤⣿⡗⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⢀⣤⡀⣿⣿⠀⠀⠉⣿⣿⡿⠁⠀⠀⣿⡟⣀⣤⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠀⠙⣻⣿⣿⣧⠀⠀⢸⣿⠀⠀⢀⣿⣿⣿⣟⠉⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠘⠛⠛⠉⠉⠙⠿⣿⣾⣿⣷⣿⠟⠉⠉⠙⠛⠛⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "···•· ${TITLE} ··•••" "${TITLE_FORMATTING}" "·" "${FILL_T}" "${FILL_T}"
+  echo_centering_str "⢠⣶⣤⣄⣀⣤⣶⣿⢿⣿⢿⣿⣶⣄⣀⣤⣤⣶⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠀⣨⣿⣿⣿⡟⠁⠀⢸⣿⠀⠀⠉⣿⣿⣿⣯⣀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠈⠛⠁⣿⣿⢀⠀⣠⣿⣿⣷⡀⠀⠈⣿⣧⠉⠛⢀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠀⠀⠀⠀⠀⠀⣾⡿⢻⣿⠙⣿⡷⠀⠈⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠘⠛⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+  echo " "
+  echo_centering_str "https://norlab.ulaval.ca" "${URL_FORMATTING}" " " "${FILL_U}" "${FILL_U}"
+  echo_centering_str "${OPTIONAL_URL}" "${URL_FORMATTING}" " " "${FILL_U}" "${FILL_U}"
+  echo " "
+  echo " "
+}
+
+# =================================================================================================================
+# NorLab Terminal splash screen
+#
+# Credit: ASCII art generated using image generator at https://asciiart.club
+#
+# Usage:
+#
+#   $ source function_library/terminal_splash.bash
+#   $ norlab_splash [title [url [splash-type]] ]
+#
+#   $ norlab_splash "NorLab" "https://github.com/norlab-ulaval"
+#
+# Globals:
+#   none
+# Arguments:
+#   <title>         The title printed in the center of the splash screen (default 'NorLab')
+#   <url>           The url printed at the bottom of the splash screen (default 'https://github.com/norlab-ulaval')
+#   <splash-type>   The style of presentation: small, negative or big (default 'negative')
+# Outputs:
+#   Output the splash screen to STDOUT
+# Returns:
+#   none
+#
+# References:
+#   - Bash tips: Colors and formatting (ANSI/VT100 Control sequences):
+#     https://misc.flogisoft.com/bash/tip_colors_and_formatting#bash_tipscolors_and_formatting_ansivt100_control_sequences
+#   - ASCII art generated using image generator at https://asciiart.club
+#   - https://lachlanarthur.github.io/Braille-ASCII-Art/
 #
 # Dev workflow: run the following command
 #
@@ -105,52 +198,138 @@ function echo_centering_str() {
 function norlab_splash() {
   local TITLE=${1:-'NorLab'}
   local OPTIONAL_URL=${2:-'https://github.com/norlab-ulaval'}
+  local SPLASH_TYPE=${3:-negative} # Option: small, negative or big
 
-  # iceboxed: Background in white
-  #     >> would be nice but result might be inconsistent across terminal type >> Not worth the trouble.
-  # GRAY_FG_WHITE_BG="\e[0;37;107m"
+  local FILL_T=''
+  local FILL_U=''
+  if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
+    local FILL_T='······'
+    local FILL_U='      '
+  fi
 
-  # Foreground colors
-  #   - 2=Dim
-  #   - 37=light gray
-  #   - 90=dark gray
-  #   - 30=black
-  #   - 97=white
   # Formatting
   #   - 1=Bold/bright
   #   - 2=Dim
   #   - 4=underline
-  local SNOW_FG=97
-  local TITLE_FG=97
-  local URL_FG=37
-  local SNOW_FORMATTING=2
-  local TITLE_FORMATTING=1
-  local URL_FORMATTING=2
-
-  # ToDo: validate
-  local SS='  '
-  if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
-    SS=''
+  if [[ ${TEAMCITY_VERSION} ]] || [[ ${IS_TEAMCITY_RUN} == true ]] ; then
+    local TITLE_FORMATTING="[1m"
+    local SNOW_FORMATTING="[2m"
+    local URL_FORMATTING="[2m"
+  else
+    local TITLE_FORMATTING="\033[1m"
+    local SNOW_FORMATTING="\033[2m"
+    local URL_FORMATTING="\033[2m"
   fi
 
-  echo " "
-  echo " "
-  echo " "
-  echo_centering_str "${SS}⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "${SS}⠀⠀⠀⠀⠀⠀⠀⢿⣷⣼⣿⣤⣿⡗⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "${SS}⠀⢀⣤⡀⣿⣿⠀⠀⠉⣿⣿⡿⠁⠀⠀⣿⡟⣀⣤⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "${SS}⠀⠀⠙⣻⣿⣿⣧⠀⠀⢸⣿⠀⠀⢀⣿⣿⣿⣟⠉⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "${SS}⠀⠘⠛⠛⠉⠉⠙⠿⣿⣾⣿⣷⣿⠟⠉⠉⠙⠛⠛⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "···•· ${TITLE} ··•••" "\033[${TITLE_FORMATTING};${TITLE_FG}m" "\033[0m·"
-  echo_centering_str "${SS}⠀⢠⣶⣤⣄⣀⣤⣶⣿⢿⣿⢿⣿⣶⣄⣀⣤⣤⣶⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "${SS}⠀⠀⣨⣿⣿⣿⡟⠁⠀⢸⣿⠀⠀⠉⣿⣿⣿⣯⣀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "${SS}⠀⠈⠛⠁⣿⣿⢀⠀⣠⣿⣿⣷⡀⠀⠈⣿⣧⠉⠛⢀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "${SS}⠀⠀⠀⠀⠀⠀⠀⣾⡿⢻⣿⠙⣿⡷⠀⠈⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo_centering_str "${SS}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠛⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "\033[${SNOW_FORMATTING};${SNOW_FG}m" " "
-  echo " "
-  echo_centering_str "https://norlab.ulaval.ca" "\033[${URL_FORMATTING};${URL_FG}m" " "
-  echo_centering_str "${OPTIONAL_URL}" "\033[${URL_FORMATTING};${URL_FG}m" " "
-  echo " "
-  echo " "
+
+  #  echo -e "SPLASH_TYPE=${SPLASH_TYPE}"
+  if [[ ${SPLASH_TYPE} == small ]]; then
+
+    echo " "
+    echo " "
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣤⣄⠀⠀⠀⣼⣿⣿⣿⣿⠀⠀⠀⢀⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⡿⢛⣩⣭⣶⣶⠒⣶⣦⣭⣉⠛⢿⣿⣿⣿⠂⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⣠⠟⣭⣾⣿⣿⣿⡿⠙⢿⠀⠿⠉⣿⣿⣿⣿⣶⣍⠻⣄⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⣴⣿⣿⠟⣶⣿⣿⣿⣿⣿⣿⠉⠻⣶⠀⣶⠛⠉⠟⣛⣛⣛⣛⠻⢦⠻⣿⣿⣦⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠘⣿⣿⢡⡋⠙⠿⠀⣿⡀⢸⡟⠙⢷⣤⠀⣤⠞⠾⢿⡇⢰⡟⠀⠟⠉⢻⡟⣾⣿⠗⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⢰⢁⣿⣿⠛⠀⣀⠈⠀⢸⡇⢸⣶⣄⠀⣤⠘⡀⢸⠃⠈⠀⣀⠀⠛⣿⣼⠸⡄⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⣶⣾⣿⣾⣿⣿⣿⠉⢀⣤⡶⠒⠀⠈⠛⢿⠀⠛⠚⠀⠀⠒⣶⣤⡀⢙⡿⣴⣿⣧⣿⣦⣤" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "···•· ${TITLE} ··•••" "${TITLE_FORMATTING}" "·" "${FILL_T}" "${FILL_T}"
+    echo_centering_str "⠀⣿⣿⣏⣿⣿⣿⣿⡿⣿⣄⠀⠛⣿⡿⠛⠀⠀⠀⠒⣶⡮⠛⠢⠿⣛⣭⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠈⠉⣿⢹⣿⣿⠛⢶⣤⡀⠉⠉⠀⢰⣿⣿⠀⣿⣷⡀⠀⠉⠉⣀⣤⡾⠛⣿⣿⡏⡿⠛⠉" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⣨⣆⣿⣿⠟⠀⠀⣠⠀⢸⡇⠘⠉⣀⠀⡀⠉⠀⢸⡆⢰⡄⠀⠐⠿⣿⣿⣼⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠺⣿⣿⣆⢷⣾⣿⣀⣿⣀⣾⣷⡾⠋⢀⠀⠈⠛⣶⣿⣇⣸⣿⣀⣿⣶⡿⣴⣿⣿⠆⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠙⡿⠿⢷⡙⣿⣿⣿⣿⣿⣿⣶⠟⠉⠀⠉⠿⣶⣿⣿⣿⣿⣿⣿⢫⣿⣿⣿⠃⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠈⣿⣬⡛⣿⣿⣿⣿⣶⣿⠀⣿⣶⣿⣿⣿⡿⢛⣵⣿⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠘⠿⣿⣿⣿⠓⠶⣭⣭⣉⣉⣉⣭⣭⠶⢾⣿⣿⣿⠿⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⣿⣿⣿⣿⠃⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo " "
+    echo_centering_str "https://norlab.ulaval.ca" "${URL_FORMATTING}" " " "${FILL_U}" "${FILL_U}"
+    echo_centering_str "${OPTIONAL_URL}" "${URL_FORMATTING}" " " "${FILL_U}" "${FILL_U}"
+    echo " "
+    echo " "
+
+  elif [[ ${SPLASH_TYPE} == big ]]; then
+
+    echo " "
+    echo " "
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⣾⣷⣤⡀⠀⠀⣀⣰⣿⣿⣿⣿⣿⣿⣿⣀⠀⠀⠀⢀⣴⣷⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⣿⣿⣿⣿⣿⠿⠛⣋⣉⣩⣤⣤⠤⠤⣤⣬⣍⣉⡙⠛⠶⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⠿⢛⣡⣴⣾⣿⣿⣿⣿⣿⣿⠀⠀⣿⣿⣿⣿⣿⣿⣶⣦⣌⡛⠿⣿⣿⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡴⠛⣡⣶⣿⣿⣿⣿⣿⣿⣟⠁⠉⠻⠀⠀⠟⠉⠈⣻⣿⣿⣿⣿⣿⣿⣶⣌⠛⢧⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⣴⣿⣷⣶⣶⠋⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⠻⢷⣦⡀⠀⠀⢀⣴⡾⠟⣿⣿⣿⣿⣿⣿⣿⣿⣷⣄⠙⣦⣤⣴⣶⣦⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⢀⣼⣿⣿⣿⡟⢡⣾⣿⣿⠿⠿⣿⣿⣿⣿⣿⣧⣀⠀⠉⠻⠀⠀⠟⠉⠀⡀⢈⣥⡴⣶⣶⣶⠶⠤⣭⣍⣓⡈⠻⠿⠿⢿⣧⡀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠺⣿⣿⣿⠟⣰⠏⠙⠻⣿⡀⠀⣿⡇⠀⢸⣿⠛⠻⢷⣦⣀⠀⠀⣀⣴⠎⣴⣿⣿⡇⠀⢸⣿⠀⢀⡿⠟⠋⠹⣿⡟⣰⣿⣿⡷⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠈⢻⡟⢰⣿⣶⣤⣀⠀⠁⠀⢹⡇⠀⢸⣿⠀⢀⡀⠈⠙⠀⠀⠋⠁⢸⠀⠀⣿⡇⠀⢸⡇⠀⠈⠀⣀⣤⣶⡿⢀⢻⣿⠟⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⡿⢀⣿⣿⣟⠛⠉⠀⣀⣀⡀⠀⠀⠸⣿⠀⢸⣿⣶⣤⠀⠀⣤⣶⢸⡇⠀⣿⠇⠀⠀⢀⣀⣀⠀⠉⠛⣿⢃⣿⡄⢿⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⢀⣀⣤⣼⡇⣸⣿⣿⣿⣦⣶⠿⠛⠉⠀⢀⣠⡀⠀⠀⠘⢿⣿⣿⠀⠀⣿⠏⡸⠃⠀⠀⢀⣄⡀⠀⠉⠛⠿⣶⣴⠇⣼⣿⣇⢸⣇⡀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⣿⣿⣿⣿⠁⣿⣿⣿⣿⣿⣿⣄⣠⣴⡾⠟⠉⠀⢀⣤⣄⠀⠈⠙⠀⠀⠁⠀⠀⣠⣤⡀⠀⠉⠻⢷⣦⣄⣠⡿⢃⣾⣿⣿⣿⠀⣿⣿⣿⣶" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "···•· ${TITLE} ··•••" "${TITLE_FORMATTING}" "·" "${FILL_T}" "${FILL_T}"
+    echo_centering_str "⣿⣿⣿⣿⠀⣿⣿⣿⣿⣿⣿⣿⣿⣏⡀⠀⠐⠾⣿⣿⣿⡿⠒⠀⠀⠀⠀⠠⢴⣶⣦⣍⠳⠦⣄⣼⡿⠟⣋⣴⣿⣿⣿⣿⣿⠀⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠿⣿⣿⣿⠀⣿⣿⣿⣿⣿⣿⠁⠉⠛⠿⣶⣤⡀⠀⠉⠁⠀⣠⣴⠀⠀⣦⣀⠀⠈⠉⠀⢀⣤⣶⠶⠒⠉⠈⣿⣿⣿⣿⣿⣿⢀⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠈⢹⡇⢹⣿⣿⣿⠛⠛⠿⣶⣤⡀⠀⠉⠀⢀⠀⢰⣿⣿⣿⠀⠀⣿⣿⣿⠀⠀⡀⠀⠉⠀⢀⣤⣶⠿⠛⠻⣿⣿⣿⡏⢸⡟⠛⠉⠁" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⣷⠘⣿⣿⣷⣦⣄⠀⠀⠁⠀⡀⠀⢸⣿⠀⢸⡿⠟⠋⠀⠀⠙⠻⢿⠀⠀⣿⡇⠀⢀⠀⠈⠀⠀⣠⣴⣿⣿⣿⠁⣾⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⣴⣿⣧⠹⣿⠟⠉⠀⢀⠀⠀⣼⡇⠀⢸⣿⠀⠀⠀⣠⣴⠀⠀⣦⣀⠀⠀⠀⣿⡇⠀⢸⡇⠀⢀⡀⠀⠙⠻⣿⠇⣼⣧⡀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⢾⣿⣿⣿⣦⠹⣧⣴⣾⣿⠀⠀⣿⡇⠀⢸⣿⣦⣶⠿⠋⠁⠀⠀⠈⠛⠿⣶⣴⣿⡇⠀⢸⣿⠀⠈⣿⣷⣤⣼⠏⣴⣿⣿⣿⡦⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠈⢻⣿⣿⣿⣧⡘⢿⣿⣿⣿⣶⣿⣿⣿⣿⣿⡏⠁⢀⣠⣶⠀⠀⣶⣄⡀⠈⢻⣿⣿⣿⣿⣿⣶⣿⣿⣿⡿⢃⣼⣿⣿⣿⡟⠁⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠻⠿⠟⠛⠻⣄⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣶⠿⠋⠀⠀⠀⠀⠙⠿⣶⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⣠⠿⠿⢿⣿⠟⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢳⣤⡙⠿⣿⣿⣿⣿⣿⣿⣷⣄⣠⣾⠀⠀⣷⣄⣠⣾⣿⣿⣿⣿⣿⣿⠿⢋⣤⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⣿⣶⣬⡙⠻⠿⣿⣿⣿⣿⣿⣿⠀⠀⣿⣿⣿⣿⣿⣿⡿⠟⢋⣥⣶⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⠶⣤⣌⣉⣙⡛⠛⠛⠛⠛⠛⣋⣉⣩⣤⣶⣿⣿⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⢿⠟⠁⠀⠀⠀⠉⣿⣿⣿⣿⣿⣿⣿⠏⠉⠀⠀⠈⠛⢿⡿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo_centering_str "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀" "${SNOW_FORMATTING}" "⠀"
+    echo " "
+    echo_centering_str "https://norlab.ulaval.ca" "${URL_FORMATTING}" " " "${FILL_U}" "${FILL_U}"
+    echo_centering_str "${OPTIONAL_URL}" "${URL_FORMATTING}" " " "${FILL_U}" "${FILL_U}"
+    echo " "
+    echo " "
+
+  elif [[ ${SPLASH_TYPE} == negative ]]; then
+
+    local SS="·"
+    if [[ ${TEAMCITY_VERSION} ]] || [[ ${IS_TEAMCITY_RUN} == true ]] ; then
+      SS=""
+    fi
+
+    echo " "
+    echo " "
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⢿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠉⠀⠀⠀⠀⠈⢉⣡⣤⠤⠶⠶⠶⠶⢤⣤⣈⡉⠋⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⣠⠶⠋⠉⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀⠉⠛⢶⣄⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⠛⠿⢿⡟⢁⡶⠉⠀⠀⠀⠀⠀⠀⠘⣿⣷⣿⣿⣾⡿⠃⠀⠀⠀⠀⠀⠀⠉⢶⡈⢿⣿⣿⡿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⠁⠀⠀⢀⡾⠁⠀⠀⠀⠀⠀⠀⠀⠶⣿⣦⡀⣿⣿⣀⣴⣿⣦⠴⠒⠒⠒⠒⠦⢤⣌⣶⠀⠀⠀⠈⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣄⠀⠀⢠⠋⣶⣤⡀⢻⣿⠀⣿⡇⠀⣤⣄⠉⠻⣿⣿⠛⢁⠋⠀⠀⣶⣶⠀⣿⡆⢀⣤⠀⠀⣰⠁⠀⠀⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⡿⢠⠃⠀⠀⠉⣻⣿⣿⣤⣿⣿⠀⣿⠛⠿⣿⣿⣿⣿⣿⢸⣿⠀⣿⣟⣤⣿⣿⣟⠉⠀⢠⠻⡀⣴⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⡿⠀⡟⠀⠀⠈⠟⠋⠁⣤⣿⣿⣿⣶⣿⠂⠀⠀⣿⣿⠀⣿⢸⣿⣶⣿⣿⣿⣄⠈⠙⠁⢀⠋⠀⣿⠈⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⠀⠀⠀⢰⠁⠀⠀⠀⠀⠹⠟⠉⣀⣴⣾⡿⠛⠿⣿⣦⣿⣿⣿⣿⠟⠛⢿⣷⣤⡀⠉⠋⠀⣠⠋⠀⠀⢸⠀⠀⠀⠉⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "${SS}··•· ${TITLE} ··•••" "${TITLE_FORMATTING}" "·" "${FILL_T}" "${FILL_T}"
+    echo_centering_str "⣿⣿⣿⣿⠀⠀⠀⢸⠀⠀⠀⠀⠀⢀⡀⠈⠻⣿⣶⣄⠀⣀⣶⣿⣿⣿⣿⣦⣀⠀⣹⣦⣭⣥⣤⢖⠋⠀⠀⠀⠀⢸⠀⠀⠀⢸⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣷⣶⣤⠀⡇⠀⠀⠀⡀⠉⠛⣿⣷⣦⣴⣿⣿⠛⠁⠀⣿⣿⠀⠉⢻⣿⣿⣤⣴⣾⡿⠛⠉⣀⠀⠀⠀⢸⠀⢀⣠⣼⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⡆⢻⠀⠀⠈⠛⢿⣿⣾⣿⣿⣿⠀⣿⠀⣀⣴⣿⣿⣦⡀⢸⣿⠀⣿⡿⣿⣶⣿⠿⠛⠀⠀⠀⡟⣸⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⠟⠀⠀⢷⠀⣶⣿⠟⣻⣿⠀⣿⡏⠀⣿⡿⠛⢁⣿⣿⠉⠛⣿⣿⠀⣿⣿⠀⣿⡟⠿⣿⣶⠀⡿⠀⠙⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠻⡀⠀⠀⠛⠛⠀⠉⠁⠀⣀⣶⣿⠟⣿⣿⠿⣿⣦⡀⠀⠉⠉⠀⠛⠃⠀⠀⢠⠟⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣦⣀⣀⣤⡈⢷⡀⠀⠀⠀⠀⠀⠀⠀⠁⣠⣾⣿⣿⣶⣄⠉⠀⠀⠀⠀⠀⠀⠀⢀⡾⢁⡀⠀⠀⣾⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⠈⠓⣤⠀⠀⠀⠀⠀⠈⠋⠀⣿⣿⠀⠛⠀⠀⠀⠀⠀⢀⣤⠛⢠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀⠀⠀⠀⠉⠓⢦⣤⣀⡀⠀⠉⠉⠀⢀⣀⣤⡴⠚⠉⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⣀⠀⣴⣿⣿⣶⣆⠀⠀⠀⠀⠀⠀⣶⣶⣿⣶⡀⠀⣠⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⣀⣀⣀⣀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo_centering_str "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿" "${SNOW_FORMATTING}" "⣿"
+    echo " "
+    echo_centering_str "https://norlab.ulaval.ca" "${URL_FORMATTING}" " " "${FILL_U}" "${FILL_U}"
+    echo_centering_str "${OPTIONAL_URL}" "${URL_FORMATTING}" " " "${FILL_U}" "${FILL_U}"
+    echo " "
+    echo " "
+
+  else
+    MSG_ERROR_FORMAT="\033[1;31m"
+    MSG_END_FORMAT="\033[0m"
+    echo -e "${MSG_ERROR_FORMAT}SPLASH_TYPE \"${SPLASH_TYPE}\" not implemented! ${MSG_END_FORMAT}"
+  fi
 
 }
