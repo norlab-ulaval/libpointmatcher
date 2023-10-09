@@ -65,6 +65,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/Sphericality.h"
 #include "DataPointsFilters/Saliency.h"
 #include "DataPointsFilters/SpectralDecomposition.h"
+#include "DataPointsFilters/Symmetry.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -98,6 +99,7 @@ struct DataPointsFiltersImpl
     typedef ::SphericalityDataPointsFilter<T> SphericalityDataPointsFilter;
 	typedef ::SaliencyDataPointsFilter<T> SaliencyDataPointsFilter;
 	typedef ::SpectralDecompositionDataPointsFilter<T> SpectralDecompositionDataPointsFilter;
+	typedef ::SymmetryDataPointsFilter<T> SymmetryDataPointsFilter;
 }; // DataPointsFiltersImpl
 
 #endif // __POINTMATCHER_DATAPOINTSFILTERS_H
