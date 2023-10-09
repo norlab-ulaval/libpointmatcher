@@ -5,6 +5,7 @@
 #include "Symmetry.h"
 #include "MatchersImpl.h"
 #include "Eigen/Eigenvalues"
+#include <unordered_map>
 
 // Distribution
 //Constructor
