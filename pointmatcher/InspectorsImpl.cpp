@@ -207,6 +207,14 @@ void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& d
 		{
 			buildTensorStream(stream, "eigVectors", data);
 		}
+		else if(it->text == "deviation")
+		{
+			buildTensorStream(stream, "deviation", data);
+		}
+		else if(it->text == "omega")
+		{
+			buildScalarStream(stream, "omega", data);
+		}
 		else if(it->text == "color")
 		{
 			buildColorStream(stream, "color", data);
