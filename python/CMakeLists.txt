@@ -79,6 +79,7 @@ set(PYBIND11_SOURCES
     datapointsfilters/simple_sensor_noise.cpp
     datapointsfilters/sphericality.cpp
     datapointsfilters/surface_normal.cpp
+    datapointsfilters/symmetry.cpp
 
     modules/point_matcher_module.cpp
     modules/point_matcher_support_module.cpp
