@@ -127,6 +127,9 @@ endif()
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
+option(Boost_USE_STATIC_LIBS "Use static Boost build, requires Boost library to be built from source with -fPIC flag" OFF)
+
+
 find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time)
 if (Boost_MINOR_VERSION GREATER 47)
 	find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time chrono)
@@ -365,7 +368,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Sphericality.cpp
 	pointmatcher/DataPointsFilters/Saliency.cpp
 	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp
-	pointmatcher/DataPointsFilters/Symmetry.cpp)
+)
 
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
