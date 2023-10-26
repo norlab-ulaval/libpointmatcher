@@ -127,7 +127,8 @@ endif()
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
-set(Boost_USE_STATIC_LIBS  ON)
+option(Boost_USE_STATIC_LIBS "Use static Boost build, requires Boost library to be built from source with -fPIC flag" OFF)
+
 
 find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time)
 if (Boost_MINOR_VERSION GREATER 47)
