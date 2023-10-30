@@ -266,6 +266,7 @@ jobs:
             -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 \
             -DBUILD_PYTHON_MODULE:BOOL=ON \
             -DUSE_OPEN_MP:BOOL=ON \
+            -DBoost_USE_STATIC_LIBS=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -S . -B ${{ env.BUILD_DIR }}
           sudo cmake --build ${{ env.BUILD_DIR }} --target install
@@ -280,6 +281,7 @@ jobs:
             -DLIBNABO_INSTALL_DIR:PATH="${{ env.LIBNABO_INSTALL_PATH }}" `
             -Dpybind11_DIR:PATH="${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11" `
             -DBUILD_PYTHON_MODULE:BOOL=ON `
+            -DBoost_USE_STATIC_LIBS=ON `
             -DPYTHON_INSTALL_TARGET:PATH="./python/${{ env.PYTHON_PACKAGE_NAME }}" `
             -DVCPKG_TARGET_TRIPLET="x64-windows-static" `
             -DUSE_OPEN_MP:BOOL=ON `
