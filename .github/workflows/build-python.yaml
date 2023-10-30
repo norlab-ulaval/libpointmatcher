@@ -294,11 +294,14 @@ jobs:
         run: |
           python -m build --wheel --no-isolation --outdir ${{ env.PYTHON_WHEEL_DIR }}
 
-      - name: Test package
+      - name: Install package
         working-directory: ./python
         run: |
           pip install ${{ env.PYTHON_WHEEL_DIR }}/*.whl
-          python -c "from pypointmatcher import *"
+      
+      - name: Test import
+        working-directory: ${{ runner.temp }}
+        run: python -c "from pypointmatcher import *"
 
       - name: Upload python wheel
         uses: actions/upload-artifact@v3

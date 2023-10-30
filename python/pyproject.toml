@@ -7,7 +7,9 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
+dynamic = ["version"]
 name = "pypointmatcher"
+dependencies = ["numpy>=1.20"]
 classifiers = [
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3"
