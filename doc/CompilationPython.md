@@ -129,6 +129,8 @@ cmake -DBUILD_PYTHON_MODULE=ON ..
 
 Everything is now set up to proceed to the compilation and the installation.
 
+> **Note** *If you want to compile boost with static linkage, then make sure that it was compiled with position independent code. pybind compiles dynamic library. Static linking in dynamic library can be done if the static library was compiled with position independent code.* 
+
 ## Compilation
 
 Now, to compile pypointmatcher into the `build/` directory, run the following command:
