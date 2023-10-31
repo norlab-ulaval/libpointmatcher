@@ -9,26 +9,25 @@ This tutorial presents the different steps of compiling *pypointmatcher*, the li
 
 To get started, you will need the same prerequisites as libpointmatcher, but also some additional dependencies as listed here:
 
-| Name             | Version <br> (Tested August 2020 on Ubuntu 18.04) |
-| :--------------- | :-----------------------------------------------: |
-| pybind11         |                       2.5.0                       |
-| Python3          |                       3.6.9                       |
-|                  |                                                   |
-| **Dependencies** |                                                   |
-| python3-dev      |                       3.6.7                       |
-| catch            |                      1.10.0                       |
-| pytest           |                       5.4.3                       |
+| Name             | Version <br> (Tested October 2023 on Ubuntu 22.04) |
+| :--------------- |:--------------------------------------------------:|
+| pybind11         |                       2.5.0                        |
+| Python3          |                      3.10.12                       |
+|                  |                                                    |
+| **Dependencies** |                                                    |
+| python3-dev      |                       3.10.6                       |
+| catch            |                       1.12.1                       |
+| pytest           |                       7.4.2                        |
 
-`pytest` needs to be installed with `pip`:
+> ***Note:*** *This guide assumes you're using a virtual python environment. For this, you can use the [virtualenv tool](https://virtualenv.pypa.io/en/stable/). If you are not familiar with Python virtual environments, you can [read this tutorial](https://realpython.com/python-virtual-environments-a-primer/), which explains very well the reasons for using a virtual environment, or [watch this video tutorial](https://youtu.be/nnhjvHYRsmM)*
+
+Install `pytest` with `pip`:
 
 ```bash
-pip3 install pytest wheel
-
-# If you have multiple installed versions of python3 :
-# python3.6 -m pip install pytest
+pip3 install pytest wheel build
 ```
 
-But `catch` and `python3-dev` need to be installed with a package manager:
+And `catch` and `python3-dev` with your package manager:
 
 *Ubuntu users:*
 
@@ -52,7 +51,7 @@ pybind11 is a library used to create Python bindings of existing C++ code and vi
 
 The very first step is to clone [pybind11](https://github.com/pybind/pybind11) into a directory of your choice.
 
-At the moment, pypointmatcher can only be compiled with **version 2.5.0** of pybind11. To install the right version, run the following commands:
+At the moment, pypointmatcher is only tested for compilation with **version 2.5.0** of pybind11. To install the right version, run the following commands:
 
 ```bash
 cd pybind11
@@ -115,9 +114,7 @@ Once this is done, return to libpointmatcher's `build/` directory.
 
 You're now ready to proceed to the [configuration step](#configuration).
 
-## Configuring the variables <a name="configuration"></a>
-
-> ***Note:*** *It is recommended to create a virtual environment before proceeding with the next steps. For this, you can use the [virtualenv tool](https://virtualenv.pypa.io/en/stable/). If you are not familiar with Python virtual environments, you can [read this tutorial](https://realpython.com/python-virtual-environments-a-primer/), which explains very well the reasons for using a virtual environment, or [watch this video tutorial](https://youtu.be/nnhjvHYRsmM)*
+### Configuring the variables <a name="configuration"></a>
 
 #### Enabling the compilation
 
@@ -136,32 +133,22 @@ Everything is now set up to proceed to the compilation and the installation.
 Now, to compile pypointmatcher into the `build/` directory, run the following command:
 
 ```bash
-cmake --build . -j N --target install
+make -j 4
+sudo make install
 ```
-
-where `N` is the number of jobs (or threads) you allow at once on your computer for the compilation. If `-j` is omitted the native build tool's default number is used.
-
-> ***Note:*** *Depending on your system, the compilation can take quite some time, so consider leaving the `-j` command with no argument in order to speed up this step.*
 
 ## Installation
 
-And finally, to install the module on your system, run the following command:
-
-```console
-pip install build
-```
-
-Return to the `python` directory:
+To install the module on your system, first open the `python` directory:
 ```console
 cd  <my-project-folder>/libpointmatcher/python
-python -m build --wheel --no-isolation --outdir  ./dist
-
-pip install ./dist/pypointmatcher-*.whl
 ```
-
-**`python -m build` will lead to error**
-
-Check that all working:
+and install the bindings through pip:
+```console
+python3 -m build --wheel --no-isolation --outdir /tmp/libpointmatcher
+pip3 install /tmp/libpointmatcher/pypointmatcher-*.whl
+```
+Finally, verify that `pypointmatcher` can be imported as a regular Python package:
 ```
 python -c "from pypointmatcher import *"
 ```
