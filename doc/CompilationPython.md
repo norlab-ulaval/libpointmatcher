@@ -41,6 +41,12 @@ sudo apt install catch python3-dev
 brew install catch2
 ```
 
+#### Case-sensitivity
+Note that to build pypointmatcher, your filesystem must be case-sensitive.
+This applies especially to MacOS, where the APFS is case-insensitive for legacy reasons.
+To overcome this, open `Disk Utility` and add a new case-sensitive APFS volume to your container.
+Then, move libpointmatcher to the new volume.
+
 The rest of this tutorial will guide you through the necessary steps to compile pypointmatcher.
 
 ## pybind11
