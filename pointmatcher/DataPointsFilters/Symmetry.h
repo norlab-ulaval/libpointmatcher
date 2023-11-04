@@ -10,7 +10,7 @@
 #include "Eigen/Eigenvalues"
 #include "PointMatcher.h"
 
-//! TODO
+
 template<typename T>
 struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
@@ -68,7 +68,7 @@ struct Distribution {
     Vector point;
     T omega;
     Matrix deviation;
-    T volume;
+    T volume = -1;
 
     Distribution(Vector point, T  omega, Matrix deviation);
     static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2)
@@ -91,12 +91,18 @@ struct Distribution {
         volume = (2. * 1.73 * eigenVa.cwiseSqrt()).prod();
     }
 
-public: T getVolume()
+public:
+    T getVolume()
     {
         if(volume == -1) {
             computeVolume();
         }
         return volume;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Distribution& distribution)
+    {
+        return os << "Point:\n" << distribution.point << "\nOmega:\n" << distribution.omega << "\nDeviation:\n" << distribution.deviation << '\n';
     }
 };
 
