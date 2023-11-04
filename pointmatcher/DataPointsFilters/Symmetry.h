@@ -9,12 +9,13 @@
 
 #include "Eigen/Eigenvalues"
 #include "PointMatcher.h"
+#include "MatchersImpl.h"
 
 
 template<typename T>
 struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
-
+    typedef PointMatcher<T> PM;
     typedef PointMatcherSupport::Parametrizable Parametrizable;
     typedef PointMatcherSupport::Parametrizable P;
     typedef Parametrizable::Parameters Parameters;
@@ -27,6 +28,9 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	typedef typename PointMatcher<T>::Matrix Matrix;
 
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
+
+	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
+	typedef typename PointMatcher<T>::Matches Matches;
 
 	using Matrix33 = Eigen::Matrix<T, 3, 3>;
 
@@ -50,6 +54,8 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	const T dt;
 	const T ct;
 	const unsigned knn;
+
+    const float sigmaLaser = 0.0009;
 
 	//! Constructor, uses parameter interface
 	SymmetryDataPointsFilter(const Parameters& params = Parameters());
