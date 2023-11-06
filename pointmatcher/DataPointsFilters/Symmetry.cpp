@@ -9,7 +9,7 @@
 // Distribution
 //Constructor
 template<typename T>
-Distribution<T>::Distribution(Distribution::Vector point, T omega, Distribution::Matrix deviation):
+Distribution<T>::Distribution(Distribution::Vector point, T omega, Distribution::Matrix33 deviation):
     point(point),
     omega(omega),
     deviation(deviation)
@@ -261,7 +261,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
     {
         out.features.col(ctr).head(3) = distro.point;
         omegas(0, ctr) = distro.omega;
-        deviations.col(ctr) = distro.deviation;
+        deviations.col(ctr) = distro.deviation.reshaped(9, 1);
         ctr += 1;
     }
 
@@ -396,7 +396,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
     {
         out.features.col(ctr).head(3) = distro.point;
         omegas(0, ctr) = distro.omega;
-        deviations.col(ctr) = distro.deviation;
+        deviations.col(ctr) = distro.deviation.reshaped(9, 1);
         ctr += 1;
     }
 

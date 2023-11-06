@@ -69,14 +69,15 @@ template<typename T>
 struct Distribution {
 
 	typedef typename PointMatcher<T>::Vector Vector;
-	typedef typename PointMatcher<T>::Matrix Matrix;
+
+	using Matrix33 = Eigen::Matrix<T, 3, 3>;
 
     Vector point;
     T omega;
-    Matrix deviation;
+    Matrix33 deviation;
     T volume = -1;
 
-    Distribution(Vector point, T  omega, Matrix deviation);
+    Distribution(Vector point, T  omega, Matrix33 deviation);
     static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2)
     {
         T omega_12 = distro1.omega + distro2.omega;
@@ -84,7 +85,7 @@ struct Distribution {
         Vector delta = distro1.point - distro2.point;
 
         Vector mu_12 = distro2.point + omega_12_inv * distro1.omega * delta;
-        Matrix deviation_12 = distro1.deviation + distro2.deviation
+        Matrix33 deviation_12 = distro1.deviation + distro2.deviation
                 + omega_12_inv * distro1.omega * distro2.omega * (delta * delta.transpose());
         return Distribution<T>(mu_12, omega_12, deviation_12);
     }
@@ -92,7 +93,7 @@ struct Distribution {
     void computeVolume()
     {
         auto covariance = deviation / omega;
-        const Eigen::EigenSolver<Matrix> solver(covariance);
+        const Eigen::EigenSolver<Matrix33> solver(covariance);
         auto eigenVa = solver.eigenvalues().real();
         volume = (2. * 1.73 * eigenVa.cwiseSqrt()).prod();
     }
