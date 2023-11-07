@@ -40,7 +40,7 @@ struct Distribution {
     void computeVolume()
     {
         auto covariance = deviation / omega;
-        const Eigen::EigenSolver<Matrix33> solver(covariance);
+        const Eigen::SelfAdjointEigenSolver<Matrix33> solver(covariance);
         auto eigenVa = solver.eigenvalues().real();
         volume = (2. * 1.73 * eigenVa.cwiseSqrt()).prod();
     }
@@ -79,8 +79,6 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
 	typedef typename PointMatcher<T>::Matches Matches;
-
-	using Matrix33 = Eigen::Matrix<T, 3, 3>;
 
 	inline static const std::string description()
 	{
