@@ -10,7 +10,55 @@
 #include "Eigen/Eigenvalues"
 #include "PointMatcher.h"
 #include "MatchersImpl.h"
+#include "vector"
 
+template<typename T>
+struct Distribution {
+
+	typedef typename PointMatcher<T>::Vector Vector;
+
+	using Matrix33 = Eigen::Matrix<T, 3, 3>;
+
+    Vector point;
+    T omega;
+    Matrix33 deviation;
+    T volume = -1;
+
+    Distribution(Vector point, T  omega, Matrix33 deviation);
+    static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2)
+    {
+        T omega_12 = distro1.omega + distro2.omega;
+        T omega_12_inv = 1. / omega_12;
+        Vector delta = distro1.point - distro2.point;
+
+        Vector mu_12 = distro2.point + omega_12_inv * distro1.omega * delta;
+        Matrix33 deviation_12 = distro1.deviation + distro2.deviation
+                + omega_12_inv * distro1.omega * distro2.omega * (delta * delta.transpose());
+        return Distribution<T>(mu_12, omega_12, deviation_12);
+    }
+
+    void computeVolume()
+    {
+        auto covariance = deviation / omega;
+        const Eigen::EigenSolver<Matrix33> solver(covariance);
+        auto eigenVa = solver.eigenvalues().real();
+        volume = (2. * 1.73 * eigenVa.cwiseSqrt()).prod();
+    }
+
+public:
+    T getVolume()
+    {
+        if(volume == -1) {
+            computeVolume();
+        }
+        return volume;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Distribution& distribution)
+    {
+        return os << "Point:\n" << distribution.point << "\nOmega:\n" << distribution.omega << "\nDeviation:\n" << distribution.deviation << '\n';
+    }
+};
 
 template<typename T>
 struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
@@ -61,56 +109,10 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	SymmetryDataPointsFilter(const Parameters& params = Parameters());
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
-    void symmetrySampling(DataPoints& cloud);
-    void overlapSampling(DataPoints& cloud);
-};
-
-template<typename T>
-struct Distribution {
-
-	typedef typename PointMatcher<T>::Vector Vector;
-
-	using Matrix33 = Eigen::Matrix<T, 3, 3>;
-
-    Vector point;
-    T omega;
-    Matrix33 deviation;
-    T volume = -1;
-
-    Distribution(Vector point, T  omega, Matrix33 deviation);
-    static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2)
-    {
-        T omega_12 = distro1.omega + distro2.omega;
-        T omega_12_inv = 1. / omega_12;
-        Vector delta = distro1.point - distro2.point;
-
-        Vector mu_12 = distro2.point + omega_12_inv * distro1.omega * delta;
-        Matrix33 deviation_12 = distro1.deviation + distro2.deviation
-                + omega_12_inv * distro1.omega * distro2.omega * (delta * delta.transpose());
-        return Distribution<T>(mu_12, omega_12, deviation_12);
-    }
-
-    void computeVolume()
-    {
-        auto covariance = deviation / omega;
-        const Eigen::EigenSolver<Matrix33> solver(covariance);
-        auto eigenVa = solver.eigenvalues().real();
-        volume = (2. * 1.73 * eigenVa.cwiseSqrt()).prod();
-    }
-
-public:
-    T getVolume()
-    {
-        if(volume == -1) {
-            computeVolume();
-        }
-        return volume;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Distribution& distribution)
-    {
-        return os << "Point:\n" << distribution.point << "\nOmega:\n" << distribution.omega << "\nDeviation:\n" << distribution.deviation << '\n';
-    }
+    void symmetrySampling(std::vector<std::shared_ptr<Distribution<T>>>& distributions);
+    void overlapSampling(std::vector<std::shared_ptr<Distribution<T>>>& distributions);
+    std::vector<std::shared_ptr<Distribution<T>>> getDistributionsFromCloud(DataPoints& cloud);
+    DataPoints getCloudFromDistributions(std::vector<std::shared_ptr<Distribution<T>>>& distributions);
 };
 
 #endif //LIBPOINTMATCHER_SYMMETRY_H
