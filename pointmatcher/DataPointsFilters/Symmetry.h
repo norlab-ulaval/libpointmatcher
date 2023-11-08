@@ -93,7 +93,7 @@ struct Distribution {
     void computeVolume()
     {
         auto covariance = deviation / omega;
-        const Eigen::EigenSolver<Matrix33> solver(covariance);
+        const Eigen::SelfAdjointEigenSolver<Matrix33> solver(covariance);
         auto eigenVa = solver.eigenvalues().real();
         volume = (2. * 1.73 * eigenVa.cwiseSqrt()).prod();
     }
