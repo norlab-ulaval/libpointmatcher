@@ -91,13 +91,13 @@ void SymmetryDataPointsFilter<T>::inPlaceFilter(
             overlapSampling(distributions);
         }
         auto number_of_points_after_sampling = static_cast<float>(distributions.size());
+        std::cout << "Down to " << number_of_points_after_sampling << " points\n";
         if(number_of_points_after_sampling / number_of_points_before_sampling < ct)
         {
             if(updated_ctr == 0)
             {
                 updated_ctr = 2;
             }
-            std::cout << "Down to " << number_of_points_after_sampling << " points\n";
         }
         else
         {
@@ -133,7 +133,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
 
     for(int i = 0; i < pointsCount; ++i)
     {
-        if(masks_all(i) == 0)
+        if(masks_all(i) != 1)
         {
             continue;
         }
@@ -147,7 +147,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
 
             unsigned m = matches.ids(j, i);
 
-            if(masks_all(m) == 0)
+            if(masks_all(m) != 1)
             {
                 continue;
             }
@@ -164,7 +164,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
                     continue;
                 }
                 unsigned neighbor_idx = matches.ids(k, i);
-                if(masks_all(neighbor_idx) == 0)
+                if(masks_all(neighbor_idx) != 1)
                 {
                     continue;
                 }
@@ -208,12 +208,19 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
     }
 
     std::vector<std::shared_ptr<Distribution<T>>> distributions_out;
+    std::vector<std::shared_ptr<Distribution<T>>> distributions_out_unused;// TODO this is only needed for testing, to preserve the same order of elements as in the Rust code
     for(int i = 0; i < distributions.size(); ++i)
     {
-        if (masks_all(i) != 0) {
+        if (masks_all(i) == 1) {
+            distributions_out_unused.push_back(distributions[i]);
+        }
+        if (masks_all(i) == 2) {
             distributions_out.push_back(distributions[i]);
         }
     }
+    distributions_out.insert(distributions_out.end(),
+                                      std::make_move_iterator(distributions_out_unused.begin()),
+                                      std::make_move_iterator(distributions_out_unused.end()));
     distributions = distributions_out;
 }
 
@@ -231,7 +238,6 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
     boost::assign::insert(param)("knn", toParam(knn));
     auto cloud = getCloudFromDistributions(distributions);
 
-//    auto cloud = getCloudFromDistributions(distributions);
     // Build kd-tree
     KDTreeMatcher matcher(param);
     matcher.init(cloud);
@@ -243,7 +249,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
     for(int i = 0; i < pointsCount; ++i)
     {
-        if(masks_all(i) == 0)
+        if(masks_all(i) != 1)
         {
             continue;
         }
@@ -260,7 +266,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
             unsigned m = matches.ids(j, i);
 
-            if(masks_all(m) == 0)
+            if(masks_all(m) != 1)
             {
                 continue;
             }
@@ -274,6 +280,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
             if(ratio < vro)
             {
+//                std::cout << ratio << std::endl;
                 masks_all(m) = 0;
                 was_overlap = true;
                 distro1 = std::make_shared<Distribution<T>>(distro_c);
@@ -288,12 +295,19 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
     }
 
     std::vector<std::shared_ptr<Distribution<T>>> distributions_out;
+    std::vector<std::shared_ptr<Distribution<T>>> distributions_out_unused; // TODO this is only needed for testing, to preserve the same order of elements as in the Rust code
     for(int i = 0; i < distributions.size(); ++i)
     {
-        if (masks_all(i) != 0) {
+        if (masks_all(i) == 1) {
+            distributions_out_unused.push_back(distributions[i]);
+        }
+        if (masks_all(i) == 2) {
             distributions_out.push_back(distributions[i]);
         }
     }
+    distributions_out.insert(distributions_out.end(),
+                                      std::make_move_iterator(distributions_out_unused.begin()),
+                                      std::make_move_iterator(distributions_out_unused.end()));
     distributions = distributions_out;
 }
 
