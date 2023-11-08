@@ -16,7 +16,6 @@ template<typename T>
 struct Distribution {
 
 	typedef typename PointMatcher<T>::Vector Vector;
-
 	using Matrix33 = Eigen::Matrix<T, 3, 3>;
 
     Vector point;

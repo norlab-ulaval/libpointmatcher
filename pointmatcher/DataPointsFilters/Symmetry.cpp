@@ -118,7 +118,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
     const int pointsCount(distributions.size());
 
     Parametrizable::Parameters param;
-    boost::assign::insert(param)("knn", toParam(knn));
+    boost::assign::insert(param)("knn", toParam(std::min(knn, (unsigned) distributions.size())));
 
     auto cloud = getCloudFromDistributions(distributions);
 
@@ -157,7 +157,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
             bool was_merge = false;
 
             boost::optional<Distribution<T>> combined_distro;
-            for(int k = j + 1; k < knn; ++k)
+            for(unsigned k = j + 1; k < knn; ++k)
             {
                 if(matches.dists(k, i) == Matches::InvalidDist || matches.ids(k, i) == Matches::InvalidId)
                 {
@@ -209,7 +209,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
 
     std::vector<std::shared_ptr<Distribution<T>>> distributions_out;
     std::vector<std::shared_ptr<Distribution<T>>> distributions_out_unused;// TODO this is only needed for testing, to preserve the same order of elements as in the Rust code
-    for(int i = 0; i < distributions.size(); ++i)
+    for(unsigned i = 0; i < distributions.size(); ++i)
     {
         if (masks_all(i) == 1) {
             distributions_out_unused.push_back(distributions[i]);
@@ -235,7 +235,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
     const int pointsCount(distributions.size());
 
     Parametrizable::Parameters param;
-    boost::assign::insert(param)("knn", toParam(knn));
+    boost::assign::insert(param)("knn", toParam(std::min(knn, (unsigned) distributions.size())));
     auto cloud = getCloudFromDistributions(distributions);
 
     // Build kd-tree
@@ -296,7 +296,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
     std::vector<std::shared_ptr<Distribution<T>>> distributions_out;
     std::vector<std::shared_ptr<Distribution<T>>> distributions_out_unused; // TODO this is only needed for testing, to preserve the same order of elements as in the Rust code
-    for(int i = 0; i < distributions.size(); ++i)
+    for(unsigned i = 0; i < distributions.size(); ++i)
     {
         if (masks_all(i) == 1) {
             distributions_out_unused.push_back(distributions[i]);
@@ -328,7 +328,7 @@ typename PointMatcher<T>::DataPoints SymmetryDataPointsFilter<T>::getCloudFromDi
     BOOST_AUTO(omegas, out.getDescriptorViewByName("omega"));
     BOOST_AUTO(deviations, out.getDescriptorViewByName("deviation"));
 
-    // TODO copy existing descriptors
+    // TODO copy existing descriptors and times
     unsigned ctr = 0;
     out.features.row(3).setOnes();
     for(const auto &distro: distributions)
@@ -349,7 +349,7 @@ std::vector<std::shared_ptr<Distribution<T>>> SymmetryDataPointsFilter<T>::getDi
     auto points = cloud.features;
     auto omegas = cloud.getDescriptorViewByName("omega");
     auto deviations = cloud.getDescriptorViewByName("deviation");
-    for(int i = 0; i < cloud.getNbPoints(); ++i)
+    for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
     {
         distributions.emplace_back(new Distribution<T>(points.col(i).head(3),
                                                        omegas(0, i),
