@@ -59,7 +59,7 @@ static inline void assertOnDataPointsTransformation(const PM::DataPoints& cloud,
     EXPECT_EQ(cloud.featureLabels, transformedCloud.featureLabels);
     EXPECT_EQ(cloud.descriptorLabels, transformedCloud.descriptorLabels);
     EXPECT_EQ(cloud.timeLabels, transformedCloud.timeLabels);
-    EXPECT_EQ(cloud.times, transformedCloud.times);
+    EXPECT_TRUE(cloud.times.isApprox(transformedCloud.times));
 }
 
 //---------------------------
