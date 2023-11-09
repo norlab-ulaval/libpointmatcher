@@ -30,7 +30,7 @@ struct Distribution {
     DescriptorsViewBlock descriptors;
 
     Distribution(Vector point, T  omega, Matrix33 deviation, TimeViewBlock times, DescriptorsViewBlock descriptors);
-    static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2)
+    static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2, unsigned n=2)
     {
         T omega_12 = distro1.omega + distro2.omega;
         T omega_12_inv = 1. / omega_12;
@@ -40,17 +40,13 @@ struct Distribution {
         Matrix33 deviation_12 = distro1.deviation + distro2.deviation
                 + omega_12_inv * distro1.omega * distro2.omega * (delta * delta.transpose());
 
-//        PM::Int64Matrix times_combined = PM::Int64Matrix::Ones(3, 1);
-        auto times_combined = ((distro1.times + distro2.times) / 2).eval();
-        auto descriptors_combined = ((distro1.descriptors + distro2.descriptors) / 2).eval();
-//        Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> descriptors_combined = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Ones(3, 1);
-//        std::cout << times_combined << "\n---\n";
-//        std::cout << descriptors_combined << "\n\n";
+        TimeViewBlock times_combined = (distro2.times + (n-1) * distro1.times).eval();
+        times_combined = times_combined.array() / n;
+        DescriptorsViewBlock descriptors_combined = (distro2.descriptors + (n-1) * distro1.descriptors).eval();
+        descriptors_combined = descriptors_combined.array() / n;
         Distribution<T> distro_out = Distribution<T>(mu_12, omega_12, deviation_12,
                                times_combined,
                                descriptors_combined);
-//        std::cout << distro_out.times << "\n---\n";
-//        std::cout << distro_out.descriptors << "\n\n";
         return distro_out;
     }
 

@@ -194,10 +194,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
             {
                 masks_all(i) = 2;
                 mergedIndexes.push_back(i);
-                Distribution<T> new_distro = Distribution<T>::combineDistros(*distro1, *combined_distro);
-                mergeTimesDescriptors(distributions, mergedIndexes);
-                new_distro.setDescriptors(distributions[i]->descriptors);
-                new_distro.setTimes(distributions[i]->times);
+                Distribution<T> new_distro = Distribution<T>::combineDistros(*combined_distro, *distro1, 3);
                 distributions[i] = std::make_shared<Distribution<T>>(new_distro);
             }
 
@@ -277,7 +274,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
             }
             auto distro2 = distributions[m];
 
-            Distribution<T> distro_c = Distribution<T>::combineDistros(*distro1, *distro2);
+            Distribution<T> distro_c = Distribution<T>::combineDistros(*distro2, *distro1, 2);
 
             float volume_c = distro_c.getVolume();
             float sum_of_volumes = distro1->getVolume() + distro2->getVolume();
@@ -288,8 +285,6 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
                 masks_all(m) = 0;
                 mergedIndexes.push_back(m);
                 was_overlap = true;
-                distro_c.setDescriptors(distro1->descriptors);
-                distro_c.setTimes(distro1->times);
                 distro1 = std::make_shared<Distribution<T>>(distro_c);
             }
         }
@@ -298,9 +293,6 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
         {
             masks_all(i) = 2;
             mergedIndexes.push_back(i);
-            mergeTimesDescriptors(distributions, mergedIndexes);
-            distro1->descriptors = distributions[i]->descriptors;
-            distro1->times = distributions[i]->times;
             distributions[i] = distro1;
         }
     }
