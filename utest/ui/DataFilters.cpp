@@ -956,8 +956,8 @@ TEST_F(DataFilterTest, SymmetryDataPointsFilter)
 	using DPFiltersPtr = std::shared_ptr<PM::DataPointsFilter>;
 
 	// Test with point cloud
-	DP cloud = generateRandomDataPoints(1000);
-    cloud.features *= 1.5;
+	DP cloud = generateRandomDataPoints(30000);
+    cloud.features *= 2.5;
     cloud.descriptors = PM::Matrix::Ones(cloud.descriptors.rows(), cloud.descriptors.cols());
     cloud.times = PM::Int64Matrix::Ones(cloud.times.rows(), cloud.times.cols());
 
