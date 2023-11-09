@@ -950,3 +950,46 @@ TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 	addFilter("SpectralDecompositionDataPointsFilter", params);
 	validate3dTransformation();
 }
+
+TEST_F(DataFilterTest, SymmetryDataPointsFilter)
+{
+	using DPFiltersPtr = std::shared_ptr<PM::DataPointsFilter>;
+
+	// Test with point cloud
+	DP cloud = generateRandomDataPoints(30000);
+    cloud.features *= 2.5;
+    cloud.descriptors = PM::Matrix::Ones(cloud.descriptors.rows(), cloud.descriptors.cols());
+    cloud.times = PM::Int64Matrix::Ones(cloud.times.rows(), cloud.times.cols());
+
+	// This filter creates descriptors
+	params = PM::Parameters();
+		params["vrs"] = "5.0";
+		params["vro"] = "1.025";
+		params["dt"] = "0.025";
+		params["ct"] = "0.95";
+		params["knn"] = "10";
+
+	DPFiltersPtr symmetryFilter = PM::get().DataPointsFilterRegistrar.create(
+		"SymmetryDataPointsFilter", params
+	);
+
+	DP filteredCloud = symmetryFilter->filter(cloud);
+	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	EXPECT_EQ(cloud.getDescriptorDim()+1+9, filteredCloud.getDescriptorDim()); // we add omega and deviation
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+    EXPECT_TRUE(cloud.descriptors.isApprox(PM::Matrix::Ones(cloud.descriptors.rows(), cloud.descriptors.cols())));
+    EXPECT_TRUE(cloud.times.isApprox(PM::Int64Matrix::Ones(cloud.times.rows(), cloud.times.cols())));
+
+    filteredCloud.save("/Users/mbo/Desktop/out.vtk");
+
+	params = PM::Parameters();
+		params["vrs"] = "5.0";
+		params["vro"] = "1.025";
+		params["dt"] = "0.05";
+		params["ct"] = "0.95";
+		params["knn"] = "10";
+
+	addFilter("SymmetryDataPointsFilter", params);
+	validate3dTransformation();
+}
