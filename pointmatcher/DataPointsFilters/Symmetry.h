@@ -12,18 +12,25 @@
 #include "MatchersImpl.h"
 #include "vector"
 
+typedef PointMatcher<float> PM;
+typedef PM::DataPoints DP;
+
 template<typename T>
 struct Distribution {
 
 	typedef typename PointMatcher<T>::Vector Vector;
+    typedef typename Eigen::Ref<PM::Int64Matrix> TimeViewBlock;
+    typedef typename Eigen::Ref<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> DescriptorsViewBlock;
 	using Matrix33 = Eigen::Matrix<T, 3, 3>;
 
     Vector point;
     T omega;
     Matrix33 deviation;
     T volume = -1;
+    TimeViewBlock times;
+    DescriptorsViewBlock descriptors;
 
-    Distribution(Vector point, T  omega, Matrix33 deviation);
+    Distribution(Vector point, T  omega, Matrix33 deviation, const TimeViewBlock &times, const DescriptorsViewBlock &descriptors);
     static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2)
     {
         T omega_12 = distro1.omega + distro2.omega;
@@ -33,7 +40,10 @@ struct Distribution {
         Vector mu_12 = distro2.point + omega_12_inv * distro1.omega * delta;
         Matrix33 deviation_12 = distro1.deviation + distro2.deviation
                 + omega_12_inv * distro1.omega * distro2.omega * (delta * delta.transpose());
-        return Distribution<T>(mu_12, omega_12, deviation_12);
+
+        return Distribution<T>(mu_12, omega_12, deviation_12,
+                               distro1.times,
+                               distro1.descriptors); // TODO replace distro1 data by average values
     }
 
     void computeVolume()
@@ -45,6 +55,14 @@ struct Distribution {
     }
 
 public:
+    void setTimes(const TimeViewBlock& times_in) {
+        times = times_in;
+    }
+
+    void setDescriptors(const DescriptorsViewBlock& descriptors_in) {
+        descriptors = descriptors_in;
+    }
+
     T getVolume()
     {
         if(volume == -1) {
@@ -109,7 +127,9 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
     void symmetrySampling(std::vector<std::shared_ptr<Distribution<T>>>& distributions);
     void overlapSampling(std::vector<std::shared_ptr<Distribution<T>>>& distributions);
     std::vector<std::shared_ptr<Distribution<T>>> getDistributionsFromCloud(DataPoints& cloud);
-    DataPoints getCloudFromDistributions(std::vector<std::shared_ptr<Distribution<T>>>& distributions);
+    DataPoints getCloudFromDistributions(const DataPoints& in_cloud, std::vector<std::shared_ptr<Distribution<T>>>& distributions);
+    DataPoints getPointsFromDistributions(std::vector<std::shared_ptr<Distribution<T>>>& distributions);
+    void mergeTimesDescriptors(std::vector<std::shared_ptr<Distribution<T>>>& distributions, const std::vector<unsigned>& indexesToMerge);
 };
 
 #endif //LIBPOINTMATCHER_SYMMETRY_H

@@ -9,11 +9,14 @@
 // Distribution
 //Constructor
 template<typename T>
-Distribution<T>::Distribution(Distribution::Vector point, T omega, Distribution::Matrix33 deviation):
+Distribution<T>::Distribution(Vector point, T  omega, Matrix33 deviation, const TimeViewBlock &times, const DescriptorsViewBlock &descriptors):
         point(point),
         omega(omega),
-        deviation(deviation)
-{}
+        deviation(deviation),
+        times(times),
+        descriptors(descriptors)
+{
+}
 
 // SymmetryDataPointsFilter
 // Constructor
@@ -104,7 +107,7 @@ void SymmetryDataPointsFilter<T>::inPlaceFilter(
             std::cout << "Almost no points removed\n";
         }
     }
-    cloud = getCloudFromDistributions(distributions);
+    cloud = getCloudFromDistributions(cloud, distributions);
 }
 
 template<typename T>
@@ -120,7 +123,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
     Parametrizable::Parameters param;
     boost::assign::insert(param)("knn", toParam(std::min(knn, (unsigned) distributions.size())));
 
-    auto cloud = getCloudFromDistributions(distributions);
+    auto cloud = getPointsFromDistributions(distributions);
 
     // Build kd-tree
     KDTreeMatcher matcher(param);
@@ -138,6 +141,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
             continue;
         }
         auto distro1 = distributions[i];
+        std::vector<unsigned> mergedIndexes;
         for(int j = 1; j < int(knn); ++j) // index from 1 to skip self-match
         {
             if(matches.dists(j, i) == Matches::InvalidDist || matches.ids(j, i) == Matches::InvalidId)
@@ -189,6 +193,8 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
                         masks_all(neighbor_idx) = 0;
                         was_merge = true;
                         combined_distro = distro_c;
+                        mergedIndexes.push_back(m);
+                        mergedIndexes.push_back(neighbor_idx);
                         break;
                     }
                 }
@@ -196,7 +202,11 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
             if(combined_distro)
             {
                 masks_all(i) = 2;
+                mergedIndexes.push_back(i);
                 Distribution<T> new_distro = Distribution<T>::combineDistros(*distro1, *combined_distro);
+                mergeTimesDescriptors(distributions, mergedIndexes);
+                new_distro.setDescriptors(distributions[i]->descriptors);
+                new_distro.setTimes(distributions[i]->times);
                 distributions[i] = std::make_shared<Distribution<T>>(new_distro);
             }
 
@@ -236,7 +246,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
     Parametrizable::Parameters param;
     boost::assign::insert(param)("knn", toParam(std::min(knn, (unsigned) distributions.size())));
-    auto cloud = getCloudFromDistributions(distributions);
+    auto cloud = getPointsFromDistributions(distributions);
 
     // Build kd-tree
     KDTreeMatcher matcher(param);
@@ -257,6 +267,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
         auto distro1 = distributions[i];
 
         bool was_overlap = false;
+        std::vector<unsigned> mergedIndexes;
         for(int j = 1; j < int(knn); ++j) // index from 1 to skip self-match
         {
             if(matches.dists(j, i) == Matches::InvalidDist || matches.ids(j, i) == Matches::InvalidId)
@@ -280,9 +291,11 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
             if(ratio < vro)
             {
-//                std::cout << ratio << std::endl;
                 masks_all(m) = 0;
+                mergedIndexes.push_back(m);
                 was_overlap = true;
+                distro_c.setDescriptors(distro1->descriptors);
+                distro_c.setTimes(distro1->times);
                 distro1 = std::make_shared<Distribution<T>>(distro_c);
             }
         }
@@ -290,6 +303,10 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
         if(was_overlap)
         {
             masks_all(i) = 2;
+            mergedIndexes.push_back(i);
+            mergeTimesDescriptors(distributions, mergedIndexes);
+            distro1->descriptors = distributions[i]->descriptors;
+            distro1->times = distributions[i]->times;
             distributions[i] = distro1;
         }
     }
@@ -313,6 +330,33 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
 template<typename T>
 typename PointMatcher<T>::DataPoints SymmetryDataPointsFilter<T>::getCloudFromDistributions(
+        const DataPoints& in_cloud, std::vector<std::shared_ptr<Distribution<T>>>& distributions)
+{
+    DataPoints out_cloud = in_cloud.createSimilarEmpty();
+    out_cloud.conservativeResize(distributions.size());
+
+    std::cout << in_cloud.getTimeDim() << ", " << in_cloud.getDescriptorDim() << ", [" << in_cloud.features.rows() << ", " << in_cloud.features.cols() << "]\n";
+    std::cout << out_cloud.getTimeDim() << ", " << out_cloud.getDescriptorDim() << ", [" << out_cloud.features.rows() << ", " << out_cloud.features.cols() << "]\n";
+
+    BOOST_AUTO(omegas, out_cloud.getDescriptorViewByName("omega"));
+    BOOST_AUTO(deviations, out_cloud.getDescriptorViewByName("deviation"));
+
+    unsigned ctr = 0;
+    out_cloud.features.row(3).setOnes();
+    for(const auto &distro: distributions)
+    {
+        out_cloud.features.col(ctr).head(3) = (*distro).point;
+        out_cloud.descriptors.col(ctr) = (*distro).descriptors;
+        out_cloud.times.col(ctr) = (*distro).times;
+        omegas(0, ctr) = (*distro).omega;
+        deviations.col(ctr) = (*distro).deviation.reshaped(9, 1);
+        ctr += 1;
+    }
+    return out_cloud;
+}
+
+template<typename T>
+typename PointMatcher<T>::DataPoints SymmetryDataPointsFilter<T>::getPointsFromDistributions(
         std::vector<std::shared_ptr<Distribution<T>>>& distributions)
 {
     DataPoints out;
@@ -322,21 +366,12 @@ typename PointMatcher<T>::DataPoints SymmetryDataPointsFilter<T>::getCloudFromDi
     out.allocateFeature("pad", 1);
 
     out.conservativeResize(distributions.size());
-
-    out.allocateDescriptor("omega", 1);
-    out.allocateDescriptor("deviation", 9);
-    BOOST_AUTO(omegas, out.getDescriptorViewByName("omega"));
-    BOOST_AUTO(deviations, out.getDescriptorViewByName("deviation"));
-
-    // TODO copy existing descriptors and times
-    unsigned ctr = 0;
+    unsigned idx = 0;
     out.features.row(3).setOnes();
     for(const auto &distro: distributions)
     {
-        out.features.col(ctr).head(3) = (*distro).point;
-        omegas(0, ctr) = (*distro).omega;
-        deviations.col(ctr) = (*distro).deviation.reshaped(9, 1);
-        ctr += 1;
+        out.features.col(idx).head(3) = (*distro).point;
+        idx += 1;
     }
     return out;
 }
@@ -353,9 +388,26 @@ std::vector<std::shared_ptr<Distribution<T>>> SymmetryDataPointsFilter<T>::getDi
     {
         distributions.emplace_back(new Distribution<T>(points.col(i).head(3),
                                                        omegas(0, i),
-                                                       deviations.block(0, i, 9, 1).reshaped(3, 3)));
+                                                       deviations.block(0, i, 9, 1).reshaped(3, 3),
+                                                       cloud.times.col(i),
+                                                       cloud.descriptors.col(i)));
     }
     return distributions;
+}
+
+template<typename T>
+void SymmetryDataPointsFilter<T>::mergeTimesDescriptors(std::vector<std::shared_ptr<Distribution<T>>>& distributions, const std::vector<unsigned>& indexesToMerge)
+{
+    unsigned numOfPoints = indexesToMerge.size();
+    const unsigned int mergeTo = indexesToMerge[numOfPoints - 1];
+
+    for(unsigned i = 0; i < numOfPoints-1; ++i)
+    {
+        distributions[mergeTo]->descriptors += distributions[i]->descriptors;
+        distributions[mergeTo]->times += distributions[i]->times;
+    }
+    distributions[mergeTo]->descriptors /= numOfPoints;
+    distributions[mergeTo]->times /= numOfPoints;
 }
 
 template
