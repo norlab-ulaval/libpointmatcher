@@ -9,7 +9,7 @@ using namespace PointMatcherSupport;
 // Symmetry DataFilter modules
 //---------------------------
 
-TEST(SymmetryDataPointsFilter, Distributions)
+TEST(SymmetryDataPointsFilter, Distributions) // TODO add test for incremental statistics (running average) for descriptors calculation
 {
     const float sigmaLaser = 0.0009;
 
