@@ -3,20 +3,8 @@
 //
 
 #include "Symmetry.h"
-#include "Eigen/Eigenvalues"
-#include <unordered_map>
+#include "MatchersImpl.h"
 
-// Distribution
-//Constructor
-template<typename T>
-Distribution<T>::Distribution(Vector point, T  omega, Matrix33 deviation, const TimeViewBlock &times, const DescriptorsViewBlock &descriptors):
-        point(point),
-        omega(omega),
-        deviation(deviation),
-        times(times),
-        descriptors(descriptors)
-{
-}
 
 // SymmetryDataPointsFilter
 // Constructor
@@ -117,6 +105,9 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
     std::cout << "Symmetry sampling" << std::endl;
 
     using namespace PointMatcherSupport;
+
+	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
+	typedef typename PointMatcher<T>::Matches Matches;
 
     const int pointsCount(distributions.size());
 
@@ -242,6 +233,9 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
     using namespace PointMatcherSupport;
 
+	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
+	typedef typename PointMatcher<T>::Matches Matches;
+
     const int pointsCount(distributions.size());
 
     Parametrizable::Parameters param;
@@ -334,9 +328,6 @@ typename PointMatcher<T>::DataPoints SymmetryDataPointsFilter<T>::getCloudFromDi
 {
     DataPoints out_cloud = in_cloud.createSimilarEmpty();
     out_cloud.conservativeResize(distributions.size());
-
-    std::cout << in_cloud.getTimeDim() << ", " << in_cloud.getDescriptorDim() << ", [" << in_cloud.features.rows() << ", " << in_cloud.features.cols() << "]\n";
-    std::cout << out_cloud.getTimeDim() << ", " << out_cloud.getDescriptorDim() << ", [" << out_cloud.features.rows() << ", " << out_cloud.features.cols() << "]\n";
 
     BOOST_AUTO(omegas, out_cloud.getDescriptorViewByName("omega"));
     BOOST_AUTO(deviations, out_cloud.getDescriptorViewByName("deviation"));

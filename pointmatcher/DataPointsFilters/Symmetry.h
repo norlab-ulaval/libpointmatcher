@@ -9,7 +9,6 @@
 
 #include "Eigen/Eigenvalues"
 #include "PointMatcher.h"
-#include "MatchersImpl.h"
 #include "vector"
 
 typedef PointMatcher<float> PM;
@@ -19,8 +18,8 @@ template<typename T>
 struct Distribution {
 
 	typedef typename PointMatcher<T>::Vector Vector;
-    typedef typename Eigen::Ref<PM::Int64Matrix> TimeViewBlock;
-    typedef typename Eigen::Ref<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> DescriptorsViewBlock;
+    typedef typename PM::Int64Matrix TimeViewBlock;
+    typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> DescriptorsViewBlock;
 	using Matrix33 = Eigen::Matrix<T, 3, 3>;
 
     Vector point;
@@ -30,7 +29,7 @@ struct Distribution {
     TimeViewBlock times;
     DescriptorsViewBlock descriptors;
 
-    Distribution(Vector point, T  omega, Matrix33 deviation, const TimeViewBlock &times, const DescriptorsViewBlock &descriptors);
+    Distribution(Vector point, T  omega, Matrix33 deviation, TimeViewBlock times, DescriptorsViewBlock descriptors);
     static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2)
     {
         T omega_12 = distro1.omega + distro2.omega;
@@ -41,9 +40,18 @@ struct Distribution {
         Matrix33 deviation_12 = distro1.deviation + distro2.deviation
                 + omega_12_inv * distro1.omega * distro2.omega * (delta * delta.transpose());
 
-        return Distribution<T>(mu_12, omega_12, deviation_12,
-                               distro1.times,
-                               distro1.descriptors); // TODO replace distro1 data by average values
+//        PM::Int64Matrix times_combined = PM::Int64Matrix::Ones(3, 1);
+        auto times_combined = ((distro1.times + distro2.times) / 2).eval();
+        auto descriptors_combined = ((distro1.descriptors + distro2.descriptors) / 2).eval();
+//        Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> descriptors_combined = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Ones(3, 1);
+//        std::cout << times_combined << "\n---\n";
+//        std::cout << descriptors_combined << "\n\n";
+        Distribution<T> distro_out = Distribution<T>(mu_12, omega_12, deviation_12,
+                               times_combined,
+                               descriptors_combined);
+//        std::cout << distro_out.times << "\n---\n";
+//        std::cout << distro_out.descriptors << "\n\n";
+        return distro_out;
     }
 
     void computeVolume()
@@ -77,6 +85,18 @@ public:
     }
 };
 
+// Distribution
+//Constructor
+template<typename T>
+Distribution<T>::Distribution(Vector point, T  omega, Matrix33 deviation, TimeViewBlock times, DescriptorsViewBlock descriptors):
+        point(point),
+        omega(omega),
+        deviation(deviation),
+        times(times),
+        descriptors(descriptors)
+{
+}
+
 template<typename T>
 struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
@@ -93,9 +113,6 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	typedef typename PointMatcher<T>::Matrix Matrix;
 
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
-
-	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
-	typedef typename PointMatcher<T>::Matches Matches;
 
 	inline static const std::string description()
 	{
