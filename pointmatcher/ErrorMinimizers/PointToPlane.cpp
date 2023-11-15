@@ -206,7 +206,7 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneErrorMinimizer<T>
 			matrixGamma << 0,-1, 0,
 			         1, 0, 0,
 			         0, 0, 0;
-			cross = ((matrixGamma*mPts.reading.features).transpose()*normalRef).diagonal().transpose();
+			cross = ((matrixGamma*mPts.reading.features.block(0, 0, 3, nbPts)).transpose()*normalRef).diagonal().transpose();
 		}
 
 
@@ -441,7 +441,7 @@ T PointToPlaneErrorMinimizer<T>::getOverlap() const
 		{
 			// NOTE: we tried with the projected distance over the normal vector before:
 			// projectionDist = delta dotProduct n.normalized()
-			// but this doesn't make sense 
+			// but this doesn't make sense
 
 
 			if(PointMatcherSupport::anyabs(dists(i, 0)) < (uncertainties(0,i)))

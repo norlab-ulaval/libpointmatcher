@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-include(CheckSymbolExists)
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
+include(CheckSymbolExists)
+
 
 #========================
 # Project details / setup
@@ -32,6 +33,7 @@ else ()
 	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
 endif ()
 
+set(CMAKE_DEBUG_POSTFIX "d")
 
 # Check if 32 bit platform
 # By default, libpointmatcher is not compatible with and will not build on a
@@ -75,6 +77,7 @@ if( MSVC )
 	add_definitions( /D _VARIADIC_MAX=10 ) # VS2012 does not support tuples correctly yet
 	add_definitions( /D _USE_MATH_DEFINES) # defines M_PI for Visual Studio
 	add_definitions( /D _ENABLE_EXTENDED_ALIGNED_STORAGE) # this variable must be defined with VS2017 to acknowledge alignment changes of aligned_storage
+	add_definitions(/bigobj)
 endif()
 
 #======================= installation =====================================
@@ -124,9 +127,9 @@ endif()
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
-find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
+find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time)
 if (Boost_MINOR_VERSION GREATER 47)
-	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
+	find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time chrono)
 endif ()
 
 #--------------------
@@ -157,16 +160,20 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 if (NOT TARGET nabo)
   # Find libnabo:
   find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
-  message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+  if (TARGET libnabo::nabo)
+    message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode)")
+  else()
+    message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+  endif()
 else()
   # libnabo already part of this project (e.g. as a git submodule)
   # (This, plus the use of cmake target properties in libnabo, will also
   # introduce the required include directories, flags, etc.)
 endif()
-# This cmake target alias will be defined by either: 
+# This cmake target alias will be defined by either:
 # a) libnabo sources if built as a git submodule in the same project than this library, or
 # b) by libnabo-targets.cmake, included by find_package(libnabo) above.
-set(libnabo_LIBRARIES libnabo::nabo)
+# set(libnabo_LIBRARIES libnabo::nabo)
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
@@ -175,7 +182,9 @@ set(USE_OPEN_MP FALSE CACHE BOOL "Set to TRUE to use OpenMP")
 if (USE_OPEN_MP)
 	find_package(OpenMP)
 	if (OPENMP_FOUND)
-		add_definitions(-fopenmp -DHAVE_OPENMP)
+		if(NOT MSVC)
+			add_definitions(-fopenmp -DHAVE_OPENMP)
+		endif()
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 		if (CMAKE_COMPILER_IS_GNUCC)
 			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
@@ -332,8 +341,8 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/DistanceLimit.cpp
 	pointmatcher/DataPointsFilters/RemoveSensorBias.cpp
 	pointmatcher/DataPointsFilters/Sphericality.cpp
-	pointmatcher/DataPointsFilters/Saliency.cpp	
-	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp	
+	pointmatcher/DataPointsFilters/Saliency.cpp
+	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp
 )
 
 
@@ -352,12 +361,11 @@ target_include_directories(pointmatcher PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher>
 	$<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
 )
-if (libnabo_INCLUDE_DIRS)
-	include_directories(pointmatcher PUBLIC ${libnabo_INCLUDE_DIRS})
-endif()
 
 if (NOT MSVC)
 	target_compile_options(pointmatcher PRIVATE -Wall)
+else()
+	target_compile_options(pointmatcher PRIVATE /bigobj)
 endif()
 
 if(yaml-cpp_FOUND)
@@ -366,7 +374,13 @@ if(yaml-cpp_FOUND)
 endif()
 
 target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
-target_link_libraries(pointmatcher PRIVATE ${libnabo_LIBRARIES})
+
+if (TARGET libnabo::nabo)
+  target_link_libraries(pointmatcher PRIVATE libnabo::nabo)
+else()
+  include_directories(pointmatcher PUBLIC ${libnabo_INCLUDE_DIRS})
+  target_link_libraries(pointmatcher PRIVATE ${libnabo_LIBRARIES})
+endif()
 target_link_libraries(pointmatcher PRIVATE ${EXTERNAL_LIBS})
 if (EXTRA_DEPS)
 	add_dependencies(pointmatcher ${EXTRA_DEPS})

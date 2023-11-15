@@ -202,10 +202,10 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 					const size_t idxSize = idx.size();
 					Vector tmp_eigenVa = eigenVa;
 					Matrix tmp_eigenVe = eigenVe;
-					for(size_t i=0; i<idxSize; ++i)
+					for(size_t j=0; j<idxSize; ++j)
 					{
-						eigenVa(i,0) = tmp_eigenVa(idx[i], 0);
-						eigenVe.col(i) = tmp_eigenVe.col(idx[i]);
+						eigenVa(j,0) = tmp_eigenVa(idx[j], 0);
+						eigenVe.col(j) = tmp_eigenVe.col(idx[j]);
 					}
 				}
 			}

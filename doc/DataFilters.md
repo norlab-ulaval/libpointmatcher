@@ -218,7 +218,7 @@ __Impact on the number of points:__ reduces number of points
 
 |Parameter  |Description  |Default value    |Allowable range|
 |---------  |:---------|:----------------|:--------------|
-|seed        | srand seed | 0 | min: 0 max: 2147483647 |
+|seed        | srand seed | 1 | min: 0 max: 2147483647 |
 |maxCount |number of points beyond which subsampling occurs | 1000 | min: 0, max: 2147483647|
 
 ### Example
@@ -261,10 +261,11 @@ __Output descriptor:__ none
 __Sensor assumed to be at the origin:__ no  
 __Impact on the number of points:__ reduces number of points  
 
-|Parameter  |Description  |Default value    |Allowable range|
-|---------  |:---------|:----------------|:--------------|
-|prob        | Probability that a point is kept (1/decimation factor) | 0.75 | min: 0, max: 1 |
-|randomSamplingMethod | Random sampling method: Direct RNG (0) (fastest), Uniform (1) (more accurate but slower) | 0 | min: 0, max: 1 |
+| Parameter            | Description                                                                              | Default value | Allowable range          |
+|----------------------|:-----------------------------------------------------------------------------------------|:--------------|:-------------------------|
+| prob                 | Probability that a point is kept (1/decimation factor)                                   | 0.75          | min: 0, max: 1           |
+| randomSamplingMethod | Random sampling method: Direct RNG (0) (fastest), Uniform (1) (more accurate but slower) | 0             | min: 0, max: 1           |
+| seed                 | Seed for the random generator (-1 means no seed is used)                                 | -1            | min: -1, max: 2147483647 |
 
 ### Example
 
@@ -699,4 +700,3 @@ The number of points in a point cloud can be reduced by taking random point subs
 ## Where To Go From Here
 
 This concludes the overview of data point filters.  For a tutorial on writing a simple application for applying data point filters to an input point cloud, go [here](ApplyingDataFilters.md).  To learn more about the general configuration of the ICP chain go [here](DefaultICPConfig.md).  
-
