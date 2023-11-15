@@ -22,3 +22,6 @@ target_link_libraries(icp_advance_api pointmatcher)
 
 add_executable(icp_customized icp_customized.cpp)
 target_link_libraries(icp_customized pointmatcher)
+
+add_executable(filter_symmetry filter_symmetry.cpp)
+target_link_libraries(filter_symmetry pointmatcher)
