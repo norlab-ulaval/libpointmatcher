@@ -131,6 +131,7 @@ jobs:
             gcc \
             make \
             libeigen3-dev \
+            libyaml-cpp-dev \
             ninja-build \
             catch \
             libomp-dev \
