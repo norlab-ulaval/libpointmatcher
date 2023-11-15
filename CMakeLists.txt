@@ -369,8 +369,8 @@ else()
 endif()
 
 if(yaml-cpp_FOUND)
-	target_link_libraries(pointmatcher PRIVATE ${YAML_CPP_LIBRARIES})
-	target_include_directories(pointmatcher PRIVATE ${YAML_CPP_INCLUDE_DIR})
+	target_link_libraries(pointmatcher PUBLIC ${YAML_CPP_LIBRARIES})
+	target_include_directories(pointmatcher PUBLIC ${YAML_CPP_INCLUDE_DIR})
 endif()
 
 target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
