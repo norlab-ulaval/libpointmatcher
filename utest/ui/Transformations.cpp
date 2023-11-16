@@ -3,7 +3,6 @@
 using namespace std;
 using namespace PointMatcherSupport;
 
-
 static inline Eigen::Transform<NumericType, 2, Eigen::Affine> buildUpTransformation2D(const Eigen::Matrix<NumericType, 2, 1>& translation,
                                                                                       const Eigen::Rotation2D<NumericType>& rotation,
                                                                                       const NumericType scale = 1.0)
