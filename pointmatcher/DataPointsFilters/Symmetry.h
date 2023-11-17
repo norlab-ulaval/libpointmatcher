@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "Eigen/Eigenvalues"
 #include "PointMatcher.h"
 #include "vector"
@@ -88,11 +90,11 @@ Distribution<T>::Distribution(Vector point, T  omega, Matrix33 deviation, TimeVi
         point(point),
         omega(omega),
         deviation(deviation),
-        times(times),
+        times(std::move(times)),
         descriptors(descriptors)
 {
 }
-
+// TODO add optional produced descriptors: normals, eigenvalues, eigenvectors
 template<typename T>
 struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 {
@@ -112,7 +114,11 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 	inline static const std::string description()
 	{
-		return "TODO";
+        return "Lossy point cloud compression using incremental statistics.\n"
+               "Required descriptors: none.\n"
+               "Produced descriptors:  omega, deviation.\n"
+               "Altered descriptors:  all.\n"
+               "Altered features:     points coordinates and number of points.";
 	}
 	inline static const ParametersDoc availableParameters()
 	{
@@ -130,11 +136,11 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	const T vro;
 	const T dt;
 	const T ct;
-	const unsigned knn;
     const float initialVariance;
+	const unsigned knn;
 
 	//! Constructor, uses parameter interface
-	SymmetryDataPointsFilter(const Parameters& params = Parameters());
+	explicit SymmetryDataPointsFilter(const Parameters& params = Parameters());
 	virtual DataPoints filter(const DataPoints& input);
 	virtual void inPlaceFilter(DataPoints& cloud);
     void symmetrySampling(std::vector<std::shared_ptr<Distribution<T>>>& distributions);
