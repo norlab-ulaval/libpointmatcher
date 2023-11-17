@@ -455,6 +455,7 @@ struct PointMatcher
 	struct DataPointsFilters: public std::vector<std::shared_ptr<DataPointsFilter> >
 	{
 		DataPointsFilters();
+		DataPointsFilters(const YAML::Node& doc);
 		DataPointsFilters(std::istream& in);
 		void init();
 		void apply(DataPoints& cloud);
@@ -670,6 +671,7 @@ struct PointMatcher
 		virtual void setDefault();
 		
 		virtual void loadFromYaml(std::istream& in);
+		virtual void loadFromYamlNode(const YAML::Node& doc);
 		unsigned getPrefilteredReadingPtsCount() const;
 		unsigned getPrefilteredReferencePtsCount() const;
 
@@ -746,6 +748,7 @@ struct PointMatcher
 		void clearMap();
 		virtual void setDefault();
 		virtual void loadFromYaml(std::istream& in);
+		virtual void loadFromYamlNode(const YAML::Node& doc);
 		PM_DEPRECATED("Use getPrefilteredInternalMap instead. "
 			            "Function now always returns map with filter chain applied. "
 			            "This may have altered your program behavior."

@@ -108,16 +108,17 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 	this->inspector = std::make_shared<typename InspectorsImpl<T>::NullInspector>();
 }
 
+
+
 //! Construct an ICP algorithm from a YAML file
 template<typename T>
-void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
+void PointMatcher<T>::ICPChainBase::loadFromYamlNode(const YAML::Node& doc)
 {
 	this->cleanup();
 
-	YAML::Node doc = YAML::Load(in);
 	typedef set<string> StringSet;
 	StringSet usedModuleTypes;
-	
+
 	// Fix for issue #6: compilation on gcc 4.4.4
 	//PointMatcher<T> pm;
 	const PointMatcher & pm = PointMatcher::get();
@@ -140,14 +141,14 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 		this->transformations.push_back(std::make_shared<typename TransformationsImpl<T>::RigidTransformation>());
 	else
 		this->transformations.push_back(std::make_shared<typename TransformationsImpl<T>::SimilarityTransformation>());
-	
+
 	usedModuleTypes.insert(createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers));
 	usedModuleTypes.insert(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector));
-	
-	
+
+
 	// FIXME: this line cause segfault when there is an error in the yaml file...
 	//loadAdditionalYAMLContent(doc);
-	
+
 	// check YAML entries that do not correspend to any module
 	for(YAML::const_iterator moduleTypeIt = doc.begin(); moduleTypeIt != doc.end(); ++moduleTypeIt)
 	{
@@ -158,6 +159,15 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 				(boost::format("Module type %1% does not exist") % moduleType).str()
 			);
 	}
+
+}
+
+//! Construct an ICP algorithm from a YAML file
+template<typename T>
+void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
+{
+	YAML::Node doc = YAML::Load(in);
+    loadFromYamlNode(doc);
 }
 
 //! Return the remaining number of points in reading after prefiltering but before the iterative process
@@ -526,6 +536,12 @@ void PointMatcher<T>::ICPSequence::setDefault()
 	{
 		this->matcher->init(mapPointCloud);
 	}
+}
+
+template<typename T>
+void PointMatcher<T>::ICPSequence::loadFromYamlNode(const YAML::Node& doc)
+{
+	ICPChainBase::loadFromYamlNode(doc);
 }
 
 template<typename T>
