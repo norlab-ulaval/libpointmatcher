@@ -16,6 +16,7 @@ SymmetryDataPointsFilter<T>::SymmetryDataPointsFilter(const Parameters& params):
         vro(Parametrizable::get<T>("vro")),
         dt(Parametrizable::get<T>("dt")),
         ct(Parametrizable::get<T>("ct")),
+        initialVariance(Parametrizable::get<T>("initialVariance")),
         knn(Parametrizable::get<T>("knn"))
 {
 }
@@ -50,14 +51,14 @@ void SymmetryDataPointsFilter<T>::inPlaceFilter(
         Matrix deviations = Matrix::Zero(std::pow(dim, 2), cloud.getNbPoints());
         if(dim == 2)
         {
-            deviations.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), sigmaLaser);
-            deviations.row(3) = PM::Matrix::Constant(1, cloud.getNbPoints(), sigmaLaser);
+            deviations.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+            deviations.row(3) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
         }
         else
         {
-            deviations.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), sigmaLaser);
-            deviations.row(4) = PM::Matrix::Constant(1, cloud.getNbPoints(), sigmaLaser);
-            deviations.row(8) = PM::Matrix::Constant(1, cloud.getNbPoints(), sigmaLaser);
+            deviations.row(0) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+            deviations.row(4) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
+            deviations.row(8) = PM::Matrix::Constant(1, cloud.getNbPoints(), initialVariance);
         }
 
         cloud.addDescriptor("deviation", deviations);

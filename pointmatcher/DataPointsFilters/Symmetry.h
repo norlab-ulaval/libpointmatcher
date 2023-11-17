@@ -122,6 +122,7 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 			{"dt", "distance threshold [m] for symmetry sampling", "0.05", "0", "inf", &P::Comp<T>},
 			{"ct", "compressions tolerance [%]", "0.95", "0", "1", &P::Comp<T>},
 			{"knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned>},
+			{"initialVariance", "Variance on individual point positions (isotropic)", "0.0009", "0", "inf", &P::Comp<T>},
 			};
 	}
 
@@ -130,8 +131,7 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	const T dt;
 	const T ct;
 	const unsigned knn;
-
-    const float sigmaLaser = 0.0009;
+    const float initialVariance;
 
 	//! Constructor, uses parameter interface
 	SymmetryDataPointsFilter(const Parameters& params = Parameters());
