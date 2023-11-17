@@ -3,7 +3,6 @@
 using namespace std;
 using namespace PointMatcherSupport;
 
-
 static inline Eigen::Transform<NumericType, 2, Eigen::Affine> buildUpTransformation2D(const Eigen::Matrix<NumericType, 2, 1>& translation,
                                                                                       const Eigen::Rotation2D<NumericType>& rotation,
                                                                                       const NumericType scale = 1.0)
@@ -59,7 +58,7 @@ static inline void assertOnDataPointsTransformation(const PM::DataPoints& cloud,
     EXPECT_EQ(cloud.featureLabels, transformedCloud.featureLabels);
     EXPECT_EQ(cloud.descriptorLabels, transformedCloud.descriptorLabels);
     EXPECT_EQ(cloud.timeLabels, transformedCloud.timeLabels);
-    EXPECT_EQ(cloud.times, transformedCloud.times);
+    EXPECT_TRUE(cloud.times.isApprox(transformedCloud.times, 0));
 }
 
 //---------------------------
