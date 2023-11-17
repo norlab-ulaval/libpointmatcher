@@ -136,7 +136,7 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	const T vro;
 	const T dt;
 	const T ct;
-    const float initialVariance;
+    const T initialVariance;
 	const unsigned knn;
 
 	//! Constructor, uses parameter interface

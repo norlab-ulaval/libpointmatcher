@@ -17,7 +17,7 @@ SymmetryDataPointsFilter<T>::SymmetryDataPointsFilter(const Parameters& params):
         dt(Parametrizable::get<T>("dt")),
         ct(Parametrizable::get<T>("ct")),
         initialVariance(Parametrizable::get<T>("initialVariance")),
-        knn(Parametrizable::get<T>("knn"))
+        knn(Parametrizable::get<unsigned>("knn"))
 {
 }
 
