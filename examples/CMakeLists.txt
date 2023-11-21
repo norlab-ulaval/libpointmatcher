@@ -22,6 +22,3 @@ target_link_libraries(icp_advance_api pointmatcher)
 
 add_executable(icp_customized icp_customized.cpp)
 target_link_libraries(icp_customized pointmatcher)
-
-add_executable(add_descriptor_debug addDescriptorDebug.cpp)
-target_link_libraries(add_descriptor_debug pointmatcher)
