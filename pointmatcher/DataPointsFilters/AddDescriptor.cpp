@@ -27,14 +27,32 @@ typename PointMatcher<T>::DataPoints AddDescriptorDataPointsFilter<T>::filter(
 // In-place filter
 template<typename T>
 void AddDescriptorDataPointsFilter<T>::inPlaceFilter(
-	DataPoints& cloud)
+        DataPoints& cloud)
 {
     Matrix matrix = PM::Matrix::Ones(descriptorDimension, cloud.getNbPoints());
     for(std::size_t i = 0; i < descriptorDimension; ++i)
     {
         matrix.row(i) *= descriptorValues[i];
     }
-    cloud.addDescriptor(descriptorName, matrix);
+    if(!cloud.descriptorExists(descriptorName))
+    {
+        cloud.addDescriptor(descriptorName, matrix);
+    }
+    else
+    {
+        if(descriptorDimension == cloud.getDescriptorDimension(descriptorName))
+        {
+            cloud.getDescriptorViewByName(descriptorName) = matrix;
+        }
+        else
+        {
+            // FIXME deal with overwriting descriptors that have different dimensions
+            throw std::runtime_error("Can't overwrite existing descriptor " + descriptorName + " with dimension " +
+                                     std::to_string(cloud.getDescriptorDimension(descriptorName)) +
+                                     " by a new descriptor with dimension " +
+                                     std::to_string(descriptorDimension) + ".");
+        }
+    }
 
 }
 

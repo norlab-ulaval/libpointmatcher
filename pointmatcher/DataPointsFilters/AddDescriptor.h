@@ -31,7 +31,7 @@ struct AddDescriptorDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
     inline static const std::string description()
     {
-        return "Adds a new descriptor to an existing point cloud.\n\n"
+        return "Adds a new descriptor to an existing point cloud or overwrites existing descriptor with the same name.\n\n"
 			   "Required descriptors: none.\n"
 		       "Produced descriptors:  User defined.\n"
 			   "Altered descriptors:  none.\n"
