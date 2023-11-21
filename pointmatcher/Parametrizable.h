@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 #define BOOST_ASSIGN_MAX_PARAMS 6
 #include <boost/assign/list_inserter.hpp>
+#include <boost/algorithm/string.hpp>
 
 
 namespace PointMatcherSupport
@@ -77,7 +78,37 @@ namespace PointMatcherSupport
 	{
 		return boost::lexical_cast<Target>(arg);
 	}
-	
+
+    //! Special case of lexical cast to std::vector<T>
+    template<typename T>
+    inline std::vector<T> lexical_cast_vector(const std::string& arg)
+    {
+        std::string cleanedInput = arg;
+        if (cleanedInput.find('[') != 0)
+        {
+            throw std::runtime_error("Vector parameter '" + arg + "' must start with '['");
+        }
+        if (cleanedInput.find(']') != cleanedInput.size()-1)
+        {
+            throw std::runtime_error("Vector parameter '" + arg + "' must end with ']'");
+        }
+        cleanedInput.erase(std::remove(cleanedInput.begin(), cleanedInput.end(), '['), cleanedInput.end());
+        cleanedInput.erase(std::remove(cleanedInput.begin(), cleanedInput.end(), ' '), cleanedInput.end());
+        cleanedInput.erase(std::remove(cleanedInput.begin(), cleanedInput.end(), ']'), cleanedInput.end());
+
+        // Split the string into a vector of strings using commas as the delimiter
+        std::vector<std::string> tokens;
+        boost::algorithm::split(tokens, cleanedInput, boost::algorithm::is_any_of(","));
+
+        std::vector<T> result;
+        result.reserve(tokens.size());
+        for(const auto& token: tokens)
+        {
+            auto value = lexical_cast_scalar_to_string<T>(token);
+            result.push_back(value);
+        }
+        return result;
+    }
 	//! Special case of lexical cast to float, use lexical_cast_scalar_to_string
 	template<>
 	inline float lexical_cast(const std::string& arg) { return lexical_cast_scalar_to_string<float>(arg); }
@@ -87,12 +118,24 @@ namespace PointMatcherSupport
 	
 	//
 	
-	//! Return the a string value using lexical_cast
+	//! Return the string value using lexical_cast
 	template<typename S>
-	std::string toParam(const S& value)
+	inline std::string toParam(const S& value)
 	{
 		return lexical_cast<std::string>(value);
 	}
+
+    //! Return the string value of a std::vector<T>
+    template<typename T>
+    inline std::string toParam(const std::vector<T>& input)
+    {
+        std::ostringstream oss;
+        oss << "[";
+        std::copy(input.begin(), input.end() - 1,
+                  std::ostream_iterator<T>(oss, ", "));
+        oss << input.back() << "]";
+        return oss.str();
+    }
 	
 	//! The superclass of classes that are constructed using generic parameters. This class provides the parameter storage and fetching mechanism
 	struct Parametrizable
@@ -170,7 +213,11 @@ namespace PointMatcherSupport
 		//! Return the value of paramName, lexically-casted to S
 		template<typename S>
 		S get(const std::string& paramName) { return lexical_cast<S>(getParamValueString(paramName)); }
-		
+
+		//! Return the value of paramName, lexically-casted std::vector<S>
+		template<typename T>
+		inline std::vector<T> getVector(const std::string& paramName) {return lexical_cast_vector<T>(getParamValueString(paramName)); }
+
 		friend std::ostream& operator<< (std::ostream& o, const Parametrizable& p);
 	};
 	std::ostream& operator<< (std::ostream& o, const Parametrizable::ParametersDoc& p);

@@ -113,7 +113,7 @@ namespace PointMatcherSupport
 			{
 				for (const auto& param : params)
 					throw Parametrizable::InvalidParameter(
-							(boost::format("Parameter %1% was set but module %2% dos not use any parameter") % param.first % className).str()
+							(boost::format("Parameter %1% was set but module %2% does not use any parameter") % param.first % className).str()
 						);
 
 				return std::make_shared<C>();

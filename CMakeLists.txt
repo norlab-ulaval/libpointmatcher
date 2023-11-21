@@ -314,6 +314,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/PointToPointSimilarity.cpp
 	pointmatcher/ErrorMinimizers/Identity.cpp
 #DataPointsFilters
+	pointmatcher/DataPointsFilters/AddDescriptor.cpp
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
