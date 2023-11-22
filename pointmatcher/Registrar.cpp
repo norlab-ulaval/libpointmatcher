@@ -19,8 +19,21 @@ namespace PointMatcherSupport
 			for(YAML::const_iterator paramIt = mapIt->second.begin(); paramIt != mapIt->second.end(); ++paramIt)
 			{
 				std::string key = paramIt->first.as<std::string>();
-				std::string value = paramIt->second.as<std::string>();
-				params[key] = value;
+                if (paramIt->second.IsSequence())
+                {
+                    std::ostringstream oss;
+                    oss << "[";
+                    for(int i = 0; i < paramIt->second.size()-1; ++i)
+                    {
+                        oss << paramIt->second[i] << ", ";
+                    }
+                    oss << paramIt->second[paramIt->second.size()-1] << "]";
+                    params[key] = oss.str();
+                }
+                else
+                {
+                    params[key] = paramIt->second.as<std::string>();
+                }
 			}
 		}
 	}
