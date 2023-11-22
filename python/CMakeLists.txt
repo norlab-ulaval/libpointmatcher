@@ -49,6 +49,7 @@ set(PYBIND11_SOURCES
     errorminimizers/point_to_point_with_cov.cpp
 
     #datapointfilters module
+    datapointsfilters/add_descriptor.cpp
     datapointsfilters/bounding_box.cpp
     datapointsfilters/covariance_sampling.cpp
     datapointsfilters/cut_at_descriptor_threshold.cpp

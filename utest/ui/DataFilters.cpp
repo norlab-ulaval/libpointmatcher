@@ -978,7 +978,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
 	EXPECT_EQ(cloud.getDescriptorDim()+descriptorDimension, filteredCloud.getDescriptorDim());
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
 
-    Eigen::RowVectorX<float> row = Eigen::RowVectorX<float>::Ones(cloud.getNbPoints());
+    Eigen::Matrix<float, 1, Eigen::Dynamic> row = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(cloud.getNbPoints());
     EXPECT_EQ(filteredCloud.descriptorLabels.back().text, descriptorName);
     EXPECT_EQ(filteredCloud.descriptorLabels.back().span, descriptorDimension);
     for(unsigned i = 0; i < descriptorDimension; ++i)
