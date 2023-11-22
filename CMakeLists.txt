@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.8)
 
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 include(CheckSymbolExists)
@@ -239,21 +239,21 @@ check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
 
 #========================== libpointmatcher itself ==============================
 
-# Check the compiler version as we need full C++11 support.
+# Check the compiler version as we need full C++17 support.
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	# using Clang
-	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.3")
-		message(WARNING, "Your clang compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 3.3 or later is supported")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5")
+		message(WARNING, "Your clang compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 5 or later is supported")
 	endif ()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 	# using AppleClang
-	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
-		message(WARNING "Your XCode environment has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 5.1 or later is supported")
+	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0")
+		message(WARNING "Your XCode environment has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 7.0 or later is supported")
 	endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	# using GCC
-	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.2")
-		message(WARNING, "Your g++ compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 4.8.2 or later is supported")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9")
+		message(WARNING, "Your g++ compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 9 or later is supported")
 	endif ()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	# using MSVC
@@ -262,18 +262,18 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	endif()
 endif ()
 
-# enable C++11 support.
-if (CMAKE_VERSION VERSION_LESS "3.1")
+# enable C++17 support.
+if (CMAKE_VERSION VERSION_LESS "3.8")
 	if (MSVC)
 		message(FATAL_ERROR, "CMake version 3.1 or later is required to compiler ${PROJECT_NAME} with Microsoft Visual C++")
 	endif ()
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		set (CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 	else ()
-		set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+		set (CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 	endif ()
 else ()
-	set (CMAKE_CXX_STANDARD 11)
+	set (CMAKE_CXX_STANDARD 17)
 endif ()
 
 # SOURCE
