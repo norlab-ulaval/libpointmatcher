@@ -13,8 +13,8 @@ TEST(SymmetryDataPointsFilter, Distributions) // TODO add test for incremental s
 {
     const float sigmaLaser = 0.0009;
 
-	typedef typename Eigen::Matrix<float, 3, 1> Vector;
-    typedef typename Eigen::Matrix<long long, 3, 1> Times;
+	typedef typename Eigen::Vector3f Vector;
+    typedef typename PointMatcher<float>::Int64Matrix Times;
 	using Matrix = Eigen::Matrix<float, 3, 3>;
 
     Vector point1;
@@ -23,8 +23,10 @@ TEST(SymmetryDataPointsFilter, Distributions) // TODO add test for incremental s
     diag << sigmaLaser, sigmaLaser, sigmaLaser;
     Matrix deviation1 = diag.array().matrix().asDiagonal();
     float omega1 = 1.0;
-    Eigen::Vector3f descriptors1 = Eigen::Vector3f::Random();
-    Times times1 = Eigen::Matrix<long long, 3, 1>::Random();
+    Vector descriptors1 = Vector::Random();
+    Times times1(3, 1);
+    times1.setRandom(3, 1);
+
 
     auto distro1 = Distribution<float>(point1, omega1, deviation1, times1, descriptors1);
 
@@ -35,7 +37,8 @@ TEST(SymmetryDataPointsFilter, Distributions) // TODO add test for incremental s
     Matrix deviation2 = diag.array().matrix().asDiagonal();
     float omega2 = 1.0;
     Eigen::Vector3f descriptors2 = Eigen::Vector3f::Random();
-    Times times2 = Eigen::Matrix<long long, 3, 1>::Random();
+    Times times2(3, 1);
+    times2.setRandom(3, 1);
 
     auto distro2 = Distribution<float>(point2, omega2, deviation2, times2, descriptors2);
 

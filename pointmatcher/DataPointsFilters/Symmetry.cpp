@@ -333,7 +333,10 @@ typename PointMatcher<T>::DataPoints SymmetryDataPointsFilter<T>::getCloudFromDi
         out_cloud.descriptors.col(ctr) = (*distro).descriptors;
         out_cloud.times.col(ctr) = (*distro).times;
         omegas(0, ctr) = (*distro).omega;
-        deviations.col(ctr) = (*distro).deviation.reshaped(9, 1);
+        // Eigen reshaped requires Eigen3.4
+//        deviations.col(ctr) = (*distro).deviation.reshaped(9, 1);
+        Eigen::Map<Eigen::Matrix<T, 9, 1>> deviationVector((*distro).deviation.data(), 9, 1);
+        deviations.col(ctr) = deviationVector;
         ctr += 1;
     }
     return out_cloud;
@@ -370,9 +373,11 @@ std::vector<std::shared_ptr<Distribution<T>>> SymmetryDataPointsFilter<T>::getDi
     auto deviations = cloud.getDescriptorViewByName("deviation");
     for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
     {
+        // Eigen reshaped requires Eigen3.4
+        Eigen::Map<Eigen::Matrix<T, 3, 3>> deviationMatrix(deviations.block(0, i, 9, 1).data(), 3, 3);
         distributions.emplace_back(new Distribution<T>(points.col(i).head(3),
                                                        omegas(0, i),
-                                                       deviations.block(0, i, 9, 1).reshaped(3, 3),
+                                                       deviationMatrix,
                                                        cloud.times.col(i),
                                                        cloud.descriptors.col(i)));
     }
