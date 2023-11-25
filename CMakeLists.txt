@@ -441,22 +441,20 @@ endif()
 
 #=============== trigger other makefile ======================
 
-# Example programs TODO
-option(POINTMATCHER_BUILD_EXAMPLES "Build libpointmatcher examples" ON)
-if (POINTMATCHER_BUILD_EXAMPLES)
+# Example programs
+option(BUILD_EXAMPLES "Build libpointmatcher examples" ON)
+if (BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-# Evaluation programs TODO
-option(POINTMATCHER_BUILD_EVALUATIONS "Build libpointmatcher evaluations" ON)
-if (POINTMATCHER_BUILD_EVALUATIONS)
+# Evaluation programs
+option(BUILD_EVALUATIONS "Build libpointmatcher evaluations" ON)
+if (BUILD_EVALUATIONS)
   add_subdirectory(evaluations)
 endif()
 
 # Unit testing
-
 option(BUILD_TESTS "Build all tests." OFF)
-
 if (BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(utest)
