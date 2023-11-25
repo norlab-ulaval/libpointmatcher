@@ -220,12 +220,9 @@ endif()
 
 message(STATUS "Looking for yaml-cpp on system...")
 
-find_package(yaml-cpp QUIET)
-
-if(yaml-cpp_FOUND)
-        message(STATUS "yaml-cpp version ${yaml-cpp_VERSION} found, text-based configuration enabled")
-else()
-        message(STATUS "yaml-cpp not found, text-based configuration and related applications disabled")
+find_package(yaml-cpp CONFIG REQUIRED)
+if(TARGET yaml-cpp::yaml-cpp)
+	set(YAML_CPP_LIBRARIES "yaml-cpp::yaml-cpp")
 endif()
 
 #--------------------
@@ -360,7 +357,7 @@ target_include_directories(pointmatcher PUBLIC
   $<INSTALL_INTERFACE:pointmatcher>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher>
-	$<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
+  $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
 )
 
 if (NOT MSVC)
@@ -369,10 +366,8 @@ else()
 	target_compile_options(pointmatcher PRIVATE /bigobj)
 endif()
 
-if(yaml-cpp_FOUND)
-	target_link_libraries(pointmatcher PUBLIC ${YAML_CPP_LIBRARIES})
-	target_include_directories(pointmatcher PUBLIC ${YAML_CPP_INCLUDE_DIR})
-endif()
+target_link_libraries(pointmatcher PUBLIC ${YAML_CPP_LIBRARIES})
+target_include_directories(pointmatcher PUBLIC ${YAML_CPP_INCLUDE_DIR})
 
 target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
 
