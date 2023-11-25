@@ -161,7 +161,8 @@ if (NOT TARGET nabo)
   # Find libnabo:
   find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
   if (TARGET libnabo::nabo)
-    message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode)")
+ 	set(libnabo_LIBRARIES libnabo::nabo)
+    message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode,  libs=${libnabo_LIBRARIES})")
   else()
     message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
   endif()
@@ -173,7 +174,6 @@ endif()
 # This cmake target alias will be defined by either:
 # a) libnabo sources if built as a git submodule in the same project than this library, or
 # b) by libnabo-targets.cmake, included by find_package(libnabo) above.
-# set(libnabo_LIBRARIES libnabo::nabo)
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
