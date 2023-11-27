@@ -9,6 +9,7 @@
 #set -v
 
 # ....Pre-condition................................................................................................
+# ToDo: assessment >> next precondition ↓↓ not required
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
   echo -e "\nERROR: This script must be sourced from directory 'build_system'!\n cwd: $(pwd)"
   exit 1
@@ -56,7 +57,7 @@ function echo_centering_str() {
   #echo "\$COLUMNS=${COLUMNS}"
 
   # Ref https://bash.cyberciti.biz/guide/$TERM_variable
-  TPUT_FLAG=''
+  TPUT_FLAG="-T $TERM"
   if [[ -z ${TERM} ]]; then
     TPUT_FLAG='-T xterm-256color'
   elif [[ ${TERM} == dumb ]]; then
@@ -70,6 +71,7 @@ function echo_centering_str() {
 
   local terminal_width
 #  terminal_width=$(tput ${TPUT_FLAG} cols)
+  # shellcheck disable=SC2086
   terminal_width="${COLUMNS:-$(tput ${TPUT_FLAG} cols)}"
   local total_padding_len=$(( $terminal_width - $str_len ))
   local single_side_padding_len=$(( $total_padding_len / 2 ))

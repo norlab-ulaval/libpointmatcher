@@ -41,21 +41,21 @@
 #set -v
 #set -x
 
-# ....Default......................................................................................................
+# ....Default......................................................................................
 DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'
 BUILD_STATUS_PASS=0
 
-# ....Project root logic...........................................................................................
+# ....Project root logic...........................................................................
 TMP_CWD=$(pwd)
 
-# ....Load environment variables from file.........................................................................
+# ....Load environment variables from file.........................................................
 set -o allexport
 source .env
 source .env.build_matrix
 source .env.prompt
 set +o allexport
 
-# ....Helper function..............................................................................................
+# ....Helper function..............................................................................
 ## import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
@@ -93,12 +93,12 @@ function print_help_in_terminal() {
 "
 }
 
-# ====Begin========================================================================================================
+# ====Begin========================================================================================
 norlab_splash "${LPM_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 
 print_formated_script_header 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
 
-# ....Script command line flags....................................................................................
+# ....Script command line flags....................................................................
 while [ $# -gt 0 ]; do
 
   case $1 in
@@ -169,7 +169,7 @@ while [ $# -gt 0 ]; do
 done
 
 
-# ..................................................................................................................
+# .................................................................................................
 print_msg "Build images specified in ${MSG_DIMMED_FORMAT}'docker-compose.libpointmatcher.yaml'${MSG_END_FORMAT} following ${MSG_DIMMED_FORMAT}.env.build_matrix${MSG_END_FORMAT}"
 
 ## Freeze build matrix env variable to prevent override by lpm_execute_compose.bash when reloading .env/build_matrix
@@ -236,7 +236,7 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}"; do
                                           --os-version "${EACH_OS_VERSION}" \
                                           -- "${DOCKER_COMPOSE_CMD_ARGS}"
 
-        # ....Collect image tags exported by lpm_execute_compose.bash..............................................
+        # ....Collect image tags exported by lpm_execute_compose.bash..............................
         # Global: Read 'DOCKER_EXIT_CODE' env variable exported by function show_and_execute_docker
         if [[ ${DOCKER_EXIT_CODE} == 0 ]]; then
           MSG_STATUS="${MSG_DONE_FORMAT}Pass ${MSG_DIMMED_FORMAT}›"
@@ -261,7 +261,7 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}"; do
           IMAGE_TAG_CRAWLED=("${IMAGE_TAG_CRAWLED[@]}" "${MSG_STATUS} ${LPM_IMAGE_TAG} Compile mode: ${EACH_CMAKE_BUILD_TYPE}")
           IMAGE_TAG_CRAWLED_TC=("${IMAGE_TAG_CRAWLED_TC[@]}" "${MSG_STATUS_TC_TAG} ${LPM_IMAGE_TAG} Compile mode: ${EACH_CMAKE_BUILD_TYPE}")
         fi
-        # .........................................................................................................
+        # .........................................................................................
 
         if [[ ${TEAMCITY_VERSION} ]]; then
           echo -e "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} execute lpm_execute_compose.bash']"
@@ -306,13 +306,13 @@ done
 
 print_formated_script_footer 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
 
-# ====TeamCity service message=====================================================================================
+# ====TeamCity service message=====================================================================
 if [[ ${TEAMCITY_VERSION} ]]; then
   # Tag added to the TeamCity build via a service message
   for tc_build_tag in "${IMAGE_TAG_CRAWLED_TC[@]}" ; do
       echo -e "##teamcity[addBuildTag '${tc_build_tag}']"
   done
 fi
-# ====Teardown=====================================================================================================
+# ====Teardown=====================================================================================
 cd "${TMP_CWD}"
 exit $BUILD_STATUS_PASS

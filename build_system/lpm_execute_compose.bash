@@ -28,7 +28,7 @@
 #   Dont use "set -e" in this script as it will affect the build system policy, use the --fail-fast flag instead
 #
 
-# ....Default......................................................................................................
+# ....Default......................................................................................
 LIBPOINTMATCHER_VERSION='head'
 LIBPOINTMATCHER_CMAKE_BUILD_TYPE='RelWithDebInfo'
 OS_NAME='ubuntu'
@@ -36,17 +36,17 @@ OS_VERSION='focal'
 #LPM_JOB_ID='0'
 DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'  # alt: build --no-cache --push
 
-# ....Project root logic...........................................................................................
+# ....Project root logic...........................................................................
 TMP_CWD=$(pwd)
 
-# ....Load environment variables from file.........................................................................
+# ....Load environment variables from file.........................................................
 set -o allexport
 source .env
 source .env.build_matrix
 source .env.prompt
 set +o allexport
 
-# ....Helper function..............................................................................................
+# ....Helper function..............................................................................
 ## import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
@@ -75,7 +75,7 @@ function print_help_in_terminal() {
 "
 }
 
-# ....TeamCity service message logic................................................................................
+# ....TeamCity service message logic...............................................................
 if [[ ${TEAMCITY_VERSION} ]]; then
   export IS_TEAMCITY_RUN=true
   TC_VERSION="TEAMCITY_VERSION=${TEAMCITY_VERSION}"
@@ -84,7 +84,7 @@ else
 fi
 print_msg "IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN} ${TC_VERSION}"
 
-# ====Begin========================================================================================================
+# ====Begin========================================================================================
 SHOW_SPLASH_EC="${SHOW_SPLASH_EC:-true}"
 
 if [[ "${SHOW_SPLASH_EC}" == 'true' ]]; then
@@ -93,7 +93,7 @@ fi
 
 print_formated_script_header 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
 
-# ....Script command line flags....................................................................................
+# ....Script command line flags....................................................................
 while [ $# -gt 0 ]; do
 
   case $1 in
@@ -148,7 +148,7 @@ while [ $# -gt 0 ]; do
 
 done
 
-# ..................................................................................................................
+# .................................................................................................
 # Note: LIBPOINTMATCHER_VERSION will be used to fetch the repo at release tag (ref task NMO-252)
 export LIBPOINTMATCHER_VERSION="${LIBPOINTMATCHER_VERSION}"
 export LIBPOINTMATCHER_CMAKE_BUILD_TYPE="${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}"
@@ -182,5 +182,5 @@ ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE} ${MSG
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG} ${MSG_END_FORMAT}"
 
 print_formated_script_footer 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
-# ====Teardown=====================================================================================================
+# ====Teardown=====================================================================================
 cd "${TMP_CWD}"

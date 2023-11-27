@@ -19,7 +19,7 @@ ENV TZ=Etc/UTC
 
 ENV TERM=${TERM:-"xterm-256color"}
 
-# ....Setup timezone and localization..............................................................................
+# ....Setup timezone and localization..............................................................
 # change the locale from POSIX to UTF-8
 RUN apt-get update && \
     apt-get install --assume-yes --no-install-recommends \
@@ -32,9 +32,9 @@ ENV LANG=en_US.UTF-8
 ENV PYTHONIOENCODING=utf-8
 
 
-# ====Begin install=================================================================================================
+# ====Begin install================================================================================
 
-# ....Install development utilities................................................................................
+# ....Install development utilities................................................................
 RUN apt-get update && \
     apt-get install --assume-yes --no-install-recommends \
         sudo \
@@ -51,7 +51,7 @@ RUN apt-get update && \
         apt-utils && \
     rm -rf /var/lib/apt/lists/*
 
-# ====Begin========================================================================================================
+# ====Begin========================================================================================
 WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build_system"
 
 COPY ./build_system/.env.prompt .
@@ -65,7 +65,7 @@ RUN chmod +x ./ubuntu/lpm_install_python_dev_tools.bash
 RUN source ./ubuntu/lpm_install_python_dev_tools.bash
 
 
-# ====Install Libpointmatcher dependencies==========================================================================
+# ====Install Libpointmatcher dependencies=========================================================
 FROM base-image AS libpointmatcher-dependencies
 
 WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build_system"
@@ -80,7 +80,7 @@ WORKDIR ./ubuntu
 RUN chmod +x ./lpm_install_dependencies_ubuntu.bash
 RUN source ./lpm_install_dependencies_ubuntu.bash
 
-# ====End==========================================================================================================
+# ====End==========================================================================================
 WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/"
 RUN rm -r -f "./${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
 

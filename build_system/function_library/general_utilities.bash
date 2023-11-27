@@ -39,6 +39,8 @@ source ./function_library/prompt_utilities.bash
 # Returns:
 #   Return docker command exit code
 # =================================================================================================================
+# ToDo: redaction >> add read global IS_TEAMCITY_RUN to the doc
+# ToDo: assessment >> consider adding the logic determine if run in teamcity in the script instead of relying on the IS_TEAMCITY_RUN env variable
 function show_and_execute_docker() {
   local FULL_DOCKER_COMMAND=$1
   unset DOCKER_EXIT_CODE
