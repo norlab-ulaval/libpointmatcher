@@ -7,14 +7,14 @@
 #
 set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
-# ....Project root logic...........................................................................................
+# ....Project root logic...........................................................................
 TMP_CWD=$(pwd)
 
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
   cd ../
 fi
 
-# ....Load environment variables from file.........................................................................
+# ....Load environment variables from file.........................................................
 set -o allexport
 source ./.env
 source ./.env.prompt
@@ -23,7 +23,7 @@ set +o allexport
 # skip GUI dialog by setting everything to default
 export DEBIAN_FRONTEND=noninteractive
 
-# ....Helper function..............................................................................................
+# ....Helper function..............................................................................
 ## import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
@@ -32,7 +32,7 @@ source ./function_library/general_utilities.bash
 # Set environment variable LPM_IMAGE_ARCHITECTURE
 source ./lpm_utility_script/lpm_export_which_architecture.bash
 
-# ====Begin========================================================================================================
+# ====Begin========================================================================================
 SHOW_SPLASH_IDU="${SHOW_SPLASH_IDU:-true}"
 
 if [[ "${SHOW_SPLASH_IDU}" == 'true' ]]; then
@@ -41,7 +41,7 @@ fi
 
 print_formated_script_header "lpm_install_dependencies_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 
-# ................................................................................................................
+# .................................................................................................
 teamcity_service_msg_blockOpened "Install development utilities"
 
 sudo apt-get update &&
@@ -63,7 +63,7 @@ sudo apt-get update &&
 cmake --version
 
 teamcity_service_msg_blockClosed
-# ................................................................................................................
+# .................................................................................................
 
 if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   print_msg "The install script is run in teamCity >> the python install step was executed earlier in the Dockerfile.dependencies"
@@ -72,7 +72,7 @@ else
   source ./ubuntu/lpm_install_python_dev_tools.bash
 fi
 
-# ................................................................................................................
+# .................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Boost"
 # https://www.boost.org/doc/libs/1_79_0/more/getting_started/unix-variants.html
 
@@ -82,7 +82,7 @@ sudo apt-get update &&
   sudo rm -rf /var/lib/apt/lists/*
 
 teamcity_service_msg_blockClosed
-# ................................................................................................................
+# .................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Eigen"
 # https://eigen.tuxfamily.org/index.php
 
@@ -92,7 +92,7 @@ sudo apt-get update &&
   sudo rm -rf /var/lib/apt/lists/*
 
 teamcity_service_msg_blockClosed
-# ................................................................................................................
+# .................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Libnabo"
 # https://github.com/ethz-asl/libnabo
 
@@ -136,6 +136,8 @@ git clone https://github.com/ethz-asl/libnabo.git &&
 
 teamcity_service_msg_compilationStarted "cmake"
 
+# (Priority) inprogress: investigate?? (ref task NMO-402 fix: unstable compilation issue)
+# ToDo: Add mention about 'CMAKE_INSTALL_PREFIX' in the doc install step as a fix
 cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo \
  -D CMAKE_INSTALL_PREFIX=${LPM_INSTALLED_LIBRARIES_PATH} \
  "${LPM_INSTALLED_LIBRARIES_PATH}/libnabo" &&
@@ -143,10 +145,11 @@ cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo \
   make test &&
   sudo make install
 
+
 teamcity_service_msg_compilationFinished
 
 teamcity_service_msg_blockClosed
-# ................................................................................................................
+# .................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher dev tools"
 
 sudo apt-get update &&
@@ -158,5 +161,5 @@ teamcity_service_msg_blockClosed
 
 echo " " && print_msg_done "Libpointmatcher dependencies installed"
 print_formated_script_footer "lpm_install_dependencies_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
-# ====Teardown=====================================================================================================
+# ====Teardown=====================================================================================
 cd "${TMP_CWD}"

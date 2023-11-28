@@ -25,21 +25,21 @@
 #
 set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
-# ....Default......................................................................................................
+# ....Default......................................................................................
 LIBPOINTMATCHER_VERSION='head'
 BUILD_TESTS_FLAG=FALSE
 GENERATE_API_DOC_FLAG=FALSE
 BUILD_SYSTEM_CI_INSTALL=FALSE
 CMAKE_BUILD_TYPE=RelWithDebInfo
 
-# ....Project root logic...........................................................................................
+# ....Project root logic...........................................................................
 TMP_CWD=$(pwd)
 
 if [[ "$(basename $(pwd))" != "build_system" ]]; then
   cd ../
 fi
 
-# ....Load environment variables from file.........................................................................
+# ....Load environment variables from file.........................................................
 set -o allexport
 source ./.env
 source ./.env.prompt
@@ -48,7 +48,7 @@ set +o allexport
 ## skip GUI dialog by setting everything to default
 export DEBIAN_FRONTEND=noninteractive
 
-# ....Helper function..............................................................................................
+# ....Helper function..............................................................................
 ## import shell functions from Libpointmatcher-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
@@ -77,7 +77,7 @@ function print_help_in_terminal() {
   "
 }
 
-# ====Begin========================================================================================================
+# ====Begin========================================================================================
 SHOW_SPLASH_ILU="${SHOW_SPLASH_ILU:-true}"
 
 if [[ "${SHOW_SPLASH_ILU}" == 'true' ]]; then
@@ -87,7 +87,7 @@ fi
 print_formated_script_header "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
 
 
-# ....Script command line flags....................................................................................
+# ....Script command line flags....................................................................
 
 while [ $# -gt 0 ]; do
 
@@ -139,7 +139,7 @@ while [ $# -gt 0 ]; do
 
 done
 
-# ................................................................................................................
+# .................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher"
 # https://github.com/ethz-asl/libpointmatcher/tree/master
 
@@ -178,12 +178,17 @@ teamcity_service_msg_compilationStarted "cmake"
 # (CRITICAL) ToDo: validate >> GENERATE_API_DOC install dir
 
 
+# (Priority) inprogress: investigate?? (ref task NMO-402 fix: unstable compilation issue)
 cmake -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D BUILD_TESTS=${BUILD_TESTS_FLAG} \
   -D GENERATE_API_DOC=${GENERATE_API_DOC_FLAG} \
-  -D LIBNABO_INSTALL_DIR="${LPM_INSTALLED_LIBRARIES_PATH}/libnabo" \
   -D CMAKE_INSTALL_PREFIX="${LPM_INSTALLED_LIBRARIES_PATH}" \
   "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+
+# Note:
+#   - Previously use intall flag quick-hack to work around the install issue.
+#   - Keep it here as futur reference
+#  -D LIBNABO_INSTALL_DIR="${LPM_INSTALLED_LIBRARIES_PATH}/libnabo" \
 
 BUILD_EXIT_CODE=$?
 
@@ -234,5 +239,5 @@ else
 fi
 
 print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
-# ====Teardown=====================================================================================================
+# ====Teardown=====================================================================================
 cd "${TMP_CWD}"

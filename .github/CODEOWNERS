@@ -1,0 +1,13 @@
+# Files or directories with designated code owner.
+# Branch with "Require review from Code Owners" will automaticaly trigger a request to a designated code owner
+
+# DevOps related
+/build_system/ @RedLeader962
+/.github/ @RedLeader962
+/.dockerignore @RedLeader962
+/.gitignore @RedLeader962
+
+# Core
+/pointmatcher @boxanm @simonpierredeschenes @aguenette
+/python @boxanm @simonpierredeschenes @aguenette
+/utest @boxanm @simonpierredeschenes @aguenette
