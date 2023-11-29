@@ -19,9 +19,15 @@
 #                                           (default to RelWithDebInfo)
 #   [-h, --help]                          Get help
 #
+# Global
+#   - Read OVERRIDE_LPM_CMAKE_INSTALL_PREFIX
+#     Usage:
+#       export OVERRIDE_LPM_CMAKE_INSTALL_PREFIX=( "-D CMAKE_INSTALL_PREFIX=/opt" ) \
+#           && source lpm_install_libpointmatcher_ubuntu.bash
+#
 # Note:
 #   - this script required package: g++, make, cmake, build-essential, git and all libpointmatcher dependencies
-#   - execute `lpm_install_dependencies_ubuntu.bash` first
+#   - execute `lpm_install_dependencies_general_ubuntu.bash` first
 #
 set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
@@ -31,6 +37,7 @@ BUILD_TESTS_FLAG=FALSE
 GENERATE_API_DOC_FLAG=FALSE
 BUILD_SYSTEM_CI_INSTALL=FALSE
 CMAKE_BUILD_TYPE=RelWithDebInfo
+
 
 # ....Project root logic...........................................................................
 TMP_CWD=$(pwd)
@@ -139,6 +146,13 @@ while [ $# -gt 0 ]; do
 
 done
 
+
+# ....Override.....................................................................................
+declare -ar DEFAULT_CMAKE_INSTALL_PREFIX=( "-D CMAKE_INSTALL_PREFIX=${LPM_INSTALLED_LIBRARIES_PATH:?err}" )
+declare -a OVERRIDE_LPM_CMAKE_INSTALL_PREFIX
+declare -a LPM_CMAKE_INSTALL_PREFIX=( "${OVERRIDE_LPM_CMAKE_INSTALL_PREFIX[@]:-${DEFAULT_CMAKE_INSTALL_PREFIX[@]}}" )
+
+
 # .................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher"
 # https://github.com/ethz-asl/libpointmatcher/tree/master
@@ -176,14 +190,14 @@ mkdir -p build && cd build
 teamcity_service_msg_compilationStarted "cmake"
 
 # (CRITICAL) ToDo: validate >> GENERATE_API_DOC install dir
-
-
 # (Priority) inprogress: investigate?? (ref task NMO-402 fix: unstable compilation issue)
 cmake -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
   -D BUILD_TESTS=${BUILD_TESTS_FLAG} \
   -D GENERATE_API_DOC=${GENERATE_API_DOC_FLAG} \
-  -D CMAKE_INSTALL_PREFIX="${LPM_INSTALLED_LIBRARIES_PATH}" \
+  "${LPM_CMAKE_INSTALL_PREFIX[@]}" \
   "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+
+#  -D CMAKE_INSTALL_PREFIX="${LPM_INSTALLED_LIBRARIES_PATH}" \
 
 # Note:
 #   - Previously use intall flag quick-hack to work around the install issue.

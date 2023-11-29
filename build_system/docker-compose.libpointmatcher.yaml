@@ -1,9 +1,10 @@
 services:
 
   # ====Dependency related services================================================================
-  dependencies:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies:${LPM_IMAGE_TAG:?err}
+  dependencies-general:
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies-general:${LPM_IMAGE_TAG:?err}
     build:
+      target: libpointmatcher-dependencies-general
       context: ..
       dockerfile: ./build_system/ubuntu/Dockerfile.dependencies
       platforms:
@@ -18,6 +19,13 @@ services:
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)
+
+  dependencies:
+    extends: dependencies-general
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies:${LPM_IMAGE_TAG:?err}
+    build:
+      target: libpointmatcher-dependencies-libnabo
+
   dependencies-doc:
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies-doc:${LPM_IMAGE_TAG:?err}
     build:
@@ -35,6 +43,43 @@ services:
     stdin_open: true
 
   # ====Pull-request related services==============================================================
+  _test_compilation:
+    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-compilation-test:${LPM_IMAGE_TAG:?err}
+    pull_policy: build
+    build:
+      context: ..
+      dockerfile: './build_system/ubuntu/Dockerfile.libpointmatcher_test_compilation'
+      target: test-compilation-auto-path-resolution
+      ## Mute 'platforms' while using arch virtualization with C++ build to prevent segmentation fault during lpm cmake install
+#      platforms:
+#        - "linux/amd64"
+#        - "linux/arm64/v8"
+      args:
+        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        BASE_IMAGE: libpointmatcher-dependencies-general
+        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+        IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
+        LIBPOINTMATCHER_VERSION: 'head'
+        LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
+        LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--build-system-CI-install'
+    tty: true
+    stdin_open: true
+    init: true  # Propagate exit code (See remark in task NMO-266)
+    depends_on:
+      - dependencies-general
+  test_compilation_prefixed_path:
+    extends: _test_compilation
+    build:
+      target: test-compilation-prefixed-path
+    depends_on:
+      - _test_compilation
+  test_compilation_auto_path_resolution:
+    extends: _test_compilation
+    build:
+      target: test-compilation-auto-path-resolution
+    depends_on:
+      - _test_compilation
+
   ci_PR:
     image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-pr:${LPM_IMAGE_TAG:?err}
     pull_policy: build
