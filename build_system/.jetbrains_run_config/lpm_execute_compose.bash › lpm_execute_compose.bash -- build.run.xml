@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="lpm_execute_compose.bash › lpm_execute_compose.bash -- build" type="ShConfigurationType" folderName="(TEST | IamBuildSystemTester) LPM test user script in isolation">
-    <option name="SCRIPT_TEXT" value="bash test_build_and_run_IamBuildSystemTester.bash &quot;bash ./lpm_execute_compose.bash -- build --dry-run&quot;" />
+  <configuration default="false" name="nbs_execute_compose.bash › nbs_execute_compose.bash -- build" type="ShConfigurationType" folderName="(B | TEST › IamBuildSystemTester) LPM test user script in isolation">
+    <option name="SCRIPT_TEXT" value="bash test_build_and_run_IamBuildSystemTester.bash &quot;bash ./nbs_execute_compose.bash -- build --dry-run&quot;" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="(test) lpm_execute_compose_over_build_matrix.bash › build --dry-run" type="ShConfigurationType" folderName="(TEST | dry-run) ">
-    <option name="SCRIPT_TEXT" value="bash lpm_execute_compose_over_build_matrix.bash --fail-fast -- build --dry-run" />
+  <configuration default="false" name="(test) nbs_execute_compose_over_build_matrix.bash › build --dry-run" type="ShConfigurationType" folderName="(B | TEST › dry-run) ">
+    <option name="SCRIPT_TEXT" value="bash nbs_execute_compose_over_build_matrix.bash --fail-fast -- build --dry-run" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />

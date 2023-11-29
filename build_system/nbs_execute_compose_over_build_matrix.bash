@@ -1,18 +1,18 @@
 #!/bin/bash
 #
-# Execute build matrix on docker compose docker-compose.libpointmatcher.yaml
+# Execute build matrix over docker compose file specified in NBS_EXECUTE_BUILD_MATRIX_OVER_COMPOSE_FILE
 #
 # Usage:
-#   $ bash lpm_execute_compose_over_build_matrix.bash [<optional flag>] [-- <any docker cmd+arg>]
+#   $ bash nbs_execute_compose_over_build_matrix.bash [<optional flag>] [-- <any docker cmd+arg>]
 #
-#   $ bash lpm_execute_compose_over_build_matrix.bash -- up --build --force-recreate
+#   $ bash nbs_execute_compose_over_build_matrix.bash -- build --dry-run
 #
 # Arguments:
 #   [--repository-version-build-matrix-override latest]
-#                               The libpointmatcher release tag. Override must be a single value
+#                               The repository release tag. Override must be a single value
 #                               (default to array sequence specified in .env.build_matrix)
 #   [--cmake-build-type-build-matrix-override RelWithDebInfo]
-#                               Change the libpointmatcher compilation mode.
+#                               Change the compilation mode.
 #                               Either 'None' 'Debug' 'Release' 'RelWithDebInfo' or 'MinSizeRel'
 #                               (default to array sequence specified in .env.build_matrix)
 #   [--os-name-build-matrix-override ubuntu]
@@ -24,7 +24,7 @@
 #                               (default to array sequence specified in .env.build_matrix)
 #   [-- <any docker cmd+arg>]
 #                               Any argument passed after '--' will be passed to docker compose
-#                                as docker command and arguments (default: 'up --build --force-recreate')
+#                                as docker command and arguments (default: 'build --dry-run')
 #                               Note: passing script flag via docker --build-arg can be tricky,
 #                                     pass them in the docker-compose.yaml if you experience problem.
 #   [--docker-debug-logs]       Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
@@ -42,7 +42,7 @@
 #set -x
 
 # ....Default......................................................................................................
-DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'
+DOCKER_COMPOSE_CMD_ARGS='build --dry-run'
 BUILD_STATUS_PASS=0
 
 # ....Project root logic...........................................................................................
@@ -56,7 +56,7 @@ source .env.prompt
 set +o allexport
 
 # ....Helper function..............................................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
+## import shell functions from norlab-build-system utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
 source ./function_library/terminal_splash.bash
@@ -94,9 +94,9 @@ function print_help_in_terminal() {
 }
 
 # ====Begin========================================================================================================
-norlab_splash "${LPM_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+norlab_splash "${NBS_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
 
-print_formated_script_header 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
+print_formated_script_header 'nbs_execute_compose_over_build_matrix.bash' "${NBS_LINE_CHAR_BUILDER_LVL1}"
 
 # ....Script command line flags....................................................................................
 while [ $# -gt 0 ]; do
@@ -170,9 +170,9 @@ done
 
 
 # ..................................................................................................................
-print_msg "Build images specified in ${MSG_DIMMED_FORMAT}'docker-compose.libpointmatcher.yaml'${MSG_END_FORMAT} following ${MSG_DIMMED_FORMAT}.env.build_matrix${MSG_END_FORMAT}"
+print_msg "Build images specified in ${MSG_DIMMED_FORMAT}'${NBS_EXECUTE_BUILD_MATRIX_OVER_COMPOSE_FILE}'${MSG_END_FORMAT} following ${MSG_DIMMED_FORMAT}.env.build_matrix${MSG_END_FORMAT}"
 
-## Freeze build matrix env variable to prevent override by lpm_execute_compose.bash when reloading .env/build_matrix
+## Freeze build matrix env variable to prevent override by nbs_execute_compose.bash when reloading .env/build_matrix
 FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS=("${NBS_MATRIX_REPOSITORY_VERSIONS[@]}")
 FREEZED_NBS_MATRIX_SUPPORTED_OS=("${NBS_MATRIX_SUPPORTED_OS[@]}")
 FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("${NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
@@ -188,10 +188,10 @@ ${MSG_DIMMED_FORMAT}    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATR
 ${MSG_DIMMED_FORMAT}    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
 "
 
-# Note: EACH_LPM_VERSION is used for container labeling and to fetch the repo at release tag
-for EACH_LPM_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
+# Note: EACH_NBS_VERSION is used for container labeling and to fetch the repo at release tag
+for EACH_NBS_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
   if [[ ${TEAMCITY_VERSION} ]]; then
-    echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_LPM_VERSION}']"
+    echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_NBS_VERSION}']"
   fi
 
   for EACH_OS_NAME in "${FREEZED_NBS_MATRIX_SUPPORTED_OS[@]}"; do
@@ -214,7 +214,7 @@ for EACH_LPM_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
     fi
 
     for EACH_OS_VERSION in "${CRAWL_OS_VERSIONS[@]}"; do
-#      export LPM_JOB_ID=${LPM_JOB_ID}
+#      export NBS_JOB_ID=${NBS_JOB_ID}
 
       if [[ ${TEAMCITY_VERSION} ]]; then
         echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_OS_VERSION}']"
@@ -226,17 +226,18 @@ for EACH_LPM_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
         SHOW_SPLASH_EC='false'
 
         if [[ ${TEAMCITY_VERSION} ]]; then
-          echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} execute lpm_execute_compose.bash' description='${MSG_DIMMED_FORMAT_TEAMCITY} --repository-version ${EACH_LPM_VERSION} --cmake-build-type ${EACH_CMAKE_BUILD_TYPE} --os-name ${EACH_OS_NAME} --os-version ${EACH_OS_VERSION} -- ${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT_TEAMCITY}|n']"
+          echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} execute nbs_execute_compose.bash' description='${MSG_DIMMED_FORMAT_TEAMCITY} --repository-version ${EACH_NBS_VERSION} --cmake-build-type ${EACH_CMAKE_BUILD_TYPE} --os-name ${EACH_OS_NAME} --os-version ${EACH_OS_VERSION} -- ${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT_TEAMCITY}|n']"
           echo " "
         fi
 
-        source ./lpm_execute_compose.bash --repository-version "${EACH_LPM_VERSION}" \
+        source nbs_execute_compose.bash ${NBS_EXECUTE_BUILD_MATRIX_OVER_COMPOSE_FILE} \
+                                          --repository-version "${EACH_NBS_VERSION}" \
                                           --cmake-build-type "${EACH_CMAKE_BUILD_TYPE}" \
                                           --os-name "${EACH_OS_NAME}" \
                                           --os-version "${EACH_OS_VERSION}" \
                                           -- "${DOCKER_COMPOSE_CMD_ARGS}"
 
-        # ....Collect image tags exported by lpm_execute_compose.bash..............................................
+        # ....Collect image tags exported by nbs_execute_compose.bash..............................................
         # Global: Read 'DOCKER_EXIT_CODE' env variable exported by function show_and_execute_docker
         if [[ ${DOCKER_EXIT_CODE} == 0 ]]; then
           MSG_STATUS="${MSG_DONE_FORMAT}Pass ${MSG_DIMMED_FORMAT}›"
@@ -252,19 +253,19 @@ for EACH_LPM_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
           fi
         fi
 
-        # Collect image tags exported by lpm_execute_compose.bash
-        # Global: Read 'LPM_IMAGE_TAG' env variable exported by lpm_execute_compose.bash
+        # Collect image tags exported by nbs_execute_compose.bash
+        # Global: Read 'NBS_IMAGE_TAG' env variable exported by nbs_execute_compose.bash
         if [[ ${EACH_CMAKE_BUILD_TYPE} == 'None' ]] || [[ -z ${EACH_CMAKE_BUILD_TYPE} ]]; then
-          IMAGE_TAG_CRAWLED=("${IMAGE_TAG_CRAWLED[@]}" "${MSG_STATUS} ${LPM_IMAGE_TAG}")
-          IMAGE_TAG_CRAWLED_TC=("${IMAGE_TAG_CRAWLED_TC[@]}" "${MSG_STATUS_TC_TAG} ${LPM_IMAGE_TAG}")
+          IMAGE_TAG_CRAWLED=("${IMAGE_TAG_CRAWLED[@]}" "${MSG_STATUS} ${NBS_IMAGE_TAG}")
+          IMAGE_TAG_CRAWLED_TC=("${IMAGE_TAG_CRAWLED_TC[@]}" "${MSG_STATUS_TC_TAG} ${NBS_IMAGE_TAG}")
         else
-          IMAGE_TAG_CRAWLED=("${IMAGE_TAG_CRAWLED[@]}" "${MSG_STATUS} ${LPM_IMAGE_TAG} Compile mode: ${EACH_CMAKE_BUILD_TYPE}")
-          IMAGE_TAG_CRAWLED_TC=("${IMAGE_TAG_CRAWLED_TC[@]}" "${MSG_STATUS_TC_TAG} ${LPM_IMAGE_TAG} Compile mode: ${EACH_CMAKE_BUILD_TYPE}")
+          IMAGE_TAG_CRAWLED=("${IMAGE_TAG_CRAWLED[@]}" "${MSG_STATUS} ${NBS_IMAGE_TAG} Compile mode: ${EACH_CMAKE_BUILD_TYPE}")
+          IMAGE_TAG_CRAWLED_TC=("${IMAGE_TAG_CRAWLED_TC[@]}" "${MSG_STATUS_TC_TAG} ${NBS_IMAGE_TAG} Compile mode: ${EACH_CMAKE_BUILD_TYPE}")
         fi
         # .........................................................................................................
 
         if [[ ${TEAMCITY_VERSION} ]]; then
-          echo -e "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} execute lpm_execute_compose.bash']"
+          echo -e "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} execute nbs_execute_compose.bash']"
         fi
 
       done
@@ -281,7 +282,7 @@ for EACH_LPM_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
 
   done
   if [[ ${TEAMCITY_VERSION} ]]; then
-    echo -e "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} ${EACH_LPM_VERSION}']"
+    echo -e "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} ${EACH_NBS_VERSION}']"
   fi
 done
 
@@ -296,7 +297,7 @@ ${MSG_DIMMED_FORMAT}    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_
 
 print_msg_done "FINAL › Build matrix completed with command
 
-${MSG_DIMMED_FORMAT}    $ docker compose -f docker-compose.libpointmatcher.yaml ${DOCKER_COMPOSE_CMD_ARGS} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    $ docker compose -f ${NBS_EXECUTE_BUILD_MATRIX_OVER_COMPOSE_FILE} ${DOCKER_COMPOSE_CMD_ARGS} ${MSG_END_FORMAT}
 
 Status of tag crawled:
 "
@@ -304,7 +305,7 @@ for tag in "${IMAGE_TAG_CRAWLED[@]}" ; do
     echo -e "   ${tag}${MSG_END_FORMAT}"
 done
 
-print_formated_script_footer 'lpm_execute_compose_over_build_matrix.bash' "${LPM_LINE_CHAR_BUILDER_LVL1}"
+print_formated_script_footer 'nbs_execute_compose_over_build_matrix.bash' "${NBS_LINE_CHAR_BUILDER_LVL1}"
 
 # ====TeamCity service message=====================================================================================
 if [[ ${TEAMCITY_VERSION} ]]; then

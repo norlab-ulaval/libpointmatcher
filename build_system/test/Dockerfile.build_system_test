@@ -45,6 +45,11 @@ RUN apt-get update \
 
 
 # ....Install docker tools.........................................................................................
+
+# Required for norlab-build-system path resolution logic
+WORKDIR /libpointmatcher-build-system
+COPY ./.git ./.git
+
 # Copy all files from the checkout branch in the repository (except those in the .dockerignore)
 WORKDIR /libpointmatcher-build-system/build_system
 
@@ -54,7 +59,6 @@ COPY ./build_system/lpm_utility_script/lpm_install_docker_tools.bash ./lpm_utili
 COPY ./build_system/function_library/prompt_utilities.bash ./function_library/prompt_utilities.bash
 
 RUN chmod +x ./lpm_utility_script/lpm_install_docker_tools.bash
-
 
 RUN source ./lpm_utility_script/lpm_install_docker_tools.bash
 

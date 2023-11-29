@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# Build and run a single container based on docker compose docker-compose.libpointmatcher.yaml
+# Build and run a single container based on a norlab-build-system docker-compose.yaml file
 #
 # Usage:
-#   $ bash lpm_execute_compose.bash [<optional flag>] [-- <any docker cmd+arg>]
+#   $ bash nbs_execute_compose.bash  <docker-compose.yaml> [<optional flag>] [-- <any docker cmd+arg>]
 #
-#   $ bash lpm_execute_compose.bash -- run --rm ci
+#   $ bash nbs_execute_compose.bash -- run --rm ci
 #
 # Arguments:
 #   [--repository-version v1.3.1]         The libpointmatcher release tag (default: see REPOSITORY_VERSION)
@@ -33,7 +33,7 @@ REPOSITORY_VERSION='latest'
 LIBPOINTMATCHER_CMAKE_BUILD_TYPE='RelWithDebInfo'
 OS_NAME='ubuntu'
 OS_VERSION='focal'
-#LPM_JOB_ID='0'
+#NBS_JOB_ID='0'
 DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'  # alt: build --no-cache --push
 
 # ....Project root logic...........................................................................................
@@ -42,7 +42,6 @@ TMP_CWD=$(pwd)
 # ....Load environment variables from file.........................................................................
 set -o allexport
 source .env
-source .env.build_matrix
 source .env.prompt
 set +o allexport
 
@@ -88,10 +87,17 @@ print_msg "IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN} ${TC_VERSION}"
 SHOW_SPLASH_EC="${SHOW_SPLASH_EC:-true}"
 
 if [[ "${SHOW_SPLASH_EC}" == 'true' ]]; then
-  norlab_splash "${LPM_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+  norlab_splash "${NBS_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
 fi
 
-print_formated_script_header 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
+declare -r COMPOSE_FILE="${1:?'Missing the docker-compose.yaml file mandatory argument'}"
+shift # Remove argument value
+
+if [[ ! -f ${COMPOSE_FILE} ]]; then
+  print_msg_error_and_exit "docker-compose file ${COMPOSE_FILE} is unreachable"
+fi
+
+print_formated_script_header 'nbs_execute_compose.bash' "${NBS_LINE_CHAR_BUILDER_LVL2}"
 
 # ....Script command line flags....................................................................................
 while [ $# -gt 0 ]; do
@@ -118,7 +124,7 @@ while [ $# -gt 0 ]; do
     shift # Remove argument value
     ;;
 #  --job-id)
-#    LPM_JOB_ID="${2}"
+#    NBS_JOB_ID="${2}"
 #    shift # Remove argument (--job-id)
 #    shift # Remove argument value
 #    ;;
@@ -155,7 +161,7 @@ export LIBPOINTMATCHER_CMAKE_BUILD_TYPE="${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}"
 export DEPENDENCIES_BASE_IMAGE="${OS_NAME}"
 export DEPENDENCIES_BASE_IMAGE_TAG="${OS_VERSION}"
 
-export LPM_IMAGE_TAG="${REPOSITORY_VERSION}-${DEPENDENCIES_BASE_IMAGE}-${DEPENDENCIES_BASE_IMAGE_TAG}"
+export NBS_IMAGE_TAG="${REPOSITORY_VERSION}-${DEPENDENCIES_BASE_IMAGE}-${DEPENDENCIES_BASE_IMAGE_TAG}"
 
 print_msg "Environment variables set for compose:\n
 ${MSG_DIMMED_FORMAT}    REPOSITORY_VERSION=${REPOSITORY_VERSION} ${MSG_END_FORMAT}
@@ -164,15 +170,15 @@ ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE} ${MSG
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG} ${MSG_END_FORMAT}
 "
 
-print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}docker-compose.libpointmatcher.yaml${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
-print_msg "Image tag ${MSG_DIMMED_FORMAT}${LPM_IMAGE_TAG}${MSG_END_FORMAT}"
-#${MSG_DIMMED_FORMAT}$(printenv | grep -i -e LPM_ -e DEPENDENCIES_BASE_IMAGE -e BUILDKIT)${MSG_END_FORMAT}
+print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}${COMPOSE_FILE}${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
+print_msg "Image tag ${MSG_DIMMED_FORMAT}${NBS_IMAGE_TAG}${MSG_END_FORMAT}"
+#${MSG_DIMMED_FORMAT}$(printenv | grep -i -e NBS_ -e DEPENDENCIES_BASE_IMAGE -e BUILDKIT)${MSG_END_FORMAT}
 
 ## docker compose [-f <theComposeFile> ...] [options] [COMMAND] [ARGS...]
 ## docker compose build [OPTIONS] [SERVICE...]
 ## docker compose run [OPTIONS] SERVICE [COMMAND] [ARGS...]
 
-show_and_execute_docker "compose -f docker-compose.libpointmatcher.yaml ${DOCKER_COMPOSE_CMD_ARGS}"
+show_and_execute_docker "compose -f ${COMPOSE_FILE} ${DOCKER_COMPOSE_CMD_ARGS}"
 
 
 print_msg "Environment variables used by compose:\n
@@ -181,6 +187,6 @@ ${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE} ${MSG_END_FORMAT}
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG} ${MSG_END_FORMAT}"
 
-print_formated_script_footer 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
+print_formated_script_footer 'nbs_execute_compose.bash' "${NBS_LINE_CHAR_BUILDER_LVL2}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"

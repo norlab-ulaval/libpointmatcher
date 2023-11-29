@@ -2,7 +2,7 @@ services:
 
   # ====Dependency related services================================================================
   dependencies-general:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies-general:${LPM_IMAGE_TAG:?err}
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies-general:${NBS_IMAGE_TAG:?err}
     build:
       target: libpointmatcher-dependencies-general
       context: ..
@@ -14,20 +14,20 @@ services:
         BASE_IMAGE: ${DEPENDENCIES_BASE_IMAGE:?err}
         BASE_IMAGE_TAG: ${DEPENDENCIES_BASE_IMAGE_TAG:?err}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
-        LPM_INSTALLED_LIBRARIES_PATH: ${LPM_INSTALLED_LIBRARIES_PATH:?err}
-        LPM_LIBPOINTMATCHER_SRC_REPO_NAME: ${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?err}
+        NBS_LIB_INSTALL_PATH: ${NBS_LIB_INSTALL_PATH:?err}
+        NBS_REPOSITORY_NAME: ${NBS_REPOSITORY_NAME:?err}
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)
 
   dependencies:
     extends: dependencies-general
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies:${LPM_IMAGE_TAG:?err}
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies:${NBS_IMAGE_TAG:?err}
     build:
       target: libpointmatcher-dependencies-libnabo
 
   dependencies-doc:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-dependencies-doc:${LPM_IMAGE_TAG:?err}
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies-doc:${NBS_IMAGE_TAG:?err}
     build:
       context: ..
       dockerfile: ./build_system/ubuntu/Dockerfile.dependencies_doc
@@ -35,16 +35,16 @@ services:
         - "linux/amd64"
         - "linux/arm64/v8"
       args:
-        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies
-        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+        BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
     tty: true
     stdin_open: true
 
   # ====Pull-request related services==============================================================
   _test_compilation:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-compilation-test:${LPM_IMAGE_TAG:?err}
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-compilation-test:${NBS_IMAGE_TAG:?err}
     pull_policy: build
     build:
       context: ..
@@ -55,9 +55,9 @@ services:
 #        - "linux/amd64"
 #        - "linux/arm64/v8"
       args:
-        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies-general
-        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+        BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: 'latest'
         LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
@@ -81,16 +81,16 @@ services:
       - _test_compilation
 
   ci_PR:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-pr:${LPM_IMAGE_TAG:?err}
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-ci-pr:${NBS_IMAGE_TAG:?err}
     pull_policy: build
     build:
       context: ..
       dockerfile: './build_system/ubuntu/Dockerfile.libpointmatcher_ci_PR'
       no_cache: true
       args:
-        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies
-        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+        BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: 'latest'
         LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
@@ -113,16 +113,16 @@ services:
 
   # ====Build system assessment services===========================================================
   ci_SITREP_matrix:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher-ci-sitrep-matrix:${LPM_IMAGE_TAG:?err}
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-ci-sitrep-matrix:${NBS_IMAGE_TAG:?err}
     pull_policy: build
     build:
       context: ..
       dockerfile: './build_system/ubuntu/Dockerfile.libpointmatcher_ci_SITREP_matrix'
       no_cache: true
       args:
-        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies
-        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+        BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: ${REPOSITORY_VERSION:?err}
         LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
@@ -139,7 +139,7 @@ services:
 
   # ====Dockerhub release image====================================================================
   release:
-    image: ${LPM_PROJECT_DOCKERHUB:?err}/libpointmatcher:${LPM_IMAGE_TAG:?err}
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher:${NBS_IMAGE_TAG:?err}
     container_name: libpointmatcher
     build:
       context: ..
@@ -149,9 +149,9 @@ services:
         - "linux/arm64/v8"
       no_cache: true
       args:
-        PROJECT_HUB: ${LPM_PROJECT_DOCKERHUB}
+        PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies-doc
-        BASE_IMAGE_TAG: ${LPM_IMAGE_TAG}
+        BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: ${REPOSITORY_VERSION:?err}
         LIBPOINTMATCHER_CMAKE_BUILD_TYPE: 'Release'
