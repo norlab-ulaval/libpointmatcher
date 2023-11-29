@@ -8,10 +8,10 @@
 #   $ bash lpm_execute_compose_over_build_matrix.bash -- up --build --force-recreate
 #
 # Arguments:
-#   [--libpointmatcher-version-build-matrix-override head]
+#   [--repository-version-build-matrix-override latest]
 #                               The libpointmatcher release tag. Override must be a single value
 #                               (default to array sequence specified in .env.build_matrix)
-#   [--libpointmatcher-cmake-build-type-build-matrix-override RelWithDebInfo]
+#   [--cmake-build-type-build-matrix-override RelWithDebInfo]
 #                               Change the libpointmatcher compilation mode.
 #                               Either 'None' 'Debug' 'Release' 'RelWithDebInfo' or 'MinSizeRel'
 #                               (default to array sequence specified in .env.build_matrix)
@@ -29,8 +29,8 @@
 #                                     pass them in the docker-compose.yaml if you experience problem.
 #   [--docker-debug-logs]       Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
 #   [--fail-fast]               Exit script at first encountered error
-#   [--ci-sitrep-run]           Override LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE and
-#                                 LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS with there respective _SITREP version
+#   [--ci-sitrep-run]           Override NBS_MATRIX_CMAKE_BUILD_TYPE and
+#                                 NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS with there respective _SITREP version
 #   [-h, --help]                Get help
 #
 # Note:
@@ -67,10 +67,10 @@ function print_help_in_terminal() {
   \033[1m
     <optional argument>:\033[0m
       -h, --help          Get help
-      --libpointmatcher-version-build-matrix-override head
+      --repository-version-build-matrix-override latest
                           The libpointmatcher release tag. Override must be a single value
                           (default to array sequence specified in .env.build_matrix)
-      --libpointmatcher-cmake-build-type-build-matrix-override RelWithDebInfo
+      --cmake-build-type-build-matrix-override RelWithDebInfo
                           Change the libpointmatcher compilation mode.
                           Either 'None' 'Debug' 'Release' 'RelWithDebInfo' or 'MinSizeRel'
                           (default to array sequence specified in .env.build_matrix)
@@ -84,8 +84,8 @@ function print_help_in_terminal() {
       --docker-debug-logs
                           Set Docker builder log output for debug (i.e.BUILDKIT_PROGRESS=plain)
       --fail-fast         Exit script at first encountered error
-      --ci-sitrep-run     Override LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE and
-                            LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS with there respective _SITREP version
+      --ci-sitrep-run     Override NBS_MATRIX_CMAKE_BUILD_TYPE and
+                            NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS with there respective _SITREP version
 
   \033[1m
     [-- <any docker cmd+arg>]\033[0m                 Any argument passed after '--' will be passed to docker compose as docker
@@ -102,33 +102,33 @@ print_formated_script_header 'lpm_execute_compose_over_build_matrix.bash' "${LPM
 while [ $# -gt 0 ]; do
 
   case $1 in
-  --libpointmatcher-version-build-matrix-override)
-    unset LPM_MATRIX_LIBPOINTMATCHER_VERSIONS
-    LPM_MATRIX_LIBPOINTMATCHER_VERSIONS=("$2")
-    shift # Remove argument (--libpointmatcher-version-build-matrix-override)
+  --repository-version-build-matrix-override)
+    unset NBS_MATRIX_REPOSITORY_VERSIONS
+    NBS_MATRIX_REPOSITORY_VERSIONS=("$2")
+    shift # Remove argument (--repository-version-build-matrix-override)
     shift # Remove argument value
     ;;
-  --libpointmatcher-cmake-build-type-build-matrix-override)
-    unset LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE
-    LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE=("$2")
-    shift # Remove argument (--libpointmatcher-cmake-build-type-build-matrix-override)
+  --cmake-build-type-build-matrix-override)
+    unset NBS_MATRIX_CMAKE_BUILD_TYPE
+    NBS_MATRIX_CMAKE_BUILD_TYPE=("$2")
+    shift # Remove argument (--cmake-build-type-build-matrix-override)
     shift # Remove argument value
     ;;
   --os-name-build-matrix-override)
-    unset LPM_MATRIX_SUPPORTED_OS
-    LPM_MATRIX_SUPPORTED_OS=("$2")
+    unset NBS_MATRIX_SUPPORTED_OS
+    NBS_MATRIX_SUPPORTED_OS=("$2")
     shift # Remove argument (--os-name-build-matrix-override)
     shift # Remove argument value
     ;;
   --ubuntu-version-build-matrix-override)
-    unset LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS
-    LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("$2")
+    unset NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS
+    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("$2")
     shift # Remove argument (--ubuntu-version-build-matrix-override)
     shift # Remove argument value
     ;;
   --osx-version-build-matrix-override)
-    unset LPM_MATRIX_OSX_SUPPORTED_VERSIONS
-    LPM_MATRIX_OSX_SUPPORTED_VERSIONS=("$2")
+    unset NBS_MATRIX_OSX_SUPPORTED_VERSIONS
+    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=("$2")
     shift # Remove argument (--osx-version-build-matrix-override)
     shift # Remove argument value
     ;;
@@ -144,13 +144,13 @@ while [ $# -gt 0 ]; do
     ;;
   --ci-sitrep-run)
     shift # Remove argument (--ci-sitrep-run)
-    unset LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE
-    unset LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS
-    LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE=("${LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE_SITREP[@]}")
-    LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("${LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS_SITREP[@]}")
+    unset NBS_MATRIX_CMAKE_BUILD_TYPE
+    unset NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS
+    NBS_MATRIX_CMAKE_BUILD_TYPE=("${NBS_MATRIX_CMAKE_BUILD_TYPE_SITREP[@]}")
+    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("${NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS_SITREP[@]}")
     print_msg "${MSG_DIMMED_FORMAT}ci-sitrep${MSG_END_FORMAT} run environment variable override:
-        - ${MSG_DIMMED_FORMAT}LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE=(${LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE_SITREP[*]})${MSG_END_FORMAT}
-        - ${MSG_DIMMED_FORMAT}LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS_SITREP[*]})${MSG_END_FORMAT}"
+        - ${MSG_DIMMED_FORMAT}NBS_MATRIX_CMAKE_BUILD_TYPE=(${NBS_MATRIX_CMAKE_BUILD_TYPE_SITREP[*]})${MSG_END_FORMAT}
+        - ${MSG_DIMMED_FORMAT}NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS_SITREP[*]})${MSG_END_FORMAT}"
     ;;
   -h | --help)
     print_help_in_terminal
@@ -173,34 +173,34 @@ done
 print_msg "Build images specified in ${MSG_DIMMED_FORMAT}'docker-compose.libpointmatcher.yaml'${MSG_END_FORMAT} following ${MSG_DIMMED_FORMAT}.env.build_matrix${MSG_END_FORMAT}"
 
 ## Freeze build matrix env variable to prevent override by lpm_execute_compose.bash when reloading .env/build_matrix
-FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS=("${LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}")
-FREEZED_LPM_MATRIX_SUPPORTED_OS=("${LPM_MATRIX_SUPPORTED_OS[@]}")
-FREEZED_LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("${LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
-FREEZED_LPM_MATRIX_OSX_SUPPORTED_VERSIONS=("${LPM_MATRIX_OSX_SUPPORTED_VERSIONS[@]}")
-FREEZED_LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE=("${LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE[@]}")
+FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS=("${NBS_MATRIX_REPOSITORY_VERSIONS[@]}")
+FREEZED_NBS_MATRIX_SUPPORTED_OS=("${NBS_MATRIX_SUPPORTED_OS[@]}")
+FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("${NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
+FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS=("${NBS_MATRIX_OSX_SUPPORTED_VERSIONS[@]}")
+FREEZED_NBS_MATRIX_CMAKE_BUILD_TYPE=("${NBS_MATRIX_CMAKE_BUILD_TYPE[@]}")
 
 
 print_msg "Environment variables ${MSG_EMPH_FORMAT}(build matrix)${MSG_END_FORMAT} set for compose:\n
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_LIBPOINTMATCHER_VERSIONS=(${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE=(${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_SUPPORTED_OS=(${FREEZED_LPM_MATRIX_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_LPM_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_REPOSITORY_VERSIONS=(${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_CMAKE_BUILD_TYPE=(${FREEZED_NBS_MATRIX_CMAKE_BUILD_TYPE[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_SUPPORTED_OS=(${FREEZED_NBS_MATRIX_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
 "
 
 # Note: EACH_LPM_VERSION is used for container labeling and to fetch the repo at release tag
-for EACH_LPM_VERSION in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}"; do
+for EACH_LPM_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
   if [[ ${TEAMCITY_VERSION} ]]; then
     echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_LPM_VERSION}']"
   fi
 
-  for EACH_OS_NAME in "${FREEZED_LPM_MATRIX_SUPPORTED_OS[@]}"; do
+  for EACH_OS_NAME in "${FREEZED_NBS_MATRIX_SUPPORTED_OS[@]}"; do
     unset CRAWL_OS_VERSIONS
 
     if [[ ${EACH_OS_NAME} == 'ubuntu' ]]; then
-      CRAWL_OS_VERSIONS=("${FREEZED_LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
+      CRAWL_OS_VERSIONS=("${FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
     elif [[ ${EACH_OS_NAME} == 'osx' ]]; then
-      CRAWL_OS_VERSIONS=("${FREEZED_LPM_MATRIX_OSX_SUPPORTED_VERSIONS[@]}")
+      CRAWL_OS_VERSIONS=("${FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS[@]}")
     else
       print_msg_error_and_exit "${EACH_OS_NAME} not supported!"
     fi
@@ -220,18 +220,18 @@ for EACH_LPM_VERSION in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[@]}"; do
         echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_OS_VERSION}']"
       fi
 
-      for EACH_CMAKE_BUILD_TYPE in "${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE[@]}"; do
+      for EACH_CMAKE_BUILD_TYPE in "${FREEZED_NBS_MATRIX_CMAKE_BUILD_TYPE[@]}"; do
 
         # shellcheck disable=SC2034
         SHOW_SPLASH_EC='false'
 
         if [[ ${TEAMCITY_VERSION} ]]; then
-          echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} execute lpm_execute_compose.bash' description='${MSG_DIMMED_FORMAT_TEAMCITY} --libpointmatcher-version ${EACH_LPM_VERSION} --libpointmatcher-cmake-build-type ${EACH_CMAKE_BUILD_TYPE} --os-name ${EACH_OS_NAME} --os-version ${EACH_OS_VERSION} -- ${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT_TEAMCITY}|n']"
+          echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} execute lpm_execute_compose.bash' description='${MSG_DIMMED_FORMAT_TEAMCITY} --repository-version ${EACH_LPM_VERSION} --cmake-build-type ${EACH_CMAKE_BUILD_TYPE} --os-name ${EACH_OS_NAME} --os-version ${EACH_OS_VERSION} -- ${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT_TEAMCITY}|n']"
           echo " "
         fi
 
-        source ./lpm_execute_compose.bash --libpointmatcher-version "${EACH_LPM_VERSION}" \
-                                          --libpointmatcher-cmake-build-type "${EACH_CMAKE_BUILD_TYPE}" \
+        source ./lpm_execute_compose.bash --repository-version "${EACH_LPM_VERSION}" \
+                                          --cmake-build-type "${EACH_CMAKE_BUILD_TYPE}" \
                                           --os-name "${EACH_OS_NAME}" \
                                           --os-version "${EACH_OS_VERSION}" \
                                           -- "${DOCKER_COMPOSE_CMD_ARGS}"
@@ -287,11 +287,11 @@ done
 
 echo " "
 print_msg "Environment variables ${MSG_EMPH_FORMAT}(build matrix)${MSG_END_FORMAT} used by compose:\n
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_LIBPOINTMATCHER_VERSIONS=(${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_VERSIONS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE=(${FREEZED_LPM_MATRIX_LIBPOINTMATCHER_CMAKE_BUILD_TYPE[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_SUPPORTED_OS=(${FREEZED_LPM_MATRIX_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_LPM_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    LPM_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_LPM_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_REPOSITORY_VERSIONS=(${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_CMAKE_BUILD_TYPE=(${FREEZED_NBS_MATRIX_CMAKE_BUILD_TYPE[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_SUPPORTED_OS=(${FREEZED_NBS_MATRIX_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
 "
 
 print_msg_done "FINAL › Build matrix completed with command

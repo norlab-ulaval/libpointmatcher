@@ -8,7 +8,7 @@
 # Arguments:
 #   [--install-path </dir/abs/path/>]     The directory where to install libpointmatcher (absolute path)
 #                                           (default location defined in the .env)
-#   [--libpointmatcher-version v1.3.1]    Install libpointmatcher release tag version (default to master branch head)
+#   [--repository-version v1.3.1]         Install libpointmatcher release tag version (default to master branch latest)
 #   [--compile-test]                      Compile the libpointmatcher unit-test
 #   [--generate-doc]                      Generate the libpointmatcher doxygen documentation
 #                                           in /usr/local/share/doc/libpointmatcher/api/html/index.html
@@ -32,7 +32,7 @@
 set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
 # ....Default......................................................................................
-LIBPOINTMATCHER_VERSION='head'
+REPOSITORY_VERSION='latest'
 BUILD_TESTS_FLAG=FALSE
 GENERATE_API_DOC_FLAG=FALSE
 BUILD_SYSTEM_CI_INSTALL=FALSE
@@ -70,7 +70,7 @@ function print_help_in_terminal() {
   \033[1m<optional argument>:\033[0m
     --install-path </dir/abs/path/>       The directory where to install libpointmatcher (absolute path)
                                             (default location ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH:?'err LPM_INSTALLED_LIBRARIES_PATH env variable was not fetched from the .env'}${MSG_END_FORMAT})
-    --libpointmatcher-version v1.3.1      Install libpointmatcher release tag version (default to master branch head)
+    --repository-version v1.3.1           Install libpointmatcher release tag version (default to master branch latest)
     --compile-test                        Compile the libpointmatcher unit-test
                                             in ${MSG_DIMMED_FORMAT}${LPM_INSTALLED_LIBRARIES_PATH}/libpointmatcher/build${MSG_END_FORMAT}
     --generate-doc                        Generate the libpointmatcher doxygen documentation
@@ -105,9 +105,9 @@ while [ $# -gt 0 ]; do
     shift # Remove argument (--install-path)
     shift # Remove argument value
     ;;
-  --libpointmatcher-version)
-    LIBPOINTMATCHER_VERSION="${2}"
-    shift # Remove argument (--libpointmatcher-version)
+  --repository-version)
+    REPOSITORY_VERSION="${2}"
+    shift # Remove argument (--repository-version)
     shift # Remove argument value
     ;;
   --cmake-build-type)
@@ -170,14 +170,14 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
 
   git clone https://github.com/"${LPM_LIBPOINTMATCHER_SRC_DOMAIN}"/"${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}".git
 
-  if [[ "${LIBPOINTMATCHER_VERSION}" != 'head' ]]; then
+  if [[ "${REPOSITORY_VERSION}" != 'latest' ]]; then
     cd "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"/
 
     git fetch --tags
     git tag --list
 
     # Remove prefix 'v' from version tag
-    GITHUB_TAG="${LIBPOINTMATCHER_VERSION/v/}"
+    GITHUB_TAG="${REPOSITORY_VERSION/v/}"
     print_msg "GITHUB_TAG=${GITHUB_TAG}"
 
     git checkout tags/"${GITHUB_TAG}"
