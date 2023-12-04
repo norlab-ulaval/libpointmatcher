@@ -23,7 +23,7 @@ i.e. for each node, the Visitor/Callback is called
 
 			firstptssamplerClass.def_readwrite("idx", &FirstPtsSampler::idx)
 //			.def_readwrite("pts", &FirstPtsSampler::pts, py::return_value_policy::reference) FIXME
-				.def_readwrite("mapidx", &FirstPtsSampler::mapidx, "Build map of (old index to new index), in case we sample pts at the begining of the pointcloud")
+				.def_readwrite("mapidx", &FirstPtsSampler::mapidx, "Build map of (old index to new index), in case we sample pts at the beginning of the pointcloud")
 
 				.def(py::init<DataPoints&>(), py::arg("dp"))
 
@@ -56,10 +56,17 @@ i.e. for each node, the Visitor/Callback is called
 //			.def("__call__", &RandomPtsSampler::operator()<2>, py::arg("oc")) FIXME
 //			.def("__call__", &RandomPtsSampler::operator()<3>, py::arg("oc")); FIXME
 
+			using CentroidSampler = OctreeGridDataPointsFilter::NDTSampler;
+			py::class_<NDTSampler, FirstPtsSampler>(firstptssamplerClass, "NDTSampler")
+				.def(py::init<DataPoints&>(), py::arg("dp"));
+
+//			.def("__call__", &NDTSampler::operator()<2>, py::arg("oc")) FIXME
+//			.def("__call__", &NDTSampler::operator()<3>, py::arg("oc")); FIXME
+
 			using SamplingMethod = OctreeGridDataPointsFilter::SamplingMethod;
 			py::enum_<SamplingMethod>(octreegridClass, "SamplingMethod").value("FIRST_PTS", SamplingMethod::FIRST_PTS)
 				.value("RAND_PTS", SamplingMethod::RAND_PTS).value("CENTROID", SamplingMethod::CENTROID)
-				.value("MEDOID", SamplingMethod::MEDOID).export_values();
+				.value("MEDOID", SamplingMethod::MEDOID).value("NDT", SamplingMethod::NDT).export_values();
 
 			octreegridClass.def_static("description", &OctreeGridDataPointsFilter::description)
 				.def_static("availableParameters", &OctreeGridDataPointsFilter::availableParameters)
