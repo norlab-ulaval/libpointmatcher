@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 include(CheckSymbolExists)
+include(CMakePackageConfigHelpers)
 
 
 #========================
@@ -26,12 +27,8 @@ endif ()
 string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTMATCHER_PROJECT_VERSION}")
 
 # In 3.0+, project(...) should specify VERSION to satisfy CMP0048
-if (CMAKE_VERSION VERSION_LESS 3.0.0)
-	project(libpointmatcher)
-else ()
-	cmake_policy(SET CMP0048 NEW)
-	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
-endif ()
+cmake_policy(SET CMP0048 NEW)
+project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
 
 set(CMAKE_DEBUG_POSTFIX "d")
 
@@ -161,7 +158,8 @@ if (NOT TARGET nabo)
   # Find libnabo:
   find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
   if (TARGET libnabo::nabo)
-    message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode)")
+ 	set(libnabo_LIBRARIES libnabo::nabo)
+    message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode,  libs=${libnabo_LIBRARIES})")
   else()
     message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
   endif()
@@ -173,7 +171,6 @@ endif()
 # This cmake target alias will be defined by either:
 # a) libnabo sources if built as a git submodule in the same project than this library, or
 # b) by libnabo-targets.cmake, included by find_package(libnabo) above.
-# set(libnabo_LIBRARIES libnabo::nabo)
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
@@ -219,14 +216,13 @@ endif()
 #--------------------
 
 message(STATUS "Looking for yaml-cpp on system...")
-
-find_package(yaml-cpp QUIET)
-
-if(yaml-cpp_FOUND)
-        message(STATUS "yaml-cpp version ${yaml-cpp_VERSION} found, text-based configuration enabled")
-else()
-        message(STATUS "yaml-cpp not found, text-based configuration and related applications disabled")
+find_package(yaml-cpp CONFIG REQUIRED)
+if(TARGET yaml-cpp::yaml-cpp)
+	set(YAML_CPP_LIBRARIES "yaml-cpp::yaml-cpp")
 endif()
+if(YAML_CPP_LIBRARIES STREQUAL "")
+	set(YAML_CPP_LIBRARIES "yaml-cpp") # Fix linking issue on MacOS with yaml-cpp 0.7.0
+endif ()
 
 
 #--------------------
@@ -362,7 +358,7 @@ target_include_directories(pointmatcher PUBLIC
   $<INSTALL_INTERFACE:pointmatcher>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher>
-	$<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
+  $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
 )
 
 if (NOT MSVC)
@@ -371,10 +367,8 @@ else()
 	target_compile_options(pointmatcher PRIVATE /bigobj)
 endif()
 
-if(yaml-cpp_FOUND)
-	target_link_libraries(pointmatcher PUBLIC ${YAML_CPP_LIBRARIES})
-	target_include_directories(pointmatcher PUBLIC ${YAML_CPP_INCLUDE_DIR})
-endif()
+target_link_libraries(pointmatcher PUBLIC ${YAML_CPP_LIBRARIES})
+target_include_directories(pointmatcher PUBLIC ${YAML_CPP_INCLUDE_DIR})
 
 target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
 
@@ -432,7 +426,7 @@ set(GENERATE_API_DOC false CACHE BOOL "Set to true to build the documentation us
 
 if(GENERATE_API_DOC)
 
-	message("-- API Documentation (doxygen): enabled")
+	message(STATUS "API Documentation (doxygen): enabled")
 
 	# Note: there seems to be equations in the documentation leading to the
 	# use of Latex anyway. This cause problems for user without latex...
@@ -452,21 +446,19 @@ endif()
 #=============== trigger other makefile ======================
 
 # Example programs
-option(POINTMATCHER_BUILD_EXAMPLES "Build libpointmatcher examples" ON)
-if (POINTMATCHER_BUILD_EXAMPLES)
+option(BUILD_EXAMPLES "Build libpointmatcher examples" ON)
+if (BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
 # Evaluation programs
-option(POINTMATCHER_BUILD_EVALUATIONS "Build libpointmatcher evaluations" ON)
-if (POINTMATCHER_BUILD_EVALUATIONS)
+option(BUILD_EVALUATIONS "Build libpointmatcher evaluations" ON)
+if (BUILD_EVALUATIONS)
   add_subdirectory(evaluations)
 endif()
 
 # Unit testing
-
 option(BUILD_TESTS "Build all tests." OFF)
-
 if (BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(utest)
@@ -490,6 +482,8 @@ endif()
 #  target_link_libraries(executableName ${libpointmatcher_LIBRARIES})
 #  ...
 
+# 1- local build #
+
 # Install cmake config module
 install(EXPORT ${PROJECT_NAME}-config DESTINATION share/${PROJECT_NAME}/cmake)
 
@@ -507,27 +501,27 @@ get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY IN
 set(POINTMATCHER_LIB  $<TARGET_FILE:pointmatcher>)
 
 # Configure config file for local build tree
-configure_file(libpointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" @ONLY)
+configure_package_config_file(libpointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake"
+  		INSTALL_DESTINATION share/libnabo/cmake
+		PATH_VARS PROJECT_NAME
+		)
 
 # 2- installation build #
 
 # Change the include location for the case of an install location
 set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 
-#FIXME: this will only be applied to installed files. Confirm that we want that.
-# gather all the includes but remove ones in the source tree
-# because we added an include for the local yaml-cpp-pm we should also remove it
-list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR})
-
 # We put the generated file for installation in a different repository (i.e., ./CMakeFiles/)
-configure_file(libpointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" @ONLY)
+configure_package_config_file(libpointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
+  		INSTALL_DESTINATION share/libnabo/cmake
+		PATH_VARS PROJECT_NAME
+		)
 
 # The same versioning file can be used for both cases
-configure_file(libpointmatcherConfigVersion.cmake.in
-  "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" @ONLY)
-
+write_basic_package_version_file(libpointmatcherConfigVersion.cmake
+		COMPATIBILITY AnyNewerVersion)
 
 # Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
 install(

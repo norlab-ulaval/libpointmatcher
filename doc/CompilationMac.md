@@ -114,7 +114,7 @@ brew install eigen
 
 ### 2. Installing yaml-cpp
 
-The straightforward way to install yaml-cpp library through brew was, as for hte end 2023, not functional  
+The straightforward way to install yaml-cpp library through brew was, as for the end of 2023, not functional  
 ```bash
 brew install yaml-cpp
 ```
@@ -122,7 +122,7 @@ Instead, you can install the library from sources. Follow https://github.com/jbe
 ```bash
 mkdir ~/Libraries/
 cd ~/Libraries
-git clone git@github.com:jbeder/yaml-cpp.git
+git clone -b yaml-cpp-0.7.0 git@github.com:jbeder/yaml-cpp.git
 cd yaml-cpp
 ```
 Now you can compile and install yaml-cpp by entering the following commands
@@ -131,7 +131,7 @@ Now you can compile and install yaml-cpp by entering the following commands
 SRC_DIR=$PWD
 BUILD_DIR=${SRC_DIR}/build
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
-cmake ..
+cmake -DBUILD_TESTING=FALSE ..
 make
 sudo make install
 ```
