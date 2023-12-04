@@ -1,6 +1,6 @@
 #include "../utest.h"
 #include <cmath>
-#include "pointmatcher/DataPointsFilters/Symmetry.h"
+#include "pointmatcher/DataPointsFilters/utils/distribution.h"
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -9,7 +9,7 @@ using namespace PointMatcherSupport;
 // Symmetry DataFilter modules
 //---------------------------
 
-TEST(SymmetryDataPointsFilter, Distributions) // TODO add test for incremental statistics (running average) for descriptors calculation
+TEST(Distribution, Distribution) // TODO add test for incremental statistics (running average) for descriptors calculation
 {
     const float sigmaLaser = 0.0009;
 
