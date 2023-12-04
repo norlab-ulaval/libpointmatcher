@@ -493,6 +493,81 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 			}
 }
 
+TEST_F(DataFilterTest, NDTOctreeGridDataPointsFilter)
+{
+	const unsigned int nbPts = 60000;
+	const DP cloud = generateRandomDataPoints(nbPts);
+	params = PM::Parameters();
+    params.clear();
+
+	auto paramsOmega = PM::Parameters();
+    paramsOmega["descriptorName"] = toParam("omega");
+    paramsOmega["descriptorDimension"] = toParam(1);
+    paramsOmega["descriptorValues"] = toParam("[1]");
+
+    std::shared_ptr<PM::DataPointsFilter> filterOmega = PM::get().DataPointsFilterRegistrar.create("AddDescriptorDataPointsFilter", paramsOmega);
+    DP cloud1 = filterOmega->filter(cloud);
+
+	auto paramsDeviation = PM::Parameters();
+    paramsDeviation["descriptorName"] = toParam("deviation");
+    paramsDeviation["descriptorDimension"] = toParam(9);
+    paramsDeviation["descriptorValues"] = toParam("[0.0009, 0, 0, 0, 0.0009, 0, 0, 0, 0.0009]");
+
+    std::shared_ptr<PM::DataPointsFilter> filterDeviation = PM::get().DataPointsFilterRegistrar.create("AddDescriptorDataPointsFilter", paramsDeviation);
+    const DP cloudDescriptors = filterDeviation->filter(cloud1);
+
+    EXPECT_TRUE(cloudDescriptors.descriptorLabels.contains("omega"));
+    EXPECT_TRUE(cloudDescriptors.descriptorLabels.contains("deviation"));
+
+	std::shared_ptr<PM::DataPointsFilter> octreeFilter;
+
+    for(const size_t maxData : {1,5})
+        for(const float maxSize : {0.,0.05})
+        {
+            params.clear();
+            params["maxPointByNode"] = toParam(maxData);
+            params["maxSizeByNode"] = toParam(maxSize);
+            params["samplingMethod"] = toParam(4);
+            params["buildParallel"] = "1";
+
+            octreeFilter = PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
+
+            const DP filteredCloud = octreeFilter->filter(cloudDescriptors);
+
+            if(maxData==1 and maxSize==0.)
+            {
+                // 1/pts by octants + validate parallel build
+                // the number of point should not change
+                // the sampling methods should not change anything
+                //Check number of points
+                EXPECT_EQ(cloudDescriptors.getNbPoints(), filteredCloud.getNbPoints());
+                EXPECT_EQ(cloudDescriptors.getDescriptorDim(), filteredCloud.getDescriptorDim());
+                EXPECT_EQ(cloudDescriptors.getTimeDim(), filteredCloud.getTimeDim());
+
+                EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
+            }
+            else
+            {
+                //Check number of points
+                EXPECT_GE(cloudDescriptors.getNbPoints(), filteredCloud.getNbPoints());
+            }
+
+            float sum_omega = 0;
+            for(int i = 0; i < filteredCloud.getNbPoints(); ++i)
+            {
+                sum_omega += filteredCloud.getDescriptorViewByName("omega")(0, i);
+            }
+            EXPECT_EQ(cloudDescriptors.getNbPoints(), sum_omega);
+            //Validate transformation
+            icp.readingDataPointsFilters.clear();
+            addFilter("AddDescriptorDataPointsFilter", paramsOmega);
+            addFilter("AddDescriptorDataPointsFilter", paramsDeviation);
+            addFilter("OctreeGridDataPointsFilter", params);
+            validate2dTransformation();
+            validate3dTransformation();
+        }
+}
+
 TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 {
 	const size_t nbPts = 60000;

@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "OctreeGrid.h"
 
+#include "utils/distribution.h"
 #include <limits>
 
 //Define Visitor classes to apply processing
@@ -211,6 +212,103 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 	
 	return true;
 }
+
+template<typename T>
+OctreeGridDataPointsFilter<T>::NDTSampler::NDTSampler(DataPoints& dp)
+	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
+{
+}
+	
+template<typename T>
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::NDTSampler::operator()(Octree_<T,dim>& oc)
+{
+	if(oc.isLeaf() and not oc.isEmpty())
+	{
+		auto* data = oc.getData();
+		const std::size_t nbData = (*data).size();
+			
+		const auto& d = (*data)[0]; //get first data
+		std::size_t j = d; //j contains real index of first point
+		
+		//retrieve index from lookup table if sampling in already switched element
+		while(j<idx)
+        {
+//            std::cout << "|orig j: " << j << "|";
+            j = mapidx[j];
+        }
+
+        auto points = pts.features;
+        auto omegas = pts.getDescriptorViewByName("omega");
+        auto deviations = pts.getDescriptorViewByName("deviation");
+
+//        std::cout << "Processing " << nbData << " points. j: "<< j << ", d: " << d << ", idx: " << idx << ", omega " << omegas(0, j) << "\t";
+
+        assert(j >= idx);
+
+        std::vector<std::shared_ptr<Distribution<T>>> distributions;
+
+        Eigen::Map<Eigen::Matrix<T, 3, 3>> deviationMatrix(deviations.block(0, j, 9, 1).data(), 3, 3);
+        distributions.emplace_back(new Distribution<T>(points.col(j).head(3),
+                                                       omegas(0, j),
+                                                       deviationMatrix,
+                                                       pts.times.col(j),
+                                                       pts.descriptors.col(j)));
+        assert(omegas(0, j) == 1);
+		//We sum all the data in the first data
+		for(std::size_t id=1;id<nbData;++id)
+		{
+			//get current idx
+			const auto& curId = (*data)[id];
+			std::size_t i = curId; //i contains real index
+
+			//retrieve index from lookup table if sampling in already switched element
+			while(i<idx)
+				i = mapidx[i];
+
+            assert(i >= idx);
+            assert(omegas(0, i) == 1);
+            Eigen::Map<Eigen::Matrix<T, 3, 3>> deviationMatrix(deviations.block(0, i, 9, 1).data(), 3, 3);
+            distributions.emplace_back(new Distribution<T>(points.col(i).head(3),
+                                                           omegas(0, i),
+                                                           deviationMatrix,
+                                                           pts.times.col(i),
+                                                           pts.descriptors.col(i)));
+		}
+
+        Distribution<T> combined_distro = *distributions[0];
+		// Combine all distributions
+        for(int i = 1; i < distributions.size(); ++i)
+        {
+            combined_distro = Distribution<T>::combineDistros(combined_distro, *distributions[i]);
+        }
+
+        if (nbData == 1)
+            assert(combined_distro.omega == omegas(0, j));
+        else
+            assert(combined_distro.omega == nbData);
+        pts.features.col(j).head(3) = combined_distro.point;
+        pts.descriptors.col(j) = combined_distro.descriptors;
+        pts.times.col(j) = combined_distro.times;
+
+        omegas(0, j) = combined_distro.omega;
+
+        Eigen::Map<Eigen::Matrix<T, 9, 1>> deviationVector((combined_distro).deviation.data(), 9, 1);
+        deviations.col(j) = deviationVector;
+
+		//Switch columns j and idx
+		pts.swapCols(idx, j);
+
+//        std::cout << "swapping " << j << " and " << idx << ". omega: " << combined_distro.omega << std::endl;
+		//Maintain new index position	
+		mapidx[idx] = j;
+		//Update index
+		++idx;		
+	}
+	
+	return true;
+}
+
 template<typename T>
 OctreeGridDataPointsFilter<T>::MedoidSampler::MedoidSampler(DataPoints& dp)  
 	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
@@ -362,6 +460,13 @@ void OctreeGridDataPointsFilter<T>::sample(DataPoints& cloud)
 		case SamplingMethod::MEDOID:
 		{
 			MedoidSampler sampler(cloud);
+			oc.visit(sampler);
+			sampler.finalize();
+			break;
+		}
+		case SamplingMethod::NDT:
+		{
+			NDTSampler sampler(cloud);
 			oc.visit(sampler);
 			sampler.finalize();
 			break;
