@@ -56,7 +56,7 @@ i.e. for each node, the Visitor/Callback is called
 //			.def("__call__", &RandomPtsSampler::operator()<2>, py::arg("oc")) FIXME
 //			.def("__call__", &RandomPtsSampler::operator()<3>, py::arg("oc")); FIXME
 
-			using CentroidSampler = OctreeGridDataPointsFilter::NDTSampler;
+			using NDTSampler = OctreeGridDataPointsFilter::NDTSampler;
 			py::class_<NDTSampler, FirstPtsSampler>(firstptssamplerClass, "NDTSampler")
 				.def(py::init<DataPoints&>(), py::arg("dp"));
 
