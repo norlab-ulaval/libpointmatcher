@@ -11,6 +11,9 @@ ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
 SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 
+# Required for norlab-build-system path resolution logic
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+COPY ./.git ./.git
 
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system"
 
