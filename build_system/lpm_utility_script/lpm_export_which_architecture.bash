@@ -29,7 +29,6 @@
 #   exit 1 in case of unsupported processor architecture
 
 function export_which_architecture() {
-  # ....Project root logic.........................................................................
   local TMP_CWD
   TMP_CWD=$(pwd)
 
@@ -43,7 +42,7 @@ function export_which_architecture() {
   set +o allexport
 
   # ....Helper function............................................................................
-  ## import shell functions from Libpointmatcher-build-system utilities library
+  # import shell functions from utilities library
   source ./function_library/prompt_utilities.bash
 
   # ====Begin======================================================================================

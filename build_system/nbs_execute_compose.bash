@@ -34,7 +34,7 @@ LIBPOINTMATCHER_CMAKE_BUILD_TYPE='RelWithDebInfo'
 OS_NAME='ubuntu'
 OS_VERSION='focal'
 #NBS_JOB_ID='0'
-DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'  # alt: build --no-cache --push
+DOCKER_COMPOSE_CMD_ARGS='build --dry-run'  # alt: "build --no-cache --push" or "up --build --force-recreate"
 
 # ....Project root logic...........................................................................................
 TMP_CWD=$(pwd)
@@ -46,7 +46,7 @@ source .env.prompt
 set +o allexport
 
 # ....Helper function..............................................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
+# import shell functions from utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
 source ./function_library/terminal_splash.bash
@@ -90,11 +90,11 @@ if [[ "${SHOW_SPLASH_EC}" == 'true' ]]; then
   norlab_splash "${NBS_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
 fi
 
-declare -r COMPOSE_FILE="${1:?'Missing the docker-compose.yaml file mandatory argument'}"
+_COMPOSE_FILE="${1:?'Missing the docker-compose.yaml file mandatory argument'}"
 shift # Remove argument value
 
-if [[ ! -f ${COMPOSE_FILE} ]]; then
-  print_msg_error_and_exit "docker-compose file ${COMPOSE_FILE} is unreachable"
+if [[ ! -f ${_COMPOSE_FILE} ]]; then
+  print_msg_error_and_exit "docker-compose file ${_COMPOSE_FILE} is unreachable"
 fi
 
 print_formated_script_header 'nbs_execute_compose.bash' "${NBS_LINE_CHAR_BUILDER_LVL2}"
@@ -123,11 +123,6 @@ while [ $# -gt 0 ]; do
     shift # Remove argument (--os-version)
     shift # Remove argument value
     ;;
-#  --job-id)
-#    NBS_JOB_ID="${2}"
-#    shift # Remove argument (--job-id)
-#    shift # Remove argument value
-#    ;;
   --docker-debug-logs)
 #    set -v
 #    set -x
@@ -170,7 +165,7 @@ ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE} ${MSG
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG} ${MSG_END_FORMAT}
 "
 
-print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}${COMPOSE_FILE}${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
+print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}${_COMPOSE_FILE}${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
 print_msg "Image tag ${MSG_DIMMED_FORMAT}${NBS_IMAGE_TAG}${MSG_END_FORMAT}"
 #${MSG_DIMMED_FORMAT}$(printenv | grep -i -e NBS_ -e DEPENDENCIES_BASE_IMAGE -e BUILDKIT)${MSG_END_FORMAT}
 
@@ -178,7 +173,7 @@ print_msg "Image tag ${MSG_DIMMED_FORMAT}${NBS_IMAGE_TAG}${MSG_END_FORMAT}"
 ## docker compose build [OPTIONS] [SERVICE...]
 ## docker compose run [OPTIONS] SERVICE [COMMAND] [ARGS...]
 
-show_and_execute_docker "compose -f ${COMPOSE_FILE} ${DOCKER_COMPOSE_CMD_ARGS}"
+show_and_execute_docker "compose -f ${_COMPOSE_FILE} ${DOCKER_COMPOSE_CMD_ARGS}"
 
 
 print_msg "Environment variables used by compose:\n

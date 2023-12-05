@@ -163,7 +163,7 @@ cd "${NBS_LIB_INSTALL_PATH}"
 
 if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
 
-  if [[ -d ${NBS_REPOSITORY_NAME}/pointmatcher ]]; then
+  if [[ -d ${NBS_REPOSITORY_NAME}/.git ]]; then
     print_msg_error_and_exit "${MSG_DIMMED_FORMAT}${NBS_REPOSITORY_NAME}${MSG_END_FORMAT} source code was already checkout in the specified install directory ${MSG_DIMMED_FORMAT}${NBS_LIB_INSTALL_PATH}/${MSG_END_FORMAT}, specify an other one using ${MSG_DIMMED_FORMAT}--install-path </install/dir/path/>${MSG_END_FORMAT}."
   fi
 
@@ -249,5 +249,8 @@ else
 fi
 
 print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+
 # ====Teardown=====================================================================================
+unset DEFAULT_CMAKE_INSTALL_PREFIX
+
 cd "${TMP_CWD}"

@@ -19,7 +19,7 @@ source .env
 set +o allexport
 
 # ....Helper function..............................................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
+# import shell functions from utilities library
 source ./function_library/prompt_utilities.bash
 
 # ==== Check libopintmatcher dependencies versions=================================================================

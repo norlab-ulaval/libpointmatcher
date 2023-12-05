@@ -172,35 +172,35 @@ done
 # ..................................................................................................................
 print_msg "Build images specified in ${MSG_DIMMED_FORMAT}'${NBS_EXECUTE_BUILD_MATRIX_OVER_COMPOSE_FILE}'${MSG_END_FORMAT} following ${MSG_DIMMED_FORMAT}.env.build_matrix${MSG_END_FORMAT}"
 
-## Freeze build matrix env variable to prevent override by nbs_execute_compose.bash when reloading .env/build_matrix
-FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS=("${NBS_MATRIX_REPOSITORY_VERSIONS[@]}")
-FREEZED_NBS_MATRIX_SUPPORTED_OS=("${NBS_MATRIX_SUPPORTED_OS[@]}")
-FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=("${NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
-FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS=("${NBS_MATRIX_OSX_SUPPORTED_VERSIONS[@]}")
-FREEZED_NBS_MATRIX_CMAKE_BUILD_TYPE=("${NBS_MATRIX_CMAKE_BUILD_TYPE[@]}")
-
+# Freeze build matrix env variable to prevent accidental override
+# Note: declare -r ==> set as read-only, declare -a  ==> set as an array
+declare -ra NBS_MATRIX_REPOSITORY_VERSIONS
+declare -ra NBS_MATRIX_CMAKE_BUILD_TYPE
+declare -ra NBS_MATRIX_SUPPORTED_OS
+declare -ra NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS
+declare -ra NBS_MATRIX_OSX_SUPPORTED_VERSIONS
 
 print_msg "Environment variables ${MSG_EMPH_FORMAT}(build matrix)${MSG_END_FORMAT} set for compose:\n
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_REPOSITORY_VERSIONS=(${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_CMAKE_BUILD_TYPE=(${FREEZED_NBS_MATRIX_CMAKE_BUILD_TYPE[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_SUPPORTED_OS=(${FREEZED_NBS_MATRIX_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_REPOSITORY_VERSIONS=(${NBS_MATRIX_REPOSITORY_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_CMAKE_BUILD_TYPE=(${NBS_MATRIX_CMAKE_BUILD_TYPE[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_SUPPORTED_OS=(${NBS_MATRIX_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=(${NBS_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
 "
 
-# Note: EACH_NBS_VERSION is used for container labeling and to fetch the repo at release tag
-for EACH_NBS_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
+# Note: EACH_REPO_VERSION is used for container labeling and to fetch the repo at release tag
+for EACH_REPO_VERSION in "${NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
   if [[ ${TEAMCITY_VERSION} ]]; then
-    echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_NBS_VERSION}']"
+    echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_REPO_VERSION}']"
   fi
 
-  for EACH_OS_NAME in "${FREEZED_NBS_MATRIX_SUPPORTED_OS[@]}"; do
+  for EACH_OS_NAME in "${NBS_MATRIX_SUPPORTED_OS[@]}"; do
     unset CRAWL_OS_VERSIONS
 
     if [[ ${EACH_OS_NAME} == 'ubuntu' ]]; then
-      CRAWL_OS_VERSIONS=("${FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
+      CRAWL_OS_VERSIONS=("${NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[@]}")
     elif [[ ${EACH_OS_NAME} == 'osx' ]]; then
-      CRAWL_OS_VERSIONS=("${FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS[@]}")
+      CRAWL_OS_VERSIONS=("${NBS_MATRIX_OSX_SUPPORTED_VERSIONS[@]}")
     else
       print_msg_error_and_exit "${EACH_OS_NAME} not supported!"
     fi
@@ -220,18 +220,18 @@ for EACH_NBS_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
         echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} ${EACH_OS_VERSION}']"
       fi
 
-      for EACH_CMAKE_BUILD_TYPE in "${FREEZED_NBS_MATRIX_CMAKE_BUILD_TYPE[@]}"; do
+      for EACH_CMAKE_BUILD_TYPE in "${NBS_MATRIX_CMAKE_BUILD_TYPE[@]}"; do
 
         # shellcheck disable=SC2034
         SHOW_SPLASH_EC='false'
 
         if [[ ${TEAMCITY_VERSION} ]]; then
-          echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} execute nbs_execute_compose.bash' description='${MSG_DIMMED_FORMAT_TEAMCITY} --repository-version ${EACH_NBS_VERSION} --cmake-build-type ${EACH_CMAKE_BUILD_TYPE} --os-name ${EACH_OS_NAME} --os-version ${EACH_OS_VERSION} -- ${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT_TEAMCITY}|n']"
+          echo -e "##teamcity[blockOpened name='${MSG_BASE_TEAMCITY} execute nbs_execute_compose.bash' description='${MSG_DIMMED_FORMAT_TEAMCITY} --repository-version ${EACH_REPO_VERSION} --cmake-build-type ${EACH_CMAKE_BUILD_TYPE} --os-name ${EACH_OS_NAME} --os-version ${EACH_OS_VERSION} -- ${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT_TEAMCITY}|n']"
           echo " "
         fi
 
         source nbs_execute_compose.bash ${NBS_EXECUTE_BUILD_MATRIX_OVER_COMPOSE_FILE} \
-                                          --repository-version "${EACH_NBS_VERSION}" \
+                                          --repository-version "${EACH_REPO_VERSION}" \
                                           --cmake-build-type "${EACH_CMAKE_BUILD_TYPE}" \
                                           --os-name "${EACH_OS_NAME}" \
                                           --os-version "${EACH_OS_VERSION}" \
@@ -282,17 +282,17 @@ for EACH_NBS_VERSION in "${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[@]}"; do
 
   done
   if [[ ${TEAMCITY_VERSION} ]]; then
-    echo -e "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} ${EACH_NBS_VERSION}']"
+    echo -e "##teamcity[blockClosed name='${MSG_BASE_TEAMCITY} ${EACH_REPO_VERSION}']"
   fi
 done
 
 echo " "
 print_msg "Environment variables ${MSG_EMPH_FORMAT}(build matrix)${MSG_END_FORMAT} used by compose:\n
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_REPOSITORY_VERSIONS=(${FREEZED_NBS_MATRIX_REPOSITORY_VERSIONS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_CMAKE_BUILD_TYPE=(${FREEZED_NBS_MATRIX_CMAKE_BUILD_TYPE[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_SUPPORTED_OS=(${FREEZED_NBS_MATRIX_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
-${MSG_DIMMED_FORMAT}    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=(${FREEZED_NBS_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_REPOSITORY_VERSIONS=(${NBS_MATRIX_REPOSITORY_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_CMAKE_BUILD_TYPE=(${NBS_MATRIX_CMAKE_BUILD_TYPE[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_SUPPORTED_OS=(${NBS_MATRIX_SUPPORTED_OS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS=(${NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    NBS_MATRIX_OSX_SUPPORTED_VERSIONS=(${NBS_MATRIX_OSX_SUPPORTED_VERSIONS[*]}) ${MSG_END_FORMAT}
 "
 
 print_msg_done "FINAL › Build matrix completed with command
@@ -315,5 +315,11 @@ if [[ ${TEAMCITY_VERSION} ]]; then
   done
 fi
 # ====Teardown=====================================================================================================
+unset NBS_MATRIX_REPOSITORY_VERSIONS
+unset NBS_MATRIX_CMAKE_BUILD_TYPE
+unset NBS_MATRIX_SUPPORTED_OS
+unset NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS
+unset NBS_MATRIX_OSX_SUPPORTED_VERSIONS
+
 cd "${TMP_CWD}"
 exit $BUILD_STATUS_PASS

@@ -24,7 +24,7 @@ set +o allexport
 export DEBIAN_FRONTEND=noninteractive
 
 # ....Helper function..............................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
+# import shell functions from utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
 source ./function_library/general_utilities.bash

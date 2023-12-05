@@ -29,7 +29,7 @@ set +o allexport
 export DEBIAN_FRONTEND=noninteractive
 
 # ....Helper function..............................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
+# import shell functions from utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/terminal_splash.bash
 source ./function_library/general_utilities.bash
@@ -120,5 +120,9 @@ teamcity_service_msg_blockClosed
 
 echo " " && print_msg_done "Libpointmatcher dependencies installed"
 print_formated_script_footer "lpm_install_dependencies_libnabo_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+
 # ====Teardown=====================================================================================
+unset DEFAULT_LIBNABO_CMAKE_INSTALL_PREFIX
+unset LIBNABO_CMAKE_INSTALL_PREFIX
+
 cd "${TMP_CWD}"
