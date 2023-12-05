@@ -25,6 +25,8 @@ services:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies:${NBS_IMAGE_TAG:?err}
     build:
       target: libpointmatcher-dependencies-libnabo
+    depends_on:
+      - dependencies-general
 
   dependencies-doc:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies-doc:${NBS_IMAGE_TAG:?err}

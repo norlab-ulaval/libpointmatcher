@@ -314,12 +314,7 @@ if [[ ${TEAMCITY_VERSION} ]]; then
       echo -e "##teamcity[addBuildTag '${tc_build_tag}']"
   done
 fi
-# ====Teardown=====================================================================================================
-unset NBS_MATRIX_REPOSITORY_VERSIONS
-unset NBS_MATRIX_CMAKE_BUILD_TYPE
-unset NBS_MATRIX_SUPPORTED_OS
-unset NBS_MATRIX_UBUNTU_SUPPORTED_VERSIONS
-unset NBS_MATRIX_OSX_SUPPORTED_VERSIONS
 
+# ====Teardown=====================================================================================================
 cd "${TMP_CWD}"
 exit $BUILD_STATUS_PASS

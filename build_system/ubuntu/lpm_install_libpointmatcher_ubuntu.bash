@@ -148,7 +148,7 @@ done
 
 
 # ....Override.....................................................................................
-declare -ar DEFAULT_CMAKE_INSTALL_PREFIX=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" )
+declare -a DEFAULT_CMAKE_INSTALL_PREFIX=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" )
 declare -a OVERRIDE_NBS_CMAKE_INSTALL_PREFIX
 declare -a NBS_CMAKE_INSTALL_PREFIX=( "${OVERRIDE_NBS_CMAKE_INSTALL_PREFIX[@]:-${DEFAULT_CMAKE_INSTALL_PREFIX[@]}}" )
 
@@ -251,6 +251,4 @@ fi
 print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
 
 # ====Teardown=====================================================================================
-unset DEFAULT_CMAKE_INSTALL_PREFIX
-
 cd "${TMP_CWD}"

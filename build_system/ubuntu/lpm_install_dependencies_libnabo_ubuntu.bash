@@ -38,9 +38,9 @@ source ./function_library/general_utilities.bash
 source ./lpm_utility_script/lpm_export_which_architecture.bash
 
 # ....Override.....................................................................................
-declare -ar DEFAULT_LIBNABO_CMAKE_INSTALL_PREFIX=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" )
+declare -a DEFAULT_LIBNABO_CMAKE_INSTALL_PREFIX=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" )
 declare -a OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX
-declare -ar LIBNABO_CMAKE_INSTALL_PREFIX=( "${OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX[@]:-${DEFAULT_LIBNABO_CMAKE_INSTALL_PREFIX[@]}}" )
+declare -a LIBNABO_CMAKE_INSTALL_PREFIX=( "${OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX[@]:-${DEFAULT_LIBNABO_CMAKE_INSTALL_PREFIX[@]}}" )
 
 
 # ====Begin========================================================================================
@@ -122,7 +122,4 @@ echo " " && print_msg_done "Libpointmatcher dependencies installed"
 print_formated_script_footer "lpm_install_dependencies_libnabo_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
 
 # ====Teardown=====================================================================================
-unset DEFAULT_LIBNABO_CMAKE_INSTALL_PREFIX
-unset LIBNABO_CMAKE_INSTALL_PREFIX
-
 cd "${TMP_CWD}"
