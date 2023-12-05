@@ -24,7 +24,7 @@ source .env.prompt
 set +o allexport
 
 # ....Load helper function.........................................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
+# import shell functions from utilities library
 source ./function_library/prompt_utilities.bash
 
 # =================================================================================================================

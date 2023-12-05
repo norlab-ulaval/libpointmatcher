@@ -15,7 +15,7 @@ if [[ "$(basename $(pwd))" != "build_system" ]]; then
 fi
 
 # ....Helper function..............................................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
+# import shell functions from utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
 

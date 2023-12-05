@@ -25,6 +25,9 @@ TEST(IOTest, loadYaml)
 	
 	std::ifstream ifs3((dataPath + "unit_tests/badIcpConfig_InvalidModuleType.yaml").c_str());
 	EXPECT_THROW(icp.loadFromYaml(ifs3), PointMatcherSupport::InvalidModuleType);
+
+	std::ifstream ifs4((dataPath + "add_descriptor_config.yaml").c_str());
+	EXPECT_NO_THROW(PM::DataPointsFilters filters(ifs4));
 }
 
 TEST(IOTest, loadCSV)

@@ -5,14 +5,14 @@ FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-depe
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
 
-ARG LIBPOINTMATCHER_VERSION='head'
-ENV LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION}
-LABEL libpointmatcher.version="${LIBPOINTMATCHER_VERSION}"
+ARG REPOSITORY_VERSION='latest'
+ENV REPOSITORY_VERSION=${REPOSITORY_VERSION}
+LABEL libpointmatcher.version="${REPOSITORY_VERSION}"
 
-ARG LPM_INSTALLED_LIBRARIES_PATH
-ARG LPM_LIBPOINTMATCHER_SRC_REPO_NAME
-ENV LPM_INSTALLED_LIBRARIES_PATH=${LPM_INSTALLED_LIBRARIES_PATH:?'Build argument needs to be set and non-empty.'}
-ENV LPM_LIBPOINTMATCHER_SRC_REPO_NAME=${LPM_LIBPOINTMATCHER_SRC_REPO_NAME:?'Build argument needs to be set and non-empty.'}
+ARG NBS_LIB_INSTALL_PATH
+ARG NBS_REPOSITORY_NAME
+ENV NBS_LIB_INSTALL_PATH=${NBS_LIB_INSTALL_PATH:?'Build argument needs to be set and non-empty.'}
+ENV NBS_REPOSITORY_NAME=${NBS_REPOSITORY_NAME:?'Build argument needs to be set and non-empty.'}
 
 ARG LIBPOINTMATCHER_CMAKE_BUILD_TYPE=RelWithDebInfo
 ARG LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG='--build-system-CI-install --compile-test'
@@ -30,13 +30,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TERM=${TERM:-"xterm-256color"}
 
 # ====Checkout libpointmatcher repository==========================================================
-WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 
 # Copy all files from the checkout branch in the repository (except those in the .dockerignore)
 COPY . .
 
 # ====Check Libpointmatcher dependencies installed versions========================================
-WORKDIR "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 RUN chmod +x ./utest/listVersionsUbuntu.sh
 RUN utest/listVersionsUbuntu.sh
 
@@ -49,7 +49,7 @@ RUN chmod +x entrypoint.bash
 
 
 RUN source lpm_install_libpointmatcher_ubuntu.bash \
-    --libpointmatcher-version ${LIBPOINTMATCHER_VERSION} \
+    --repository-version ${REPOSITORY_VERSION} \
     --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
     ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
 

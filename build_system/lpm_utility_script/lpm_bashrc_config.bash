@@ -2,51 +2,58 @@
 #
 # (Optional) .bashrc config script
 #
+# Usage:
+#   $ bash lpm_bashrc_config.bash
+#
 
-# ....Load environment variables from file.........................................................................
-set -o allexport
-source .env
-source .env.prompt
-set +o allexport
+function configure_bashrc() {
+  local TMP_CWD
+  TMP_CWD=$(pwd)
 
-# ....Helper function..............................................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
-source ./function_library/prompt_utilities.bash
+  # ....Project root logic.........................................................................
+  LPM_PATH=$(git rev-parse --show-toplevel)
 
-# ....Project root logic...........................................................................................
-TMP_CWD=$(pwd)
+  # ....Load environment variables from file.......................................................
+  cd "${LPM_PATH}/build_system" || exit
+  set -o allexport
+  source .env
+  source .env.prompt
+  set +o allexport
 
-if [[ "$(basename $(pwd))" != "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}" ]]; then
-  cd ..
-fi
+  # ....Helper function............................................................................
+  ## import shell functions from build-system utilities library
+  source ./function_library/prompt_utilities.bash
 
-# ToDo: validate >> next bloc ↓↓
-if [[ "$(basename $(pwd))" == "${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}" ]]; then
-  LPM_PATH=$(pwd)
-else
-  print_msg_error_and_exit "Can't find directory ${MSG_DIMMED_FORMAT}${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}${MSG_END_FORMAT}"
-fi
+  # ====Begin======================================================================================
+  print_formated_script_header 'lpm_bashrc_config.bash' "${NBS_LINE_CHAR_UTIL}"
 
-# ====Begin========================================================================================================
-print_formated_script_header 'lpm_bashrc_config.bash' "${LPM_LINE_CHAR_UTIL}"
 
-# ....Config bashrc................................................................................................
-# Add the following lines to .bashsrc if no alias prefixed with `lpm_` exist
-if [[ -z $(alias | grep -i lpm_) ]]; then
-  (
-    echo
-    echo "# libpointmatcher build-system aliases"
-    echo "export LPM_PATH=${LPM_PATH}"
-    echo "alias lpm_cd='cd $LPM_PATH'"
-    echo "alias lpmm_cd='cd $LPM_PATH/build_system'"
-    echo
-  ) >> ~/.bashrc && source ~/.bashrc
-  #  echo "alias lpm_attach='cd $DN_PATH && bash dn_attach.bash'"
-fi
+  if [[ "$(basename ${LPM_PATH})" != "${NBS_REPOSITORY_NAME}" ]]; then
+    print_msg_error_and_exit "Can't find directory ${MSG_DIMMED_FORMAT}${NBS_REPOSITORY_NAME}${MSG_END_FORMAT}"
+  fi
 
-print_msg_done "New aliases with prefix 'lpm' added to .bashrc"
 
-print_formated_script_footer 'lpm_bashrc_config.bash' "${LPM_LINE_CHAR_UTIL}"
-# ====Teardown=====================================================================================================
-cd "${TMP_CWD}"
+  # ....Config bashrc..............................................................................
+  # Add the following lines to .bashsrc if no alias prefixed with `lpm_` exist
+  if [[ -z $(alias | grep -i lpm_) ]]; then
+    (
+      echo
+      echo "# libpointmatcher build-system aliases"
+      echo "export LPM_PATH=${LPM_PATH}"
+      echo "alias lpm_cd='cd ${LPM_PATH}'"
+      echo "alias lpmm_cd='cd ${LPM_PATH}/build_system'"
+      echo
+    ) >> ~/.bashrc && source ~/.bashrc
+    #  echo "alias lpm_attach='cd $DN_PATH && bash dn_attach.bash'"
+  fi
 
+  print_msg_done "New aliases with prefix 'lpm' added to .bashrc"
+
+  print_formated_script_footer 'lpm_bashrc_config.bash' "${NBS_LINE_CHAR_UTIL}"
+
+  # ====Teardown===================================================================================
+  cd "${TMP_CWD}"
+}
+
+# ::::main:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+configure_bashrc

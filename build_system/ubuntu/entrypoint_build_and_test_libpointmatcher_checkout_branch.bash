@@ -16,13 +16,13 @@ set +o allexport
 
 # ==== Build libpointmatcher checkout branch ======================================================================
 source lpm_install_libpointmatcher_ubuntu.bash \
-  --libpointmatcher-version ${LIBPOINTMATCHER_VERSION:?'err variable not set'} \
+  --repository-version ${REPOSITORY_VERSION:?'err variable not set'} \
   --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
   ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
 
 # ==== Execute libpointmatcher unit-test===========================================================================
-cd "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build"
-utest/utest --path "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/examples/data/"
+cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build"
+utest/utest --path "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/examples/data/"
 
 # ====Continue=====================================================================================================
 exec "$@"
