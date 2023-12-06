@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run › interactive" type="ShConfigurationType" folderName="(Local docker) LPM dev container › iLoveLidarDependencies">
+    <option name="SCRIPT_TEXT" value="docker run -p 8111:8111 --name iLoveLidarDependencies -t -i --rm lpm.ubuntu20 bash -c &quot;echo &amp;&amp; pwd &amp;&amp; tree -L 1 &amp;&amp; bash&quot;" />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+    <option name="SCRIPT_PATH" value="" />
+    <option name="SCRIPT_OPTIONS" value="" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+    <option name="INTERPRETER_PATH" value="/bin/zsh" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_SCRIPT_FILE" value="false" />
+    <envs />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="build › Dockerfile.dependencies" run_configuration_type="ShConfigurationType" />
+    </method>
+  </configuration>
+</component>

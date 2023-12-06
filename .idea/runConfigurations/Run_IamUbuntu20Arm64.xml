@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run IamUbuntu20Arm64" type="docker-deploy" factoryName="docker-image" folderName="Docker service" server-name="Docker from MacBook">
+    <deployment type="docker-image">
+      <settings>
+        <option name="imageTag" value="ubuntu:20.04" />
+        <option name="command" value="bash" />
+        <option name="containerName" value="IamUbuntu20-arm64" />
+        <option name="commandLineOptions" value="-i -t --rm" />
+        <option name="showCommandPreview" value="true" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>

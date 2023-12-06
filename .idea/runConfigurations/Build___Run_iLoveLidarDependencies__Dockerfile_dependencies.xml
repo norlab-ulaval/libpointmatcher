@@ -1,0 +1,22 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Build &amp; Run iLoveLidarDependencies ‹ Dockerfile.dependencies" type="docker-deploy" factoryName="dockerfile" folderName="Docker service" server-name="Docker from MacBook">
+    <deployment type="dockerfile">
+      <settings>
+        <option name="imageTag" value="lpm.ubuntu20" />
+        <option name="containerName" value="iLoveLidarDependencies" />
+        <option name="portBindings">
+          <list>
+            <DockerPortBindingImpl>
+              <option name="containerPort" value="8111" />
+              <option name="hostPort" value="8111" />
+            </DockerPortBindingImpl>
+          </list>
+        </option>
+        <option name="commandLineOptions" value="-i -t --rm " />
+        <option name="showCommandPreview" value="true" />
+        <option name="sourceFilePath" value="build_system/ubuntu/Dockerfile.dependencies" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>
