@@ -1173,7 +1173,7 @@ TEST_F(DataFilterTest, DecompressDataPointsFilter)
 
 	DP decompressedCloud = decompressFilter->filter(filteredCloud);
 
-	EXPECT_GT(cloud.getNbPoints(), decompressedCloud.getNbPoints());
+	EXPECT_EQ(cloud.getNbPoints(), decompressedCloud.getNbPoints());
 	EXPECT_EQ(cloud.getDescriptorDim(), decompressedCloud.getDescriptorDim());
 	EXPECT_EQ(cloud.getTimeDim(), decompressedCloud.getTimeDim());
 }

@@ -20,6 +20,7 @@ struct DecompressDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	typedef typename PointMatcher<T>::Vector Vector;
 	typedef typename PointMatcher<T>::DataPoints DataPoints;
 	typedef typename PointMatcher<T>::Matrix Matrix;
+	typedef typename PointMatcher<T>::Int64Matrix Int64Matrix;
 
 	typedef typename PointMatcher<T>::DataPoints::InvalidField InvalidField;
 
@@ -46,14 +47,12 @@ public:
 
             unsigned nbPointsToGenerate = omegas.sum();
 
-            std::cout << "Should generate " << nbPointsToGenerate << " points\n";
-
             DataPoints newCloud;
             newCloud.conservativeResize(nbPointsToGenerate);
             Matrix features = Matrix::Zero(4, nbPointsToGenerate);
             features.row(3).setConstant(1);
             Matrix descriptors = Matrix::Zero(cloud.descriptors.rows() - omegas.rows() - deviations.rows(), nbPointsToGenerate);
-            Matrix times = Matrix::Zero(cloud.times.rows(), nbPointsToGenerate);
+            Int64Matrix times = Int64Matrix::Zero(cloud.times.rows(), nbPointsToGenerate);
 
             cloud.removeDescriptor("omega");
             cloud.removeDescriptor("deviation");
@@ -73,10 +72,16 @@ public:
                                                cloud.descriptors.col(i));
                 Matrix newPoints = processPoint(distribution);
                 features.block(0, idx, 3, omega) = newPoints;
-//                descriptors.block(0, idx, descriptorsCount, omega) = cloud.descriptors.col(i);
-//                times.block(0, idx, timesCount, omega) = cloud.times.col(i);
+                descriptors.block(0, idx, descriptorsCount, omega) = cloud.descriptors.col(i);
+                times.block(0, idx, timesCount, omega) = cloud.times.col(i);
                 idx += omega;
             }
+
+            newCloud.descriptors = descriptors;
+            newCloud.descriptorLabels = cloud.descriptorLabels;
+            newCloud.times = times;
+            newCloud.timeLabels = cloud.timeLabels;
+            cloud = newCloud;
         }
 
         virtual Matrix processPoint(const Distribution<T>& distribution) = 0;
