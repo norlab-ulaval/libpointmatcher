@@ -1104,10 +1104,10 @@ TEST_F(DataFilterTest, SymmetryDataPointsFilter)
 
 	// First, fully compress the point cloud
 	params = PM::Parameters();
-		params["vrs"] = "50.0";
-		params["vro"] = "10.025";
+		params["vrs"] = "5.0";
+		params["vro"] = "1.025";
 		params["dt"] = "0.025";
-		params["ct"] = "1.0";
+		params["ct"] = "0.95";
 		params["knn"] = "10";
 
 	DPFiltersPtr symmetryFilter = PM::get().DataPointsFilterRegistrar.create(
