@@ -8,3 +8,9 @@ build
 
 dist/
 *.so
+
+# Python
+venv/
+
+# Iintelij CMake
+cmake-build-*/
