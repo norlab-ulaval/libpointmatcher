@@ -28,7 +28,7 @@ source ./function_library/prompt_utilities.bash
 # ====Begin========================================================================================================
 print_formated_script_header 'lpm_execute_libpointmatcher_unittest.bash' ':'
 
-cd "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/build"
+cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build"
 
 if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
   echo -e "##teamcity[testSuiteStarted name='gtest']"
@@ -39,7 +39,7 @@ fi
 
 # .................................................................................................................
 sudo chmod +x utest/utest
-utest/utest --path "${LPM_INSTALLED_LIBRARIES_PATH}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}/examples/data/"
+utest/utest --path "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/examples/data/"
 UTEST_EXIT_CODE=$?
 # .................................................................................................................
 

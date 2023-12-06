@@ -1,15 +1,15 @@
 #!/bin/bash
 #
-# Build and run a single container based on docker compose docker-compose.libpointmatcher.yaml
+# Build and run a single container based on a norlab-build-system docker-compose.yaml file
 #
 # Usage:
-#   $ bash lpm_execute_compose.bash [<optional flag>] [-- <any docker cmd+arg>]
+#   $ bash nbs_execute_compose.bash  <docker-compose.yaml> [<optional flag>] [-- <any docker cmd+arg>]
 #
-#   $ bash lpm_execute_compose.bash -- run --rm ci
+#   $ bash nbs_execute_compose.bash -- run --rm ci
 #
 # Arguments:
-#   [--libpointmatcher-version v1.3.1]    The libpointmatcher release tag (default: see LIBPOINTMATCHER_VERSION)
-#   [--libpointmatcher-cmake-build-type RelWithDebInfo]
+#   [--repository-version v1.3.1]         The libpointmatcher release tag (default: see REPOSITORY_VERSION)
+#   [--cmake-build-type RelWithDebInfo]
 #                                         Change the libpointmatcher compilation mode.
 #                                         Either 'None' 'Debug' 'Release' 'RelWithDebInfo' or 'MinSizeRel'
 #   [--os-name ubuntu]                    The operating system name. Either 'ubuntu' or 'osx' (default: see OS_NAME)
@@ -29,12 +29,12 @@
 #
 
 # ....Default......................................................................................................
-LIBPOINTMATCHER_VERSION='head'
+REPOSITORY_VERSION='latest'
 LIBPOINTMATCHER_CMAKE_BUILD_TYPE='RelWithDebInfo'
 OS_NAME='ubuntu'
 OS_VERSION='focal'
-#LPM_JOB_ID='0'
-DOCKER_COMPOSE_CMD_ARGS='up --build --force-recreate'  # alt: build --no-cache --push
+#NBS_JOB_ID='0'
+DOCKER_COMPOSE_CMD_ARGS='build --dry-run'  # alt: "build --no-cache --push" or "up --build --force-recreate"
 
 # ....Project root logic...........................................................................................
 TMP_CWD=$(pwd)
@@ -42,12 +42,11 @@ TMP_CWD=$(pwd)
 # ....Load environment variables from file.........................................................................
 set -o allexport
 source .env
-source .env.build_matrix
 source .env.prompt
 set +o allexport
 
 # ....Helper function..............................................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
+# import shell functions from utilities library
 source ./function_library/prompt_utilities.bash
 source ./function_library/general_utilities.bash
 source ./function_library/terminal_splash.bash
@@ -58,8 +57,8 @@ function print_help_in_terminal() {
   \033[1m
     <optional argument>:\033[0m
       -h, --help                              Get help
-      --libpointmatcher-version v1.3.1        The libpointmatcher release tag (default to master branch head)
-      --libpointmatcher-cmake-build-type RelWithDebInfo
+      --repository-version v1.3.1             The libpointmatcher release tag (default to master branch latest)
+      --cmake-build-type RelWithDebInfo
                                               Change the libpointmatcher compilation mode.
                                               Either 'None' 'Debug' 'Release' 'RelWithDebInfo' or 'MinSizeRel'
       --os-name ubuntu                        The operating system name. Either 'ubuntu' or 'osx' (default to 'ubuntu')
@@ -88,23 +87,30 @@ print_msg "IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN} ${TC_VERSION}"
 SHOW_SPLASH_EC="${SHOW_SPLASH_EC:-true}"
 
 if [[ "${SHOW_SPLASH_EC}" == 'true' ]]; then
-  norlab_splash "${LPM_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+  norlab_splash "${NBS_BUILD_SYSTEM_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
 fi
 
-print_formated_script_header 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
+_COMPOSE_FILE="${1:?'Missing the docker-compose.yaml file mandatory argument'}"
+shift # Remove argument value
+
+if [[ ! -f ${_COMPOSE_FILE} ]]; then
+  print_msg_error_and_exit "docker-compose file ${_COMPOSE_FILE} is unreachable"
+fi
+
+print_formated_script_header 'nbs_execute_compose.bash' "${NBS_LINE_CHAR_BUILDER_LVL2}"
 
 # ....Script command line flags....................................................................................
 while [ $# -gt 0 ]; do
 
   case $1 in
-  --libpointmatcher-version)
-    LIBPOINTMATCHER_VERSION="${2}"
-    shift # Remove argument (--libpointmatcher-version)
+  --repository-version)
+    REPOSITORY_VERSION="${2}"
+    shift # Remove argument (--repository-version)
     shift # Remove argument value
     ;;
-  --libpointmatcher-cmake-build-type)
+  --cmake-build-type)
     LIBPOINTMATCHER_CMAKE_BUILD_TYPE="${2}"
-    shift # Remove argument (--libpointmatcher-cmake-build-type)
+    shift # Remove argument (--cmake-build-type)
     shift # Remove argument value
     ;;
   --os-name)
@@ -117,11 +123,6 @@ while [ $# -gt 0 ]; do
     shift # Remove argument (--os-version)
     shift # Remove argument value
     ;;
-#  --job-id)
-#    LPM_JOB_ID="${2}"
-#    shift # Remove argument (--job-id)
-#    shift # Remove argument value
-#    ;;
   --docker-debug-logs)
 #    set -v
 #    set -x
@@ -149,38 +150,38 @@ while [ $# -gt 0 ]; do
 done
 
 # ..................................................................................................................
-# Note: LIBPOINTMATCHER_VERSION will be used to fetch the repo at release tag (ref task NMO-252)
-export LIBPOINTMATCHER_VERSION="${LIBPOINTMATCHER_VERSION}"
+# Note: REPOSITORY_VERSION will be used to fetch the repo at release tag (ref task NMO-252)
+export REPOSITORY_VERSION="${REPOSITORY_VERSION}"
 export LIBPOINTMATCHER_CMAKE_BUILD_TYPE="${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}"
 export DEPENDENCIES_BASE_IMAGE="${OS_NAME}"
 export DEPENDENCIES_BASE_IMAGE_TAG="${OS_VERSION}"
 
-export LPM_IMAGE_TAG="${LIBPOINTMATCHER_VERSION}-${DEPENDENCIES_BASE_IMAGE}-${DEPENDENCIES_BASE_IMAGE_TAG}"
+export NBS_IMAGE_TAG="${REPOSITORY_VERSION}-${DEPENDENCIES_BASE_IMAGE}-${DEPENDENCIES_BASE_IMAGE_TAG}"
 
 print_msg "Environment variables set for compose:\n
-${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    REPOSITORY_VERSION=${REPOSITORY_VERSION} ${MSG_END_FORMAT}
 ${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} ${MSG_END_FORMAT}
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE} ${MSG_END_FORMAT}
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG} ${MSG_END_FORMAT}
 "
 
-print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}docker-compose.libpointmatcher.yaml${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
-print_msg "Image tag ${MSG_DIMMED_FORMAT}${LPM_IMAGE_TAG}${MSG_END_FORMAT}"
-#${MSG_DIMMED_FORMAT}$(printenv | grep -i -e LPM_ -e DEPENDENCIES_BASE_IMAGE -e BUILDKIT)${MSG_END_FORMAT}
+print_msg "Executing docker compose command on ${MSG_DIMMED_FORMAT}${_COMPOSE_FILE}${MSG_END_FORMAT} with command ${MSG_DIMMED_FORMAT}${DOCKER_COMPOSE_CMD_ARGS}${MSG_END_FORMAT}"
+print_msg "Image tag ${MSG_DIMMED_FORMAT}${NBS_IMAGE_TAG}${MSG_END_FORMAT}"
+#${MSG_DIMMED_FORMAT}$(printenv | grep -i -e NBS_ -e DEPENDENCIES_BASE_IMAGE -e BUILDKIT)${MSG_END_FORMAT}
 
 ## docker compose [-f <theComposeFile> ...] [options] [COMMAND] [ARGS...]
 ## docker compose build [OPTIONS] [SERVICE...]
 ## docker compose run [OPTIONS] SERVICE [COMMAND] [ARGS...]
 
-show_and_execute_docker "compose -f docker-compose.libpointmatcher.yaml ${DOCKER_COMPOSE_CMD_ARGS}"
+show_and_execute_docker "compose -f ${_COMPOSE_FILE} ${DOCKER_COMPOSE_CMD_ARGS}"
 
 
 print_msg "Environment variables used by compose:\n
-${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_VERSION=${LIBPOINTMATCHER_VERSION} ${MSG_END_FORMAT}
+${MSG_DIMMED_FORMAT}    REPOSITORY_VERSION=${REPOSITORY_VERSION} ${MSG_END_FORMAT}
 ${MSG_DIMMED_FORMAT}    LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} ${MSG_END_FORMAT}
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE=${DEPENDENCIES_BASE_IMAGE} ${MSG_END_FORMAT}
 ${MSG_DIMMED_FORMAT}    DEPENDENCIES_BASE_IMAGE_TAG=${DEPENDENCIES_BASE_IMAGE_TAG} ${MSG_END_FORMAT}"
 
-print_formated_script_footer 'lpm_execute_compose.bash' "${LPM_LINE_CHAR_BUILDER_LVL2}"
+print_formated_script_footer 'nbs_execute_compose.bash' "${NBS_LINE_CHAR_BUILDER_LVL2}"
 # ====Teardown=====================================================================================================
 cd "${TMP_CWD}"
