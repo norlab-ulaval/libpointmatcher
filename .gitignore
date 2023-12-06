@@ -8,3 +8,5 @@ build
 
 dist/
 *.so
+
+.idea/
