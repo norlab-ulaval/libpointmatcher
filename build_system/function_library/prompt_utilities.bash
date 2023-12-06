@@ -133,7 +133,7 @@ function draw_horizontal_line_across_the_terminal_window() {
   local pad
 
   # Ref https://bash.cyberciti.biz/guide/$TERM_variable
-  TPUT_FLAG=''
+  TPUT_FLAG="-T $TERM"
   if [[ -z ${TERM} ]]; then
     TPUT_FLAG='-T xterm-256color'
   elif [[ ${TERM} == dumb ]]; then
@@ -149,6 +149,7 @@ function draw_horizontal_line_across_the_terminal_window() {
   #printf '%*s\n' "${COLUMNS:-$(tput ${TPUT_FLAG} cols)}" '' | tr ' ' "${SYMBOL}"
 
   # Alt version
+  # shellcheck disable=SC2086
   terminal_width="${COLUMNS:-$(tput ${TPUT_FLAG} cols)}"
   pad=$(printf -- "${SYMBOL}%.0s" $(seq $terminal_width))
   printf -- "${pad}\n"
