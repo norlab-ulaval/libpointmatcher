@@ -43,6 +43,9 @@ private:
 public:
     struct PointsGenerator
     {
+        using Matrix33 = Eigen::Matrix<T, 3, 3>;
+	    typedef typename PointMatcher<T>::Vector Vector;
+
         PointsGenerator(int seed): seed{seed} {
             if (seed == -1)
             {
@@ -116,6 +119,20 @@ public:
 
     protected:
         const int seed;
+
+        static void transformPoints(Matrix& points, const Matrix33& covariance, const Vector& mean, T sigma=1.)
+        {
+            const Eigen::SelfAdjointEigenSolver<Matrix33> solver(covariance);
+            auto eigenVa = solver.eigenvalues();
+            auto eigenVec = solver.eigenvectors();
+
+            // TODO replace this by transformation matrix
+            Matrix scales = eigenVa.array().sqrt() * sigma;
+            Matrix33 S = scales.asDiagonal();
+            points = eigenVec * S * points;
+            points.colwise() += mean;
+        }
+
     public:
         std::minstd_rand randomNumberGenerator;
         std::random_device randomDevice;
@@ -136,14 +153,7 @@ public:
                 return normalRealDistribution(PointsGenerator::randomNumberGenerator);
             });
             Matrix33 covariance = distribution.deviation / distribution.omega;
-            const Eigen::SelfAdjointEigenSolver<Matrix33> solver(covariance);
-            auto eigenVa = solver.eigenvalues().real();
-            auto eigenVec = solver.eigenvectors().real();
-
-            Matrix scales = eigenVa.array().sqrt();
-            Matrix33 S = scales.asDiagonal();
-            points = S * eigenVec * points;
-            points.colwise() += distribution.point; // TODO replace this by transformation matrix
+            PointsGenerator::transformPoints(points, covariance, distribution.point);
             return points;
         }
     };
@@ -163,14 +173,7 @@ public:
                 return uniformRealDistribution(PointsGenerator::randomNumberGenerator);
             });
             Matrix33 covariance = distribution.deviation / distribution.omega;
-            const Eigen::SelfAdjointEigenSolver<Matrix33> solver(covariance);
-            auto eigenVa = solver.eigenvalues().real();
-            auto eigenVec = solver.eigenvectors().real();
-
-            Matrix scales = eigenVa.array().sqrt() * 1.73205080757; // TODO better represent the sigma value
-            Matrix33 S = scales.asDiagonal();
-            points = S * eigenVec * points;
-            points.colwise() += distribution.point; // TODO replace this by transformation matrix
+            PointsGenerator::transformPoints(points, covariance, distribution.point, 1.73205080757); // TODO better represent the sigma value
             return points;
         }
     };
