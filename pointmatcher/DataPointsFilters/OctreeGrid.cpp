@@ -299,8 +299,7 @@ bool OctreeGridDataPointsFilter<T>::NDTSampler::operator()(Octree_<T,dim>& oc)
 		//Switch columns j and idx
 		pts.swapCols(idx, j);
 
-//        std::cout << "swapping " << j << " and " << idx << ". omega: " << combined_distro.omega << std::endl;
-		//Maintain new index position	
+        //Maintain new index position
 		mapidx[idx] = j;
 		//Update index
 		++idx;		

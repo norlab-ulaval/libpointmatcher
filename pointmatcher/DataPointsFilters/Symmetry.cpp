@@ -41,7 +41,6 @@ void SymmetryDataPointsFilter<T>::inPlaceFilter(
     assert(cloud.getEuclideanDim() == dim);
     if(!cloud.descriptorExists("omega"))
     {
-
         Matrix omegas = Matrix::Zero(1, cloud.getNbPoints());
         omegas.setOnes();
         cloud.addDescriptor("omega", omegas);
