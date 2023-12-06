@@ -6,7 +6,7 @@
 #   $ bash ./lpm_utility_script/lpm_install_docker_tools.bash
 #
 
-function install_docker_tools() {
+function lpm::install_docker_tools() {
   # ....Project root logic.........................................................................
   local TMP_CWD
   TMP_CWD=$(pwd)
@@ -84,20 +84,10 @@ function install_docker_tools() {
 
   print_msg "${NTSI_ADMIN_USER} added to docker group"
 
-  print_msg "Create a multi-architecture docker builder"
-  docker buildx create \
-    --name local-builder-multiarch-virtual \
-    --driver docker-container \
-    --platform linux/amd64,linux/arm64 \
-    --bootstrap \
-    --use
-
-  docker buildx ls
-
   print_formated_script_footer 'lpm_install_docker_tools.bash' "${NBS_LINE_CHAR_UTIL}"
   # ====Teardown===================================================================================
   cd "${TMP_CWD}"
 }
 
 # ::::main:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-install_docker_tools
+lpm::install_docker_tools

@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="nbs_execute_compose_over_build_matrix.bash › test flag (popup)" type="ShConfigurationType" folderName="(B | TEST › IamBuildSystemTester) LPM test user script in isolation" editBeforeRun="true">
-    <option name="SCRIPT_TEXT" value="bash build_and_run_IamBuildSystemTester.bash &quot;bash ./nbs_execute_compose_over_build_matrix.bash --repository-version-build-matrix-override latest  --cmake-build-type-build-matrix-override None --docker-debug-logs -- build --dry-run&quot;" />
+  <configuration default="false" name="test_execute_compose_over_build_matrix_with_flag.bash" type="ShConfigurationType" folderName="(B | TEST › IamBuildSystemTester) LPM test user script in isolation">
+    <option name="SCRIPT_TEXT" value="bash test_execute_compose_over_build_matrix_with_flag.bash" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
     <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
-    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/build_system/tests" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/build_system/tests/test_in_docker_container/" />
     <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
     <option name="INTERPRETER_PATH" value="/bin/zsh" />
     <option name="INTERPRETER_OPTIONS" value="" />

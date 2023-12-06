@@ -28,7 +28,7 @@
 # Returns:
 #   exit 1 in case of unsupported processor architecture
 
-function export_which_architecture() {
+function lpm::export_which_architecture() {
   local TMP_CWD
   TMP_CWD=$(pwd)
 
@@ -71,4 +71,4 @@ function export_which_architecture() {
 }
 
 # ::::main:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-export_which_architecture
+lpm::export_which_architecture

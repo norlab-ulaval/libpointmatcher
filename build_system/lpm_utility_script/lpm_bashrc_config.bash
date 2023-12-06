@@ -6,7 +6,7 @@
 #   $ bash lpm_bashrc_config.bash
 #
 
-function configure_bashrc() {
+function lpm::configure_bashrc() {
   local TMP_CWD
   TMP_CWD=$(pwd)
 
@@ -56,4 +56,4 @@ function configure_bashrc() {
 }
 
 # ::::main:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-configure_bashrc
+lpm::configure_bashrc
