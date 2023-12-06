@@ -69,7 +69,7 @@ void SymmetryDataPointsFilter<T>::inPlaceFilter(
 
     auto distributions = getDistributionsFromCloud(cloud);
 
-    while(updated_ctr > 0)
+    while(updated_ctr > 0 && distributions.size() > 1)
     {
         updated_ctr -= 1;
         auto number_of_points_before_sampling = static_cast<float>(distributions.size());
@@ -111,8 +111,14 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
 
     const int pointsCount(distributions.size());
 
+    if (pointsCount == 1)
+    {
+        return;
+    }
+
     Parametrizable::Parameters param;
-    boost::assign::insert(param)("knn", toParam(std::min(knn, (unsigned) distributions.size())));
+    const unsigned knnLocal = std::min(knn, (unsigned) distributions.size());
+    boost::assign::insert(param)("knn", toParam(knnLocal));
 
     auto cloud = getPointsFromDistributions(distributions);
 
@@ -120,7 +126,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
     KDTreeMatcher matcher(param);
     matcher.init(cloud);
 
-    Matches matches(typename Matches::Dists(knn, pointsCount), typename Matches::Ids(knn, pointsCount));
+    Matches matches(typename Matches::Dists(knnLocal, pointsCount), typename Matches::Ids(knnLocal, pointsCount));
     matches = matcher.findClosests(cloud);
 
     Vector masks_all = Vector::Ones(pointsCount);
@@ -133,7 +139,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
         }
         auto distro1 = distributions[i];
         std::vector<unsigned> mergedIndexes;
-        for(int j = 1; j < int(knn); ++j) // index from 1 to skip self-match
+        for(int j = 1; j < int(knnLocal); ++j) // index from 1 to skip self-match
         {
             if(matches.dists(j, i) == Matches::InvalidDist || matches.ids(j, i) == Matches::InvalidId)
             {
@@ -152,7 +158,7 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
             bool was_merge = false;
 
             boost::optional<Distribution<T>> combined_distro;
-            for(unsigned k = j + 1; k < knn; ++k)
+            for(unsigned k = j + 1; k < knnLocal; ++k)
             {
                 if(matches.dists(k, i) == Matches::InvalidDist || matches.ids(k, i) == Matches::InvalidId)
                 {
@@ -235,15 +241,20 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
     const int pointsCount(distributions.size());
 
+    if (pointsCount == 1)
+    {
+        return;
+    }
     Parametrizable::Parameters param;
-    boost::assign::insert(param)("knn", toParam(std::min(knn, (unsigned) distributions.size())));
+    const unsigned knnLocal = std::min(knn, (unsigned) distributions.size());
+    boost::assign::insert(param)("knn", toParam(knnLocal));
     auto cloud = getPointsFromDistributions(distributions);
 
     // Build kd-tree
     KDTreeMatcher matcher(param);
     matcher.init(cloud);
 
-    Matches matches(typename Matches::Dists(knn, pointsCount), typename Matches::Ids(knn, pointsCount));
+    Matches matches(typename Matches::Dists(knnLocal, pointsCount), typename Matches::Ids(knnLocal, pointsCount));
     matches = matcher.findClosests(cloud);
 
     Eigen::VectorXd masks_all = Eigen::VectorXd::Ones(pointsCount);
@@ -259,7 +270,7 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
         bool was_overlap = false;
         std::vector<unsigned> mergedIndexes;
-        for(int j = 1; j < int(knn); ++j) // index from 1 to skip self-match
+        for(int j = 1; j < int(knnLocal); ++j) // index from 1 to skip self-match
         {
             if(matches.dists(j, i) == Matches::InvalidDist || matches.ids(j, i) == Matches::InvalidId)
             {
