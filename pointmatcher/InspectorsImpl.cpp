@@ -641,6 +641,7 @@ void InspectorsImpl<T>::AbstractVTKInspector::buildTimeStream(std::ostream& stre
 		return;
 		
 	const BOOST_AUTO(time, cloud.getTimeViewByName(name));
+    // TODO this breaks when trying to save a point cloud from unit tests
 	assert(time.rows() == 1);
 
 	// Loop through the array to split the lower and higher part of int64_t

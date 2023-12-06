@@ -7,7 +7,8 @@
 template<typename T>
 DecompressDataPointsFilter<T>::DecompressDataPointsFilter(const DecompressDataPointsFilter::Parameters& params):
         PointMatcher<T>::DataPointsFilter("DecompressDataPointsFilter",
-                                          DecompressDataPointsFilter::availableParameters(), params)
+                                          DecompressDataPointsFilter::availableParameters(), params),
+                                          seed(Parametrizable::get<int>("seed"))
 {
 	try
 	{
@@ -35,13 +36,15 @@ void DecompressDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
     {
         case PointsGeneratorType::GAUSSIAN:
         {
-            GaussianGenerator generator;
+            GaussianGenerator generator(seed);
             generator.processCloud(cloud);
+            break;
         }
         case PointsGeneratorType::UNIFORM:
         {
-            UniformGenerator generator;
+            UniformGenerator generator(seed);
             generator.processCloud(cloud);
+            break;
         }
     }
 }

@@ -4,6 +4,7 @@
 
 #include "PointMatcher.h"
 #include "utils/distribution.h"
+#include <random>
 
 
 template<typename T>
@@ -32,18 +33,32 @@ struct DecompressDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 	{
 		return {
 			{"pointsGenerator", "Type of the probability distribution used to generate points. Gaussian (0), Uniform (1)", "0", "0", "1", &P::Comp<unsigned>},
-			};
+			{"seed", "Seed for random sampling (-1 means no seed is used)", "-1", "-1", "2147483647", &P::Comp<int>}
+            };
 	}
+
+private:
+    const std::size_t seed;
 
 public:
     struct PointsGenerator
     {
+        PointsGenerator(int seed): seed{seed} {
+            if (seed == -1)
+            {
+                randomNumberGenerator = std::minstd_rand(randomDevice());
+            }
+            else
+            {
+                randomNumberGenerator = std::minstd_rand(seed);
+            }
+        }
 		virtual ~PointsGenerator(){}
         void processCloud(DataPoints& cloud)
         {
             auto points = cloud.features;
-            auto omegas = cloud.getDescriptorViewByName("omega");
-            auto deviations = cloud.getDescriptorViewByName("deviation");
+            auto omegas = cloud.getDescriptorCopyByName("omega");
+            auto deviations = cloud.getDescriptorCopyByName("deviation");
 
             unsigned nbPointsToGenerate = omegas.sum();
 
@@ -64,19 +79,32 @@ public:
             for(unsigned i = 0; i < cloud.getNbPoints(); ++i)
             {
                 unsigned omega = omegas(0, i);
-                Eigen::Map<Eigen::Matrix<T, 3, 3>> deviationMatrix(deviations.block(0, i, 9, 1).data(), 3, 3);
-                Distribution<T> distribution(points.col(i).head(3),
-                                               omega,
-                                               deviationMatrix,
-                                               cloud.times.col(i),
-                                               cloud.descriptors.col(i));
-                Matrix newPoints = processPoint(distribution);
-                features.block(0, idx, 3, omega) = newPoints;
-                descriptors.block(0, idx, descriptorsCount, omega) = cloud.descriptors.col(i);
-                times.block(0, idx, timesCount, omega) = cloud.times.col(i);
-                idx += omega;
+                assert(omega >= 1);
+                Matrix newPoints;
+                if (omega > 1)
+                {
+                    Eigen::Map<Eigen::Matrix<T, 3, 3>> deviationMatrix(deviations.block(0, i, 9, 1).data(), 3, 3);
+                    Distribution<T> distribution(points.col(i).head(3),
+                                                 omega,
+                                                 deviationMatrix,
+                                                 cloud.times.col(i),
+                                                 cloud.descriptors.col(i));
+                    newPoints = processPoint(distribution);
+                }
+                else
+                {
+                    newPoints = points.col(i).head(3);
+                }
+                unsigned nbNewPoints = newPoints.cols();
+                features.block(0, idx, 3, nbNewPoints) = newPoints;
+                descriptors.block(0, idx, descriptorsCount, nbNewPoints).colwise() = cloud.descriptors.col(i);
+
+                times.block(0, idx, timesCount, nbNewPoints).colwise() = cloud.times.col(i);
+                idx += nbNewPoints;
             }
 
+            newCloud.features = features;
+            newCloud.featureLabels = cloud.featureLabels;
             newCloud.descriptors = descriptors;
             newCloud.descriptorLabels = cloud.descriptorLabels;
             newCloud.times = times;
@@ -85,26 +113,64 @@ public:
         }
 
         virtual Matrix processPoint(const Distribution<T>& distribution) = 0;
+
+    protected:
+        const int seed;
+    public:
+        std::minstd_rand randomNumberGenerator;
+        std::random_device randomDevice;
     };
 
     struct GaussianGenerator : public PointsGenerator {
-		GaussianGenerator() {}
+		GaussianGenerator(int seed): PointsGenerator(seed) {
+
+        }
 		virtual ~GaussianGenerator(){}
 
         Matrix processPoint(const Distribution<T>& distribution) override {
-            unsigned numberOfPoints = distribution.omega;
-            Matrix points = Matrix::Zero(3, numberOfPoints);
+            using Matrix33 = Eigen::Matrix<T, 3, 3>;
+
+            unsigned nbPoints = distribution.omega;
+            std::normal_distribution<float> normalRealDistribution(0, 1);
+            Matrix points = Matrix::NullaryExpr(3, nbPoints, [&](float) {
+                return normalRealDistribution(PointsGenerator::randomNumberGenerator);
+            });
+            Matrix33 covariance = distribution.deviation / distribution.omega;
+            const Eigen::SelfAdjointEigenSolver<Matrix33> solver(covariance);
+            auto eigenVa = solver.eigenvalues().real();
+            auto eigenVec = solver.eigenvectors().real();
+
+            Matrix scales = eigenVa.array().sqrt();
+            Matrix33 S = scales.asDiagonal();
+            points = S * eigenVec * points;
+            points.colwise() += distribution.point; // TODO replace this by transformation matrix
             return points;
         }
     };
 
     struct UniformGenerator : public PointsGenerator {
-		UniformGenerator() {}
+		UniformGenerator(int seed): PointsGenerator(seed) {
+
+        }
 		virtual ~UniformGenerator(){}
 
         Matrix processPoint(const Distribution<T>& distribution) override {
-            unsigned numberOfPoints = distribution.omega;
-            Matrix points = Matrix::Zero(3, numberOfPoints);
+            using Matrix33 = Eigen::Matrix<T, 3, 3>;
+
+            unsigned nbPoints = distribution.omega;
+            std::uniform_real_distribution<float> uniformRealDistribution(-1, 1);
+            Matrix points = Matrix::NullaryExpr(3, nbPoints, [&](float) {
+                return uniformRealDistribution(PointsGenerator::randomNumberGenerator);
+            });
+            Matrix33 covariance = distribution.deviation / distribution.omega;
+            const Eigen::SelfAdjointEigenSolver<Matrix33> solver(covariance);
+            auto eigenVa = solver.eigenvalues().real();
+            auto eigenVec = solver.eigenvectors().real();
+
+            Matrix scales = eigenVa.array().sqrt() * 1.73205080757; // TODO better represent the sigma value
+            Matrix33 S = scales.asDiagonal();
+            points = S * eigenVec * points;
+            points.colwise() += distribution.point; // TODO replace this by transformation matrix
             return points;
         }
     };

@@ -1098,8 +1098,30 @@ TEST_F(DataFilterTest, SymmetryDataPointsFilter)
 {
 	using DPFiltersPtr = std::shared_ptr<PM::DataPointsFilter>;
 
+    // Test with point cloud
+	DP cloud = generateRandomDataPoints(100);
+    cloud.features *= 0.25;
+
+	// First, fully compress the point cloud
+	params = PM::Parameters();
+		params["vrs"] = "50.0";
+		params["vro"] = "10.025";
+		params["dt"] = "0.025";
+		params["ct"] = "1.0";
+		params["knn"] = "10";
+
+	DPFiltersPtr symmetryFilter = PM::get().DataPointsFilterRegistrar.create(
+		"SymmetryDataPointsFilter", params
+	);
+	DP filteredCloud = symmetryFilter->filter(cloud);
+	EXPECT_EQ(filteredCloud.getNbPoints(), 1);
+	EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getDescriptorViewByName("omega")(0,0));
+	EXPECT_EQ(cloud.getDescriptorDim()+1+9, filteredCloud.getDescriptorDim()); // we add omega and deviation
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+
 	// Test with point cloud
-	DP cloud = generateRandomDataPoints(30000);
+	cloud = generateRandomDataPoints(30000);
     cloud.features *= 2.5;
     cloud.descriptors = PM::Matrix::Ones(cloud.descriptors.rows(), cloud.descriptors.cols());
     cloud.times = PM::Int64Matrix::Ones(cloud.times.rows(), cloud.times.cols());
@@ -1112,11 +1134,11 @@ TEST_F(DataFilterTest, SymmetryDataPointsFilter)
 		params["ct"] = "0.95";
 		params["knn"] = "10";
 
-	DPFiltersPtr symmetryFilter = PM::get().DataPointsFilterRegistrar.create(
+	symmetryFilter = PM::get().DataPointsFilterRegistrar.create(
 		"SymmetryDataPointsFilter", params
 	);
 
-	DP filteredCloud = symmetryFilter->filter(cloud);
+	filteredCloud = symmetryFilter->filter(cloud);
 	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
 	EXPECT_EQ(cloud.getDescriptorDim()+1+9, filteredCloud.getDescriptorDim()); // we add omega and deviation
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
@@ -1139,41 +1161,45 @@ TEST_F(DataFilterTest, DecompressDataPointsFilter)
 	using DPFiltersPtr = std::shared_ptr<PM::DataPointsFilter>;
 
 	// Test with point cloud
-	DP cloud = generateRandomDataPoints(5000);
-    cloud.features *= 2.5;
-    cloud.descriptors = PM::Matrix::Ones(cloud.descriptors.rows(), cloud.descriptors.cols());
-    cloud.times = PM::Int64Matrix::Ones(cloud.times.rows(), cloud.times.cols());
+	DP cloud = generateRandomDataPoints(100);
+    cloud.features *= 0.25;
 
 	// First, compress the point cloud
 	params = PM::Parameters();
-		params["vrs"] = "5.0";
-		params["vro"] = "1.025";
+		params["vrs"] = "50.0";
+		params["vro"] = "10.025";
 		params["dt"] = "0.025";
-		params["ct"] = "0.95";
+		params["ct"] = "1.0";
 		params["knn"] = "10";
 
 	DPFiltersPtr symmetryFilter = PM::get().DataPointsFilterRegistrar.create(
 		"SymmetryDataPointsFilter", params
 	);
 
-	DP filteredCloud = symmetryFilter->filter(cloud);
+	const DP filteredCloud = symmetryFilter->filter(cloud);
 	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
 	EXPECT_EQ(cloud.getDescriptorDim()+1+9, filteredCloud.getDescriptorDim()); // we add omega and deviation
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
-    EXPECT_TRUE(filteredCloud.descriptors.block(0, 0, cloud.getDescriptorDim(), cloud.getNbPoints()).isApprox(PM::Matrix::Ones(cloud.descriptors.rows(), filteredCloud.descriptors.cols())));
-    EXPECT_TRUE(filteredCloud.times.isApprox(PM::Int64Matrix::Ones(filteredCloud.times.rows(), filteredCloud.times.cols())));
 
+    cloud.save("/Volumes/CaseSensitive/libpointmatcher/utest/ui/cloud.vtk");
+    filteredCloud.save("/Volumes/CaseSensitive/libpointmatcher/utest/ui/filteredCloud.vtk");
     // Then, decompress it
-	params.clear();
-		params["pointsGenerator"] = "1";
+    for(unsigned i:{0, 1})
+    {
+        params.clear();
+            params["pointsGenerator"] = toParam(i);
 
-	DPFiltersPtr decompressFilter = PM::get().DataPointsFilterRegistrar.create(
-		"DecompressDataPointsFilter", params
-	);
+        DPFiltersPtr decompressFilter = PM::get().DataPointsFilterRegistrar.create(
+            "DecompressDataPointsFilter", params
+        );
 
-	DP decompressedCloud = decompressFilter->filter(filteredCloud);
+        DP decompressedCloud = decompressFilter->filter(filteredCloud);
 
-	EXPECT_EQ(cloud.getNbPoints(), decompressedCloud.getNbPoints());
-	EXPECT_EQ(cloud.getDescriptorDim(), decompressedCloud.getDescriptorDim());
-	EXPECT_EQ(cloud.getTimeDim(), decompressedCloud.getTimeDim());
+        decompressedCloud.save("/Volumes/CaseSensitive/libpointmatcher/utest/ui/decompressed"+std::to_string(i)+".vtk");
+        EXPECT_EQ(cloud.getNbPoints(), decompressedCloud.getNbPoints());
+        EXPECT_EQ(cloud.getDescriptorDim(), decompressedCloud.getDescriptorDim());
+        EXPECT_EQ(cloud.getTimeDim(), decompressedCloud.getTimeDim());
+        EXPECT_EQ(cloud.descriptorLabels, decompressedCloud.descriptorLabels);
+        EXPECT_EQ(cloud.timeLabels, decompressedCloud.timeLabels);
+    }
 }
