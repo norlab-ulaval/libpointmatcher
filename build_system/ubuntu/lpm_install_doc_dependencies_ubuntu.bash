@@ -7,31 +7,26 @@
 #
 set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
-# ....Project root logic...........................................................................
-TMP_CWD=$(pwd)
-
-if [[ "$(basename $(pwd))" != "build_system" ]]; then
-  cd ../
-fi
-
-
-# ....Load environment variables from file.........................................................
-set -o allexport
-source ./.env
-source ./.env.prompt
-set +o allexport
-
 ## skip GUI dialog by setting everything to default
 export DEBIAN_FRONTEND=noninteractive
 
+# ....Project root logic...........................................................................
+TMP_CWD=$(pwd)
+
+LPM_PATH=$(git rev-parse --show-toplevel)
+cd "${LPM_PATH}/build_system" || exit
+
+# ....Load environment variables from file.........................................................
+set -o allexport
+source .env
+set +o allexport
+
 # ....Helper function..............................................................................
 # import shell functions from utilities library
-source ./function_library/prompt_utilities.bash
-source ./function_library/terminal_splash.bash
-source ./function_library/general_utilities.bash
+source "${LPM_PATH}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
 
-## Set environment variable 'NBS_IMAGE_ARCHITECTURE'
-source ./lpm_utility_script/lpm_export_which_architecture.bash
+# Set environment variable NBS_IMAGE_ARCHITECTURE
+source "${LPM_PATH}/build_system/lpm_utility_script/lpm_export_which_architecture.bash"
 
 # ====Begin========================================================================================
 SHOW_SPLASH_IDDU="${SHOW_SPLASH_IDDU:-true}"

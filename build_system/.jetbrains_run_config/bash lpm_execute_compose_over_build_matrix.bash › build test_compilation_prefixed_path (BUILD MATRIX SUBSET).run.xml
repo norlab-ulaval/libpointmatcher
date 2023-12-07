@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="bash nbs_execute_compose_over_build_matrix.bash › build test_compilation_prefixed_path (BUILD MATRIX SUBSET)" type="ShConfigurationType" folderName="(A | Execute compose over build matrix)" editBeforeRun="true">
-    <option name="SCRIPT_TEXT" value="bash nbs_execute_compose_over_build_matrix.bash --fail-fast --cmake-build-type-build-matrix-override Release --os-name-build-matrix-override ubuntu --ubuntu-version-build-matrix-override focal -- build test_compilation_prefixed_path" />
+  <configuration default="false" name="bash lpm_execute_compose_over_build_matrix.bash › build test_compilation_prefixed_path (BUILD MATRIX SUBSET)" type="ShConfigurationType" folderName="(A | Execute compose over build matrix)" editBeforeRun="true">
+    <option name="SCRIPT_TEXT" value="bash lpm_execute_compose_over_build_matrix.bash --fail-fast --cmake-build-type-build-matrix-override Release --os-name-build-matrix-override ubuntu --ubuntu-version-build-matrix-override focal -- build test_compilation_prefixed_path" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
@@ -9,7 +9,7 @@
     <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
     <option name="INTERPRETER_PATH" value="/bin/zsh" />
     <option name="INTERPRETER_OPTIONS" value="" />
-    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_IN_TERMINAL" value="false" />
     <option name="EXECUTE_SCRIPT_FILE" value="false" />
     <envs>
       <env name="BUILDX_BUILDER" value="local-builder-multiarch-virtual" />

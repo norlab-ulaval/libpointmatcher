@@ -39,30 +39,26 @@ BUILD_SYSTEM_CI_INSTALL=FALSE
 CMAKE_BUILD_TYPE=RelWithDebInfo
 
 
+# skip GUI dialog by setting everything to default
+export DEBIAN_FRONTEND=noninteractive
+
 # ....Project root logic...........................................................................
 TMP_CWD=$(pwd)
 
-if [[ "$(basename $(pwd))" != "build_system" ]]; then
-  cd ../
-fi
+LPM_PATH=$(git rev-parse --show-toplevel)
+cd "${LPM_PATH}/build_system" || exit
 
 # ....Load environment variables from file.........................................................
 set -o allexport
-source ./.env
-source ./.env.prompt
+source .env
 set +o allexport
 
-## skip GUI dialog by setting everything to default
-export DEBIAN_FRONTEND=noninteractive
-
 # ....Helper function..............................................................................
-## import shell functions from norlab-build-system utilities library
-source ./function_library/prompt_utilities.bash
-source ./function_library/terminal_splash.bash
-source ./function_library/general_utilities.bash
+# import shell functions from utilities library
+source "${LPM_PATH}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
 
-## Set environment variable NBS_IMAGE_ARCHITECTURE
-source ./lpm_utility_script/lpm_export_which_architecture.bash
+# Set environment variable NBS_IMAGE_ARCHITECTURE
+source "${LPM_PATH}/build_system/lpm_utility_script/lpm_export_which_architecture.bash"
 
 function print_help_in_terminal() {
   echo -e "\$ ${0} [<optional argument>]

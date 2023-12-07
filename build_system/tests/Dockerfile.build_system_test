@@ -53,10 +53,13 @@ COPY ./.git ./.git
 # Copy all files from the checkout branch in the repository (except those in the .dockerignore)
 WORKDIR /libpointmatcher-build-system/build_system
 
+COPY ./build_system/utilities/norlab-build-system ./utilities/norlab-build-system
+COPY ./build_system/utilities/norlab-shell-script-tools ./utilities/norlab-shell-script-tools
+
 COPY ./build_system/.env ./.env
-COPY ./build_system/.env.prompt ./.env.prompt
+#COPY ./build_system/.env.prompt ./.env.prompt
 COPY ./build_system/lpm_utility_script/lpm_install_docker_tools.bash ./lpm_utility_script/lpm_install_docker_tools.bash
-COPY ./build_system/function_library/prompt_utilities.bash ./function_library/prompt_utilities.bash
+#COPY ./build_system/function_library/prompt_utilities.bash ./function_library/prompt_utilities.bash
 
 RUN chmod +x ./lpm_utility_script/lpm_install_docker_tools.bash
 

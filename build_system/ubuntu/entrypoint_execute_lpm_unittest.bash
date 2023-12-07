@@ -18,9 +18,14 @@ set -o allexport
 source .env
 set +o allexport
 
+# ....path resolution logic........................................................................
+_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
+LPM_ROOT_DIR="$(dirname "${_PATH_TO_SCRIPT}")"
+
 # ....Helper function..............................................................................................
 # import shell functions from utilities library
-source ./function_library/prompt_utilities.bash
+source "${LPM_ROOT_DIR}/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
+#source ./function_library/prompt_utilities.bash
 
 # ==== Check libopintmatcher dependencies versions=================================================================
 cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"

@@ -7,19 +7,23 @@
 #
 set -e
 
-# ....Project root logic...........................................................................................
+# ....Project root logic...........................................................................
 TMP_CWD=$(pwd)
 
-if [[ "$(basename $(pwd))" != "build_system" ]]; then
-  cd ../
-fi
+# ....Project root logic...........................................................................
+LPM_PATH=$(git rev-parse --show-toplevel)
+cd "${LPM_PATH}/build_system" || exit
 
-# ....Helper function..............................................................................................
+# ....Load environment variables from file.........................................................
+set -o allexport
+source .env
+set +o allexport
+
+# ....Helper function..............................................................................
 # import shell functions from utilities library
-source ./function_library/prompt_utilities.bash
-source ./function_library/general_utilities.bash
+source "${LPM_PATH}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
 
-# ====Install python version based on ubuntu distro================================================================
+# ====Install python version based on ubuntu distro===================================================
 if [[ $(uname) == 'Linux' ]]; then
 
   sudo update-ca-certificates
@@ -30,7 +34,7 @@ if [[ $(uname) == 'Linux' ]]; then
   print_msg "Ubuntu version is ${DISTRIB_RELEASE}"
   if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
 
-    # ....Case › Ubuntu bionic ==> python 2........................................................................
+    # ....Case › Ubuntu bionic ==> python 2........................................................
     teamcity_service_msg_blockOpened "Install python development tools for Ubuntu distro (python 2)"
 
     sudo apt-get update &&
@@ -48,7 +52,7 @@ if [[ $(uname) == 'Linux' ]]; then
     teamcity_service_msg_blockOpened "Install python development tools for Ubuntu distro (python 3)"
 
     if [[ ${DISTRIB_RELEASE} == '20.04' ]]; then
-      # ....Case › Ubuntu distro still have to deal with python 2 legacy code.....................................
+      # ....Case › Ubuntu distro still have to deal with python 2 legacy code......................
       sudo apt-get update &&
         sudo apt-get install --assume-yes \
           python3-dev \
@@ -58,7 +62,7 @@ if [[ $(uname) == 'Linux' ]]; then
         sudo rm -rf /var/lib/apt/lists/*
 
     else
-      # ....Case › python 3 is Ubuntu default python version......................................................
+      # ....Case › python 3 is Ubuntu default python version.......................................
       sudo apt-get update &&
         sudo apt-get install --assume-yes \
           python3-dev \
@@ -72,7 +76,7 @@ if [[ $(uname) == 'Linux' ]]; then
   fi
 fi
 
-# ====Universal python install step (common to all OS version)======================================================
+# ====Universal python install step (common to all OS version)=====================================
 teamcity_service_msg_blockOpened "Pip install python packages"
 
 # Note: 2X "--quiet" correspond to ERROR logging level
@@ -81,7 +85,7 @@ pip install --no-cache-dir --quiet --quiet --upgrade pip &&
 
 teamcity_service_msg_blockClosed
 
-# ====Install TeamCity and CI/CD utilities==========================================================================
+# ====Install TeamCity and CI/CD utilities=========================================================
 if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   teamcity_service_msg_blockOpened "Install TeamCity and CI/CD python tools"
   # Note: dont hardcode 'pip' version (2 vs 3) as this step is also used by bionic distro
@@ -90,5 +94,5 @@ if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   teamcity_service_msg_blockClosed
 fi
 
-# ====Teardown=====================================================================================================
+# ====Teardown=====================================================================================
 cd "${TMP_CWD}"

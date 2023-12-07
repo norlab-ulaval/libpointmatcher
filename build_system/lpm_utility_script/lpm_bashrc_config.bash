@@ -20,9 +20,13 @@ function lpm::configure_bashrc() {
   #source .env.prompt    # todo: delete on task end
   set +o allexport
 
-  # ....Helper function............................................................................
-  ## import shell functions from build-system utilities library
-  source ./function_library/prompt_utilities.bash
+  # ....Helper function..............................................................................................
+  # import shell functions from utilities library
+  source "${LPM_PATH}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
+
+#  # ....Helper function............................................................................
+#  ## import shell functions from build-system utilities library
+#  source ./function_library/prompt_utilities.bash
 
   # ====Begin======================================================================================
   print_formated_script_header 'lpm_bashrc_config.bash' "${NBS_LINE_CHAR_UTIL}"

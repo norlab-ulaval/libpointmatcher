@@ -22,8 +22,17 @@ if [[ "$(basename $(pwd))" == "tests" ]]; then
   cd ../
 fi
 
-source ./function_library/prompt_utilities.bash
-source ./function_library/general_utilities.bash
+
+# ....path resolution logic........................................................................
+_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
+LPM_ROOT_DIR="$(dirname "${_PATH_TO_SCRIPT}")/.."
+
+# ....Helper function..............................................................................................
+# import shell functions from utilities library
+source "${LPM_ROOT_DIR}/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
+
+#source ./function_library/prompt_utilities.bash
+#source ./function_library/general_utilities.bash
 
 # ....Project root logic...........................................................................
 if [[ "$(basename $(pwd))" == "build_system" ]]; then

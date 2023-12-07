@@ -8,24 +8,22 @@
 # Notes:
 #   The script propagate the utest exit code on exit
 
-# ....Project root logic...........................................................................................
+# ....Project root logic...........................................................................
 TMP_CWD=$(pwd)
 
-if [[ "$(basename $(pwd))" != "build_system" ]]; then
-  cd ../
-fi
+LPM_PATH=$(git rev-parse --show-toplevel)
+cd "${LPM_PATH}/build_system" || exit
 
-# ....Load environment variables from file.........................................................................
+# ....Load environment variables from file.........................................................
 set -o allexport
 source .env
-#source .env.prompt    # todo: delete on task end
 set +o allexport
 
-# ....Load helper function.........................................................................................
+# ....Helper function..............................................................................
 # import shell functions from utilities library
-source ./function_library/prompt_utilities.bash
+source "${LPM_PATH}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
 
-# ====Begin========================================================================================================
+# ====Begin========================================================================================
 print_formated_script_header 'lpm_execute_libpointmatcher_unittest.bash' ':'
 
 cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build"
@@ -37,11 +35,11 @@ else
   print_msg "Starting Libpointmatcher GoogleTest unit-test"
 fi
 
-# .................................................................................................................
+# .................................................................................................
 sudo chmod +x utest/utest
 utest/utest --path "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/examples/data/"
 UTEST_EXIT_CODE=$?
-# .................................................................................................................
+# .................................................................................................
 
 SUCCESS_MSG="Libpointmatcher GoogleTest unit-test completed successfully"
 FAILURE_MSG="Libpointmatcher GoogleTest unit-test completed with error"
@@ -68,6 +66,6 @@ else
 fi
 
 print_formated_script_footer 'lpm_execute_libpointmatcher_unittest.bash' ':'
-# ====Teardown=====================================================================================================
+# ====Teardown=====================================================================================
 cd "${TMP_CWD}"
 exit $UTEST_EXIT_CODE

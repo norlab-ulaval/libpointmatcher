@@ -42,7 +42,7 @@ RUN chmod +x entrypoint_execute_lpm_unittest.bash
 RUN chmod +x entrypoint.bash
 
 # ====Install Libpointmatcher======================================================================
-RUN source lpm_install_libpointmatcher_ubuntu.bash \
+RUN bash lpm_install_libpointmatcher_ubuntu.bash \
     --repository-version ${REPOSITORY_VERSION} \
     --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
     ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}

@@ -36,14 +36,19 @@ function lpm::export_which_architecture() {
   LPM_PATH=$(git rev-parse --show-toplevel)
   cd "${LPM_PATH}/build_system" || exit
 
-  # ....Load environment variables from file.......................................................
-  set -o allexport
-  #source .env.prompt    # todo: delete on task end
-  set +o allexport
+#  # ....Load environment variables from file.......................................................
+#  set -o allexport
+#  #source .env.prompt    # todo: delete on task end
+#  set +o allexport
 
-  # ....Helper function............................................................................
+
+  # ....Helper function..............................................................................................
   # import shell functions from utilities library
-  source ./function_library/prompt_utilities.bash
+  source "${LPM_PATH}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
+
+#  # ....Helper function............................................................................
+#  # import shell functions from utilities library
+#  source ./function_library/prompt_utilities.bash
 
   # ====Begin======================================================================================
   #print_formated_script_header 'lpm_export_which_architecture.bash' "${NBS_LINE_CHAR_UTIL}"
