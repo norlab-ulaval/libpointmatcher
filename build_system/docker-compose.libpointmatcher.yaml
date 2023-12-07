@@ -32,7 +32,7 @@ services:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies-doc:${NBS_IMAGE_TAG:?err}
     build:
       context: ..
-      dockerfile: ./build_system/ubuntu/Dockerfile.dependencies_doc
+      dockerfile: ubuntu/Dockerfile.dependencies.doxygen
       platforms:
         - "linux/amd64"
         - "linux/arm64/v8"
@@ -50,7 +50,7 @@ services:
     pull_policy: build
     build:
       context: ..
-      dockerfile: './build_system/ubuntu/Dockerfile.libpointmatcher_test_compilation'
+      dockerfile: ubuntu/Dockerfile.libpointmatcher.compilation_test
       target: test-compilation-auto-path-resolution
       ## Mute 'platforms' while using arch virtualization with C++ build to prevent segmentation fault during lpm cmake install
 #      platforms:
@@ -87,7 +87,7 @@ services:
     pull_policy: build
     build:
       context: ..
-      dockerfile: './build_system/ubuntu/Dockerfile.libpointmatcher_ci_PR'
+      dockerfile: ubuntu/Dockerfile.libpointmatcher.ci_PR
       no_cache: true
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
@@ -119,7 +119,7 @@ services:
     pull_policy: build
     build:
       context: ..
-      dockerfile: './build_system/ubuntu/Dockerfile.libpointmatcher_ci_SITREP_matrix'
+      dockerfile: ubuntu/Dockerfile.libpointmatcher.ci_SITREP_matrix
       no_cache: true
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
@@ -145,7 +145,7 @@ services:
     container_name: libpointmatcher
     build:
       context: ..
-      dockerfile: ./build_system/ubuntu/Dockerfile.libpointmatcher
+      dockerfile: ubuntu/Dockerfile.libpointmatcher.hub_release
       platforms:
         - "linux/amd64"
         - "linux/arm64/v8"
