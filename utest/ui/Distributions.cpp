@@ -55,3 +55,33 @@ TEST(Distribution, Distribution) // TODO add test for incremental statistics (ru
     EXPECT_TRUE(distro_c.times.isApprox((times1 + times2)/2));
     EXPECT_TRUE(distro_c.descriptors.isApprox((descriptors1 + descriptors2)/2));
 }
+
+TEST(Distribution, ComputeVolume)
+{
+	typedef typename Eigen::Vector3f Vector;
+    typedef typename PointMatcher<float>::Int64Matrix Times;
+	using Matrix = Eigen::Matrix<float, 3, 3>;
+
+    Vector point1;
+    point1 << -2.0, -1.0, -0.25;
+    Matrix deviation1 = Matrix::Identity();
+    float omega1 = 0.25;
+    Vector descriptors1 = Vector::Random();
+    Times times1(3, 1);
+    times1.setRandom(3, 1);
+
+
+    auto distro1 = Distribution<float>(point1, omega1, deviation1, times1, descriptors1);
+    EXPECT_TRUE((distro1.getVolume() - 1*std::pow(2, 3)*std::pow(1.73, 3) / std::pow(omega1, 3)) < 1e-5);
+
+    Eigen::Matrix<float, 3, 1> diag2;
+    diag2 << 1, 5, 29;
+    Matrix deviation2 = diag2.array().matrix().asDiagonal();
+    float omega2 = 11.0;
+    Eigen::Vector3f descriptors2 = Eigen::Vector3f::Random();
+    Times times2(3, 1);
+    times2.setRandom(3, 1);
+
+    auto distro2 = Distribution<float>(point1, omega2, deviation2, times2, descriptors2);
+    EXPECT_TRUE((distro2.getVolume() - diag2.cwiseSqrt().prod()*std::pow(2, 3)*std::pow(1.73, 3) / std::pow(omega1, 3)) < 1e-5);
+}

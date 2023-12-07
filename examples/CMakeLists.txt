@@ -25,3 +25,6 @@ target_link_libraries(icp_customized pointmatcher)
 
 add_executable(filter_symmetry filter_symmetry.cpp)
 target_link_libraries(filter_symmetry pointmatcher)
+
+add_executable(distribution_bench distribution_bench.cpp)
+target_link_libraries(distribution_bench pointmatcher)
