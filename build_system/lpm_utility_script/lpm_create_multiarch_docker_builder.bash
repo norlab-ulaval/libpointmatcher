@@ -18,16 +18,11 @@ function lpm::create_multiarch_docker_builder() {
   # ....Load environment variables from file.......................................................
   set -o allexport
   source .env
-  #source .env.prompt    # todo: delete on task end
   set +o allexport
 
   # ....Helper function..............................................................................................
   # import shell functions from utilities library
   source "${LPM_PATH}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
-
-#  # ....Load helper function.......................................................................
-#  # import shell functions from utilities library
-#  source ./function_library/prompt_utilities.bash
 
   # ====Begin======================================================================================
   print_formated_script_header 'lpm_create_multiarch_docker_builder.bash'

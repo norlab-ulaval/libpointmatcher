@@ -59,17 +59,14 @@ COPY ./.git ./.git
 
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system"
 
-#COPY ./build_system/.env.prompt .
 COPY ./build_system/utilities/norlab-build-system ./utilities/norlab-build-system/
 COPY ./build_system/utilities/norlab-shell-script-tools ./utilities/norlab-shell-script-tools/
-#COPY ./build_system/function_library/ ./function_library/
 
 COPY ./build_system/.env .
 COPY ./build_system/ubuntu/lpm_install_python_dev_tools.bash ./ubuntu/
 
 RUN chmod +x ./ubuntu/lpm_install_python_dev_tools.bash
 
-#RUN tree -L 3 && source ./ubuntu/lpm_install_python_dev_tools.bash
 RUN bash ./ubuntu/lpm_install_python_dev_tools.bash
 
 

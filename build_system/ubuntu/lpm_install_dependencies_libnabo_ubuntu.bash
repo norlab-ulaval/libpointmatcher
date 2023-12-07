@@ -92,23 +92,15 @@ git clone https://github.com/ethz-asl/libnabo.git &&
 
 teamcity_service_msg_compilationStarted "cmake"
 
-## (Priority) inprogress: investigate?? (ref task NMO-402 fix: unstable compilation issue)
 ## ToDo: Add mention about 'CMAKE_INSTALL_PREFIX' in the doc install step as a fix
-#cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo \
-# -D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH} \
-# "${NBS_LIB_INSTALL_PATH}/libnabo" &&
-#  make -j $(nproc) &&
-#  make test &&
-#  sudo make install
-
-
+# shellcheck disable=SC2068
 cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo ${LIBNABO_CMAKE_INSTALL_PREFIX[@]} \
   "${NBS_LIB_INSTALL_PATH}/libnabo" &&
   make -j $(nproc) &&
   sudo make install
 
 # (NICE TO HAVE) ToDo: refactor (ref task NMO-428 refactor: drop libnabo `make test` step after libnabo-build-system deployment)
-#  make test &&
+#  make -j $(nproc) && make test && sudo make install
 
 teamcity_service_msg_compilationFinished
 

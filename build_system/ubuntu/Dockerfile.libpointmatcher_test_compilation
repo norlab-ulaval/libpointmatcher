@@ -51,7 +51,7 @@ FROM libpointmatcher-dependencies-general AS test-compilation-auto-path-resoluti
 ENV OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX=()
 ENV OVERRIDE_NBS_CMAKE_INSTALL_PREFIX=()
 
-RUN echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> delete this line
+RUN #echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> delete this line
 
 # ....Install libnabo..............................................................................
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/ubuntu"
@@ -84,7 +84,7 @@ FROM libpointmatcher-dependencies-general AS test-compilation-prefixed-path
 ENV OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX=("-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}")
 ENV OVERRIDE_NBS_CMAKE_INSTALL_PREFIX=("-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}")
 
-RUN echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> delete this line
+RUN #echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> delete this line
 
 # ....Install libnabo..............................................................................
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/ubuntu"
