@@ -1,15 +1,18 @@
 #!/bin/bash
 #
-# Execute build matrix over docker compose file specified in NBS_EXECUTE_BUILD_MATRIX_OVER_COMPOSE_FILE
+# Execute build matrix specified in '.env.build_matrix.dependencies'
+#
 # Redirect the execution to 'nbs_execute_compose_over_build_matrix.bash' from the norlab-build-system library
 #
 # Usage:
-#   $ bash lpm_execute_compose_over_build_matrix.bash [<optional flag>] [-- <any docker cmd+arg>]
+#   $ bash lpm_crawl_dependencies_build_matrix.bash [<optional flag>] [-- <any docker cmd+arg>]
 #
-#   $ bash lpm_execute_compose_over_build_matrix.bash -- build --dry-run
+#   $ bash lpm_crawl_dependencies_build_matrix.bash -- build --dry-run
 #
 # Run script with the '--help' flag for details
 #
+
+clear
 
 # ....path resolution logic........................................................................
 NBS_PATH_TO_SRC_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
@@ -19,7 +22,7 @@ N2ST_ROOT_DIR="$(dirname "${NBS_PATH_TO_SRC_SCRIPT}")/utilities/norlab-shell-scr
 # ....Load environment variables from file.........................................................
 set -o allexport
 source .env
-source .env.build_matrix
+source .env.build_matrix.dependencies
 set +o allexport
 
 # ....Helper function..............................................................................

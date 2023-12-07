@@ -8,4 +8,7 @@ LPM_ROOT_DIR="$(dirname "${_PATH_TO_SCRIPT}")"
 cd "${LPM_ROOT_DIR}/../../"
 
 # ====begin========================================================================================
-bash lpm_execute_compose_over_build_matrix.bash --fail-fast -- build --dry-run
+bash -c "export BUILDX_BUILDER=local-builder-multiarch-virtual \
+         && bash lpm_crawl_dependencies_build_matrix.bash \
+                  --fail-fast \
+                  -- config --quiet"
