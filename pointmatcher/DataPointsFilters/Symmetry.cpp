@@ -82,17 +82,12 @@ void SymmetryDataPointsFilter<T>::inPlaceFilter(
             overlapSampling(distributions);
         }
         auto number_of_points_after_sampling = static_cast<float>(distributions.size());
-        std::cout << "Down to " << number_of_points_after_sampling << " points\n";
         if(number_of_points_after_sampling / number_of_points_before_sampling < ct)
         {
             if(updated_ctr == 0)
             {
                 updated_ctr = 2;
             }
-        }
-        else
-        {
-            std::cout << "Almost no points removed\n";
         }
     }
     cloud = getCloudFromDistributions(cloud, distributions);
@@ -102,8 +97,6 @@ template<typename T>
 void SymmetryDataPointsFilter<T>::symmetrySampling(
         std::vector<std::shared_ptr<Distribution<T>>>& distributions)
 {
-    std::cout << "Symmetry sampling" << std::endl;
-
     using namespace PointMatcherSupport;
 
 	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
@@ -232,8 +225,6 @@ template<typename T>
 void SymmetryDataPointsFilter<T>::overlapSampling(
         std::vector<std::shared_ptr<Distribution<T>>>& distributions)
 {
-    std::cout << "Overlap sampling" << std::endl;
-
     using namespace PointMatcherSupport;
 
 	typedef typename MatchersImpl<T>::KDTreeMatcher KDTreeMatcher;
