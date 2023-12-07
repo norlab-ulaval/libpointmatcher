@@ -14,7 +14,7 @@ export DEBIAN_FRONTEND=noninteractive
 TMP_CWD=$(pwd)
 
 LPM_PATH=$(git rev-parse --show-toplevel)
-cd "${LPM_PATH}/build_system" || exit
+cd "${LPM_PATH}/build_system" || cd "${LPM_PATH}" || exit
 
 # ....Load environment variables from file.........................................................
 set -o allexport
@@ -61,11 +61,15 @@ cmake --version
 teamcity_service_msg_blockClosed
 # .................................................................................................
 
+# (Priority) ToDo: add check to see if executed in a docker container. Current check does not do what its intended
 if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   print_msg "The install script is run in teamCity >> the python install step was executed earlier in the Dockerfile.dependencies"
 else
   print_msg "The install script is executed in stand alone mode"
-  source ./ubuntu/lpm_install_python_dev_tools.bash
+#  source ./ubuntu/lpm_install_python_dev_tools.bash
+  cd "${LPM_PATH}/build_system/utilities/norlab-build-system/src/container_tools" || exit
+  bash "./nbs_install_python_dev_tools.bash"
+#  source "${LPM_PATH}/build_system/utilities/norlab-build-system/src/container_tools/nbs_install_python_dev_tools.bash"
 fi
 
 # .................................................................................................
