@@ -38,7 +38,7 @@ function lpm::export_which_architecture() {
 
   # ....Load environment variables from file.......................................................
   set -o allexport
-  source .env.prompt
+  #source .env.prompt    # todo: delete on task end
   set +o allexport
 
   # ....Helper function............................................................................

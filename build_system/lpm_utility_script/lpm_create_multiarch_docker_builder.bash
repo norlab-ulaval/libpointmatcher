@@ -18,7 +18,7 @@ function lpm::create_multiarch_docker_builder() {
   # ....Load environment variables from file.......................................................
   set -o allexport
   source .env
-  source .env.prompt
+  #source .env.prompt    # todo: delete on task end
   set +o allexport
 
   # ....Load helper function.......................................................................

@@ -17,7 +17,7 @@ function lpm::configure_bashrc() {
   cd "${LPM_PATH}/build_system" || exit
   set -o allexport
   source .env
-  source .env.prompt
+  #source .env.prompt    # todo: delete on task end
   set +o allexport
 
   # ....Helper function............................................................................

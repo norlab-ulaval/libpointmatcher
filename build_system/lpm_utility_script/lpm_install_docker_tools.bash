@@ -18,7 +18,7 @@ function lpm::install_docker_tools() {
   # ....Load environment variables from file.......................................................
   set -o allexport
   source .env
-  source .env.prompt
+  #source .env.prompt    # todo: delete on task end
   set +o allexport
 
   # ....Load helper function.......................................................................
