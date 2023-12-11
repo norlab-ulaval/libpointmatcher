@@ -9,8 +9,8 @@
 
 libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
 The library is written in C++ for effeciency with [bindings in Python](https://github.com/norlab-ulaval/libpointmatcher/blob/master/doc/index.md#python-).
-
-**Quick link for the tutorial pages: [Tutorials](doc/index.md) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
+ 
+**Quick link for the tutorial pages: [Tutorials](doc/index.md)** (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/) but might not be up-to-date).
 
 Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
 
@@ -61,10 +61,20 @@ utest/utest --path ../examples/data/
 
 We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/demo_Qt), which manually lists all the dependencies in the file [`demo.pro`](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system. For a more detailed procedure, check the [Linking Projects to libpointmatcher](doc/LinkingProjects.md) section.
 
+## Contributing
 
 ### Bug reporting
 
 Please use our [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs. If you are running the library on Ubuntu, copy-paste the output of the script [listVersionsUbuntu.sh](https://github.com/norlab-ulaval/libpointmatcher/blob/master/utest/listVersionsUbuntu.sh) to simplify the search of an answer.
+
+### Codebase development
+
+Libpointmatcher codebase now integrate [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) which is a build infrastructure agnostic build system custom made for our need at NorLab.
+NBS is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuous integration/deployment server and oversee both protected branch of the [libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) GitHub repository: the `master` branch and the `develop` branch.
+- The `master` branch can only be merged from the `release` branch through a pull-request done the repository admin;
+- The `develop` branch can only be merged from any `<feature>` branch through a pull-request. Any contributor can submit a pullrequest to the `develop` branch
+
+
 
 ## File formats
 The library support different file formats for importing or exporting data:
