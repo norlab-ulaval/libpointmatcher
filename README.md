@@ -23,6 +23,15 @@ You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 
 # Quick Start
 
+Clone the repository with its submodule
+```shell
+git clone --recurse-submodules https://github.com/norlab-ulaval/libpointmatcher.git
+
+# If libpointmatcher is already cloned, fetch its new submodule 
+git submodule update --remote --recursive --init
+```
+
+
 Although we suggest to use the [tutorials](doc/index.md), here is a quick version of it:
 
 The library has a light dependency list:
