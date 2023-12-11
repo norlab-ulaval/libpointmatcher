@@ -61,29 +61,89 @@ utest/utest --path ../examples/data/
 
 We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/demo_Qt), which manually lists all the dependencies in the file [`demo.pro`](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system. For a more detailed procedure, check the [Linking Projects to libpointmatcher](doc/LinkingProjects.md) section.
 
-## Contributing
+## File formats
 
-### Bug reporting
+The library support different file formats for importing or exporting data:
+
+* csv (Comma Separated Values)
+* vtk (Visualization Toolkit Files)
+* ply (Polygon File Format)
+* pcd (Point Cloud Library Format)
+
+Those functionnalities are available without increasing the list of dependencies at the expense of
+limited functionality support. For more details, see the
+tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using
+those file formats from the command line can be found in the `/examples` directory and are
+described [here](doc/ICPIntro.md) in more detail.
+
+# Contributing
+
+## Bug reporting
 
 Please use our [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs. If you are running the library on Ubuntu, copy-paste the output of the script [listVersionsUbuntu.sh](https://github.com/norlab-ulaval/libpointmatcher/blob/master/utest/listVersionsUbuntu.sh) to simplify the search of an answer.
 
-### Codebase development
+## Codebase
 
-Libpointmatcher codebase now integrate [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) which is a build infrastructure agnostic build system custom made for our need at NorLab.
-NBS is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuous integration/deployment server and oversee both protected branch of the [libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) GitHub repository: the `master` branch and the `develop` branch.
-- The `master` branch can only be merged from the `release` branch through a pull-request done the repository admin;
-- The `develop` branch can only be merged from any `<feature>` branch through a pull-request. Any contributor can submit a pullrequest to the `develop` branch
+Libpointmatcher codebase now integrate [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) and [norlab-shell-script-tools (N2ST)](https://github.com/norlab-ulaval/norlab-shell-script-tools). `NBS` is a build-infrastructure-agnostic build system custom-made for our need at NorLab and `N2ST` is library of shell script, function for shell script development and a shell testing tools leveraging `bats-core`.
+
+NBS is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuous integration/deployment server and oversees both protected branch of the [libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) GitHub repository: the `master` branch and the `develop` branch.
+
+- The `develop` branch can only be merged through a pull-request from any `<feature>` branchs. Any contributor can submit a pull request to the `develop` branch;
+- The `master` branch can only be merged from the `release` branch through a pull-request by a repository admin.
+In both cases submiting a pull request will trigger a build configuration on our build system and the pull request will be granted if the build/test run succeede.
+
+**Current build matrix:**
+`[latest] x [x86, arm64] x [ubuntu] x [bionic, focal, jammy] x [Release, RelWithDebInfo, MinSizeRel]`
+
+### Development workflow
+
+To speed up the development process, you can run the build system localy on your workstation and have access to stacktrace and build log. 
+It support multi-OS and multi-architecture through docker container.
+Install steps
+```shell
+cd <path/to/libpointmatcher>
+
+# If libpointmatcher is already cloned, fetch the NBS and N2ST submodule 
+git submodule update --remote --recursive --init
+
+cd ./build_system/lpm_utility_script
+
+# Execute docker tools install script i.e. docker daemon, docker compose, docker buildx 
+bash lpm_install_docker_tools.bash
+
+# Configure a multi-architecture docker builder
+bash lpm_create_multiarch_docker_builder.bash
+```
+
+Execute build/test step localy
+```shell
+cd <path/to/libpointmatcher>/build_system
 
 
+# Run the build matrix as specified in ".env.build_matrix.libpointmatcher" on native architecture using "ci_PR" service 
+bash lpm_crawl_libpointmatcher_build_matrix.bash --fail-fast -- build ci_PR
 
-## File formats
-The library support different file formats for importing or exporting data:
-  * csv (Comma Separated Values)
-  * vtk (Visualization Toolkit Files)
-  * ply (Polygon File Format)
-  * pcd (Point Cloud Library Format)
+# Run a specific case using build flags with multi-architecture virtualization using "ci_PR_amd64" and "ci_PR_arm64v8" services 
+bash lpm_crawl_libpointmatcher_build_matrix.bash --repository-version-build-matrix-override latest \
+                                                 --os-name-build-matrix-override ubuntu \
+                                                 --cmake-build-type-build-matrix-override RelWithDebInfo \
+                                                 --ubuntu-version-build-matrix-override focal \
+                                                 --fail-fast \
+                                                 -- build ci_PR_amd64 ci_PR_arm64v8
 
-Those functionnalities are available without increasing the list of dependencies at the expense of limited functionality support. For more details, see the tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using those file formats from the command line can be found in the `/examples` directory and are described [here](doc/ICPIntro.md) in more detail.
+# Read the help for details
+bash lpm_crawl_libpointmatcher_build_matrix.bash --help
+```
+
+**Build system notes:** 
+- `lpm_crawl_dependencies_build_matrix.bash` execute the build matrix for the libpointmatcher dependencies. 
+   It's not required to build them locally as they are pre-build by our TeamCity server periodically push to dockerhub.
+   When executing `lpm_crawl_libpointmatcher_build_matrix.bash`, the `libpointmatcher-dependencies` docker images are pull and used as base image for the `libpointmatcher-[ci_PR_test|release]` images.
+- About `libpointmatcher/.github/workflow/` vs `libpointmatcher/build_system/` logic: Those are separate build logic.
+  `.github/workflow/` was community contributed and as the responsibilities of building python-binding and pushing packages. 
+  For this reason, it run a one-dimension build matrix: multiple python version, single OS version, single arch (x86) and
+  single compile flag which GitHub action computing resources can handle just fine.
+
 
 # Citing
 
