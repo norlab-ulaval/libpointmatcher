@@ -85,6 +85,8 @@ tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example ex
 those file formats from the command line can be found in the `/examples` directory and are
 described [here](doc/ICPIntro.md) in more detail.
 
+---
+
 # Contributing
 
 ## Bug reporting
@@ -108,7 +110,8 @@ In both cases submiting a pull request will trigger a build configuration on our
 
 To speed up the development process, you can run the build system localy on your workstation and have access to stacktrace and build log. 
 It support multi-OS and multi-architecture through docker container.
-Install steps
+
+#### Install _libpointmatcher-build-system_ dependencies
 ```shell
 cd <path/to/libpointmatcher>
 
@@ -124,10 +127,9 @@ bash lpm_install_docker_tools.bash
 bash lpm_create_multiarch_docker_builder.bash
 ```
 
-Execute build/test step localy
+#### libpointmatcher development › to execute build/test step locally
 ```shell
 cd <path/to/libpointmatcher>/build_system
-
 
 # Run the build matrix as specified in ".env.build_matrix.libpointmatcher" on native architecture using "ci_PR" service 
 bash lpm_crawl_libpointmatcher_build_matrix.bash --fail-fast -- build ci_PR
@@ -144,7 +146,14 @@ bash lpm_crawl_libpointmatcher_build_matrix.bash --repository-version-build-matr
 bash lpm_crawl_libpointmatcher_build_matrix.bash --help
 ```
 
-**Build system notes:** 
+#### Build system development › to execute docker dryrun and configuration test
+```shell
+cd <path/to/libpointmatcher>/build_system/tests/
+ 
+bash run_all_docker_dryrun_and_config_tests.bash
+```
+
+#### Build system notes: 
 - `lpm_crawl_dependencies_build_matrix.bash` execute the build matrix for the libpointmatcher dependencies. 
    It's not required to build them locally as they are pre-build by our TeamCity server periodically push to dockerhub.
    When executing `lpm_crawl_libpointmatcher_build_matrix.bash`, the `libpointmatcher-dependencies` docker images are pull and used as base image for the `libpointmatcher-[ci_PR_test|release]` images.
@@ -153,6 +162,7 @@ bash lpm_crawl_libpointmatcher_build_matrix.bash --help
   For this reason, it run a one-dimension build matrix: multiple python version, single OS version, single arch (x86) and
   single compile flag which GitHub action computing resources can handle just fine.
 
+---
 
 # Citing
 
