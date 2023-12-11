@@ -42,5 +42,7 @@ services:
         BASE_IMAGE: libpointmatcher-dependencies
         BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
+    depends_on:
+      - dependencies
     tty: true
     stdin_open: true
