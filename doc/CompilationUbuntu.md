@@ -178,7 +178,7 @@ sudo apt-get install doxygen
 You will also need LaTeX for the equations rendering :
 
 ```bash
-sudo apt-get install texlive-full
+sudo apt-get install doxygen-latex
 ```
 
 After you have installed Doxygen and LaTeX, you can enable the documentation by setting the CMake variable `GENERATE_API_DOC` to `TRUE`. This can be achieved through CMake-GUI or by the command line:
