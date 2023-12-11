@@ -11,6 +11,7 @@ services:
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.libpointmatcher.compilation_test
+      no_cache: true
       target: test-compilation-auto-path-resolution
       ## Mute 'platforms' while using arch virtualization with C++ build to prevent segmentation fault during lpm cmake install
 #      platforms:
