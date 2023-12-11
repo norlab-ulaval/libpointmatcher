@@ -23,7 +23,8 @@ set +o allexport
 
 # ....Helper function..............................................................................
 # import shell functions from utilities library
-source "${LPM_PATH}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
+N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
+source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 
 # Set environment variable NBS_IMAGE_ARCHITECTURE
 source "${LPM_PATH}/build_system/lpm_utility_script/lpm_export_which_architecture.bash"
