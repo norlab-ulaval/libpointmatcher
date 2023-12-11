@@ -6,7 +6,7 @@ services:
     build:
       target: libpointmatcher-dependencies-general
       context: ..
-      dockerfile: ./build_system/ubuntu/Dockerfile.dependencies
+      dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.dependencies
       platforms:
         - "linux/amd64"
         - "linux/arm64/v8"
@@ -33,7 +33,7 @@ services:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies-doc:${NBS_IMAGE_TAG:?err}
     build:
       context: ..
-      dockerfile: ./build_system/ubuntu/Dockerfile.dependencies.doxygen
+      dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.dependencies.doxygen
       platforms:
         - "linux/amd64"
         - "linux/arm64/v8"
@@ -42,5 +42,7 @@ services:
         BASE_IMAGE: libpointmatcher-dependencies
         BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
+    depends_on:
+      - dependencies
     tty: true
     stdin_open: true

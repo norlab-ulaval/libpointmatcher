@@ -27,9 +27,12 @@ fi
 _PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 LPM_ROOT_DIR="$(dirname "${_PATH_TO_SCRIPT}")/.."
 
+set -o allexport && source .env && set +o allexport
+#tree -L 1 $LPM_ROOT_DIR
+
 # ....Helper function..............................................................................................
 # import shell functions from utilities library
-source "${LPM_ROOT_DIR}/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
+source "${LPM_ROOT_DIR}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
 
 #source ./function_library/prompt_utilities.bash
 #source ./function_library/general_utilities.bash
