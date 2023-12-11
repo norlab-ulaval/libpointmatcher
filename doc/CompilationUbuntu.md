@@ -221,6 +221,7 @@ Finally, to install libpointmatcher on your system, run the following command:
 sudo make install
 ```
 
+<!---
 ### 4. Possible Caveats
 
 If Eigen, libnabo, yaml-cpp, or GTest are not found during the installation, you will have to manually supply their installation locations by setting the CMake flags. You can do so using the CMake-GUI.
@@ -229,8 +230,8 @@ If Eigen, libnabo, yaml-cpp, or GTest are not found during the installation, you
 cd build
 cmake-gui .
 ```
-
 ![alt text](images/cmake_screenshot.png "Screenshot of CMake-GUI")
+-->
 
 <!---
 If yaml-cpp was installed using apt-get as described above, it will not be found by the default CMake configuration.  You should set the `yaml-cpp_INCLUDE_DIRS` and `yaml-cpp_LIBRARIES` to `/usr/include/yaml-cpp` and `/usr/lib/x86_64-linux-gnu/` respectively.  These locations could be different on your machine.  You can find them by the files installed by the libyaml package:
@@ -240,12 +241,14 @@ dpkg -L libyaml-cpp-dev
 ```
 -->
 
+<!---
 You can then set `EIGEN_INCLUDE_DIR`, `NABO_INCLUDE_DIR`, `NABO_LIBRARY`, `yaml-cpp_INCLUDE_DIRS`, `yaml-cpp_LIBRARIES` to point to your installation directories as shown in the screenshot above.  Then, generate the make files by clicking generate and rerun the following inside `/build`:
 
 ```bash
 make
 sudo make install
 ```
+-->
 
 # Having problems?
 Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/norlab-ulaval/libpointmatcher/issues). You may need to ensure that the file is executable:
