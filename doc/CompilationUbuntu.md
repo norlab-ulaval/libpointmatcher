@@ -7,19 +7,19 @@
 
 If you are used to development projects, here is what you need:
 
-| Name           | Version  <br> (Tested Feb. 20, 2015)    |Version  <br> (Tested Sept. 6, 2016) | Version  <br> (Tested Jan. 8, 2019) |
-|----------------|-----------------------------------------|-----------------------|-----------------------|
-| Ubuntu         | 12.04.5 LTS (64 bit)                    | 14.04.5 LTS (64 bit)  | 18.04.1 LTS (64 bit) |
-| gcc            | 4.6.3                                   | 4.8.4                 | 7.3.0 |
-| git            | 1.7.9.5                                 | 1.9.1                 | 2.17.1 |
-| cmake          | 2.8.11.2                                | 2.8.12.2              | 3.10.2 |
-| doxygen (opt.) | 1.7.6.1                                 | 1.8.6-2               | 1.8.13-10 |
-|                |                                         |||
-| _Dependency:_  |                                         |  |
-| boost          | 1.48.0.2                                | 1.54.0                 | 1.65.1 |
-| eigen          | 3.0.5                                   | 3.2.0-8                | 3.3.4-4 |
-| yaml-cpp       | 0.5+                                    | 0.5+                | 0.5+ |
-| libnabo        | [from source](https://github.com/ethz-asl/libnabo) | [from source](https://github.com/ethz-asl/libnabo) | [from source](https://github.com/ethz-asl/libnabo) |
+| Name           | Version  <br> (Tested A2023)                       | Version  <br> (Tested A2023)                       |
+|----------------|----------------------------------------------------|----------------------------------------------------|
+| Ubuntu         | bionic 18.04.1 LTS (64 bit)                        | focal 20.04 LTS (64 bit)                           |
+| gcc            | 7.3.0                                              | latest                                             |
+| git            | 2.17.1                                             | latest                                             |
+| cmake          | 3.10.2                                             | latest                                             |
+| doxygen (opt.) | 1.8.13-10                                          | latest                                             |
+|                |                                                    |                                                    |
+| _Dependency:_  |                                                    |                                                    |
+| boost          | 1.65.1                                             | latest                                             |
+| eigen          | 3.3.4-4                                            | latest                                             |
+| yaml-cpp       | 0.5+                                               | latest                                             |
+| libnabo        | [from source](https://github.com/ethz-asl/libnabo) | [from source](https://github.com/ethz-asl/libnabo) |
 
 __Note:__ we only support 64-bit systems because of some issues with Eigen. Other versions will most probably work but you'll have to try yourself to know for sure.
 
