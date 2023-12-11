@@ -248,7 +248,7 @@ sudo make install
 ```
 
 # Having problems?
-Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/ethz-asl/libpointmatcher/issues). You may need to ensure that the file is executable:
+Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/norlab-ulaval/libpointmatcher/issues). You may need to ensure that the file is executable:
 
 ```bash
 chmod +x ./utest/listVersionsUbuntu.sh

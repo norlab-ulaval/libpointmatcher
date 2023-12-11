@@ -32,13 +32,13 @@ This page lists the available tutorials for libpointmatcher. The [Beginner](#beg
 - [Example: Writing a program which performs ICP](BasicRegistration.md)
 - [How to move a point cloud using a rigid transformation?](Transformations.md)
 - [Example: Configure an ICP solution without yaml](ICPWithoutYaml.md)
-- Measuring Hausdorff distance, Haussdorff quantile and mean residual error? [See this discussion for code examples.](https://github.com/ethz-asl/libpointmatcher/issues/125)
-- How to compute the residual error with `ErrorMinimizer::getResidualError(...)` [See the example code provided here.](https://github.com/ethz-asl/libpointmatcher/issues/193#issue-203885636)
-- How to build a global map from a sequence of scans? [See the example align_sequence.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/align_sequence.cpp ).
-- How to minimize the error with translation, rotation and scale? [See this example.](https://github.com/ethz-asl/libpointmatcher/issues/188#issuecomment-270960696)
-- How to do a nearest neighbor search between two point clouds without an ICP object? [See the comments here.](https://github.com/ethz-asl/libpointmatcher/issues/193#issuecomment-276093785)
-- How to construct a `DataPoints` from my own point cloud? [See the unit test on `Datapoints` here.](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/ui/DataFilters.cpp#L52)
-- How to link against [PCL](https://pointclouds.org/)? [See the comments here.](https://github.com/ethz-asl/libpointmatcher/issues/176#issuecomment-734067786)
+- Measuring Hausdorff distance, Haussdorff quantile and mean residual error? [See this discussion for code examples.](https://github.com/norlab-ulaval/libpointmatcher/issues/125)
+- How to compute the residual error with `ErrorMinimizer::getResidualError(...)` [See the example code provided here.](https://github.com/norlab-ulaval/libpointmatcher/issues/193#issue-203885636)
+- How to build a global map from a sequence of scans? [See the example align_sequence.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/align_sequence.cpp ).
+- How to minimize the error with translation, rotation and scale? [See this example.](https://github.com/norlab-ulaval/libpointmatcher/issues/188#issuecomment-270960696)
+- How to do a nearest neighbor search between two point clouds without an ICP object? [See the comments here.](https://github.com/norlab-ulaval/libpointmatcher/issues/193#issuecomment-276093785)
+- How to construct a `DataPoints` from my own point cloud? [See the unit test on `Datapoints` here.](https://github.com/norlab-ulaval/libpointmatcher/blob/master/utest/ui/DataFilters.cpp#L52)
+- How to link against [PCL](https://pointclouds.org/)? [See the comments here.](https://github.com/norlab-ulaval/libpointmatcher/issues/176#issuecomment-734067786)
 
 ## Developer <a name="developer"></a>
 
