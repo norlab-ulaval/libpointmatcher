@@ -3,7 +3,9 @@
 
 
 ---
-
+`libpointmatcher` is currently tested on our build system with the following architecture and OS
+- x86 and arm64/v8
+- Ubuntu bionic (18.04) and focal (20.04) 
 
 # Documentation and Tutorials
 
