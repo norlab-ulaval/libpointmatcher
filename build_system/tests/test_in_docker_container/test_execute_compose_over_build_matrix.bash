@@ -8,7 +8,7 @@ LPM_ROOT_DIR="$(dirname "${_PATH_TO_SCRIPT}")"
 cd "${LPM_ROOT_DIR}/../"
 
 # ====begin========================================================================================
-bash build_and_run_IamBuildSystemTester.bash "bash ./nbs_execute_compose_over_build_matrix.bash \
+bash build_and_run_IamBuildSystemTester.bash "bash ./lpm_crawl_libpointmatcher_build_matrix.bash \
     --repository-version-build-matrix-override latest  \
     --cmake-build-type-build-matrix-override None \
     --docker-debug-logs \
