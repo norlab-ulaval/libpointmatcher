@@ -64,7 +64,7 @@ git version 2.17.1
 If not refer to the Git homepage for installation instructions or install via the package manager by running
 
 ```bash
-sudo apt-get install git-core
+sudo apt-get install git
 ```
 
 #### c. Installing CMake
