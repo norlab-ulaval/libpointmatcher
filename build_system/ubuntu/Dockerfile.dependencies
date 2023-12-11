@@ -9,6 +9,11 @@ ARG NBS_REPOSITORY_NAME
 ENV NBS_LIB_INSTALL_PATH=${NBS_LIB_INSTALL_PATH:?'Build argument needs to be set and non-empty.'}
 ENV NBS_REPOSITORY_NAME=${NBS_REPOSITORY_NAME:?'Build argument needs to be set and non-empty.'}
 
+ENV NBS_PATH=${NBS_LIB_INSTALL_PATH}/norlab-build-system
+
+ARG NBS_SUPERPROJECT_BUILD_SYSTEM_DIR
+ENV NBS_SUPERPROJECT_BUILD_SYSTEM_DIR=${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:-"${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}"}
+
 ARG IS_TEAMCITY_RUN
 ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
 
@@ -51,20 +56,24 @@ RUN apt-get update && \
         apt-utils && \
     rm -rf /var/lib/apt/lists/*
 
+# ....Install norlab-build-system library..........................................................
+WORKDIR "${NBS_LIB_INSTALL_PATH}"
+RUN git clone --recurse-submodules https://github.com/norlab-ulaval/norlab-build-system.git
+
 # ====Begin========================================================================================
 
 # Required for norlab-build-system path resolution logic
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 COPY ./.git ./.git
 
-WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system"
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}"
 
-COPY ./build_system/utilities/norlab-build-system ./utilities/norlab-build-system/
-COPY ./build_system/utilities/norlab-shell-script-tools ./utilities/norlab-shell-script-tools/
+#COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/utilities/norlab-build-system ./utilities/norlab-build-system/
+COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/utilities/norlab-shell-script-tools ./utilities/norlab-shell-script-tools/
 
-COPY ./build_system/.env .
+COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/.env .
 
-WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/utilities/norlab-build-system/src/container_tools"
+WORKDIR "${NBS_PATH}/src/utility_scripts/"
 RUN chmod +x ./nbs_install_python_dev_tools.bash
 RUN bash nbs_install_python_dev_tools.bash
 
@@ -72,11 +81,11 @@ RUN bash nbs_install_python_dev_tools.bash
 # ====Install Libpointmatcher dependencies=========================================================
 FROM base-image AS libpointmatcher-dependencies-general
 
-WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system"
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}"
 
-COPY ./build_system/ubuntu/lpm_install_dependencies_general_ubuntu.bash ./ubuntu/
-COPY ./build_system/ubuntu/lpm_install_dependencies_libnabo_ubuntu.bash ./ubuntu/
-COPY ./build_system/lpm_utility_script/lpm_export_which_architecture.bash ./lpm_utility_script/
+COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/ubuntu/lpm_install_dependencies_general_ubuntu.bash ./ubuntu/
+COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/ubuntu/lpm_install_dependencies_libnabo_ubuntu.bash ./ubuntu/
+COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/lpm_utility_script/lpm_export_which_architecture.bash ./lpm_utility_script/
 
 WORKDIR ./ubuntu
 RUN chmod +x ./lpm_install_dependencies_general_ubuntu.bash

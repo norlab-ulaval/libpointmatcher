@@ -21,8 +21,8 @@ set +o allexport
 cd ./ubuntu/
 bash lpm_install_libpointmatcher_ubuntu.bash \
   --repository-version ${REPOSITORY_VERSION:?'err variable not set'} \
-  --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
-  ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
+  --cmake-build-type ${CMAKE_BUILD_TYPE} \
+  ${INSTALL_SCRIPT_FLAG}
 
 # ==== Execute libpointmatcher unit-test===========================================================
 cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build"

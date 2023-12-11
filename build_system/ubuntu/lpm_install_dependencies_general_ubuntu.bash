@@ -66,10 +66,8 @@ if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   print_msg "The install script is run in teamCity >> the python install step was executed earlier in the Dockerfile.dependencies"
 else
   print_msg "The install script is executed in stand alone mode"
-#  source ./ubuntu/lpm_install_python_dev_tools.bash
-  cd "${LPM_PATH}/build_system/utilities/norlab-build-system/src/container_tools" || exit
+  cd "${NBS_PATH}/src/utility_scripts" || exit
   bash "./nbs_install_python_dev_tools.bash"
-#  source "${LPM_PATH}/build_system/utilities/norlab-build-system/src/container_tools/nbs_install_python_dev_tools.bash"
 fi
 
 # .................................................................................................

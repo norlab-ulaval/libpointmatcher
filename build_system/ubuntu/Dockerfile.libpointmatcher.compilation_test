@@ -14,11 +14,11 @@ ARG NBS_REPOSITORY_NAME
 ENV NBS_LIB_INSTALL_PATH=${NBS_LIB_INSTALL_PATH:?'Build argument needs to be set and non-empty.'}
 ENV NBS_REPOSITORY_NAME=${NBS_REPOSITORY_NAME:?'Build argument needs to be set and non-empty.'}
 
-ARG LIBPOINTMATCHER_CMAKE_BUILD_TYPE=RelWithDebInfo
-ARG LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG='--build-system-CI-install'
+ARG CMAKE_BUILD_TYPE=RelWithDebInfo
+ARG INSTALL_SCRIPT_FLAG='--build-system-CI-install'
 # Note: Those env variable are used in the entrypoint build version
-ENV LIBPOINTMATCHER_CMAKE_BUILD_TYPE=${LIBPOINTMATCHER_CMAKE_BUILD_TYPE}
-ENV LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG=${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
+ENV CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+ENV INSTALL_SCRIPT_FLAG=${INSTALL_SCRIPT_FLAG}
 
 ARG IS_TEAMCITY_RUN
 ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
@@ -65,8 +65,8 @@ RUN utest/listVersionsUbuntu.sh
 WORKDIR ./build_system/ubuntu
 RUN source lpm_install_libpointmatcher_ubuntu.bash \
     --repository-version ${REPOSITORY_VERSION} \
-    --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
-    ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
+    --cmake-build-type ${CMAKE_BUILD_TYPE} \
+    ${INSTALL_SCRIPT_FLAG}
 
 # .... Compile package dependent on libpointmatcher ...............................................
 WORKDIR "${NBS_LIB_INSTALL_PATH}"
@@ -98,8 +98,8 @@ RUN utest/listVersionsUbuntu.sh
 WORKDIR ./build_system/ubuntu
 RUN source lpm_install_libpointmatcher_ubuntu.bash \
     --repository-version ${REPOSITORY_VERSION} \
-    --cmake-build-type ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE} \
-    ${LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG}
+    --cmake-build-type ${CMAKE_BUILD_TYPE} \
+    ${INSTALL_SCRIPT_FLAG}
 
 # .... Compile package dependent on libpointmatcher ...............................................
 WORKDIR "${NBS_LIB_INSTALL_PATH}"

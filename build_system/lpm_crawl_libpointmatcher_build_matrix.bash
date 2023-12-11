@@ -12,22 +12,20 @@
 # Run script with the '--help' flag for details
 #
 
-clear
-
 # ....path resolution logic........................................................................
 NBS_PATH_TO_SRC_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
-NBS_ROOT_DIR="$(dirname "${NBS_PATH_TO_SRC_SCRIPT}")/utilities/norlab-build-system"
+LPM_ROOT_DIR="$(dirname "${NBS_PATH_TO_SRC_SCRIPT}")/.."
 N2ST_ROOT_DIR="$(dirname "${NBS_PATH_TO_SRC_SCRIPT}")/utilities/norlab-shell-script-tools"
 
 # ....Load environment variables from file.........................................................
-set -o allexport
-source .env
-source .env.build_matrix.libpointmatcher
-set +o allexport
+set -o allexport && source ${LPM_ROOT_DIR}/build_system/.env && set +o allexport
+
+DOTENV_BUILD_MATRIX=${LPM_ROOT_DIR}/build_system/.env.build_matrix.libpointmatcher
 
 # ....Helper function..............................................................................
 # import shell functions from utilities library
 source "${N2ST_ROOT_DIR}"/import_norlab_shell_script_tools_lib.bash
 
 # ====Begin========================================================================================
-source "${NBS_ROOT_DIR}"/src/build_scripts/nbs_execute_compose_over_build_matrix.bash "$@"
+cd "${LPM_ROOT_DIR}"/build_system/utilities/norlab-build-system/src/utility_scripts
+source nbs_execute_compose_over_build_matrix.bash "${DOTENV_BUILD_MATRIX}" "$@"

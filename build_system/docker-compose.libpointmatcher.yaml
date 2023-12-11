@@ -22,8 +22,8 @@ services:
         BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: 'latest'
-        LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
-        LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--build-system-CI-install'
+        CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE:?err}
+        INSTALL_SCRIPT_FLAG: '--build-system-CI-install'
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)
@@ -56,8 +56,8 @@ services:
         BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: 'latest'
-        LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
-        LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--build-system-CI-install --compile-test'
+        CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE:?err}
+        INSTALL_SCRIPT_FLAG: '--build-system-CI-install --compile-test'
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)
@@ -88,8 +88,8 @@ services:
         BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: ${REPOSITORY_VERSION:?err}
-        LIBPOINTMATCHER_CMAKE_BUILD_TYPE: ${LIBPOINTMATCHER_CMAKE_BUILD_TYPE:?err}
-        LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--compile-test'
+        CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE:?err}
+        INSTALL_SCRIPT_FLAG: '--compile-test'
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)
@@ -117,8 +117,8 @@ services:
         BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: ${REPOSITORY_VERSION:?err}
-        LIBPOINTMATCHER_CMAKE_BUILD_TYPE: 'Release'
-        LIBPOINTMATCHER_INSTALL_SCRIPT_FLAG: '--compile-test --generate-doc'
+        CMAKE_BUILD_TYPE: 'Release'
+        INSTALL_SCRIPT_FLAG: '--compile-test --generate-doc'
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)
