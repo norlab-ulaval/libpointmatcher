@@ -10,7 +10,7 @@ If you are used to development projects, here is what you need:
 | Name           | Version  <br> (Tested A2023)                       | Version  <br> (Tested A2023)                       |
 |----------------|----------------------------------------------------|----------------------------------------------------|
 | Ubuntu         | bionic 18.04.1 LTS (64 bit)                        | focal 20.04 LTS (64 bit)                           |
-| gcc            | 7.3.0                                              | latest                                             |
+| gcc            | 7.5.0                                              | latest                                             |
 | git            | 2.17.1                                             | latest                                             |
 | cmake          | 3.10.2                                             | latest                                             |
 | doxygen (opt.) | 1.8.13-10                                          | latest                                             |
