@@ -58,8 +58,8 @@ set +o allexport
 N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
 source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 
-# Set environment variable NBS_IMAGE_ARCHITECTURE
-source "${LPM_PATH}/build_system/lpm_utility_script/lpm_export_which_architecture.bash"
+# Set environment variable IMAGE_ARCH_AND_OS
+cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash"
 
 function print_help_in_terminal() {
   echo -e "\$ ${0} [<optional argument>]
@@ -88,7 +88,7 @@ if [[ "${SHOW_SPLASH_ILU}" == 'true' ]]; then
   norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
 fi
 
-print_formated_script_header "lpm_install_libpointmatcher_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+print_formated_script_header "lpm_install_libpointmatcher_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 
 
 # ....Script command line flags....................................................................
@@ -223,11 +223,11 @@ if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   else
     if [[ ${BUILD_EXIT_CODE} != 0 ]]; then
       echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$BUILD_EXIT_CODE' status='ERROR']"
-      print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+      print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
       exit $BUILD_EXIT_CODE
     else
       echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$INSTALL_EXIT_CODE' status='ERROR']"
-      print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+      print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
       exit $INSTALL_EXIT_CODE
     fi
   fi
@@ -236,7 +236,7 @@ else
     echo " " && print_msg_done "${SUCCESS_MSG}"
   else
     print_msg_error "${FAILURE_MSG}"
-    print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+    print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
     if [[ ${BUILD_EXIT_CODE} != 0 ]]; then
       exit $BUILD_EXIT_CODE
     else
@@ -245,7 +245,7 @@ else
   fi
 fi
 
-print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+print_formated_script_footer "lpm_install_libpointmatcher_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 
 # ====Teardown=====================================================================================
 cd "${TMP_CWD}"

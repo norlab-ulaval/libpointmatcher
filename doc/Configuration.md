@@ -86,7 +86,7 @@ To load an ICP configuration from a YAML file, use the `PointMatcher<T>::ICPChai
 
 ## Where To Go From Here
 
-Now that you have the tools to configure your own ICP chain, we recommend that you make a copy of the default configuration file located at [examples/data/default.yaml](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/data/default.yaml).  For example:
+Now that you have the tools to configure your own ICP chain, we recommend that you make a copy of the default configuration file located at [examples/data/default.yaml](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/data/default.yaml).  For example:
 
 `cp examples/data/default.yaml my_config.yaml`
 

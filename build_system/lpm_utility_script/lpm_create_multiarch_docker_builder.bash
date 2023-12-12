@@ -7,20 +7,19 @@
 #
 
 function lpm::create_multiarch_docker_builder() {
-  # ....Project root logic.........................................................................
   local TMP_CWD
   TMP_CWD=$(pwd)
 
   # ....Project root logic.........................................................................
   LPM_PATH=$(git rev-parse --show-toplevel)
-  cd "${LPM_PATH}/build_system" || exit
 
   # ....Load environment variables from file.......................................................
+  cd "${LPM_PATH}/build_system" || exit
   set -o allexport
   source .env
   set +o allexport
 
-  # ....Helper function..............................................................................................
+  # ....Helper function............................................................................
   # import shell functions from utilities library
   N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
   source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
@@ -42,7 +41,7 @@ function lpm::create_multiarch_docker_builder() {
 
   docker buildx ls
 
-  print_formated_script_footer 'lpm_create_multiarch_docker_builder.bash' "${NBS_LINE_CHAR_UTIL}"
+  print_formated_script_footer 'lpm_create_multiarch_docker_builder.bash' "${MSG_LINE_CHAR_UTIL}"
   # ====Teardown===================================================================================
   cd "${TMP_CWD}"
 }

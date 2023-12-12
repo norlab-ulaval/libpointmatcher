@@ -2,7 +2,7 @@
 
 ## Wish list for next release
 
- * Change the API to allow only on kind of transformation, not a list of transformations. See issue [#164](https://github.com/ethz-asl/libpointmatcher/issues/164).
+ * Change the API to allow only on kind of transformation, not a list of transformations. See issue [#164](https://github.com/norlab-ulaval/libpointmatcher/issues/164).
  * Migrate ffrom yaml-cpp 0.3 to 0.5
  * Fix portability problem with FileLogger on Windows
  * Support for OpenMP parallel computing
@@ -13,11 +13,11 @@ Already implemented in the current master:
  * add a new OutlierFilter: RobustWelschOutlierFilter (for robust cost function using Welsch weighting).
  * Add a new ErrorMinimizer: PointToPointSimilarityErrorMinimizer (rotation + translation + scale)
  * Add a new Transformation: SimilarityTransformation.
- * Add a new data filter: [VoxelGrid](https://github.com/ethz-asl/libpointmatcher/blob/master/doc/Datafilters.md#voxel-grid-filter-) (April 2014, thanks to Samuel Charreyron) 
+ * Add a new data filter: [VoxelGrid](https://github.com/norlab-ulaval/libpointmatcher/blob/master/doc/Datafilters.md#voxel-grid-filter-) (April 2014, thanks to Samuel Charreyron) 
  * Add support for PCL ([Point Cloud Library](http://pointclouds.org/)) data format: PCD (April 2014, thanks to Samuel Charreyron) 
  * Improve *.vtk legacy format to handle UNSTRUCTURED_GRID format (April 2014, thanks to Samuel Charreyron)
  * New ErrorMinimizer producing covariance matrix (1 April, 2014, thanks to Francisco J Perez Grau)
- * Better user [documentation and tutorials](https://github.com/ethz-asl/libpointmatcher/blob/master/doc/index.md) (5 Fev. 2014 thanks to Samuel Charreyron)
+ * Better user [documentation and tutorials](https://github.com/norlab-ulaval/libpointmatcher/blob/master/doc/index.md) (5 Fev. 2014 thanks to Samuel Charreyron)
  * Avoid point cloud copies when filtering (10 Jan. 2014 thanks to Oleg Alexandrov)
  * Add CMake support for find_package (20 Sept. 2013)
  * Added support for PLY ([Polygon File Format or the Stanford Triangle Format](http://en.wikipedia.org/wiki/PLY_(file_format))) for ascii encoding (14 March, 2014)

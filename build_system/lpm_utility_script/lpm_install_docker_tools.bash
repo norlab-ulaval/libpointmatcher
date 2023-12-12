@@ -7,84 +7,26 @@
 #
 
 function lpm::install_docker_tools() {
-  # ....Project root logic.........................................................................
   local TMP_CWD
   TMP_CWD=$(pwd)
 
   # ....Project root logic.........................................................................
   LPM_PATH=$(git rev-parse --show-toplevel)
-  cd "${LPM_PATH}/build_system" || exit
 
   # ....Load environment variables from file.......................................................
+  cd "${LPM_PATH}/build_system" || exit
   set -o allexport
   source .env
   set +o allexport
 
-  # ....Helper function..............................................................................................
+  # ....Helper function............................................................................
   # import shell functions from utilities library
   N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
   source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 
-  # ====Begin======================================================================================
-  print_formated_script_header 'lpm_install_docker_tools.bash'
+#  # ====Begin=====================================================================================
+  cd "${N2ST_PATH}"/src/utility_scripts/ && bash install_docker_tools.bash
 
-  # ...............................................................................................
-  echo
-  print_msg "Install utilities"
-  echo
-
-  sudo apt-get update &&
-    sudo apt-get upgrade --assume-yes &&
-    sudo apt-get install --assume-yes \
-      ca-certificates \
-      curl \
-      lsb-release \
-      gnupg \
-      apt-utils &&
-    sudo rm -rf /var/lib/apt/lists/*
-
-  # ...............................................................................................
-  echo
-  print_msg "Install Docker tools" "${NBS_LINE_CHAR_UTIL}"
-
-  # . . Add Docker’s official GPG key:. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-  sudo mkdir -m 0755 -p /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-  # . . set up the docker repository:. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-
-  # ...............................................................................................
-  print_msg "Install Docker-compose"
-  echo
-
-  sudo apt-get update &&
-    sudo apt-get upgrade &&
-    sudo apt-get install --assume-yes \
-      docker-ce \
-      docker-ce-cli \
-      containerd.io \
-      docker-buildx-plugin \
-      docker-compose-plugin
-
-  # ...............................................................................................
-  echo
-  print_msg "Configure docker"
-  echo
-
-  print_msg "Manage Docker as a non-root user"
-  # Config so that we dont have to preface docker command with sudo everytime
-  # Ref: https://docs.docker.com/engine/install/linux-postinstall/
-  echo
-
-  sudo groupadd -f docker
-  sudo usermod -a -G docker "$(whoami)"
-
-  print_msg "${NTSI_ADMIN_USER} added to docker group"
-
-  print_formated_script_footer 'lpm_install_docker_tools.bash' "${NBS_LINE_CHAR_UTIL}"
   # ====Teardown===================================================================================
   cd "${TMP_CWD}"
 }

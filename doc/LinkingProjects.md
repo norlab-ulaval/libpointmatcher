@@ -22,7 +22,7 @@ message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 add_executable(myProgram myProgram.cpp)
 target_link_libraries(myProgram ${libpointmatcher_LIBRARIES})
 ```
-A working example of how to link to an external project can be found in [./examples/demo_cmake](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_cmake).
+A working example of how to link to an external project can be found in [./examples/demo_cmake](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/demo_cmake).
 
 ## Option 2: Using Eclipse
 
@@ -87,7 +87,7 @@ LIBS     	+= 	/usr/local/lib/libboost_thread-mt.dylib \
                         /Users/francoispomerleau/Research/Code/libpointmatcher/build/contrib/yaml-cpp-pm/libyaml-cpp-pm.a
 ```
 
-A working example of how to link to an external project can be found in [./examples/demo_Qt](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt).
+A working example of how to link to an external project can be found in [./examples/demo_Qt](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/demo_Qt).
 
 ## Option 4: Using Compiler Flags
 

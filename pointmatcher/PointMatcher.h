@@ -750,14 +750,14 @@ struct PointMatcher
 			            "Function now always returns map with filter chain applied. "
 			            "This may have altered your program behavior."
 		              "Reasons for this stated here and in associated PR: "
-		              "https://github.com/ethz-asl/libpointmatcher/issues/209.")
+		              "https://github.com/norlab-ulaval/libpointmatcher/issues/209.")
 		const DataPoints& getInternalMap() const;
 		const DataPoints& getPrefilteredInternalMap() const;
 		PM_DEPRECATED("Use getPrefilteredMap instead. "
 									"Function now always returns map with filter chain applied. "
 			            "This may have altered your program behavior."
 			            "Reasons for this stated here and in associated PR: "
-			            "https://github.com/ethz-asl/libpointmatcher/issues/209")
+			            "https://github.com/norlab-ulaval/libpointmatcher/issues/209")
 		const DataPoints getMap() const;
 		const DataPoints getPrefilteredMap() const;
 		

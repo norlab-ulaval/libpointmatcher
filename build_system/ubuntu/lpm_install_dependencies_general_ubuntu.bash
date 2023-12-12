@@ -26,8 +26,8 @@ set +o allexport
 N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
 source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 
-# Set environment variable NBS_IMAGE_ARCHITECTURE
-source "${LPM_PATH}/build_system/lpm_utility_script/lpm_export_which_architecture.bash"
+# Set environment variable IMAGE_ARCH_AND_OS
+cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash"
 
 # ====Begin========================================================================================
 SHOW_SPLASH_IDU="${SHOW_SPLASH_IDU:-true}"
@@ -36,7 +36,7 @@ if [[ "${SHOW_SPLASH_IDU}" == 'true' ]]; then
   norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
 fi
 
-print_formated_script_header "lpm_install_dependencies_general_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+print_formated_script_header "lpm_install_dependencies_general_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 
 # .................................................................................................
 teamcity_service_msg_blockOpened "Install development utilities"
@@ -102,6 +102,6 @@ sudo apt-get update &&
 teamcity_service_msg_blockClosed
 
 #echo " " && print_msg_done "Libpointmatcher general dependencies installed"
-print_formated_script_footer "lpm_install_dependencies_general_ubuntu.bash (${NBS_IMAGE_ARCHITECTURE})" "${NBS_LINE_CHAR_INSTALLER}"
+print_formated_script_footer "lpm_install_dependencies_general_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================
 cd "${TMP_CWD}"

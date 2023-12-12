@@ -104,7 +104,7 @@ While most files should contain data structured in a natural order ie ("x", "y" 
 ---
 ### Note For libpointmatcher Developers
 
-The association between descriptor properties identifiers and libpointmatcher descriptor labels is set in the `getDescAssocationMap` function in [pointmatcher/IO.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/IO.cpp).  To extend IO support to additional descriptors, you can modify this function.
+The association between descriptor properties identifiers and libpointmatcher descriptor labels is set in the `getDescAssocationMap` function in [pointmatcher/IO.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/pointmatcher/IO.cpp).  To extend IO support to additional descriptors, you can modify this function.
 
 The `getDescAssocationMap` returns a map which associates a property identifier and a pair consisting of a row number and a point matcher descriptor name.  For example, the descriptor identifier *nx* maps to row 0 of the *normals* libpointmatcher descriptor. Ie:
 
@@ -112,4 +112,4 @@ The `getDescAssocationMap` returns a map which associates a property identifier 
 "ny" -> (1, "normals") <br>
 "nz" -> (2, "normals")
 
-For converting libpointmatcher descriptors back to a property identifier, you must modify the  `getColLabel` function in [pointmatcher/IO.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/pointmatcher/IO.cpp).
+For converting libpointmatcher descriptors back to a property identifier, you must modify the  `getColLabel` function in [pointmatcher/IO.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/pointmatcher/IO.cpp).
