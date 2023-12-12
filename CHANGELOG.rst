@@ -2,7 +2,7 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.0.0 (2023-12-15)
+1.4.0 (2023-12-15)
 -----------------
 * fix: N2ST path resolution in dependencies-doc docker image
 * refactor: move libpointmatcher build-system logic to norlab-build-system submodule
