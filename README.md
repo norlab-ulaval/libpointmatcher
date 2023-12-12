@@ -103,7 +103,8 @@ NBS is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuou
 
 - The `develop` branch can only be merged through a pull-request from any `<feature>` branchs. Any contributor can submit a pull request to the `develop` branch;
 - The `master` branch can only be merged from the `release` branch through a pull-request by a repository admin.
-In both cases submiting a pull request will trigger a build configuration on our build system and the pull request will be granted if the build/test run succeede.
+
+In both cases submitting a pull request will trigger a build configuration on our build system and the pull request will be granted if the build/test run succeed.
 
 **Current build matrix:**
 `[latest] x [x86, arm64] x [ubuntu] x [bionic, focal, jammy] x [Release, RelWithDebInfo, MinSizeRel]`
