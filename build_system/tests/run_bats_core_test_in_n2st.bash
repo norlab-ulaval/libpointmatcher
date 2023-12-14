@@ -1,10 +1,8 @@
 #!/bin/bash
 # =================================================================================================
-# Execute '<my-superproject>' repo shell script tests via 'norlab-shell-script-tools' library
+# Execute libpoitmatcher repo shell script tests via 'norlab-shell-script-tools' library
 #
-#   1. ToDo: Copy this script somewhere in your superproject
-#   2. (optional) ToDo: set N2ST_PATH="<path/to/submodule/norlab-shell-script-tools>"
-#   3. Execute the script
+# Note the script can be executed from anywhere as long as its inside the libpointmatcher repository
 #
 # Usage:
 #  $ bash run_bats_core_test_in_n2st.bash ['<test-directory>[/<this-bats-test-file.bats>]' ['<image-distro>']]
@@ -14,11 +12,15 @@
 #   - ['<test-directory>/<this-bats-test-file.bats>']  A specific bats file to run, default will
 #                                                      run all bats file in the test directory
 #
-# Globals:
-#   Read N2ST_PATH    Default to "./utilities/norlab-shell-script-tools"
+# Globals: none
 #
 # =================================================================================================
 OPTIONS="$@"
+
+if [[ -z $OPTIONS ]]; then
+  # Set to default bats tests directory if none specified
+  OPTIONS="build_system/tests/tests_bats/"
+fi
 
 N2ST_PATH="build_system/utilities/norlab-shell-script-tools"
 
