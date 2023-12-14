@@ -47,11 +47,11 @@ RUN apt-get update \
 # ....Install docker tools.........................................................................
 
 # Required for norlab-build-system path resolution logic
-WORKDIR /libpointmatcher-build-system
+WORKDIR /libpointmatcher
 COPY ./.git ./.git
 
 # Copy all files from the checkout branch in the repository (except those in the .dockerignore)
-WORKDIR /libpointmatcher-build-system/build_system
+WORKDIR /libpointmatcher/build_system
 
 COPY ./build_system/utilities/norlab-build-system ./utilities/norlab-build-system
 COPY ./build_system/utilities/norlab-shell-script-tools ./utilities/norlab-shell-script-tools
@@ -62,14 +62,13 @@ COPY ./build_system/lpm_utility_script/lpm_install_docker_tools.bash ./lpm_utili
 #COPY ./build_system/function_library/prompt_utilities.bash ./function_library/prompt_utilities.bash
 
 RUN chmod +x ./lpm_utility_script/lpm_install_docker_tools.bash
-
 RUN source ./lpm_utility_script/lpm_install_docker_tools.bash
 
 
 # ....Copy and prep libpointmatcher repository main files..........................................
-WORKDIR /libpointmatcher-build-system
+WORKDIR /libpointmatcher
 
-COPY . /libpointmatcher-build-system/
+COPY .. /libpointmatcher/
 
 # Note: Build context must be at repository root
 RUN /bin/bash -c " \
@@ -79,7 +78,7 @@ if [[ ! -f LICENSE ]]; then \
 fi"
 
 
-RUN chmod +x --recursive /libpointmatcher-build-system/
+RUN chmod +x --recursive /libpointmatcher/
 
 # ====End==========================================================================================
 WORKDIR ./build_system
@@ -87,5 +86,5 @@ WORKDIR ./build_system
 ## Trick to validate the output of the file created with COPY <<EOF ...
 #ENTRYPOINT [ "more", "./tests/entrypoint.bash" ]
 
-ENTRYPOINT [ "./tests/entrypoint.bash" ]
+ENTRYPOINT [ "./tests/tests_docker_interactive/entrypoint.bash" ]
 CMD [ "bash" ]

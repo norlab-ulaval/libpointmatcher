@@ -22,34 +22,16 @@ if [[ "$(basename $(pwd))" == "tests" ]]; then
   cd ../
 fi
 
-
 # ....path resolution logic........................................................................
 _PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
-LPM_ROOT_DIR="$(dirname "${_PATH_TO_SCRIPT}")/.."
+LPM_ROOT_DIR="$(dirname "${_PATH_TO_SCRIPT}")/../../.."
+cd "${LPM_ROOT_DIR}"
 
-set -o allexport && source .env && set +o allexport
-#tree -L 1 $LPM_ROOT_DIR
+set -o allexport && source ./build_system/.env && set +o allexport
 
 # ....Helper function..............................................................................................
 # import shell functions from utilities library
-source "${LPM_ROOT_DIR}/build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
-
-#source ./function_library/prompt_utilities.bash
-#source ./function_library/general_utilities.bash
-
-# ....Project root logic...........................................................................
-if [[ "$(basename $(pwd))" == "build_system" ]]; then
-  cd ../
-fi
-
-## ToDo: validate >> Logic in the next bloc was pushed in the Dockerfile. Check if it still make sense before deleting.
-#if [[ -f LICENSE ]]; then
-#  echo "Build context at project root '$(basename $(pwd))'"
-#else
-#  echo "Project root not reached! Current workdir: $(pwd)"
-#  exit 1
-#fi
-
+source "./build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
 
 # ====Begin========================================================================================
 print_formated_script_header 'build_and_run_IamBuildSystemTester.bash' "${MSG_LINE_CHAR_TEST}"
@@ -59,8 +41,11 @@ echo
 print_msg "Building 'lpm.ubuntu20.buildsystem.test'"
 # Note: Build context must be at repository root
 
+pwd
+tree -L 1 -a
+
+show_and_execute_docker "build -f build_system/tests/tests_docker_interactive/Dockerfile.build_system_test -t lpm.ubuntu20.buildsystem.test ."
 #--no-cache
-show_and_execute_docker "build -f build_system/tests/Dockerfile.build_system_test -t lpm.ubuntu20.buildsystem.test ."
 
 # ....Run container................................................................................
 print_msg "Starting 'IamBuildSystemTester'"
@@ -69,7 +54,7 @@ if [[ -n ${DOCKER_CMD_ARGS} ]]; then
   print_msg "Passing command ${MSG_DIMMED_FORMAT}\"${DOCKER_CMD_ARGS}\"${MSG_END_FORMAT} to docker run"
 fi
 
-show_and_execute_docker "run --name IamBuildSystemTester -t -i --rm lpm.ubuntu20.buildsystem.test ${DOCKER_CMD_ARGS}"
+show_and_execute_docker "run --name IamBuildSystemTester -it --rm lpm.ubuntu20.buildsystem.test ${DOCKER_CMD_ARGS}"
 
 print_formated_script_footer 'build_and_run_IamBuildSystemTester.bash' "${MSG_LINE_CHAR_TEST}"
 # ====Teardown=====================================================================================
