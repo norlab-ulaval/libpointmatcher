@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="test_execute_compose_over_build_matrix_with_flag.bash" type="ShConfigurationType" folderName="(B | TEST › IamBuildSystemTester) LPM test user script in isolation">
+  <configuration default="false" name="test_execute_compose_over_build_matrix_with_flag.bash" type="ShConfigurationType" folderName="[LPM] B | TEST › IamBuildSystemTester LPM test user script in isolation">
     <option name="SCRIPT_TEXT" value="bash test_execute_compose_over_build_matrix_with_flag.bash" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
