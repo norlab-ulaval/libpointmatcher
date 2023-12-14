@@ -28,4 +28,5 @@ source "${N2ST_ROOT_DIR}"/import_norlab_shell_script_tools_lib.bash
 
 # ====Begin========================================================================================
 cd "${LPM_ROOT_DIR}"/build_system/utilities/norlab-build-system/src/utility_scripts
-bash nbs_execute_compose_over_build_matrix.bash "${DOTENV_BUILD_MATRIX}" "$@"
+source nbs_execute_compose_over_build_matrix.bash "${DOTENV_BUILD_MATRIX}" "$@"
+#source nbs_execute_compose_over_build_matrix.bash --help # (CRITICAL) ToDo: on task end >> delete this line ←
