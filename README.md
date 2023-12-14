@@ -147,12 +147,24 @@ bash lpm_crawl_libpointmatcher_build_matrix.bash --repository-version-build-matr
 # Read the help for details
 bash lpm_crawl_libpointmatcher_build_matrix.bash --help
 ```
+Note: To assess the state of the codebase, even for cases that are known the break the build, 
+execute `lpm_crawl_libpointmatcher_build_matrix.bleeding.bash` with build matrix `.env.build_matrix.libpointmatcher.bleeding`.
+The stable build matrix used for release is `.env.build_matrix.libpointmatcher`.
 
-#### Build system development › to execute docker dryrun and configuration test
+
+#### Build system development 
 ```shell
 cd <path/to/libpointmatcher>/build_system/tests/
  
+# To execute docker dryrun and configuration tests
 bash run_all_docker_dryrun_and_config_tests.bash
+
+# To execute shell script tests
+bash run_bats_core_test_in_n2st.bash
+
+# To spin a container in interactive mode with the codebase cloned but not compiled  
+cd ./tests_docker_interactive/
+bash build_and_run_IamBuildSystemTester.bash bash
 ```
 
 #### Build system notes: 

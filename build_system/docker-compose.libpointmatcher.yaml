@@ -75,32 +75,6 @@ services:
       platforms:
         - "linux/arm64/v8"
 
-  # ====Build system assessment services===========================================================
-  ci_SITREP_matrix:
-    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-ci-sitrep-matrix:${NBS_IMAGE_TAG:?err}
-    pull_policy: build
-    build:
-      context: ..
-      dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/ubuntu/Dockerfile.libpointmatcher.ci_SITREP_matrix
-      no_cache: true
-      args:
-        PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
-        BASE_IMAGE: libpointmatcher-dependencies
-        BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
-        IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
-        REPOSITORY_VERSION: ${REPOSITORY_VERSION:?err}
-        CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE:?err}
-        INSTALL_SCRIPT_FLAG: '--compile-test'
-    tty: true
-    stdin_open: true
-    init: true  # Propagate exit code (See remark in task NMO-266)
-  ci_SITREP_matrix_amd64:
-    extends: ci_SITREP_matrix
-    platform: "linux/amd64"
-  ci_SITREP_matrix_arm64v8:
-    extends: ci_SITREP_matrix
-    platform: "linux/arm64/v8"
-
   # ====Dockerhub release image====================================================================
   release:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher:${NBS_IMAGE_TAG:?err}

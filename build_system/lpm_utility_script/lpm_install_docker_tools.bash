@@ -13,19 +13,9 @@ function lpm::install_docker_tools() {
   # ....Project root logic.........................................................................
   LPM_PATH=$(git rev-parse --show-toplevel)
 
-  # ....Load environment variables from file.......................................................
-  cd "${LPM_PATH}/build_system" || exit
-  set -o allexport
-  source .env
-  set +o allexport
-
-  # ....Helper function............................................................................
-  # import shell functions from utilities library
-  N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
-  source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
-
-#  # ====Begin=====================================================================================
-  cd "${N2ST_PATH}"/src/utility_scripts/ && bash install_docker_tools.bash
+  # ====Begin=====================================================================================
+  cd "${LPM_PATH}"/build_system/utilities/norlab-build-system/install_scripts/ \
+    && bash nbs_install_docker_tools.bash
 
   # ====Teardown===================================================================================
   cd "${TMP_CWD}"
