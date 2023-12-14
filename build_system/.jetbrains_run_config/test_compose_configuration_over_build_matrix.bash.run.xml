@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="test_configuration_lpm_crawl_libpointmatcher_build_matrix.bash" type="ShConfigurationType" folderName="[LPM] B | TEST › dry-run">
+  <configuration default="false" name="test_configuration_lpm_crawl_libpointmatcher_build_matrix.bash" type="ShConfigurationType" folderName="[LPM] B | dry-run">
     <option name="SCRIPT_TEXT" value="bash test_configuration_lpm_crawl_libpointmatcher_build_matrix.bash" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
