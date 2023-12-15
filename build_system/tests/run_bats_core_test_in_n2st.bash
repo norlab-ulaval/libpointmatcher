@@ -1,6 +1,6 @@
 #!/bin/bash
 # =================================================================================================
-# Execute libpoitmatcher repo shell script tests via 'norlab-shell-script-tools' library
+# Execute libpointmatcher repo shell script tests via 'norlab-shell-script-tools' library
 #
 # Note the script can be executed from anywhere as long as its inside the libpointmatcher repository
 #

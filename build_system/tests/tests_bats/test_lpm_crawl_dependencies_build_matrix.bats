@@ -68,7 +68,7 @@ teardown() {
 # ====Test casses==================================================================================
 
 @test "${TESTED_FILE} › dependencies image › execute ok › expect pass" {
-#  skip "tmp mute" # ToDo: on task end >> delete this line ←
+#  skip "dev" # ToDo: on task end >> mute this line ←
 
 #  run bash "${TESTED_FILE}" "${DOTENV_BUILD_MATRIX}" --fail-fast -- build >&3
   run bash "${TESTED_FILE}" "${DOTENV_BUILD_MATRIX}" --fail-fast -- build
@@ -78,21 +78,21 @@ teardown() {
 }
 
 @test "${TESTED_FILE} › --help as first argument › execute ok › expect pass" {
-#  skip "tmp mute" # ToDo: on task end >> delete this line ←
+#  skip "dev" # ToDo: on task end >> mute this line ←
 
   run bash "${TESTED_FILE}" --help
 
   assert_success
-  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"\$".*"${TESTED_FILE}".*"[--help]".*"<.env.build_matrix.*>".*"[<optional flag>]".*"[".*"<any docker cmd+arg>]".*"Mandatory argument:".*"<.env.build_matrix.*>".*"Optional arguments:".*"-h, --help".*"--docker-debug-logs".*"--fail-fast"
+  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"\$".*"${TESTED_FILE} \[--help\] <.env.build_matrix.*> \[<optional flag>\] \[-- <any docker cmd\+arg>\]".*"Mandatory argument:".*"<.env.build_matrix.*>".*"Optional arguments:".*"-h, --help".*"--docker-debug-logs".*"--fail-fast"
   refute_output --regexp .*"Starting".*"${TESTED_FILE}".*"[NBS]".*"Build images specified in".*"'${COMPOSE_FILE}'".*"following".*"${DOTENV_BUILD_MATRIX_NAME}"
 }
 
 @test "${TESTED_FILE} › second arg: --help › execute ok › expect pass" {
-#  skip "tmp mute" # ToDo: on task end >> delete this line ←
+#  skip "dev" # ToDo: on task end >> mute this line ←
 
   run bash "${TESTED_FILE}" --fail-fast  --help
   assert_success
-  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"\$".*"${TESTED_FILE}".*"[--help]".*"<.env.build_matrix.*>".*"[<optional flag>]".*"[".*"<any docker cmd+arg>]".*"Mandatory argument:".*"<.env.build_matrix.*>".*"Optional arguments:".*"-h, --help".*"--docker-debug-logs".*"--fail-fast"
+  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"\$".*"${TESTED_FILE} \[--help\] <.env.build_matrix.*> \[<optional flag>\] \[-- <any docker cmd\+arg>\]".*"Mandatory argument:".*"<.env.build_matrix.*>".*"Optional arguments:".*"-h, --help".*"--docker-debug-logs".*"--fail-fast"
   refute_output --regexp .*"Starting".*"${TESTED_FILE}".*"[NBS]".*"Build images specified in".*"'${COMPOSE_FILE}'".*"following".*"${DOTENV_BUILD_MATRIX_NAME}"
 }
 
