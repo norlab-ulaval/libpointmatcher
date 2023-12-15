@@ -3,9 +3,31 @@
 
 
 ---
-`libpointmatcher` is currently tested on our build system with the following architecture and OS
+
+
+`libpointmatcher` is currently tested on our build system for the following architecture and OS
 - x86 and arm64/v8
-- Ubuntu bionic (18.04) and focal (20.04) 
+- Ubuntu bionic (18.04) and focal (20.04)  
+  Note: support for Ubuntu jammy (22.04) and MacOs OsX (latest) are on our wishlist  
+
+<div align="center">
+<img src="https://img.shields.io/static/v1?label=norlab-teamcity-build-system&message=CI&color=green?style=plastic&logo=teamcity" />
+</div>
+
+<div style="padding: 20px; margin-top:20px;margin-bottom:20px; border: 2px solid LightGray; border-radius:10px;">
+
+### ★ Version `1.4.0` release note (important)
+This release of _libpointmatcher_ introduces the integration of [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) as a _git submodule_ for codebase development and testing.
+
+Execute the following to clone the repository with its submodule:
+```shell
+git clone --recurse-submodules https://github.com/norlab-ulaval/libpointmatcher.git
+```
+If _libpointmatcher_ was previously cloned, execute the following to fetch its new submodule 
+```shell
+git submodule update --remote --recursive --init
+```
+</div>
 
 # Documentation and Tutorials
 
@@ -23,17 +45,10 @@ It is now maintained by the Northern Robotics Laboratory ([Norlab](https://norla
 
 You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 
+
+
+
 # Quick Start
-
-Clone the repository with its submodule
-```shell
-git clone --recurse-submodules https://github.com/norlab-ulaval/libpointmatcher.git
-
-# If libpointmatcher is already cloned, fetch its new submodule 
-git submodule update --remote --recursive --init
-```
-
-
 Although we suggest to use the [tutorials](doc/index.md), here is a quick version of it:
 
 The library has a light dependency list:
@@ -106,7 +121,7 @@ NBS is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuou
 In both cases submiting a pull request will trigger a build configuration on our build system and the pull request will be granted if the build/test run succeede.
 
 **Current build matrix:**
-`[latest] x [x86, arm64] x [ubuntu] x [bionic, focal, jammy] x [Release, RelWithDebInfo, MinSizeRel]`
+`[latest] x [x86, arm64] x [ubuntu] x [bionic, focal] x [Release, RelWithDebInfo, MinSizeRel]`
 
 ### Development workflow
 
