@@ -110,15 +110,19 @@ described [here](doc/ICPIntro.md) in more detail.
 
 Please use our [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs. If you are running the library on Ubuntu, copy-paste the output of the script [listVersionsUbuntu.sh](https://github.com/norlab-ulaval/libpointmatcher/blob/master/utest/listVersionsUbuntu.sh) to simplify the search of an answer.
 
-## Codebase
+## Codebase development
 
-Libpointmatcher codebase now integrate [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) and [norlab-shell-script-tools (N2ST)](https://github.com/norlab-ulaval/norlab-shell-script-tools). `NBS` is a build-infrastructure-agnostic build system custom-made for our need at NorLab and `N2ST` is library of shell script, function for shell script development and a shell testing tools leveraging `bats-core`.
+Libpointmatcher codebase now integrate [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) and [norlab-shell-script-tools (N2ST)](https://github.com/norlab-ulaval/norlab-shell-script-tools). 
+`NBS` is a build-infrastructure-agnostic build system custom-made to meet our needs in robotic software engineering at NorLab and `N2ST` is a library of shell script functions as well as a shell testing tools leveraging _**bats-core**_ and _**docker**_ .
+`N2ST` purpose is to speed up shell script development and improve reliability.
 
-NBS is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuous integration/deployment server and oversees both protected branch of the [libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) GitHub repository: the `master` branch and the `develop` branch.
+`NBS` is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuous integration/deployment server and oversees protected branches of the [libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) GitHub repository:
 
-- The `develop` branch can only be merged through a pull-request from any `<feature>` branchs. Any contributor can submit a pull request to the `develop` branch;
-- The `master` branch can only be merged from the `release` branch through a pull-request by a repository admin.
-In both cases submiting a pull request will trigger a build configuration on our build system and the pull request will be granted if the build/test run succeede.
+- The `develop` branch can only be merged through a pull-request from any `<feature>` branches. Any contributor can submit a pull request to the `develop` branch;
+- the `release` branch is a revision and preparation branch where we can freeze the codebase in a given state without stalling to `develop` branch progression;
+- The `master` branch can only be merged through a pull-request from the `release` branch. Only repository admin can submit a PR to the `master` branch.
+
+In any cases, submitting a pull request to `develop` or `master` will trigger a build/test configuration on our build system and the pull request will be granted if the build/test run succeed.
 
 **Current build matrix:**
 `[latest] x [x86, arm64] x [ubuntu] x [bionic, focal] x [Release, RelWithDebInfo, MinSizeRel]`
