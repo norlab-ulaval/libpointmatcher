@@ -18,7 +18,7 @@
 # Checklist:
 
 ### Code related
-- [ ] All tests pass locally with my changes (Check [README.md Contributing](https://github.com/norlab-ulaval/libpointmatcher/tree/master#contributing) for testing procedure ) 
+- [ ] All tests pass locally with my changes (Check [README.md #Contributing](https://github.com/norlab-ulaval/libpointmatcher/tree/master#contributing) for testing procedure using the _libpointmatcher-build-system_ localy) 
 - [ ] I have made corresponding changes to the documentation (i.e.: function, class, script header,
   README.md)
 - [ ] I have commented hard-to-understand code 
