@@ -17,13 +17,13 @@
 /pointmatcher @boxanm @simonpierredeschenes @aguenette
 /python @boxanm @simonpierredeschenes @aguenette
 /utest @boxanm @simonpierredeschenes @aguenette
+/.env.libpointmatcher @RedLeader962
 
 # ....DevOps related...............................................................................
+/.github/ @RedLeader962
 /build_system/ @RedLeader962
 /build_system/utilities @RedLeader962
-/.github/ @RedLeader962
 /.gitmodules @RedLeader962
-/.dockerignore @RedLeader962
 /.gitignore @RedLeader962
-/.env.libpointmatcher @RedLeader962
+/.dockerignore @RedLeader962
 
