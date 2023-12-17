@@ -9,21 +9,21 @@
 
 # ....Repository wide code owner...................................................................
 # These owners will be the default owners for everything in the repo.
-*                           @pomerlef
+*       @pomerlef
 
 # ....Core directories and files...................................................................
-/README.md                  @pomerlef
-/LICENSE                    @pomerlef
-/pointmatcher               @boxanm @simonpierredeschenes @aguenette
-/python @boxanm             @simonpierredeschenes @aguenette
-/utest @boxanm              @simonpierredeschenes @aguenette
+/README.md @pomerlef
+/LICENSE @pomerlef
+/pointmatcher @boxanm @simonpierredeschenes @aguenette
+/python @boxanm @simonpierredeschenes @aguenette
+/utest @boxanm @simonpierredeschenes @aguenette
 
 # ....DevOps related...............................................................................
-/build_system/              @RedLeader962
-/build_system/utilities     @RedLeader962
-/.github/                   @RedLeader962
-/.env.libpointmatcher       @RedLeader962
-/.gitmodules                @RedLeader962
-/.dockerignore              @RedLeader962
-/.gitignore                 @RedLeader962
+/build_system/ @RedLeader962
+/build_system/utilities @RedLeader962
+/.github/ @RedLeader962
+/.gitmodules @RedLeader962
+/.dockerignore @RedLeader962
+/.gitignore @RedLeader962
+/.env.libpointmatcher @RedLeader962
 
