@@ -1,4 +1,5 @@
 #!/bin/bash
+# =================================================================================================
 #
 # Execute build matrix specified in '.env.build_matrix.dependencies'
 #
@@ -11,22 +12,28 @@
 #
 # Run script with the '--help' flag for details
 #
+# =================================================================================================
+PARAMS="$@"
 
 # ....path resolution logic........................................................................
-NBS_PATH_TO_SRC_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
-LPM_ROOT_DIR="$(dirname "${NBS_PATH_TO_SRC_SCRIPT}")/.."
-N2ST_ROOT_DIR="$(dirname "${NBS_PATH_TO_SRC_SCRIPT}")/utilities/norlab-shell-script-tools"
+LPM_ROOT="$(dirname "$(realpath "$0")")/.."
+LPM_BUILD_SYSTEM_PATH="${LPM_ROOT}/build_system"
+NBS_PATH="${LPM_BUILD_SYSTEM_PATH}/utilities/norlab-build-system"
+N2ST_PATH="${LPM_BUILD_SYSTEM_PATH}/utilities/norlab-shell-script-tools"
 
 # ....Load environment variables from file.........................................................
-set -o allexport && source ${LPM_ROOT_DIR}/build_system/.env && set +o allexport
+cd "${LPM_BUILD_SYSTEM_PATH}" || exit
+set -o allexport && source .env && set +o allexport
 
-DOTENV_BUILD_MATRIX=${LPM_ROOT_DIR}/build_system/.env.build_matrix.dependencies
+# ....Source NBS dependencies......................................................................
+cd "${NBS_PATH}" || exit
+source import_norlab_build_system_lib.bash
 
-# ....Helper function..............................................................................
-# import shell functions from utilities library
-source "${N2ST_ROOT_DIR}"/import_norlab_shell_script_tools_lib.bash
+# ====begin========================================================================================
+cd "${NBS_PATH}/src/utility_scripts" || exit
 
-# ====Begin========================================================================================
-cd "${LPM_ROOT_DIR}"/build_system/utilities/norlab-build-system/src/utility_scripts
-source nbs_execute_compose_over_build_matrix.bash "${DOTENV_BUILD_MATRIX}" "$@"
-#source nbs_execute_compose_over_build_matrix.bash --help # (CRITICAL) ToDo: on task end >> delete this line ←
+DOTENV_BUILD_MATRIX_REALPATH=${LPM_BUILD_SYSTEM_PATH}/.env.build_matrix.dependencies
+
+# Note: do not double cote PARAMS or threat it as a array otherwise it will cause error
+# shellcheck disable=SC2086
+source nbs_execute_compose_over_build_matrix.bash "${DOTENV_BUILD_MATRIX_REALPATH}" $PARAMS
