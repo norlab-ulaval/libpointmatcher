@@ -24,6 +24,7 @@ if [[ -d ${BATS_HELPER_PATH} ]]; then
   load "${BATS_HELPER_PATH}/bats-assert/load"
   load "${BATS_HELPER_PATH}/bats-file/load"
   load "${SRC_CODE_PATH}/${N2ST_BATS_TESTING_TOOLS_RELATIVE_PATH}/bats_helper_functions"
+  load "${SRC_CODE_PATH}/build_system/tests/tests_bats/bats_helper_functions"
   #load "${BATS_HELPER_PATH}/bats-detik/load" # << Kubernetes support
 else
   echo -e "\n[\033[1;31mERROR\033[0m] $0 path to bats-core helper library unreachable at \"${BATS_HELPER_PATH}\"!"
@@ -34,10 +35,10 @@ fi
 
 # ====Setup========================================================================================
 
-TESTED_FILE="lpm_crawl_dependencies_build_matrix.bash"
+TESTED_FILE="lpm_crawl_libpointmatcher_build_matrix.bash"
 TESTED_FILE_PATH="./build_system/"
-COMPOSE_FILE="docker-compose.dependencies.yaml"
-DOTENV_BUILD_MATRIX="${SRC_CODE_PATH}"/build_system/.env.build_matrix.dependencies
+COMPOSE_FILE="docker-compose.libpointmatcher.yaml"
+DOTENV_BUILD_MATRIX="${SRC_CODE_PATH}"/build_system/.env.build_matrix.libpointmatcher
 DOTENV_BUILD_MATRIX_NAME=$( basename "${DOTENV_BUILD_MATRIX}" )
 
 # executed once before starting the first test (valide for all test in that file)
@@ -67,33 +68,27 @@ teardown() {
 
 # ====Test casses==================================================================================
 
-@test "${TESTED_FILE} › dependencies image › execute ok › expect pass" {
-#  skip "dev" # ToDo: on task end >> mute this line ←
 
-#  run bash "${TESTED_FILE}" "${DOTENV_BUILD_MATRIX}" --fail-fast -- build >&3
+@test "${TESTED_FILE} › docker image › execute ok › expect pass" {
+
   run bash "${TESTED_FILE}" "${DOTENV_BUILD_MATRIX}" --fail-fast -- build
+
   assert_success
-  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"[NBS]".*"Build images specified in".*"'${COMPOSE_FILE}'".*"following".*"${DOTENV_BUILD_MATRIX_NAME}"
+  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"\[NBS\]".*"Build images specified in".*"'${COMPOSE_FILE}'".*"following".*"${DOTENV_BUILD_MATRIX_NAME}"
   assert_output --regexp "Status of tag crawled:".*"Pass".*"› latest".*"Completed".*"${TESTED_FILE}".*
 }
 
+
+# ....Test --help flag related logic...............................................................
+
 @test "${TESTED_FILE} › --help as first argument › execute ok › expect pass" {
-#  skip "dev" # ToDo: on task end >> mute this line ←
-
   run bash "${TESTED_FILE}" --help
-
-  assert_success
-  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"\$".*"${TESTED_FILE} \[--help\] <.env.build_matrix.*> \[<optional flag>\] \[-- <any docker cmd\+arg>\]".*"Mandatory argument:".*"<.env.build_matrix.*>".*"Optional arguments:".*"-h, --help".*"--docker-debug-logs".*"--fail-fast"
-  refute_output --regexp .*"Starting".*"${TESTED_FILE}".*"[NBS]".*"Build images specified in".*"'${COMPOSE_FILE}'".*"following".*"${DOTENV_BUILD_MATRIX_NAME}"
+  test_generic_help_flag_logic
 }
 
 @test "${TESTED_FILE} › second arg: --help › execute ok › expect pass" {
-#  skip "dev" # ToDo: on task end >> mute this line ←
-
   run bash "${TESTED_FILE}" --fail-fast  --help
-  assert_success
-  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"\$".*"${TESTED_FILE} \[--help\] <.env.build_matrix.*> \[<optional flag>\] \[-- <any docker cmd\+arg>\]".*"Mandatory argument:".*"<.env.build_matrix.*>".*"Optional arguments:".*"-h, --help".*"--docker-debug-logs".*"--fail-fast"
-  refute_output --regexp .*"Starting".*"${TESTED_FILE}".*"[NBS]".*"Build images specified in".*"'${COMPOSE_FILE}'".*"following".*"${DOTENV_BUILD_MATRIX_NAME}"
+  test_generic_help_flag_logic
 }
 
 # ToDo: implement >> test for IS_TEAMCITY_RUN==true casses

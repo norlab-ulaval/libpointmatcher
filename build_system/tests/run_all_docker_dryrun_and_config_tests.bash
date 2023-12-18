@@ -7,6 +7,8 @@
 #
 #
 
+# (CRITICAL) ToDo: refactor to match NBS implementation
+
 #_PATH_TO_SCRIPT="$(realpath "${BASH_SOURCE[0]}")"
 _PATH_TO_SCRIPT="$(realpath "$0")"
 SCRIPT_DIR_PATH="$(dirname "${_PATH_TO_SCRIPT}")"
