@@ -6,17 +6,19 @@
 	</description>
 	<maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
 	<license>BSD</license>
-	<url type="repository">https://github.com/ethz-asl/libpointmatcher</url>
+	<url type="repository">https://github.com/norlab-ulaval/libpointmatcher</url>
 
 	<buildtool_depend>cmake</buildtool_depend>
 
 	<build_depend>boost</build_depend>
 	<build_depend>libnabo</build_depend>
 	<build_depend>eigen</build_depend>
+	<build_depend>yaml-cpp</build_depend>
 
 	<exec_depend>boost</exec_depend>
 	<exec_depend>libnabo</exec_depend>
 	<exec_depend>eigen</exec_depend>
+	<exec_depend>yaml-cpp</exec_depend>
 	<exec_depend condition="$ROS_VERSION == 1">catkin</exec_depend>
 
 	<export>

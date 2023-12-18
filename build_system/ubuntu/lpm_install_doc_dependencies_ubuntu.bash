@@ -7,43 +7,40 @@
 #
 set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
 
-# ....Project root logic...........................................................................................
-TMP_CWD=$(pwd)
-
-if [[ "$(basename $(pwd))" != "build_system" ]]; then
-  cd ../
-fi
-
-
-# ....Load environment variables from file.........................................................................
-set -o allexport
-source ./.env
-source ./.env.prompt
-set +o allexport
-
 ## skip GUI dialog by setting everything to default
 export DEBIAN_FRONTEND=noninteractive
 
-# ....Helper function..............................................................................................
-## import shell functions from Libpointmatcher-build-system utilities library
-source ./function_library/prompt_utilities.bash
-source ./function_library/terminal_splash.bash
-source ./function_library/general_utilities.bash
+# ....Project root logic...........................................................................
+TMP_CWD=$(pwd)
 
-## Set environment variable 'LPM_IMAGE_ARCHITECTURE'
-source ./lpm_utility_script/lpm_export_which_architecture.bash
+LPM_PATH=$(git rev-parse --show-toplevel)
+cd "${LPM_PATH}/build_system" || exit
 
-# ====Begin========================================================================================================
+
+# ....Load environment variables from file.........................................................
+set -o allexport
+source .env
+set +o allexport
+
+# ....Helper function..............................................................................
+# import shell functions from utilities library
+N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
+source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
+
+# Set environment variable IMAGE_ARCH_AND_OS
+cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash"
+
+# ====Begin========================================================================================
 SHOW_SPLASH_IDDU="${SHOW_SPLASH_IDDU:-true}"
 
 if [[ "${SHOW_SPLASH_IDDU}" == 'true' ]]; then
-  norlab_splash "${LPM_SPLASH_NAME}" "https://github.com/${LPM_LIBPOINTMATCHER_SRC_DOMAIN}/${LPM_LIBPOINTMATCHER_SRC_REPO_NAME}"
+  norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
 fi
 
-print_formated_script_header "lpm_install_doc_dependencies_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
+print_formated_script_header "lpm_install_doc_dependencies_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 
 
-# ................................................................................................................
+# .................................................................................................
 teamcity_service_msg_blockOpened "Install libpointmatcher documentation related dependencies"
 
 ## Package required when GENERATE_API_DOC flag is set to true
@@ -57,7 +54,7 @@ sudo apt-get update &&
 teamcity_service_msg_blockClosed
 
 echo " " && print_msg_done "Libpointmatcher documentation related dependencies installed"
-print_formated_script_footer "lpm_install_doc_dependencies_ubuntu.bash (${LPM_IMAGE_ARCHITECTURE})" "${LPM_LINE_CHAR_INSTALLER}"
-# ====Teardown=====================================================================================================
+print_formated_script_footer "lpm_install_doc_dependencies_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+# ====Teardown=====================================================================================
 cd "${TMP_CWD}"
 
