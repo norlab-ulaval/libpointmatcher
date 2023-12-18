@@ -5,16 +5,22 @@
 ---
 
 
-`libpointmatcher` is currently tested on our build system for the following architecture and OS
+`libpointmatcher` is tested on our build system under the following architecture and OS:
 - x86 and arm64/v8
 - Ubuntu bionic (18.04) and focal (20.04)  
-  Note: support for Ubuntu jammy (22.04) and MacOs OsX (latest) are on our wishlist  
+  
+Note: 
+- support for Ubuntu jammy (22.04) comming soon
+- `libpointmatcher` reportedly works on MacOs OsX (latest) and Windows (latest)
 
 <div align="center">
-<img src="https://img.shields.io/static/v1?label=norlab-teamcity-build-system&message=CI&color=green?style=plastic&logo=teamcity" />
+<img src="https://img.shields.io/static/v1?label=powered by JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
 </div>
 
-<div style="padding: 20px; margin-top:20px;margin-bottom:20px; border: 2px solid LightGray; border-radius:10px;">
+<br>
+<br>
+
+<div style="padding: 20px;padding-top: 5px;padding-bottom: 5px; margin-top:20px;margin-bottom:20px; border: 2px solid LightGray; border-radius:10px;">
 
 ### ★ Version `1.4.0` release note (important)
 This release of _libpointmatcher_ introduces the integration of [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) as a _git submodule_ for codebase development and testing.
@@ -152,16 +158,19 @@ bash lpm_create_multiarch_docker_builder.bash
 ```shell
 cd <path/to/libpointmatcher>/build_system
 
-# Run the build matrix as specified in ".env.build_matrix.libpointmatcher" on native architecture using "ci_PR" service 
+# Run the build matrix as specified in ".env.build_matrix.libpointmatcher" 
+#   on native architecture using "ci_PR" service 
 bash lpm_crawl_libpointmatcher_build_matrix.bash --fail-fast -- build ci_PR
 
-# Run a specific case using build flags with multi-architecture virtualization using "ci_PR_amd64" and "ci_PR_arm64v8" services 
-bash lpm_crawl_libpointmatcher_build_matrix.bash --repository-version-build-matrix-override latest \
-                                                 --os-name-build-matrix-override ubuntu \
-                                                 --cmake-build-type-build-matrix-override RelWithDebInfo \
-                                                 --ubuntu-version-build-matrix-override focal \
-                                                 --fail-fast \
-                                                 -- build ci_PR_amd64 ci_PR_arm64v8
+# Run a specific case using build flags with multi-architecture 
+# virtualization using "ci_PR_amd64" and "ci_PR_arm64v8" services 
+bash lpm_crawl_libpointmatcher_build_matrix.bash \
+            --repository-version-build-matrix-override latest \
+            --os-name-build-matrix-override ubuntu \
+            --cmake-build-type-build-matrix-override RelWithDebInfo \
+            --ubuntu-version-build-matrix-override focal \
+            --fail-fast \
+            -- build ci_PR_amd64 ci_PR_arm64v8
 
 # Read the help for details
 bash lpm_crawl_libpointmatcher_build_matrix.bash --help
