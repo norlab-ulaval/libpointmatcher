@@ -22,7 +22,7 @@
   README.md)
 - [ ] I have commented hard-to-understand code 
 - [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] All tests pass locally with my changes (Check [README.md #Contributing](https://github.com/norlab-ulaval/libpointmatcher/tree/master#contributing) for local testing procedure using _libpointmatcher-build-system_) 
+- [ ] All tests pass locally with my changes (Check [README.md #Contributing](https://github.com/norlab-ulaval/libpointmatcher/tree/release#contributing) for local testing procedure using _libpointmatcher-build-system_) 
 
 ### PR creation related 
 - [ ] My pull request `base ref` branch is set to the `develop` branch (the _build-system_ won't be triggered otherwise) 
@@ -34,7 +34,7 @@
   - Types: `feat` `fix` `docs` `style` `refactor` `perf` `test` `build` `ci` `chore` `revert`
   - Breaking changes: `<type>!`
   - Reference: 
-    - See [commit_msg_reference.md](https://github.com/norlab-ulaval/libpointmatcher/blob/master/commit_msg_reference.md) in the repository root for details
+    - See [commit_msg_reference.md](https://github.com/norlab-ulaval/libpointmatcher/blob/release/commit_msg_reference.md) in the repository root for details
     - https://www.conventionalcommits.org
 - [ ] I have indicated the related issue's id with `# <issue-id>` if changes are of type `fix`
 
