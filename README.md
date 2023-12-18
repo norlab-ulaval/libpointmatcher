@@ -3,9 +3,37 @@
 
 
 ---
-`libpointmatcher` is currently tested on our build system with the following architecture and OS
+
+
+`libpointmatcher` is tested on our build system under the following architecture and OS:
 - x86 and arm64/v8
-- Ubuntu bionic (18.04) and focal (20.04) 
+- Ubuntu bionic (18.04) and focal (20.04)  
+  
+Note: 
+- support for Ubuntu jammy (22.04) comming soon
+- `libpointmatcher` reportedly works on MacOs OsX (latest) and Windows (latest)
+
+<div align="center">
+<img src="https://img.shields.io/static/v1?label=powered by JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
+</div>
+
+<br>
+<br>
+
+<div style="padding: 20px;padding-top: 5px;padding-bottom: 5px; margin-top:20px;margin-bottom:20px; border: 2px solid LightGray; border-radius:10px;">
+
+### ★ Version `1.4.0` release note (important)
+This release of _libpointmatcher_ introduces the integration of [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) as a _git submodule_ for codebase development and testing.
+
+Execute the following to clone the repository with its submodule:
+```shell
+git clone --recurse-submodules https://github.com/norlab-ulaval/libpointmatcher.git
+```
+If _libpointmatcher_ was previously cloned, execute the following to fetch its new submodule 
+```shell
+git submodule update --remote --recursive --init
+```
+</div>
 
 # Documentation and Tutorials
 
@@ -23,17 +51,10 @@ It is now maintained by the Northern Robotics Laboratory ([Norlab](https://norla
 
 You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 
+
+
+
 # Quick Start
-
-Clone the repository with its submodule
-```shell
-git clone --recurse-submodules https://github.com/norlab-ulaval/libpointmatcher.git
-
-# If libpointmatcher is already cloned, fetch its new submodule 
-git submodule update --remote --recursive --init
-```
-
-
 Although we suggest to use the [tutorials](doc/index.md), here is a quick version of it:
 
 The library has a light dependency list:
@@ -95,18 +116,22 @@ described [here](doc/ICPIntro.md) in more detail.
 
 Please use our [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs. If you are running the library on Ubuntu, copy-paste the output of the script [listVersionsUbuntu.sh](https://github.com/norlab-ulaval/libpointmatcher/blob/master/utest/listVersionsUbuntu.sh) to simplify the search of an answer.
 
-## Codebase
+## Codebase development
 
-Libpointmatcher codebase now integrate [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) and [norlab-shell-script-tools (N2ST)](https://github.com/norlab-ulaval/norlab-shell-script-tools). `NBS` is a build-infrastructure-agnostic build system custom-made for our need at NorLab and `N2ST` is library of shell script, function for shell script development and a shell testing tools leveraging `bats-core`.
+Libpointmatcher codebase now integrate [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) and [norlab-shell-script-tools (N2ST)](https://github.com/norlab-ulaval/norlab-shell-script-tools). 
+`NBS` is a build-infrastructure-agnostic build system custom-made to meet our needs in robotic software engineering at NorLab and `N2ST` is a library of shell script functions as well as a shell testing tools leveraging _**bats-core**_ and _**docker**_ .
+`N2ST` purpose is to speed up shell script development and improve reliability.
 
-NBS is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuous integration/deployment server and oversees both protected branch of the [libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) GitHub repository: the `master` branch and the `develop` branch.
+`NBS` is deployed on our [TeamCity](https://www.jetbrains.com/teamcity/) continuous integration/deployment server and oversees protected branches of the [libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) GitHub repository:
 
-- The `develop` branch can only be merged through a pull-request from any `<feature>` branchs. Any contributor can submit a pull request to the `develop` branch;
-- The `master` branch can only be merged from the `release` branch through a pull-request by a repository admin.
-In both cases submiting a pull request will trigger a build configuration on our build system and the pull request will be granted if the build/test run succeede.
+- The `develop` branch can only be merged through a pull-request from any `<feature>` branches. Any contributor can submit a pull request to the `develop` branch;
+- the `release` branch is a revision and preparation branch where we can freeze the codebase in a given state without stalling to `develop` branch progression;
+- The `master` branch can only be merged through a pull-request from the `release` branch. Only repository admin can submit a PR to the `master` branch.
+
+In any cases, submitting a pull request to `develop` or `master` will trigger a build/test configuration on our build system and the pull request will be granted if the build/test run succeed.
 
 **Current build matrix:**
-`[latest] x [x86, arm64] x [ubuntu] x [bionic, focal, jammy] x [Release, RelWithDebInfo, MinSizeRel]`
+`[latest] x [x86, arm64] x [ubuntu] x [bionic, focal] x [Release, RelWithDebInfo, MinSizeRel]`
 
 ### Development workflow
 
@@ -133,16 +158,19 @@ bash lpm_create_multiarch_docker_builder.bash
 ```shell
 cd <path/to/libpointmatcher>/build_system
 
-# Run the build matrix as specified in ".env.build_matrix.libpointmatcher" on native architecture using "ci_PR" service 
+# Run the build matrix as specified in ".env.build_matrix.libpointmatcher" 
+#   on native architecture using "ci_PR" service 
 bash lpm_crawl_libpointmatcher_build_matrix.bash --fail-fast -- build ci_PR
 
-# Run a specific case using build flags with multi-architecture virtualization using "ci_PR_amd64" and "ci_PR_arm64v8" services 
-bash lpm_crawl_libpointmatcher_build_matrix.bash --repository-version-build-matrix-override latest \
-                                                 --os-name-build-matrix-override ubuntu \
-                                                 --cmake-build-type-build-matrix-override RelWithDebInfo \
-                                                 --ubuntu-version-build-matrix-override focal \
-                                                 --fail-fast \
-                                                 -- build ci_PR_amd64 ci_PR_arm64v8
+# Run a specific case using build flags with multi-architecture 
+# virtualization using "ci_PR_amd64" and "ci_PR_arm64v8" services 
+bash lpm_crawl_libpointmatcher_build_matrix.bash \
+            --repository-version-build-matrix-override latest \
+            --os-name-build-matrix-override ubuntu \
+            --cmake-build-type-build-matrix-override RelWithDebInfo \
+            --ubuntu-version-build-matrix-override focal \
+            --fail-fast \
+            -- build ci_PR_amd64 ci_PR_arm64v8
 
 # Read the help for details
 bash lpm_crawl_libpointmatcher_build_matrix.bash --help

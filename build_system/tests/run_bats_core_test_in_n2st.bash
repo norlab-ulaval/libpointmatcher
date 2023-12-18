@@ -1,10 +1,8 @@
 #!/bin/bash
 # =================================================================================================
-# Execute '<my-superproject>' repo shell script tests via 'norlab-shell-script-tools' library
+# Execute libpointmatcher repo shell script tests via 'norlab-shell-script-tools' library
 #
-#   1. ToDo: Copy this script somewhere in your superproject
-#   2. (optional) ToDo: set N2ST_PATH="<path/to/submodule/norlab-shell-script-tools>"
-#   3. Execute the script
+# Note the script can be executed from anywhere as long as its inside the libpointmatcher repository
 #
 # Usage:
 #  $ bash run_bats_core_test_in_n2st.bash ['<test-directory>[/<this-bats-test-file.bats>]' ['<image-distro>']]
@@ -14,11 +12,15 @@
 #   - ['<test-directory>/<this-bats-test-file.bats>']  A specific bats file to run, default will
 #                                                      run all bats file in the test directory
 #
-# Globals:
-#   Read N2ST_PATH    Default to "./utilities/norlab-shell-script-tools"
+# Globals: none
 #
 # =================================================================================================
-OPTIONS="$@"
+PARAMS="$@"
+
+if [[ -z $PARAMS ]]; then
+  # Set to default bats tests directory if none specified
+  PARAMS="build_system/tests/tests_bats/"
+fi
 
 N2ST_PATH="build_system/utilities/norlab-shell-script-tools"
 
@@ -32,7 +34,9 @@ function n2st::run_n2st_testsing_tools(){
 
   # ....Execute N2ST run_bats_tests_in_docker.bash.................................................
   cd "$LPM_PATH"
-  bash "${N2ST_PATH}/tests/bats_testing_tools/run_bats_tests_in_docker.bash" "$OPTIONS"
+
+  # shellcheck disable=SC2086
+  bash "${N2ST_PATH}/tests/bats_testing_tools/run_bats_tests_in_docker.bash" $PARAMS
 
   # ....Teardown...................................................................................
   cd "$TMP_CWD"
