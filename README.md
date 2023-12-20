@@ -9,11 +9,10 @@
 <img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
 <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
 
-
 <img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
-
-
 </div>
+<br>
+
 
 `libpointmatcher` is tested on our build system under the following architecture and OS:
 - x86 and arm64/v8
@@ -23,8 +22,6 @@ Note:
 - support for Ubuntu jammy (22.04) comming soon
 - `libpointmatcher` reportedly works on MacOs OsX (latest) and Windows (latest)
 
-
-<br>
 <br>
 
 ---
@@ -40,6 +37,7 @@ If _libpointmatcher_ was previously cloned, execute the following to fetch its n
 ```shell
 git submodule update --remote --recursive --init
 ```
+<br>
 
 ---
 
