@@ -9,7 +9,7 @@
 
 # ....Repository wide code owner...................................................................
 # These owners will be the default owners for everything in the repo.
-*       @pomerlef
+#*       @pomerlef
 
 # ....Core directories and files...................................................................
 /README.md @pomerlef
