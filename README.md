@@ -4,6 +4,16 @@
 
 ---
 
+<div align="center">
+<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/norlab-ulaval/libpointmatcher">
+<img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
+<img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
+
+
+<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
+
+
+</div>
 
 `libpointmatcher` is tested on our build system under the following architecture and OS:
 - x86 and arm64/v8
@@ -13,14 +23,11 @@ Note:
 - support for Ubuntu jammy (22.04) comming soon
 - `libpointmatcher` reportedly works on MacOs OsX (latest) and Windows (latest)
 
-<div align="center">
-<img src="https://img.shields.io/static/v1?label=powered by JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
-</div>
 
 <br>
 <br>
 
-<div style="padding: 20px;padding-top: 5px;padding-bottom: 5px; margin-top:20px;margin-bottom:20px; border: 2px solid LightGray; border-radius:10px;">
+---
 
 ### ★ Version `1.4.0` release note (important)
 This release of _libpointmatcher_ introduces the integration of [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) as a _git submodule_ for codebase development and testing.
@@ -33,7 +40,8 @@ If _libpointmatcher_ was previously cloned, execute the following to fetch its n
 ```shell
 git submodule update --remote --recursive --init
 ```
-</div>
+
+---
 
 # Documentation and Tutorials
 
