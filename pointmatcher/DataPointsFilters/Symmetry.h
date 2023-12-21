@@ -48,7 +48,7 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 		return {
 			{"vrs", "volume ratio for symmetry sampling", "5", "0", "inf", &P::Comp<T>},
 			{"vro", "volume ratio for overlap sampling", "1.025", "0", "inf", &P::Comp<T>},
-			{"dt", "distance threshold [m] for symmetry sampling", "0.05", "0", "inf", &P::Comp<T>},
+			{"dr", "distance ration for symmetry sampling", "0.1", "0", "inf", &P::Comp<T>},
 			{"ct", "compressions tolerance [%]", "0.95", "0", "1", &P::Comp<T>},
 			{"knn", "number of nearest neighbors to consider, including the point itself", "5", "3", "2147483647", &P::Comp<unsigned>},
 			{"initialVariance", "Variance on individual point positions (isotropic)", "0.0009", "0", "inf", &P::Comp<T>},
@@ -57,7 +57,7 @@ struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
 	const T vrs;
 	const T vro;
-	const T dt;
+	const T dr;
 	const T ct;
     const T initialVariance;
 	const unsigned knn;

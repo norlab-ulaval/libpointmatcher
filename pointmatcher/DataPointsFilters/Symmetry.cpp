@@ -14,7 +14,7 @@ SymmetryDataPointsFilter<T>::SymmetryDataPointsFilter(const Parameters& params):
                                           SymmetryDataPointsFilter::availableParameters(), params),
         vrs(Parametrizable::get<T>("vrs")),
         vro(Parametrizable::get<T>("vro")),
-        dt(Parametrizable::get<T>("dt")),
+        dr(Parametrizable::get<T>("dr")),
         ct(Parametrizable::get<T>("ct")),
         initialVariance(Parametrizable::get<T>("initialVariance")),
         knn(Parametrizable::get<unsigned>("knn"))
@@ -166,9 +166,11 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
                 auto point3 = cloud.features.col(neighbor_idx).head(3);
                 auto delta = distro2->point - distro3->point;
                 auto closest_point = point3 + (1. / (distro2->omega + distro3->omega) * distro2->omega * delta);
-                float distance = (closest_point - distro1->point).norm();
+                float distance_to_point1 = (closest_point - distro1->point).norm();
+                float distance_point2_point3 = delta.norm();
 
-                if(distance < dt)
+                float distance_ratio = distance_to_point1 / distance_point2_point3;
+                if(distance_ratio < dr)
                 {
                     float volume3 = distro3->getVolume();
                     Distribution<T> distro_c = Distribution<T>::combineDistros(*distro2, *distro3);

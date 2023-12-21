@@ -34,10 +34,10 @@ int main(int argc, char* argv[])
                     "SymmetryDataPointsFilter",
                     {
                             {"vrs", toParam(5.0)},
-                            {"vro", toParam(1.025)},
-                            {"dt",  toParam(0.05)},
+                            {"vro", toParam(1.05)},
+                            {"dr",  toParam(0.075)},
                             {"ct",  toParam(0.95)},
-                            {"knn", toParam(10)}
+                            {"knn", toParam(20)}
                     }
             );
 
@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
         cout << "Performed symmetry sampling in " << (float)(time_b - time_a) / CLOCKS_PER_SEC << " seconds" << endl;
     }
 
-    cout << "Saving data" << std::endl;
-//    out.save("out.vtk");
+    cout << "Saving points cloud with " << out.getNbPoints() << " points" << std::endl;
+    out.save("out.vtk");
 
     return 0;
 }
