@@ -1,14 +1,26 @@
-[![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms) Awesome LIDAR; [![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping) Awesome Robotics Libraries; [![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds) Awesome Robotics
-![banner](doc/images/banner_light.jpeg)
+<div align="center">
 
+[![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms)
+[![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping)
+[![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds)<br>
+&nbsp; &nbsp; &nbsp; 
+[LIDAR](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms) 
+&nbsp; &nbsp; &nbsp; &nbsp; 
+[Robotics Libraries](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping) 
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+[Robotics](https://github.com/ahundt/awesome-robotics#point-clouds)
+
+
+![banner](doc/images/banner_light.jpeg)
 
 ---
 
-<div align="center">
 <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/norlab-ulaval/libpointmatcher">
 <img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
+<img alt="GitHub License" src="https://img.shields.io/github/license/norlab-ulaval/libpointmatcher">
 <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
-
+<br>
+<br>
 <img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
 </div>
 <br>
