@@ -49,7 +49,7 @@ static inline void assertOnDataPointsTransformation(const PM::DataPoints& cloud,
     {
         const int span(cloud.descriptorLabels[i].span);
         const std::string& name(cloud.descriptorLabels[i].text);
-        if (name == "normals" || name == "observationDirections")
+        if (name == "normals" || name == "observationDirections") // TODO add missing descriptors that also must be transformed (eigen vectors)
         {
             const auto transformedDescriptor = R * cloud.descriptors.block(row, 0, span, descCols);
             ASSERT_TRUE(transformedDescriptor.isApprox(transformedCloud.descriptors.block(row, 0, span, descCols), kEpsilonNumericalError));
@@ -417,5 +417,92 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator, kEpsilonNumericalError);
+    }
+}
+
+TEST(Transformation, TransformDistribution3D)
+{
+//    Eigen::Map<Eigen::Matrix<float, 3, 3>> getCovarianceMatrix(Eigen::Map<Eigen::Matrix<float, 9, 1>> deviation, )
+    std::shared_ptr<PM::Transformation> transformator = PM::get().REG(Transformation).create("RigidTransformation");
+    const int dimFeatures = 4;
+    const int dimDescriptors = 10; // omega (1) and deviation (9)
+    const int dimTime = 1;
+    const int nbPoints = 1;
+
+    PM::Matrix features = PM::Matrix::Zero(dimFeatures, nbPoints);
+    DP::Labels featLabels;
+    featLabels.push_back(DP::Label("x", 1));
+    featLabels.push_back(DP::Label("y", 1));
+    featLabels.push_back(DP::Label("z", 1));
+    featLabels.push_back(DP::Label("pad", 1));
+
+    PM::Matrix descriptors = PM::Matrix(dimDescriptors, nbPoints);
+    descriptors << 2.0, 106.381, -32.0162, 0.93995, -32.0162, 54.4353, -121.197, 0.939948, -121.197, 355.23;
+    DP::Labels descLabels;
+    descLabels.push_back(DP::Label("omega", 1));
+    descLabels.push_back(DP::Label("deviation", 9));
+
+    PM::Int64Matrix randTimes = PM::Int64Matrix::Random(dimTime, nbPoints);
+    DP::Labels timeLabels;
+    timeLabels.push_back(DP::Label("dummyTime", 1));
+
+    // Construct the point cloud from the generated matrices
+    DP pointCloud = DP(features, featLabels, descriptors, descLabels, randTimes, timeLabels);
+
+    // Identity.
+    {
+        const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
+        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation);
+	    const PM::TransformationParameters R(transformation.matrix().topLeftCorner(3, 3));
+        // Transform and assert on the result.
+        assertOnDataPointsTransformation(pointCloud, transformation.matrix(), transformator);
+
+        auto transformedCloud = pointCloud;
+        transformator->inPlaceCompute(transformation.matrix(), transformedCloud);
+
+        for(int i = 0; i < transformedCloud.getNbPoints(); ++i)
+        {
+            float omega = transformedCloud.descriptors(0, i);
+            Eigen::Map<Eigen::Matrix<float, 3, 3>> deviationMatrix(transformedCloud.descriptors.block(1, i, 9, 1).data(), 3, 3);
+
+            auto cov_transformed = deviationMatrix / omega;
+
+            omega = pointCloud.descriptors(0, i);
+            deviationMatrix = Eigen::Map<Eigen::Matrix<float, 3, 3>>(pointCloud.descriptors.block(1, i, 9, 1).data(), 3, 3);
+
+            Eigen::Matrix<float, 3, 3> cov_reference = deviationMatrix / omega;
+            cov_reference = R * cov_reference * R.transpose();
+
+            EXPECT_TRUE(cov_transformed.isApprox(cov_reference));
+        }
+    }
+
+    // Rotation.
+    {
+        const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
+        const Eigen::Quaternion<NumericType> rotation{ 0.8301584, 0.1698416, 0.3754936, 0.3754936 };
+        const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation);
+	    const PM::TransformationParameters R(transformation.matrix().topLeftCorner(3, 3));
+        // Transform and assert on the result.
+        assertOnDataPointsTransformation(pointCloud, transformation.matrix(), transformator);
+
+        auto transformedCloud = pointCloud;
+        transformator->inPlaceCompute(transformation.matrix(), transformedCloud);
+
+        for(int i = 0; i < transformedCloud.getNbPoints(); ++i)
+        {
+            float omega = transformedCloud.descriptors(0, i);
+            Eigen::Map<Eigen::Matrix<float, 3, 3>> deviationMatrix(transformedCloud.descriptors.block(1, i, 9, 1).data(), 3, 3);
+
+            auto cov_transformed = deviationMatrix / omega;
+
+            float omega_ref = pointCloud.descriptors(0, i);
+            Eigen::Map<Eigen::Matrix<float, 3, 3>> deviationMatrix_ref = Eigen::Map<Eigen::Matrix<float, 3, 3>>(pointCloud.descriptors.block(1, i, 9, 1).data(), 3, 3);
+
+            Eigen::Matrix<float, 3, 3> cov_reference = deviationMatrix_ref / omega_ref;
+            cov_reference = R * cov_reference * R.transpose();
+            EXPECT_TRUE(cov_transformed.isApprox(cov_reference));
+        }
     }
 }

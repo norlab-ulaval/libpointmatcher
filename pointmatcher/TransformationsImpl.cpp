@@ -103,6 +103,17 @@ void TransformationsImpl<T>::RigidTransformation::inPlaceCompute(
 				cloud.descriptors.block(vectorStartingRow, 0, vectorSpan, descCols).applyOnTheLeft(R);
 			}
 		}
+        else if (descName == "deviation")
+        {
+			int vectorSpan = std::sqrt(descSpan);
+            for(int j = 0; j < cloud.getNbPoints(); ++j)
+            {
+                Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> deviationMatrix(cloud.descriptors.block(descStartingRow, j, descSpan, 1).data(), vectorSpan, vectorSpan);
+                deviationMatrix = R * deviationMatrix * R.transpose();
+                Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>> deviationVector(deviationMatrix.data(), descSpan, 1);
+                cloud.descriptors.block(descStartingRow, j, descSpan, 1) = deviationVector;
+            }
+        }
 
 		descStartingRow += descSpan;
 	}
