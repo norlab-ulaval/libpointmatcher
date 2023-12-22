@@ -1,5 +1,9 @@
 <div align="center">
 
+![banner](doc/images/banner_light.jpeg)
+
+[//]: # (====Awesome badges=======================================================================)
+
 [![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms)
 &nbsp; &nbsp; &nbsp;
 [![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping)
@@ -15,9 +19,8 @@
 <a href="http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping">Robotics Libraries</a>
 </sup>
 
-![banner](doc/images/banner_light.jpeg)
 
----
+[//]: # (====GitHub badges========================================================================)
 
 <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/norlab-ulaval/libpointmatcher">
 <img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
@@ -25,10 +28,10 @@
 <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
 <br>
 <br>
-<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
 </div>
-<br>
 
+
+[//]: # (====Supported OS and aarch===============================================================)
 
 `libpointmatcher` is tested on our build system under the following architecture and OS:
 - x86 and arm64/v8
@@ -40,7 +43,15 @@ Note:
 
 <br>
 
+[//]: # (====DevOps badges========================================================================)
+<div align="center">
+<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
+<br>
+</div>
+
 ---
+
+[//]: # (====Release note=========================================================================)
 
 ### ★ Version `1.4.0` release note (important)
 This release of _libpointmatcher_ introduces the integration of [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) as a _git submodule_ for codebase development and testing.
@@ -57,6 +68,7 @@ git submodule update --remote --recursive --init
 
 ---
 
+[//]: # (====Body=================================================================================)
 # Documentation and Tutorials
 
 libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
