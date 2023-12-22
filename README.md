@@ -6,13 +6,14 @@
 &nbsp; &nbsp; &nbsp;
 [![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds)
 <br>
- &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-<sup> <a href="https://github.com/szenergy/awesome-lidar#basic-matching-algorithms">LIDAR</a> </sup>
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-<sup> <a href="https://github.com/ahundt/awesome-robotics#point-clouds">Robotics</a> </sup>
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-<sup> <a href="http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping">Robotics Libraries</a> </sup>
-&nbsp; &nbsp;
+<sup> 
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="https://github.com/szenergy/awesome-lidar#basic-matching-algorithms">LIDAR</a>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="https://github.com/ahundt/awesome-robotics#point-clouds">Robotics</a>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping">Robotics Libraries</a>
+</sup>
 
 ![banner](doc/images/banner_light.jpeg)
 
