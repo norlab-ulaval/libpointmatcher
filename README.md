@@ -26,6 +26,7 @@
 <img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
 <img alt="GitHub License" src="https://img.shields.io/github/license/norlab-ulaval/libpointmatcher">
 <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
+<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
 <br>
 <br>
 </div>
@@ -41,13 +42,6 @@ Note:
 - support for Ubuntu jammy (22.04) comming soon
 - `libpointmatcher` reportedly works on MacOs OsX (latest) and Windows (latest)
 
-<br>
-
-[//]: # (====DevOps badges========================================================================)
-<div align="center">
-<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
-<br>
-</div>
 
 ---
 
@@ -64,9 +58,6 @@ If _libpointmatcher_ was previously cloned, execute the following to fetch its n
 ```shell
 git submodule update --remote --recursive --init
 ```
-<br>
-
----
 
 [//]: # (====Body=================================================================================)
 # Documentation and Tutorials
