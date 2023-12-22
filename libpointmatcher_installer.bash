@@ -49,11 +49,11 @@ function lpm::install_libpointmatcher(){
   fi
 
   # . . Source NBS dependencies . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-  cd "${NBS_PATH}" || exit
+  cd "${NBS_PATH}" || exit 1
   source import_norlab_build_system_lib.bash
 
   # . . Source LPM-build-system environment variables . . . . . . . . . . . . . . . . . . . . . . .
-  cd "${LPM_BUILD_SYSTEM_PATH}" || exit
+  cd "${LPM_BUILD_SYSTEM_PATH}" || exit 1
   if [[ -f .env ]]; then
    set -o allexport && source .env && set +o allexport
   else

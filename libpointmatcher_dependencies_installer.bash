@@ -32,11 +32,11 @@ function lpm::install_libpointmatcher_dependencise(){
   fi
 
   # . . Source NBS dependencies . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-  cd "${N2ST_PATH}" || exit
+  cd "${N2ST_PATH}" || exit 1
   source import_norlab_shell_script_tools_lib.bash
 
   # . . Source LPM-build-system environment variables . . . . . . . . . . . . . . . . . . . . . . .
-  cd "${LPM_BUILD_SYSTEM_PATH}" || exit
+  cd "${LPM_BUILD_SYSTEM_PATH}" || exit 1
   if [[ -f .env ]]; then
     set -o allexport && source .env && set +o allexport
   else
