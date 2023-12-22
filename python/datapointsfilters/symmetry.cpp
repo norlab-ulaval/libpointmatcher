@@ -16,7 +16,7 @@ namespace python
 
 				.def_readonly("vrs", &SymmetryDataPointsFilter::vrs)
 				.def_readonly("vro", &SymmetryDataPointsFilter::vro)
-				.def_readonly("dt", &SymmetryDataPointsFilter::dt)
+				.def_readonly("dr", &SymmetryDataPointsFilter::dr)
 				.def_readonly("ct", &SymmetryDataPointsFilter::ct)
 				.def_readonly("knn", &SymmetryDataPointsFilter::knn)
 
