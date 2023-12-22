@@ -1,11 +1,25 @@
 #!/bin/bash -i
+
+
+
+
+
+
+
+
+
+
+# =================================================================================================
 #
 # Libpointmatcher documentation dependencies installer
 #
 # Usage:
-#   $ bash lpm_install_doc_dependencies_ubuntu.bash
+#   $ bash lpm_install_doc_dependencies_ubuntu.bash [--test-run]
 #
+# =================================================================================================
 set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
+
+declare -a  APT_FLAGS
 
 ## skip GUI dialog by setting everything to default
 export DEBIAN_FRONTEND=noninteractive
@@ -34,10 +48,29 @@ cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash
 SHOW_SPLASH_IDDU="${SHOW_SPLASH_IDDU:-true}"
 
 if [[ "${SHOW_SPLASH_IDDU}" == 'true' ]]; then
-  norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
+  norlab_splash "${NBS_SPLASH_NAME:?err}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
 fi
 
-print_formated_script_header "lpm_install_doc_dependencies_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+print_formated_script_header "lpm_install_doc_dependencies_ubuntu.bash (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
+
+# ....Script command line flags....................................................................
+while [ $# -gt 0 ]; do
+
+  case $1 in
+  --test-run)
+    APT_FLAGS=( --dry-run )
+    shift
+    ;;
+  --?* | -?*)
+    echo "$0: $1: unrecognized option" >&2 # Note: '>&2' = print to stderr
+    shift
+    ;;
+  *) # Default case
+    break
+    ;;
+  esac
+
+done
 
 
 # .................................................................................................
@@ -45,11 +78,11 @@ teamcity_service_msg_blockOpened "Install libpointmatcher documentation related 
 
 ## Package required when GENERATE_API_DOC flag is set to true
 ## Note: 'texlive-full' is ~6GB. 'doxygen-latex' is a slim version tailor made for doxygen code documentation task
-sudo apt-get update &&
-  sudo apt-get install --assume-yes \
-    doxygen \
-    doxygen-latex \
-  && sudo rm -rf /var/lib/apt/lists/*
+sudo apt-get update \
+ && sudo apt-get install --assume-yes "${APT_FLAGS[@]}" \
+      doxygen \
+      doxygen-latex \
+ && sudo rm -rf /var/lib/apt/lists/*
 
 teamcity_service_msg_blockClosed
 

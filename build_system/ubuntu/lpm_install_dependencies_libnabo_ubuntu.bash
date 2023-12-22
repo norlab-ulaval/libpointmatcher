@@ -1,16 +1,24 @@
 #!/bin/bash -i
+# =================================================================================================
 #
 # Libpointmatcher dependencies installer
 #
 # Usage:
-#   $ source lpm_install_dependencies_libnabo_ubuntu.bash
+#   $ source lpm_install_dependencies_libnabo_ubuntu.bash [--test-run]
 #
-#   $ export OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX=( "-D CMAKE_INSTALL_PREFIX=/opt" ) && source lpm_install_dependencies_libnabo_ubuntu.bash
+# Global
+#   - Read the array APPEND_TO_CMAKE_FLAG
 #
-# Global:
-#   - Read "OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX"
+#     Usage:
+#     $ export APPEND_TO_CMAKE_FLAG=( "-D CMAKE_INSTALL_PREFIX=/opt" ) \
+#           && lpm_install_dependencies_libnabo_ubuntu.bash
 #
+# =================================================================================================
 set -e # Note: we want the installer to always fail-fast (it wont affect the build system policy)
+
+# ToDo: Add mention about 'CMAKE_INSTALL_PREFIX' in the doc install step as a fix
+
+declare -a CMAKE_FLAGS
 
 # skip GUI dialog by setting everything to default
 export DEBIAN_FRONTEND=noninteractive
@@ -34,27 +42,43 @@ source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 # Set environment variable IMAGE_ARCH_AND_OS
 cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash"
 
-# ....Override.....................................................................................
-declare -a DEFAULT_LIBNABO_CMAKE_INSTALL_PREFIX=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" )
-declare -a OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX
-declare -a LIBNABO_CMAKE_INSTALL_PREFIX=( "${OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX[@]:-${DEFAULT_LIBNABO_CMAKE_INSTALL_PREFIX[@]}}" )
-
-
 # ====Begin========================================================================================
 SHOW_SPLASH_IDU="${SHOW_SPLASH_IDU:-true}"
 
 if [[ "${SHOW_SPLASH_IDU}" == 'true' ]]; then
-  norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN}/${NBS_REPOSITORY_NAME}"
+  norlab_splash "${NBS_SPLASH_NAME:?err}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
 fi
 
-print_formated_script_header "lpm_install_dependencies_libnabo_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+print_formated_script_header "lpm_install_dependencies_libnabo_ubuntu.bash (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
+
+
+# ....Script command line flags....................................................................
+while [ $# -gt 0 ]; do
+
+  case $1 in
+  --test-run)
+    TEST_RUN=true
+    shift
+    ;;
+  --?* | -?*)
+    echo "$0: $1: unrecognized option" >&2 # Note: '>&2' = print to stderr
+    shift
+    ;;
+  *) # Default case
+    break
+    ;;
+  esac
+
+done
+
+
+
+# ....cmake flags..................................................................................
+CMAKE_FLAGS=( -D CMAKE_BUILD_TYPE=RelWithDebInfo "${APPEND_TO_CMAKE_FLAG[@]}" )
 
 # .................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Libnabo"
 # https://github.com/ethz-asl/libnabo
-
-print_msg "Create required dir structure"
-mkdir -p "${NBS_LIB_INSTALL_PATH}"
 
 ## Note:
 #   - ANN is not mentioned in doc because it's only required for `make test` benchmarks
@@ -83,6 +107,10 @@ mkdir -p "${NBS_LIB_INSTALL_PATH}"
 #        libflann-dev \
 #    && sudo rm -rf /var/lib/apt/lists/*
 
+# ....Repository cloning step......................................................................
+print_msg "Create required dir structure"
+mkdir -p "${NBS_LIB_INSTALL_PATH}"
+
 cd "${NBS_LIB_INSTALL_PATH}"
 git clone https://github.com/ethz-asl/libnabo.git &&
   cd libnabo &&
@@ -90,18 +118,27 @@ git clone https://github.com/ethz-asl/libnabo.git &&
 
 # git checkout 1.0.7
 
-
+# ....Cmake install step...........................................................................
 teamcity_service_msg_compilationStarted "cmake"
 
-## ToDo: Add mention about 'CMAKE_INSTALL_PREFIX' in the doc install step as a fix
-# shellcheck disable=SC2068
-cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo ${LIBNABO_CMAKE_INSTALL_PREFIX[@]} \
-  "${NBS_LIB_INSTALL_PATH}/libnabo" &&
-  make -j $(nproc) &&
+print_msg "Execute ${MSG_DIMMED_FORMAT}
+cmake ${CMAKE_FLAGS[*]} ${NBS_LIB_INSTALL_PATH}/libnabo
+${MSG_END_FORMAT}"
+
+if [[ $TEST_RUN  == true ]]; then
+  print_msg "Test-run mode: Skipping cmake"
+  BUILD_EXIT_CODE=0
+  INSTALL_EXIT_CODE=0
+else
+
+  cmake  "${CMAKE_FLAGS[@]}" "${NBS_LIB_INSTALL_PATH}/libnabo"
+
+  make -j $(nproc)
   sudo make install
 
-# (NICE TO HAVE) ToDo: refactor (ref task NMO-428 refactor: drop libnabo `make test` step after libnabo-build-system deployment)
-#  make -j $(nproc) && make test && sudo make install
+  # (NICE TO HAVE) ToDo: refactor (ref task NMO-428 refactor: drop libnabo `make test` step after libnabo-build-system deployment)
+  #  make -j $(nproc) && make test && sudo make install
+fi
 
 teamcity_service_msg_compilationFinished
 
