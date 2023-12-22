@@ -24,7 +24,6 @@ if [[ -d ${BATS_HELPER_PATH} ]]; then
   load "${BATS_HELPER_PATH}/bats-assert/load"
   load "${BATS_HELPER_PATH}/bats-file/load"
   load "${SRC_CODE_PATH}/${N2ST_BATS_TESTING_TOOLS_RELATIVE_PATH}/bats_helper_functions"
-  load "${SRC_CODE_PATH}/build_system/tests/tests_bats/bats_helper_functions"
   #load "${BATS_HELPER_PATH}/bats-detik/load" # << Kubernetes support
 else
   echo -e "\n[\033[1;31mERROR\033[0m] $0 path to bats-core helper library unreachable at \"${BATS_HELPER_PATH}\"!" 1>&2
@@ -35,11 +34,8 @@ fi
 
 # ====Setup========================================================================================
 
-TESTED_FILE="lpm_crawl_libpointmatcher_build_matrix.bash"
-TESTED_FILE_PATH="./build_system/"
-COMPOSE_FILE="docker-compose.libpointmatcher.yaml"
-DOTENV_BUILD_MATRIX="${SRC_CODE_PATH}"/build_system/.env.build_matrix.libpointmatcher
-DOTENV_BUILD_MATRIX_NAME=$( basename "${DOTENV_BUILD_MATRIX}" )
+DOTENV_FILE=".env.libpointmatcher"
+TESTED_FILE_PATH="."
 
 # executed once before starting the first test (valide for all test in that file)
 setup_file() {
@@ -67,30 +63,45 @@ teardown() {
 #}
 
 # ====Test casses==================================================================================
+@test "${DOTENV_FILE} › Env variables set ok" {
+  # ....Pre-condition..............................................................................
+  assert_empty "${PROJECT_PROMPT_NAME}"
+  assert_empty "${PROJECT_GIT_REMOTE_URL}"
+  assert_empty "${PROJECT_GIT_NAME}"
+  assert_empty "${PROJECT_SRC_NAME}"
+  assert_empty "${PROJECT_PATH}"
 
+  assert_empty "${LPM_PROMPT_NAME}"
+  assert_empty "${LPM_GIT_REMOTE_URL}"
+  assert_empty "${LPM_GIT_NAME}"
+  assert_empty "${LPM_PATH}"
+  assert_empty "${LPM_SRC_NAME}"
 
-@test "${TESTED_FILE} › docker image › execute ok › expect pass" {
+  assert_empty "${LPM_BUILD_SYSTEM_PATH}"
+  assert_empty "${N2ST_PATH}"
+  assert_empty "${NBS_PATH}"
 
-  run bash "${TESTED_FILE}" "${DOTENV_BUILD_MATRIX}" --fail-fast -- build
+  # ....Source .env.project........................................................................
+  set -o allexport
+  source "${BATS_DOCKER_WORKDIR:?err}/${DOTENV_FILE}"
+  set +o allexport
 
-  assert_success
-  assert_output --regexp .*"Starting".*"${TESTED_FILE}".*"\[NBS\]".*"Build images specified in".*"'${COMPOSE_FILE}'".*"following".*"${DOTENV_BUILD_MATRIX_NAME}"
-  assert_output --regexp "Status of tag crawled:".*"Pass".*"› latest".*"Completed".*"${TESTED_FILE}".*
+#  printenv | grep -e 'CONTAINER_PROJECT_' -e 'PROJECT_' >&3
+
+  # ....Tests......................................................................................
+  assert_equal "${PROJECT_PROMPT_NAME}" "LPM"
+  assert_regex "${PROJECT_GIT_REMOTE_URL}" "https://github.com/norlab-ulaval/libpointmatcher"'(".git")?'
+  assert_equal "${PROJECT_GIT_NAME}" "libpointmatcher"
+  assert_equal "${PROJECT_SRC_NAME}" "libpointmatcher"
+  assert_equal "${PROJECT_PATH}" "/code/libpointmatcher"
+
+  assert_equal "${LPM_PROMPT_NAME}" "LPM"
+  assert_regex "${LPM_GIT_REMOTE_URL}" "https://github.com/norlab-ulaval/libpointmatcher"'(".git")?'
+  assert_equal "${LPM_GIT_NAME}" "libpointmatcher"
+  assert_equal "${LPM_SRC_NAME}" "libpointmatcher"
+  assert_equal "${LPM_PATH}" "/code/libpointmatcher"
+
+  assert_equal "${LPM_BUILD_SYSTEM_PATH}" "/code/libpointmatcher/build_system"
+  assert_equal "${N2ST_PATH}" "/code/libpointmatcher/build_system/utilities/norlab-shell-script-tools"
+  assert_equal "${NBS_PATH}" "/code/libpointmatcher/build_system/utilities/norlab-build-system"
 }
-
-
-# ....Test --help flag related logic...............................................................
-
-@test "${TESTED_FILE} › --help as first argument › execute ok › expect pass" {
-  run bash "${TESTED_FILE}" --help
-  test_generic_help_flag_logic
-}
-
-@test "${TESTED_FILE} › second arg: --help › execute ok › expect pass" {
-  run bash "${TESTED_FILE}" --fail-fast  --help
-  test_generic_help_flag_logic
-}
-
-# ToDo: implement >> test for IS_TEAMCITY_RUN==true casses
-# (NICE TO HAVE) ToDo: implement >> test for python intsall casses with regard to distribution
-

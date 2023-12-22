@@ -11,18 +11,26 @@
 # These owners will be the default owners for everything in the repo.
 #*       @pomerlef
 
-# ....Core directories and files...................................................................
+
+# ....High level files.............................................................................
 /README.md @pomerlef
 /LICENSE @pomerlef
+
+# ....Core directories and files...................................................................
+/doc @boxanm @simonpierredeschenes @aguenette @pomerlef
 /pointmatcher @boxanm @simonpierredeschenes @aguenette
 /python @boxanm @simonpierredeschenes @aguenette
 /utest @boxanm @simonpierredeschenes @aguenette
+/examples @boxanm @simonpierredeschenes @aguenette
+
+# ....User install tools...........................................................................
 /.env.libpointmatcher @RedLeader962
+/libpointmatcher_installer.bash @RedLeader962
+/libpointmatcher_dependencies_installer.bash @RedLeader962
 
 # ....DevOps related...............................................................................
 /.github/ @RedLeader962
 /build_system/ @RedLeader962
-/build_system/utilities @RedLeader962
 /.gitmodules @RedLeader962
 /.gitignore @RedLeader962
 /.dockerignore @RedLeader962

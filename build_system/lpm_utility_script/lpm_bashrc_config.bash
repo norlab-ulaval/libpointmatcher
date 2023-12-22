@@ -14,7 +14,7 @@ function lpm::configure_bashrc() {
   LPM_PATH=$(git rev-parse --show-toplevel)
 
   # ....Load environment variables from file.......................................................
-  cd "${LPM_PATH}/build_system" || exit
+  cd "${LPM_PATH}/build_system" || exit 1
   set -o allexport
   source .env
   set +o allexport

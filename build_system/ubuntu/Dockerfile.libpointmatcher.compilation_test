@@ -48,10 +48,8 @@ RUN chmod +x entrypoint.bash
 
 # ====Test compilation with automatic path resolution==============================================
 FROM libpointmatcher-dependencies-general AS test-compilation-auto-path-resolution
-ENV OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX=()
-ENV OVERRIDE_NBS_CMAKE_INSTALL_PREFIX=()
 
-RUN #echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> delete this line
+#RUN echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> mute this line
 
 # ....Install libnabo..............................................................................
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/ubuntu"
@@ -64,9 +62,9 @@ RUN utest/listVersionsUbuntu.sh
 # .... Build libpointmatcher checkout branch ......................................................
 WORKDIR ./build_system/ubuntu
 RUN source lpm_install_libpointmatcher_ubuntu.bash \
-    --repository-version ${REPOSITORY_VERSION} \
-    --cmake-build-type ${CMAKE_BUILD_TYPE} \
-    ${INSTALL_SCRIPT_FLAG}
+            --repository-version ${REPOSITORY_VERSION} \
+            --cmake-build-type ${CMAKE_BUILD_TYPE} \
+            ${INSTALL_SCRIPT_FLAG}
 
 # .... Compile package dependent on libpointmatcher ...............................................
 WORKDIR "${NBS_LIB_INSTALL_PATH}"
@@ -81,14 +79,14 @@ CMD [ "bash" ]
 
 # ====Test compilation with explicit path resolution===============================================
 FROM libpointmatcher-dependencies-general AS test-compilation-prefixed-path
-ENV OVERRIDE_LIBNABO_CMAKE_INSTALL_PREFIX=("-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}")
-ENV OVERRIDE_NBS_CMAKE_INSTALL_PREFIX=("-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}")
 
-RUN #echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> delete this line
+#RUN echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> mute this line
 
 # ....Install libnabo..............................................................................
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/ubuntu"
-RUN source ./lpm_install_dependencies_libnabo_ubuntu.bash
+
+RUN export APPEND_TO_CMAKE_FLAG=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" ) \
+    && source ./lpm_install_dependencies_libnabo_ubuntu.bash
 
 # ....Check Libpointmatcher dependencies installed versions........................................
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
@@ -96,7 +94,9 @@ RUN utest/listVersionsUbuntu.sh
 
 # .... Build libpointmatcher checkout branch ......................................................
 WORKDIR ./build_system/ubuntu
-RUN source lpm_install_libpointmatcher_ubuntu.bash \
+
+RUN export APPEND_TO_CMAKE_FLAG=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" ) \
+    && source lpm_install_libpointmatcher_ubuntu.bash \
     --repository-version ${REPOSITORY_VERSION} \
     --cmake-build-type ${CMAKE_BUILD_TYPE} \
     ${INSTALL_SCRIPT_FLAG}

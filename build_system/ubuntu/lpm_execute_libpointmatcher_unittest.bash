@@ -12,7 +12,7 @@
 TMP_CWD=$(pwd)
 
 LPM_PATH=$(git rev-parse --show-toplevel)
-cd "${LPM_PATH}/build_system" || exit
+cd "${LPM_PATH}/build_system" || exit 1
 
 # ....Load environment variables from file.........................................................
 set -o allexport
@@ -52,7 +52,7 @@ if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
   if [[ ${UTEST_EXIT_CODE} == 0 ]]; then
     echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${SUCCESS_MSG}' status='NORMAL']"
   else
-    echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$UTEST_EXIT_CODE' status='ERROR']"
+    echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$UTEST_EXIT_CODE' status='ERROR']" 1>&2
   fi
 
   echo -e "##teamcity[testSuiteFinished name='gtest']"

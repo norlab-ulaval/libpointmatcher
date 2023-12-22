@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="(HELP) bash lpm_crawl.* › --help menu" type="ShConfigurationType" folderName="[LPM] D | help menu">
-    <option name="SCRIPT_TEXT" value="bash lpm_crawl_libpointmatcher_build_matrix.bash --help" />
+  <configuration default="false" name="(HELP) bash libpointmatcher_installer.bash › --help menu" type="ShConfigurationType" folderName="[LPM] D | help menu">
+    <option name="SCRIPT_TEXT" value="bash libpointmatcher_installer.bash --help" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
     <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
-    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/build_system" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
     <option name="INTERPRETER_PATH" value="/bin/zsh" />
     <option name="INTERPRETER_OPTIONS" value="" />

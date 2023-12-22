@@ -1,9 +1,38 @@
-[![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms) Awesome LIDAR; [![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping) Awesome Robotics Libraries; [![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds) Awesome Robotics
+<div align="center">
+
 ![banner](doc/images/banner_light.jpeg)
 
+[//]: # (====Awesome badges=======================================================================)
 
----
+[![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms)
+&nbsp; &nbsp; &nbsp;
+[![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping)
+&nbsp; &nbsp; &nbsp;
+[![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds)
+<br>
+<sup> 
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="https://github.com/szenergy/awesome-lidar#basic-matching-algorithms">LIDAR</a>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="https://github.com/ahundt/awesome-robotics#point-clouds">Robotics</a>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping">Robotics Libraries</a>
+</sup>
 
+
+[//]: # (====GitHub badges========================================================================)
+
+<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/norlab-ulaval/libpointmatcher">
+<img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
+<img alt="GitHub License" src="https://img.shields.io/github/license/norlab-ulaval/libpointmatcher">
+<img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
+<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
+<br>
+<br>
+</div>
+
+
+[//]: # (====Supported OS and aarch===============================================================)
 
 `libpointmatcher` is tested on our build system under the following architecture and OS:
 - x86 and arm64/v8
@@ -13,14 +42,10 @@ Note:
 - support for Ubuntu jammy (22.04) comming soon
 - `libpointmatcher` reportedly works on MacOs OsX (latest) and Windows (latest)
 
-<div align="center">
-<img src="https://img.shields.io/static/v1?label=powered by JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
-</div>
 
-<br>
-<br>
+---
 
-<div style="padding: 20px;padding-top: 5px;padding-bottom: 5px; margin-top:20px;margin-bottom:20px; border: 2px solid LightGray; border-radius:10px;">
+[//]: # (====Release note=========================================================================)
 
 ### ★ Version `1.4.0` release note (important)
 This release of _libpointmatcher_ introduces the integration of [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) as a _git submodule_ for codebase development and testing.
@@ -33,8 +58,8 @@ If _libpointmatcher_ was previously cloned, execute the following to fetch its n
 ```shell
 git submodule update --remote --recursive --init
 ```
-</div>
 
+[//]: # (====Body=================================================================================)
 # Documentation and Tutorials
 
 libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
