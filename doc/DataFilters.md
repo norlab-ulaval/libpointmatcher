@@ -13,7 +13,7 @@ As a reminder, *datapoint filters* can have several purposes:
 
 Note that *datapoint filters* differ from *outlier filters* which appear further down the ICP chain and have a different purpose.
 
-[Libpointmatcher](https://github.com/ethz-asl/libpointmatcher) provides developers with a number of datapoint filters which process an input point cloud into an intermediate point cloud used in the alignment procedure.  Filters function as independent modules that can and often are combined into chains.  Sequential chains of datapoint filters can thus be adapted to the alignment problem at hand.
+[Libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) provides developers with a number of datapoint filters which process an input point cloud into an intermediate point cloud used in the alignment procedure.  Filters function as independent modules that can and often are combined into chains.  Sequential chains of datapoint filters can thus be adapted to the alignment problem at hand.
 
 ## Filter Index
 

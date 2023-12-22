@@ -5,7 +5,7 @@
 
 ## Overview
 
-The following tutorial will go through the various steps that are performed in a basic ICP registration example.  The source code associated with this tutorial can be found in [examples/icp_simple.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_simple.cpp).
+The following tutorial will go through the various steps that are performed in a basic ICP registration example.  The source code associated with this tutorial can be found in [examples/icp_simple.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_simple.cpp).
 
 Point cloud registration is a critical step in 3D reconstruction of objects and terrains and is used in such varied fields as robotics, medicine, and geography. 
 
