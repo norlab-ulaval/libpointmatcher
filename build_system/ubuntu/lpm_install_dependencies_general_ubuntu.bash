@@ -18,7 +18,7 @@ export DEBIAN_FRONTEND=noninteractive
 TMP_CWD=$(pwd)
 
 LPM_PATH=$(git rev-parse --show-toplevel)
-cd "${LPM_PATH}/build_system" || cd "${LPM_PATH}" || exit
+cd "${LPM_PATH}/build_system" || cd "${LPM_PATH}" || exit 1
 
 # ....Load environment variables from file.........................................................
 set -o allexport
@@ -92,7 +92,7 @@ if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   print_msg "The install script is run in teamCity >> the python install step was executed earlier in the Dockerfile.dependencies"
 else
   print_msg "The install script is executed in stand alone mode"
-  cd "${NBS_PATH}/src/utility_scripts" || exit
+  cd "${NBS_PATH:?err}/src/utility_scripts" || exit 1
   bash "./nbs_install_python_dev_tools.bash"
 fi
 

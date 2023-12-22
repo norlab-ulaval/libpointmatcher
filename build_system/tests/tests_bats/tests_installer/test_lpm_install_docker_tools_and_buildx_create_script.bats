@@ -26,7 +26,7 @@ if [[ -d ${BATS_HELPER_PATH} ]]; then
   load "${SRC_CODE_PATH}/${N2ST_BATS_TESTING_TOOLS_RELATIVE_PATH}/bats_helper_functions"
   #load "${BATS_HELPER_PATH}/bats-detik/load" # << Kubernetes support
 else
-  echo -e "\n[\033[1;31mERROR\033[0m] $0 path to bats-core helper library unreachable at \"${BATS_HELPER_PATH}\"!"
+  echo -e "\n[\033[1;31mERROR\033[0m] $0 path to bats-core helper library unreachable at \"${BATS_HELPER_PATH}\"!" 1>&2
   echo '(press any key to exit)'
   read -r -n 1
   exit 1
@@ -48,7 +48,7 @@ setup_file() {
 
 # executed before each test
 setup() {
-  cd "$TESTED_FILE_PATH" || exit
+  cd "$TESTED_FILE_PATH" || exit 1
 }
 
 # ====Teardown=====================================================================================

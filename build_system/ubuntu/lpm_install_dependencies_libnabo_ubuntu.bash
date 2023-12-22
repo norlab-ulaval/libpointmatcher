@@ -27,7 +27,7 @@ export DEBIAN_FRONTEND=noninteractive
 TMP_CWD=$(pwd)
 
 LPM_PATH=$(git rev-parse --show-toplevel)
-cd "${LPM_PATH}/build_system" || exit
+cd "${LPM_PATH}/build_system" || exit 1
 
 # ....Load environment variables from file.........................................................
 set -o allexport
