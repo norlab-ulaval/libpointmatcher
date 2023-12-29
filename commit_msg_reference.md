@@ -1,4 +1,4 @@
-# Conventional Commits
+# _Conventional Commits_ specification quick reference
 
 See https://www.conventionalcommits.org for details
 

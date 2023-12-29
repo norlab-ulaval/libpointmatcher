@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12)
 
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 include(CheckSymbolExists)
@@ -28,7 +28,9 @@ string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTM
 
 # In 3.0+, project(...) should specify VERSION to satisfy CMP0048
 cmake_policy(SET CMP0048 NEW)
-project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
+# In 3.12+, find_package(<PackageName>) searches prefixes specified by the `<PackageName>_ROOT` CMake and the ``<PackageName>_ROOT`` environment variable, force this with CMP0074
+cmake_policy(SET CMP0074 NEW)
+project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION} LANGUAGES CXX )
 
 set(CMAKE_DEBUG_POSTFIX "d")
 
@@ -178,16 +180,6 @@ endif()
 set(USE_OPEN_MP FALSE CACHE BOOL "Set to TRUE to use OpenMP")
 if (USE_OPEN_MP)
 	find_package(OpenMP)
-	if (OPENMP_FOUND)
-		if(NOT MSVC)
-			add_definitions(-fopenmp -DHAVE_OPENMP)
-		endif()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-		if (CMAKE_COMPILER_IS_GNUCC)
-			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
-    		message("-- OpenMP found, parallel computer enabled")
-		endif()
-	endif()
 endif ()
 
 #--------------------
@@ -244,6 +236,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	endif ()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 	# using AppleClang
+	if (USE_OPEN_MP)
+		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	endif ()
 	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0")
 		message(WARNING "Your XCode environment has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 7.0 or later is supported")
 	endif()
@@ -376,7 +371,7 @@ target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
 if (TARGET libnabo::nabo)
   target_link_libraries(pointmatcher PRIVATE libnabo::nabo)
 else()
-  include_directories(pointmatcher PUBLIC ${libnabo_INCLUDE_DIRS})
+  include_directories(pointmatcher ${libnabo_INCLUDE_DIRS})
   target_link_libraries(pointmatcher PRIVATE ${libnabo_LIBRARIES})
 endif()
 target_link_libraries(pointmatcher PRIVATE ${EXTERNAL_LIBS})
@@ -386,6 +381,13 @@ endif()
 
 if (POSIX_TIMERS AND NOT APPLE)
 	target_link_libraries(pointmatcher PRIVATE rt)
+endif ()
+
+if (OpenMP_CXX_FOUND)
+	message("-- OpenMP found, parallel computer enabled")
+	message(STATUS "${OpenMP_CXX_LIBRARIES} ${OpenMP_CXX_INCLUDE_DIR}")
+	include_directories(pointmatcher ${OpenMP_CXX_INCLUDE_DIR})
+	target_link_libraries(pointmatcher PUBLIC ${OpenMP_CXX_LIBRARIES})
 endif ()
 
 set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VERSION}" SOVERSION 1)
