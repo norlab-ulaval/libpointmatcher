@@ -28,3 +28,6 @@ target_link_libraries(filter_symmetry pointmatcher)
 
 add_executable(distribution_bench distribution_bench.cpp)
 target_link_libraries(distribution_bench pointmatcher)
+
+add_executable(bench_octree_NDT bench_octree_NDT.cpp)
+target_link_libraries(bench_octree_NDT pointmatcher)
