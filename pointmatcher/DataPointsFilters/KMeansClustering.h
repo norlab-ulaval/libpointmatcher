@@ -28,6 +28,7 @@ struct KMeansClusteringDataPointsFilter : public PointMatcher<T>::DataPointsFilt
     const std::size_t k;
     const std::size_t iter;
     const T epsilon;
+    const int seed;
 
     inline static const std::string description()
     {
@@ -43,7 +44,8 @@ struct KMeansClusteringDataPointsFilter : public PointMatcher<T>::DataPointsFilt
         return {
                 {"k",      "Number of clusters.", "2", "2", "4294967295", &P::Comp < std::size_t > },
                 {"iter", "Maximum number of iterations.", "1",            "1", "4294967295", &P::Comp < std::size_t > },
-                {"epsilon", "Tolerance value, the clustering is stopped if the centroids moved less than epsilon since the previous iteration.", "-1", "-1", "inf", &P::Comp<T>}
+                {"epsilon", "Tolerance value, the clustering is stopped if the centroids moved less than epsilon since the previous iteration.", "-1", "-1", "inf", &P::Comp<T>},
+			    {"seed", "Seed for random sampling (-1 means no seed is used)", "-1", "-1", "2147483647", &P::Comp<int>}
         };
     }
 
@@ -52,4 +54,8 @@ struct KMeansClusteringDataPointsFilter : public PointMatcher<T>::DataPointsFilt
 
     virtual DataPoints filter(const DataPoints& input);
     virtual void inPlaceFilter(DataPoints& cloud);
+
+private:
+    DataPoints getSeedPoints(const DataPoints& cloud);
+    void assignClusters(const DataPoints& cloud, const DataPoints& seeds, Vector& cluster_index);
 };

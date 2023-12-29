@@ -22,3 +22,6 @@ target_link_libraries(icp_advance_api pointmatcher)
 
 add_executable(icp_customized icp_customized.cpp)
 target_link_libraries(icp_customized pointmatcher)
+
+add_executable(k_means_clustering k_means_clustering.cpp)
+target_link_libraries(k_means_clustering pointmatcher)
