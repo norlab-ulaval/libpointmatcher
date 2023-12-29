@@ -1,5 +1,5 @@
 site_name: libpointmatcher
-repo_url: https://github.com/ethz-asl/libpointmatcher
+repo_url: https://github.com/norlab-ulaval/libpointmatcher
 edit_uri: edit/master/doc
 site_description: An "Iterative Closest Point" library for 2-D/3-D mapping in robotic
 google_analytics: ['UA-70950258-1', 'libpointmatcher.readthedocs.org']

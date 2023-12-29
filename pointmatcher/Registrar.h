@@ -38,30 +38,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Parametrizable.h"
 #include "PointMatcher.h"
+
+#include <yaml-cpp/yaml.h>
 #include <boost/format.hpp>
 #include <boost/typeof/typeof.hpp>
 
-
-#ifdef SYSTEM_YAML_CPP
-	namespace YAML
-	{
-		class Node;
-	}
-#else
-	namespace YAML_PM
-	{
-		class Node;
-	}
-#endif // HAVE_YAML_CPP
-
 namespace PointMatcherSupport
 {
-#ifdef SYSTEM_YAML_CPP
-	namespace YAML = ::YAML;
-#else
-	namespace YAML = ::YAML_PM;
-#endif
-
 	//! Retrieve name and parameters from a yaml node
 	void getNameParamsFromYAML(const YAML::Node& module, std::string& name, Parametrizable::Parameters& params);
 
@@ -130,7 +113,7 @@ namespace PointMatcherSupport
 			{
 				for (const auto& param : params)
 					throw Parametrizable::InvalidParameter(
-							(boost::format("Parameter %1% was set but module %2% dos not use any parameter") % param.first % className).str()
+							(boost::format("Parameter %1% was set but module %2% does not use any parameter") % param.first % className).str()
 						);
 
 				return std::make_shared<C>();

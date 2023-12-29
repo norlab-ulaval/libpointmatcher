@@ -1,0 +1,1 @@
+See [README.md #Contributing](https://github.com/norlab-ulaval/libpointmatcher/tree/master#contributing) for instructions on how integrate the `libpointmatcher-build-system` to your local development workflow (on your workstation). 

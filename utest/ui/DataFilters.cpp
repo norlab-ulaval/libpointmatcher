@@ -950,3 +950,71 @@ TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 	addFilter("SpectralDecompositionDataPointsFilter", params);
 	validate3dTransformation();
 }
+
+TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
+{
+	using DPFiltersPtr = std::shared_ptr<PM::DataPointsFilter>;
+
+	// Test with point cloud
+	DP cloud = generateRandomDataPoints(100);
+
+    std::string descriptorName = "test_descriptor";
+    std::size_t descriptorDimension = 3;
+    std::vector<float> descriptorValues{2, 3, 4};
+
+	// This filter adds a new descriptor
+	params = PM::Parameters();
+		params["descriptorName"] = descriptorName;
+		params["descriptorDimension"] = toParam(descriptorDimension);
+		params["descriptorValues"] = toParam(descriptorValues);
+
+	DPFiltersPtr addDescriptorFilter = PM::get().DataPointsFilterRegistrar.create(
+		"AddDescriptorDataPointsFilter", params
+	);
+
+	DP filteredCloud = addDescriptorFilter->filter(cloud);
+
+	EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
+	EXPECT_EQ(cloud.getDescriptorDim()+descriptorDimension, filteredCloud.getDescriptorDim());
+	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+    Eigen::Matrix<float, 1, Eigen::Dynamic> row = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(cloud.getNbPoints());
+    EXPECT_EQ(filteredCloud.descriptorLabels.back().text, descriptorName);
+    EXPECT_EQ(filteredCloud.descriptorLabels.back().span, descriptorDimension);
+    for(unsigned i = 0; i < descriptorDimension; ++i)
+    {
+        EXPECT_EQ(filteredCloud.descriptors.row(filteredCloud.descriptors.rows()-3+i), row*descriptorValues[i]);
+    }
+
+
+    descriptorValues = std::vector<float>{-2, -3, -4};
+    params["descriptorValues"] = toParam(descriptorValues);
+
+	addDescriptorFilter = PM::get().DataPointsFilterRegistrar.create(
+		"AddDescriptorDataPointsFilter", params
+	);
+	DP filteredCloudOvewriteParams = addDescriptorFilter->filter(filteredCloud);
+    EXPECT_EQ(filteredCloudOvewriteParams.descriptorLabels.back().text, descriptorName);
+    EXPECT_EQ(filteredCloudOvewriteParams.descriptorLabels.back().span, descriptorDimension);
+    for(unsigned i = 0; i < descriptorDimension; ++i)
+    {
+        EXPECT_EQ(filteredCloudOvewriteParams.descriptors.row(filteredCloud.descriptors.rows()-3+i), row*descriptorValues[i]);
+    }
+
+
+    descriptorValues = std::vector<float>{-2, -3, -4, -5};
+    params["descriptorDimension"] = toParam(4);
+    params["descriptorValues"] = toParam(descriptorValues);
+	addDescriptorFilter = PM::get().DataPointsFilterRegistrar.create(
+		"AddDescriptorDataPointsFilter", params
+	);
+    EXPECT_THROW(addDescriptorFilter->filter(filteredCloud), std::runtime_error);
+
+	params = PM::Parameters();
+		params["descriptorName"] = "my_descriptor";
+		params["descriptorDimension"] = toParam(descriptorDimension);
+		params["descriptorValues"] = "[2, 3, 4]";
+
+	addFilter("AddDescriptorDataPointsFilter", params);
+	validate3dTransformation();
+}

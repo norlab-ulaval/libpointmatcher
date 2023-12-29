@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 		);
 
 	// For a complete description of filter, see 
-	// https://github.com/ethz-asl/libpointmatcher/blob/master/doc/Datafilters.md
+	// https://github.com/norlab-ulaval/libpointmatcher/blob/master/doc/Datafilters.md
 	std::shared_ptr<PM::DataPointsFilter> normalFilter =
 		PM::get().DataPointsFilterRegistrar.create(
 			"SurfaceNormalDataPointsFilter",

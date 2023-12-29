@@ -6,7 +6,7 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
   pull_request:
-    branches: [master]
+    branches: [master, develop]
   workflow_dispatch:
 
 env:
@@ -131,6 +131,7 @@ jobs:
             gcc \
             make \
             libeigen3-dev \
+            libyaml-cpp-dev \
             ninja-build \
             catch \
             libomp-dev \
@@ -184,7 +185,7 @@ jobs:
         if: ${{ steps.cache-boost.outputs.cache-hit != 'true' && runner.os == 'Linux' }}
         working-directory: ${{ env.BOOST_SRC_DIR }}/${{ env.BOOST_DIR }}
         run: |
-          ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --with-python=python --prefix=${{ env.BOOST_INSTALL_PATH }}
+          ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --prefix=${{ env.BOOST_INSTALL_PATH }}
           ./b2 cxxflags=-fPIC cflags=-fPIC link=static install
 
       - name: Download source code libnabo ${{ env.LIBNABO_VERSION }}
@@ -266,6 +267,7 @@ jobs:
             -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 \
             -DBUILD_PYTHON_MODULE:BOOL=ON \
             -DUSE_OPEN_MP:BOOL=ON \
+            -DBoost_USE_STATIC_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -S . -B ${{ env.BUILD_DIR }}
           sudo cmake --build ${{ env.BUILD_DIR }} --target install
@@ -280,6 +282,7 @@ jobs:
             -DLIBNABO_INSTALL_DIR:PATH="${{ env.LIBNABO_INSTALL_PATH }}" `
             -Dpybind11_DIR:PATH="${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11" `
             -DBUILD_PYTHON_MODULE:BOOL=ON `
+            -DBoost_USE_STATIC_LIBS:BOOL=ON `
             -DPYTHON_INSTALL_TARGET:PATH="./python/${{ env.PYTHON_PACKAGE_NAME }}" `
             -DVCPKG_TARGET_TRIPLET="x64-windows-static" `
             -DUSE_OPEN_MP:BOOL=ON `
@@ -292,11 +295,14 @@ jobs:
         run: |
           python -m build --wheel --no-isolation --outdir ${{ env.PYTHON_WHEEL_DIR }}
 
-      - name: Test package
+      - name: Install package
         working-directory: ./python
         run: |
           pip install ${{ env.PYTHON_WHEEL_DIR }}/*.whl
-          python -c "from pypointmatcher import *"
+      
+      - name: Test import
+        working-directory: ${{ runner.temp }}
+        run: python -c "from pypointmatcher import *"
 
       - name: Upload python wheel
         uses: actions/upload-artifact@v3

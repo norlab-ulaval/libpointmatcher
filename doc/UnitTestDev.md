@@ -7,7 +7,7 @@ It is often good practice to accompany the development of new software features 
 
 Libpointmatcher uses the [C++ testing framework developed by Google](https://github.com/google/googletest).  If you are not sure if you installed libpointmatcher with GTest, go to the libpointmatcher's CMake build directory and run `make test`.  If the tests do not run, refer back to the [compilation instructions](CompilationUbuntu.md) to recompile with GTest.
 
-Libpointmatcher's unit tests can be found in [utest/utest.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/utest.cpp).  In this tutorial, we will write a series of tests for validating the voxel grid filter developed in [this past tutorial](DataPointsFilterDev.md).  Note that this test will not cover the myriad of features that GTest provides.  Nevertheless, it is very easy to understand GTest without extensive experience.  For those who wish to have a solid introduction to GTest we recommend to start with this [this primer](https://github.com/google/googletest/blob/master/googletest/docs/primer.md).
+Libpointmatcher's unit tests can be found in [utest/utest.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/utest/utest.cpp).  In this tutorial, we will write a series of tests for validating the voxel grid filter developed in [this past tutorial](DataPointsFilterDev.md).  Note that this test will not cover the myriad of features that GTest provides.  Nevertheless, it is very easy to understand GTest without extensive experience.  For those who wish to have a solid introduction to GTest we recommend to start with this [this primer](https://github.com/google/googletest/blob/master/googletest/docs/primer.md).
 
 
 ## A Unit Test for the Voxel Grid Filter
@@ -254,7 +254,7 @@ You can check that these tests are run succesfully by executing the following co
 
 To avoid writting the same basic test for a given combination of solution, a generic test uses a
  list of yaml files and executes them to verify that the solution is the same as before. This
-  list can be found here: [examples/data/icp_data/](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/data/icp_data/)
+  list can be found here: [examples/data/icp_data/](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/data/icp_data/)
 
 There are two types of files with the same name, but with a different extension. The first one is the `.yaml` which contains the solution to be tested (see [Configurations with YAML](Configuration.md)). The second one is the `.ref_trans`, which contains the 4 by 4 matrix used as the valid output.
 
@@ -262,7 +262,7 @@ The steps to add a new test is the following:
 
  1. Add a yaml file in `examples/data/icp_data/` with the desired configuration to test.
  
- 1. In this configuration, add a `VTKFileInspector` as in [this tutorial](https://github.com/ethz-asl/libpointmatcher/blob/master/doc/ICPIntro.md#a-real-icp-configuration).
+ 1. In this configuration, add a `VTKFileInspector` as in [this tutorial](https://github.com/norlab-ulaval/libpointmatcher/blob/master/doc/ICPIntro.md#a-real-icp-configuration).
  
  1. Run the unit tests (the test will fail, it's normal): `./utest/utest --path ../examples/data/ --gtest_filter=icpTest.icpTest`
  

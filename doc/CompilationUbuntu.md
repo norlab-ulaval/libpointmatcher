@@ -7,18 +7,20 @@
 
 If you are used to development projects, here is what you need:
 
-|Name           |Version  <br> (Tested Feb. 20, 2015) |Version  <br> (Tested Sept. 6, 2016) | Version  <br> (Tested Jan. 8, 2019) |
-|---------------|-----------------------|-----------------------|-----------------------|
-|Ubuntu         | 12.04.5 LTS (64 bit)  | 14.04.5 LTS (64 bit)  | 18.04.1 LTS (64 bit) |
-|gcc            | 4.6.3                 | 4.8.4                 | 7.3.0 |
-|git            | 1.7.9.5               | 1.9.1                 | 2.17.1 |
-|cmake          | 2.8.11.2              | 2.8.12.2              | 3.10.2 |
-|doxygen (opt.) | 1.7.6.1               | 1.8.6-2               | 1.8.13-10 |
-|||||
-| _Dependency:_|  |  |
-|boost          | 1.48.0.2             | 1.54.0                 | 1.65.1 |
-|eigen          | 3.0.5                | 3.2.0-8                | 3.3.4-4 |
-|libnabo        | [from source](https://github.com/ethz-asl/libnabo) | [from source](https://github.com/ethz-asl/libnabo) | [from source](https://github.com/ethz-asl/libnabo) |
+| Name           |     Version  <br> (Tested on our CI/CD server)     |     Version  <br> (Tested on our CI/CD server)     |
+|:---------------|:--------------------------------------------------:|:--------------------------------------------------:|
+| Ubuntu         |            bionic 18.04.1 LTS (64 bit)             |              focal 20.04 LTS (64 bit)              |
+| Architecture   |                  x86 and arm64/v8                  |              x86 and arm64/v8              |
+| gcc            |                       7.5.0                        |                       latest                       |
+| git            |                       2.17.1                       |                       latest                       |
+| cmake          |                       3.10.2                       |                       latest                       |
+| doxygen (opt.) |                     1.8.13-10                      |                       latest                       |
+|                |                                                    |                                                    |
+| _Dependency:_  |                                                    |                                                    |
+| boost          |                       1.65.1                       |                       latest                       |
+| eigen          |                      3.3.4-4                       |                       latest                       |
+| yaml-cpp       |                        0.5+                        |                       latest                       |
+| libnabo        | [from source](https://github.com/ethz-asl/libnabo) | [from source](https://github.com/ethz-asl/libnabo) |
 
 __Note:__ we only support 64-bit systems because of some issues with Eigen. Other versions will most probably work but you'll have to try yourself to know for sure.
 
@@ -63,7 +65,7 @@ git version 2.17.1
 If not refer to the Git homepage for installation instructions or install via the package manager by running
 
 ```bash
-sudo apt-get install git-core
+sudo apt-get install git
 ```
 
 #### c. Installing CMake
@@ -86,7 +88,15 @@ The Eigen linear algebra library is required before installing libpointmatcher a
 sudo apt-get install libeigen3-dev
 ```
 
-### 2. Installing libnabo
+### 2. Installing yaml-cpp
+
+The yaml-cpp library can be installed via apt by running:
+
+```bash
+sudo apt-get install libyaml-cpp-dev
+```
+
+### 3. Installing libnabo
 
 libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/ethz-asl/libnabo).  Clone the source repository into a local directory of your choice.
 
@@ -137,7 +147,7 @@ sudo apt-get install libyaml-cpp0.3-dev
 The yaml-cpp package for Trusty Tahr provides yaml-cpp0.5. Libpointmatcher is so far only compatible with yaml-cpp0.3 and thus an older version of yaml-cpp should be installed manually.
 -->
 
-### 3. Installing libpointmatcher
+### 4. Installing libpointmatcher
 
 First, you need to clone the source repository into a local directory.  As an example, we reuse the Libraries directory that was created to contain the libnabo sources.
 
@@ -169,7 +179,7 @@ sudo apt-get install doxygen
 You will also need LaTeX for the equations rendering :
 
 ```bash
-sudo apt-get install texlive-full
+sudo apt-get install doxygen-latex
 ```
 
 After you have installed Doxygen and LaTeX, you can enable the documentation by setting the CMake variable `GENERATE_API_DOC` to `TRUE`. This can be achieved through CMake-GUI or by the command line:
@@ -212,6 +222,7 @@ Finally, to install libpointmatcher on your system, run the following command:
 sudo make install
 ```
 
+<!---
 ### 4. Possible Caveats
 
 If Eigen, libnabo, yaml-cpp, or GTest are not found during the installation, you will have to manually supply their installation locations by setting the CMake flags. You can do so using the CMake-GUI.
@@ -220,8 +231,8 @@ If Eigen, libnabo, yaml-cpp, or GTest are not found during the installation, you
 cd build
 cmake-gui .
 ```
-
 ![alt text](images/cmake_screenshot.png "Screenshot of CMake-GUI")
+-->
 
 <!---
 If yaml-cpp was installed using apt-get as described above, it will not be found by the default CMake configuration.  You should set the `yaml-cpp_INCLUDE_DIRS` and `yaml-cpp_LIBRARIES` to `/usr/include/yaml-cpp` and `/usr/lib/x86_64-linux-gnu/` respectively.  These locations could be different on your machine.  You can find them by the files installed by the libyaml package:
@@ -231,15 +242,17 @@ dpkg -L libyaml-cpp-dev
 ```
 -->
 
+<!---
 You can then set `EIGEN_INCLUDE_DIR`, `NABO_INCLUDE_DIR`, `NABO_LIBRARY`, `yaml-cpp_INCLUDE_DIRS`, `yaml-cpp_LIBRARIES` to point to your installation directories as shown in the screenshot above.  Then, generate the make files by clicking generate and rerun the following inside `/build`:
 
 ```bash
 make
 sudo make install
 ```
+-->
 
 # Having problems?
-Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/ethz-asl/libpointmatcher/issues). You may need to ensure that the file is executable:
+Some dependencies changed and we don't keep track of all combinations possible. Before reporting a problem, make sure to include the versions you are using. You can run the bash script `./utest/listVersionsUbuntu.sh` and copy-paste its output when [reporting an issue on github](https://github.com/norlab-ulaval/libpointmatcher/issues). You may need to ensure that the file is executable:
 
 ```bash
 chmod +x ./utest/listVersionsUbuntu.sh

@@ -5,7 +5,7 @@
 
 ## Overview
 
-The following will go through the steps needed to write a simple program which configures a chain of data filters and applies this chain to a point cloud.  For information on data filters, refer to the [data point filters tutorial](DataFilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/demo_cmake/convert.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_cmake/convert.cpp).
+The following will go through the steps needed to write a simple program which configures a chain of data filters and applies this chain to a point cloud.  For information on data filters, refer to the [data point filters tutorial](DataFilters.md).  The filtered point cloud is then saved to disk.  The source code associated with this tutorial can be found in [examples/demo_cmake/convert.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/demo_cmake/convert.cpp).
 
 ***IMPORTANT:*** This tutorial makes use of YAML configuration files.  If you did not install yaml-cpp before installing libpointmatcher, you must do so before following these instructions.  Information on installing yaml-cpp can be found in the installation instructions for [Ubuntu](CompilationUbuntu.md), [Windows](CompilationWindows.md) and [Mac OS X](CompilationMac.md).
 
@@ -81,7 +81,7 @@ return 0;
 
 ## Configuring the Data Filters Chain
 
-An example configuration file can be found at [examples/data/default-convert.yaml](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/data/default-convert.yaml).  A diagram of this chain is shown in Figure 1.
+An example configuration file can be found at [examples/data/default-convert.yaml](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/data/default-convert.yaml).  A diagram of this chain is shown in Figure 1.
 
 |**Figure 1**: Default chain of data filters in `default-convert.yaml`|
 |:---:|

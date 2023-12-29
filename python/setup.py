@@ -33,7 +33,6 @@ if version is None:
 
 
 setup(packages=find_packages(include=["pypointmatcher*"]),
-    install_requires=["numpy>=1.20"],
     package_data={"": ["*.so"]},
     version=version,
     distclass=BinaryDistribution
