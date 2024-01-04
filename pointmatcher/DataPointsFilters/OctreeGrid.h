@@ -155,12 +155,29 @@ public:
 		using FirstPtsSampler::pts;
 		using FirstPtsSampler::mapidx;
 
+        using Vector = typename PM::Vector;
+        using VectorRef = Eigen::Ref<Vector>;
+        using Matrix = typename PM::Matrix;
+        using MatrixRef = Eigen::Ref<Matrix>;
+
+		template<std::size_t dim>
+        using MatrixMap = Eigen::Map<Eigen::Matrix<T, dim, dim, Eigen::RowMajor>>;
+
+        using TimeViewBlock = typename PM::Int64Matrix;
+        using TimeViewBlockRef = Eigen::Ref<TimeViewBlock>;
+        using DescriptorsViewBlock = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+        using DescriptorsViewBlockRef = Eigen::Ref<DescriptorsViewBlock>;
+
 		NDTSampler(DataPoints& dp);
 
 		virtual ~NDTSampler(){}
 
 		template<std::size_t dim>
 		bool operator()(Octree_<T,dim>& oc);
+
+		template<std::size_t dim>
+        void combineDistros (VectorRef mean1, MatrixMap<dim> deviation1, T& omega1, TimeViewBlockRef times1, DescriptorsViewBlockRef desc1,
+                            const Vector& mean2, const Matrix& deviation2, T omega2, const TimeViewBlock& times2, const DescriptorsViewBlock& desc2);
 	};
 
 //-------	

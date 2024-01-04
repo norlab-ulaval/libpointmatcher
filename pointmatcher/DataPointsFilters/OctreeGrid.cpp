@@ -218,10 +218,25 @@ OctreeGridDataPointsFilter<T>::NDTSampler::NDTSampler(DataPoints& dp)
 	: OctreeGridDataPointsFilter<T>::FirstPtsSampler{dp}
 {
 }
-	
+
 template<typename T>
 template<std::size_t dim>
-bool OctreeGridDataPointsFilter<T>::NDTSampler::operator()(Octree_<T,dim>& oc)
+void OctreeGridDataPointsFilter<T>::NDTSampler::combineDistros(VectorRef mean1, MatrixMap<dim> deviation1, T& omega1, TimeViewBlockRef times1, DescriptorsViewBlockRef desc1,
+                        const Vector& mean2, const Matrix& deviation2, const T omega2, const TimeViewBlock& times2, const DescriptorsViewBlock& desc2){
+    T omega_12 = omega1 + omega2;
+    T omega_12_inv = 1. / omega_12;
+    Vector delta = mean1 - mean2;
+
+    mean1 = mean2 + omega_12_inv * omega1 * delta;
+    deviation1 = deviation1 + deviation2
+            + omega_12_inv * omega1 * omega2 * (delta * delta.transpose());
+    omega1 = omega_12;
+    // TODO handle other descriptors and times
+}
+
+template<typename T>
+template<std::size_t dim>
+bool OctreeGridDataPointsFilter<T>::NDTSampler::operator()(Octree_<T, dim>& oc)
 {
 	if(oc.isLeaf() and not oc.isEmpty())
 	{
@@ -234,28 +249,20 @@ bool OctreeGridDataPointsFilter<T>::NDTSampler::operator()(Octree_<T,dim>& oc)
 		//retrieve index from lookup table if sampling in already switched element
 		while(j<idx)
         {
-//            std::cout << "|orig j: " << j << "|";
             j = mapidx[j];
         }
 
-        auto points = pts.features;
-        auto omegas = pts.getDescriptorViewByName("omega");
-        auto deviations = pts.getDescriptorViewByName("deviation");
-
-//        std::cout << "Processing " << nbData << " points. j: "<< j << ", d: " << d << ", idx: " << idx << ", omega " << omegas(0, j) << "\t";
-
         assert(j >= idx);
 
-        std::vector<std::shared_ptr<Distribution<T>>> distributions;
+        MatrixMap<dim> deviationMatrix1(pts.getDescriptorViewByName("deviation").block(0, j, dim*dim, 1).data());
+        TimeViewBlockRef time1 = pts.times.col(j);
+        DescriptorsViewBlockRef desc1 = pts.descriptors.col(j);
+        VectorRef point1 = pts.features.col(j).head(dim);
 
-        Eigen::Map<Eigen::Matrix<T, 3, 3>> deviationMatrix(deviations.block(0, j, 9, 1).data(), 3, 3);
-        distributions.emplace_back(new Distribution<T>(points.col(j).head(3),
-                                                       omegas(0, j),
-                                                       deviationMatrix,
-                                                       pts.times.col(j),
-                                                       pts.descriptors.col(j)));
-        assert(omegas(0, j) == 1);
-		//We sum all the data in the first data
+        T* omega1 = &pts.getDescriptorViewByName("omega")(0, j);
+        assert(*omega1 == 1);
+        T omega_sum = *omega1;
+//		//We sum all the data in the first data
 		for(std::size_t id=1;id<nbData;++id)
 		{
 			//get current idx
@@ -267,35 +274,18 @@ bool OctreeGridDataPointsFilter<T>::NDTSampler::operator()(Octree_<T,dim>& oc)
 				i = mapidx[i];
 
             assert(i >= idx);
-            assert(omegas(0, i) == 1);
-            Eigen::Map<Eigen::Matrix<T, 3, 3>> deviationMatrix(deviations.block(0, i, 9, 1).data(), 3, 3);
-            distributions.emplace_back(new Distribution<T>(points.col(i).head(3),
-                                                           omegas(0, i),
-                                                           deviationMatrix,
-                                                           pts.times.col(i),
-                                                           pts.descriptors.col(i)));
+
+            T omega2 = pts.getDescriptorViewByName("omega")(0, i);
+            assert(omega2 == 1);
+            omega_sum += omega2;
+            Vector point2 = pts.features.col(i).head(dim);
+            Matrix deviationMatrix2 = pts.getDescriptorViewByName("deviation").block(0, i, dim*dim, 1).reshaped(dim, dim);
+            combineDistros<dim>(point1, deviationMatrix1, *omega1, time1, desc1,
+                            point2,  deviationMatrix2, omega2, pts.times.col(i), pts.descriptors.col(i));
 		}
 
-        Distribution<T> combined_distro = *distributions[0];
-		// Combine all distributions
-        for(int i = 1; i < distributions.size(); ++i)
-        {
-            combined_distro = Distribution<T>::combineDistros(combined_distro, *distributions[i]);
-        }
-
-        if (nbData == 1)
-            assert(combined_distro.omega == omegas(0, j));
-        else
-            assert(combined_distro.omega == nbData);
-        pts.features.col(j).head(3) = combined_distro.point;
-        pts.descriptors.col(j) = combined_distro.descriptors;
-        pts.times.col(j) = combined_distro.times;
-
-        omegas(0, j) = combined_distro.omega;
-
-        Eigen::Map<Eigen::Matrix<T, 9, 1>> deviationVector((combined_distro).deviation.data(), 9, 1);
-        deviations.col(j) = deviationVector;
-
+        assert(*omega1 == omega_sum);
+        assert(pts.getDescriptorViewByName("omega")(0, j) == omega_sum);
 		//Switch columns j and idx
 		pts.swapCols(idx, j);
 
