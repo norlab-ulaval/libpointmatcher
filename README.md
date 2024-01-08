@@ -120,6 +120,15 @@ See
 available [libpointmatcher image tags](https://hub.docker.com/repository/docker/norlabulaval/libpointmatcher/)
 on dockerhub.
 
+To install docker related dependencies on ubuntu, execute the following
+```shell
+cd ./build_system/lpm_utility_script
+
+# Execute docker tools install script i.e. docker daemon, docker compose, docker buildx
+bash lpm_install_docker_tools.bash
+```
+
+
 ### Compilation & Installation 
 
 For beginner users unfamiliar with compiling and installing a library in Linux, go [here](doc/CompilationUbuntu.md) for detailed instructions on compiling libpointmatcher from the source code.  
