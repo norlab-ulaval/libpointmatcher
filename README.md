@@ -11,6 +11,16 @@ with [bindings in Python](doc/index.md#python-).
 <br>
 <br>
 
+[//]: # (====GitHub badges========================================================================)
+
+<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/norlab-ulaval/libpointmatcher">
+<img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
+<img alt="GitHub License" src="https://img.shields.io/github/license/norlab-ulaval/libpointmatcher">
+<img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
+<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
+<br>
+<br>
+
 [//]: # (====Awesome badges=======================================================================)
 
 [![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms)
@@ -28,17 +38,8 @@ with [bindings in Python](doc/index.md#python-).
 <a href="http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping">Robotics Libraries</a>
 </sup>
 
-
-[//]: # (====GitHub badges========================================================================)
-
-<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/norlab-ulaval/libpointmatcher">
-<img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
-<img alt="GitHub License" src="https://img.shields.io/github/license/norlab-ulaval/libpointmatcher">
-<img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
-<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
-<br>
-<br>
 </div>
+
 
 
 [//]: # (====Supported OS and aarch===============================================================)
