@@ -21,7 +21,7 @@ If you are used to development project, here is what you need:
 |boost          | 1.57.0                |
 |eigen          | 3.2.4                 |
 |yaml-cpp       | 0.5+                 |
-|libnabo        | [from source](https://github.com/ethz-asl/libnabo) |
+|libnabo        | [from source](https://github.com/norlab-ulaval/libnabo) |
 
 
 __Note:__ Other versions will most probably work but you'll have to try yourself to know for sure.
@@ -138,11 +138,11 @@ sudo make install
 
 ### 3. Installing libnabo
 
-libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/ethz-asl/libnabo).  Clone the source repository into a local directory of your choice.
+libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/norlab-ulaval/libnabo).  Clone the source repository into a local directory of your choice.
 
 ```bash
 cd ~/Libraries
-git clone git://github.com/ethz-asl/libnabo.git
+git clone git://github.com/norlab-ulaval/libnabo.git
 cd libnabo
 ```
 

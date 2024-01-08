@@ -78,7 +78,7 @@ CMAKE_FLAGS=( -D CMAKE_BUILD_TYPE=RelWithDebInfo "${APPEND_TO_CMAKE_FLAG[@]}" )
 
 # .................................................................................................
 teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Libnabo"
-# https://github.com/ethz-asl/libnabo
+# https://github.com/norlab-ulaval/libnabo
 
 ## Note:
 #   - ANN is not mentioned in doc because it's only required for `make test` benchmarks
@@ -112,7 +112,7 @@ print_msg "Create required dir structure"
 mkdir -p "${NBS_LIB_INSTALL_PATH}"
 
 cd "${NBS_LIB_INSTALL_PATH}"
-git clone https://github.com/ethz-asl/libnabo.git &&
+git clone https://github.com/norlab-ulaval/libnabo.git &&
   cd libnabo &&
   mkdir build && cd build
 
