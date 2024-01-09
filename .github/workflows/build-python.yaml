@@ -177,7 +177,7 @@ jobs:
         if: ${{ steps.cache-boost.outputs.cache-hit != 'true' &&  runner.os == 'Linux' }}
         working-directory: ${{ env.BOOST_SRC_DIR }}
         run: |
-          wget --no-verbose https://boostorg.jfrog.io/artifactory/main/release/${{ env.BOOST_VERSION }}/source/${{ env.BOOST_ARCHIVE_NAME }}
+          wget --no-verbose https://archives.boost.io/release/${{ env.BOOST_VERSION }}/source/${{ env.BOOST_ARCHIVE_NAME }}
           7z -y x ${{ env.BOOST_ARCHIVE_NAME }}
           rm ${{ env.BOOST_ARCHIVE_NAME }}
 
