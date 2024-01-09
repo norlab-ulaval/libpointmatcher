@@ -109,7 +109,7 @@ and was compiled on:
 
 ### Docker images
 
-Run the following commands to pull and run libnabo in a docker container
+Run the following commands to pull and run libpointmatcher in a docker container
 
 ```shell
 docker pull norlabulaval/libpointmatcher:latest-ubuntu-focal
