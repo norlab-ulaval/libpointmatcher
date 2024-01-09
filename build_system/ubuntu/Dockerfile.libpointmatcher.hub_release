@@ -28,7 +28,7 @@ SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 
 # ====Build system related setup===================================================================
-WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/release-prep/"
+WORKDIR "${NBS_LIB_INSTALL_PATH}/release-prep/"
 
 # Copy only the build system file for running the install and test scripts
 # Note: Logic to copy files from the checkout branch is handle by 'lpm_install_libpointmatcher_ubuntu.bash' script

@@ -227,6 +227,10 @@ else
 
   INSTALL_EXIT_CODE=$?
 
+  if [[ ${GENERATE_API_DOC_FLAG} = TRUE ]]; then
+      make doc
+  fi
+
   ## List all CMake build options and their default values
   ##   ref: https://stackoverflow.com/questions/16851084/how-to-list-all-cmake-build-options-and-their-default-values
   #cmake -LAH
