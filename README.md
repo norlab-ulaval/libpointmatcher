@@ -2,22 +2,23 @@
 
 ![banner](doc/images/banner_light.jpeg)
 
-[//]: # ( ==== Description =========================================== )
+[//]: # ( ==== Description ====================================================================== )
 **_libpointmatcher_ is a modular library implementing the Iterative Closest Point (ICP) algorithm<br>
 for aligning point clouds. It has applications in robotics and computer vision.**
 <br>
-The library is written in C++ for effeciency
-with [bindings in Python](doc/index.md#python-).
+The library is written in C++ for efficiency with [bindings in Python](doc/index.md#python-).
 <br>
 <br>
 
-[//]: # (====GitHub badges========================================================================)
+[//]: # (====Badges===============================================================================)
 
 <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/norlab-ulaval/libpointmatcher">
 <img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
 <img alt="GitHub License" src="https://img.shields.io/github/license/norlab-ulaval/libpointmatcher">
 <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
-<img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" />
+<a href="http://132.203.26.125:8111"><img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" /></a>
+<a href="https://hub.docker.com/repository/docker/norlabulaval/libpointmatcher/"> <img alt="Docker Image Version (latest semver)" src="https://img.shields.io/docker/v/norlabulaval/libpointmatcher?logo=docker&label=libpointmatcher"> </a>
+
 <br>
 <br>
 
@@ -37,9 +38,10 @@ with [bindings in Python](doc/index.md#python-).
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 <a href="http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping">Robotics Libraries</a>
 </sup>
-
+<br>
+<br>
+<hr style="color:lightgray;background-color:lightgray">
 </div>
-
 
 
 [//]: # (====Supported OS and aarch===============================================================)

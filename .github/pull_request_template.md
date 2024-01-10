@@ -20,7 +20,7 @@
 - [ ] I have commented hard-to-understand code
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] All tests pass locally with my changes 
-      (Check [contributing_instructions.md](https://github.com/norlab-ulaval/libnabo/tree/develop/doc/contributing/contributing_instructions.md) for local testing procedure using _libpointmatcher-build-system_)
+      (Check [contributing_instructions.md](/doc/contributing/contributing_instructions.md) for local testing procedure using _libpointmatcher-build-system_)
 
 ### PR creation related
 
@@ -34,6 +34,6 @@
 - [ ] I have included a quick summary of the changes
 - [ ] I have indicated the related issue's id with `# <issue-id>` if changes are of type `fix`
 - [ ] I have included a high-level list of changes and their corresponding types
-      (See [commit_msg_reference.md](https://github.com/norlab-ulaval/libnabo/tree/develop/doc/contributing/commit_msg_reference.md) for details)
+      (See [commit_msg_reference.md](/doc/contributing/commit_msg_reference.md) for details)
 
 ---
