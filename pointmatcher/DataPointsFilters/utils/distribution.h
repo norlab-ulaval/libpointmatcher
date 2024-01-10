@@ -41,12 +41,11 @@ struct Distribution {
     static Distribution<T> combineDistros(Distribution<T> distro1, Distribution<T> distro2, unsigned n=2)
     {
         T omega_12 = distro1.omega + distro2.omega;
-        T omega_12_inv = 1. / omega_12;
         Vector delta = distro1.point - distro2.point;
 
-        Vector mu_12 = distro2.point + omega_12_inv * distro1.omega * delta;
+        Vector mu_12 = distro2.point + (distro1.omega * delta) / omega_12;
         Matrix33 deviation_12 = distro1.deviation + distro2.deviation
-                + omega_12_inv * distro1.omega * distro2.omega * (delta * delta.transpose());
+                + ((distro1.omega * distro2.omega) / omega_12) * (delta * delta.transpose());
 
         TimeViewBlock times_combined = (distro2.times + (n-1) * distro1.times).eval();
         times_combined = times_combined.array() / n;
@@ -57,11 +56,16 @@ struct Distribution {
                                descriptors_combined);
         return distro_out;
     }
-
+    /**
+     * Note that this doesn't return the actual volume, but the determinant of the covariance matrix.
+     * To get the true volume, the determinant needs to be multiplied by a constant factor
+     * of (2*sqrt(3))^dim, where dim is the number of dimensions (either 2 or 3)
+     */
     void computeVolume()
     {
         auto covariance = deviation / omega;
-        volume = std::pow(2,3) * std::pow(1.73,3) * std::sqrt(covariance.determinant());
+        T determinant = covariance.determinant();
+        volume = std::sqrt(determinant); // FIXME can this square root be removed
     }
 
 public:
