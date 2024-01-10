@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <stdexcept>
 #include <stdio.h>
+#include <iomanip>
 
 namespace PointMatcherSupport
 {
@@ -98,7 +99,7 @@ std::ostream & writeVtkData(bool writeBinary,const Matrix & data, std::ostream &
 	}
 	else 
 	{
-		out << data;
+		out << std::setprecision(12) << data;
 	}
 
 	return out;
