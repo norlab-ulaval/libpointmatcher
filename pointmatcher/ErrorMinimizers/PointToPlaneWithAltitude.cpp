@@ -290,7 +290,11 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithAltitudeError
 				{
                     if (forceAltitude)
                     {
-                        transform.translation() = x.segment(3, 2);  //x=[alpha,beta,gamma,x,y,z]
+                        Vector transPart(3, 1);
+                        transPart << 0.0,0.0,0.0;
+                        transPart = x.segment(3, 2);  //x=[alpha,beta,gamma,x,y,z]
+                        transform.translation() = transPart;
+                        // std::cout << "translation: " << transform.translation() << std::endl;
                     }
                     else
                     {
@@ -298,14 +302,17 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithAltitudeError
                     }
 				} else if (forceAltitude)
                 {
-					transform.translation() = x.segment(1, 2);  //x=[gamma,x,y,z]
-				}
+                    Vector transPart(3, 1);
+                    transPart << 0.0,0.0,0.0;
+                    transPart = x.segment(1, 2);  //x=[gamma,x,y,z]
+                    transform.translation() = transPart;
+                    // std::cout << "translation: " << transform.translation() << std::endl;
+                }
                 else
                 {
                     transform.translation() = x.segment(1, 3);  //x=[gamma,x,y,z]
                 }
-
-				mOut = transform.matrix();
+                mOut = transform.matrix();
 
 				if (mOut != mOut)
 				{
