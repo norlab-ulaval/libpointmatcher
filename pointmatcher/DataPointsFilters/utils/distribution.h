@@ -11,13 +11,12 @@
 #include "PointMatcher.h"
 #include "vector"
 
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DP;
 
 template<typename T>
 struct Distribution {
 
-	typedef typename PointMatcher<T>::Vector Vector;
+    typedef PointMatcher<T> PM;
+	typedef typename PM::Vector Vector;
     typedef typename PM::Int64Matrix TimeViewBlock;
     typedef typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> DescriptorsViewBlock;
 	using Matrix33 = Eigen::Matrix<T, 3, 3>;
