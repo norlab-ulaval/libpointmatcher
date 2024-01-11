@@ -45,12 +45,13 @@ int compare_clouds(const typename PointMatcher<T>::DataPoints& cloud1, const typ
     return 0;
 }
 
+
+template<typename T>
 void compare_rotation(int argc, char* argv[])
 {
-    typedef float T;
     typedef PointMatcher<T> PM;
-    typedef PM::DataPoints DP;
-    typedef PM::Parameters Parameters;
+    typedef typename PM::DataPoints DP;
+    typedef typename PM::Parameters Parameters;
     if(argc != 2)
     {
         std::cerr << "USAGE: filter_symmetry <path_to_input_cloud>" << std::endl;
@@ -59,7 +60,7 @@ void compare_rotation(int argc, char* argv[])
 
     DP in(DP::load(argv[1]));
     std::cout << "Starting with " << in.getNbPoints() << " points\n";
-    std::shared_ptr<PM::DataPointsFilter> symmetrySample =
+    std::shared_ptr<typename PM::DataPointsFilter> symmetrySample =
             PM::get().DataPointsFilterRegistrar.create(
                     "SymmetryDataPointsFilter",
                     {
@@ -81,10 +82,10 @@ void compare_rotation(int argc, char* argv[])
     out.save("tunnel" + std::to_string(out.getNbPoints()) + ".vtk");
 
     cout << "Applying transformation of 45 degrees in pitch and yaw" << std::endl;
-    auto transformation = PM::get().TransformationRegistrar.create("RigidTransformation");
+    auto transformation =  PM::get().TransformationRegistrar.create("RigidTransformation");
     Eigen::Matrix4<T> rot = Eigen::Matrix4<T>::Identity();
     Eigen::Quaternion<T> q(0.8535534, 0.1464466, 0.3535534, 0.3535534);
-    rot.topLeftCorner<3, 3>() = q.normalized().toRotationMatrix();
+    rot.template topLeftCorner<3, 3>() = q.normalized().toRotationMatrix();
 
     auto in_rotated = transformation->compute(in, rot);
     std::string rotated_cloud_name = "tunnel_rotated45deg.vtk";
@@ -150,7 +151,10 @@ void compare_float_double(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    compare_rotation(argc, argv);
+    cout << "==============Evaluating float point precision==============" << std::endl;
+    compare_rotation<float>(argc, argv);
+    cout << "==============Evaluating double point precision==============" << std::endl;
+    compare_rotation<double>(argc, argv);
     compare_float_double(argc, argv);
     return 0;
 }

@@ -165,19 +165,19 @@ void SymmetryDataPointsFilter<T>::symmetrySampling(
                 auto distro3 = distributions[neighbor_idx];
                 auto point3 = cloud.features.col(neighbor_idx).head(3);
                 auto delta = distro2->point - distro3->point;
-                auto closest_point = point3 + (1. / (distro2->omega + distro3->omega) * distro2->omega * delta);
-                float distance_to_point1 = (closest_point - distro1->point).norm();
-                float distance_point2_point3 = delta.norm();
+                auto weighted_middle_point = point3 + (distro2->omega / (distro2->omega + distro3->omega)) * delta;
+                T distance_to_point1 = (weighted_middle_point - distro1->point).norm();
+                T distance_point2_point3 = delta.norm();
 
-                float distance_ratio = distance_to_point1 / distance_point2_point3;
+                T distance_ratio = distance_to_point1 / distance_point2_point3;
                 if(distance_ratio < dr)
                 {
-                    float volume3 = distro3->getVolume();
+                    T volume3 = distro3->getVolume();
                     Distribution<T> distro_c = Distribution<T>::combineDistros(*distro2, *distro3);
 
-                    float volume_c = distro_c.getVolume();
-                    float sum_of_volumes = volume2 + volume3;
-                    float ratio = volume_c / sum_of_volumes;
+                    T volume_c = distro_c.getVolume();
+                    T sum_of_volumes = volume2 + volume3;
+                    T ratio = volume_c / sum_of_volumes;
 
                     if(ratio < vrs)
                     {
@@ -280,9 +280,9 @@ void SymmetryDataPointsFilter<T>::overlapSampling(
 
             Distribution<T> distro_c = Distribution<T>::combineDistros(*distro2, *distro1, 2);
 
-            float volume_c = distro_c.getVolume();
-            float sum_of_volumes = distro1->getVolume() + distro2->getVolume();
-            float ratio = volume_c / sum_of_volumes;
+            T volume_c = distro_c.getVolume();
+            T sum_of_volumes = distro1->getVolume() + distro2->getVolume();
+            T ratio = volume_c / sum_of_volumes;
 
             if(ratio < vro)
             {
@@ -337,9 +337,9 @@ typename PointMatcher<T>::DataPoints SymmetryDataPointsFilter<T>::getCloudFromDi
         out_cloud.times.col(ctr) = (*distro).times;
         omegas(0, ctr) = (*distro).omega;
         // Eigen reshaped requires Eigen3.4
-//        deviations.col(ctr) = (*distro).deviation.reshaped(9, 1);
-        Eigen::Map<Eigen::Matrix<T, 9, 1>> deviationVector((*distro).deviation.data(), 9, 1);
-        deviations.col(ctr) = deviationVector;
+        deviations.col(ctr) = (*distro).deviation.reshaped(9, 1);
+//        Eigen::Map<Eigen::Matrix<T, 9, 1>> deviationVector((*distro).deviation.data(), 9, 1);
+//        deviations.col(ctr) = deviationVector;
         ctr += 1;
     }
     return out_cloud;
