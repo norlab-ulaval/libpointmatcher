@@ -37,8 +37,7 @@ struct DecompressDataPointsFilter : public PointMatcher<T>::DataPointsFilter
             };
 	}
 
-private:
-    const std::size_t seed;
+    const int seed;
 
 public:
     struct PointsGenerator
