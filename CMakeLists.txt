@@ -338,6 +338,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp
 	pointmatcher/DataPointsFilters/Symmetry.cpp
 	pointmatcher/DataPointsFilters/Decompress.cpp
+	pointmatcher/DataPointsFilters/ComputeNormals.cpp
 )
 
 

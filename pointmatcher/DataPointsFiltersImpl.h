@@ -68,6 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/SpectralDecomposition.h"
 #include "DataPointsFilters/Symmetry.h"
 #include "DataPointsFilters/Decompress.h"
+#include "DataPointsFilters/ComputeNormals.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
@@ -104,6 +105,7 @@ struct DataPointsFiltersImpl
 	typedef ::SpectralDecompositionDataPointsFilter<T> SpectralDecompositionDataPointsFilter;
 	typedef ::SymmetryDataPointsFilter<T> SymmetryDataPointsFilter;
 	typedef ::DecompressDataPointsFilter<T> DecompressDataPointsFilter;
+	typedef ::ComputeNormalsDataPointsFilter<T> ComputeNormalsDataPointsFilter;
 }; // DataPointsFiltersImpl
 
 #endif // __POINTMATCHER_DATAPOINTSFILTERS_H

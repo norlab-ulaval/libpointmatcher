@@ -31,3 +31,7 @@ target_link_libraries(distribution_bench pointmatcher)
 
 add_executable(bench_octree_NDT bench_octree_NDT.cpp)
 target_link_libraries(bench_octree_NDT pointmatcher)
+
+add_executable(compute_normals compute_normals.cpp)
+target_link_libraries(compute_normals pointmatcher)
+
