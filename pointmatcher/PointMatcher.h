@@ -251,6 +251,13 @@ struct PointMatcher
 		{
 			InvalidField(const std::string& reason);
 		};
+
+
+        //! An exception thrown when a required parameter is missing
+        struct MissingDescriptor: std::runtime_error
+        {
+            MissingDescriptor(const std::string& reason);
+        };
 		
 		// Constructors from descriptions (reserve memory)
 		DataPoints();
