@@ -54,6 +54,7 @@ set(PYBIND11_SOURCES
     datapointsfilters/covariance_sampling.cpp
     datapointsfilters/cut_at_descriptor_threshold.cpp
     datapointsfilters/distance_limit.cpp
+    datapointsfilters/decompress.cpp
     datapointsfilters/ellipsoids.cpp
     datapointsfilters/fix_step_sampling.cpp
     datapointsfilters/gestalt.cpp
