@@ -69,8 +69,6 @@ void ComputeNormalsDataPointsFilter<T>::inPlaceFilter(
 	typedef typename DataPoints::Label Label;
 	typedef typename DataPoints::Labels Labels;
 
-	using namespace PointMatcherSupport;
-
 	const int pointsCount(cloud.getNbPoints());
 	const int dim(cloud.features.rows()-1);
 	const int descDim(cloud.descriptors.rows());
@@ -87,22 +85,15 @@ void ComputeNormalsDataPointsFilter<T>::inPlaceFilter(
 	const int dimNormals(dim);
 
 	boost::optional<View> normals;
-	boost::optional<View> densities;
-	boost::optional<View> eigenValues;
-	boost::optional<View> eigenVectors;
-	boost::optional<View> matchedValues;
-	boost::optional<View> matchIds;
-	boost::optional<View> meanDists;
 
-	Labels cloudLabels;
-    cloudLabels.push_back(Label("normals", dimNormals));
-
-	// Reserve memory
-	cloud.allocateDescriptors(cloudLabels);
+    if (! cloud.descriptorLabels.contains("normals"))
+    {
+        Labels cloudLabels;
+        cloudLabels.push_back(Label("normals", dimNormals));
+        // Reserve memory
+        cloud.allocateDescriptors(cloudLabels);
+    }
     normals = cloud.getDescriptorViewByName("normals");
-
-	using namespace PointMatcherSupport;
-
 
 	for (int i = 0; i < pointsCount; ++i)
 	{
@@ -125,7 +116,7 @@ void ComputeNormalsDataPointsFilter<T>::inPlaceFilter(
             eigenVe = cloud.getDescriptorViewByName("eigVectors").col(i).reshaped(dim, dim);
         }
 
-        normals->col(i) = computeNormal<T>(eigenVa, eigenVe);
+        normals->col(i) = PointMatcherSupport::computeNormal<T>(eigenVa, eigenVe);
         // clamp normals to [-1,1] to handle approximation errors
         normals->col(i) = normals->col(i).cwiseMax(-1.0).cwiseMin(1.0);
     }
