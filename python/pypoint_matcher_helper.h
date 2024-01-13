@@ -12,7 +12,7 @@ namespace py = pybind11;
 namespace pms = PointMatcherSupport;
 
 // PointMatcher aliases
-using PM = PointMatcher<float>;
+using PM = PointMatcher<double>;
 using DataPoints = PM::DataPoints;
 using Label = DataPoints::Label;
 using Labels = DataPoints::Labels;

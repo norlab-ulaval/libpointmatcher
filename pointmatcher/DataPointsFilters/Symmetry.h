@@ -14,9 +14,6 @@
 #include "vector"
 #include "utils/distribution.h"
 
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DP;
-
 // TODO add optional produced descriptors: normals, eigenvalues, eigenvectors
 template<typename T>
 struct SymmetryDataPointsFilter : public PointMatcher<T>::DataPointsFilter
