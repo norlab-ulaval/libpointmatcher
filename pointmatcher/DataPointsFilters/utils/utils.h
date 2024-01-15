@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "PointMatcher.h"
+#include "Eigen/Eigenvalues"
 
 #include <vector>
 #include <algorithm>
@@ -152,6 +153,31 @@ size_t argMax(const typename PointMatcher<T>::Vector& v)
 		}
 	}
 	return maxIdx;
+}
+
+template<class T>
+Eigen::Matrix<T, 3, 8>
+getCuboid(const Eigen::Vector3<T>& point, const Eigen::Matrix3<T>& covariance)
+{
+    unsigned dim = point.rows();
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3<T>> solver; // FIXME deal with 2D case
+    solver.computeDirect(covariance); // This is interesting, difference between compute and computeDirect?
+    auto scales = solver.eigenvalues().real();
+    auto R = solver.eigenvectors().real();
+
+    scales = scales.cwiseSqrt() * std::sqrt(3.0); // FIXME is the value of this precomputed by the compiler?
+    typename PointMatcher<T>::Matrix S = scales.asDiagonal();
+
+//  points = [[-1, -1], [-1, 1], [1, 1], [1, -1]].T
+    Eigen::Matrix<T, 3, 8> points;
+    points <<  -1, -1, -1, -1,  1,  1,  1,  1,
+               -1, -1,  1,  1, -1, -1,  1,  1,
+               -1,  1, -1,  1, -1,  1, -1,  1;
+    points.applyOnTheLeft(S);
+    points.applyOnTheLeft(R);
+    points = points.colwise() + point;
+
+    return points;
 }
 
 };
