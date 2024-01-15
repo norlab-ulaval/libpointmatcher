@@ -122,7 +122,8 @@ public:
 
         static void transformPoints(Matrix& points, const Matrix33& covariance, const Vector& mean, T sigma=1.)
         {
-            const Eigen::SelfAdjointEigenSolver<Matrix33> solver(covariance);
+            Eigen::SelfAdjointEigenSolver<Matrix33> solver;
+            solver.computeDirect(covariance);
             auto eigenVa = solver.eigenvalues();
             auto eigenVec = solver.eigenvectors();
 
