@@ -4,6 +4,7 @@
 
 #include "PointMatcher.h"
 #include "utils/distribution.h"
+#include "Eigen/Eigenvalues"
 #include <random>
 
 

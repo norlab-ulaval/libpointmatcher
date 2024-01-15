@@ -7,7 +7,6 @@
 
 #include <utility>
 
-#include "Eigen/Eigenvalues"
 #include "PointMatcher.h"
 #include "vector"
 
