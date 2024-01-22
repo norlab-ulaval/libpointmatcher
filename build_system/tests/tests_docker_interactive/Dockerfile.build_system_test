@@ -1,5 +1,5 @@
 ARG BASE_IMAGE=ubuntu
-ARG BASE_IMAGE_TAG=focal
+ARG BASE_IMAGE_TAG=jammy
 FROM ${BASE_IMAGE}:${BASE_IMAGE_TAG} AS base-image
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"

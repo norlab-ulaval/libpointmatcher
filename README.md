@@ -48,11 +48,10 @@ The library is written in C++ for efficiency with [bindings in Python](doc/index
 
 ### Supported OS And Architecture
 _libpointmatcher_ is tested on our build system under the following architecture and OS:
-- Ubuntu bionic (18.04) and focal (20.04)  
+- Ubuntu bionic (18.04), focal (20.04) and jammy (22.04)  
 - x86 and arm64/v8
   
-Note: 
-- support for Ubuntu jammy (22.04) comming soon
+Note:
 - _libpointmatcher_ reportedly works on MacOs OsX (latest) and Windows (latest)
 
 
