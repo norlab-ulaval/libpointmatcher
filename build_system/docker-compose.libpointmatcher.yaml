@@ -53,12 +53,14 @@ services:
       no_cache: true
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
-        BASE_IMAGE: libpointmatcher-dependencies
+#        BASE_IMAGE: libpointmatcher-dependencies
+        BASE_IMAGE: libpointmatcher-dependencies-doc  # (CRITICAL) ToDo: on task end >> assess doc test step
         BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: 'latest'
         CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE:?err}
-        INSTALL_SCRIPT_FLAG: '--build-system-CI-install --compile-test'
+#        INSTALL_SCRIPT_FLAG: '--build-system-CI-install --compile-test'
+        INSTALL_SCRIPT_FLAG: '--build-system-CI-install --compile-test --generate-doc' # (CRITICAL) ToDo: on task end >> assess doc test step
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)
