@@ -32,7 +32,7 @@ TEST(IOTest, loadYaml)
 
 TEST(IOTest, loadCSV)
 {
-  typedef PointMatcherIO<float> IO;
+  typedef PointMatcherIO<NumericType> IO;
 	std::istringstream is;
   std::ostringstream os;
   DP pts;
@@ -183,7 +183,7 @@ TEST(IOTest, loadCSV)
 
 TEST(IOTest, loadPLY)
 {
-	typedef PointMatcherIO<float> IO;
+	typedef PointMatcherIO<NumericType> IO;
 	std::istringstream is;
 	
 	is.str(
@@ -257,7 +257,7 @@ TEST(IOTest, loadPLY)
 
 TEST(IOTest, loadPCD)
 {
-	typedef PointMatcherIO<float> IO;
+	typedef PointMatcherIO<NumericType> IO;
 	std::istringstream is;
 
 	// Empty file
