@@ -1,7 +1,7 @@
 ARG PROJECT_HUB=norlabulaval
 ARG BASE_IMAGE=libpointmatcher-dependencies-doc
 ARG BASE_IMAGE_TAG
-FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-dependencies
+FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-install
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
 
@@ -28,34 +28,37 @@ SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 
 # ====Build system related setup===================================================================
-WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}-CICD/"
+WORKDIR "${NBS_LIB_INSTALL_PATH}/release-prep/"
 
 # Copy only the build system file for running the install and test scripts
 # Note: Logic to copy files from the checkout branch is handle by 'lpm_install_libpointmatcher_ubuntu.bash' script
 COPY ./build_system/ ./build_system/
+COPY ./.git/ ./.git/
 
 # ==== Build libpointmatcher checkout branch ======================================================
 WORKDIR ./build_system/ubuntu
 
 RUN chmod +x lpm_install_libpointmatcher_ubuntu.bash
-RUN chmod +x entrypoint_execute_lpm_unittest_conditionally.bash
-RUN chmod +x entrypoint.bash
 
 # ====Install Libpointmatcher======================================================================
 RUN bash lpm_install_libpointmatcher_ubuntu.bash \
+    --install-path ${NBS_LIB_INSTALL_PATH} \
     --repository-version ${REPOSITORY_VERSION} \
     --cmake-build-type ${CMAKE_BUILD_TYPE} \
     ${INSTALL_SCRIPT_FLAG}
 
-# ==== Execute libpointmatcher unit-test===========================================================
-# Conditional execution if build/utest/ directory is present
-RUN source entrypoint_execute_lpm_unittest_conditionally.bash
-
+RUN rm -rf "${NBS_LIB_INSTALL_PATH}/release-prep/"
 
 # ====End==========================================================================================
-FROM libpointmatcher-dependencies AS libpointmatcher-release
+FROM libpointmatcher-install AS libpointmatcher-release
 
-WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}-CICD/build_system/ubuntu"
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 
-ENTRYPOINT [ "./entrypoint.bash" ]
+COPY ./build_system/ubuntu/entrypoint.bash ./build_system/ubuntu/entrypoint.bash
+COPY ./build_system/.env ./build_system/.env
+
+RUN chmod +x ./build_system/ubuntu/entrypoint.bash
+RUN chmod +x ./build_system/.env
+
+ENTRYPOINT [ "./build_system/ubuntu/entrypoint.bash" ]
 CMD [ "bash" ]
