@@ -33,7 +33,7 @@ configuration on our build system and the pull request will be granted if the bu
 succeed.
 
 **Current build matrix:**
-`[latest] x [x86, arm64] x [ubuntu] x [bionic, focal] x [Release, RelWithDebInfo, MinSizeRel]`
+`[latest] x [x86, arm64] x [ubuntu] x [bionic, focal, jammy] x [Release, RelWithDebInfo, MinSizeRel]`
 
 ### Development Workflow
 
@@ -73,7 +73,7 @@ bash lpm_crawl_libpointmatcher_build_matrix.bash \
             --repository-version-build-matrix-override latest \
             --os-name-build-matrix-override ubuntu \
             --cmake-build-type-build-matrix-override RelWithDebInfo \
-            --ubuntu-version-build-matrix-override focal \
+            --ubuntu-version-build-matrix-override jammy \
             --fail-fast \
             -- build ci_PR_amd64 ci_PR_arm64v8
 

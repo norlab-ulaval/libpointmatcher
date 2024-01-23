@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="bash lpm_crawl_dependencies_build_matrix.bash › build dependencies-general dependencies (BUILD MATRIX SUBSET)" type="ShConfigurationType" folderName="[LPM] C | Execute compose over build matrix">
-    <option name="SCRIPT_TEXT" value="bash lpm_crawl_dependencies_build_matrix.bash --fail-fast --cmake-build-type-build-matrix-override None --os-name-build-matrix-override ubuntu --ubuntu-version-build-matrix-override focal -- build dependencies-general dependencies dependencies-doc" />
+    <option name="SCRIPT_TEXT" value="bash lpm_crawl_dependencies_build_matrix.bash --fail-fast --cmake-build-type-build-matrix-override None --os-name-build-matrix-override ubuntu --ubuntu-version-build-matrix-override jammy -- build dependencies-general dependencies dependencies-doc" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
