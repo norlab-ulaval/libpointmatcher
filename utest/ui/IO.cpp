@@ -371,7 +371,7 @@ public:
 		ptCloud.addDescriptor(descriptorName, PM::Matrix::Random(rows, nbPts));
 	}
 
-	virtual void loadSaveTest(const string& testFileName, bool plyFormat = false, const int nbPts = 10, bool binary = false)
+	virtual void loadSaveTest(const string& testFileName, bool plyFormat = false, const int nbPts = 10, bool binary = false, unsigned precision=12)
 	{
 		this->testFileName = testFileName;
 
@@ -394,7 +394,7 @@ public:
 			}
 		}
 
-		ptCloud.save(testFileName, binary);
+		ptCloud.save(testFileName, binary, precision);
 
 		ptCloudFromFile = DP::load(testFileName);
 
