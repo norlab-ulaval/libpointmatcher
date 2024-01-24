@@ -1055,7 +1055,7 @@ VERTICES 525 1050
 1 523
 1 524
 POINT_DATA 525
-VECTORS orientation_x float
+VECTORS orientationX float
            1            0            0
            1 -0.000838888 -5.52684e-05
     0.999998  -0.00198224  -8.6945e-05
@@ -1581,7 +1581,7 @@ VECTORS orientation_x float
    -0.968369      0.24074   -0.0656241
    -0.968223     0.241314   -0.0656694
     -0.96831     0.240919   -0.0658378
-VECTORS orientation_y float
+VECTORS orientationY float
            0            1            0
  0.000838883            1  4.14982e-05
    0.0019823     0.999998  7.37674e-05
@@ -2107,7 +2107,7 @@ VECTORS orientation_y float
    -0.243524    -0.969141    0.0382471
      -0.2441    -0.968996    0.0382385
    -0.243732    -0.969075    0.0385757
-VECTORS orientation_z float
+VECTORS orientationZ float
            0            0            1
  5.52362e-05 -4.15401e-05            1
  8.67953e-05  -7.3948e-05            1

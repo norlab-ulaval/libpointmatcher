@@ -48,7 +48,7 @@ static inline void assertOnDataPointsTransformation(const PM::DataPoints& cloud,
     {
         const int span(cloud.descriptorLabels[i].span);
         const std::string& name(cloud.descriptorLabels[i].text);
-        if (name == "normals" || name == "observationDirections" || name == "orientation_x" || name == "orientation_y" || name == "orientation_z")
+        if (name == "normals" || name == "observationDirections" || name == "orientationX" || name == "orientationY" || name == "orientationZ")
         {
             const auto transformedDescriptor = R * cloud.descriptors.block(row, 0, span, descCols);
             ASSERT_TRUE(transformedDescriptor.isApprox(transformedCloud.descriptors.block(row, 0, span, descCols), kEpsilonNumericalError));
