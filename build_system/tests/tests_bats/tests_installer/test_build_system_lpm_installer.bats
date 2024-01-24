@@ -141,7 +141,7 @@ teardown() {
 
   run bash "./${TESTED_FILE_PATH3}/$TESTED_FILE4" --test-run \
              --install-path /opt/test_dir \
-             --repository-version 1.3.1 \
+             --repository-version 1.4.0 \
              --compile-test \
              --generate-doc \
              --cmake-build-type Release
@@ -149,9 +149,9 @@ teardown() {
   assert_success
   assert_output --regexp .*"\[".*"LPM".*"\]".*"Install libpointmatcher"
 
-  assert_output --partial "switching to 'tags/1.3.1'."
+  assert_output --partial "switching to 'tags/1.4.0'."
 
-  assert_output --regexp .*"\[".*"LPM".*"\]".*"Repository checkout at tag 1.3.1"
+  assert_output --regexp .*"\[".*"LPM".*"\]".*"Repository checkout at tag 1.4.0"
 
   assert_output --regexp .*"\[".*"LPM".*"\]".*"Execute".*"cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_TESTS=TRUE -D GENERATE_API_DOC=TRUE /opt/test_dir/libpointmatcher"
   refute_output --regexp .*"\[".*"LPM".*"\]".*"Execute".*"cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo -D BUILD_TESTS=FALSE -D GENERATE_API_DOC=FALSE /opt/percep3d_libraries/libpointmatcher"

@@ -177,7 +177,7 @@ jobs:
         if: ${{ steps.cache-boost.outputs.cache-hit != 'true' &&  runner.os == 'Linux' }}
         working-directory: ${{ env.BOOST_SRC_DIR }}
         run: |
-          wget --no-verbose https://boostorg.jfrog.io/artifactory/main/release/${{ env.BOOST_VERSION }}/source/${{ env.BOOST_ARCHIVE_NAME }}
+          wget --no-verbose https://archives.boost.io/release/${{ env.BOOST_VERSION }}/source/${{ env.BOOST_ARCHIVE_NAME }}
           7z -y x ${{ env.BOOST_ARCHIVE_NAME }}
           rm ${{ env.BOOST_ARCHIVE_NAME }}
 
@@ -192,7 +192,7 @@ jobs:
         if: steps.cache-libnabo.outputs.cache-hit != 'true'
         working-directory: ${{ env.LIBNABO_SRC_DIR }}
         run: |
-          git clone -b ${{ env.LIBNABO_VERSION }} --single-branch https://github.com/ethz-asl/libnabo.git
+          git clone -b ${{ env.LIBNABO_VERSION }} --single-branch https://github.com/norlab-ulaval/libnabo.git
 
       - name: Install libnabo ${{ env.LIBNABO_VERSION }} on Windows
         if: ${{ steps.cache-libnabo.outputs.cache-hit != 'true' && runner.os == 'Windows' }}
@@ -319,4 +319,3 @@ jobs:
           prerelease: true
           allowUpdates: true
           generateReleaseNotes: true
-  
