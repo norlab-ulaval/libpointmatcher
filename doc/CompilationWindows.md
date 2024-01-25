@@ -34,7 +34,7 @@ This tutorial is divided up like this:
 | Boost           | <https://www.boost.org/users/download/>                 | 1.75.0         |
 | Eigen3          | <http://eigen.tuxfamily.org/index.php>                  | 3.3.9          |
 | grep            | <http://gnuwin32.sourceforge.net/packages/grep.htm>     | 2.5.4          |
-| libnabo         | <https://github.com/ethz-asl/libnabo>                   | Commit 16250bf |
+| libnabo         | <https://github.com/norlab-ulaval/libnabo>                   | Commit 16250bf |
 | libpointmatcher | <https://github.com/norlab-ulaval/libpointmatcher>           | Commit e9a832d |
 
 ### Notes  
@@ -94,7 +94,7 @@ This tutorial is divided up like this:
 1. Do the following commands
 
     ```bash
-    git clone https://github.com/ethz-asl/libnabo
+    git clone https://github.com/norlab-ulaval/libnabo
     mkdir .\libnabo\build
     cd .\libnabo\build\
     cmake-gui ..

@@ -105,7 +105,9 @@ RUN export APPEND_TO_CMAKE_FLAG=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PAT
 WORKDIR "${NBS_LIB_INSTALL_PATH}"
 RUN git clone https://github.com/norlab-ulaval/norlab_icp_mapper.git \
     && mkdir -p norlab_icp_mapper/build && cd norlab_icp_mapper/build \
-    && cmake -DCMAKE_BUILD_TYPE=Release .. \
+    && cmake -D CMAKE_BUILD_TYPE=Release \
+             -D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err} \
+             .. \
     && make -j $(nproc) \
     && make install
 
