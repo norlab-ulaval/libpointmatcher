@@ -35,7 +35,7 @@ static inline void assertOnDataPointsTransformation(const PM::DataPoints& cloud,
     for (size_t i = 0; i < cloud.getNbPoints(); ++i)
     {
         const auto transformedFeature = transformation * cloud.features.col(i);
-        ASSERT_TRUE(transformedFeature.isApprox(transformedCloud.features.col(i), kEpsilonNumericalError));
+        EXPECT_TRUE(transformedFeature.isApprox(transformedCloud.features.col(i), kEpsilonNumericalError));
     }
 
     // Descriptors.
@@ -51,7 +51,7 @@ static inline void assertOnDataPointsTransformation(const PM::DataPoints& cloud,
         if (name == "normals" || name == "observationDirections")
         {
             const auto transformedDescriptor = R * cloud.descriptors.block(row, 0, span, descCols);
-            ASSERT_TRUE(transformedDescriptor.isApprox(transformedCloud.descriptors.block(row, 0, span, descCols), kEpsilonNumericalError));
+            EXPECT_TRUE(transformedDescriptor.isApprox(transformedCloud.descriptors.block(row, 0, span, descCols), kEpsilonNumericalError));
         }
         row += span;
     }
@@ -144,7 +144,7 @@ TEST(Transformation, RigidTransformationParameterCheck)
     for (int i = 0; i < 10; i++)
     {
         T_3D = rigidTrans->correctParameters(T_3D);
-        ASSERT_TRUE(rigidTrans->checkParameters(T_3D));
+        EXPECT_TRUE(rigidTrans->checkParameters(T_3D));
     }
 
     //-------------------------------------

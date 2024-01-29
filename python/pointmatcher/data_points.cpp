@@ -73,7 +73,7 @@ All channels contain scalar values of type ScalarType.)pbdoc";
 				.def("getNbGroupedDescriptors", &DataPoints::getNbGroupedDescriptors)
 				.def("getDescriptorDim", &DataPoints::getDescriptorDim).def("getTimeDim", &DataPoints::getTimeDim)
 
-				.def("save", &DataPoints::save, py::arg("fileName"), py::arg("binary") = false)
+				.def("save", &DataPoints::save, py::arg("fileName"), py::arg("binary") = false, py::arg("precision") = 6)
 				.def_static("load", &DataPoints::load, py::arg("filename"))
 
 				.def("concatenate", &DataPoints::concatenate, py::arg("dp"))
