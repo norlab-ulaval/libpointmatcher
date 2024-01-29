@@ -87,7 +87,7 @@ TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
 	// build test cloud
 	DP ref2DCopy(ref2D);
 	int goodCount(0);
-	const float nan(std::numeric_limits<float>::quiet_NaN());
+	const NumericType nan(std::numeric_limits<NumericType>::quiet_NaN());
 	for (int i(0); i < ref2DCopy.features.cols(); ++i)
 	{
 		if (rand() % 3 == 0)
@@ -456,7 +456,7 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 	
 	for(const int meth : {0,1,2,3})
 		for(const size_t maxData : {1,5})
-			for(const float maxSize : {0.,0.05})
+			for(const NumericType maxSize : {0.,0.05})
 			{
 				params.clear();
 				params["maxPointByNode"] = toParam(maxData);
@@ -515,7 +515,7 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 	
 	//Evaluate filter
 	std::vector<size_t> samples = {/* 2*nbPts2D/3, nbPts2D,*/ 1500, 5000, nbPts, nbPts3D};
-	for(const float epsilon : {M_PI/6., M_PI/32., M_PI/64.})
+	for(const NumericType epsilon : {M_PI/6., M_PI/32., M_PI/64.})
 		for(const size_t nbSample : samples)
 		{
 			icp.readingDataPointsFilters.clear();
@@ -960,7 +960,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
 
     std::string descriptorName = "test_descriptor";
     std::size_t descriptorDimension = 3;
-    std::vector<float> descriptorValues{2, 3, 4};
+    std::vector<NumericType> descriptorValues{2, 3, 4};
 
 	// This filter adds a new descriptor
 	params = PM::Parameters();
@@ -978,7 +978,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
 	EXPECT_EQ(cloud.getDescriptorDim()+descriptorDimension, filteredCloud.getDescriptorDim());
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
 
-    Eigen::Matrix<float, 1, Eigen::Dynamic> row = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(cloud.getNbPoints());
+    Eigen::Matrix<NumericType, 1, Eigen::Dynamic> row = Eigen::Matrix<NumericType, 1, Eigen::Dynamic>::Ones(cloud.getNbPoints());
     EXPECT_EQ(filteredCloud.descriptorLabels.back().text, descriptorName);
     EXPECT_EQ(filteredCloud.descriptorLabels.back().span, descriptorDimension);
     for(unsigned i = 0; i < descriptorDimension; ++i)
@@ -987,7 +987,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
     }
 
 
-    descriptorValues = std::vector<float>{-2, -3, -4};
+    descriptorValues = std::vector<NumericType>{-2, -3, -4};
     params["descriptorValues"] = toParam(descriptorValues);
 
 	addDescriptorFilter = PM::get().DataPointsFilterRegistrar.create(
@@ -1002,7 +1002,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
     }
 
 
-    descriptorValues = std::vector<float>{-2, -3, -4, -5};
+    descriptorValues = std::vector<NumericType>{-2, -3, -4, -5};
     params["descriptorDimension"] = toParam(4);
     params["descriptorValues"] = toParam(descriptorValues);
 	addDescriptorFilter = PM::get().DataPointsFilterRegistrar.create(

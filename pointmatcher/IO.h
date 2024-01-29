@@ -183,7 +183,7 @@ struct PointMatcherIO
 	static DataPoints loadCSV(const std::string& fileName);
 	static DataPoints loadCSV(std::istream& is);
 
-	static void saveCSV(const DataPoints& data, const std::string& fileName);
+	static void saveCSV(const DataPoints& data, const std::string& fileName, unsigned precision);
 	static void saveCSV(const DataPoints& data, std::ostream& os);
 
 	// VTK
@@ -212,19 +212,19 @@ struct PointMatcherIO
 	static DataPoints loadVTK(const std::string& fileName);
 	static DataPoints loadVTK(std::istream& is);
 
-	static void saveVTK(const DataPoints& data, const std::string& fileName, bool binary = false);
+	static void saveVTK(const DataPoints& data, const std::string& fileName, bool binary = false, unsigned precision = 7);
 
 	// PLY
 	static DataPoints loadPLY(const std::string& fileName);
 	static DataPoints loadPLY(std::istream& is);
 
-	static void savePLY(const DataPoints& data, const std::string& fileName); //!< save datapoints to PLY point cloud format
+	static void savePLY(const DataPoints& data, const std::string& fileName, unsigned precision); //!< save datapoints to PLY point cloud format
 
 	// PCD
 	static DataPoints loadPCD(const std::string& fileName);
 	static DataPoints loadPCD(std::istream& is);
 
-	static void savePCD(const DataPoints& data, const std::string& fileName); //!< save datapoints to PCD point cloud format
+	static void savePCD(const DataPoints& data, const std::string& fileName, unsigned precision); //!< save datapoints to PCD point cloud format
 
 	//! Information to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo
