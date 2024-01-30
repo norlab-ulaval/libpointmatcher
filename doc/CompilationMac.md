@@ -174,7 +174,19 @@ sudo make install
 
 *Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags. You can use the following command to default flags: Go [here](#possible-caveats) to see how it can be achieve.
 
-### 4. Installing libpointmatcher
+### 4. Installing OpenMP
+
+You can optionally enable parallelization with OpenMP.
+Since the default MacOS compiler, Clang, doesn't include OpenMP, you will need to install it with
+```bash
+brew install libomp
+```
+Since this installation is _keg-only_ (not linked into /usr/local), you'll need to modify your `~/.zshrc`
+```bash
+echo 'export OpenMP_ROOT=$(brew --prefix)/opt/libomp' >> ~/.zshrc
+```
+Alternatively, you can install a different compiler with `homebrew`.
+### 5. Installing libpointmatcher
 
 First, you need to clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
 
