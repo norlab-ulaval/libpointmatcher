@@ -11,7 +11,7 @@
 
 ifconfig
 
-cd "${LPM_INSTALLED_LIBRARIES_PATH}"
+cd "${NBS_LIB_INSTALL_PATH}"
 
 pwd
 tree -L 1

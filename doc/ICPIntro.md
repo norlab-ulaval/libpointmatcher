@@ -25,7 +25,7 @@ A top-down view of the point cloud is depicted below, with the colors showing ve
 
 ## Visualizing a Point Cloud in Paraview
 
-We will now open the example point clouds for viewing in paraview.  The two views from the apartment dataset can be found in [examples/icp_tutorial/cloud_0.vtk](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_tutorial/cloud_0.vtk) and [examples/icp_tutorial/cloud_1.vtk](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_tutorial/cloud_1.vtk).  Open Paraview and you will be greeted by the following window:
+We will now open the example point clouds for viewing in paraview.  The two views from the apartment dataset can be found in [examples/icp_tutorial/cloud_0.vtk](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_tutorial/cloud_0.vtk) and [examples/icp_tutorial/cloud_1.vtk](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_tutorial/cloud_1.vtk).  Open Paraview and you will be greeted by the following window:
 
 ### The Paraview Main Window
 
@@ -41,7 +41,7 @@ On the bottom-left you can find options for editing properties, and retrieving i
 
 ### Opening the Point Clouds in Paraview
 
-Go to File -> Open and open [examples/icp_tutorial/cloud_0.vtk](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_tutorial/cloud_0.vtk).  Don't forget to click the apply button in the properties pane in order to load the point cloud into the viewer.  Now, we will change some properties of the point cloud to make it easer to visualize in the viewer.  In the properties pane, change the representation style from surface to points, and change the point size to 1.
+Go to File -> Open and open [examples/icp_tutorial/cloud_0.vtk](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_tutorial/cloud_0.vtk).  Don't forget to click the apply button in the properties pane in order to load the point cloud into the viewer.  Now, we will change some properties of the point cloud to make it easer to visualize in the viewer.  In the properties pane, change the representation style from surface to points, and change the point size to 1.
 
 |Figure 4: Point properties window of Paraview|
 |:------------|
@@ -49,7 +49,7 @@ Go to File -> Open and open [examples/icp_tutorial/cloud_0.vtk](https://github.c
 
 You can click and drag in the viewer pane to navigate the 3D environment.
 
-You can then open the second view in [examples/icp_tutorial/cloud_1.vtk](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_tutorial/cloud_1.vtk).  Change the representation to points and change the color to blue so that the second point cloud is visible over the first.  You can see that both point clouds represent the same scene but do not have the same number of points and are misaligned.  ICP registration will be used to find a transformation which best aligns the points from the first point cloud to the second, while being robust to the differences or outliers between the two views.
+You can then open the second view in [examples/icp_tutorial/cloud_1.vtk](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_tutorial/cloud_1.vtk).  Change the representation to points and change the color to blue so that the second point cloud is visible over the first.  You can see that both point clouds represent the same scene but do not have the same number of points and are misaligned.  ICP registration will be used to find a transformation which best aligns the points from the first point cloud to the second, while being robust to the differences or outliers between the two views.
 
 |Figure 5: The two point clouds of the apartment scene used in this tutorial.  The reading is colored white and the reference blue.|
 |:------------|
@@ -59,7 +59,7 @@ You can also import a sequence of point clouds and play them as a video.  If a f
 
 ### An Empty ICP Configuration
 
-In libpointmatcher, configurations are stored in YAML files.  For more information, refer to the [configuration tutorial](Configuration.md).  For the purpose of this tutorial, we will start with a simplistic configuration file stored in [examples/icp_tutorial/icp_tutorial_empty.yaml](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_tutorial/icp_tutorial_empty.yaml).  The configuration is shown below.
+In libpointmatcher, configurations are stored in YAML files.  For more information, refer to the [configuration tutorial](Configuration.md).  For the purpose of this tutorial, we will start with a simplistic configuration file stored in [examples/icp_tutorial/icp_tutorial_empty.yaml](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_tutorial/icp_tutorial_empty.yaml).  The configuration is shown below.
 
 ```yaml
 readingDataPointsFilters:
@@ -129,7 +129,7 @@ Additionally, 3 files: `test_ref.vtk`, `test_data_in.vtk`, and `test_data_out.vt
 
 ### A Real ICP Configuration
 
-We will now replace the empty configuration with something which makes more sense for registration.  We will use the second configuration file of our tutorial folder [examples/icp_tutorial/icp_tutorial_cfg.yaml](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_tutorial/icp_tutorial_cfg.yaml), which contain the following:
+We will now replace the empty configuration with something which makes more sense for registration.  We will use the second configuration file of our tutorial folder [examples/icp_tutorial/icp_tutorial_cfg.yaml](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_tutorial/icp_tutorial_cfg.yaml), which contain the following:
 
 ```yaml
 readingDataPointsFilters:

@@ -1,11 +1,6 @@
 #include "PointMatcher.h"
 
-#ifdef SYSTEM_YAML_CPP
-    #include "yaml-cpp/yaml.h"
-#else
-	#include "yaml-cpp-pm/yaml.h"
-    namespace YAML = YAML_PM;
-#endif // HAVE_YAML_CPP
+#include <yaml-cpp/yaml.h>
 
 namespace PointMatcherSupport
 {
@@ -14,19 +9,31 @@ namespace PointMatcherSupport
 		if (module.size() != 1)
 		{
 			// parameter-less entry
-			name = module.to<std::string>();
+			name = module.as<std::string>();
 		}
 		else
 		{
 			// get parameters
-      YAML::Iterator mapIt(module.begin());
-			mapIt.first() >> name;
-      for(YAML::Iterator paramIt = mapIt.second().begin(); paramIt != mapIt.second().end(); ++paramIt)
+			YAML::const_iterator mapIt(module.begin());
+			name = mapIt->first.as<std::string>();
+			for(YAML::const_iterator paramIt = mapIt->second.begin(); paramIt != mapIt->second.end(); ++paramIt)
 			{
-				std::string key, value;
-				paramIt.first() >> key;
-				paramIt.second() >> value;
-				params[key] = value;
+				std::string key = paramIt->first.as<std::string>();
+                if (paramIt->second.IsSequence())
+                {
+                    std::ostringstream oss;
+                    oss << "[";
+                    for(int i = 0; i < paramIt->second.size()-1; ++i)
+                    {
+                        oss << paramIt->second[i] << ", ";
+                    }
+                    oss << paramIt->second[paramIt->second.size()-1] << "]";
+                    params[key] = oss.str();
+                }
+                else
+                {
+                    params[key] = paramIt->second.as<std::string>();
+                }
 			}
 		}
 	}

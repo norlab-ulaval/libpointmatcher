@@ -55,9 +55,10 @@ bool OctreeGridDataPointsFilter<T>::FirstPtsSampler::operator()(Octree_<T,dim>& 
 		std::size_t j = d;
 		
 		//retrieve index from lookup table if sampling in already switched element
-		if(std::size_t(d)<idx)
-			j = mapidx[d];
-			
+		while(j < idx)
+			j = mapidx[j];
+
+        assert(j >= idx);
 		//Switch columns j and idx
 		pts.swapCols(idx, j);
 				
@@ -159,9 +160,10 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 		std::size_t j = d; //j contains real index of first point
 		
 		//retrieve index from lookup table if sampling in already switched element
-		if(std::size_t(d)<idx)
-			j = mapidx[d];
-		
+		while(j < idx)
+			j = mapidx[j];
+
+        assert(j >= idx);
 		//We sum all the data in the first data
 		for(std::size_t id=1;id<nbData;++id)
 		{
@@ -170,9 +172,10 @@ bool OctreeGridDataPointsFilter<T>::CentroidSampler::operator()(Octree_<T,dim>& 
 			std::size_t i = curId; //i contains real index
 			
 			//retrieve index from lookup table if sampling in already switched element
-			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
-			
+			while (i < idx)
+				i = mapidx[i];
+            assert(i >= idx);
+
 			for (int f = 0; f < (featDim - 1); ++f)
 				pts.features(f,j) += pts.features(f,i);
 			
@@ -238,8 +241,9 @@ bool OctreeGridDataPointsFilter<T>::MedoidSampler::operator()(Octree_<T,dim>& oc
 			std::size_t i = curId; //i contains real index
 			
 			//retrieve index from lookup table if sampling in already switched element
-			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
+			while (i < idx)
+				i = mapidx[i];
+            assert(i >= idx);
 			
 			for (std::size_t f = 0; f < dim; ++f)
 				center(f) += pts.features(f,i);	
@@ -257,9 +261,9 @@ bool OctreeGridDataPointsFilter<T>::MedoidSampler::operator()(Octree_<T,dim>& oc
 			std::size_t i = curId; //i contains real index
 			
 			//retrieve index from lookup table if sampling in already switched element
-			if(std::size_t(curId)<idx)
-				i = mapidx[curId];
-				
+			while (i < idx)
+				i = mapidx[i];
+            assert(i >= idx);
 			const T curDist = dist(pts.features.col(i).head(dim), center);
 			if(curDist<minDist)
 			{

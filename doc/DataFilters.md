@@ -13,7 +13,7 @@ As a reminder, *datapoint filters* can have several purposes:
 
 Note that *datapoint filters* differ from *outlier filters* which appear further down the ICP chain and have a different purpose.
 
-[Libpointmatcher](https://github.com/ethz-asl/libpointmatcher) provides developers with a number of datapoint filters which process an input point cloud into an intermediate point cloud used in the alignment procedure.  Filters function as independent modules that can and often are combined into chains.  Sequential chains of datapoint filters can thus be adapted to the alignment problem at hand.
+[Libpointmatcher](https://github.com/norlab-ulaval/libpointmatcher) provides developers with a number of datapoint filters which process an input point cloud into an intermediate point cloud used in the alignment procedure.  Filters function as independent modules that can and often are combined into chains.  Sequential chains of datapoint filters can thus be adapted to the alignment problem at hand.
 
 ## Filter Index
 
@@ -51,19 +51,21 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 ### Descriptor Augmenting
 
-1. [Observation Direction Filter](#obsdirectionhead)
+1. [Add Descriptor Filter](#adddescriptorhead)
 
-2. [Surface Normal Filter](#surfacenormalhead)
+2. [Observation Direction Filter](#obsdirectionhead)
 
-3. [Orient Normals Filter](#orientnormalshead)
+3. [Surface Normal Filter](#surfacenormalhead)
 
-4. [Sampling Surface Normal Filter](#samplingnormhead)
+4. [Orient Normals Filter](#orientnormalshead)
 
-5. [Simple Sensor Noise Filter](#sensornoisehead)
+5. [Sampling Surface Normal Filter](#samplingnormhead)
 
-6. [Saliency Filter](#saliencyhead)
+6. [Simple Sensor Noise Filter](#sensornoisehead)
 
-7. [Fixed Step Sampling Filter](#fixedstepsamplinghead)
+7. [Saliency Filter](#saliencyhead)
+
+8. [Fixed Step Sampling Filter](#fixedstepsamplinghead)
 
 
 ## An Example Point Cloud View of an Appartment
@@ -73,6 +75,25 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 The following examples are drawn from the apartment dataset available for [download](http://projects.asl.ethz.ch/datasets/doku.php?id=laserregistration:apartment:home) from the ASL at ETH Zurich.  A top-down view of the point cloud is depicted below, with the colors showing vertical elevation.  The ceiling has been removed from the point cloud such that the floor (in blue) and the walls (in red) are clearly visible.  Note that the coordinate origin is placed in the kitchen at the starting point of data capture, which is in the top-left of the top-down view and floor plan.
 
 ![alt text](images/appt_top.png "Top down view of point cloud from appartment dataset")
+
+## Add Descriptor Filter <a name="adddescriptorhead"></a>
+
+### Description
+
+Adds a new descriptor to an existing point cloud or overwrites existing descriptor with the same name.
+
+__Required descriptors:__ none   
+__Output descriptor:__ User defined.  
+__Sensor assumed to be at the origin:__ no  
+__Impact on the number of points:__ none   
+__Altered descriptors:__  Existing descriptor with name equal to `descriptorName`.  
+__Altered features:__     none.;
+
+| Parameter           | Description                                                                                                                                          | Default value | Allowable range |
+|---------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------|:--------------|:----------------|
+| descriptorName      | Name of the descriptor to be added.                                                                                                                  |               |                 |
+| descriptorDimension | Length of the descriptor to be added.                                                                                                                | 1             | 1 to 4294967295 |
+| descriptorValues    | Values of the descriptor to be added. List of 'descriptorDimension' numbers of type T, separated by commas, closed in brackets, e.g. [2.2, 3.0, 6.1] |               |                 |
 
 ## Bounding Box Filter <a name="boundingboxhead"></a>
 

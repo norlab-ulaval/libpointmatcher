@@ -1,9 +1,3 @@
-if("${PYTHON_INSTALL_TARGET}" STREQUAL "")
-    set(PYTHON_INSTALL_TARGET ${CMAKE_CURRENT_SOURCE_DIR}/pypointmatcher)
-endif()
-
-message(STATUS "The Python module will be install at this location : ${PYTHON_INSTALL_TARGET}")
-
 set(PYBIND11_SOURCES
     #pointmatcher module
     pointmatcher/data_points.cpp
@@ -55,6 +49,7 @@ set(PYBIND11_SOURCES
     errorminimizers/point_to_point_with_cov.cpp
 
     #datapointfilters module
+    datapointsfilters/add_descriptor.cpp
     datapointsfilters/bounding_box.cpp
     datapointsfilters/covariance_sampling.cpp
     datapointsfilters/cut_at_descriptor_threshold.cpp
@@ -110,8 +105,9 @@ if(pybind11_FOUND)
 	                      pointmatcher)
 
 	add_dependencies(pypointmatcher_native pointmatcher)
+	message(STATUS "The Python module will be install at this location : ${CMAKE_CURRENT_SOURCE_DIR}/pypointmatcher")
 
-	install(TARGETS pypointmatcher_native LIBRARY DESTINATION ${PYTHON_INSTALL_TARGET})
+	install(TARGETS pypointmatcher_native LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/pypointmatcher)
 else()
 	message(FATAL_ERROR "pybind11 is required! Please follow the \"Compiling \
 libpointmatcher's with Python\" instructions from the official libpointmatcher's documentation.")
