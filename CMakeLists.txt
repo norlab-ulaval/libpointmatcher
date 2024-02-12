@@ -482,12 +482,6 @@ if (POINTMATCHER_BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-# Evaluation programs
-option(POINTMATCHER_BUILD_EVALUATIONS "Build libpointmatcher evaluations" ON)
-if (POINTMATCHER_BUILD_EVALUATIONS)
-  add_subdirectory(evaluations)
-endif()
-
 # Unit testing
 
 option(BUILD_TESTS "Build all tests." OFF)
@@ -504,6 +498,15 @@ set(PYTHON_INSTALL_TARGET "" CACHE PATH "Target where to install the python modu
 
 if (BUILD_PYTHON_MODULE)
 	add_subdirectory(python)
+endif()
+
+# ========================= Evaluation module =============================
+option(EVALUATION "Enable the evaluation script" OFF)
+
+if(EVALUATION)
+    message(STATUS "Evaluation script will be installed")
+    install(PROGRAMS ${PROJECT_SOURCE_DIR}/evaluations/evaluate_config_server.py
+        DESTINATION bin)
 endif()
 
 #=================== allow find_package() =========================
