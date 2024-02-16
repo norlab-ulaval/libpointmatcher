@@ -465,6 +465,15 @@ if (BUILD_PYTHON_MODULE)
 	add_subdirectory(python)
 endif()
 
+# ========================= Evaluation module =============================
+option(EVALUATION "Enable the evaluation script" OFF)
+
+if(EVALUATION)
+    message(STATUS "Evaluation script will be installed")
+    install(PROGRAMS ${PROJECT_SOURCE_DIR}/evaluations/evaluate_config_server.py
+        DESTINATION bin)
+endif()
+
 #=================== allow find_package() =========================
 #
 # the following case be used in an external project requiring libpointmatcher:
