@@ -1,10 +1,42 @@
 #!/usr/bin/env python3
 
 import argparse
+import asyncio
+import json
 import os
 import csv
 import random
 import sys
+from websockets import serve, WebSocketServerProtocol
+
+
+def evaluate() -> dict[str, float]:
+    # Create random scores
+    easy_score = random.uniform(0, 1)
+    medium_score = random.uniform(0, 1)
+    hard_score = random.uniform(0, 1)
+
+    # Calculate average score
+    average_score = (easy_score + medium_score + hard_score) / 3
+
+    scores = {
+        'easy': easy_score,
+        'medium': medium_score,
+        'hard': hard_score,
+        'average': average_score
+    }
+
+    return scores
+
+
+async def start_ws(port: int):
+    async def run_eval(ws: WebSocketServerProtocol):
+        async for _ in ws:
+            scores = evaluate()
+            await ws.send(json.dumps(scores))
+
+    async with serve(run_eval, "localhost", port):
+        await asyncio.Future()
 
 
 def main(config: str, point_cloud: str, output: str, seed: int):
@@ -17,17 +49,16 @@ def main(config: str, point_cloud: str, output: str, seed: int):
     if os.path.isfile(output):
         raise FileExistsError(f"File already exists: {output}")
 
-    # Create random scores
-    easy_score = random.uniform(0, 1)
-    medium_score = random.uniform(0, 1)
-    hard_score = random.uniform(0, 1)
+    scores = evaluate()
 
-    # Calculate average score
-    average_score = (easy_score + medium_score + hard_score) / 3
+    fields = ['evaluation_name']
+    first_row = ['cloud-to-cloud']
 
-    # Fields (column names) and rows (values)
-    fields = ['evaluation_name', 'easy', 'medium', 'hard', 'average']
-    rows = [['cloud-to-cloud', easy_score, medium_score, hard_score, average_score]]
+    for field_name in scores.keys():
+        fields.append(field_name)
+        first_row.append(scores[field_name])
+
+    rows = [first_row]
 
     # Writing to the csv file
     with open(output, mode='w', newline='') as csvfile:
@@ -54,10 +85,15 @@ if __name__ == "__main__":
                         help='output path with score values')
     parser.add_argument('--seed', type=int, required=True,
                         help='seed value')
+    parser.add_argument('--ws', type=int, required=False,
+                        help='[Optional] opens a Websocket on indicated port')
 
     args = parser.parse_args()
     try:
-        main(args.config, args.point_cloud, args.output, args.seed)
+        if args.ws:
+            asyncio.run(start_ws(args.ws))
+        else:
+            main(args.config, args.point_cloud, args.output, args.seed)
     except Exception as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
