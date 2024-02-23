@@ -35,7 +35,7 @@ async def start_ws(port: int):
             scores = evaluate()
             await ws.send(json.dumps(scores))
 
-    async with serve(run_eval, "localhost", port):
+    async with serve(run_eval, "0.0.0.0", port):
         await asyncio.Future()
 
 
@@ -77,6 +77,8 @@ if __name__ == "__main__":
         description='Dummy script for libpointmatcher-server evaluation.'
                     'Use with absolute paths.'
                     'Your pipeline should accommodate output files with possible multiple data lines.')
+    parser.add_argument('--ws', type=int, required=False,
+                        help='[Optional] opens a Websocket on indicated port', metavar='PORT')
     parser.add_argument('--config', type=str, required=True,
                         help='path to yaml configuration file')
     parser.add_argument('--point-cloud', type=str, required=True,
@@ -85,8 +87,6 @@ if __name__ == "__main__":
                         help='output path with score values')
     parser.add_argument('--seed', type=int, required=True,
                         help='seed value')
-    parser.add_argument('--ws', type=int, required=False,
-                        help='[Optional] opens a Websocket on indicated port')
 
     args = parser.parse_args()
     try:
