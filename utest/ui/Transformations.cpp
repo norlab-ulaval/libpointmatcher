@@ -465,16 +465,15 @@ TEST(Transformation, ComputeSimilarityTransformTrajectory3D)
         const NumericType scale{ 1.9 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
-        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator);
+        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator, 1e-6);
     }
     // Translation + rotation + Upscaling.
     {
-        const NumericType kEpsilonNumericalError = 1e-6;
         const Eigen::Matrix<NumericType, 3, 1> translation{ 1, -3, -4 };
         const Eigen::Quaternion<NumericType> rotation{ 0, -2.54, 0, 0.5 };
         const NumericType scale{ 1.9 };
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
-        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator, kEpsilonNumericalError);
+        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator, 1e-6);
     }
 }
