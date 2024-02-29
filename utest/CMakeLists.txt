@@ -8,6 +8,7 @@ add_executable(utest
                 ui/Outliers.cpp 
                 ui/ErrorMinimizers.cpp 
                 ui/Transformations.cpp 
+                ui/PointCloudGenerator.cpp 
                 ui/DataPoints.cpp 
                 ui/Inspectors.cpp 
                 ui/Loggers.cpp
