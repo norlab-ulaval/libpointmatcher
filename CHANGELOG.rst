@@ -2,6 +2,10 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.1 (2024-03-19)
+-----------------
+* Update package.xml version properly
+
 1.4.0 (2023-12-15)
 -----------------
 * fix: N2ST path resolution in dependencies-doc docker image
