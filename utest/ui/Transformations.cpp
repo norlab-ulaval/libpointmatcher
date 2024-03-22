@@ -48,7 +48,7 @@ static inline void assertOnDataPointsTransformation(const PM::DataPoints& cloud,
     {
         const int span(cloud.descriptorLabels[i].span);
         const std::string& name(cloud.descriptorLabels[i].text);
-        if (name == "normals" || name == "observationDirections")
+        if (name == "normals" || name == "observationDirections" || name == "orientationX" || name == "orientationY" || name == "orientationZ")
         {
             const auto transformedDescriptor = R * cloud.descriptors.block(row, 0, span, descCols);
             EXPECT_TRUE(transformedDescriptor.isApprox(transformedCloud.descriptors.block(row, 0, span, descCols), kEpsilonNumericalError));
@@ -414,5 +414,66 @@ TEST(Transformation, ComputeSimilarityTransformDataPoints3D)
         const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
         // Transform and assert on the result.
         assertOnDataPointsTransformation(data3D, transformation.matrix(), transformator, 1e-7);
+    }
+}
+
+TEST(Transformation, ComputeSimilarityTransformTrajectory3D)
+{
+    DP trajectory = DP::load(dataPath + "trajectory.vtk");
+    std::shared_ptr<PM::Transformation> transformator = PM::get().REG(Transformation).create("SimilarityTransformation");
+
+    // Identity.
+    {
+        const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
+        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const NumericType scale{ 1.0 };
+        const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
+        // Transform and assert on the result.
+        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator);
+    }
+    // Pure Upscaling.
+    {
+        const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
+        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const NumericType scale{ 5.0 };
+        const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
+        // Transform and assert on the result.
+        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator);
+    }
+    // Pure Downscaling.
+    {
+        const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
+        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const NumericType scale{ 0.1 };
+        const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
+        // Transform and assert on the result.
+        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator);
+    }
+    // Pure translation + Downscaling.
+    {
+        const Eigen::Matrix<NumericType, 3, 1> translation{ -1.0001, 5, -12321.234 };
+        const Eigen::Quaternion<NumericType> rotation{ 1, 0, 0, 0 };
+        const NumericType scale{ 0.5 };
+        const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
+        // Transform and assert on the result.
+        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator);
+    }
+    // Pure rotation + Upscaling.
+    {
+        const Eigen::Matrix<NumericType, 3, 1> translation{ 0, 0, 0 };
+        const Eigen::Quaternion<NumericType> rotation{ 1, -5, 23, 0.5 };
+        const NumericType scale{ 1.9 };
+        const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
+        // Transform and assert on the result.
+        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator, 1e-6);
+    }
+    // Translation + rotation + Upscaling.
+    {
+        const Eigen::Matrix<NumericType, 3, 1> translation{ 1, -3, -4 };
+        const Eigen::Quaternion<NumericType> rotation{ 0, -2.54, 0, 0.5 };
+        const NumericType scale{ 1.9 };
+        const Eigen::Transform<NumericType, 3, Eigen::Affine> transformation = buildUpTransformation3D(translation, rotation, scale);
+        // Transform and assert on the result.
+        assertOnDataPointsTransformation(trajectory, transformation.matrix(), transformator, 1e-6);
     }
 }
