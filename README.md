@@ -59,7 +59,7 @@ Note:
 
 [//]: # (====Release note=========================================================================)
 
-### ★ Version `1.4.0` Release Note
+### ★ Version `>= 1.4.0` Release Note
 This release of _libpointmatcher_ introduces the integration of [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) as a _git submodule_ for codebase development and testing.
 
 Execute the following to clone the repository with its submodule:
