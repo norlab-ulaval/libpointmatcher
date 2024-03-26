@@ -142,7 +142,8 @@ InspectorsImpl<T>::AbstractVTKInspector::AbstractVTKInspector(const std::string&
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
 	bDumpReference(Parametrizable::get<bool>("dumpReference")),
-	bWriteBinary(Parametrizable::get<bool>("writeBinary"))
+	bWriteBinary(Parametrizable::get<bool>("writeBinary")),
+    precision(Parametrizable::get<unsigned>("precision"))
 {
 }
 
@@ -369,6 +370,7 @@ template<typename T>
 void InspectorsImpl<T>::AbstractVTKInspector::dumpDataPoints(const DataPoints& filteredReference, const std::string& name)
 {
 	ostream* stream(openStream(name));
+    stream->precision(precision);
 	dumpDataPoints(filteredReference, *stream);
 	closeStream(stream);
 }
@@ -718,7 +720,8 @@ InspectorsImpl<T>::VTKFileInspector::VTKFileInspector(const Parameters& params):
 	bDumpIterationInfo(Parametrizable::get<bool>("dumpIterationInfo")),
 	bDumpDataLinks(Parametrizable::get<bool>("dumpDataLinks")),
 	bDumpReading(Parametrizable::get<bool>("dumpReading")),
-	bDumpReference(Parametrizable::get<bool>("dumpReference"))
+	bDumpReference(Parametrizable::get<bool>("dumpReference")),
+    precision(Parametrizable::get<unsigned>("precision"))
 {
 }
 

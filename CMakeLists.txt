@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10.2)
 
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 include(CheckSymbolExists)
@@ -28,7 +28,9 @@ string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTM
 
 # In 3.0+, project(...) should specify VERSION to satisfy CMP0048
 cmake_policy(SET CMP0048 NEW)
-project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
+project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION}
+		DESCRIPTION "libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds"
+		LANGUAGES CXX)
 
 set(CMAKE_DEBUG_POSTFIX "d")
 

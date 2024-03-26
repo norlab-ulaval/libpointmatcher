@@ -70,7 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //! version of the Pointmatcher library as string
-#define POINTMATCHER_VERSION "1.4.0"
+#define POINTMATCHER_VERSION "1.4.2"
 //! version of the Pointmatcher library as an int
 #define POINTMATCHER_VERSION_INT 10400
 
@@ -271,7 +271,7 @@ struct PointMatcher
 		unsigned getDescriptorDim() const;
 		unsigned getTimeDim() const;
 
-		void save(const std::string& fileName, bool binary = false) const;
+		void save(const std::string& fileName, bool binary = false, unsigned precision = 7) const;
 		static DataPoints load(const std::string& fileName);
 		
 		void concatenate(const DataPoints& dp);

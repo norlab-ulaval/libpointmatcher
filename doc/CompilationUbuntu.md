@@ -7,20 +7,20 @@
 
 If you are used to development projects, here is what you need:
 
-| Name           |     Version  <br> (Tested on our CI/CD server)     |     Version  <br> (Tested on our CI/CD server)     |
-|:---------------|:--------------------------------------------------:|:--------------------------------------------------:|
-| Ubuntu         |            bionic 18.04.1 LTS (64 bit)             |              focal 20.04 LTS (64 bit)              |
-| Architecture   |                  x86 and arm64/v8                  |              x86 and arm64/v8              |
-| gcc            |                       7.5.0                        |                       latest                       |
-| git            |                       2.17.1                       |                       latest                       |
-| cmake          |                       3.10.2                       |                       latest                       |
-| doxygen (opt.) |                     1.8.13-10                      |                       latest                       |
-|                |                                                    |                                                    |
-| _Dependency:_  |                                                    |                                                    |
-| boost          |                       1.65.1                       |                       latest                       |
-| eigen          |                      3.3.4-4                       |                       latest                       |
-| yaml-cpp       |                        0.5+                        |                       latest                       |
-| libnabo        | [from source](https://github.com/ethz-asl/libnabo) | [from source](https://github.com/ethz-asl/libnabo) |
+| Name           |     Version  <br> (Tested on our CI/CD server)     |       Version  <br> (Tested on our CI/CD server)        | Version  <br> (Tested on our CI/CD server) |
+|:---------------|:--------------------------------------------------:|:-------------------------------------------------------:|:------------------------------------------:|
+| Ubuntu         |            bionic 18.04.1 LTS (64 bit)             |                focal 20.04 LTS (64 bit)                 |          jammy 22.04 LTS (64 bit)          |
+| Architecture   |                  x86 and arm64/v8                  |                     x86 and arm64/v8                    |              x86 and arm64/v8              |
+| gcc            |                       7.5.0                        |                         latest                          |                   latest                   |
+| git            |                       2.17.1                       |                         latest                          |                   latest                   |
+| cmake          |                       3.10.2                       |                         latest                          |                   latest                   |
+| doxygen (opt.) |                     1.8.13-10                      |                         latest                          |                   latest                   |
+|                |                                                    |                                                         |                                            |
+| _Dependency:_  |                                                    |                                                         |                                            |
+| boost          |                       1.65.1                       |                         latest                          |                   latest                   |
+| eigen          |                      3.3.4-4                       |                         latest                          |                   latest                   |
+| yaml-cpp       |                        0.5+                        |                         latest                          |                   latest                   |
+| libnabo        | [from source](https://github.com/norlab-ulaval/libnabo) | [from source](https://github.com/norlab-ulaval/libnabo) |
 
 __Note:__ we only support 64-bit systems because of some issues with Eigen. Other versions will most probably work but you'll have to try yourself to know for sure.
 
@@ -98,12 +98,12 @@ sudo apt-get install libyaml-cpp-dev
 
 ### 3. Installing libnabo
 
-libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/ethz-asl/libnabo).  Clone the source repository into a local directory of your choice.
+libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/norlab-ulaval/libnabo).  Clone the source repository into a local directory of your choice.
 
 ```bash
 mkdir ~/Libraries/
 cd ~/Libraries
-git clone git://github.com/ethz-asl/libnabo.git
+git clone git://github.com/norlab-ulaval/libnabo.git
 cd libnabo
 ```
 

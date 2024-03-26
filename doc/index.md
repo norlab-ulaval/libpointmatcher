@@ -45,6 +45,12 @@ This page lists the available tutorials for libpointmatcher. The [Beginner](#beg
 - [Creating a DataPointsFilter](DataPointsFilterDev.md)
 - [Creating a Transformation](TransformationDev.md)
 - [Creating unit tests](UnitTestDev.md)
+- [Contributing Instructions](contributing/contributing_instructions.md)
+  - instructions for setting up the `libpointmatcher-build-system` on your workstation to speed up your local development
+  - bug reporting
+  - code contribution 
+  workflow
+- [Commit Message References](contributing/commit_msg_reference.md) (**Note:** this is optional for now but will eventually move our release workflow to semantic-versioning)
 
 ## Python <a name="python"></a>
 

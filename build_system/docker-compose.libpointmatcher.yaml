@@ -11,12 +11,11 @@ services:
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.libpointmatcher.compilation_test
-      no_cache: true
+      no_cache: false
       target: test-compilation-auto-path-resolution
-      ## Mute 'platforms' while using arch virtualization with C++ build to prevent segmentation fault during lpm cmake install
-#      platforms:
-#        - "linux/amd64"
-#        - "linux/arm64/v8"
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64/v8"
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies-general
@@ -50,7 +49,7 @@ services:
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/ubuntu/Dockerfile.libpointmatcher.ci_PR
-      no_cache: true
+      no_cache: false
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies
@@ -69,11 +68,23 @@ services:
     build:
       platforms:
         - "linux/amd64"
-  ci_PR_arm64v8:
+    depends_on:
+      - ci_PR
+  ci_PR_arm64:
     extends: ci_PR
     build:
       platforms:
-        - "linux/arm64/v8"
+        - "linux/arm64"
+    depends_on:
+      - ci_PR
+  ci_PR_multiarch:
+    extends: ci_PR
+    build:
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    depends_on:
+      - ci_PR
 
   # ====Dockerhub release image====================================================================
   release:
@@ -85,7 +96,7 @@ services:
       platforms:
         - "linux/amd64"
         - "linux/arm64/v8"
-      no_cache: true
+      no_cache: false
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies-doc
@@ -93,7 +104,8 @@ services:
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         REPOSITORY_VERSION: ${REPOSITORY_VERSION:?err}
         CMAKE_BUILD_TYPE: 'Release'
-        INSTALL_SCRIPT_FLAG: '--compile-test --generate-doc'
+#        INSTALL_SCRIPT_FLAG: '--compile-test --generate-doc' # (NICE TO HAVE) ToDo: fixme!! >> UseDoxygen.cmake line 112
+        INSTALL_SCRIPT_FLAG: '--compile-test'
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)

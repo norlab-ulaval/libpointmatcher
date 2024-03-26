@@ -2,6 +2,17 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.2 (2024-03-23)
+-----------------
+* Add dockerhub release logic and improve main readme by @RedLeader962 in https://github.com/norlab-ulaval/libpointmatcher/pull/550
+* Update .gitingore with auto-generated patterns for C++, Python, JetBrains IDEs ,and VSCode by @boxanm in https://github.com/norlab-ulaval/libpointmatcher/pull/555
+* build: add ubuntu jammy to the repository suported version by @RedLeader962 in https://github.com/norlab-ulaval/libpointmatcher/pull/557
+* fix: Change unit tests floating point type to double and add a precision argument to output streams by @boxanm in https://github.com/norlab-ulaval/libpointmatcher/pull/558
+* Update the minimum required Cmake version to 3.10.2 by @boxanm in https://github.com/norlab-ulaval/libpointmatcher/pull/560
+* fix: Issue 534 transformation tests failing on some platforms by @boxanm in https://github.com/norlab-ulaval/libpointmatcher/pull/559
+* Added orientation descriptor in RigidTransformation and SimilarityTransformation compute functions. by @simonpierredeschenes in https://github.com/norlab-ulaval/libpointmatcher/pull/553
+
+
 1.4.1 (2024-03-19)
 -----------------
 * Update package.xml version properly

@@ -54,7 +54,7 @@ The order is important (i.e., nx before ny). This can also be used to remap 1D d
 
 			pyPointMatcherIO
 				.def_static("loadCSV", (DataPoints (*)(const std::string&)) &PMIO::loadCSV, py::arg("fileName"))
-				.def_static("saveCSV", (void (*)(const DataPoints&, const std::string&)) &PMIO::saveCSV, py::arg("data"), py::arg("fileName"));
+				.def_static("saveCSV", (void (*)(const DataPoints&, const std::string&, unsigned precision)) &PMIO::saveCSV, py::arg("data"), py::arg("fileName"), py::arg("precision"));
 
 			using SupportedVTKDataTypes = PMIO::SupportedVTKDataTypes;
 			py::enum_<SupportedVTKDataTypes>(pyPointMatcherIO, "SupportedVTKDataTypes", "Enumeration of legacy VTK data types that can be parsed")
@@ -71,13 +71,13 @@ The order is important (i.e., nx before ny). This can also be used to remap 1D d
 
 			pyPointMatcherIO
 				.def_static("loadVTK", (DataPoints (*)(const std::string&)) &PMIO::loadVTK, py::arg("fileName"))
-				.def_static("saveVTK", (void (*)(const DataPoints&, const std::string&, bool)) &PMIO::saveVTK, py::arg("data"), py::arg("fileName"), py::arg("binary") = false)
+				.def_static("saveVTK", (void (*)(const DataPoints&, const std::string&, bool, unsigned precision)) &PMIO::saveVTK, py::arg("data"), py::arg("fileName"), py::arg("binary") = false, py::arg("precision") = 7)
 
 				.def_static("loadPLY", (DataPoints (*)(const std::string&)) &PMIO::loadPLY, py::arg("fileName"))
-				.def_static("savePLY", (void (*)(const DataPoints&, const std::string&)) &PMIO::savePLY, py::arg("data"), py::arg("fileName"), "save datapoints to PLY point cloud format")
+				.def_static("savePLY", (void (*)(const DataPoints&, const std::string&, unsigned precision)) &PMIO::savePLY, py::arg("data"), py::arg("fileName"), py::arg("precision"), "save datapoints to PLY point cloud format")
 
 				.def_static("loadPCD", (DataPoints (*)(const std::string&)) &PMIO::loadPCD, py::arg("fileName"))
-				.def_static("savePCD", (void (*)(const DataPoints&, const std::string&)) &PMIO::savePCD, py::arg("data"), py::arg("fileName"), "save datapoints to PCD point cloud format");
+				.def_static("savePCD", (void (*)(const DataPoints&, const std::string&, unsigned precision)) &PMIO::savePCD, py::arg("data"), py::arg("fileName"), py::arg("precision"), "save datapoints to PCD point cloud format");
 
 			using FileInfo = PMIO::FileInfo;
 			using Vector3 = FileInfo::Vector3;

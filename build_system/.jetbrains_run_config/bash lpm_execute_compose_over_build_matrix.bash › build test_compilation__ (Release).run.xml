@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="bash lpm_crawl_libpointmatcher_build_matrix.bash › build test_compilation_* (compilation test)" type="ShConfigurationType" folderName="[LPM] C | Execute compose over build matrix">
-    <option name="SCRIPT_TEXT" value="bash lpm_crawl_libpointmatcher_build_matrix.bash --fail-fast --cmake-build-type-build-matrix-override Release --os-name-build-matrix-override ubuntu -- build test_compilation_prefixed_path test_compilation_auto_path_resolution" />
+    <option name="SCRIPT_TEXT" value="bash lpm_crawl_libpointmatcher_build_matrix.bash --fail-fast --cmake-build-type-build-matrix-override Release --os-name-build-matrix-override ubuntu --ubuntu-version-build-matrix-override jammy -- build test_compilation_prefixed_path test_compilation_auto_path_resolution" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
