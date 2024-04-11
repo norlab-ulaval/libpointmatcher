@@ -80,7 +80,6 @@ def main(config_file: str, path: str, output: str, seed: int, number_of_random_t
                 for i in range(number_of_random_transforms):
                     tf = build_tf_matrix(rotations[i], translations[:, i])
 
-                    print("tf:\n", tf)
                     # apply the transformation
                     transformation = PM.get().TransformationRegistrar.create("RigidTransformation")
                     reading = transformation.compute(reference, tf)
