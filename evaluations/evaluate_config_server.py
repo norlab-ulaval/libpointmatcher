@@ -36,7 +36,7 @@ def get_random_translation(num=None, seed=None):
     return 2.0*(np.random.rand(3, num)-0.5)
 
 
-def main(config_file: str, path: str, output: str, seed: int, number_of_random_transforms=2):
+def main(config_file: str, path: str, output: str, seed: int, number_of_random_transforms: int):
     if not os.path.exists(config_file):
         raise FileNotFoundError("The specified config file does not exist: {}".format(config_file))
     if not os.path.exists(path):
@@ -120,10 +120,12 @@ if __name__ == "__main__":
                         help='Output path with score values')
     parser.add_argument('--seed', type=int, required=True,
                         help='Seed value')
+    parser.add_argument('--iters', type=int,
+                        help='Number of random transformations every point clouds is evaluated on.', default=10)
 
     args = parser.parse_args()
     try:
-        main(args.config, args.path, args.output, args.seed)
+        main(args.config, args.path, args.output, args.seed, args.iters)
     except Exception as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
