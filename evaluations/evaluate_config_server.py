@@ -5,6 +5,7 @@ import asyncio
 import json
 import os
 import sys
+import base64
 from websockets import serve, WebSocketServerProtocol
 
 import numpy as np
@@ -14,11 +15,12 @@ from scipy.spatial.transform import Rotation
 PM = pm.PointMatcher
 DP = PM.DataPoints
 Parameters = pms.Parametrizable.Parameters
+output_file_path = 'libraries/libpointmatcher/evaluations/demo/config_from_ws.yaml'
 
-async def start_ws(port: int, config_file: str, path: str, output: str, seed: int, number_of_random_transforms: int):
+async def start_ws(port: int, path: str, output: str, seed: int, number_of_random_transforms: int):
     async def run_eval(ws: WebSocketServerProtocol):
-        async for _ in ws:
-            scores = main(config_file, path, output, seed, number_of_random_transforms, send_via_websocket=True)
+        async for config_base64 in ws:
+            scores = main(config_base64, path, output, seed, number_of_random_transforms, send_via_websocket=True)
             await ws.send(json.dumps(scores))
 
     async with serve(run_eval, "0.0.0.0", port):
@@ -48,13 +50,13 @@ def get_random_translation(num=None, seed=None):
 
 
 def main(config_file: str, path: str, output: str, seed: int, number_of_random_transforms: int, send_via_websocket: bool = False):
-    if not os.path.exists(config_file):
+    if not os.path.exists(config_file) and not send_via_websocket:
         raise FileNotFoundError("The specified config file does not exist: {}".format(config_file))
-    if not os.path.exists(path):
+    if not os.path.exists(path) and not send_via_websocket:
         raise FileNotFoundError("The specified point-cloud path does not exist: {}".format(path))
-    if not os.path.exists(os.path.dirname(output)):
+    if not os.path.exists(os.path.dirname(output)) and not send_via_websocket:
         raise FileNotFoundError(f"The output directory does not exist: {os.path.dirname(output)}")
-    if os.path.isfile(output):
+    if os.path.isfile(output) and not send_via_websocket:
         raise FileExistsError(f"The output file already exists: {output}")
 
     # List all files in path/easy, path/medium, path/hard
@@ -65,7 +67,14 @@ def main(config_file: str, path: str, output: str, seed: int, number_of_random_t
 
     # Create ICP and load YAML config
     icp = PM.ICP()
-    icp.loadFromYaml(config_file)
+    if send_via_websocket:
+        # If we are using the websocket we create the config file
+        decoded_data = base64.b64decode(config_file)
+        with open(output_file_path, 'wb') as f:
+            f.write(decoded_data)
+        icp.loadFromYaml(output_file_path)
+    else:
+        icp.loadFromYaml(config_file)
 
     results_dict = {}
 
@@ -112,9 +121,11 @@ def main(config_file: str, path: str, output: str, seed: int, number_of_random_t
                 results_dict[difficulty][filename]["transformations"] = transformations
 
     if send_via_websocket:
+        # Remove the config file and return the result
+        os.remove(output_file_path)
         return results_dict
     else: 
-    # Writing to the output .json file
+        # Writing to the output .json file
         with open(output, 'w', encoding='utf-8') as f:
             json.dump(results_dict, f, ensure_ascii=False, indent=4)
 
@@ -141,7 +152,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     try:
         if args.ws:
-            asyncio.run(start_ws(args.ws, args.config, args.path, args.output, args.seed, args.iters))
+            asyncio.run(start_ws(args.ws, args.path, args.output, args.seed, args.iters))
         else:
             main(args.config, args.path, args.output, args.seed, args.iters)
     except Exception as e:
