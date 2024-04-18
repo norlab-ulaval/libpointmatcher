@@ -4,72 +4,119 @@ import argparse
 import asyncio
 import json
 import os
-import csv
-import random
 import sys
 from websockets import serve, WebSocketServerProtocol
 
+import numpy as np
+from pypointmatcher import pointmatcher as pm, pointmatchersupport as pms
+from scipy.spatial.transform import Rotation
 
-def evaluate() -> dict[str, float]:
-    # Create random scores
-    easy_score = random.uniform(0, 1)
-    medium_score = random.uniform(0, 1)
-    hard_score = random.uniform(0, 1)
+PM = pm.PointMatcher
+DP = PM.DataPoints
+Parameters = pms.Parametrizable.Parameters
 
-    # Calculate average score
-    average_score = (easy_score + medium_score + hard_score) / 3
-
-    scores = {
-        'easy': easy_score,
-        'medium': medium_score,
-        'hard': hard_score,
-        'average': average_score
-    }
-
-    return scores
-
-
-async def start_ws(port: int):
+async def start_ws(port: int, config_file: str, path: str, output: str, seed: int, number_of_random_transforms: int):
     async def run_eval(ws: WebSocketServerProtocol):
         async for _ in ws:
-            scores = evaluate()
+            scores = main(config_file, path, output, seed, number_of_random_transforms, send_via_websocket=True)
             await ws.send(json.dumps(scores))
 
     async with serve(run_eval, "0.0.0.0", port):
         await asyncio.Future()
 
 
-def main(config: str, point_cloud: str, output: str, seed: int):
-    if not os.path.exists(config):
-        raise FileNotFoundError("The specified config file does not exist: {}".format(config))
-    if not os.path.exists(point_cloud):
-        raise FileNotFoundError("The specified point-cloud file does not exist: {}".format(point_cloud))
+def get_angle_error(P: np.array, Q: np.array) -> float:
+    R = np.dot(P, Q.T)
+    theta = (np.trace(R) - 1) / 2
+    theta = min(theta, 1.0)
+    theta = max(theta, -1.0)
+    return np.arccos(theta)
+
+
+def build_tf_matrix(rotation: np.array, translation: np.array) -> np.array:
+    tf = np.identity(4)
+    tf[0:3, 0:3] = rotation
+    tf[0:3, 3] = translation
+    return tf
+
+
+def get_random_translation(num=None, seed=None):
+    if num is None:
+        num = 1
+    np.random.seed(seed)
+    return 2.0*(np.random.rand(3, num)-0.5)
+
+
+def main(config_file: str, path: str, output: str, seed: int, number_of_random_transforms: int, send_via_websocket: bool = False):
+    if not os.path.exists(config_file):
+        raise FileNotFoundError("The specified config file does not exist: {}".format(config_file))
+    if not os.path.exists(path):
+        raise FileNotFoundError("The specified point-cloud path does not exist: {}".format(path))
     if not os.path.exists(os.path.dirname(output)):
-        raise FileNotFoundError(f"Directory does not exist: {os.path.dirname(output)}")
+        raise FileNotFoundError(f"The output directory does not exist: {os.path.dirname(output)}")
     if os.path.isfile(output):
-        raise FileExistsError(f"File already exists: {output}")
+        raise FileExistsError(f"The output file already exists: {output}")
 
-    scores = evaluate()
+    # List all files in path/easy, path/medium, path/hard
+    paths_dict = {'easy': os.path.join(path, "easy"),
+                  'medium': os.path.join(path, "medium"),
+                  'hard': os.path.join(path, "hard")
+                  }
 
-    fields = ['evaluation_name']
-    first_row = ['cloud-to-cloud']
+    # Create ICP and load YAML config
+    icp = PM.ICP()
+    icp.loadFromYaml(config_file)
 
-    for field_name in scores.keys():
-        fields.append(field_name)
-        first_row.append(scores[field_name])
+    results_dict = {}
 
-    rows = [first_row]
+    for difficulty, path in paths_dict.items():
+        results_dict[difficulty] = {}
+        # iterate over all files in the difficulty folder
+        for (dirpath, dirnames, filenames) in os.walk(path):
+            for filename in filenames:
+                results_dict[difficulty][filename] = {}
 
-    # Writing to the csv file
-    with open(output, mode='w', newline='') as csvfile:
-        # creating a csv writer object
-        csvwriter = csv.writer(csvfile)
+                point_cloud_path = os.path.join(path, filename)
+                print(f"Processing {point_cloud_path}")
+                # load the reference point cloud to libpointmatcher
+                reference = DP(DP.load(point_cloud_path))
+                # generate N random transformations
+                rotations = Rotation.random(number_of_random_transforms, seed).as_matrix()
+                translations = get_random_translation(number_of_random_transforms, seed)
+                seed += number_of_random_transforms
 
-        # writing the fields
-        csvwriter.writerow(fields)
+                errors_rot = []
+                errors_trans = []
+                transformations = []
+                for i in range(number_of_random_transforms):
+                    tf = build_tf_matrix(rotations[i], translations[:, i])
 
-        # writing the data rows
-        csvwriter.writerows(rows)
+                    # apply the transformation
+                    transformation = PM.get().TransformationRegistrar.create("RigidTransformation")
+                    reading = transformation.compute(reference, tf)
+
+                    # register
+                    tf_icp = icp(reading, reference)
+
+                    # Compute error in translation and rotation
+                    error_rot = float(np.linalg.norm(tf_icp[0:3, 3]))
+                    error_trans = get_angle_error(tf_icp[0:3, 0:3], np.identity(3))
+
+                    # Save the errors
+                    errors_rot.append(error_rot)
+                    errors_trans.append(error_trans)
+                    transformations.append(tf_icp.tolist())
+
+                results_dict[difficulty][filename]["error_translation"] = errors_trans
+                results_dict[difficulty][filename]["error_rotation"] = errors_rot
+                results_dict[difficulty][filename]["transformations"] = transformations
+
+    if send_via_websocket:
+        return results_dict
+    else: 
+    # Writing to the output .json file
+        with open(output, 'w', encoding='utf-8') as f:
+            json.dump(results_dict, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
@@ -80,20 +127,23 @@ if __name__ == "__main__":
     parser.add_argument('--ws', type=int, required=False,
                         help='[Optional] opens a Websocket on indicated port', metavar='PORT')
     parser.add_argument('--config', type=str, required=True,
-                        help='path to yaml configuration file')
-    parser.add_argument('--point-cloud', type=str, required=True,
-                        help='path to a point cloud')
+                        help='Path to yaml configuration file')
+    parser.add_argument('--path', type=str, required=True,
+                        help='Path to a folder containing evaluation point clouds.'
+                             'The clouds are organized into three folders: easy, medium and hard')
     parser.add_argument('--output', type=str, required=True,
-                        help='output path with score values')
+                        help='Output path with score values')
     parser.add_argument('--seed', type=int, required=True,
-                        help='seed value')
+                        help='Seed value')
+    parser.add_argument('--iters', type=int,
+                        help='Number of random transformations every point clouds is evaluated on.', default=10)
 
     args = parser.parse_args()
     try:
         if args.ws:
-            asyncio.run(start_ws(args.ws))
+            asyncio.run(start_ws(args.ws, args.config, args.path, args.output, args.seed, args.iters))
         else:
-            main(args.config, args.point_cloud, args.output, args.seed)
+            main(args.config, args.path, args.output, args.seed, args.iters)
     except Exception as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
