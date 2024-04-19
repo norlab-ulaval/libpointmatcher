@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import base64
+import uuid
 from websockets import serve, WebSocketServerProtocol
 
 import numpy as np
@@ -15,13 +16,22 @@ from scipy.spatial.transform import Rotation
 PM = pm.PointMatcher
 DP = PM.DataPoints
 Parameters = pms.Parametrizable.Parameters
-output_file_path = 'libraries/libpointmatcher/evaluations/demo/config_from_ws.yaml'
+output_file_path = 'libraries/libpointmatcher/evaluations/demo/'
 
 async def start_ws(port: int, path: str, output: str, seed: int, number_of_random_transforms: int):
     async def run_eval(ws: WebSocketServerProtocol):
+        # For each config in base64, we create a new file, use it for the eval then delete it
         async for config_base64 in ws:
-            scores = main(config_base64, path, output, seed, number_of_random_transforms, send_via_websocket=True)
+            decoded_data = base64.b64decode(config_base64)
+            full_output_file_path = output_file_path + 'config_' + str(uuid.uuid4)
+
+            with open(full_output_file_path, 'wb') as f:
+                f.write(decoded_data)
+
+            scores = main(full_output_file_path, path, output, seed, number_of_random_transforms, send_via_websocket=True)
             await ws.send(json.dumps(scores))
+
+            os.remove(output_file_path)
 
     async with serve(run_eval, "0.0.0.0", port):
         await asyncio.Future()
@@ -50,9 +60,9 @@ def get_random_translation(num=None, seed=None):
 
 
 def main(config_file: str, path: str, output: str, seed: int, number_of_random_transforms: int, send_via_websocket: bool = False):
-    if not os.path.exists(config_file) and not send_via_websocket:
+    if not os.path.exists(config_file):
         raise FileNotFoundError("The specified config file does not exist: {}".format(config_file))
-    if not os.path.exists(path) and not send_via_websocket:
+    if not os.path.exists(path):
         raise FileNotFoundError("The specified point-cloud path does not exist: {}".format(path))
     if not os.path.exists(os.path.dirname(output)) and not send_via_websocket:
         raise FileNotFoundError(f"The output directory does not exist: {os.path.dirname(output)}")
@@ -67,14 +77,7 @@ def main(config_file: str, path: str, output: str, seed: int, number_of_random_t
 
     # Create ICP and load YAML config
     icp = PM.ICP()
-    if send_via_websocket:
-        # If we are using the websocket we create the config file
-        decoded_data = base64.b64decode(config_file)
-        with open(output_file_path, 'wb') as f:
-            f.write(decoded_data)
-        icp.loadFromYaml(output_file_path)
-    else:
-        icp.loadFromYaml(config_file)
+    icp.loadFromYaml(config_file)
 
     results_dict = {}
 
@@ -121,8 +124,7 @@ def main(config_file: str, path: str, output: str, seed: int, number_of_random_t
                 results_dict[difficulty][filename]["transformations"] = transformations
 
     if send_via_websocket:
-        # Remove the config file and return the result
-        os.remove(output_file_path)
+        # Return the result
         return results_dict
     else: 
         # Writing to the output .json file
