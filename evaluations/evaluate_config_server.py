@@ -23,7 +23,7 @@ async def start_ws(port: int, path: str, output: str, seed: int, number_of_rando
         # For each config in base64, we create a new file, use it for the eval then delete it
         async for config_base64 in ws:
             decoded_data = base64.b64decode(config_base64)
-            full_output_file_path = output_file_path + 'config_' + str(uuid.uuid4())
+            full_output_file_path = output_file_path + 'config_' + str(uuid.uuid4()) + '.yaml'
 
             with open(full_output_file_path, 'wb') as f:
                 f.write(decoded_data)
