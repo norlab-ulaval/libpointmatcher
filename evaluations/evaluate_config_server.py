@@ -16,7 +16,7 @@ from scipy.spatial.transform import Rotation
 PM = pm.PointMatcher
 DP = PM.DataPoints
 Parameters = pms.Parametrizable.Parameters
-output_file_path = 'libraries/libpointmatcher/evaluations/demo/'
+output_file_path = 'libraries/libpointmatcher/evaluations/'
 
 async def start_ws(port: int, path: str, output: str, seed: int, number_of_random_transforms: int):
     async def run_eval(ws: WebSocketServerProtocol):
