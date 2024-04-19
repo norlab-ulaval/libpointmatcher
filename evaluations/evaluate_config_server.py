@@ -31,7 +31,7 @@ async def start_ws(port: int, path: str, output: str, seed: int, number_of_rando
             scores = main(full_output_file_path, path, output, seed, number_of_random_transforms, send_via_websocket=True)
             await ws.send(json.dumps(scores))
 
-            os.remove(output_file_path)
+            os.remove(full_output_file_path)
 
     async with serve(run_eval, "0.0.0.0", port):
         await asyncio.Future()
