@@ -1,16 +1,86 @@
-[![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms) Awesome LIDAR; [![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping) Awesome Robotics Libraries; [![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds) Awesome Robotics
+<div align="center">
+
 ![banner](doc/images/banner_light.jpeg)
+
+[//]: # ( ==== Description ====================================================================== )
+**_libpointmatcher_ is a modular library implementing the Iterative Closest Point (ICP) algorithm<br>
+for aligning point clouds. It has applications in robotics and computer vision.**
+<br>
+The library is written in C++ for efficiency with [bindings in Python](doc/index.md#python-).
+<br>
+<br>
+
+[//]: # (====Badges===============================================================================)
+
+<img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/norlab-ulaval/libpointmatcher">
+<img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
+<img alt="GitHub License" src="https://img.shields.io/github/license/norlab-ulaval/libpointmatcher">
+<img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
+<a href="http://132.203.26.125:8111"><img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" /></a>
+<a href="https://hub.docker.com/repository/docker/norlabulaval/libpointmatcher/"> <img alt="Docker Image Version (latest semver)" src="https://img.shields.io/docker/v/norlabulaval/libpointmatcher?logo=docker&label=libpointmatcher"> </a>
+
+<br>
+<br>
+
+[//]: # (====Awesome badges=======================================================================)
+
+[![Mentioned in Awesome LIDAR](https://awesome.re/mentioned-badge.svg)](https://github.com/szenergy/awesome-lidar#basic-matching-algorithms)
+&nbsp; &nbsp; &nbsp;
+[![Mentioned in Awesome Robotics Libraries](https://awesome.re/mentioned-badge.svg)](http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping)
+&nbsp; &nbsp; &nbsp;
+[![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds)
+<br>
+<sup> 
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="https://github.com/szenergy/awesome-lidar#basic-matching-algorithms">LIDAR</a>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="https://github.com/ahundt/awesome-robotics#point-clouds">Robotics</a>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<a href="http://jslee02.github.io/awesome-robotics-libraries/#3d-mapping">Robotics Libraries</a>
+</sup>
+<br>
+<br>
+<hr style="color:lightgray;background-color:lightgray">
+</div>
+
+
+[//]: # (====Supported OS and aarch===============================================================)
+
+### Supported OS And Architecture
+_libpointmatcher_ is tested on our build system under the following architecture and OS:
+- Ubuntu bionic (18.04), focal (20.04) and jammy (22.04)  
+- x86 and arm64/v8
+  
+Note:
+- _libpointmatcher_ reportedly works on MacOs OsX (latest) and Windows (latest)
 
 
 ---
 
+[//]: # (====Release note=========================================================================)
 
+### ★ Version `>= 1.4.0` Release Note
+This release of _libpointmatcher_ introduces the integration of [norlab-build-system (NBS)](https://github.com/norlab-ulaval/norlab-build-system) as a _git submodule_ for codebase development and testing.
+
+Execute the following to clone the repository with its submodule:
+```shell
+git clone --recurse-submodules https://github.com/norlab-ulaval/libpointmatcher.git
+```
+If _libpointmatcher_ was previously cloned, execute the following to fetch its new submodule 
+```shell
+git submodule update --remote --recursive --init
+```
+
+### ★ Contributing Instructions
+See [contributing_instructions.md](doc/contributing/contributing_instructions.md)
+for instructions related to bug reporting, code contribution and for setting up the `libpointmatcher-build-system`
+on your workstation to speed up your local development workflow.
+
+
+[//]: # (====Body=================================================================================)
 # Documentation and Tutorials
-
-libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds. It has applications in robotics and computer vision.
-The library is written in C++ for effeciency with [bindings in Python](https://github.com/ethz-asl/libpointmatcher/blob/master/doc/index.md#python-).
-
-**Quick link for the tutorial pages: [Tutorials](doc/index.md) (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/)).**
+ 
+**Quick link for the tutorial pages: [Tutorials](doc/index.md)** (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/) but might not be up-to-date).
 
 Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
 
@@ -21,8 +91,10 @@ It is now maintained by the Northern Robotics Laboratory ([Norlab](https://norla
 
 You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 
-# Quick Start
 
+
+
+# Quick Start
 Although we suggest to use the [tutorials](doc/index.md), here is a quick version of it:
 
 The library has a light dependency list:
@@ -36,9 +108,41 @@ and was compiled on:
   * Mac OS X ([see how](/doc/CompilationMac.md))
   * Windows ([see how](/doc/CompilationWindows.md) - partially supported)
 
+### Docker images
+
+Run the following commands to pull and run libpointmatcher in a docker container
+
+```shell
+docker pull norlabulaval/libpointmatcher:latest-ubuntu-focal
+
+docker run -it --rm norlabulaval/libpointmatcher:latest-ubuntu-focal
+```
+
+See
+available [libpointmatcher image tags](https://hub.docker.com/repository/docker/norlabulaval/libpointmatcher/)
+on dockerhub.
+
+To install docker related dependencies on ubuntu, execute the following
+```shell
+cd ./build_system/lpm_utility_script
+
+# Execute docker tools install script i.e. docker daemon, docker compose, docker buildx
+bash lpm_install_docker_tools.bash
+```
+
+
 ### Compilation & Installation 
 
 For beginner users unfamiliar with compiling and installing a library in Linux, go [here](doc/CompilationUbuntu.md) for detailed instructions on compiling libpointmatcher from the source code.  
+
+For conveniences, you can use the provided installer script for ubuntu
+```shell
+bash libpointmatcher_dependencies_installer.bash
+
+# Use the --help flag to see the list of optional flag
+bash libpointmatcher_installer.bash [<optional flag>]
+```
+
 If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
 
 ```bash
@@ -47,6 +151,7 @@ cmake ..
 make
 sudo make install
 ```
+
 
 ### Testing
 
@@ -59,21 +164,25 @@ utest/utest --path ../examples/data/
 
 ### Linking to external projects.
 
-We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/ethz-asl/libpointmatcher/tree/master/examples/demo_Qt), which manually lists all the dependencies in the file [`demo.pro`](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system. For a more detailed procedure, check the [Linking Projects to libpointmatcher](doc/LinkingProjects.md) section.
-
-
-### Bug reporting
-
-Please use our [github's issue tracker](http://github.com/ethz-asl/libpointmatcher/issues) to report bugs. If you are running the library on Ubuntu, copy-paste the output of the script [listVersionsUbuntu.sh](https://github.com/ethz-asl/libpointmatcher/blob/master/utest/listVersionsUbuntu.sh) to simplify the search of an answer.
+We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/demo_Qt), which manually lists all the dependencies in the file [`demo.pro`](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system. For a more detailed procedure, check the [Linking Projects to libpointmatcher](doc/LinkingProjects.md) section.
 
 ## File formats
-The library support different file formats for importing or exporting data:
-  * csv (Comma Separated Values)
-  * vtk (Visualization Toolkit Files)
-  * ply (Polygon File Format)
-  * pcd (Point Cloud Library Format)
 
-Those functionnalities are available without increasing the list of dependencies at the expense of limited functionality support. For more details, see the tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using those file formats from the command line can be found in the `/examples` directory and are described [here](doc/ICPIntro.md) in more detail.
+The library support different file formats for importing or exporting data:
+
+* csv (Comma Separated Values)
+* vtk (Visualization Toolkit Files)
+* ply (Polygon File Format)
+* pcd (Point Cloud Library Format)
+
+Those functionnalities are available without increasing the list of dependencies at the expense of
+limited functionality support. For more details, see the
+tutorial [Importing and Exporting Point Clouds](doc/ImportExport.md). Example executables using
+those file formats from the command line can be found in the `/examples` directory and are
+described [here](doc/ICPIntro.md) in more detail.
+
+
+---
 
 # Citing
 
@@ -145,7 +254,7 @@ libpointmatcher is released under a permissive BSD license. Enjoy!
 [CMake documentation]: https://cmake.org/cmake/help/v3.10/
 [git]: http://git-scm.com
 [Eigen]: http://eigen.tuxfamily.org
-[libnabo]: http://github.com/ethz-asl/libnabo
+[libnabo]: https://github.com/norlab-ulaval/libnabo
 [ROS]: http://www.ros.org/
 [Paraview]: http://www.paraview.org/
 [yaml-cpp]: https://github.com/jbeder/yaml-cpp

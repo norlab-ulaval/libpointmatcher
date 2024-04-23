@@ -1,0 +1,64 @@
+ARG PROJECT_HUB=norlabulaval
+ARG BASE_IMAGE=libpointmatcher-dependencies-doc
+ARG BASE_IMAGE_TAG
+FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-install
+
+LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
+
+ARG REPOSITORY_VERSION
+ENV REPOSITORY_VERSION=${REPOSITORY_VERSION:?'Build argument needs to be set and non-empty.'}
+LABEL libpointmatcher.version="${REPOSITORY_VERSION}"
+
+
+ARG NBS_LIB_INSTALL_PATH
+ARG NBS_REPOSITORY_NAME
+ENV NBS_LIB_INSTALL_PATH=${NBS_LIB_INSTALL_PATH:?'Build argument needs to be set and non-empty.'}
+ENV NBS_REPOSITORY_NAME=${NBS_REPOSITORY_NAME:?'Build argument needs to be set and non-empty.'}
+
+ARG CMAKE_BUILD_TYPE=Release
+ARG INSTALL_SCRIPT_FLAG=""
+# Note: Those env variable are used in the entrypoint build version
+ENV CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+ENV INSTALL_SCRIPT_FLAG=${INSTALL_SCRIPT_FLAG}
+
+ARG IS_TEAMCITY_RUN
+ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
+
+SHELL ["/bin/bash", "-c"]
+ARG DEBIAN_FRONTEND=noninteractive
+
+# ====Build system related setup===================================================================
+WORKDIR "${NBS_LIB_INSTALL_PATH}/release-prep/"
+
+# Copy only the build system file for running the install and test scripts
+# Note: Logic to copy files from the checkout branch is handle by 'lpm_install_libpointmatcher_ubuntu.bash' script
+COPY ./build_system/ ./build_system/
+COPY ./.git/ ./.git/
+
+# ==== Build libpointmatcher checkout branch ======================================================
+WORKDIR ./build_system/ubuntu
+
+RUN chmod +x lpm_install_libpointmatcher_ubuntu.bash
+
+# ====Install Libpointmatcher======================================================================
+RUN bash lpm_install_libpointmatcher_ubuntu.bash \
+    --install-path ${NBS_LIB_INSTALL_PATH} \
+    --repository-version ${REPOSITORY_VERSION} \
+    --cmake-build-type ${CMAKE_BUILD_TYPE} \
+    ${INSTALL_SCRIPT_FLAG}
+
+RUN rm -rf "${NBS_LIB_INSTALL_PATH}/release-prep/"
+
+# ====End==========================================================================================
+FROM libpointmatcher-install AS libpointmatcher-release
+
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+
+COPY ./build_system/ubuntu/entrypoint.bash ./build_system/ubuntu/entrypoint.bash
+COPY ./build_system/.env ./build_system/.env
+
+RUN chmod +x ./build_system/ubuntu/entrypoint.bash
+RUN chmod +x ./build_system/.env
+
+ENTRYPOINT [ "./build_system/ubuntu/entrypoint.bash" ]
+CMD [ "bash" ]

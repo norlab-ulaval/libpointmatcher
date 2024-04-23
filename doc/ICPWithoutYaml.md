@@ -3,7 +3,7 @@
 
 # Example of an ICP solution without yaml
 
-See [examples/icp_customized.cpp](https://github.com/ethz-asl/libpointmatcher/blob/master/examples/icp_customized.cpp) for a working example.
+See [examples/icp_customized.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_customized.cpp) for a working example.
 
 Here are the important part of the example. First, generate an empty ICP object with some generic variables:
 

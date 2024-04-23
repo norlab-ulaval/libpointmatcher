@@ -20,7 +20,8 @@ If you are used to development project, here is what you need:
 |_Dependency:_ ||
 |boost          | 1.57.0                |
 |eigen          | 3.2.4                 |
-|libnabo        | [from source](https://github.com/ethz-asl/libnabo) |
+|yaml-cpp       | 0.5+                 |
+|libnabo        | [from source](https://github.com/norlab-ulaval/libnabo) |
 
 
 __Note:__ Other versions will most probably work but you'll have to try yourself to know for sure.
@@ -111,14 +112,37 @@ The Eigen linear algebra is required before installing libpointmatcher and can b
 brew install eigen
 ```
 
-### 2. Installing libnabo
+### 2. Installing yaml-cpp
 
-libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/ethz-asl/libnabo).  Clone the source repository into a local directory of your choice.
-
+The straightforward way to install yaml-cpp library through brew was, as for the end of 2023, not functional  
+```bash
+brew install yaml-cpp
+```
+Instead, you can install the library from sources. Follow https://github.com/jbeder/yaml-cpp/tree/master
 ```bash
 mkdir ~/Libraries/
 cd ~/Libraries
-git clone git://github.com/ethz-asl/libnabo.git
+git clone -b yaml-cpp-0.7.0 git@github.com:jbeder/yaml-cpp.git
+cd yaml-cpp
+```
+Now you can compile and install yaml-cpp by entering the following commands
+
+```bash
+SRC_DIR=$PWD
+BUILD_DIR=${SRC_DIR}/build
+mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+cmake -DBUILD_TESTING=FALSE ..
+make
+sudo make install
+```
+
+### 3. Installing libnabo
+
+libnabo is a library for performing fast nearest-neighbor searches in low-dimensional spaces.  It can be found [here](https://github.com/norlab-ulaval/libnabo).  Clone the source repository into a local directory of your choice.
+
+```bash
+cd ~/Libraries
+git clone git://github.com/norlab-ulaval/libnabo.git
 cd libnabo
 ```
 
@@ -150,7 +174,7 @@ sudo make install
 
 *Note:* If Eigen or Boost are not in their regular system locations you will have to indicate their location by setting the corresponding CMake flags. You can use the following command to default flags: Go [here](#possible-caveats) to see how it can be achieve.
 
-### 3. Installing libpointmatcher
+### 4. Installing libpointmatcher
 
 First, you need to clone the source repository into a local directory.  As an example we reuse the Libraries directory that was created to contain the libnabo sources.
 

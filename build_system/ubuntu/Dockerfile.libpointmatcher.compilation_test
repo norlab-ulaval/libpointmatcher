@@ -1,0 +1,122 @@
+ARG PROJECT_HUB=norlabulaval
+ARG BASE_IMAGE=libpointmatcher-dependencies-general
+ARG BASE_IMAGE_TAG
+FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-dependencies-general
+
+LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
+
+ARG REPOSITORY_VERSION='latest'
+ENV REPOSITORY_VERSION=${REPOSITORY_VERSION}
+LABEL libpointmatcher.version="${REPOSITORY_VERSION}"
+
+ARG NBS_LIB_INSTALL_PATH
+ARG NBS_REPOSITORY_NAME
+ENV NBS_LIB_INSTALL_PATH=${NBS_LIB_INSTALL_PATH:?'Build argument needs to be set and non-empty.'}
+ENV NBS_REPOSITORY_NAME=${NBS_REPOSITORY_NAME:?'Build argument needs to be set and non-empty.'}
+
+ARG CMAKE_BUILD_TYPE=RelWithDebInfo
+ARG INSTALL_SCRIPT_FLAG='--build-system-CI-install'
+# Note: Those env variable are used in the entrypoint build version
+ENV CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+ENV INSTALL_SCRIPT_FLAG=${INSTALL_SCRIPT_FLAG}
+
+ARG IS_TEAMCITY_RUN
+ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
+
+SHELL ["/bin/bash", "-c"]
+ARG DEBIAN_FRONTEND=noninteractive
+
+# ToDo: validate
+ENV TERM=${TERM:-"xterm-256color"}
+
+# ====Checkout libpointmatcher repository==========================================================
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+
+# Copy all files from the checkout branch in the repository (except those in the .dockerignore)
+COPY . .
+
+#WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/ubuntu"
+
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+RUN chmod +x ./utest/listVersionsUbuntu.sh
+
+WORKDIR ./build_system/ubuntu
+RUN chmod +x lpm_install_dependencies_libnabo_ubuntu.bash
+RUN chmod +x lpm_install_libpointmatcher_ubuntu.bash
+RUN chmod +x lpm_execute_libpointmatcher_unittest.bash
+RUN chmod +x entrypoint.bash
+
+# ====Test compilation with automatic path resolution==============================================
+FROM libpointmatcher-dependencies-general AS test-compilation-auto-path-resolution
+
+#RUN echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> mute this line
+
+# ....Install libnabo..............................................................................
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/ubuntu"
+RUN source ./lpm_install_dependencies_libnabo_ubuntu.bash
+
+# ....Check Libpointmatcher dependencies installed versions........................................
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+RUN utest/listVersionsUbuntu.sh
+
+# .... Build libpointmatcher checkout branch ......................................................
+WORKDIR ./build_system/ubuntu
+RUN source lpm_install_libpointmatcher_ubuntu.bash \
+            --repository-version ${REPOSITORY_VERSION} \
+            --cmake-build-type ${CMAKE_BUILD_TYPE} \
+            ${INSTALL_SCRIPT_FLAG}
+
+# .... Compile package dependent on libpointmatcher ...............................................
+WORKDIR "${NBS_LIB_INSTALL_PATH}"
+RUN git clone https://github.com/norlab-ulaval/norlab_icp_mapper.git \
+    && mkdir -p norlab_icp_mapper/build && cd norlab_icp_mapper/build \
+    && cmake -DCMAKE_BUILD_TYPE=Release .. \
+    && make -j $(nproc) \
+    && make install
+
+ENTRYPOINT [ "./entrypoint.bash" ]
+CMD [ "bash" ]
+
+# ====Test compilation with explicit path resolution===============================================
+FROM libpointmatcher-dependencies-general AS test-compilation-prefixed-path
+
+#RUN echo && echo ">> nproc=$(nproc)" && echo # ToDo: on task end >> mute this line
+
+# ....Install libnabo..............................................................................
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/ubuntu"
+
+RUN export APPEND_TO_CMAKE_FLAG=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" ) \
+    && source ./lpm_install_dependencies_libnabo_ubuntu.bash
+
+# ....Check Libpointmatcher dependencies installed versions........................................
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+RUN utest/listVersionsUbuntu.sh
+
+# .... Build libpointmatcher checkout branch ......................................................
+WORKDIR ./build_system/ubuntu
+
+RUN export APPEND_TO_CMAKE_FLAG=( "-D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err}" ) \
+    && source lpm_install_libpointmatcher_ubuntu.bash \
+    --repository-version ${REPOSITORY_VERSION} \
+    --cmake-build-type ${CMAKE_BUILD_TYPE} \
+    ${INSTALL_SCRIPT_FLAG}
+
+# .... Compile package dependent on libpointmatcher ...............................................
+WORKDIR "${NBS_LIB_INSTALL_PATH}"
+RUN git clone https://github.com/norlab-ulaval/norlab_icp_mapper.git \
+    && mkdir -p norlab_icp_mapper/build && cd norlab_icp_mapper/build \
+    && cmake -D CMAKE_BUILD_TYPE=Release \
+             -D CMAKE_INSTALL_PREFIX=${NBS_LIB_INSTALL_PATH:?err} \
+             .. \
+    && make -j $(nproc) \
+    && make install
+
+ENTRYPOINT [ "./entrypoint.bash" ]
+CMD [ "bash" ]
+
+# .................................................................................................
+## Alternate version
+#RUN chmod +x entrypoint_build_and_test_libpointmatcher_checkout_branch.bash
+#RUN chmod +x entrypoint_build_libpointmatcher_checkout_branch.bash
+#RUN source entrypoint_build_and_test_libpointmatcher_checkout_branch.bash
+#RUN source entrypoint_build_libpointmatcher_checkout_branch.bash

@@ -47,7 +47,7 @@ rand_subsample = PM.get().DataPointsFilterRegistrar.create("RandomSamplingDataPo
 params.clear()
 
 # For a complete description of filter, see
-# https://github.com/ethz-asl/libpointmatcher/blob/master/doc/Datafilters.md
+# https://github.com/norlab-ulaval/libpointmatcher/blob/master/doc/Datafilters.md
 params["knn"] = "10"
 params["epsilon"] = "5"
 params["keepNormals"] = "1"

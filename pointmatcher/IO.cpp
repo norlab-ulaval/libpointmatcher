@@ -806,38 +806,39 @@ PointMatcher<double>::DataPoints PointMatcherIO<double>::loadCSV(const std::stri
 
 //! Save a point cloud to a file, determine format from extension
 template<typename T>
-void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary) const
+void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary, unsigned precision) const
 {
 	const boost::filesystem::path path(fileName);
 	const string& ext(boost::filesystem::extension(path));
 	if (boost::iequals(ext, ".vtk"))
-		return PointMatcherIO<T>::saveVTK(*this, fileName, binary);
+		return PointMatcherIO<T>::saveVTK(*this, fileName, binary, precision);
 
 	if (binary)
 		throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\".");
 
 	if (boost::iequals(ext, ".csv"))
-		return PointMatcherIO<T>::saveCSV(*this, fileName);
+		return PointMatcherIO<T>::saveCSV(*this, fileName, precision);
 	else if (boost::iequals(ext, ".ply"))
-		return PointMatcherIO<T>::savePLY(*this, fileName);
+		return PointMatcherIO<T>::savePLY(*this, fileName, precision);
 	else if (boost::iequals(ext, ".pcd"))
-		return PointMatcherIO<T>::savePCD(*this, fileName);
+		return PointMatcherIO<T>::savePCD(*this, fileName, precision);
 	else
 		throw runtime_error("save(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
 }
 
 template
-void PointMatcher<float>::DataPoints::save(const std::string& fileName, bool binary) const;
+void PointMatcher<float>::DataPoints::save(const std::string& fileName, bool binary, unsigned precision) const;
 template
-void PointMatcher<double>::DataPoints::save(const std::string& fileName, bool binary) const;
+void PointMatcher<double>::DataPoints::save(const std::string& fileName, bool binary, unsigned precision) const;
 
 //! Save point cloud to a file as CSV
 template<typename T>
-void PointMatcherIO<T>::saveCSV(const DataPoints& data, const std::string& fileName)
+void PointMatcherIO<T>::saveCSV(const DataPoints& data, const std::string& fileName, unsigned precision)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
+    ofs.precision(precision);
 	saveCSV(data, ofs);
 }
 
@@ -901,9 +902,9 @@ void PointMatcherIO<T>::saveCSV(const DataPoints& data, std::ostream& os)
 }
 
 template
-void PointMatcherIO<float>::saveCSV(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::saveCSV(const DataPoints& data, const std::string& fileName, unsigned precision);
 template
-void PointMatcherIO<double>::saveCSV(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<double>::saveCSV(const DataPoints& data, const std::string& fileName, unsigned precision);
 
 //! Load point cloud from a file as VTK
 template<typename T>
@@ -1258,22 +1259,23 @@ PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadVTK(const std::st
 
 //! Save point cloud to a file as VTK
 template<typename T>
-void PointMatcherIO<T>::saveVTK(const DataPoints& data, const std::string& fileName, bool binary)
+void PointMatcherIO<T>::saveVTK(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision)
 {
 	typedef typename InspectorsImpl<T>::VTKFileInspector VTKInspector;
 	
 	Parametrizable::Parameters param;
 	boost::assign::insert(param) ("baseFileName", "");
 	boost::assign::insert(param) ("writeBinary", toParam(binary));
+	boost::assign::insert(param) ("precision", toParam(precision));
 	VTKInspector vtkInspector(param);
 	vtkInspector.dumpDataPoints(data, fileName);
 }
 
 
 template
-void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName, bool binary);
+void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 template
-void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName, bool binary);
+void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 
 //! @brief Load polygon file format (ply) file
 //! @param fileName a string containing the path and the file name
@@ -1651,7 +1653,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 template<typename T>
 void PointMatcherIO<T>::savePLY(const DataPoints& data,
-		const std::string& fileName)
+		const std::string& fileName, unsigned precision)
 {
 	//typedef typename DataPoints::Labels Labels;
 
@@ -1659,6 +1661,7 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
 
+    ofs.precision(precision);
 	const int pointCount(data.features.cols());
 	const int featCount(data.features.rows());
 	const int descRows(data.descriptors.rows());
@@ -1719,9 +1722,9 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 }
 
 template
-void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName, unsigned precision);
 template
-void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName, unsigned precision);
 
 //! @(brief) Regular PLY property constructor
 template<typename T>
@@ -2255,11 +2258,11 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 
 template<typename T>
 void PointMatcherIO<T>::savePCD(const DataPoints& data,
-		const std::string& fileName) {
+		const std::string& fileName, unsigned precision) {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
-
+    ofs.precision(precision);
 	const int pointCount(data.features.cols());
 	const int featCount(data.features.rows());
 	const int descRows(data.descriptors.rows());
@@ -2345,9 +2348,9 @@ void PointMatcherIO<T>::savePCD(const DataPoints& data,
 }
 
 template
-void PointMatcherIO<float>::savePCD(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::savePCD(const DataPoints& data, const std::string& fileName, unsigned precision);
 template
-void PointMatcherIO<double>::savePCD(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<double>::savePCD(const DataPoints& data, const std::string& fileName, unsigned precision);
 
 
 
