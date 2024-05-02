@@ -36,7 +36,7 @@ TEST_F(PointCloudGeneratorTest, BuildUpTransformationTranslationOnly)
 
     // Assertions on results.
     ASSERT_EQ(transformation.translation(), translation);
-    ASSERT_EQ(transformation.linear(), orientation.normalized().toRotationMatrix());
+    ASSERT_TRUE(transformation.linear().isApprox(orientation.normalized().toRotationMatrix()));
 }
 
 // This test validates that the function that builds up transformations to point clouds is correct. Considers pure rotation.
@@ -50,7 +50,7 @@ TEST_F(PointCloudGeneratorTest, BuildUpTransformationRotationOnly)
 
     // Assertions on results.
     ASSERT_EQ(transformation.translation(), translation);
-    ASSERT_EQ(transformation.linear(), orientation.normalized().toRotationMatrix());
+    ASSERT_TRUE(transformation.linear().isApprox(orientation.normalized().toRotationMatrix()));
 }
 
 // This test validates that the function that builds up transformations to point clouds is correct. Considers translation+rotation.
@@ -64,7 +64,7 @@ TEST_F(PointCloudGeneratorTest, BuildUpTransformationTranslationRotation)
 
     // Assertions on results.
     ASSERT_EQ(transformation.translation(), translation);
-    ASSERT_EQ(transformation.linear(), orientation.normalized().toRotationMatrix());
+    ASSERT_TRUE(transformation.linear().isApprox(orientation.normalized().toRotationMatrix()));
 }
 
 // This test validates that the function that creates empty 3D point clouds is correct.
