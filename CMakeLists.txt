@@ -343,7 +343,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Saliency.cpp	
 	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp
 #PointCloudGenerators
-	pointmatcher/PointCloudGenerator
+	pointmatcher/PointCloudGenerator.cpp
 )
 
 
