@@ -65,8 +65,8 @@ using OutlierWeights = PM::OutlierWeights;
 
 // Point Cloud Generator
 using Generator = PM::PointCloudGenerator;
-using AffineTransform = PM::AffineTransform;
-using StaticCoordVector = PM::StaticCoordVector;
+using AffineTransform = Generator::AffineTransform;
+using StaticCoordVector = Generator::StaticCoordVector;
 
 PYBIND11_MAKE_OPAQUE(std::vector<std::string>) // StringVector
 PYBIND11_MAKE_OPAQUE(std::map<std::string, std::map<std::string, std::string>>) // Bibliography

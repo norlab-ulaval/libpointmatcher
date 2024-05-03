@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <random>
 
 template<typename T>
-typename PointMatcher<T>::AffineTransform PointMatcher<T>::PointCloudGenerator::buildUpTransformation(const StaticCoordVector& translation,
+typename PointMatcher<T>::PointCloudGenerator::AffineTransform PointMatcher<T>::PointCloudGenerator::buildUpTransformation(const StaticCoordVector& translation,
                                                                                                       const Quaternion& rotation)
 {
     AffineTransform transformation;
@@ -81,7 +81,7 @@ void PointMatcher<T>::PointCloudGenerator::applyTransformation(const StaticCoord
 }
 
 template<typename T>
-typename PointMatcher<T>::StaticCoordVector PointMatcher<T>::PointCloudGenerator::computeNormalOfAxisAlignedPlane(
+typename PointMatcher<T>::PointCloudGenerator::StaticCoordVector PointMatcher<T>::PointCloudGenerator::computeNormalOfAxisAlignedPlane(
     const StaticCoordVector& axisAlignedPlaneDimensions)
 {
     StaticCoordVector normalVector{ StaticCoordVector::Zero() };

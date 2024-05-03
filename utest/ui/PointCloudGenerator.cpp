@@ -9,7 +9,7 @@ public:
     /* Setup methods */
     void setDefaultParameters()
     {
-        translation_ = PM::StaticCoordVector(0.0f, 0.5f, 0.0f);
+        translation_ = PM::PointCloudGenerator::StaticCoordVector(0.0f, 0.5f, 0.0f);
         orientation_ = PM::Quaternion(0.0f, 0.2f, 5.0f, 1.0f);
         orientation_.normalize();
 
@@ -17,7 +17,7 @@ public:
     }
 
     // Parameters.
-    PM::StaticCoordVector translation_{ PM::StaticCoordVector::Zero() };
+    PM::PointCloudGenerator::StaticCoordVector translation_{ PM::PointCloudGenerator::StaticCoordVector::Zero() };
     PM::Quaternion orientation_{ PM::Quaternion::Identity() };
     PM::DataPoints::Index numberOfPoints_{ 0 };
 
@@ -28,11 +28,11 @@ public:
 // This test validates that the function that builds up transformations to point clouds is correct. Considers pure translation
 TEST_F(PointCloudGeneratorTest, BuildUpTransformationTranslationOnly)
 { // NOLINT
-    const PM::StaticCoordVector translation{ 1.0f, 0.5f, -50.212312f };
+    const PM::PointCloudGenerator::StaticCoordVector translation{ 1.0f, 0.5f, -50.212312f };
     const PM::Quaternion orientation{ 0.0f, 0.0f, 0.0f, 1.0f };
 
     // Build up transformation.
-    const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation, orientation) };
+    const PM::PointCloudGenerator::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation, orientation) };
 
     // Assertions on results.
     ASSERT_EQ(transformation.translation(), translation);
@@ -42,11 +42,11 @@ TEST_F(PointCloudGeneratorTest, BuildUpTransformationTranslationOnly)
 // This test validates that the function that builds up transformations to point clouds is correct. Considers pure rotation.
 TEST_F(PointCloudGeneratorTest, BuildUpTransformationRotationOnly)
 { // NOLINT
-    const PM::StaticCoordVector translation{ 0.0f, 0.0f, 0.0f };
+    const PM::PointCloudGenerator::StaticCoordVector translation{ 0.0f, 0.0f, 0.0f };
     const PM::Quaternion orientation{ 0.123123f, 0.9576f, -42.232193f, 0.00001f };
 
     // Build up transformation.
-    const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation, orientation) };
+    const PM::PointCloudGenerator::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation, orientation) };
 
     // Assertions on results.
     ASSERT_EQ(transformation.translation(), translation);
@@ -56,11 +56,11 @@ TEST_F(PointCloudGeneratorTest, BuildUpTransformationRotationOnly)
 // This test validates that the function that builds up transformations to point clouds is correct. Considers translation+rotation.
 TEST_F(PointCloudGeneratorTest, BuildUpTransformationTranslationRotation)
 { // NOLINT
-    const PM::StaticCoordVector translation{ 1.0f, 0.5f, -50.212312f };
+    const PM::PointCloudGenerator::StaticCoordVector translation{ 1.0f, 0.5f, -50.212312f };
     const PM::Quaternion orientation{ 0.123123f, 0.9576f, -42.232193f, 0.00001f };
 
     // Build up transformation.
-    const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation, orientation) };
+    const PM::PointCloudGenerator::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation, orientation) };
 
     // Assertions on results.
     ASSERT_EQ(transformation.translation(), translation);
@@ -88,8 +88,8 @@ TEST_F(PointCloudGeneratorTest, ApplyTransformation)
 { // NOLINT
     // Test points.
     const PM::DataPoints::Index numberOfPoints{ 2 };
-    const PM::StaticCoordVector point1{ 0.0f, 0.0f, 0.0f };
-    const PM::StaticCoordVector point2{ 2.1213f, -100000.0f, -23459999.2342312370987978687f };
+    const PM::PointCloudGenerator::StaticCoordVector point1{ 0.0f, 0.0f, 0.0f };
+    const PM::PointCloudGenerator::StaticCoordVector point2{ 2.1213f, -100000.0f, -23459999.2342312370987978687f };
     // First point is at the origin, second is somewhere else.
 
     // Point cloud.
@@ -103,12 +103,12 @@ TEST_F(PointCloudGeneratorTest, ApplyTransformation)
     pointCloud.features(2, 1) = point2(2);
 
     // Build up transformation.
-    const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
+    const PM::PointCloudGenerator::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
 
     // Transform point cloud and points.
     PM::PointCloudGenerator::applyTransformation(translation_, orientation_, pointCloud);
-    const PM::StaticCoordVector transformedPoint1{ transformation * point1 };
-    const PM::StaticCoordVector transformedPoint2{ transformation * point2 };
+    const PM::PointCloudGenerator::StaticCoordVector transformedPoint1{ transformation * point1 };
+    const PM::PointCloudGenerator::StaticCoordVector transformedPoint2{ transformation * point2 };
 
     // Assertions on results.
     // Number of points.
@@ -138,14 +138,14 @@ TEST_F(PointCloudGeneratorTest, SphereShape)
     // Number of points.
     ASSERT_EQ(pointCloud.getNbPoints(), numberOfPoints_);
     // Points correspond to volume.
-    const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
+    const PM::PointCloudGenerator::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
     bool isSphere{ true };
     const PM::ScalarType expectedRadiusSquared{ radius * radius };
     for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols() && isSphere; ++i)
     {
         // Fetch point and remove transformation offset.
-        const PM::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
-        const PM::StaticCoordVector centeredPoint{ transformation.inverse() * point };
+        const PM::PointCloudGenerator::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
+        const PM::PointCloudGenerator::StaticCoordVector centeredPoint{ transformation.inverse() * point };
 
         // Check whether the point lies inside the volume.
         const PM::ScalarType computedRadiusSquared{ centeredPoint(0) * centeredPoint(0) + centeredPoint(1) * centeredPoint(1)
@@ -175,14 +175,14 @@ TEST_F(PointCloudGeneratorTest, CylinderShape)
     // Number of points.
     ASSERT_EQ(pointCloud.getNbPoints(), numberOfPoints_);
     // Points correspond to volume.
-    const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
+    const PM::PointCloudGenerator::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
     bool isCylinder{ true };
     const PM::ScalarType expectedRadiusSquared = radius * radius;
     for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols() && isCylinder; ++i)
     {
         // Fetch point and remove transformation offset.
-        const PM::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
-        const PM::StaticCoordVector centeredPoint{ transformation.inverse() * point };
+        const PM::PointCloudGenerator::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
+        const PM::PointCloudGenerator::StaticCoordVector centeredPoint{ transformation.inverse() * point };
 
         // Check whether the point lies inside the volume.
         const PM::ScalarType computedRadiusSquared{ centeredPoint(0) * centeredPoint(0) + centeredPoint(1) * centeredPoint(1) };
@@ -214,13 +214,13 @@ TEST_F(PointCloudGeneratorTest, BoxShape)
     // Number of points.
     ASSERT_EQ(pointCloud.getNbPoints(), numberOfPoints_);
     // Points correspond to volume.
-    const PM::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
+    const PM::PointCloudGenerator::AffineTransform transformation{ PM::PointCloudGenerator::buildUpTransformation(translation_, orientation_) };
     bool isCube{ true };
     for (PM::DataPoints::Index i{ 0 }; i < pointCloud.features.cols() && isCube; ++i)
     {
         // Fetch point and remove transformation offset.
-        const PM::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
-        const PM::StaticCoordVector centeredPoint{ transformation.inverse() * point };
+        const PM::PointCloudGenerator::StaticCoordVector point(pointCloud.features(0), pointCloud.features(1), pointCloud.features(2));
+        const PM::PointCloudGenerator::StaticCoordVector centeredPoint{ transformation.inverse() * point };
 
         // Check whether the point lies inside the volume.
         if (std::abs(centeredPoint(0)) > 0.5f * length + kEpsilonError_ || std::abs(centeredPoint(1)) > 0.5f * width + kEpsilonError_

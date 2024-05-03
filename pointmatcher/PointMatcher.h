@@ -154,13 +154,9 @@ struct PointMatcher
 	// ---------------------------------
 	// eigen and nabo-based types
 	// ---------------------------------
-	
-	//! The dimension of the point clouds that libpointmatcher will process
-	static constexpr Eigen::Index kPointDimension{ 3 };
+
 	//! The scalar type
 	typedef T ScalarType;
-	//! A vector over ScalarType
-	typedef typename Eigen::Matrix<T, kPointDimension, 1> StaticCoordVector;
 	//! A vector over ScalarType
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
 	//! A vector of vector over ScalarType, not a matrix
@@ -177,8 +173,6 @@ struct PointMatcher
 	typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	//! A dense array over ScalarType
 	typedef typename Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> Array;
-	//! An affine transform over ScalarType
-	typedef typename Eigen::Transform<T, kPointDimension, Eigen::Affine> AffineTransform;
 
 
 	//! A matrix holding the parameters a transformation.
@@ -777,6 +771,13 @@ struct PointMatcher
     //
     struct PointCloudGenerator
     {
+        //! The dimension of the point clouds that libpointmatcher will process
+        static constexpr Eigen::Index kPointDimension{ 3 };
+        //! An affine transform over ScalarType of kPointDimension
+        typedef typename Eigen::Transform<T, kPointDimension, Eigen::Affine> AffineTransform;
+        //! A vector over ScalarType of kPointDimension
+        typedef typename Eigen::Matrix<T, kPointDimension, 1> StaticCoordVector;
+
         using Index = typename DataPoints::Index;
 
         //! @brief Builds a 3D affine transformation with a given translation and rotation.
