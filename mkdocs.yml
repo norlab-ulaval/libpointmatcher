@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
 site_name: libpointmatcher
 repo_url: https://github.com/norlab-ulaval/libpointmatcher
 edit_uri: edit/master/doc
@@ -5,13 +7,40 @@ site_description: An "Iterative Closest Point" library for 2-D/3-D mapping in ro
 google_analytics: ['UA-70950258-1', 'libpointmatcher.readthedocs.org']
 docs_dir: 'doc'
 theme:
-    name: mkdocs
-    hljs_style: atom-one-light
-    hljs_languages:
-        - bash
-        - cmake
-        - cpp
-        - yaml
+  name: material
+  logo: images/logo.png
+  favicon: images/logo.png
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.footer
+    - navigation.tabs.sticky
+    - navigation.top
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/norlab-ulaval/libpointmatcher
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/norlab/
+    - icon: fontawesome/solid/globe
+      link: https://norlab.ulaval.ca
 nav:
 - Home: 'index.md'
 - Compilation:
