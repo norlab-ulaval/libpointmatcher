@@ -33,6 +33,7 @@ theme:
     - navigation.footer
     - navigation.tabs.sticky
     - navigation.top
+    - content.tabs
 extra:
   social:
     - icon: fontawesome/brands/github
@@ -41,12 +42,16 @@ extra:
       link: https://www.linkedin.com/company/norlab/
     - icon: fontawesome/solid/globe
       link: https://norlab.ulaval.ca
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
 nav:
 - Home: 'index.md'
-- Compilation:
-  - 'Ubuntu': 'CompilationUbuntu.md'
-  - 'Mac OS X': 'CompilationMac.md'
-  - 'Windows': 'CompilationWindows.md'
+- Compilation: 'Compilation.md'
+#  - 'Ubuntu': 'CompilationUbuntu.md'
+#  - 'Mac OS X': 'CompilationMac.md'
+#  - 'Windows': 'CompilationWindows.md'
 - Beginner:
     - 'What is libpointmatcher about?': 'Introduction.md'
     - 'What can I do with libpointmatcher': 'ApplicationsAndPub.md'
