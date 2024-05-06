@@ -170,7 +170,7 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::PointCloudGenerator::gener
     {
         // Sample random values of theta and phi.
         const ScalarType phi{ 2.0f * pi * uniformDistribution(randomNumberGenerator) };
-        const ScalarType radiusSample{ radius * uniformDistribution(randomNumberGenerator) };
+        const ScalarType radiusSample{ sqrt(radius * uniformDistribution(randomNumberGenerator)) };
 
         // Pre-compute values, such as sine and cosine of phi and theta.
         const ScalarType sinPhi{ std::sin(phi) };
