@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](UnitTestDev.md) | [Next](PythonModule.md) |
-| :------------------------- | :------------------------: | ----------------------: |
-
 # Compiling libpointmatcher with Python
 
 This tutorial presents the different steps of compiling *pypointmatcher*, the libpointmatcher's Python module, on Ubuntu and Mac OS X.
@@ -13,8 +10,6 @@ To get started, you will need the same prerequisites as libpointmatcher, but als
 | :--------------- |:--------------------------------------------------:|
 | pybind11         |                       2.5.0                        |
 | Python3          |                      3.10.12                       |
-|                  |                                                    |
-| **Dependencies** |                                                    |
 | python3-dev      |                       3.10.6                       |
 | catch            |                       1.12.1                       |
 | pytest           |                       7.4.2                        |
@@ -29,17 +24,14 @@ pip3 install pytest wheel build
 
 And `catch` and `python3-dev` with your package manager:
 
-*Ubuntu users:*
-
-```bash
-sudo apt install catch python3-dev
-```
-
-*Mac OS users*:
-
-```bash
-brew install catch2
-```
+=== "Ubuntu"
+    ```bash
+    sudo apt install catch python3-dev
+    ```
+=== "MacOS"
+    ```bash
+    brew install catch2
+    ```
 
 #### Case-sensitivity
 Note that to build pypointmatcher, your filesystem must be case-sensitive.
@@ -53,7 +45,7 @@ The rest of this tutorial will guide you through the necessary steps to compile 
 
 pybind11 is a library used to create Python bindings of existing C++ code and vice versa. So, in order to be able to compile pypointmatcher, you must either install pybind11 on your system or add it as a git submodule in the libpointmatcher's `contrib/` directory. You must then create a symbolic link to this git submodule in the `python/` directory. Go [here](#installing-pybind11) for the installation steps or [here](#adding-pybind11) for the git sudmodule steps.
 
-### Installing pybind11 (recommended) <a name="installing-pybind11"></a>
+### Installing pybind11 <a name="installing-pybind11"></a>
 
 The very first step is to clone [pybind11](https://github.com/pybind/pybind11) into a directory of your choice.
 
@@ -86,40 +78,6 @@ Once this is done, return to libpointmatcher's `build/` directory.
 
 You're now ready to proceed to the [configuration step](#configuration).
 
-### Adding pybind11 as a `git` submodule <a name="adding-pybind11"></a>
-
-An alternative to installing pybind11 on your system is to add its repository as a git submodule and create a symbolic link into the `python/` directory. To do this, you will first need to clone the repository as a git submodule by running the following commands in your terminal from the `contrib/` directory.
-
-```bash
-cd contrib
-git submodule add https://github.com/pybind/pybind11.git
-```
-
-This will add pybind11 as a git submodule of libpointmatcher into the `contrib/` directory. Then, still from the `contrib/` directory, run this command to create a symbolic link to pybind11 in the `python/` directory:
-
-```bash
-ln -sr pybind11 ../python/pybind11
-```
-
-At the moment, pypointmatcher can only be compiled with **version 2.5.0** of pybind11. To install the right version, run the following commands:
-
-```bash
-cd pybind11
-git checkout v2.5.0
-```
-
-Finally, tell CMake that you want to use pybind11 as a git submodule by setting the `USE_SYSTEM_PYBIND11` variable to `OFF`:
-
-```bash
-cmake -D USE_SYSTEM_PYBIND11=OFF ..
-```
-
-> ***IMPORTANT:*** When this method is used, it is very important to checkout the version **2.5.0** of pybind11 or it will be impossible to generate the build files.
-
-Once this is done, return to libpointmatcher's `build/` directory.
-
-You're now ready to proceed to the [configuration step](#configuration).
-
 ### Configuring the variables <a name="configuration"></a>
 
 #### Enabling the compilation
@@ -146,15 +104,15 @@ sudo make install
 ## Installation
 
 To install the module on your system, first open the `python` directory:
-```console
+```bash
 cd  <my-project-folder>/libpointmatcher/python
 ```
 and install the bindings through pip:
-```console
+```bash
 python3 -m build --wheel --no-isolation --outdir /tmp/libpointmatcher
 pip3 install /tmp/libpointmatcher/pypointmatcher-*.whl
 ```
 Finally, verify that `pypointmatcher` can be imported as a regular Python package:
-```
+```bash
 python -c "from pypointmatcher import *"
 ```

@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](ImportExport.md) | [Next](UsingInRos.md) |
-| :--- | :---: | ---: |
-
 # Linking Projects to libpointmatcher
 
 Once you have followed the [compilation instructions](CompilationUbuntu.md) and installed libpointmatcher to your system, you can use libpointmatcher in your project.
@@ -12,10 +9,10 @@ Because libpointmatcher was build using CMake, it can be conveniently included i
 In this following example, we build a very simple CMake project containing one executable in `myProgram.cpp` which depends on libpointmatcher.
 
 ```cmake
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.10.12)
 project (myProject)
 
-find_package(libpointmatcher 1.1.0 REQUIRED)
+find_package(libpointmatcher 1.4.2 REQUIRED)
 include_directories("${libpointmatcher_INCLUDE_DIRS}")
 message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 

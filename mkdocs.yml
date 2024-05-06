@@ -34,6 +34,7 @@ theme:
     - navigation.tabs.sticky
     - navigation.top
     - content.tabs
+    - content.code.copy
 extra:
   social:
     - icon: fontawesome/brands/github
@@ -46,14 +47,12 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - attr_list
+  - md_in_html
 nav:
 - Home: 'index.md'
 - Compilation: 'Compilation.md'
-#  - 'Ubuntu': 'CompilationUbuntu.md'
-#  - 'Mac OS X': 'CompilationMac.md'
-#  - 'Windows': 'CompilationWindows.md'
 - Beginner:
-    - 'What is libpointmatcher about?': 'Introduction.md'
     - 'What can I do with libpointmatcher': 'ApplicationsAndPub.md'
     - 'What the different data filters do?': 'DataFilters.md'
     - 'Example: applying a chain of data filters': 'ApplyingDataFilters.md'
@@ -73,6 +72,8 @@ nav:
     - 'Creating a DataPointsFilter': 'DataPointsFilterDev.md'
     - 'Creating a Transformation': 'TransformationDev.md'
     - 'Creating unit tests': 'UnitTestDev.md'
+    - 'Contribution': 'contributing/contributing_instructions.md'
+    - 'Best practices': 'contributing/commit_msg_reference.md'
 - Python:
     - 'Compiling libpointmatcher with Python': 'CompilationPython.md'
     - 'Using libpointmatcher with Python': 'PythonModule.md'

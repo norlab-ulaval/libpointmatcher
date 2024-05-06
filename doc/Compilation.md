@@ -17,14 +17,19 @@ This tutorial will guide you through the different steps to install libpointmatc
 
 
 === "Windows"
+
+    | Name            | Version <br> (Tested February 11, 2021) |
+    | ------          | -------------  |
+    | Windows         | 10 v1909 64bit |
+
     Windows is currently not officially supported, but we can confirm that you can install `libpointmatcher` in [WSL](https://learn.microsoft.com/en-us/windows/wsl/about). 
     
-    Currently, we don't have a developer fully supporting compilation on Windows. If you can help refreshing this documentation, your help is more than welcome.
+    If you want to contribute to this documentation, your help is more than welcome.
     
     Before reporting new building issues, have a look in the current/past list of issues. Add as many details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side. Here are some of them:
     
     - Your directory structure need to be well organized as mentioned in [Issue #136](https://github.com/norlab-ulaval/libpointmatcher/issues/136).
-      - There might be some problems related to libnabo as mentioned in [Issue #118](https://github.com/norlab-ulaval/libpointmatcher/issues/118).
+    - There might be some problems related to libnabo as mentioned in [Issue #118](https://github.com/norlab-ulaval/libpointmatcher/issues/118).
     
     Special thanks to the following users in helping us with the Windows support:
     
@@ -32,12 +37,9 @@ This tutorial will guide you through the different steps to install libpointmatc
     - [braddodson](https://github.com/braddodson) for porting a version of libpointmatcher to `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
 
     
-    | Name            | Version <br> (Tested February 11, 2021) |
-    | ------          | -------------  |
-    | Windows         | 10 v1909 64bit |
 
 ### Dependencies
-`libpointmatcher` relies on a number of standard libraries, most of which can be installed with standard package managers. The following table lists the minimum requirements necessary to instal libpointmatcher.
+Libpointmatcher relies on a number of standard libraries, most of which can be installed with standard package managers. The following table lists the minimum requirements necessary to instal libpointmatcher.
 
 | Library name | cmake  | boost  |  eigen  | yaml-cpp | libnabo | doxygen (opt.) |
 |:-------------|:------:|:------:|:-------:|:--------:|:-------:|:--------------:|
