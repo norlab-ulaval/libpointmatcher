@@ -74,5 +74,5 @@ jobs:
         run: |
           gh pr create --repo norlab-ulaval/norlab-ulaval.github.io -B master -H update-libpointmatcher-docs --title 'Update documentation for new release' --body 'Automated documentation update for new release from libpointmatcher'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.NORLAB_WEBSITE_DOCUMENTATION }}
 
