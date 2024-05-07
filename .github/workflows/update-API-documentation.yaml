@@ -78,4 +78,6 @@ jobs:
       - name: Create website PR
         run: |
           gh pr create --repo norlab-ulaval/norlab-ulaval.github.io -B master -H update-libpointmatcher-docs --title 'Update documentation for new release' --body 'Automated documentation update for new release from libpointmatcher'
+        env:
+          GH_TOKEN: ${{ github.token }}
 
