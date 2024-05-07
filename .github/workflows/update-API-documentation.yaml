@@ -68,12 +68,3 @@ jobs:
           git add libpointmatcher-doc
           git commit -m "Update documentation for new release"
           git push origin HEAD:refs/heads/update-libpointmatcher-docs
-
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          token: ${{ secrets.NORLAB_WEBSITE_DOCUMENTATION }}
-          branch: update-docs
-          title: "Update documentation for new release"
-          body: "Automated documentation update for new release from libpointmatcher"
-          base: master
