@@ -53,7 +53,7 @@ jobs:
       - name: Clone website repository
         uses: actions/checkout@v2
         with:
-          repository: https://github.com/norlab-ulaval/norlab-ulaval.github.io  # Replace with your website repository
+          repository: norlab-ulaval/norlab-ulaval.github.io
           path: website
           token: ${{ secrets.NORLAB_WEBSITE_DOCUMENTATION }}
 
