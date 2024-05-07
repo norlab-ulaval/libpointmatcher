@@ -56,6 +56,7 @@ jobs:
           repository: norlab-ulaval/norlab-ulaval.github.io
           path: website
           ssh-key: ${{ secrets.NORLAB_WEBSITE_DOCUMENTATION }}
+          ref: update-libpointmatcher-docs
 
       - name: Replace documentation files
         run: cp -r build/doc/html website/libpointmatcher-doc
@@ -65,6 +66,8 @@ jobs:
           cd website
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
+          git fetch
           git add libpointmatcher-doc
+          git pull
           git commit -m "Update documentation for new release"
           git push origin HEAD:refs/heads/update-libpointmatcher-docs
