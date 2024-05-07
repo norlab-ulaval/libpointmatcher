@@ -66,8 +66,6 @@ jobs:
           cd website
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git fetch
           git add libpointmatcher-doc
-          git pull
           git commit -m "Update documentation for new release"  || exit 0
-          git push origin HEAD:refs/heads/update-libpointmatcher-docs
+          git push origin HEAD:refs/heads/update-libpointmatcher-docs --force
