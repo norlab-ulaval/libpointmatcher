@@ -69,5 +69,5 @@ jobs:
           git fetch
           git add libpointmatcher-doc
           git pull
-          git commit -m "Update documentation for new release"
+          git commit -m "Update documentation for new release"  || exit 0
           git push origin HEAD:refs/heads/update-libpointmatcher-docs
