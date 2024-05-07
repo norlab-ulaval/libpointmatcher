@@ -3,6 +3,7 @@
 #include "pointmatcher/point_matcher.h"
 #include "pointmatcher/impl.h"
 #include "pointmatcher/io.h"
+#include "pointmatcher/point_cloud_generator.h"
 
 namespace python
 {
@@ -15,6 +16,7 @@ namespace python
 			pointmatcher::pybindPointMatcher(pointmatcherModule);
 			pointmatcher::pybindIO(pointmatcherModule);
 			pointmatcher::pybindImpl(pointmatcherModule);
+            pointmatcher::pybindPointCloudGenerator(pointmatcherModule);
 		}
 	}
 }

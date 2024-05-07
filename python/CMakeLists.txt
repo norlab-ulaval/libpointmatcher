@@ -20,6 +20,7 @@ set(PYBIND11_SOURCES
     pointmatcher/outlier_filter.cpp
     pointmatcher/outlier_filters.cpp
     pointmatcher/point_matcher.cpp
+    pointmatcher/point_cloud_generator.cpp
     pointmatcher/transformation.cpp
     pointmatcher/transformations.cpp
     pointmatcher/transformation_checker.cpp
