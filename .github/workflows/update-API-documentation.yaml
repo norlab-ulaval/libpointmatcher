@@ -69,3 +69,10 @@ jobs:
           git add libpointmatcher-doc
           git commit -m "Update documentation for new release"  || exit 0
           git push origin HEAD:refs/heads/update-libpointmatcher-docs --force
+
+      - name: Create website PR
+        run: |
+          gh pr create --repo norlab-ulaval/norlab-ulaval.github.io -B master -H update-libpointmatcher-docs --title 'Update documentation for new release' --body 'Automated documentation update for new release from libpointmatcher'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
