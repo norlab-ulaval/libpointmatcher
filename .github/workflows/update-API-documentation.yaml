@@ -1,0 +1,79 @@
+name: Update Documentation on Website
+
+on:
+  release:
+    types: [published]
+  push:
+    branches:
+      - doxygen-github-action
+  workflow_dispatch: # manual trigger
+
+
+jobs:
+  build_and_update_docs:
+    runs-on: ubuntu-latest
+    outputs:
+      libnabo_tag: ${{ steps.step1.outputs.libnabo_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential cmake doxygen graphviz libboost-all-dev libeigen3-dev libyaml-cpp-dev
+
+      - name: Install libnabo 1) install jq
+        run: sudo apt install -y jq  # Install jq for JSON processing
+
+      - name: Install libnabo 2) Get Latest Release Tag
+        id: get_latest_release
+        run: |
+          TAG=$(curl -s https://api.github.com/repos/norlab-ulaval/libnabo/releases/latest | jq -r '.tag_name')
+          echo "::set-output name=tag::$TAG"
+
+      - name: Install libnabo 4) Install libnabo
+        run: |
+          git clone -b ${{ steps.get_latest_release.outputs.tag }} https://github.com/norlab-ulaval/libnabo.git
+          echo "Latest release tag: ${{ steps.get_latest_release.outputs.tag }}"
+          mkdir -p libnabo/build
+          cd libnabo/build
+          cmake ..
+          sudo make install
+
+      - name: Set up libpointmatcher CMake
+        run: |
+          mkdir build
+          cd build
+          cmake -DGENERATE_API_DOC=TRUE ..
+
+      - name: Build Documentation
+        run: cd build && make doc
+
+      - name: Clone website repository
+        uses: actions/checkout@v2
+        with:
+          repository: https://github.com/norlab-ulaval/norlab-ulaval.github.io  # Replace with your website repository
+          path: website
+          token: ${{ secrets.NORLAB_WEBSITE_DOCUMENTATION }}
+
+      - name: Replace documentation files
+        run: cp -r build/doc/html website/libpointmatcher-doc
+
+      - name: Commit and push changes
+        run: |
+          cd website
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add libpointmatcher-doc
+          git commit -m "Update documentation for new release"
+          git push origin HEAD:refs/heads/update-libpointmatcher-docs
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.NORLAB_WEBSITE_DOCUMENTATION }}
+          branch: update-docs
+          title: "Update documentation for new release"
+          body: "Automated documentation update for new release from libpointmatcher"
+          base: master
