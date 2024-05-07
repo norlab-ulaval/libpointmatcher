@@ -56,7 +56,7 @@ jobs:
           repository: norlab-ulaval/norlab-ulaval.github.io
           path: website
           ssh-key: ${{ secrets.NORLAB_WEBSITE_DOCUMENTATION }}
-          ref: update-libpointmatcher-docs
+          ref: master
 
       - name: Replace documentation files
         run: cp -r build/doc/html website/libpointmatcher-doc
