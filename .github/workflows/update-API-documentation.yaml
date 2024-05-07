@@ -1,12 +1,9 @@
 name: Update Documentation on Website
 
 on:
-  release:
-    types: [published]
   push:
     branches:
-      - doxygen-github-action
-  workflow_dispatch: # manual trigger
+      - master
 
 
 jobs:
