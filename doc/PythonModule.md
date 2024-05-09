@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](CompilationPython.md) |
-| :--- | ---: |
-
 # Using libpointmatcher with Python
 
 This tutorial presents the different things to know before using *pypointmatcher*, the libpointmatcher's Python module.

@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](OutlierFiltersFamilies.md) | [Next](DefaultICPConfig.md) |
-| :--- | :---: | ---: |
-
 # An Introduction to ICP Registration
 
 In the following tutorial, we will perform an ICP registration on an example dataset.  Throughout this tutorial, we will be making use of the `pmicp` executable, which can be found in the `examples` directory of your libpointmatcher build directory (i.e., `build/examples/pmicp`).
@@ -97,8 +94,8 @@ This configuration file won't do much in term of registration, but it is useful 
 You can run the registration program with this empty configuration to see what it does.  If you have built libpointmatcher in `/build` subdirectory, you can use the following commands:
 
 ```bash
-$ cd libpointmatcher/examples/icp_tutorial/
-$ ../../build/examples/pmicp -v --config icp_tutorial_empty.yaml cloud_0.vtk cloud_1.vtk
+cd libpointmatcher/examples/icp_tutorial/
+../../build/examples/pmicp -v --config icp_tutorial_empty.yaml cloud_0.vtk cloud_1.vtk
 ```
 
 You should see the following results in your console:
@@ -205,7 +202,7 @@ We activate the generation of point cloud visualizations in the VTK inspector.  
 You can run the ICP registration with this new configuration with the following:
 
 ```bash
-$ ../../build/examples/pmicp -v --config icp_tutorial_cfg.yaml cloud_0.vtk cloud_1.vtk
+../../build/examples/pmicp -v --config icp_tutorial_cfg.yaml cloud_0.vtk cloud_1.vtk
 ```
 
 You should now see the following outputs to the console. We will break them down into steps.  
@@ -278,19 +275,19 @@ In the following animation, you can observe the reading point cloud being transf
 The executable `pmicp` can output the list of all the modules you can load in the yaml file along with their parameters and default values. You can see those using:
 
 ```bash
-$ ./pmicp -l
+./pmicp -l
 ```
 
 If you are searching for the documentation of a particular module, you can do:
 
 ```bash
-$ ./pmicp -l | awk '/<name>/' RS="\n\n" ORS="\n\n"
+./pmicp -l | awk '/<name>/' RS="\n\n" ORS="\n\n"
 ```
 
 where you need to replace `<name>` by the module name. For example:
 
 ```bash
-$ ./pmicp -l | awk '/VoxelGridDataPointsFilter/' RS="\n\n" ORS="\n\n"
+./pmicp -l | awk '/VoxelGridDataPointsFilter/' RS="\n\n" ORS="\n\n"
 ```
 
 Will output:

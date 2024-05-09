@@ -4,7 +4,7 @@
 cmake_minimum_required (VERSION 3.10)
 project(convert)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(libpointmatcher REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem)

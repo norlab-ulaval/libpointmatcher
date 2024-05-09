@@ -1,20 +1,37 @@
-![alt tag](images/banner_light.jpeg)
+![alt tag](images/banner_light.jpeg#only-light)
+![alt tag](images/banner_dark.jpeg#only-dark)
 
 ---
+
+# What is libpointmatcher about? 
+
+libpointmatcher is a library that implements the Iterative Closest
+Point (ICP) algorithm for alignment of point clouds. It supports both
+point-to-point and point-to-plane ICP. With the former, it is able to
+solve not only for a rigid transform, but also for a scale change
+between the clouds (that is, a similarity transform).
+
+More precisely, given two point clouds, R (the reference) and S (the
+source), ICP tries to find the best rigid (or similarity) transform T
+so that T * S = R.
+
+The [Wikipedia article on ICP](https://en.wikipedia.org/wiki/Iterative_closest_point) has more
+information.
+
+libpointmatcher implements a [set of filters](DataFilters.md) to help
+denoise and subsample the input point clouds. It supports a [variety
+of file types](ImportExport.md) and it can be configured via both
+[YAML files](Configuration.md) and an [in-memory API](ICPWithoutYaml.md).
+
+libpointmatcher is written in C++.
 
 # Tutorials
 
 This page lists the available tutorials for libpointmatcher. The [Beginner](#beginner) section is aimed at the more casual user and contains high-level information on the various steps of point cloud registration. The [Advanced](#advanced) section is targeted at those with existing experience with point cloud registration and proficiency in C++ development.  Those who wish to contribute to libpointmatcher can follow the guidelines in the [Developer](#developer) section. Finally, the [Python](#python) section is intended for those who are interested in using libpointmatcher with *Python*.
 
-## Compilation <a name="compilation"></a>
-
-- [Ubuntu: How to compile libpointmatcher](CompilationUbuntu.md)
-- [Mac OS X: How to compile libpointmatcher](CompilationMac.md)
-- [Windows: How to compile libpointmatcher](CompilationWindows.md)
-
 ## Beginner <a name="beginner"></a>
 
-- [What is libpointmatcher about?](Introduction.md)
+- [How to compile libpointmatcher](Compilation.md) <a name="compilation"></a>
 - [What can I do with libpointmatcher?](ApplicationsAndPub.md)
 - [What the different data filters do?](DataFilters.md)
 - [Example: Applying a chain of data filters](ApplyingDataFilters.md)
@@ -58,7 +75,3 @@ This page lists the available tutorials for libpointmatcher. The [Beginner](#beg
 - [Using libpointmatcher with Python](PythonModule.md)
 
 **Note**: if you don't find what you need, don't hesitate to propose or participate to new tutorials. 
-
----
-
-![alt tag](images/banner_dark.jpeg)
