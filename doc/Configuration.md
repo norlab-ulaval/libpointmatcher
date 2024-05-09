@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](DefaultICPConfig.md) | [Next](ImportExport.md) |
-| :--- | :---: | ---: |
-
 # Creating Custom Configurations with YAML
 
 ## Overview

@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](TransformationDev.md) | [Next](CompilationPython.md) |
-| :--- | :---: | ---: |
-
 # Testing libpointmatcher Modules
 
 It is often good practice to accompany the development of new software features with the development of test cases which validate that these features are working correctly.  When developing for an open source project such as libpointmatcher, testing is crucial to maintain stability and avoid the introduction of erronous code.

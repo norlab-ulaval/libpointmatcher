@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](ApplyingDataFilters.md) | [Next](ICPIntro.md) |
-| :--- | :---: | ---: |
-
 # Families of Outlier Filters
 
 This section adresses the various filters and tries to organise them in families. 
