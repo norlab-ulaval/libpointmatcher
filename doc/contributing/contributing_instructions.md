@@ -133,3 +133,6 @@ See [Commit Message References](commit_msg_reference.md) for details.
 - Once a PR from `release` -> `master` branch is created (not in draft mode),
   - it triggers the _build-system_ test
   - (in-progress) and it triggers the _semantic release automation_
+
+## Writing Documentation
+The documentation is located in the /doc folder and uses the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) Markdown framework. 

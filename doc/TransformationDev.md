@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](DataPointsFilterDev.md) | [Next](UnitTestDev.md) |
-| :--- | :---: | ---: |
-
 # Extending libpointmatcher Transformations
 
 ## Defining your own Transformation Class

@@ -80,7 +80,7 @@ on your workstation to speed up your local development workflow.
 [//]: # (====Body=================================================================================)
 # Documentation and Tutorials
  
-**Quick link for the tutorial pages: [Tutorials](doc/index.md)** (also available on [readthedocs.org](http://libpointmatcher.readthedocs.org/) but might not be up-to-date).
+**Quick link for the tutorial pages: [Tutorials](http://libpointmatcher.readthedocs.org/).
 
 Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
 
