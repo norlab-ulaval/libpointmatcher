@@ -670,6 +670,7 @@ struct PointMatcher
 		virtual void setDefault();
 		
 		virtual void loadFromYaml(std::istream& in);
+		virtual void loadFromYamlNode(const YAML::Node& doc);
 		unsigned getPrefilteredReadingPtsCount() const;
 		unsigned getPrefilteredReferencePtsCount() const;
 
@@ -746,6 +747,7 @@ struct PointMatcher
 		void clearMap();
 		virtual void setDefault();
 		virtual void loadFromYaml(std::istream& in);
+		virtual void loadFromYamlNode(const YAML::Node& doc);
 		PM_DEPRECATED("Use getPrefilteredInternalMap instead. "
 			            "Function now always returns map with filter chain applied. "
 			            "This may have altered your program behavior."
