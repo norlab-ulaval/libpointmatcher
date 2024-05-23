@@ -12,6 +12,7 @@ namespace python
 					.def("getDescriptor", &DataPointsFilterRegistrar::getDescriptor, py::arg("name"), "Return a descriptor following a name, throw an exception if name is invalid")
 					.def("create", &DataPointsFilterRegistrar::create, py::arg("name"), py::arg("params") = Parameters(), "Create an instance")
 					.def("getDescription", &DataPointsFilterRegistrar::getDescription, py::arg("name"), "Get the description of a class")
+                    .def("getAvailableParameters", &DataPointsFilterRegistrar::getAvailableParameters, py::arg("name"), "Get all available parameters of a class")
 					.def("dump", [](const DataPointsFilterRegistrar& self)
 					{
 						std::ostringstream oss;
