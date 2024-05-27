@@ -13,7 +13,7 @@ env:
   BOOST_MAJOR_VERSION: '1'
   BOOST_MINOR_VERSION: '80'
   BOOST_PATCH_VERSION: '0'
-  LIBNABO_VERSION: '1.1.1'
+  LIBNABO_VERSION: '1.1.2'
   PYBIND11_VERSION: 'v2.10.2'
   BOOST_INSTALL_PATH: ${{ github.workspace }}/.tmp/boost/install
   BOOST_SRC_DIR: ${{ github.workspace }}/.tmp/boost
