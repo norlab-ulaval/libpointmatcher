@@ -218,6 +218,10 @@ if [[ $TEST_RUN  == true ]]; then
   BUILD_EXIT_CODE=0
   INSTALL_EXIT_CODE=0
 else
+  #  # Hack to prevent LPM cmake build failure in ubuntu bionic
+  #  BOOST_ROOT=$(whereis boost) && export BOOST_ROOT
+  #  CMAKE_FLAGS=( -D BOOST_ROOT="$BOOST_ROOT" "${CMAKE_FLAGS[@]}" )
+
   cmake "${CMAKE_FLAGS[@]}" "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 
   BUILD_EXIT_CODE=$?
