@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](BasicRegistration.md) | [Next](ICPWithoutYaml.md) |
-| :--- | :---: | ---: |
-
 # Applying Transformations to Point Clouds
 
 The outcome of a point cloud registration is some rigid transformation which, when applied to the reading point cloud, best aligns it with the reference point cloud.  This transformation can be represented algebraically with a square matrix of the dimensions of the homogeneous point coordinates. A point cloud is transformed by left-multiplying it by the transformation matrix.
@@ -27,6 +24,7 @@ We make use of the "RigidTransformation" module provided by libpointmatcher.  Th
 
 In the following example we define a transformation by specifying the TransformationParameters object to represent a translation in the x direction.  We do so by setting the top right element of the transformation Eigen matrix to be 50, such that the point cloud will move by 50 meters in the x direction.  We apply this transformation to an input point cloud and save the output point cloud.
 
+=== "C++"
 ```cpp
 int main(int argc, char *argv[]) {
 	if (argc != 3) {
@@ -78,6 +76,7 @@ If you use some other type of transformations than rigid transformations, you ma
 
 We can also perform transformations by directly applying a transformation on a point cloud.  In the following example, we perform a transformation by multiplying a transformation matrix to the original point cloud.  Note that **this does not apply the transformation to associated descriptors** such as surface normals or orientation directions.  For this reason, this approach is strongly discouraged in practice.  The following example code performs the same transformation as in the previous cases:
 
+=== "C++"
 ```cpp
 #include <pointmatcher/PointMatcher.h>
 #include <iostream>

@@ -36,9 +36,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*!
 \mainpage libpointmatcher
 
-from http://github.com/ethz-asl/libpointmatcher by François Pomerleau and Stéphane Magnenat (http://stephane.magnenat.net), ASL-ETHZ, Switzerland (http://www.asl.ethz.ch)
+from http://github.com/norlab-ulaval/libpointmatcher by François Pomerleau and Stéphane Magnenat (http://stephane.magnenat.net), ASL-ETHZ, Switzerland (http://www.asl.ethz.ch)
 
-libpointmatcher is a modular ICP library, useful for robotics and computer vision. This help assumes that libpointmatcher is already installed, if not, please read the \c README.md file at the top-level of the source tree.
+libpointmatcher is a modular ICP library, useful for robotics and computer vision. This help assumes that libpointmatcher is already installed, if not, please read the \c README.md file at the top-level of the source tree. You can also follow the guide available on https://libpointmatcher.readthedocs.io/en/latest/.
 
 \section Test
 

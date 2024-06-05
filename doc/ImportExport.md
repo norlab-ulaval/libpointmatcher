@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](Configuration.md) | [Next](LinkingProjects.md) |
-| :--- | :---: | ---: |
-
 # Importing and Exporting Point Clouds
 
 ## Overview
