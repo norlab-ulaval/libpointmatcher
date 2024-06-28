@@ -2,6 +2,14 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Class to generate point cloud primitives
+* Updated documentation
+* Github actions for code API
+* Function that lists all available Filter parameters
+
+
 1.4.2 (2024-03-23)
 ------------------
 * Add dockerhub release logic and improve main readme by @RedLeader962 in https://github.com/norlab-ulaval/libpointmatcher/pull/550
