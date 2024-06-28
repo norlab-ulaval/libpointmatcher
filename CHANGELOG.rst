@@ -2,8 +2,8 @@
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.3 (2024-06-28)
+------------------
 * Class to generate point cloud primitives
 * Updated documentation
 * Github actions for code API
