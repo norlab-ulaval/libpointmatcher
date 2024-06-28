@@ -20,6 +20,9 @@ TMP_CWD=$(pwd)
 LPM_PATH=$(git rev-parse --show-toplevel)
 cd "${LPM_PATH}/build_system" || cd "${LPM_PATH}" || exit 1
 
+NBS_PATH=${NBS_PATH:-"${LPM_PATH}/build_system/utilities/norlab-build-system"}
+N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
+
 # ....Load environment variables from file.........................................................
 set -o allexport
 source .env
@@ -27,8 +30,8 @@ set +o allexport
 
 # ....Helper function..............................................................................
 # import shell functions from utilities library
-N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-tools"}
 source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
+
 
 # Set environment variable IMAGE_ARCH_AND_OS
 cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash"

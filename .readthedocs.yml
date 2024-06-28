@@ -5,6 +5,11 @@
 # Required
 version: 2
 
+build:
+  os: ubuntu-lts-latest
+  tools:
+    python: "3.12"
+
 # Build documentation with MkDocs
 mkdocs:
   configuration: mkdocs.yml
@@ -15,6 +20,5 @@ mkdocs:
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
-  version: 3
   install:
     - requirements: doc/requirements.txt
