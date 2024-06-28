@@ -158,7 +158,7 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 #--------------------
 if (NOT TARGET nabo)
   # Find libnabo:
-  find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
+  find_package(libnabo 1.1.1 REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
   if (TARGET libnabo::nabo)
  	set(libnabo_LIBRARIES libnabo::nabo)
     message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode,  libs=${libnabo_LIBRARIES})")
