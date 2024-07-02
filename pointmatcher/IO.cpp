@@ -1845,19 +1845,6 @@ bool PointMatcherIO<T>::plyPropTypeValid(const std::string& type) {
 }
 
 
-template <typename T>
-bool PointMatcherIO<T>::PLYElement::operator==(const PLYElement& rhs) const
-{
-	return name == rhs.name;
-}
-
-
-template <typename T>
-bool PointMatcherIO<T>::PLYProperty::operator==(const PLYProperty& rhs) const
-{
-	return name == rhs.name && type == rhs.type;
-}
-
 
 //! @brief Load Point Cloud Library (pcd) file
 //! @param fileName a string containing the path and the file name
