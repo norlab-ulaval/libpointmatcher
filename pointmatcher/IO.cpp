@@ -377,14 +377,14 @@ typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::load(const std
 	const boost::filesystem::path path(fileName);
     if (path.has_extension())
     {
-        const string& ext(path.extension().string());
-        if(boost::iequals(ext, ".vtk"))
+        const string ext(path.extension().string());
+        if(ext == ".vtk")
             return PointMatcherIO<T>::loadVTK(fileName);
-        else if(boost::iequals(ext, ".csv"))
+        else if(ext == ".csv")
             return PointMatcherIO<T>::loadCSV(fileName);
-        else if(boost::iequals(ext, ".ply"))
+        else if(ext == ".ply")
             return PointMatcherIO<T>::loadPLY(fileName);
-        else if(boost::iequals(ext, ".pcd"))
+        else if(ext == ".pcd")
             return PointMatcherIO<T>::loadPCD(fileName);
         else
             throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
@@ -818,18 +818,18 @@ void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary,
 	const boost::filesystem::path path(fileName);
     if (path.has_extension())
     {
-        const string& ext(path.extension().string());
-        if (boost::iequals(ext, ".vtk"))
+        const string ext(path.extension().string());
+        if (ext == ".vtk")
             return PointMatcherIO<T>::saveVTK(*this, fileName, binary, precision);
 
         if (binary)
             throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\".");
 
-        if (boost::iequals(ext, ".csv"))
+        if (ext == ".csv")
             return PointMatcherIO<T>::saveCSV(*this, fileName, precision);
-        else if (boost::iequals(ext, ".ply"))
+        else if (ext == ".ply")
             return PointMatcherIO<T>::savePLY(*this, fileName, precision);
-        else if (boost::iequals(ext, ".pcd"))
+        else if (ext == ".pcd")
             return PointMatcherIO<T>::savePCD(*this, fileName, precision);
         else
             throw runtime_error("save(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
