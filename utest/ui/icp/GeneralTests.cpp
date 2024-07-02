@@ -84,8 +84,9 @@ TEST(icpTest, icpTest)
 		std::cout << "Testing file " << d->path().string() << std::endl;
 		// Load config file, and form ICP object
 		PM::ICP icp;
+        if (d->path().has_extension() != true) continue;
+		if (d->path().extension().string() != ".yaml") continue;
 		std::string config_file = d->path().string();
-		if (fs::extension(config_file) != ".yaml") continue;
 		std::ifstream ifs(config_file.c_str());
 		EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
 

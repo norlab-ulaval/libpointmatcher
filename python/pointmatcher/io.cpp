@@ -132,8 +132,8 @@ Note that the header must at least contain "reading".
 				.def(py::init<>(), "Default constructor. If used member values must be filled later.")
 				.def(py::init<const std::string&, const std::string&, const unsigned>(), py::arg("type"), py::arg("name"), py::arg("pos"), "regular property")
 				.def(py::init<const std::string&, const std::string&, const std::string&, const unsigned>(), py::arg("idx_type"), py::arg("type"), py::arg("name"), py::arg("pos"), "list property")
-
-				.def("__eq__", &PLYProperty::operator==, "compare with other property");
+                .def(py::self == py::self)
+				.def(py::self != py::self);
 
 			using PLYProperties = PMIO::PLYProperties;
 			py::bind_vector<PLYProperties>(pyPointMatcherIO, "PLYProperties", "Vector of properties specific to PLY files");
@@ -160,7 +160,9 @@ PLY Element constructor
 
 This object holds information about a PLY element contained in the file.
 It is filled out when reading the header and used when parsing the data.
-)pbdoc").def("__eq__", &PLYElement::operator==, "comparison operator for elements");
+)pbdoc")
+                .def(py::self == py::self)
+				.def(py::self != py::self);
 
 			using PLYVertex = PMIO::PLYVertex;
 			py::class_<PLYVertex, PLYElement>(pyPointMatcherIO, "PLYVertex", "Implementation of PLY vertex element")
@@ -173,11 +175,10 @@ Constructor
 Implementation of PLY element interface for the vertex element
 )pbdoc");
 
-//		FIXME : Generate undefined symbol error for "elementSupported" or "createElement" method when importing the module
-//		using PLYElementF = PMIO::PLYElementF;
-//		py::class_<PLYElementF>(pyPointMatcherIO, "PLYElementF", "Factory for PLY elements")
-//			.def("elementSupported", &PLYElementF::elementSupported, py::arg("elem_name"), "returns true if element named elem_name is supported by this parser")
-//			.def_static("createElement", &PLYElementF::createElement, py::arg("elem_name"), py::arg("elem_num"), py::arg("offset"), "factory function, build element defined by name with elem_num elements");
+		using PLYElementF = PMIO::PLYElementF;
+		py::class_<PLYElementF>(pyPointMatcherIO, "PLYElementF", "Factory for PLY elements")
+			.def("elementSupported", &PLYElementF::elementSupported, py::arg("elem_name"), "returns true if element named elem_name is supported by this parser")
+			.def_static("createElement", &PLYElementF::createElement, py::arg("elem_name"), py::arg("elem_num"), py::arg("offset"), "factory function, build element defined by name with elem_num elements");
 
 			using PCDproperty = PMIO::PCDproperty;
 			py::class_<PCDproperty>(pyPointMatcherIO, "PCDproperty", "Information for a PCD property")
