@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](ApplicationsAndPub.md) | [Next](ApplyingDataFilters.md) |
-| :--- | :---: | ---: |
-
 # Datapoint Filters
 
 In this section, the various filters which can be applied to the reading and reference point clouds before performing the ICP process.

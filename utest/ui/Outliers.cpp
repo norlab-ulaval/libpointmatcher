@@ -123,30 +123,30 @@ TEST_F(OutlierFilterTest, VarTrimmedDistOutlierFilter)
 	validate3dTransformation();
 }
 
-OutlierFiltersImpl<float>::OutlierWeights VarTrimLambdaTest(const float lambda) {
-	OutlierFiltersImpl<float>::VarTrimmedDistOutlierFilter filter({{"minRatio", toParam(0.0000001)},
+OutlierFiltersImpl<NumericType>::OutlierWeights VarTrimLambdaTest(const NumericType lambda) {
+	OutlierFiltersImpl<NumericType>::VarTrimmedDistOutlierFilter filter({{"minRatio", toParam(0.0000001)},
 																   {"maxRatio", toParam(1.0)},
 																   {"lambda", toParam(lambda)}});
-	PointMatcher<float>::DataPoints filteredReading;
-	PointMatcher<float>::DataPoints filteredReference;
+	PointMatcher<NumericType>::DataPoints filteredReading;
+	PointMatcher<NumericType>::DataPoints filteredReference;
 
 	// Create a vector a distance
-	PointMatcher<float>::Matches::Dists dists(1, 5);
+	PointMatcher<NumericType>::Matches::Dists dists(1, 5);
 	dists << 4, 5, 5, 5, 5;
-	PointMatcher<float>::Matches::Ids ids(1, 5);
-	PointMatcher<float>::Matches input(dists, ids);
+	PointMatcher<NumericType>::Matches::Ids ids(1, 5);
+	PointMatcher<NumericType>::Matches input(dists, ids);
 	return filter.compute(filteredReading, filteredReference, input);
 }
 
 TEST_F(OutlierFilterTest, VarTrimmedDistOutlierFilterParameters)
 {
 	// A lambda parameter of zero, all matches will be reject except for the minimum
-	OutlierFiltersImpl<float>::OutlierWeights weights = VarTrimLambdaTest(0.0);
+	OutlierFiltersImpl<NumericType>::OutlierWeights weights = VarTrimLambdaTest(0.0);
 	// The minimum is the first value
-	ASSERT_EQ(1.0f, weights(0, 0));
-	ASSERT_EQ(0.0f, weights(0, 1));
+	EXPECT_EQ(1.0f, weights(0, 0));
+	EXPECT_EQ(0.0f, weights(0, 1));
 
 	weights = VarTrimLambdaTest(1.0);
-	ASSERT_EQ(1.0f, weights(0, 0));
-	ASSERT_EQ(1.0f, weights(0, 1));
+	EXPECT_EQ(1.0f, weights(0, 0));
+	EXPECT_EQ(1.0f, weights(0, 1));
 }

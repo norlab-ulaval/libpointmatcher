@@ -9,7 +9,7 @@
 # Arguments:
 #   --install-path </dir/abs/path/>     The directory where to install libpointmatcher (absolute path)
 #                                           (default location defined in the .env)
-#   --repository-version v1.3.1         Install libpointmatcher release tag version (default to master branch latest)
+#   --repository-version 1.4.0         Install libpointmatcher release tag version (default to master branch latest)
 #   --compile-test                      Compile the libpointmatcher unit-test
 #   --generate-doc                      Generate the libpointmatcher doxygen documentation
 #                                           in /usr/local/share/doc/libpointmatcher/api/html/index.html
@@ -74,7 +74,7 @@ function print_help_in_terminal() {
   \033[1m<optional argument>:\033[0m
     --install-path </dir/abs/path/>       The directory where to install (absolute path)
                                             (default location ${MSG_DIMMED_FORMAT}${NBS_LIB_INSTALL_PATH:?err}${MSG_END_FORMAT})
-    --repository-version v1.3.1           Install release tag version (default to master branch latest)
+    --repository-version 1.4.0           Install release tag version (default to master branch latest)
     --compile-test                        Compile the unit-test
                                             in ${MSG_DIMMED_FORMAT}${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME:?err}/build${MSG_END_FORMAT}
     --generate-doc                        Generate the libpointmatcher doxygen documentation
@@ -194,7 +194,8 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
     git tag --list
 
     # Remove prefix 'v' from version tag
-    GITHUB_TAG="${REPOSITORY_VERSION/v/}"
+#    GITHUB_TAG="${REPOSITORY_VERSION/v/}"
+    GITHUB_TAG="${REPOSITORY_VERSION}"
 
     git checkout tags/"${GITHUB_TAG}"
 
@@ -217,6 +218,10 @@ if [[ $TEST_RUN  == true ]]; then
   BUILD_EXIT_CODE=0
   INSTALL_EXIT_CODE=0
 else
+  #  # Hack to prevent LPM cmake build failure in ubuntu bionic
+  #  BOOST_ROOT=$(whereis boost) && export BOOST_ROOT
+  #  CMAKE_FLAGS=( -D BOOST_ROOT="$BOOST_ROOT" "${CMAKE_FLAGS[@]}" )
+
   cmake "${CMAKE_FLAGS[@]}" "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 
   BUILD_EXIT_CODE=$?
@@ -225,6 +230,10 @@ else
   sudo make install
 
   INSTALL_EXIT_CODE=$?
+
+  if [[ ${GENERATE_API_DOC_FLAG} = TRUE ]]; then
+      make doc
+  fi
 
   ## List all CMake build options and their default values
   ##   ref: https://stackoverflow.com/questions/16851084/how-to-list-all-cmake-build-options-and-their-default-values

@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](ICPIntro.md) | [Next](Configuration.md) |
-| :--- | :---: | ---: |
-
 # Default Configuration of the ICP Chain
 
 The following details the default configuration for ICP in libpointmatcher.

@@ -180,6 +180,12 @@ namespace PointMatcherSupport
 			return getDescriptor(name)->description();
 		}
 
+		//! Get all available parameters of a class
+		const Parametrizable::ParametersDoc getAvailableParameters(const std::string& name) const
+		{
+			return getDescriptor(name)->availableParameters();
+		}
+
 		//! Print the list of registered classes to stream
 		void dump(std::ostream &stream) const
 		{

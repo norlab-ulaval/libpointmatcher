@@ -1,12 +1,10 @@
-| [Tutorials Home](index.md) | [Previous](Transformations.md) | [Next](DataPointsFilterDev.md) |
-| :--- | :---: | ---: |
-
 # Example of an ICP solution without yaml
 
 See [examples/icp_customized.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/icp_customized.cpp) for a working example.
 
 Here are the important part of the example. First, generate an empty ICP object with some generic variables:
 
+=== "C++"
 ```cpp
 // Create the default ICP algorithm
 PM::ICP icp;
@@ -16,6 +14,7 @@ std::string name;
 
 Prepare the objects for the DataFilters:
 
+=== "C++"
 ```cpp
 // Prepare reading filters
 name = "MinDistDataPointsFilter";
@@ -46,6 +45,7 @@ params.clear();
 
 Prepare the objects for the Matchers:
 
+=== "C++"
 ```cpp
 // Prepare matching function
 name = "KDTreeMatcher";
@@ -58,6 +58,7 @@ params.clear();
 
 Prepare the objects for the OutlierFilters:
 
+=== "C++"
 ```cpp
 // Prepare outlier filters
 name = "TrimmedDistOutlierFilter";
@@ -69,6 +70,7 @@ params.clear();
 
 Prepare the object for the ErrorMinimizer:
 
+=== "C++"
 ```cpp
 // Prepare error minimization
 name = "PointToPointErrorMinimizer";
@@ -78,6 +80,7 @@ std::shared_ptr<PM::ErrorMinimizer> pointToPoint =
 
 Prepare the objects for the TransformationCheckers:
 
+=== "C++"
 ```cpp
 // Prepare outlier filters
 name = "CounterTransformationChecker";
@@ -97,6 +100,7 @@ params.clear();
 
 Prepare the objects for the Inspector:
 
+=== "C++"
 ```cpp
 // Prepare inspector
 std::shared_ptr<PM::Inspector> nullInspect =
@@ -105,6 +109,7 @@ std::shared_ptr<PM::Inspector> nullInspect =
 
 Prepare the objects for the Transformation:
 
+=== "C++"
 ```cpp
 // Prepare transformation
 std::shared_ptr<PM::Transformation> rigidTrans =
@@ -113,6 +118,7 @@ std::shared_ptr<PM::Transformation> rigidTrans =
 
 Finally, build the complete solution:
 
+=== "C++"
 ```cpp
 // Build ICP solution
 icp.readingDataPointsFilters.push_back(minDist_read);
