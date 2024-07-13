@@ -390,7 +390,7 @@ You will also need LaTeX for the equations rendering :
 After you have installed Doxygen and LaTeX, you can enable the documentation by setting the CMake variable `GENERATE_API_DOC` to `TRUE`. This can be achieved through CMake-GUI or by the command line in your `build` directory:
 
 ```bash
-    cmake -D GENERATE_API_DOC=TRUE ${SRC_DIR}
+cmake -D GENERATE_API_DOC=TRUE ${SRC_DIR}
 ```
 
 Compiling libpointmatcher will generate the documentation, which you can simply open the `/usr/local/share/doc/libpointmatcher/api/html/index.html` file to view the API documentation in a browser.
@@ -407,8 +407,9 @@ If you want to verify that the version of libpointmatcher you have compiled is s
     ```bash
     cmake -D BUILD_TESTS=TRUE ${SRC_DIR}
     ```
-=== "Windows
+=== "Windows"
     Set the CMake variable `BUILD_TESTS` to `TRUE`
+
 
 Then, once the compilation process is completed, the unit tests can be run with the following command line:
 
@@ -420,7 +421,7 @@ Then, once the compilation process is completed, the unit tests can be run with 
     ```bash
     utest/utest --path ${SRC_DIR}/examples/data/
     ```
-=== "Windows
+=== "Windows"
     From build directory
     ```powershell
     utest/utest --path ../examples/data/
@@ -434,18 +435,18 @@ Now, to compile libpointmatcher into the `/build` directory, run the following c
     ```bash
     make -j N
     ```
-*Note:* It is highly recommended to add the `-j N` optional argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time. 
+    *Note:* It is highly recommended to add the `-j N` optional argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time. 
 
 === "MacOS"
     ```bash
     make -j N
     ```
-*Note:* It is highly recommended to add the `-j N` optional argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time. 
+    *Note:* It is highly recommended to add the `-j N` optional argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time. 
 
-=== "Windows
+=== "Windows"
     Following the previous configuration in CMake GUI:
-    1. Click on the button Configure, Generate and then Open Project  
-       Visual Studio will open up
+
+    1. Click on the button Configure, Generate and then Open Project. Visual Studio will open up
     2. Put your "Solution Configuration" in `Release` mode
     3. Build the `BUILD` project
 
@@ -461,8 +462,9 @@ Finally, to install libpointmatcher on your system, run the following command:
     ```bash
     sudo make install
     ```
-=== "Windows
+=== "Windows"
     Following the previous configuration in CMake GUI:
+    
     1. Build the `INSTALL` project
     >    We have to install the library and not only build it, because otherwise all CMake files won't be able to be found by programs using libpointmatcher
     2. Set `libpointmatcher_DIR` environment variable to `C:\dev\libpointmatcher\build\install\share\libpointmatcher\cmake`
@@ -484,9 +486,8 @@ Some dependencies changed, and we don't keep track of all combinations possible.
     chmod +x ./utest/listVersionsMacOS.sh
     ./utest/listVersionsMacOS.sh
     ```
-=== "Windows
-    ```TODO
-    chmod +x ./utest/listVersionsWindows.sh
-    ./utest/listVersionsWindows.sh
+=== "Windows"
+    ```
+    TODO
     ```
     
