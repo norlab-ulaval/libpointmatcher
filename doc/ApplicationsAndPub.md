@@ -21,7 +21,7 @@ Click on the image to play.
   + Sensor: Velodyne HDL-32E
   + Application: 3D mapping and localization
   <a href="https://www.youtube.com/watch?v=cMgLyLpnsoU" target="_blank">
-   <img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/cMgLyLpnsoU.jpg" width="240" height="180"/>
+   <img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/cMgLyLpnsoU.jpg" width="240" height="180"/>
   </a>
 
 -   __NIFTi: railyard mapping__
@@ -30,7 +30,7 @@ Click on the image to play.
 + Sensor: Sick LMS-151
 + Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=ygIvzWVfPYk" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/ygIvzWVfPYk.jpg"
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/ygIvzWVfPYk.jpg"
  width="240" height="180" border="10" />
 </a>
 
@@ -40,7 +40,7 @@ Click on the image to play.
 + Sensor: Sick LMS-151
 + Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=lP5Mj-TGaiw" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/lP5Mj-TGaiw.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/lP5Mj-TGaiw.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -52,7 +52,7 @@ Click on the image to play.
 - Sensor: Velodyne HDL-32E
 - Application: Navigation
 <a href="https://www.youtube.com/watch?v=UCCAUf64tD0" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/UCCAUf64tD0.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/UCCAUf64tD0.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -64,7 +64,7 @@ Click on the image to play.
 + Sensor: Velodyne HDL-32E
 + Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=M5Y99o7um88" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/M5Y99o7um88.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/M5Y99o7um88.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -74,7 +74,7 @@ Click on the image to play.
 + Sensor: Velodyne HDL-32E
 + Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=g8l-Xq4qYeE" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/g8l-Xq4qYeE.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/g8l-Xq4qYeE.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -84,7 +84,7 @@ Click on the image to play.
 + Sensor: Kinect
 + Application: 3D model reconstruction
 <a href="https://www.youtube.com/watch?v=rIZud3F5IJw" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/rIZud3F5IJw.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/rIZud3F5IJw.jpg" 
  width="240" height="180" border="10" />
 </a>
 
@@ -94,7 +94,7 @@ Click on the image to play.
 + Sensor: Kinect
 + Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=McxpJGOZTPs" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/McxpJGOZTPs.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/McxpJGOZTPs.jpg" 
  width="240" height="180" border="10" />
 </a>
 </div>
