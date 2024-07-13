@@ -316,13 +316,13 @@ First, you need to clone the source repository into a local directory. As an exa
 === "Ubuntu"
     ```bash
     cd ~/Libraries/
-    git clone git://github.com/ethz-asl/libpointmatcher.git
+    git clone git://github.com/norlab-ulaval/libpointmatcher.git
     cd libpointmatcher
     ```
 === "MacOS"
     ```bash
     cd ~/Libraries/
-    git clone git://github.com/ethz-asl/libpointmatcher.git
+    git clone git://github.com/norlab-ulaval/libpointmatcher.git
     cd libpointmatcher
     ```
 === "Windows"
