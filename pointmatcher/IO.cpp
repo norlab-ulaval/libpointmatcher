@@ -360,7 +360,7 @@ void PointMatcherSupport::validateFile(const std::string& fileName)
 	if (!ifs.good() || !boost::filesystem::is_regular_file(fullPath))
 	#if BOOST_FILESYSTEM_VERSION >= 3
 		#if BOOST_VERSION >= 105000
-				throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).generic_string());
+				throw runtime_error(string("Cannot open file ") + boost::filesystem::absolute(fullPath).generic_string());
 		#else
 				throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).generic_string());
 		#endif
@@ -375,17 +375,24 @@ template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::load(const std::string& fileName)
 {
 	const boost::filesystem::path path(fileName);
-	const string& ext(boost::filesystem::extension(path));
-	if (boost::iequals(ext, ".vtk"))
-		return PointMatcherIO<T>::loadVTK(fileName);
-	else if (boost::iequals(ext, ".csv"))
-		return PointMatcherIO<T>::loadCSV(fileName);
-	else if (boost::iequals(ext, ".ply"))
-		return PointMatcherIO<T>::loadPLY(fileName);
-	else if (boost::iequals(ext, ".pcd"))
-		return PointMatcherIO<T>::loadPCD(fileName);
-	else
-		throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
+    if (path.has_extension())
+    {
+        const string& ext(path.extension().string());
+        if(boost::iequals(ext, ".vtk"))
+            return PointMatcherIO<T>::loadVTK(fileName);
+        else if(boost::iequals(ext, ".csv"))
+            return PointMatcherIO<T>::loadCSV(fileName);
+        else if(boost::iequals(ext, ".ply"))
+            return PointMatcherIO<T>::loadPLY(fileName);
+        else if(boost::iequals(ext, ".pcd"))
+            return PointMatcherIO<T>::loadPCD(fileName);
+        else
+            throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+    }
+    else
+    {
+        throw runtime_error("loadAnyFormat(): Missing extension for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
+    }
 }
 
 template
@@ -809,21 +816,29 @@ template<typename T>
 void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary, unsigned precision) const
 {
 	const boost::filesystem::path path(fileName);
-	const string& ext(boost::filesystem::extension(path));
-	if (boost::iequals(ext, ".vtk"))
-		return PointMatcherIO<T>::saveVTK(*this, fileName, binary, precision);
+    if (path.has_extension())
+    {
+        const string& ext(path.extension().string());
+        if (boost::iequals(ext, ".vtk"))
+            return PointMatcherIO<T>::saveVTK(*this, fileName, binary, precision);
 
-	if (binary)
-		throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\".");
+        if (binary)
+            throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\".");
 
-	if (boost::iequals(ext, ".csv"))
-		return PointMatcherIO<T>::saveCSV(*this, fileName, precision);
-	else if (boost::iequals(ext, ".ply"))
-		return PointMatcherIO<T>::savePLY(*this, fileName, precision);
-	else if (boost::iequals(ext, ".pcd"))
-		return PointMatcherIO<T>::savePCD(*this, fileName, precision);
-	else
-		throw runtime_error("save(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+        if (boost::iequals(ext, ".csv"))
+            return PointMatcherIO<T>::saveCSV(*this, fileName, precision);
+        else if (boost::iequals(ext, ".ply"))
+            return PointMatcherIO<T>::savePLY(*this, fileName, precision);
+        else if (boost::iequals(ext, ".pcd"))
+            return PointMatcherIO<T>::savePCD(*this, fileName, precision);
+        else
+            throw runtime_error("save(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+
+    }
+    else
+    {
+        throw runtime_error("save(): Missing extension for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+    }
 }
 
 template
