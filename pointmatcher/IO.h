@@ -285,7 +285,15 @@ struct PointMatcherIO
 		// list property
 		PLYProperty(const std::string& idx_type, const std::string& type, const std::string& name, const unsigned pos); //! list prop ctor
 
-		bool operator==(const PLYProperty& other) const; //! compare with other property
+		bool friend operator==(const PLYProperty& lhs, const PLYProperty& rhs) //! compare with other property
+        {
+            return lhs.name == rhs.name && lhs.type == rhs.type;
+        }
+
+		bool friend operator!=(const PLYProperty& lhs, const PLYProperty& rhs) //! compare with other property
+        {
+            return lhs.name != rhs.name || lhs.type != rhs.type;
+        }
 	};
 
 	//! Map from a descriptor name to a list PLY property
@@ -325,8 +333,15 @@ struct PointMatcherIO
 
 		//bool supportsProperty(const PLYProperty& prop) const; //!< Returns true if property pro is supported by element
 
-		bool operator==(const PLYElement& other) const; //!< comparison operator for elements
+		bool friend operator==(const PLYElement& lhs, const PLYElement& rhs)  //!< comparison operator for elements
+        {
+            return lhs.name == rhs.name;
+        }
 
+		bool friend operator!=(const PLYElement& lhs, const PLYElement& rhs)  //!< comparison operator for elements
+        {
+            return lhs.name != rhs.name;
+        }
 	};
 
 
