@@ -37,10 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pointmatcher/IO.h"
 #include <cassert>
 #include <iostream>
-#include <fstream>
-#include <boost/format.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/lexical_cast.hpp>
 
 using namespace std;
@@ -210,7 +207,7 @@ int main(int argc, char *argv[])
 		}
 
 		stringstream outputFileNameIter;
-		outputFileNameIter << boost::filesystem::path(outputFileName).stem().c_str() << "_" << i << ".vtk";
+		outputFileNameIter << std::filesystem::path(outputFileName).stem().c_str() << "_" << i << ".vtk";
 		
 		mapCloud.save(outputFileNameIter.str());
 	}
