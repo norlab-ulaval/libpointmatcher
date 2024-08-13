@@ -68,14 +68,14 @@ cd <path/to/libpointmatcher>/build_system
 bash lpm_crawl_libpointmatcher_build_matrix.bash --fail-fast -- build ci_PR
 
 # Run a specific case using build flags with multi-architecture 
-# virtualization using "ci_PR_amd64" and "ci_PR_arm64v8" services 
+# virtualization using "ci_PR_amd64" and "ci_PR_arm64" services 
 bash lpm_crawl_libpointmatcher_build_matrix.bash \
             --repository-version-build-matrix-override latest \
             --os-name-build-matrix-override ubuntu \
             --cmake-build-type-build-matrix-override RelWithDebInfo \
             --ubuntu-version-build-matrix-override jammy \
             --fail-fast \
-            -- build ci_PR_amd64 ci_PR_arm64v8
+            -- build ci_PR_amd64 ci_PR_arm64
 
 # Read the help for details
 bash lpm_crawl_libpointmatcher_build_matrix.bash --help

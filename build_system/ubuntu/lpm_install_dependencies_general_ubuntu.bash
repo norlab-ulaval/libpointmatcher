@@ -87,6 +87,16 @@ sudo apt-get update &&
 
 ##cmake --version
 
+# Retrieve ubuntu version number: DISTRIB_RELEASE
+source /etc/lsb-release
+print_msg "Ubuntu version is ${DISTRIB_RELEASE}"
+if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
+  sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  sudo apt update
+  sudo apt install gcc-9 g++-9
+fi
+
+
 teamcity_service_msg_blockClosed
 # .................................................................................................
 
