@@ -91,9 +91,11 @@ sudo apt-get update &&
 source /etc/lsb-release
 print_msg "Ubuntu version is ${DISTRIB_RELEASE}"
 if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
+  sudo apt update
+  sudo apt install --assume-yes software-properties-common
   sudo add-apt-repository ppa:ubuntu-toolchain-r/test
   sudo apt update
-  sudo apt install gcc-9 g++-9
+  sudo apt install --assume-yes gcc-9 g++-9
 fi
 
 
