@@ -11,7 +11,7 @@ services:
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.libpointmatcher.compilation_test
-      no_cache: false
+      no_cache: true
       target: test-compilation-auto-path-resolution
       platforms:
         - "linux/amd64"
@@ -24,7 +24,6 @@ services:
         REPOSITORY_VERSION: 'latest'
         CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE:?err}
         INSTALL_SCRIPT_FLAG: '--build-system-CI-install'
-        INVALIDATE_CACHE: ${INVALIDATE_CACHE:?err}
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)

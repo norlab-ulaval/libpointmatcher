@@ -29,8 +29,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 # ToDo: validate
 ENV TERM=${TERM:-"xterm-256color"}
 
-ARG INVALIDATE_CACHE
-
 # ====Checkout libpointmatcher repository==========================================================
 WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 
