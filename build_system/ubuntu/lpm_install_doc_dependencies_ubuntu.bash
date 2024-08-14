@@ -48,10 +48,10 @@ cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash
 SHOW_SPLASH_IDDU="${SHOW_SPLASH_IDDU:-true}"
 
 if [[ "${SHOW_SPLASH_IDDU}" == 'true' ]]; then
-  norlab_splash "${NBS_SPLASH_NAME:?err}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
+  n2st::norlab_splash "${NBS_SPLASH_NAME:?err}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
 fi
 
-print_formated_script_header "lpm_install_doc_dependencies_ubuntu.bash (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
+n2st::print_formated_script_header "lpm_install_doc_dependencies_ubuntu.bash (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
 
 # ....Script command line flags....................................................................
 while [ $# -gt 0 ]; do
@@ -74,7 +74,7 @@ done
 
 
 # .................................................................................................
-teamcity_service_msg_blockOpened "Install libpointmatcher documentation related dependencies"
+n2st::teamcity_service_msg_blockOpened "Install libpointmatcher documentation related dependencies"
 
 ## Package required when GENERATE_API_DOC flag is set to true
 ## Note: 'texlive-full' is ~6GB. 'doxygen-latex' is a slim version tailor made for doxygen code documentation task
@@ -84,10 +84,10 @@ sudo apt-get update \
       doxygen-latex \
  && sudo rm -rf /var/lib/apt/lists/*
 
-teamcity_service_msg_blockClosed
+n2st::teamcity_service_msg_blockClosed
 
-echo " " && print_msg_done "Libpointmatcher documentation related dependencies installed"
-print_formated_script_footer "lpm_install_doc_dependencies_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+echo " " && n2st::print_msg_done "Libpointmatcher documentation related dependencies installed"
+n2st::print_formated_script_footer "lpm_install_doc_dependencies_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================
 cd "${TMP_CWD}"
 
