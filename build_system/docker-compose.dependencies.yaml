@@ -17,6 +17,7 @@ services:
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
         NBS_LIB_INSTALL_PATH: ${NBS_LIB_INSTALL_PATH:?err}
         NBS_REPOSITORY_NAME: ${NBS_REPOSITORY_NAME:?err}
+        INVALIDATE_CACHE: ${INVALIDATE_CACHE:?err}
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)

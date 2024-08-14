@@ -25,6 +25,8 @@ ENV TZ=Etc/UTC
 
 ENV TERM=${TERM:-"xterm-256color"}
 
+ARG INVALIDATE_CACHE
+
 # ....Setup timezone and localization..............................................................
 # change the locale from POSIX to UTF-8
 RUN apt-get update && \

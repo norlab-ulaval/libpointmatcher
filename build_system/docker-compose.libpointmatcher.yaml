@@ -24,6 +24,7 @@ services:
         REPOSITORY_VERSION: 'latest'
         CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE:?err}
         INSTALL_SCRIPT_FLAG: '--build-system-CI-install'
+        INVALIDATE_CACHE: ${INVALIDATE_CACHE:?err}
     tty: true
     stdin_open: true
     init: true  # Propagate exit code (See remark in task NMO-266)
