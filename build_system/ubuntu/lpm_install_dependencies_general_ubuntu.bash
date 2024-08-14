@@ -78,6 +78,8 @@ sudo apt-get update &&
     git \
     software-properties-common \
   && sudo apt-get install --assume-yes "${APT_FLAGS[@]}" \
+    gcc \
+    g++ \
     catch \
     make \
     cmake \
@@ -98,14 +100,7 @@ if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
       gcc-9 \
       g++-9 &&
   sudo rm -rf /var/lib/apt/lists/*
-else
-  sudo apt-get update &&
-    sudo apt-get install --assume-yes "${APT_FLAGS[@]}" \
-      g++ \
-      gcc &&
-  sudo rm -rf /var/lib/apt/lists/*
 fi
-
 
 teamcity_service_msg_blockClosed
 # .................................................................................................
