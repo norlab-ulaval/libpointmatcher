@@ -11,7 +11,7 @@ services:
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.libpointmatcher.compilation_test
-      no_cache: false
+      no_cache: true
       target: test-compilation-auto-path-resolution
       platforms:
         - "linux/amd64"
