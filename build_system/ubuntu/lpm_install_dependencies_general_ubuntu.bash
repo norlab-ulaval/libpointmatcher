@@ -100,6 +100,7 @@ if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
       gcc-9 \
       g++-9 &&
   sudo rm -rf /var/lib/apt/lists/*
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 fi
 
 n2st::teamcity_service_msg_blockClosed
