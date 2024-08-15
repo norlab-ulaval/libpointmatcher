@@ -41,9 +41,9 @@ This tutorial will guide you through the different steps to install libpointmatc
 ### Dependencies
 Libpointmatcher relies on a number of standard libraries, most of which can be installed with standard package managers. The following table lists the minimum requirements necessary to instal libpointmatcher.
 
-| Library name | cmake  | boost  |  eigen  | yaml-cpp | libnabo | doxygen (opt.) |
-|:-------------|:------:|:------:|:-------:|:--------:|:-------:|:--------------:|
-| **Version**  | 3.10.2 | 1.65.1 | 3.3.4-4 |   0.5    |  1.1.1  |   1.8.13-10    |
+| Library name | g++   | cmake  | boost  |  eigen  | yaml-cpp | libnabo | doxygen (opt.) |
+|:-------------|-------|:------:|:------:|:-------:|:--------:|:-------:|:--------------:|
+| **Version**  | 9.4.0 | 3.10.2 | 1.65.1 | 3.3.4-4 |   0.5    |  1.1.1  |   1.8.13-10    |
 
 ## Detailed Installation Instructions
 The rest of this tutorial will guide you through the different requirements step by step.
@@ -52,11 +52,24 @@ The rest of this tutorial will guide you through the different requirements step
 Some installation steps are platform-dependent and need to be done beforehand.
 
 === "Ubuntu"
-    You will need to install the GNU Compiler Collection, also known as GCC. The minimum supported version is 7.5.0.
+    You will need to install the GNU Compiler Collection, also known as GCC. The minimum supported version is 9.4.0.
     ```bash
     sudo apt update
     sudo apt install build-essential
     ```
+    
+    ??? warning "Ubuntu 18 Bionic"
+
+        While newer versions of Ubuntu come with gcc and g++ on newer versions than 9.4.0 and support all modern C++17 standard library features, it is not the case for Ubuntu Bionic.
+        You will therefore need to install it manually.
+        Run
+        ```shell
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update &&
+        sudo apt-get install gcc-9 g++-9
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+        ```
+
 === "MacOS"
     ###### Installing Xcode via the App Store (OS X 10.10.2 and later)
     
