@@ -45,7 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 #include <ctype.h>
 #include "boost/algorithm/string.hpp"
-#include "boost/filesystem/operations.hpp"
 #include <filesystem>
 #include "boost/lexical_cast.hpp"
 #include "boost/foreach.hpp"

@@ -163,7 +163,6 @@ jobs:
                 libopenmpt:x64-windows `
                 boost-mpi:x64-windows-static `
                 boost-thread:x64-windows-static `
-                boost-filesystem:x64-windows-static `
                 boost-system:x64-windows-static `
                 boost-program-options:x64-windows-static `
                 boost-date-time:x64-windows-static `
@@ -185,7 +184,7 @@ jobs:
         if: ${{ steps.cache-boost.outputs.cache-hit != 'true' && runner.os == 'Linux' }}
         working-directory: ${{ env.BOOST_SRC_DIR }}/${{ env.BOOST_DIR }}
         run: |
-          ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --prefix=${{ env.BOOST_INSTALL_PATH }}
+          ./bootstrap.sh --with-libraries=thread,system,program_options,date_time,chrono --with-icu --prefix=${{ env.BOOST_INSTALL_PATH }}
           ./b2 cxxflags=-fPIC cflags=-fPIC link=static install
 
       - name: Download source code libnabo ${{ env.LIBNABO_VERSION }}
