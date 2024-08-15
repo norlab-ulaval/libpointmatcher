@@ -68,7 +68,7 @@ source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 # Set environment variable IMAGE_ARCH_AND_OS
 cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash"
 
-function print_help_in_terminal() {
+function lpm::print_help_in_terminal() {
   echo -e "\$ ${0} [<optional argument>]
 
   \033[1m<optional argument>:\033[0m
@@ -99,10 +99,10 @@ function print_help_in_terminal() {
 SHOW_SPLASH_ILU="${SHOW_SPLASH_ILU:-true}"
 
 if [[ "${SHOW_SPLASH_ILU}" == 'true' ]]; then
-  norlab_splash "${NBS_SPLASH_NAME:?err}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
+  n2st::norlab_splash "${NBS_SPLASH_NAME:?err}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
 fi
 
-print_formated_script_header "${CALLER_NAME} (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
+n2st::print_formated_script_header "${CALLER_NAME} (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
 
 
 # ....Script command line flags....................................................................
@@ -142,7 +142,7 @@ while [ $# -gt 0 ]; do
     shift
     ;;
   -h | --help)
-    print_help_in_terminal
+    lpm::print_help_in_terminal
     exit
     ;;
   --) # no more option
@@ -172,17 +172,17 @@ CMAKE_FLAGS=( -D CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" -D BUILD_TESTS="${BUILD_
 #  -D LIBNABO_INSTALL_DIR="${NBS_LIB_INSTALL_PATH}/libnabo" \
 
 # ----Install steps--------------------------------------------------------------------------------
-teamcity_service_msg_blockOpened "Install ${NBS_REPOSITORY_NAME}"
+n2st::teamcity_service_msg_blockOpened "Install ${NBS_REPOSITORY_NAME}"
 
 mkdir -p "${NBS_LIB_INSTALL_PATH}"
-print_msg "Directories (pre libpointmatcher install)$(tree -L 2 "${NBS_LIB_INSTALL_PATH}")"
+n2st::print_msg "Directories (pre libpointmatcher install)$(tree -L 2 "${NBS_LIB_INSTALL_PATH}")"
 cd "${NBS_LIB_INSTALL_PATH}"
 
 # ....Repository cloning step......................................................................
 if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
 
   if [[ -d ${NBS_REPOSITORY_NAME}/.git ]]; then
-    print_msg_error_and_exit "${MSG_DIMMED_FORMAT}${NBS_REPOSITORY_NAME}${MSG_END_FORMAT} source code was already checkout in the specified install directory ${MSG_DIMMED_FORMAT}${NBS_LIB_INSTALL_PATH}/${MSG_END_FORMAT}, specify an other one using ${MSG_DIMMED_FORMAT}--install-path </install/dir/path/>${MSG_END_FORMAT}."
+    n2st::print_msg_error_and_exit "${MSG_DIMMED_FORMAT}${NBS_REPOSITORY_NAME}${MSG_END_FORMAT} source code was already checkout in the specified install directory ${MSG_DIMMED_FORMAT}${NBS_LIB_INSTALL_PATH}/${MSG_END_FORMAT}, specify an other one using ${MSG_DIMMED_FORMAT}--install-path </install/dir/path/>${MSG_END_FORMAT}."
   fi
 
   git clone https://github.com/"${NBS_REPOSITORY_DOMAIN}"/"${NBS_REPOSITORY_NAME}".git
@@ -199,7 +199,7 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
 
     git checkout tags/"${GITHUB_TAG}"
 
-    print_msg "Repository checkout at tag $(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)"
+    n2st::print_msg "Repository checkout at tag $(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)"
   fi
 fi
 
@@ -207,14 +207,14 @@ cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 mkdir -p build && cd build
 
 # ....Cmake install step...........................................................................
-teamcity_service_msg_compilationStarted "cmake"
+n2st::teamcity_service_msg_compilationStarted "cmake"
 
-print_msg "Execute ${MSG_DIMMED_FORMAT}
+n2st::print_msg "Execute ${MSG_DIMMED_FORMAT}
 cmake ${CMAKE_FLAGS[*]} ${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}
 ${MSG_END_FORMAT}"
 
 if [[ $TEST_RUN  == true ]]; then
-  print_msg "Test-run mode: Skipping cmake"
+  n2st::print_msg "Test-run mode: Skipping cmake"
   BUILD_EXIT_CODE=0
   INSTALL_EXIT_CODE=0
 else
@@ -240,10 +240,10 @@ else
   #cmake -LAH
 fi
 
-print_msg "Directories (post ${NBS_REPOSITORY_NAME} install)$(tree -L 2 ${NBS_LIB_INSTALL_PATH})"
+n2st::print_msg "Directories (post ${NBS_REPOSITORY_NAME} install)$(tree -L 2 ${NBS_LIB_INSTALL_PATH})"
 
-teamcity_service_msg_compilationFinished
-teamcity_service_msg_blockClosed
+n2st::teamcity_service_msg_compilationFinished
+n2st::teamcity_service_msg_blockClosed
 
 # ....Install/build feedback.......................................................................
 SUCCESS_MSG="${NBS_REPOSITORY_NAME} installed successfully at ${MSG_DIMMED_FORMAT}${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}${MSG_END_FORMAT}"
@@ -256,20 +256,20 @@ if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   else
     if [[ ${BUILD_EXIT_CODE} != 0 ]]; then
       echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$BUILD_EXIT_CODE' status='ERROR']"
-      print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+      n2st::print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
       exit $BUILD_EXIT_CODE
     else
       echo -e "##teamcity[message text='${MSG_BASE_TEAMCITY} ${FAILURE_MSG}' errorDetails='$INSTALL_EXIT_CODE' status='ERROR']"
-      print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+      n2st::print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
       exit $INSTALL_EXIT_CODE
     fi
   fi
 else
   if [[ ${BUILD_EXIT_CODE} == 0 ]] && [[ ${INSTALL_EXIT_CODE} == 0 ]]; then
-    echo " " && print_msg_done "${SUCCESS_MSG}"
+    echo " " && n2st::print_msg_done "${SUCCESS_MSG}"
   else
-    print_msg_error "${FAILURE_MSG}"
-    print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+    n2st::print_msg_error "${FAILURE_MSG}"
+    n2st::print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
     if [[ ${BUILD_EXIT_CODE} != 0 ]]; then
       exit $BUILD_EXIT_CODE
     else
@@ -278,7 +278,7 @@ else
   fi
 fi
 
-print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+n2st::print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 
 # ====Teardown=====================================================================================
 cd "${TMP_CWD}"
