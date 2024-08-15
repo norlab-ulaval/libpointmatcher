@@ -34,7 +34,7 @@ cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build"
 if [[ -d ./utest ]]; then
   source "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build_system/ubuntu/lpm_execute_libpointmatcher_unittest.bash"
 else
-  print_msg_warning "Directory ${MSG_DIMMED_FORMAT}utest/${MSG_END_FORMAT} was not created during compilation.
+  n2st::print_msg_warning "Directory ${MSG_DIMMED_FORMAT}utest/${MSG_END_FORMAT} was not created during compilation.
   Skipping Libpointmatcher unit-test."
 fi
 
