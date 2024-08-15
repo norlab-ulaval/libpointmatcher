@@ -25,11 +25,11 @@ function lpm::configure_bashrc() {
   source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 
   # ====Begin======================================================================================
-  print_formated_script_header 'lpm_bashrc_config.bash' "${MSG_LINE_CHAR_UTIL}"
+  n2st::print_formated_script_header 'lpm_bashrc_config.bash' "${MSG_LINE_CHAR_UTIL}"
 
 
   if [[ "$(basename ${LPM_PATH})" != "${NBS_REPOSITORY_NAME}" ]]; then
-    print_msg_error_and_exit "Can't find directory ${MSG_DIMMED_FORMAT}${NBS_REPOSITORY_NAME}${MSG_END_FORMAT}"
+    n2st::print_msg_error_and_exit "Can't find directory ${MSG_DIMMED_FORMAT}${NBS_REPOSITORY_NAME}${MSG_END_FORMAT}"
   fi
 
 
@@ -47,9 +47,9 @@ function lpm::configure_bashrc() {
     #  echo "alias lpm_attach='cd $DN_PATH && bash dn_attach.bash'"
   fi
 
-  print_msg_done "New aliases with prefix 'lpm' added to .bashrc"
+  n2st::print_msg_done "New aliases with prefix 'lpm' added to .bashrc"
 
-  print_formated_script_footer 'lpm_bashrc_config.bash' "${MSG_LINE_CHAR_UTIL}"
+  n2st::print_formated_script_footer 'lpm_bashrc_config.bash' "${MSG_LINE_CHAR_UTIL}"
 
   # ====Teardown===================================================================================
   cd "${TMP_CWD}"

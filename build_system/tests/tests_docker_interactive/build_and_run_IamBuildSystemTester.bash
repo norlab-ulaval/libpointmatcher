@@ -34,28 +34,28 @@ set -o allexport && source ./build_system/.env && set +o allexport
 source "./build_system/utilities/norlab-shell-script-tools/import_norlab_shell_script_tools_lib.bash"
 
 # ====Begin========================================================================================
-print_formated_script_header 'build_and_run_IamBuildSystemTester.bash' "${MSG_LINE_CHAR_TEST}"
+n2st::print_formated_script_header 'build_and_run_IamBuildSystemTester.bash' "${MSG_LINE_CHAR_TEST}"
 
 # ....Build image..................................................................................
 echo
-print_msg "Building 'lpm.ubuntu20.buildsystem.test'"
+n2st::print_msg "Building 'lpm.ubuntu20.buildsystem.test'"
 # Note: Build context must be at repository root
 
 pwd
 tree -L 1 -a
 
-show_and_execute_docker "build -f build_system/tests/tests_docker_interactive/Dockerfile.build_system_test -t lpm.ubuntu20.buildsystem.test ."
+n2st::show_and_execute_docker "build -f build_system/tests/tests_docker_interactive/Dockerfile.build_system_test -t lpm.ubuntu20.buildsystem.test ."
 #--no-cache
 
 # ....Run container................................................................................
-print_msg "Starting 'IamBuildSystemTester'"
+n2st::print_msg "Starting 'IamBuildSystemTester'"
 
 if [[ -n ${DOCKER_CMD_ARGS} ]]; then
-  print_msg "Passing command ${MSG_DIMMED_FORMAT}\"${DOCKER_CMD_ARGS}\"${MSG_END_FORMAT} to docker run"
+  n2st::print_msg "Passing command ${MSG_DIMMED_FORMAT}\"${DOCKER_CMD_ARGS}\"${MSG_END_FORMAT} to docker run"
 fi
 
-show_and_execute_docker "run --name IamBuildSystemTester -it --rm lpm.ubuntu20.buildsystem.test ${DOCKER_CMD_ARGS}"
+n2st::show_and_execute_docker "run --name IamBuildSystemTester -it --rm lpm.ubuntu20.buildsystem.test ${DOCKER_CMD_ARGS}"
 
-print_formated_script_footer 'build_and_run_IamBuildSystemTester.bash' "${MSG_LINE_CHAR_TEST}"
+n2st::print_formated_script_footer 'build_and_run_IamBuildSystemTester.bash' "${MSG_LINE_CHAR_TEST}"
 # ====Teardown=====================================================================================
 cd "${TMP_CWD}"
