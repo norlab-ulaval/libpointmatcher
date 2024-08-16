@@ -418,7 +418,7 @@ public:
 
 	virtual void TearDown()
 	{
-		EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(testFileName)));
+		EXPECT_TRUE(std::filesystem::remove(std::filesystem::path(testFileName)));
 	}
 
 
