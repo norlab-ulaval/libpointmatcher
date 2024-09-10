@@ -76,6 +76,7 @@ sudo apt-get update &&
     curl \
     wget \
     git \
+    software-properties-common \
   && sudo apt-get install --assume-yes "${APT_FLAGS[@]}" \
     g++ \
     gcc \
@@ -86,6 +87,22 @@ sudo apt-get update &&
   sudo rm -rf /var/lib/apt/lists/*
 
 ##cmake --version
+
+# Retrieve ubuntu version number: DISTRIB_RELEASE
+source /etc/lsb-release
+print_msg "Ubuntu version is ${DISTRIB_RELEASE}"
+if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
+  # Update Bionic outdated compiler
+  # Ref https://github.com/norlab-ulaval/libpointmatcher/pull/581#issuecomment-2284415233
+  sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  sudo apt-get update &&
+    sudo apt-get install --assume-yes "${APT_FLAGS[@]}" \
+      gcc-9 \
+      g++-9 &&
+  sudo rm -rf /var/lib/apt/lists/*
+  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+fi
+
 
 teamcity_service_msg_blockClosed
 # .................................................................................................
