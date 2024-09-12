@@ -226,7 +226,8 @@ else
 
   BUILD_EXIT_CODE=$?
 
-  make -j $(nproc)
+  print_msg "Nb of available core in the current process $(nproc)"
+  make -j $(nproc --ignore=2)
   sudo make install
 
   INSTALL_EXIT_CODE=$?

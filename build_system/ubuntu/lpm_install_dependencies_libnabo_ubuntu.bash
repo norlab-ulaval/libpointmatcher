@@ -133,7 +133,8 @@ else
 
   cmake  "${CMAKE_FLAGS[@]}" "${NBS_LIB_INSTALL_PATH}/libnabo"
 
-  make -j $(nproc)
+  print_msg "Nb of available core in the current process $(nproc)"
+  make -j $(nproc --ignore=2)
   sudo make install
 
   # (NICE TO HAVE) ToDo: refactor (ref task NMO-428 refactor: drop libnabo `make test` step after libnabo-build-system deployment)

@@ -2,6 +2,8 @@ ARG PROJECT_HUB=norlabulaval
 ARG BASE_IMAGE=libpointmatcher-dependencies
 ARG BASE_IMAGE_TAG
 FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-dependencies
+ARG TARGETPLATFORM
+ARG TARGETARCH
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
 
