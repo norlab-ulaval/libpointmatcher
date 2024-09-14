@@ -223,13 +223,10 @@ else
   #  CMAKE_FLAGS=( -D BOOST_ROOT="$BOOST_ROOT" "${CMAKE_FLAGS[@]}" )
 
   cmake "${CMAKE_FLAGS[@]}" "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
-
   BUILD_EXIT_CODE=$?
 
-  print_msg "Nb of available core in the current process $(nproc)"
-  make -j $(nproc --ignore=2)
+  make -j $(nproc)
   sudo make install
-
   INSTALL_EXIT_CODE=$?
 
   if [[ ${GENERATE_API_DOC_FLAG} = TRUE ]]; then
