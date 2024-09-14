@@ -188,7 +188,7 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
   git clone https://github.com/"${NBS_REPOSITORY_DOMAIN}"/"${NBS_REPOSITORY_NAME}".git
 
   if [[ "${REPOSITORY_VERSION}" != 'latest' ]]; then
-    cd "${NBS_REPOSITORY_NAME}"
+    cd "${NBS_REPOSITORY_NAME}" || exit
 
     git fetch --tags
     git tag --list
@@ -203,7 +203,7 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
   fi
 fi
 
-cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}" || exit
 mkdir -p build && cd build
 
 # ....Cmake install step...........................................................................
@@ -223,12 +223,10 @@ else
   #  CMAKE_FLAGS=( -D BOOST_ROOT="$BOOST_ROOT" "${CMAKE_FLAGS[@]}" )
 
   cmake "${CMAKE_FLAGS[@]}" "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
-
   BUILD_EXIT_CODE=$?
 
   make -j $(nproc)
   sudo make install
-
   INSTALL_EXIT_CODE=$?
 
   if [[ ${GENERATE_API_DOC_FLAG} = TRUE ]]; then
@@ -281,4 +279,4 @@ fi
 n2st::print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 
 # ====Teardown=====================================================================================
-cd "${TMP_CWD}"
+cd "${TMP_CWD}" || exit
