@@ -27,7 +27,7 @@ source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 # ====Begin========================================================================================
 print_formated_script_header 'lpm_execute_libpointmatcher_unittest.bash' ':'
 
-cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build"
+cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build" || exit 1
 
 if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
   echo -e "##teamcity[testSuiteStarted name='gtest']"
@@ -68,5 +68,5 @@ fi
 
 print_formated_script_footer 'lpm_execute_libpointmatcher_unittest.bash' ':'
 # ====Teardown=====================================================================================
-cd "${TMP_CWD}"
+cd "${TMP_CWD}" || exit 1
 exit $UTEST_EXIT_CODE

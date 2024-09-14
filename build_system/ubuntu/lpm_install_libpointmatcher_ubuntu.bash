@@ -176,7 +176,7 @@ teamcity_service_msg_blockOpened "Install ${NBS_REPOSITORY_NAME}"
 
 mkdir -p "${NBS_LIB_INSTALL_PATH}"
 print_msg "Directories (pre libpointmatcher install)$(tree -L 2 "${NBS_LIB_INSTALL_PATH}")"
-cd "${NBS_LIB_INSTALL_PATH}"
+cd "${NBS_LIB_INSTALL_PATH}" || exit
 
 # ....Repository cloning step......................................................................
 if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
@@ -188,7 +188,7 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
   git clone https://github.com/"${NBS_REPOSITORY_DOMAIN}"/"${NBS_REPOSITORY_NAME}".git
 
   if [[ "${REPOSITORY_VERSION}" != 'latest' ]]; then
-    cd "${NBS_REPOSITORY_NAME}"
+    cd "${NBS_REPOSITORY_NAME}" || exit
 
     git fetch --tags
     git tag --list
@@ -203,7 +203,7 @@ if [[ ${BUILD_SYSTEM_CI_INSTALL} == FALSE ]]; then
   fi
 fi
 
-cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}" || exit
 mkdir -p build && cd build
 
 # ....Cmake install step...........................................................................
@@ -279,4 +279,4 @@ fi
 print_formated_script_footer "${CALLER_NAME} (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 
 # ====Teardown=====================================================================================
-cd "${TMP_CWD}"
+cd "${TMP_CWD}" || exit
