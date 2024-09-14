@@ -4,7 +4,7 @@ include:
 services:
 
   # ====Pull-request related services==============================================================
-  # ....Test logic related to libpointmatcher install casses.......................................
+  # ....Test logic related to libpointmatcher install cases........................................
   _test_compilation:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-compilation-test:${NBS_IMAGE_TAG:?err}
     pull_policy: build # Execute the `build` attribute over pulling the `image` attribute
