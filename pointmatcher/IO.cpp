@@ -799,14 +799,14 @@ void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary,
         const string& ext(path.extension().string());
         if (boost::iequals(ext, ".vtk"))
             return PointMatcherIO<T>::saveVTK(*this, fileName, binary, precision);
+        else if (boost::iequals(ext, ".ply"))
+            return PointMatcherIO<T>::savePLY(*this, fileName, binary, precision);
 
         if (binary)
-            throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\".");
+            throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\" and \".ply\".");
 
         if (boost::iequals(ext, ".csv"))
             return PointMatcherIO<T>::saveCSV(*this, fileName, precision);
-        else if (boost::iequals(ext, ".ply"))
-            return PointMatcherIO<T>::savePLY(*this, fileName, precision);
         else if (boost::iequals(ext, ".pcd"))
             return PointMatcherIO<T>::savePCD(*this, fileName, precision);
         else
@@ -1337,6 +1337,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	PLYElement* current_element = NULL;
 	bool skip_props = false; // flag to skip properties if element is not supported
 	unsigned elem_offset = 0; // keep track of line position of elements that are supported
+    bool is_binary = false;
 	string line;
 	safeGetLine(is, line);
 
@@ -1374,8 +1375,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			if (format_str != "ascii" && format_str != "binary_little_endian" && format_str != "binary_big_endian")
 				throw runtime_error(string("PLY parse error: format <") + format_str + string("> is not supported"));
 
-			if (format_str == "binary_little_endian" || format_str == "binary_big_endian")
-				throw runtime_error(string("PLY parse error: binary PLY files are not supported"));
+			if (format_str == "binary_little_endian")
+                is_binary = true;
+            if (format_str == "binary_big_endian")
+				throw runtime_error(string("PLY parse error: only little endian binary PLY files are currently supported"));
 			if (version_str != "1.0")
 			{
 				throw runtime_error(string("PLY parse error: version <") + version_str + string("> of ply is not supported"));
@@ -1386,8 +1389,6 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		}
 		else if (keyword == "element")
 		{
-			
-
 			string elem_name, elem_num_s;
 			stringstream >> elem_name >> elem_num_s;
 
@@ -1528,9 +1529,9 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 						it->pmRowID = rowIdTime;
 						timeLabelGen.add(supLabel.internalName);
 						rowIdTime++;
+                        break;
 					default:
 						throw runtime_error(string("PLY Implementation Error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
-						break;
 				}
 
 				// we stop searching once we have a match
@@ -1573,37 +1574,44 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	for(int i=0; i<nbValues; i++)
 	{
 		T value;
-		if(!(is >> value))
-		{
-			throw runtime_error(
-			(boost::format("PLY parse error: expected %1% values (%2% points with %3% properties) but only found %4% values.") % nbValues % nbPoints % nbProp % i).str());
-		}
-		else
-		{
-			const int row = vertex->properties[propID].pmRowID;
-			const PMPropTypes type = vertex->properties[propID].pmType;
-			
-			// rescale color from [0,254] to [0, 1[
-			// FIXME: do we need that?
-			if (vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" || vertex->properties[propID].name == "alpha") {
-				value /= 255.0;
-			}
+        if (is_binary)
+        {
+            is.read(reinterpret_cast<char*>(&value), sizeof(float));
+        }
+        if ((is_binary && !is) || (!is_binary && !(is >> value)))
+        {
+            throw runtime_error(
+                    (boost::format("PLY parse error: expected %1% values (%2% points with %3% properties) but only found %4% values.") % nbValues % nbPoints % nbProp %
+                     i).str());
+        }
+        else
+        {
+            const int row = vertex->properties[propID].pmRowID;
+            const PMPropTypes type = vertex->properties[propID].pmType;
 
-			switch (type)
-			{
-				case FEATURE:
-					features(row, col) = value;
-					break;
-				case DESCRIPTOR:
-					descriptors(row, col) = value;
-					break;
-				case TIME:
-					times(row, col) = value;
-					break;
-				case UNSUPPORTED:
-					throw runtime_error("Implementation error in loadPLY(). This should not throw.");
-					break;
-			}
+            // rescale color from [0,254] to [0, 1[
+            // FIXME: do we need that?
+            if(vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" ||
+               vertex->properties[propID].name == "alpha")
+            {
+                value /= 255.0;
+            }
+
+            switch(type)
+            {
+                case FEATURE:
+                    features(row, col) = value;
+                    break;
+                case DESCRIPTOR:
+                    descriptors(row, col) = value;
+                    break;
+                case TIME:
+                    times(row, col) = value;
+                    break;
+                case UNSUPPORTED:
+                    throw runtime_error("Implementation error in loadPLY(). This should not throw.");
+                    break;
+            }
 
 			++propID;
 
@@ -1614,8 +1622,6 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			}
 		}
 	}
-
-
 
 	///////////////////////////
 	// 5- ASSEMBLE FINAL DATAPOINTS
@@ -1666,7 +1672,11 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		return;
 	}
 
-	ofs << "ply\n" <<"format ascii 1.0\n";
+    if (binary)
+        ofs << "ply\n" <<"format binary_little_endian 1.0\n";
+    else
+	    ofs << "ply\n" <<"format ascii 1.0\n";
+    ofs << "comment File created with libpointmatcher\n";
 	ofs << "element vertex " << pointCount << "\n";
 	for (int f=0; f <(featCount-1); f++)
 	{
@@ -1715,9 +1725,9 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 }
 
 template
-void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName, unsigned precision);
+void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 template
-void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName, unsigned precision);
+void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 
 //! @(brief) Regular PLY property constructor
 template<typename T>

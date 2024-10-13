@@ -218,7 +218,7 @@ struct PointMatcherIO
 	static DataPoints loadPLY(const std::string& fileName);
 	static DataPoints loadPLY(std::istream& is);
 
-	static void savePLY(const DataPoints& data, const std::string& fileName, unsigned precision); //!< save datapoints to PLY point cloud format
+	static void savePLY(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision); //!< save datapoints to PLY point cloud format
 
 	// PCD
 	static DataPoints loadPCD(const std::string& fileName);
