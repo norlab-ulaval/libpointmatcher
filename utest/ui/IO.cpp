@@ -463,6 +463,11 @@ TEST_F(IOLoadSaveTest, PLY)
 	loadSaveTest(dataPath + "unit_test.ply", true);
 }
 
+TEST_F(IOLoadSaveTest, PLYBinary)
+{
+	loadSaveTest(dataPath + "unit_test.bin.ply", true, 1, true);
+}
+
 TEST_F(IOLoadSaveTest, PCD)
 {
 	loadSaveTest(dataPath + "unit_test.pcd");
