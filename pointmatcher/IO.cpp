@@ -1719,7 +1719,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 template<typename T>
 void PointMatcherIO<T>::savePLY(const DataPoints& data,
-		const std::string& fileName, unsigned precision)
+		const std::string& fileName, bool binary, unsigned precision)
 {
 	//typedef typename DataPoints::Labels Labels;
 
@@ -1743,20 +1743,32 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
         ofs << "ply\n" <<"format binary_little_endian 1.0\n";
     else
 	    ofs << "ply\n" <<"format ascii 1.0\n";
+
     ofs << "comment File created with libpointmatcher\n";
 	ofs << "element vertex " << pointCount << "\n";
+    std::string dataType;
+
+    using ValueType = typename std::conditional<std::is_same<T, float>::value, float, double>::type;
+    if (std::is_same<ValueType, float>::value)
+        dataType = "float";
+    else
+        dataType = "double";
+
 	for (int f=0; f <(featCount-1); f++)
 	{
-		ofs << "property float " << data.featureLabels[f].text << "\n";
+		ofs << "property " << dataType << " " << data.featureLabels[f].text << "\n";
 	}
 
 	for (size_t i = 0; i < data.descriptorLabels.size(); i++)
 	{
 		Label lab = data.descriptorLabels[i];
 		for (size_t s = 0; s < lab.span; s++)
-
 		{
-			ofs << "property float " << getColLabel(lab,s) << "\n";
+            std::string label = getColLabel(lab,s);
+            if (label == "red" || label == "green" || label == "blue" || label == "alpha")
+			    ofs << "property uchar " << label << "\n";
+            else
+			    ofs << "property " << dataType << " " << label << "\n";
 		}
 	}
 
@@ -1767,9 +1779,16 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 	{
 		for (int f = 0; f < featCount - 1; ++f)
 		{
-			ofs << data.features(f, p);
-			if(!(f == featCount-2 && descRows == 0))
-				ofs << " ";
+            if (binary)
+            {
+                ofs.write(reinterpret_cast<const char*>(&data.features(f, p)), sizeof(T));
+            }
+            else
+            {
+                ofs << data.features(f, p);
+                if(!(f == featCount - 2 && descRows == 0))
+                    ofs << " ";
+            }
 		}
 
 		bool datawithColor = data.descriptorExists("color");
@@ -1778,14 +1797,24 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		for (int d = 0; d < descRows; ++d)
 		{
 			if (datawithColor && d >= colorStartingRow && d < colorEndRow) {
-				ofs << static_cast<unsigned>(data.descriptors(d, p) * 255.0);
+                if (binary)
+                {
+                    char value = static_cast<char>(data.descriptors(d, p) * 255.0);
+                    ofs.write(reinterpret_cast<const char*>(&value), sizeof(char));
+                }
+                else
+				    ofs << static_cast<unsigned>(data.descriptors(d, p) * 255.0);
 			} else {
-				ofs << data.descriptors(d, p);
+                if (binary)
+				    ofs.write(reinterpret_cast<const char*>(&data.descriptors(d, p)), sizeof(T));
+                else
+				    ofs << data.descriptors(d, p);
 			}
-			if(d != descRows-1)
+			if(d != descRows-1 && !binary)
 				ofs << " ";
 		}
-		ofs << "\n";
+        if(!binary)
+		    ofs << "\n";
 	}
 
 	ofs.close();
@@ -1801,11 +1830,11 @@ template<typename T>
 PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& type,
 		const std::string& name, const unsigned pos) :
 		name(name),
-		type(type),
 		pos(pos)
 {
 	if (plyPropTypeValid(type))
 	{
+        this->type = get_type_from_string(type);
 		is_list = false;
 	}
 	else
@@ -1826,12 +1855,12 @@ template<typename T>
 PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& idx_type,
 		const std::string& type, const std::string& name, const unsigned pos) :
 		name(name),
-		type(type),
 		idx_type(idx_type),
 		pos(pos)
 {
 	if (plyPropTypeValid(idx_type) && plyPropTypeValid(type))
 	{
+        this->type = get_type_from_string(type);
 		is_list = true;
 	}
 	else
