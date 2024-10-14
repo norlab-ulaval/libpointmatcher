@@ -1576,7 +1576,74 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		T value;
         if (is_binary)
         {
-            is.read(reinterpret_cast<char*>(&value), sizeof(float));
+            switch(vertex->properties[propID].type)
+            {
+                case PLYProperty::PLYPropertyType::INT8:
+                {
+                    int8_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int8_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT8:
+                {
+                    uint8_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint8_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::INT16:
+                {
+                    int16_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int16_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT16:
+                {
+                    uint16_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint16_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::INT32:
+                {
+                    // TODO what happens if T is float and we overflow?
+                    int32_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int32_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT32:
+                {
+                    // TODO what happens if T is float and we overflow?
+                    uint32_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint32_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::FLOAT32:
+                {
+                    float temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(float));
+                    value = static_cast<T>(temp); // Directly assign if T is float, or cast if T is double
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::FLOAT64:
+                {
+                    // TODO what happens if T is float and we read a double?
+                    double temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(double));
+                    value = static_cast<T>(temp); // Directly assign if T is double, or cast if T is float
+                    break;
+                }
+                default:
+                {
+                    throw std::runtime_error(
+                            (std::stringstream() << "Unsupported data type in binary mode \"" << static_cast<int>(vertex->properties[propID].type) << "\"").str()
+                    );
+                }
+            }
         }
         if ((is_binary && !is) || (!is_binary && !(is >> value)))
         {
@@ -1597,21 +1664,21 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
                 value /= 255.0;
             }
 
-            switch(type)
-            {
-                case FEATURE:
-                    features(row, col) = value;
-                    break;
-                case DESCRIPTOR:
-                    descriptors(row, col) = value;
-                    break;
-                case TIME:
-                    times(row, col) = value;
-                    break;
-                case UNSUPPORTED:
-                    throw runtime_error("Implementation error in loadPLY(). This should not throw.");
-                    break;
-            }
+			switch (type)
+			{
+				case FEATURE:
+					features(row, col) = value;
+					break;
+				case DESCRIPTOR:
+					descriptors(row, col) = value;
+					break;
+				case TIME:
+					times(row, col) = value;
+					break;
+				case UNSUPPORTED:
+					throw runtime_error("Implementation error in loadPLY(). This should not throw.");
+					break;
+			}
 
 			++propID;
 
