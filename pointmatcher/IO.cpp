@@ -1639,9 +1639,8 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
                 }
                 default:
                 {
-                    throw std::runtime_error(
-                            (std::stringstream() << "Unsupported data type in binary mode \"" << static_cast<int>(vertex->properties[propID].type) << "\"").str()
-                    );
+                    throw runtime_error(
+                        (boost::format("Unsupported data type in binary mode %1%.") % static_cast<int>(vertex->properties[propID].type)).str());
                 }
             }
         }
