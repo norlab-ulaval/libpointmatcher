@@ -173,11 +173,10 @@ Constructor
 Implementation of PLY element interface for the vertex element
 )pbdoc");
 
-//		FIXME : Generate undefined symbol error for "elementSupported" or "createElement" method when importing the module
-//		using PLYElementF = PMIO::PLYElementF;
-//		py::class_<PLYElementF>(pyPointMatcherIO, "PLYElementF", "Factory for PLY elements")
-//			.def("elementSupported", &PLYElementF::elementSupported, py::arg("elem_name"), "returns true if element named elem_name is supported by this parser")
-//			.def_static("createElement", &PLYElementF::createElement, py::arg("elem_name"), py::arg("elem_num"), py::arg("offset"), "factory function, build element defined by name with elem_num elements");
+		using PLYElementF = PMIO::PLYElementF;
+		py::class_<PLYElementF>(pyPointMatcherIO, "PLYElementF", "Factory for PLY elements")
+			.def("elementSupported", &PLYElementF::elementSupported, py::arg("elem_name"), "returns true if element named elem_name is supported by this parser")
+			.def_static("createElement", &PLYElementF::createElement, py::arg("elem_name"), py::arg("elem_num"), py::arg("offset"), "factory function, build element defined by name with elem_num elements");
 
 			using PCDproperty = PMIO::PCDproperty;
 			py::class_<PCDproperty>(pyPointMatcherIO, "PCDproperty", "Information for a PCD property")

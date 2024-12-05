@@ -1386,7 +1386,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		}
 		else if (keyword == "element")
 		{
-			
+
 
 			string elem_name, elem_num_s;
 			stringstream >> elem_name >> elem_num_s;
@@ -1582,7 +1582,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		{
 			const int row = vertex->properties[propID].pmRowID;
 			const PMPropTypes type = vertex->properties[propID].pmType;
-			
+
 			// rescale color from [0,254] to [0, 1[
 			// FIXME: do we need that?
 			if (vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" || vertex->properties[propID].name == "alpha") {
@@ -1822,6 +1822,23 @@ bool PointMatcherIO<T>::plyPropTypeValid(const std::string& type) {
 			|| type == "float" || type == "double");
 }
 
+
+// Explicitly instatiating the template for PLYElement, PLYProperty and PLYElementF
+// class functions to fix Python bindings import, which otherwise complains about a missing
+// symbol on pypointmatcher import
+template bool PointMatcherIO<float>::PLYElement::operator==(const PointMatcherIO<float>::PLYElement&) const;
+template bool PointMatcherIO<double>::PLYElement::operator==(const PointMatcherIO<double>::PLYElement&) const;
+
+template bool PointMatcherIO<float>::PLYProperty::operator==(const PointMatcherIO<float>::PLYProperty&) const;
+template bool PointMatcherIO<double>::PLYProperty::operator==(const PointMatcherIO<double>::PLYProperty&) const;
+
+template PointMatcherIO<float>::PLYElement* PointMatcherIO<float>::PLYElementF::createElement(
+		const std::string& elem_name, const int elem_num, const unsigned offset);
+template PointMatcherIO<double>::PLYElement* PointMatcherIO<double>::PLYElementF::createElement(
+		const std::string& elem_name, const int elem_num, const unsigned offset);
+
+template bool PointMatcherIO<float>::PLYElementF::elementSupported(const std::string& elem_name);
+template bool PointMatcherIO<double>::PLYElementF::elementSupported(const std::string& elem_name);
 
 template <typename T>
 bool PointMatcherIO<T>::PLYElement::operator==(const PLYElement& rhs) const

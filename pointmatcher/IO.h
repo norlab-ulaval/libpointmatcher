@@ -57,9 +57,9 @@ struct PointMatcherIO
 	//! Map to associate common descriptor sublabels to PM descriptor matrix row and labels
 	//! ex: nx, ny, nz are associated with (0,normals) (1,normals) (2,normals) respectively
 	typedef std::map<std::string, LabelAssociationPair > SublabelAssociationMap;
-	
+
 	static std::string getColLabel(const Label& label, const int row); //!< convert a descriptor label to an appropriate sub-label
-	
+
 	//! Type of information in a DataPoints. Each type is stored in its own dense matrix.
 	enum PMPropTypes
 		{
@@ -112,7 +112,7 @@ struct PointMatcherIO
 	};
 
 	//! Vector containing the mapping of all external names to PointMatcher representation.
-	//! The order is important (i.e., nx before ny). This can also be used to remap 
+	//! The order is important (i.e., nx before ny). This can also be used to remap
 	//! 1D descriptor name to a better one.
 	static const SupportedLabels & getSupportedExternalLabels()
 	{
@@ -272,10 +272,10 @@ struct PointMatcherIO
 		std::string idx_type; //!< for list properties, type of number of elements
 		unsigned pos; //!< index of the property in element
 		bool is_list; //!< member is true of property is a list
-		
+
 		//PointMatcher information:
 		PMPropTypes pmType; //!< type of information in PointMatcher
-		int pmRowID; //!< row id used in a DataPoints 
+		int pmRowID; //!< row id used in a DataPoints
 
 		PLYProperty() { } //!< Default constructor. If used member values must be filled later.
 
@@ -291,14 +291,14 @@ struct PointMatcherIO
 	//! Map from a descriptor name to a list PLY property
 	//! ex: "normals" -> nx, ny ,nz
 	typedef std::map<std::string, std::vector<PLYProperty> > PLYDescPropMap;
-	
+
 	//! Vector of properties specific to PLY files
 	typedef std::vector<PLYProperty> PLYProperties;
 
 	//! Iterator for a vector of PLY properties
 	typedef typename PLYProperties::iterator it_PLYProp;
 
-	//! Interface for all PLY elements. 
+	//! Interface for all PLY elements.
 	class PLYElement
 	{
 	public:
@@ -367,7 +367,7 @@ struct PointMatcherIO
 		unsigned int size; //!< Size of the property in bytes
 		char type; //!< Type: I: signed, U: unsigned, F: float
 		unsigned int count; //!< number of dimension
-		
+
 		//PointMatcher information:
 		PMPropTypes pmType; //!< type of information in PointMatcher
 		int pmRowID; //!< row id used in a DataPoints
