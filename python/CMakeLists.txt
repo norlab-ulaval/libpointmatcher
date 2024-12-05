@@ -51,6 +51,7 @@ set(PYBIND11_SOURCES
 
     #datapointfilters module
     datapointsfilters/add_descriptor.cpp
+    datapointsfilters/angle_limit.cpp
     datapointsfilters/bounding_box.cpp
     datapointsfilters/covariance_sampling.cpp
     datapointsfilters/cut_at_descriptor_threshold.cpp
