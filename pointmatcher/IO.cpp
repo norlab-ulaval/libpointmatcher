@@ -1312,7 +1312,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	1- PARSE PLY HEADER
 	2- ASSIGN PLY PROPERTIES TO DATAPOINTS ROWS
 	3- Reserve memory for a DataPoints
-	4- Parse PLY vertex to appropriate DataPoints cols and rows 
+	4- Parse PLY vertex to appropriate DataPoints cols and rows
 	5- Assemble final DataPoints
 
 	PLY organisation:
@@ -1479,7 +1479,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 	///////////////////////////
 	// 2- ASSIGN PLY PROPERTIES TO DATAPOINTS ROWS
-	
+
 	// Fetch vertex
 	PLYElement* vertex = elements[0];
 

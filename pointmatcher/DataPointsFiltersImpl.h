@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __POINTMATCHER_DATAPOINTSFILTERS_H
 
 #include "DataPointsFilters/AddDescriptor.h"
+#include "DataPointsFilters/AngleLimit.h"
 #include "DataPointsFilters/Identity.h"
 #include "DataPointsFilters/RemoveNaN.h"
 #include "DataPointsFilters/MaxDist.h"
@@ -72,6 +73,7 @@ struct DataPointsFiltersImpl
 {
 	typedef ::IdentityDataPointsFilter<T>   IdentityDataPointsFilter;
 	typedef ::AddDescriptorDataPointsFilter<T>   AddDescriptorDataPointsFilter;
+	typedef ::AngleLimitDataPointsFilter<T>   AngleLimitDataPointsFilter;
 	typedef ::RemoveNaNDataPointsFilter<T>  RemoveNaNDataPointsFilter;
 	typedef ::MaxDistDataPointsFilter<T>	MaxDistDataPointsFilter;
 	typedef ::MinDistDataPointsFilter<T>	MinDistDataPointsFilter;
