@@ -91,15 +91,22 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils
                     ${CMAKE_SOURCE_DIR}/pointmatcher/ErrorMinimizers)
 
-if(USE_SYSTEM_PYBIND11)
-	find_package(pybind11 2.5.0 REQUIRED)
-	message(STATUS "pybind11 v${pybind11_VERSION}")
+# Requires CMake 3.15
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+if (Python_FOUND)
+    message(STATUS "Python found: ${Python_VERSION}")
 else()
-	add_subdirectory(pybind11)
-	set(pybind11_FOUND TRUE)
+    message(FATAL_ERROR "Python not found")
 endif()
 
+# Use Python to locate pybind11 installed via pip
+execute_process(COMMAND ${Python_EXECUTABLE} -c "import pybind11; print(pybind11.get_cmake_dir())"
+                OUTPUT_VARIABLE pybind11_DIR
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+find_package(pybind11 CONFIG REQUIRED)
 if(pybind11_FOUND)
+    message(STATUS "Found pybind11 v${pybind11_VERSION} at ${PYBIND11_CMAKE_DIR}")
 	pybind11_add_module(pypointmatcher_native ${PYBIND11_SOURCES})
 
 	target_link_libraries(pypointmatcher_native
@@ -114,4 +121,3 @@ else()
 	message(FATAL_ERROR "pybind11 is required! Please follow the \"Compiling \
 libpointmatcher's with Python\" instructions from the official libpointmatcher's documentation.")
 endif()
-
