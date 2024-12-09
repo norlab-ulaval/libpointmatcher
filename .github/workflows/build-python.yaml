@@ -121,7 +121,10 @@ jobs:
             ninja-build \
             catch \
             libomp-dev \
-            wget
+            wget \
+            p7zip-full \
+            sudo \
+            cmake
 
       - name: Install MS MPI
         if: ${{ runner.os == 'Windows' }}
@@ -201,11 +204,10 @@ jobs:
           cd libnabo
           cmake -GNinja \
             -DBOOST_ROOT=${{ env.BOOST_INSTALL_PATH }} \
-            -DCMAKE_INSTALL_PREFIX=${{ env.LIBNABO_INSTALL_PATH }} \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DUSE_OPEN_MP:BOOL=ON \
             -S . -B ./build
-          cmake --build ./build --target install
+          cmake --build ./build --target install --parallel 4
           cd -
           rm -r ./libnabo/build
 
@@ -214,13 +216,12 @@ jobs:
         run: |
           cmake \
             -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} \
-            -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} \
             -DBUILD_PYTHON_MODULE:BOOL=ON \
             -DUSE_OPEN_MP:BOOL=ON \
             -DBoost_USE_STATIC_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -S . -B ${{ env.BUILD_DIR }}
-          sudo cmake --build ${{ env.BUILD_DIR }} --target install
+          sudo cmake --build ${{ env.BUILD_DIR }} --target install --parallel 4
 
       - name: Compile libpointmatcher on Windows
         if: runner.os == 'Windows'
@@ -237,7 +238,7 @@ jobs:
             -DUSE_OPEN_MP:BOOL=ON `
             -DCMAKE_BUILD_TYPE="RelWithDebInfo" `
             -S . -B ${{ env.BUILD_DIR }}
-          cmake --build ${{ env.BUILD_DIR }} --target install
+          cmake --build ${{ env.BUILD_DIR }} --target install --parallel 4
 
       - name: Build python wheel
         working-directory: ./python
