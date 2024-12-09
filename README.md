@@ -30,7 +30,7 @@ The library is written in C++ for efficiency with [bindings in Python](doc/index
 &nbsp; &nbsp; &nbsp;
 [![Mentioned in Awesome Robotics](https://awesome.re/mentioned-badge.svg)](https://github.com/ahundt/awesome-robotics#point-clouds)
 <br>
-<sup> 
+<sup>
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 <a href="https://github.com/szenergy/awesome-lidar#basic-matching-algorithms">LIDAR</a>
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
@@ -48,9 +48,9 @@ The library is written in C++ for efficiency with [bindings in Python](doc/index
 
 ### Supported OS And Architecture
 _libpointmatcher_ is tested on our build system under the following architecture and OS:
-- Ubuntu bionic (18.04), focal (20.04) and jammy (22.04)  
+- Ubuntu bionic (18.04), focal (20.04) and jammy (22.04)
 - x86 and arm64/v8
-  
+
 Note:
 - _libpointmatcher_ reportedly works on MacOs OsX (latest) and Windows (latest)
 
@@ -66,7 +66,7 @@ Execute the following to clone the repository with its submodule:
 ```shell
 git clone --recurse-submodules https://github.com/norlab-ulaval/libpointmatcher.git
 ```
-If _libpointmatcher_ was previously cloned, execute the following to fetch its new submodule 
+If _libpointmatcher_ was previously cloned, execute the following to fetch its new submodule
 ```shell
 git submodule update --remote --recursive --init
 ```
@@ -79,12 +79,12 @@ on your workstation to speed up your local development workflow.
 
 [//]: # (====Body=================================================================================)
 # Documentation and Tutorials
- 
+
 **Quick link for the tutorial pages: [Tutorials](http://libpointmatcher.readthedocs.org/).
 
-Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase. 
+Those tutorials are written using Markdown syntax and stored in the project's `/doc` folder.  Their scope ranges from introductory material on performing point cloud registration to instructions for the more experienced developer on how to extend the library's codebase.
 
-Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](https://norlab.ulaval.ca/libpointmatcher-doc/), but it is suggested to use the one build for your version in `doc/html`. 
+Libpointmatcher's source code is fully documented based on doxygen to provide an easy API to developers. An example of this API can be found [here](https://norlab.ulaval.ca/libpointmatcher-doc/), but it is suggested to use the one build for your version in `doc/html`.
 
 libpointmatcher was orginaly developed by [François Pomerleau](mailto:f.pomerleau@gmail.com) and [Stéphane Magnenat](http://stephane.magnenat.net) as part of our work at [ASL-ETH](http://www.asl.ethz.ch).
 It is now maintained by the Northern Robotics Laboratory ([Norlab](https://norlab.ulaval.ca/)), led by François Pomerleau.
@@ -102,7 +102,7 @@ The library has a light dependency list:
  * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
  * [boost] version 1.48 and up, portable C++ source libraries,
  * [libnabo] version 1.0.7, a fast K Nearest Neighbour library for low-dimensional spaces,
- 
+
 and was compiled on:
   * Ubuntu ([see how](/doc/CompilationUbuntu.md))
   * Mac OS X ([see how](/doc/CompilationMac.md))
@@ -131,9 +131,9 @@ bash lpm_install_docker_tools.bash
 ```
 
 
-### Compilation & Installation 
+### Compilation & Installation
 
-For beginner users unfamiliar with compiling and installing a library in Linux, go [here](doc/CompilationUbuntu.md) for detailed instructions on compiling libpointmatcher from the source code.  
+For beginner users unfamiliar with compiling and installing a library in Linux, go [here](doc/CompilationUbuntu.md) for detailed instructions on compiling libpointmatcher from the source code.
 
 For conveniences, you can use the provided installer script for ubuntu
 ```shell
@@ -214,7 +214,7 @@ and/or
 
 If you are interested in learning more about different registration algorithms, we recently put together a literature review surveying multiple solutions. The review is organized in the same way as the library and many examples are provided based on real deployments.
 
-F. Pomerleau, F. Colas and R. Siegwart (2015), "_A Review of Point Cloud Registration Algorithms for Mobile Robotics_", __Foundations and Trends® in Robotics__: Vol. 4: No. 1, pp 1-104.  https://doi.org/10.1561/2300000035 
+F. Pomerleau, F. Colas and R. Siegwart (2015), "_A Review of Point Cloud Registration Algorithms for Mobile Robotics_", __Foundations and Trends® in Robotics__: Vol. 4: No. 1, pp 1-104.  https://doi.org/10.1561/2300000035
 
 If you don't have access to the journal, you can download it from [here](https://www.researchgate.net/publication/277558596_A_Review_of_Point_Cloud_Registration_Algorithms_for_Mobile_Robotics).
 
@@ -226,7 +226,7 @@ We also produced those freely available data sets to test different registration
 
 ![alt tag](http://projects.asl.ethz.ch/datasets/lib/exe/fetch.php?cache=&media=laserregistration:asldataset_weblarge.jpg)
 
-You can download the files in CSV or VTK formats, which are directly supported by the library I/O module. 
+You can download the files in CSV or VTK formats, which are directly supported by the library I/O module.
 
 
 # Projects and Partners
@@ -241,7 +241,8 @@ If you are using libpointmatcher in your project and you would like to have it l
  * [Norlab](https://norlab.ulaval.ca/) is maintaining and using the library for its research on autonomous navigation in harsh environments.
  * [ANYbotics AG](https://www.anybotics.com) is investigating autonomous navigation algorithms using this library.
  * [Point Laz Mining LiDAR Expert](https://www.pointlaz.com/) is scanning mine shafts to ensure infrastructure safety.
-
+ * [Point Laz Mining LiDAR Expert](https://www.pointlaz.com/) is scanning mine shafts to ensure infrastructure safety.
+ * [DREAM lab](https://dream.georgiatech-metz.fr/research/woodseer/) use libpointmatcher to reconstruct wood logs in 3D.
 For a larger list of work realized with libpointmatcher, please see the page [Applications And Publications](/doc/ApplicationsAndPub.md).
 
 
