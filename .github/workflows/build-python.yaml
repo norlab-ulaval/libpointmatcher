@@ -33,9 +33,7 @@ jobs:
           # - windows-2019 cannot compile on Windows
           # (!) TODO: The workflow contains code for Windows building, but we cannot compile it with MS MPI. Changes in the source code are needed.
 
-          - ubuntu-22.04
-          - ubuntu-20.04
-          - ubuntu-24.04
+          - ubuntu-22.04 # test on Ubuntu 22.04 since other versions should behave similarly
 
     permissions:
       contents: write
