@@ -207,7 +207,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DUSE_OPEN_MP:BOOL=ON \
             -S . -B ./build
-          cmake --build ./build --target install --parallel 4
+          sudo cmake --build ./build --target install --parallel 4
           cd -
           rm -r ./libnabo/build
 
