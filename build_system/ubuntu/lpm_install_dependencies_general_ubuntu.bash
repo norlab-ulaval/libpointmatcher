@@ -148,4 +148,4 @@ n2st::teamcity_service_msg_blockClosed
 
 n2st::print_formated_script_footer "lpm_install_dependencies_general_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================
-cd "${TMP_CWD}"
+cd "${TMP_CWD}" || exit
