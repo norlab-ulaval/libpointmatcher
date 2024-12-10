@@ -1655,7 +1655,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
             const int row = vertex->properties[propID].pmRowID;
             const PMPropTypes type = vertex->properties[propID].pmType;
 
-            // rescale color from [0,254] to [0, 1[
+            // rescale color from [0,255] to [0, 1[
             // FIXME: do we need that?
             if(vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" ||
                vertex->properties[propID].name == "alpha")
