@@ -799,14 +799,14 @@ void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary,
         const string& ext(path.extension().string());
         if (boost::iequals(ext, ".vtk"))
             return PointMatcherIO<T>::saveVTK(*this, fileName, binary, precision);
+        else if (boost::iequals(ext, ".ply"))
+            return PointMatcherIO<T>::savePLY(*this, fileName, binary, precision);
 
         if (binary)
-            throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\".");
+            throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\" and \".ply\".");
 
         if (boost::iequals(ext, ".csv"))
             return PointMatcherIO<T>::saveCSV(*this, fileName, precision);
-        else if (boost::iequals(ext, ".ply"))
-            return PointMatcherIO<T>::savePLY(*this, fileName, precision);
         else if (boost::iequals(ext, ".pcd"))
             return PointMatcherIO<T>::savePCD(*this, fileName, precision);
         else
@@ -1337,6 +1337,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	PLYElement* current_element = NULL;
 	bool skip_props = false; // flag to skip properties if element is not supported
 	unsigned elem_offset = 0; // keep track of line position of elements that are supported
+    bool is_binary = false;
 	string line;
 	safeGetLine(is, line);
 
@@ -1374,8 +1375,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			if (format_str != "ascii" && format_str != "binary_little_endian" && format_str != "binary_big_endian")
 				throw runtime_error(string("PLY parse error: format <") + format_str + string("> is not supported"));
 
-			if (format_str == "binary_little_endian" || format_str == "binary_big_endian")
-				throw runtime_error(string("PLY parse error: binary PLY files are not supported"));
+			if (format_str == "binary_little_endian")
+                is_binary = true;
+            if (format_str == "binary_big_endian")
+				throw runtime_error(string("PLY parse error: only little endian binary PLY files are currently supported"));
 			if (version_str != "1.0")
 			{
 				throw runtime_error(string("PLY parse error: version <") + version_str + string("> of ply is not supported"));
@@ -1528,9 +1531,9 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 						it->pmRowID = rowIdTime;
 						timeLabelGen.add(supLabel.internalName);
 						rowIdTime++;
+                        break;
 					default:
 						throw runtime_error(string("PLY Implementation Error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
-						break;
 				}
 
 				// we stop searching once we have a match
@@ -1573,21 +1576,94 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	for(int i=0; i<nbValues; i++)
 	{
 		T value;
-		if(!(is >> value))
-		{
-			throw runtime_error(
-			(boost::format("PLY parse error: expected %1% values (%2% points with %3% properties) but only found %4% values.") % nbValues % nbPoints % nbProp % i).str());
-		}
-		else
-		{
-			const int row = vertex->properties[propID].pmRowID;
-			const PMPropTypes type = vertex->properties[propID].pmType;
+        if (is_binary)
+        {
+            switch(vertex->properties[propID].type)
+            {
+                case PLYProperty::PLYPropertyType::INT8:
+                {
+                    int8_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int8_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT8:
+                {
+                    uint8_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint8_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::INT16:
+                {
+                    int16_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int16_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT16:
+                {
+                    uint16_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint16_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::INT32:
+                {
+                    // TODO what happens if T is float and we overflow?
+                    int32_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int32_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT32:
+                {
+                    // TODO what happens if T is float and we overflow?
+                    uint32_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint32_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::FLOAT32:
+                {
+                    float temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(float));
+                    value = static_cast<T>(temp); // Directly assign if T is float, or cast if T is double
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::FLOAT64:
+                {
+                    // TODO what happens if T is float and we read a double?
+                    double temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(double));
+                    value = static_cast<T>(temp); // Directly assign if T is double, or cast if T is float
+                    break;
+                }
+                default:
+                {
+                    throw runtime_error(
+                        (boost::format("Unsupported data type in binary mode %1%.") % static_cast<int>(vertex->properties[propID].type)).str());
+                }
+            }
+        }
+        if ((is_binary && !is) || (!is_binary && !(is >> value)))
+        {
+            throw runtime_error(
+                    (boost::format("PLY parse error: expected %1% values (%2% points with %3% properties) but only found %4% values.") % nbValues % nbPoints % nbProp %
+                     i).str());
+        }
+        else
+        {
+            const int row = vertex->properties[propID].pmRowID;
+            const PMPropTypes type = vertex->properties[propID].pmType;
 
-			// rescale color from [0,254] to [0, 1[
-			// FIXME: do we need that?
-			if (vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" || vertex->properties[propID].name == "alpha") {
-				value /= 255.0;
-			}
+            // rescale color from [0,255] to [0, 1[
+            // FIXME: do we need that?
+            if(vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" ||
+               vertex->properties[propID].name == "alpha")
+            {
+                value /= 255.0;
+            }
 
 			switch (type)
 			{
@@ -1614,8 +1690,6 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			}
 		}
 	}
-
-
 
 	///////////////////////////
 	// 5- ASSEMBLE FINAL DATAPOINTS
@@ -1646,7 +1720,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 template<typename T>
 void PointMatcherIO<T>::savePLY(const DataPoints& data,
-		const std::string& fileName, unsigned precision)
+		const std::string& fileName, bool binary, unsigned precision)
 {
 	//typedef typename DataPoints::Labels Labels;
 
@@ -1666,20 +1740,36 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		return;
 	}
 
-	ofs << "ply\n" <<"format ascii 1.0\n";
+    if (binary)
+        ofs << "ply\n" <<"format binary_little_endian 1.0\n";
+    else
+	    ofs << "ply\n" <<"format ascii 1.0\n";
+
+    ofs << "comment File created with libpointmatcher\n";
 	ofs << "element vertex " << pointCount << "\n";
+    std::string dataType;
+
+    using ValueType = typename std::conditional<std::is_same<T, float>::value, float, double>::type;
+    if (std::is_same<ValueType, float>::value)
+        dataType = "float";
+    else
+        dataType = "double";
+
 	for (int f=0; f <(featCount-1); f++)
 	{
-		ofs << "property float " << data.featureLabels[f].text << "\n";
+		ofs << "property " << dataType << " " << data.featureLabels[f].text << "\n";
 	}
 
 	for (size_t i = 0; i < data.descriptorLabels.size(); i++)
 	{
 		Label lab = data.descriptorLabels[i];
 		for (size_t s = 0; s < lab.span; s++)
-
 		{
-			ofs << "property float " << getColLabel(lab,s) << "\n";
+            std::string label = getColLabel(lab,s);
+            if (label == "red" || label == "green" || label == "blue" || label == "alpha")
+			    ofs << "property uchar " << label << "\n";
+            else
+			    ofs << "property " << dataType << " " << label << "\n";
 		}
 	}
 
@@ -1690,9 +1780,16 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 	{
 		for (int f = 0; f < featCount - 1; ++f)
 		{
-			ofs << data.features(f, p);
-			if(!(f == featCount-2 && descRows == 0))
-				ofs << " ";
+            if (binary)
+            {
+                ofs.write(reinterpret_cast<const char*>(&data.features(f, p)), sizeof(T));
+            }
+            else
+            {
+                ofs << data.features(f, p);
+                if(!(f == featCount - 2 && descRows == 0))
+                    ofs << " ";
+            }
 		}
 
 		bool datawithColor = data.descriptorExists("color");
@@ -1701,34 +1798,44 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		for (int d = 0; d < descRows; ++d)
 		{
 			if (datawithColor && d >= colorStartingRow && d < colorEndRow) {
-				ofs << static_cast<unsigned>(data.descriptors(d, p) * 255.0);
+                if (binary)
+                {
+                    char value = static_cast<char>(data.descriptors(d, p) * 255.0);
+                    ofs.write(reinterpret_cast<const char*>(&value), sizeof(char));
+                }
+                else
+				    ofs << static_cast<unsigned>(data.descriptors(d, p) * 255.0);
 			} else {
-				ofs << data.descriptors(d, p);
+                if (binary)
+				    ofs.write(reinterpret_cast<const char*>(&data.descriptors(d, p)), sizeof(T));
+                else
+				    ofs << data.descriptors(d, p);
 			}
-			if(d != descRows-1)
+			if(d != descRows-1 && !binary)
 				ofs << " ";
 		}
-		ofs << "\n";
+        if(!binary)
+		    ofs << "\n";
 	}
 
 	ofs.close();
 }
 
 template
-void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName, unsigned precision);
+void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 template
-void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName, unsigned precision);
+void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 
 //! @(brief) Regular PLY property constructor
 template<typename T>
 PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& type,
 		const std::string& name, const unsigned pos) :
 		name(name),
-		type(type),
 		pos(pos)
 {
 	if (plyPropTypeValid(type))
 	{
+        this->type = get_type_from_string(type);
 		is_list = false;
 	}
 	else
@@ -1749,12 +1856,12 @@ template<typename T>
 PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& idx_type,
 		const std::string& type, const std::string& name, const unsigned pos) :
 		name(name),
-		type(type),
 		idx_type(idx_type),
 		pos(pos)
 {
 	if (plyPropTypeValid(idx_type) && plyPropTypeValid(type))
 	{
+        this->type = get_type_from_string(type);
 		is_list = true;
 	}
 	else
