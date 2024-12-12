@@ -28,7 +28,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python_version: ['3.12']
+        # python_version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         os:
           # - windows-2019 cannot compile on Windows
           # (!) TODO: The workflow contains code for Windows building, but we cannot compile it with MS MPI. Changes in the source code are needed.
@@ -216,6 +217,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cmake \
+            -DCMAKE_PREFIX_PATH=${{ env.LIBNABO_INSTALL_PATH }} \
             -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} \
             -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} \
             -DBUILD_PYTHON_MODULE:BOOL=ON \
