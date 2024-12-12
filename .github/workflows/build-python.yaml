@@ -77,12 +77,12 @@ jobs:
           path: ${{ env.BOOST_INSTALL_PATH }}
           key: ${{ runner.os }}-boost-cache-${{ env.BOOST_VERSION }}-python-${{ matrix.python_version }}
 
-      - name: Cache libnabo
-        id: cache-libnabo
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.LIBNABO_INSTALL_PATH }}
-          key: ${{ runner.os }}-libnabo-cache-${{ env.LIBNABO_VERSION }}
+      # - name: Cache libnabo
+      #   id: cache-libnabo
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ env.LIBNABO_INSTALL_PATH }}
+      #     key: ${{ runner.os }}-libnabo-cache-${{ env.LIBNABO_VERSION }}
 
       - name: Cache binary vcpkg
         if: ${{ runner.os  == 'Windows' }}
@@ -217,7 +217,6 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cmake \
-            -DCMAKE_PREFIX_PATH=${{ env.LIBNABO_INSTALL_PATH }} \
             -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} \
             -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} \
             -DBUILD_PYTHON_MODULE:BOOL=ON \
