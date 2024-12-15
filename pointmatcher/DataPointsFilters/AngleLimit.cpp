@@ -71,8 +71,6 @@ void AngleLimitDataPointsFilter<T>::inPlaceFilter(
 	const int nbRows = cloud.features.rows();
 
 	int j = 0;
-    T angle_min = 10;
-    T angle_max = -10;
     for(int i = 0; i < nbPoints; ++i)
     {
         auto point = cloud.features.col(i).head(nbRows-1);
@@ -84,14 +82,9 @@ void AngleLimitDataPointsFilter<T>::inPlaceFilter(
         if (point(1) < 0)
             phiPoint = -phiPoint;
 
-        if (phiPoint < angle_min)
-            angle_min = phiPoint;
-        if (phiPoint > angle_max)
-            angle_max = phiPoint;
-
         if(removeInside)
         {
-            if (phiMin < phiPoint && phiPoint < phiMax && thetaMin < thetaPoint && thetaPoint < thetaMax) // point is inside range
+            if((phiPoint < phiMin || phiMax < phiPoint) || (thetaPoint < thetaMin || thetaMax < thetaPoint)) // point is outside range, keep it
             {
                 cloud.setColFrom(j, cloud, i);
                 ++j;
