@@ -92,7 +92,7 @@ void AngleLimitDataPointsFilter<T>::inPlaceFilter(
         }
         else
         {
-            if((phiPoint < phiMin || phiMax < phiPoint) || (thetaPoint < thetaMin || thetaMax < thetaPoint)) // point is outside range
+            if (phiMin < phiPoint && phiPoint < phiMax && thetaMin < thetaPoint && thetaPoint < thetaMax) // point is inside range, keep it
             {
                 cloud.setColFrom(j, cloud, i);
                 ++j;
