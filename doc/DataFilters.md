@@ -113,7 +113,7 @@ __Impact on the number of points:__ reduces number of points
 |phiMax       |Maximum value on the x-axis defining one side of the box | inf | -inf to inf|
 |thetaMin       |Minimum value on the y-axis defining one side of the box | -inf | -inf to inf|
 |thetaMax       |Maximum value on the y-axis defining one side of the box | inf | -inf to inf|
-|removeInside   |if set to 1, points contained within the box are removed, else points outside are removed  |1   | 0 or 1|
+|removeInside   |if set to 1, points contained within the sphere wedge are removed, else points outside are removed  |1   | 0 or 1|
 
 
 ## Bounding Box Filter <a name="boundingboxhead"></a>

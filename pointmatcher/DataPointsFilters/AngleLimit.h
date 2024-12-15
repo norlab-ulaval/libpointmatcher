@@ -63,7 +63,7 @@ struct AngleLimitDataPointsFilter: public PointMatcher<T>::DataPointsFilter
 				{"phiMax", "Upper bound of the azimuthal angle", "-inf", "-inf", "inf", &P::Comp<T>},
 				{"thetaMin", "Lower bound of the polar angle", "-inf", "-inf", "inf", &P::Comp<T>},
 				{"thetaMax", "Upper bound of the polar angle", "-inf", "-inf", "inf", &P::Comp<T>},
-				{"removeInside", "If set to true (1), remove points before the distance limit; else (0), remove points beyond the distance limit", "1", "0", "1", P::Comp<bool>}
+				{"removeInside", "If set to true (1), remove points inside the spherical wedge; else (0), remove points outside the wedge", "1", "0", "1", P::Comp<bool>}
 		};
 	}
 
