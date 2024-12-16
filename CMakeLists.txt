@@ -28,9 +28,11 @@ string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTM
 
 # In 3.0+, project(...) should specify VERSION to satisfy CMP0048
 cmake_policy(SET CMP0048 NEW)
+# In 3.12+, find_package(<PackageName>) searches prefixes specified by the `<PackageName>_ROOT` CMake and the ``<PackageName>_ROOT`` environment variable, force this with CMP0074
+cmake_policy(SET CMP0074 NEW)
 project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION}
 		DESCRIPTION "libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds"
-		LANGUAGES CXX)
+		LANGUAGES CXX )
 
 set(CMAKE_DEBUG_POSTFIX "d")
 
@@ -180,16 +182,6 @@ endif()
 set(USE_OPEN_MP FALSE CACHE BOOL "Set to TRUE to use OpenMP")
 if (USE_OPEN_MP)
 	find_package(OpenMP)
-	if (OPENMP_FOUND)
-		if(NOT MSVC)
-			add_definitions(-fopenmp -DHAVE_OPENMP)
-		endif()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-		if (CMAKE_COMPILER_IS_GNUCC)
-			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
-    		message("-- OpenMP found, parallel computer enabled")
-		endif()
-	endif()
 endif ()
 
 #--------------------
@@ -220,9 +212,11 @@ endif()
 message(STATUS "Looking for yaml-cpp on system...")
 find_package(yaml-cpp CONFIG REQUIRED)
 if(TARGET yaml-cpp::yaml-cpp)
+    message(STATUS "yaml-cpp found, version ${yaml-cpp_VERSION}")
 	set(YAML_CPP_LIBRARIES "yaml-cpp::yaml-cpp")
 endif()
 if(YAML_CPP_LIBRARIES STREQUAL "")
+    message(STATUS "yaml-cpp found, version ${yaml-cpp_VERSION}")
 	set(YAML_CPP_LIBRARIES "yaml-cpp") # Fix linking issue on MacOS with yaml-cpp 0.7.0
 endif ()
 
@@ -245,6 +239,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	endif ()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 	# using AppleClang
+	if (USE_OPEN_MP)
+		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	endif ()
 	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0")
 		message(WARNING "Your XCode environment has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 7.0 or later is supported")
 	endif()
@@ -378,7 +375,7 @@ target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
 if (TARGET libnabo::nabo)
   target_link_libraries(pointmatcher PRIVATE libnabo::nabo)
 else()
-  include_directories(pointmatcher PUBLIC ${libnabo_INCLUDE_DIRS})
+  include_directories(pointmatcher ${libnabo_INCLUDE_DIRS})
   target_link_libraries(pointmatcher PRIVATE ${libnabo_LIBRARIES})
 endif()
 target_link_libraries(pointmatcher PRIVATE ${EXTERNAL_LIBS})
@@ -388,6 +385,13 @@ endif()
 
 if (POSIX_TIMERS AND NOT APPLE)
 	target_link_libraries(pointmatcher PRIVATE rt)
+endif ()
+
+if (OpenMP_CXX_FOUND)
+	message("-- OpenMP found, parallel computer enabled")
+	message(STATUS "${OpenMP_CXX_LIBRARIES} ${OpenMP_CXX_INCLUDE_DIR}")
+	include_directories(pointmatcher ${OpenMP_CXX_INCLUDE_DIR})
+	target_link_libraries(pointmatcher PUBLIC ${OpenMP_CXX_LIBRARIES})
 endif ()
 
 set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VERSION}" SOVERSION 1)
