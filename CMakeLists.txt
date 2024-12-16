@@ -30,7 +30,7 @@ string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTM
 cmake_policy(SET CMP0048 NEW)
 # In 3.12+, find_package(<PackageName>) searches prefixes specified by the `<PackageName>_ROOT` CMake and the ``<PackageName>_ROOT`` environment variable, force this with CMP0074
 cmake_policy(SET CMP0074 NEW)
-project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION} 
+project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION}
 		DESCRIPTION "libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds"
 		LANGUAGES CXX )
 
@@ -212,9 +212,11 @@ endif()
 message(STATUS "Looking for yaml-cpp on system...")
 find_package(yaml-cpp CONFIG REQUIRED)
 if(TARGET yaml-cpp::yaml-cpp)
+    message(STATUS "yaml-cpp found, version ${yaml-cpp_VERSION}")
 	set(YAML_CPP_LIBRARIES "yaml-cpp::yaml-cpp")
 endif()
 if(YAML_CPP_LIBRARIES STREQUAL "")
+    message(STATUS "yaml-cpp found, version ${yaml-cpp_VERSION}")
 	set(YAML_CPP_LIBRARIES "yaml-cpp") # Fix linking issue on MacOS with yaml-cpp 0.7.0
 endif ()
 
