@@ -82,10 +82,8 @@ sudo apt-get update &&
     g++ \
     catch \
     make \
-    cmake \
-    cmake-gui &&
+    python3-pip
   sudo rm -rf /var/lib/apt/lists/*
-
 ##cmake --version
 
 # Retrieve ubuntu version number: DISTRIB_RELEASE
@@ -103,6 +101,26 @@ if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
   sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 fi
 
+n2st::teamcity_service_msg_blockClosed
+# .................................................................................................
+
+n2st::teamcity_service_msg_blockOpened "Install a newer CMake version"
+dpkg -l | grep -q "^ii  cmake" && sudo apt remove --purge --auto-remove cmake
+if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
+    sudo apt update && \
+    sudo apt install -y software-properties-common lsb-release && \
+    sudo apt clean all
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+    sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+    sudo apt update
+    sudo apt install -y cmake
+else
+    wget https://bootstrap.pypa.io/get-pip.py
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 get-pip.py
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install --upgrade pip
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install cmake
+fi
+print_msg "Cmake version is $(cmake --version)"
 n2st::teamcity_service_msg_blockClosed
 # .................................................................................................
 
