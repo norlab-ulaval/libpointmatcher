@@ -115,6 +115,9 @@ if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
     sudo apt update
     sudo apt install -y cmake
 else
+    wget https://bootstrap.pypa.io/get-pip.py
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 get-pip.py
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install --upgrade pip
     PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install cmake
 fi
 print_msg "Cmake version is $(cmake --version)"
