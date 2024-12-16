@@ -46,10 +46,10 @@ cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash
 SHOW_SPLASH_IDU="${SHOW_SPLASH_IDU:-true}"
 
 if [[ "${SHOW_SPLASH_IDU}" == 'true' ]]; then
-  norlab_splash "${NBS_SPLASH_NAME:?err}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
+  n2st::norlab_splash "${NBS_SPLASH_NAME:?err}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
 fi
 
-print_formated_script_header "lpm_install_dependencies_libnabo_ubuntu.bash (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
+n2st::print_formated_script_header "lpm_install_dependencies_libnabo_ubuntu.bash (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
 
 
 # ....Script command line flags....................................................................
@@ -77,8 +77,8 @@ done
 CMAKE_FLAGS=( -D CMAKE_BUILD_TYPE=RelWithDebInfo "${APPEND_TO_CMAKE_FLAG[@]}" )
 
 # .................................................................................................
-teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Libnabo"
-# https://github.com/ethz-asl/libnabo
+n2st::teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Libnabo"
+# https://github.com/norlab-ulaval/libnabo
 
 ## Note:
 #   - ANN is not mentioned in doc because it's only required for `make test` benchmarks
@@ -108,25 +108,25 @@ teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Libna
 #    && sudo rm -rf /var/lib/apt/lists/*
 
 # ....Repository cloning step......................................................................
-print_msg "Create required dir structure"
+n2st::print_msg "Create required dir structure"
 mkdir -p "${NBS_LIB_INSTALL_PATH}"
 
 cd "${NBS_LIB_INSTALL_PATH}"
-git clone https://github.com/ethz-asl/libnabo.git &&
+git clone https://github.com/norlab-ulaval/libnabo.git &&
   cd libnabo &&
   mkdir build && cd build
 
 # git checkout 1.0.7
 
 # ....Cmake install step...........................................................................
-teamcity_service_msg_compilationStarted "cmake"
+n2st::teamcity_service_msg_compilationStarted "cmake"
 
-print_msg "Execute ${MSG_DIMMED_FORMAT}
+n2st::print_msg "Execute ${MSG_DIMMED_FORMAT}
 cmake ${CMAKE_FLAGS[*]} ${NBS_LIB_INSTALL_PATH}/libnabo
 ${MSG_END_FORMAT}"
 
 if [[ $TEST_RUN  == true ]]; then
-  print_msg "Test-run mode: Skipping cmake"
+  n2st::print_msg "Test-run mode: Skipping cmake"
   BUILD_EXIT_CODE=0
   INSTALL_EXIT_CODE=0
 else
@@ -140,12 +140,12 @@ else
   #  make -j $(nproc) && make test && sudo make install
 fi
 
-teamcity_service_msg_compilationFinished
+n2st::teamcity_service_msg_compilationFinished
 
-teamcity_service_msg_blockClosed
+n2st::teamcity_service_msg_blockClosed
 
-echo " " && print_msg_done "Libpointmatcher dependencies installed"
-print_formated_script_footer "lpm_install_dependencies_libnabo_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+echo " " && n2st::print_msg_done "Libpointmatcher dependencies installed"
+n2st::print_formated_script_footer "lpm_install_dependencies_libnabo_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 
 # ====Teardown=====================================================================================
 cd "${TMP_CWD}"

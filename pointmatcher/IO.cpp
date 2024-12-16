@@ -45,9 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 #include <ctype.h>
 #include "boost/algorithm/string.hpp"
-#include "boost/filesystem.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/operations.hpp"
+#include <filesystem>
 #include "boost/lexical_cast.hpp"
 #include "boost/foreach.hpp"
 
@@ -93,7 +91,7 @@ static std::vector<string> csvLineToVector(const char* line)
 CsvElements parseCsvWithHeader(const std::string& fileName)
 {
 	validateFile(fileName);
-	
+
 	ifstream is(fileName.c_str());
 
 	unsigned elementCount=0;
@@ -102,15 +100,15 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 
 	bool firstLine(true);
 	unsigned lineCount=0;
-	
-	string line; 
+
+	string line;
 	while (safeGetLine(is, line))
 	{
 
 		if(firstLine)
 		{
 			std::vector<string> header = csvLineToVector(line.c_str());
-				
+
 			elementCount = header.size();
 			for(unsigned int i = 0; i < elementCount; i++)
 			{
@@ -126,7 +124,7 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 			{
 				stringstream errorMsg;
 				errorMsg << "Error at line " << lineCount+1 << ": expecting " << elementCount << " columns but read " << parsedLine.size() << " elements.";
-				throw runtime_error(errorMsg.str());	
+				throw runtime_error(errorMsg.str());
 			}
 
 			for(unsigned int i = 0; i < parsedLine.size(); i++)
@@ -135,7 +133,7 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 				{
 					if(i == (*it).second)
 					{
-						data[(*it).first].push_back(parsedLine[i]);	
+						data[(*it).first].push_back(parsedLine[i]);
 					}
 				}
 			}
@@ -143,9 +141,9 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 
 		lineCount++;
 	}
-	
+
 	// Use for debug
-	
+
 	//for(BOOST_AUTO(it,data.begin()); it!=data.end(); it++)
 	//{
 	//	cout << "--------------------------" << endl;
@@ -155,7 +153,7 @@ CsvElements parseCsvWithHeader(const std::string& fileName)
 	//	//	cout << (*it).second[i] << endl;
 	//	//}
 	//}
-	
+
 
 	return data;
 }
@@ -186,7 +184,7 @@ PointMatcherIO<T>::FileInfoVector::FileInfoVector()
 	@param fileName name of the CSV file
 	@param dataPath path relative to which the point cloud CSV or VTK will be resolved
 	@param configPath path relative to which the yaml configuration files will be resolved
-	
+
 	The first line of the CSV file must contain a header. The supported tags are:
 	- reading: file name of the reading point cloud
 	- reference: file name of the reference point cloud
@@ -200,23 +198,15 @@ PointMatcherIO<T>::FileInfoVector::FileInfoVector(const std::string& fileName, s
 {
 	if (dataPath.empty())
 	{
-		#if BOOST_FILESYSTEM_VERSION >= 3
-		dataPath = boost::filesystem::path(fileName).parent_path().string();
-		#else
-		dataPath = boost::filesystem::path(fileName).parent_path().file_string();
-		#endif
+		dataPath = std::filesystem::path(fileName).parent_path().string();
 	}
 	if (configPath.empty())
 	{
-		#if BOOST_FILESYSTEM_VERSION >= 3
-		configPath = boost::filesystem::path(fileName).parent_path().string();
-		#else
-		configPath = boost::filesystem::path(fileName).parent_path().file_string();
-		#endif
+		configPath = std::filesystem::path(fileName).parent_path().string();
 	}
-	
+
 	const CsvElements data = parseCsvWithHeader(fileName);
-	
+
 	// Look for transformations
 	const bool found3dInitialTrans(findTransform(data, "iT", 3));
 	bool found2dInitialTrans(findTransform(data, "iT", 2));
@@ -226,7 +216,7 @@ PointMatcherIO<T>::FileInfoVector::FileInfoVector(const std::string& fileName, s
 		found2dInitialTrans = false;
 	if (found3dGroundTruthTrans)
 		found2dGroundTruthTrans = false;
-	
+
 	// Check for consistency
 	if (found3dInitialTrans && found2dGroundTruthTrans)
 		throw runtime_error("Initial transformation is in 3D but ground-truth is in 2D");
@@ -237,7 +227,7 @@ PointMatcherIO<T>::FileInfoVector::FileInfoVector(const std::string& fileName, s
 		throw runtime_error("Error transfering CSV to structure: The header should at least contain \"reading\".");
 	CsvElements::const_iterator referenceIt(data.find("reference"));
 	CsvElements::const_iterator configIt(data.find("config"));
-	
+
 	// Load reading
 	const std::vector<string>& readingFileNames = readingIt->second;
 	const unsigned lineCount = readingFileNames.size();
@@ -258,14 +248,14 @@ PointMatcherIO<T>::FileInfoVector::FileInfoVector(const std::string& fileName, s
 	for(unsigned line=0; line<lineCount; line++)
 	{
 		FileInfo info;
-		
+
 		// Files
 		info.readingFileName = localToGlobalFileName(dataPath, readingFileNames[line]);
 		if (referenceFileNames)
 			info.referenceFileName = localToGlobalFileName(dataPath, (*referenceFileNames)[line]);
 		if (configFileNames)
 			info.configFileName = localToGlobalFileName(configPath, (*configFileNames)[line]);
-		
+
 		// Load transformations
 		if(found3dInitialTrans)
 			info.initialTransformation = getTransform(data, "iT", 3, line);
@@ -275,11 +265,11 @@ PointMatcherIO<T>::FileInfoVector::FileInfoVector(const std::string& fileName, s
 			info.groundTruthTransformation = getTransform(data, "gT", 3, line);
 		if(found2dGroundTruthTrans)
 			info.groundTruthTransformation = getTransform(data, "gT", 2, line);
-		
+
 		// Build the list
 		this->push_back(info);
 	}
-	
+
 	// Debug: Print the list
 	/*for(unsigned i=0; i<list.size(); i++)
 	{
@@ -299,14 +289,10 @@ template<typename T>
 std::string PointMatcherIO<T>::FileInfoVector::localToGlobalFileName(const std::string& parentPath, const std::string& fileName)
 {
 	std::string globalFileName(fileName);
-	if (!boost::filesystem::exists(globalFileName))
+	if (!std::filesystem::exists(globalFileName))
 	{
-		const boost::filesystem::path globalFilePath(boost::filesystem::path(parentPath) /  boost::filesystem::path(fileName));
-		#if BOOST_FILESYSTEM_VERSION >= 3
+		const std::filesystem::path globalFilePath(std::filesystem::path(parentPath) /  std::filesystem::path(fileName));
 		globalFileName = globalFilePath.string();
-		#else
-		globalFileName = globalFilePath.file_string();
-		#endif
 	}
 	validateFile(globalFileName);
 	return globalFileName;
@@ -354,19 +340,11 @@ template struct PointMatcherIO<double>::FileInfoVector;
 //! Throw a runtime_error exception if fileName cannot be opened
 void PointMatcherSupport::validateFile(const std::string& fileName)
 {
-	boost::filesystem::path fullPath(fileName);
+	std::filesystem::path fullPath(fileName);
 
 	ifstream ifs(fileName.c_str());
-	if (!ifs.good() || !boost::filesystem::is_regular_file(fullPath))
-	#if BOOST_FILESYSTEM_VERSION >= 3
-		#if BOOST_VERSION >= 105000
-				throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).generic_string());
-		#else
-				throw runtime_error(string("Cannot open file ") + boost::filesystem3::complete(fullPath).generic_string());
-		#endif
-	#else
-		throw runtime_error(string("Cannot open file ") + boost::filesystem::complete(fullPath).native_file_string());
-    #endif
+	if (!ifs.good() || !std::filesystem::is_regular_file(fullPath))
+        throw runtime_error(string("Cannot open file ") + std::filesystem::absolute(fullPath).generic_string());
 }
 
 
@@ -374,18 +352,25 @@ void PointMatcherSupport::validateFile(const std::string& fileName)
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcher<T>::DataPoints::load(const std::string& fileName)
 {
-	const boost::filesystem::path path(fileName);
-	const string& ext(boost::filesystem::extension(path));
-	if (boost::iequals(ext, ".vtk"))
-		return PointMatcherIO<T>::loadVTK(fileName);
-	else if (boost::iequals(ext, ".csv"))
-		return PointMatcherIO<T>::loadCSV(fileName);
-	else if (boost::iequals(ext, ".ply"))
-		return PointMatcherIO<T>::loadPLY(fileName);
-	else if (boost::iequals(ext, ".pcd"))
-		return PointMatcherIO<T>::loadPCD(fileName);
-	else
-		throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\" or \".csv\"");
+	const std::filesystem::path path(fileName);
+    if (path.has_extension())
+    {
+        const string& ext(path.extension().string());
+        if(ext == ".vtk")
+            return PointMatcherIO<T>::loadVTK(fileName);
+        else if(ext  == ".csv")
+            return PointMatcherIO<T>::loadCSV(fileName);
+        else if(ext == ".ply")
+            return PointMatcherIO<T>::loadPLY(fileName);
+        else if(ext == ".pcd")
+            return PointMatcherIO<T>::loadPCD(fileName);
+        else
+            throw runtime_error("loadAnyFormat(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+    }
+    else
+    {
+        throw runtime_error("loadAnyFormat(): Missing extension for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+    }
 }
 
 template
@@ -396,19 +381,19 @@ PointMatcher<double>::DataPoints PointMatcher<double>::DataPoints::load(const st
 
 //! @brief Load comma separated values (csv) file
 //! @param fileName a string containing the path and the file name
-//! 
+//!
 //! This loader has 3 behaviors since there is no official standard for
 //! csv files. A 2D or 3D point cloud will be created automatically if:
 //!   - there is a header with columns named x, y and optionnaly z
 //!   - there are only 2 or 3 columns in the file
 //!
-//! Otherwise, the user is asked to enter column id manually which might 
+//! Otherwise, the user is asked to enter column id manually which might
 //! block automatic processing.
 template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(const std::string& fileName)
 {
 	ifstream ifs(fileName.c_str());
-	
+
 	validateFile(fileName);
 
 	return loadCSV(ifs);
@@ -436,7 +421,7 @@ void PointMatcherIO<T>::LabelGenerator::add(const std::string internalName)
 			findLabel = true;
 			break;
 		}
-		
+
 	}
 
 	if(!findLabel)
@@ -543,13 +528,13 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 	unsigned int csvRow = 0;
 	bool hasHeader(false);
 	bool firstLine(true);
-	
+
 
 	//count lines in the file
 	is.unsetf(std::ios_base::skipws);
 	unsigned int line_count = std::count(
 	        std::istream_iterator<char>(is),
-			std::istream_iterator<char>(), 
+			std::istream_iterator<char>(),
 			'\n');
 	//reset the stream
 	is.clear();
@@ -560,11 +545,11 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 	string line;
 	while (safeGetLine(is, line))
 	{
-		
+
 		// Skip empty lines
 		if(line.empty())
 			break;
-	
+
 		// Look for text header
 		unsigned int len = strspn(line.c_str(), " ,+-.1234567890Ee");
 		if(len != line.length())
@@ -597,7 +582,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 				dim++;
 				token = strtok_r(NULL, delimiters, &brkt);
 			}
-			
+
 			if (!hasHeader)
 			{
 				// Check if it is a simple file with only coordinates
@@ -621,7 +606,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 
 						csvHeader.push_back(GenericInputHeader(os.str()));
 					}
-					
+
 					// Overwrite with user inputs
 					csvHeader[idX] = GenericInputHeader("x");
 					csvHeader[idY] = GenericInputHeader("y");
@@ -647,7 +632,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 			int rowIdDescriptors = 0;
 			int rowIdTime = 0;
 
-			
+
 			// Loop through all known external names (ordered list)
 			for(size_t i=0; i<externalLabels.size(); i++)
 			{
@@ -680,7 +665,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 								throw runtime_error(string("CSV parse error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
 								break;
 						}
-						
+
 						// we stop searching once we have a match
 						break;
 					}
@@ -698,7 +683,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 					rowIdDescriptors++;
 				}
 			}
-		
+
 
 			//3- RESERVE MEMORY
 			if(hasHeader && line_count > 0)
@@ -720,7 +705,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		char line_c[1024];//FIXME: this might be a problem for large files
 		strcpy(line_c,line.c_str());
 		token = strtok_r(line_c, delimiters, &brkt);
-		
+
 		if(!(hasHeader && firstLine))
 		{
 			// Parse a line
@@ -733,11 +718,11 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 					throw runtime_error(
 					(boost::format("CSV parse error: at line %1%, too many elements to parse compare to the header number of columns (col=%2%).") % csvRow % csvHeader.size()).str());
 				}
-				
+
 				// Alias
 				const int matrixRow = csvHeader[csvCol].matrixRowId;
 				const int matrixCol = csvRow;
-				
+
 				switch (csvHeader[csvCol].matrixType)
 				{
 					case FEATURE:
@@ -759,8 +744,8 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 				token = strtok_r(NULL, delimiters, &brkt);
 				csvCol++;
 			}
-		
-		
+
+
 			// Error check (not enough data)
 			if(csvCol != (csvHeader.size()))
 			{
@@ -772,7 +757,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 		}
 
 		firstLine = false;
-		
+
 	}
 
 	// 5- ASSEMBLE FINAL DATAPOINTS
@@ -787,7 +772,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 	if(times.rows() > 0)
 	{
 		loadedPoints.times = times;
-		loadedPoints.timeLabels = timeLabelGen.getLabels();	
+		loadedPoints.timeLabels = timeLabelGen.getLabels();
 	}
 
 	// Ensure homogeous coordinates
@@ -806,38 +791,47 @@ PointMatcher<double>::DataPoints PointMatcherIO<double>::loadCSV(const std::stri
 
 //! Save a point cloud to a file, determine format from extension
 template<typename T>
-void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary) const
+void PointMatcher<T>::DataPoints::save(const std::string& fileName, bool binary, unsigned precision) const
 {
-	const boost::filesystem::path path(fileName);
-	const string& ext(boost::filesystem::extension(path));
-	if (boost::iequals(ext, ".vtk"))
-		return PointMatcherIO<T>::saveVTK(*this, fileName, binary);
+	const std::filesystem::path path(fileName);
+    if (path.has_extension())
+    {
+        const string& ext(path.extension().string());
+        if (boost::iequals(ext, ".vtk"))
+            return PointMatcherIO<T>::saveVTK(*this, fileName, binary, precision);
+        else if (boost::iequals(ext, ".ply"))
+            return PointMatcherIO<T>::savePLY(*this, fileName, binary, precision);
 
-	if (binary)
-		throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\".");
+        if (binary)
+            throw runtime_error("save(): Binary writing is not supported together with extension \"" + ext + "\". Currently binary writing is only supported with \".vtk\" and \".ply\".");
 
-	if (boost::iequals(ext, ".csv"))
-		return PointMatcherIO<T>::saveCSV(*this, fileName);
-	else if (boost::iequals(ext, ".ply"))
-		return PointMatcherIO<T>::savePLY(*this, fileName);
-	else if (boost::iequals(ext, ".pcd"))
-		return PointMatcherIO<T>::savePCD(*this, fileName);
-	else
-		throw runtime_error("save(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+        if (boost::iequals(ext, ".csv"))
+            return PointMatcherIO<T>::saveCSV(*this, fileName, precision);
+        else if (boost::iequals(ext, ".pcd"))
+            return PointMatcherIO<T>::savePCD(*this, fileName, precision);
+        else
+            throw runtime_error("save(): Unknown extension \"" + ext + "\" for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+
+    }
+    else
+    {
+        throw runtime_error("save(): Missing extension for file \"" + fileName + "\", extension must be either \".vtk\", \".ply\", \".pcd\" or \".csv\"");
+    }
 }
 
 template
-void PointMatcher<float>::DataPoints::save(const std::string& fileName, bool binary) const;
+void PointMatcher<float>::DataPoints::save(const std::string& fileName, bool binary, unsigned precision) const;
 template
-void PointMatcher<double>::DataPoints::save(const std::string& fileName, bool binary) const;
+void PointMatcher<double>::DataPoints::save(const std::string& fileName, bool binary, unsigned precision) const;
 
 //! Save point cloud to a file as CSV
 template<typename T>
-void PointMatcherIO<T>::saveCSV(const DataPoints& data, const std::string& fileName)
+void PointMatcherIO<T>::saveCSV(const DataPoints& data, const std::string& fileName, unsigned precision)
 {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
+    ofs.precision(precision);
 	saveCSV(data, ofs);
 }
 
@@ -848,13 +842,13 @@ void PointMatcherIO<T>::saveCSV(const DataPoints& data, std::ostream& os)
 	const int pointCount(data.features.cols());
 	const int dimCount(data.features.rows());
 	const int descDimCount(data.descriptors.rows());
-	
+
 	if (pointCount == 0)
 	{
 		LOG_WARNING_STREAM( "Warning, no points, doing nothing");
 		return;
 	}
-	
+
 	// write header
 	for (int i = 0; i < dimCount - 1; i++)
 	{
@@ -897,13 +891,13 @@ void PointMatcherIO<T>::saveCSV(const DataPoints& data, std::ostream& os)
 		}
 		os << "\n";
 	}
-	
+
 }
 
 template
-void PointMatcherIO<float>::saveCSV(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::saveCSV(const DataPoints& data, const std::string& fileName, unsigned precision);
 template
-void PointMatcherIO<double>::saveCSV(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<double>::saveCSV(const DataPoints& data, const std::string& fileName, unsigned precision);
 
 //! Load point cloud from a file as VTK
 template<typename T>
@@ -949,7 +943,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is)
 {
 	std::map<std::string, SplitTime> labelledSplitTime;
-	
+
 	DataPoints loadedPoints;
 
 	// parse header
@@ -983,7 +977,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 	int dim = 0;
 	int pointCount = 0;
 	string type;
-	
+
 	while (is >> fieldName)
 	{
 		// load features
@@ -1077,7 +1071,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 				}
 				else if(!(type == "float" || type == "double"))
 						throw runtime_error(string("Field " + fieldName + " is " + type + " but can only be of type double or float"));
-						 
+
 
 				Matrix descriptor(dim, pointCount);
 				readVtkData(type, isBinary, descriptor.transpose(), is);
@@ -1098,7 +1092,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 
 			// label name
 			is >> name;
-			
+
 			bool isTimeSec = false;
 			bool isTimeNsec = false;
 
@@ -1108,14 +1102,14 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 				isTimeSec = true;
 				boost::algorithm::erase_last(name, "_splitTime_high32");
 			}
-			
+
 			if(boost::algorithm::ends_with(name, "_splitTime_low32"))
 			{
 				isTimeNsec = true;
 				boost::algorithm::erase_last(name, "_splitTime_low32");
 			}
 
-			
+
 			bool skipLookupTable = false;
 			bool isColorScalars = false;
 			if(fieldName == "SCALARS")
@@ -1148,10 +1142,10 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 			else
 				throw runtime_error(string("Unknown field name " + fieldName + ", expecting SCALARS, VECTORS, TENSORS, NORMALS or COLOR_SCALARS."));
 
-			
+
 			safeGetLine(is, line); // remove rest of the parameter line including its line end;
 
-			
+
 			// Load time data
 			if(isTimeSec || isTimeNsec)
 			{
@@ -1160,7 +1154,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 				{
 					safeGetLine(is, line);
 				}
-				
+
 				typename std::map<std::string, SplitTime>::iterator it;
 
 				it = labelledSplitTime.find(name);
@@ -1180,7 +1174,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 					readVtkData(type, isBinary, labelledSplitTime[name].high32.transpose(), is);
 					labelledSplitTime[name].isHigh32Found = true;
 				}
-				
+
 				// Load nano seconds
 				if(isTimeNsec)
 				{
@@ -1191,10 +1185,10 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 			}
 			else
 			{
-				
+
 				Matrix descriptorData(dim, pointCount);
-				
-				if(isColorScalars && isBinary) 
+
+				if(isColorScalars && isBinary)
 				{
 					std::vector<unsigned char> buffer(dim);
 					for (int i = 0; i < pointCount; ++i){
@@ -1203,8 +1197,8 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 							descriptorData(r, i) = buffer[r] / static_cast<T>(255.0);
 						}
 					}
-				} 
-				else 
+				}
+				else
 				{
 					if(!(type == "float" || type == "double"))
 						throw runtime_error(string("Field " + fieldName + " is " + type + " but can only be of type double or float."));
@@ -1230,7 +1224,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 		{
 			throw runtime_error(string("Missing time field representing the higher 32 bits. Expecting SCALARS with name " + it->first + "_splitTime_high32 in the VTK file."));
 		}
-		
+
 		if(it->second.isLow32Found == false)
 		{
 			throw runtime_error(string("Missing time field representing the lower 32 bits. Expecting SCALARS with name " + it->first + "_splitTime_low32 in the VTK file."));
@@ -1240,13 +1234,13 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 		Int64Matrix timeData(1,pointCount);
 		for(int i=0; i<it->second.high32.cols(); i++)
 		{
-		
+
 			timeData(0,i) = (((std::int64_t) it->second.high32(0,i)) << 32) | ((std::int64_t) it->second.low32(0,i));
 		}
 
 		loadedPoints.addTime(it->first, timeData);
 	}
-	
+
 	return loadedPoints;
 }
 
@@ -1258,22 +1252,23 @@ PointMatcherIO<double>::DataPoints PointMatcherIO<double>::loadVTK(const std::st
 
 //! Save point cloud to a file as VTK
 template<typename T>
-void PointMatcherIO<T>::saveVTK(const DataPoints& data, const std::string& fileName, bool binary)
+void PointMatcherIO<T>::saveVTK(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision)
 {
 	typedef typename InspectorsImpl<T>::VTKFileInspector VTKInspector;
-	
+
 	Parametrizable::Parameters param;
 	boost::assign::insert(param) ("baseFileName", "");
 	boost::assign::insert(param) ("writeBinary", toParam(binary));
+	boost::assign::insert(param) ("precision", toParam(precision));
 	VTKInspector vtkInspector(param);
 	vtkInspector.dumpDataPoints(data, fileName);
 }
 
 
 template
-void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName, bool binary);
+void PointMatcherIO<float>::saveVTK(const PointMatcherIO<float>::DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 template
-void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName, bool binary);
+void PointMatcherIO<double>::saveVTK(const PointMatcher<double>::DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 
 //! @brief Load polygon file format (ply) file
 //! @param fileName a string containing the path and the file name
@@ -1317,7 +1312,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	1- PARSE PLY HEADER
 	2- ASSIGN PLY PROPERTIES TO DATAPOINTS ROWS
 	3- Reserve memory for a DataPoints
-	4- Parse PLY vertex to appropriate DataPoints cols and rows 
+	4- Parse PLY vertex to appropriate DataPoints cols and rows
 	5- Assemble final DataPoints
 
 	PLY organisation:
@@ -1342,6 +1337,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	PLYElement* current_element = NULL;
 	bool skip_props = false; // flag to skip properties if element is not supported
 	unsigned elem_offset = 0; // keep track of line position of elements that are supported
+    bool is_binary = false;
 	string line;
 	safeGetLine(is, line);
 
@@ -1379,8 +1375,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			if (format_str != "ascii" && format_str != "binary_little_endian" && format_str != "binary_big_endian")
 				throw runtime_error(string("PLY parse error: format <") + format_str + string("> is not supported"));
 
-			if (format_str == "binary_little_endian" || format_str == "binary_big_endian")
-				throw runtime_error(string("PLY parse error: binary PLY files are not supported"));
+			if (format_str == "binary_little_endian")
+                is_binary = true;
+            if (format_str == "binary_big_endian")
+				throw runtime_error(string("PLY parse error: only little endian binary PLY files are currently supported"));
 			if (version_str != "1.0")
 			{
 				throw runtime_error(string("PLY parse error: version <") + version_str + string("> of ply is not supported"));
@@ -1391,7 +1389,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		}
 		else if (keyword == "element")
 		{
-			
+
 
 			string elem_name, elem_num_s;
 			stringstream >> elem_name >> elem_num_s;
@@ -1484,25 +1482,25 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 	///////////////////////////
 	// 2- ASSIGN PLY PROPERTIES TO DATAPOINTS ROWS
-	
+
 	// Fetch vertex
 	PLYElement* vertex = elements[0];
-	
+
 	if(vertex->name != "vertex")
 	{
 		throw runtime_error(string("PLY parse error: vertex should be the first element defined."));
 	}
-		
+
 	// Fetch known features and descriptors
 	const SupportedLabels & externalLabels = getSupportedExternalLabels();
-	
+
 	int rowIdFeatures = 0;
 	int rowIdDescriptors = 0;
 	int rowIdTime= 0;
-	
+
 	LabelGenerator featLabelGen, descLabelGen, timeLabelGen;
 
-	
+
 	// Loop through all known external names (ordered list)
 	for(size_t i=0; i<externalLabels.size(); i++)
 	{
@@ -1533,9 +1531,9 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 						it->pmRowID = rowIdTime;
 						timeLabelGen.add(supLabel.internalName);
 						rowIdTime++;
+                        break;
 					default:
 						throw runtime_error(string("PLY Implementation Error: encounter a type different from FEATURE, DESCRIPTOR and TIME. Implementation not supported. See the definition of 'enum PMPropTypes'"));
-						break;
 				}
 
 				// we stop searching once we have a match
@@ -1543,7 +1541,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 			}
 		}
 	}
-	
+
 	// loop through the remaining UNSUPPORTED labels and assigned them to a single descriptor row
 	for(it_PLYProp it=vertex->properties.begin(); it!=vertex->properties.end(); ++it)
 	{
@@ -1578,21 +1576,94 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	for(int i=0; i<nbValues; i++)
 	{
 		T value;
-		if(!(is >> value))
-		{
-			throw runtime_error(
-			(boost::format("PLY parse error: expected %1% values (%2% points with %3% properties) but only found %4% values.") % nbValues % nbPoints % nbProp % i).str());
-		}
-		else
-		{
-			const int row = vertex->properties[propID].pmRowID;
-			const PMPropTypes type = vertex->properties[propID].pmType;
-			
-			// rescale color from [0,254] to [0, 1[
-			// FIXME: do we need that?
-			if (vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" || vertex->properties[propID].name == "alpha") {
-				value /= 255.0;
-			}
+        if (is_binary)
+        {
+            switch(vertex->properties[propID].type)
+            {
+                case PLYProperty::PLYPropertyType::INT8:
+                {
+                    int8_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int8_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT8:
+                {
+                    uint8_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint8_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::INT16:
+                {
+                    int16_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int16_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT16:
+                {
+                    uint16_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint16_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::INT32:
+                {
+                    // TODO what happens if T is float and we overflow?
+                    int32_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(int32_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::UINT32:
+                {
+                    // TODO what happens if T is float and we overflow?
+                    uint32_t temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(uint32_t));
+                    value = static_cast<T>(temp);
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::FLOAT32:
+                {
+                    float temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(float));
+                    value = static_cast<T>(temp); // Directly assign if T is float, or cast if T is double
+                    break;
+                }
+                case PLYProperty::PLYPropertyType::FLOAT64:
+                {
+                    // TODO what happens if T is float and we read a double?
+                    double temp;
+                    is.read(reinterpret_cast<char*>(&temp), sizeof(double));
+                    value = static_cast<T>(temp); // Directly assign if T is double, or cast if T is float
+                    break;
+                }
+                default:
+                {
+                    throw runtime_error(
+                        (boost::format("Unsupported data type in binary mode %1%.") % static_cast<int>(vertex->properties[propID].type)).str());
+                }
+            }
+        }
+        if ((is_binary && !is) || (!is_binary && !(is >> value)))
+        {
+            throw runtime_error(
+                    (boost::format("PLY parse error: expected %1% values (%2% points with %3% properties) but only found %4% values.") % nbValues % nbPoints % nbProp %
+                     i).str());
+        }
+        else
+        {
+            const int row = vertex->properties[propID].pmRowID;
+            const PMPropTypes type = vertex->properties[propID].pmType;
+
+            // rescale color from [0,255] to [0, 1[
+            // FIXME: do we need that?
+            if(vertex->properties[propID].name == "red" || vertex->properties[propID].name == "green" || vertex->properties[propID].name == "blue" ||
+               vertex->properties[propID].name == "alpha")
+            {
+                value /= 255.0;
+            }
 
 			switch (type)
 			{
@@ -1620,11 +1691,9 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 		}
 	}
 
-
-
 	///////////////////////////
 	// 5- ASSEMBLE FINAL DATAPOINTS
-	
+
 	DataPoints loadedPoints(features, featLabelGen.getLabels());
 
 	if (descriptors.rows() > 0)
@@ -1636,10 +1705,10 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 	if(times.rows() > 0)
 	{
 		loadedPoints.times = times;
-		loadedPoints.timeLabels = timeLabelGen.getLabels();	
+		loadedPoints.timeLabels = timeLabelGen.getLabels();
 	}
 
-	// Ensure homogeous coordinates
+	// Ensure homogeneous coordinates
 	if(!loadedPoints.featureExists("pad"))
 	{
 		loadedPoints.addFeature("pad", Matrix::Ones(1,features.cols()));
@@ -1651,7 +1720,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 template<typename T>
 void PointMatcherIO<T>::savePLY(const DataPoints& data,
-		const std::string& fileName)
+		const std::string& fileName, bool binary, unsigned precision)
 {
 	//typedef typename DataPoints::Labels Labels;
 
@@ -1659,6 +1728,7 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
 
+    ofs.precision(precision);
 	const int pointCount(data.features.cols());
 	const int featCount(data.features.rows());
 	const int descRows(data.descriptors.rows());
@@ -1670,20 +1740,36 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		return;
 	}
 
-	ofs << "ply\n" <<"format ascii 1.0\n";
+    if (binary)
+        ofs << "ply\n" <<"format binary_little_endian 1.0\n";
+    else
+	    ofs << "ply\n" <<"format ascii 1.0\n";
+
+    ofs << "comment File created with libpointmatcher\n";
 	ofs << "element vertex " << pointCount << "\n";
+    std::string dataType;
+
+    using ValueType = typename std::conditional<std::is_same<T, float>::value, float, double>::type;
+    if (std::is_same<ValueType, float>::value)
+        dataType = "float";
+    else
+        dataType = "double";
+
 	for (int f=0; f <(featCount-1); f++)
 	{
-		ofs << "property float " << data.featureLabels[f].text << "\n";
+		ofs << "property " << dataType << " " << data.featureLabels[f].text << "\n";
 	}
 
 	for (size_t i = 0; i < data.descriptorLabels.size(); i++)
 	{
 		Label lab = data.descriptorLabels[i];
 		for (size_t s = 0; s < lab.span; s++)
-
 		{
-			ofs << "property float " << getColLabel(lab,s) << "\n";
+            std::string label = getColLabel(lab,s);
+            if (label == "red" || label == "green" || label == "blue" || label == "alpha")
+			    ofs << "property uchar " << label << "\n";
+            else
+			    ofs << "property " << dataType << " " << label << "\n";
 		}
 	}
 
@@ -1694,9 +1780,16 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 	{
 		for (int f = 0; f < featCount - 1; ++f)
 		{
-			ofs << data.features(f, p);
-			if(!(f == featCount-2 && descRows == 0))
-				ofs << " ";
+            if (binary)
+            {
+                ofs.write(reinterpret_cast<const char*>(&data.features(f, p)), sizeof(T));
+            }
+            else
+            {
+                ofs << data.features(f, p);
+                if(!(f == featCount - 2 && descRows == 0))
+                    ofs << " ";
+            }
 		}
 
 		bool datawithColor = data.descriptorExists("color");
@@ -1705,34 +1798,44 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		for (int d = 0; d < descRows; ++d)
 		{
 			if (datawithColor && d >= colorStartingRow && d < colorEndRow) {
-				ofs << static_cast<unsigned>(data.descriptors(d, p) * 255.0);
+                if (binary)
+                {
+                    char value = static_cast<char>(data.descriptors(d, p) * 255.0);
+                    ofs.write(reinterpret_cast<const char*>(&value), sizeof(char));
+                }
+                else
+				    ofs << static_cast<unsigned>(data.descriptors(d, p) * 255.0);
 			} else {
-				ofs << data.descriptors(d, p);
+                if (binary)
+				    ofs.write(reinterpret_cast<const char*>(&data.descriptors(d, p)), sizeof(T));
+                else
+				    ofs << data.descriptors(d, p);
 			}
-			if(d != descRows-1)
+			if(d != descRows-1 && !binary)
 				ofs << " ";
 		}
-		ofs << "\n";
+        if(!binary)
+		    ofs << "\n";
 	}
 
 	ofs.close();
 }
 
 template
-void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::savePLY(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 template
-void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<double>::savePLY(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision);
 
 //! @(brief) Regular PLY property constructor
 template<typename T>
 PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& type,
 		const std::string& name, const unsigned pos) :
-		name(name), 
-		type(type), 
-		pos(pos) 
+		name(name),
+		pos(pos)
 {
 	if (plyPropTypeValid(type))
 	{
+        this->type = get_type_from_string(type);
 		is_list = false;
 	}
 	else
@@ -1752,15 +1855,15 @@ PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& type,
 template<typename T>
 PointMatcherIO<T>::PLYProperty::PLYProperty(const std::string& idx_type,
 		const std::string& type, const std::string& name, const unsigned pos) :
-		name(name), 
-		type(type), 
-		idx_type(idx_type), 
+		name(name),
+		idx_type(idx_type),
 		pos(pos)
 {
-	if (plyPropTypeValid(idx_type) && plyPropTypeValid(type)) 
+	if (plyPropTypeValid(idx_type) && plyPropTypeValid(type))
 	{
+        this->type = get_type_from_string(type);
 		is_list = true;
-	} 
+	}
 	else
 	{
 		throw std::runtime_error(
@@ -1827,6 +1930,23 @@ bool PointMatcherIO<T>::plyPropTypeValid(const std::string& type) {
 }
 
 
+// Explicitly instatiating the template for PLYElement, PLYProperty and PLYElementF
+// class functions to fix Python bindings import, which otherwise complains about a missing
+// symbol on pypointmatcher import
+template bool PointMatcherIO<float>::PLYElement::operator==(const PointMatcherIO<float>::PLYElement&) const;
+template bool PointMatcherIO<double>::PLYElement::operator==(const PointMatcherIO<double>::PLYElement&) const;
+
+template bool PointMatcherIO<float>::PLYProperty::operator==(const PointMatcherIO<float>::PLYProperty&) const;
+template bool PointMatcherIO<double>::PLYProperty::operator==(const PointMatcherIO<double>::PLYProperty&) const;
+
+template PointMatcherIO<float>::PLYElement* PointMatcherIO<float>::PLYElementF::createElement(
+		const std::string& elem_name, const int elem_num, const unsigned offset);
+template PointMatcherIO<double>::PLYElement* PointMatcherIO<double>::PLYElementF::createElement(
+		const std::string& elem_name, const int elem_num, const unsigned offset);
+
+template bool PointMatcherIO<float>::PLYElementF::elementSupported(const std::string& elem_name);
+template bool PointMatcherIO<double>::PLYElementF::elementSupported(const std::string& elem_name);
+
 template <typename T>
 bool PointMatcherIO<T>::PLYElement::operator==(const PLYElement& rhs) const
 {
@@ -1869,7 +1989,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	1- PARSE PCD HEADER
 	2- ASSIGN PCD PROPERTIES TO DATAPOINTS ROWS
 	3- Reserve memory for a DataPoints
-	4- Parse PCD XXX to appropriate DataPoints cols and rows 
+	4- Parse PCD XXX to appropriate DataPoints cols and rows
 	5- Assemble final DataPoints
 
 	PCD organisation:
@@ -1927,19 +2047,19 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 		else if (tokens[0] == "FIELDS")
 		{
 			header.properties.resize(tokens.size() - 1);
-			
+
 			for (size_t i = 1; i < tokens.size(); i++)
 			{
 				header.properties[i-1].field = tokens[i];
 			}
-			
+
 		}
 
 		else if (tokens[0] == "SIZE")
 		{
 			if((tokens.size() - 1) != header.properties.size())
 				throw runtime_error("PCD Parse Error: number of elements for SIZE must be the same as FIELDS");
-			
+
 			for (size_t i = 1; i < tokens.size(); i++)
 			{
 				const unsigned int size = boost::lexical_cast<unsigned int >(tokens[i]);
@@ -1960,7 +2080,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 				if (type != 'I' && type != 'U' && type != 'F')
 					throw runtime_error("PCD Parse Error: invalid TYPE, it must be 'I', 'U', or 'F'");
 			}
-			
+
 		}
 
 		else if (tokens[0] == "COUNT")
@@ -1968,13 +2088,13 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 
 			if((tokens.size() - 1) != header.properties.size())
 				throw runtime_error("PCD Parse Error: number of elements for COUNT must be the same as FIELDS");
-			
+
 			for (size_t i = 1; i < tokens.size(); i++)
 			{
 				const unsigned int count = boost::lexical_cast<unsigned int >(tokens[i]);
 				header.properties[i-1].count = count;
 			}
-			
+
 		}
 
 		else if (tokens[0] == "WIDTH")
@@ -1982,12 +2102,12 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			try
 			{
 				header.width = boost::lexical_cast<unsigned int >(tokens[1]);
-			} 
+			}
 			catch (boost::bad_lexical_cast&)
 			{
 				throw runtime_error("PCD Parse Error: invalid WIDTH");
 			}
-			
+
 		}
 
 		else if (tokens[0] == "HEIGHT")
@@ -1995,12 +2115,12 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			try
 			{
 				header.height= boost::lexical_cast<unsigned int >(tokens[1]);
-			} 
+			}
 			catch (boost::bad_lexical_cast&)
 			{
 				throw runtime_error("PCD Parse Error: invalid HEIGHT");
 			}
-		
+
 		}
 
 		else if (tokens[0] == "VIEWPOINT")
@@ -2041,7 +2161,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 		else if (tokens[0] == "DATA")
 		{
 			header.dataType= tokens[1];
-			
+
 			if (header.dataType == "ascii")
 			{
 				// DATA is the last element of the header, we exit the loop
@@ -2076,11 +2196,11 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 
 	// Fetch known features and descriptors
 	const SupportedLabels & externalLabels = getSupportedExternalLabels();
-	
+
 	int rowIdFeatures = 0;
 	int rowIdDescriptors = 0;
 	int rowIdTime= 0;
-	
+
 	LabelGenerator featLabelGen, descLabelGen, timeLabelGen;
 
 	// Loop through all known external names (ordered list)
@@ -2132,7 +2252,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 			}
 		}
 	}
-	
+
 	// loop through the remaining UNSUPPORTED labels and assigned them to a single descriptor row
 	for(size_t i=0; i < header.properties.size(); i++)
 	{
@@ -2229,7 +2349,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 
 	///////////////////////////
 	// 5- ASSEMBLE FINAL DATAPOINTS
-	
+
 	DataPoints loadedPoints(features, featLabelGen.getLabels());
 
 	if (descriptors.rows() > 0)
@@ -2241,7 +2361,7 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 	if(times.rows() > 0)
 	{
 		loadedPoints.times = times;
-		loadedPoints.timeLabels = timeLabelGen.getLabels();	
+		loadedPoints.timeLabels = timeLabelGen.getLabels();
 	}
 
 	// Ensure homogeous coordinates
@@ -2255,11 +2375,11 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPCD(std::istream& 
 
 template<typename T>
 void PointMatcherIO<T>::savePCD(const DataPoints& data,
-		const std::string& fileName) {
+		const std::string& fileName, unsigned precision) {
 	ofstream ofs(fileName.c_str());
 	if (!ofs.good())
 		throw runtime_error(string("Cannot open file ") + fileName);
-
+    ofs.precision(precision);
 	const int pointCount(data.features.cols());
 	const int featCount(data.features.rows());
 	const int descRows(data.descriptors.rows());
@@ -2345,9 +2465,6 @@ void PointMatcherIO<T>::savePCD(const DataPoints& data,
 }
 
 template
-void PointMatcherIO<float>::savePCD(const DataPoints& data, const std::string& fileName);
+void PointMatcherIO<float>::savePCD(const DataPoints& data, const std::string& fileName, unsigned precision);
 template
-void PointMatcherIO<double>::savePCD(const DataPoints& data, const std::string& fileName);
-
-
-
+void PointMatcherIO<double>::savePCD(const DataPoints& data, const std::string& fileName, unsigned precision);

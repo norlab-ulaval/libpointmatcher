@@ -4,10 +4,10 @@
 cmake_minimum_required (VERSION 3.10)
 project(convert)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(libpointmatcher REQUIRED)
-find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(Boost REQUIRED)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${libpointmatcher_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 

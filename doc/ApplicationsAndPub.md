@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](Introduction.md) | [Next](DataFilters.md) |
-| :--- | :---: | ---: |
-
 # Applications and Publications
 
 Here some applications and scientific publications using libpointmatcher.
@@ -9,102 +6,98 @@ Here some applications and scientific publications using libpointmatcher.
 
 Click on the image to play.
 
-#### Mapping A Campus
+<div class="grid cards" markdown>
 
-- Sensor: Velodyne HDL-64E
-- Application: Indoor and outdoor 3D mapping and localization
+-   __Mapping A Campus__
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=jlAArM_6N-I
-" target="_blank"><img src="http://img.youtube.com/vi/jlAArM_6N-I/0.jpg" 
-alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
+    ---
++ Sensor: Velodyne HDL-64E
++ Application: Indoor and outdoor 3D mapping and localization
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=jlAArM_6N-I" target="_blank"><img src="http://img.youtube.com/vi/jlAArM_6N-I/0.jpg" alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
-#### ARTOR: Long-term 3D map maintenance in dynamic environments
+-   __ARTOR: Long-term 3D map maintenance in dynamic environments__
 
-- Sensor: Velodyne HDL-32E
-- Application: 3D mapping and localization
+    ---
+  + Sensor: Velodyne HDL-32E
+  + Application: 3D mapping and localization
+  <a href="https://www.youtube.com/watch?v=cMgLyLpnsoU" target="_blank">
+   <img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/cMgLyLpnsoU.jpg" width="240" height="180"/>
+  </a>
 
+-   __NIFTi: railyard mapping__
 
-<a href="https://www.youtube.com/watch?v=cMgLyLpnsoU" target="_blank">
- <img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/cMgLyLpnsoU.jpg" width="240" height="180"/>
-</a>
-
-#### NIFTi: railyard mapping
-
-- Sensor: Sick LMS-151
-- Application: 3D mapping and localization
-
+    ---
++ Sensor: Sick LMS-151
++ Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=ygIvzWVfPYk" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/ygIvzWVfPYk.jpg"
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/ygIvzWVfPYk.jpg"
  width="240" height="180" border="10" />
 </a>
 
+-   __NIFTi: multi-floor mapping__
 
-#### NIFTi: multi-floor mapping: 
-
-- Sensor: Sick LMS-151
-- Application: 3D mapping and localization
-
+    ---
++ Sensor: Sick LMS-151
++ Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=lP5Mj-TGaiw" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/lP5Mj-TGaiw.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/lP5Mj-TGaiw.jpg" 
  width="240" height="180" border="10" />
 </a>
 
 
-#### ARTOR: Navigation in urban scene
 
+-   __ARTOR: Navigation in urban scene__
+
+    ---
 - Sensor: Velodyne HDL-32E
 - Application: Navigation
-
 <a href="https://www.youtube.com/watch?v=UCCAUf64tD0" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/UCCAUf64tD0.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/UCCAUf64tD0.jpg" 
  width="240" height="180" border="10" />
 </a>
 
 
 
-#### ARTOR: Mapping rough terrain
+-   __ARTOR: Mapping rough terrain__
 
-- Sensor: Velodyne HDL-32E
-- Application: 3D mapping and localization
-
+    ---
++ Sensor: Velodyne HDL-32E
++ Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=M5Y99o7um88" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/M5Y99o7um88.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/M5Y99o7um88.jpg" 
  width="240" height="180" border="10" />
 </a>
 
+- __Lizhbeth: Shore mapping around lake Zurich__
 
-#### Lizhbeth: Shore mapping around lake Zurich
-
-- Sensor: Velodyne HDL-32E
-- Application: 3D mapping and localization
-
+    ---
++ Sensor: Velodyne HDL-32E
++ Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=g8l-Xq4qYeE" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/g8l-Xq4qYeE.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/g8l-Xq4qYeE.jpg" 
  width="240" height="180" border="10" />
 </a>
 
+- __BBQ modeling__
 
-#### BBQ modeling
-- Sensor: Kinect
-- Application: 3D model reconstruction
- 
+    ---
++ Sensor: Kinect
++ Application: 3D model reconstruction
 <a href="https://www.youtube.com/watch?v=rIZud3F5IJw" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/rIZud3F5IJw.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/rIZud3F5IJw.jpg" 
  width="240" height="180" border="10" />
 </a>
 
+- __Kinect tracker__
 
-
-#### Kinect tracker
-
-- Sensor: Kinect
-- Application: 3D mapping and localization
-
+    ---
++ Sensor: Kinect
++ Application: 3D mapping and localization
 <a href="https://www.youtube.com/watch?v=McxpJGOZTPs" target="_blank">
-<img src="https://raw.githubusercontent.com/ethz-asl/libpointmatcher/master/doc/images/youtubeCovers/McxpJGOZTPs.jpg" 
+<img src="https://raw.githubusercontent.com/norlab-ulaval/libpointmatcher/master/doc/images/youtubeCovers/McxpJGOZTPs.jpg" 
  width="240" height="180" border="10" />
 </a>
-
+</div>
 
 
 ## Publications using libpointmatcher

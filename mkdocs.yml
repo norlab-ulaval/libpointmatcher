@@ -1,25 +1,58 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
 site_name: libpointmatcher
 repo_url: https://github.com/norlab-ulaval/libpointmatcher
 edit_uri: edit/master/doc
-site_description: An "Iterative Closest Point" library for 2-D/3-D mapping in robotic
-google_analytics: ['UA-70950258-1', 'libpointmatcher.readthedocs.org']
+site_description: "An Iterative Closest Point library for 2D/3D mapping in robotics"
 docs_dir: 'doc'
 theme:
-    name: mkdocs
-    hljs_style: atom-one-light
-    hljs_languages:
-        - bash
-        - cmake
-        - cpp
-        - yaml
+  name: material
+  logo: images/logo.png
+  favicon: images/logo.png
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.footer
+    - navigation.tabs.sticky
+    - navigation.top
+    - content.tabs
+    - content.code.copy
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/norlab-ulaval/libpointmatcher
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/norlab/
+    - icon: fontawesome/solid/globe
+      link: https://norlab.ulaval.ca
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - attr_list
+  - md_in_html
 nav:
 - Home: 'index.md'
-- Compilation:
-  - 'Ubuntu': 'CompilationUbuntu.md'
-  - 'Mac OS X': 'CompilationMac.md'
-  - 'Windows': 'CompilationWindows.md'
+- Compilation: 'Compilation.md'
 - Beginner:
-    - 'What is libpointmatcher about?': 'Introduction.md'
     - 'What can I do with libpointmatcher': 'ApplicationsAndPub.md'
     - 'What the different data filters do?': 'DataFilters.md'
     - 'Example: applying a chain of data filters': 'ApplyingDataFilters.md'
@@ -39,6 +72,8 @@ nav:
     - 'Creating a DataPointsFilter': 'DataPointsFilterDev.md'
     - 'Creating a Transformation': 'TransformationDev.md'
     - 'Creating unit tests': 'UnitTestDev.md'
+    - 'Contribution': 'contributing/contributing_instructions.md'
+    - 'Best practices': 'contributing/commit_msg_reference.md'
 - Python:
     - 'Compiling libpointmatcher with Python': 'CompilationPython.md'
     - 'Using libpointmatcher with Python': 'PythonModule.md'

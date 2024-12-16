@@ -2,6 +2,8 @@ ARG PROJECT_HUB=norlabulaval
 ARG BASE_IMAGE=libpointmatcher-dependencies
 ARG BASE_IMAGE_TAG
 FROM ${PROJECT_HUB}/${BASE_IMAGE}:${BASE_IMAGE_TAG:?err} AS libpointmatcher-dependencies
+ARG TARGETPLATFORM
+ARG TARGETARCH
 
 LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
 
@@ -40,13 +42,12 @@ WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
 RUN chmod +x ./utest/listVersionsUbuntu.sh
 RUN utest/listVersionsUbuntu.sh
 
-# ==== Build libpointmatcher checkout branch ======================================================
+# ==== Build/test libpointmatcher checkout branch =================================================
 WORKDIR ./build_system/ubuntu
 
 RUN chmod +x lpm_install_libpointmatcher_ubuntu.bash
 RUN chmod +x lpm_execute_libpointmatcher_unittest.bash
 RUN chmod +x entrypoint.bash
-
 
 RUN bash lpm_install_libpointmatcher_ubuntu.bash \
     --repository-version ${REPOSITORY_VERSION} \

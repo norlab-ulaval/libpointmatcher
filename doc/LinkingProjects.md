@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](ImportExport.md) | [Next](UsingInRos.md) |
-| :--- | :---: | ---: |
-
 # Linking Projects to libpointmatcher
 
 Once you have followed the [compilation instructions](CompilationUbuntu.md) and installed libpointmatcher to your system, you can use libpointmatcher in your project.
@@ -12,10 +9,10 @@ Because libpointmatcher was build using CMake, it can be conveniently included i
 In this following example, we build a very simple CMake project containing one executable in `myProgram.cpp` which depends on libpointmatcher.
 
 ```cmake
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.10.12)
 project (myProject)
 
-find_package(libpointmatcher 1.1.0 REQUIRED)
+find_package(libpointmatcher 1.4.3 REQUIRED)
 include_directories("${libpointmatcher_INCLUDE_DIRS}")
 message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 
@@ -26,18 +23,18 @@ A working example of how to link to an external project can be found in [./examp
 
 ## Option 2: Using Eclipse
 
-We will demonstrate how to create an Eclipse project containing a simple executable which depends on libpointmatcher.  You must have [Eclipse CDT](http://www.eclipse.org/cdt/) installed to develop with libpointmatcher in Eclipse.  
+We will demonstrate how to create an Eclipse project containing a simple executable which depends on libpointmatcher.  You must have [Eclipse CDT](http://www.eclipse.org/cdt/) installed to develop with libpointmatcher in Eclipse.
 
-Create a new C++ project by clicking `File > New > C++ Project`.  You can name your project "PointmatcherEclipseDemo" and in toolchains select the default toolchain for your system (most likely Linux GCC).  Click `Finish` to add your project to your Eclipse workspace.  
+Create a new C++ project by clicking `File > New > C++ Project`.  You can name your project "PointmatcherEclipseDemo" and in toolchains select the default toolchain for your system (most likely Linux GCC).  Click `Finish` to add your project to your Eclipse workspace.
 
-You must then configure the project by going to `Project > Properties > C/C++Build > Settings`.  Navigate to `C++ Compiler > Includes` and add the libpointmatcher (e.g. ~/Libraries/libpointmatcher) and eigen (e.g. /usr/include/eigen3) include path to the `Include paths (-I)` list.  Next, go to `C++ Linker/Libraries` and add the the following three dependencies to the "Libraries (-l)" list: 
+You must then configure the project by going to `Project > Properties > C/C++Build > Settings`.  Navigate to `C++ Compiler > Includes` and add the libpointmatcher (e.g. ~/Libraries/libpointmatcher) and eigen (e.g. /usr/include/eigen3) include path to the `Include paths (-I)` list.  Next, go to `C++ Linker/Libraries` and add the the following three dependencies to the "Libraries (-l)" list:
 
 * pointmatcher
 * boost_system
 * nabo
 
 Click `Ok` to save the configuration.  Create a new source file by clicking `File > New > Source File` and name it "Demo.cpp".  In this file you can type the following:
- 
+
 ```cpp
 #include <pointmatcher/PointMatcher.h>
 #include <iostream>
@@ -77,7 +74,6 @@ CONFIG          += c++11
 #QMAKE_LFLAGS   += -mmacosx-version-min=10.7
 
 LIBS     	+= 	/usr/local/lib/libboost_thread-mt.dylib \
-                	/usr/local/lib/libboost_filesystem-mt.dylib \
                         /usr/local/lib/libboost_system-mt.dylib \
                         /usr/local/lib/libboost_program_options-mt.dylib \
                         /usr/local/lib/libboost_date_time-mt.dylib \
@@ -100,7 +96,7 @@ g++ -I/usr/local/include/pointmatcher -o myProgram.o -c myProgram.cpp
 You can then link to the pointmatcher library using:
 
 ```bash
-g++ myProgram.o -o myProgram -lpointmatcher -lnabo -lboost_system -lyaml-cpp -lboost_filesystem -lrt
+g++ myProgram.o -o myProgram -lpointmatcher -lnabo -lboost_system -lyaml-cpp -lrt
 ```
 
 Nevertheless, it is always more convenient to use a builder such as CMake.

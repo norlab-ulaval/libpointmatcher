@@ -9,7 +9,7 @@
 # Arguments:
 #   --install-path </dir/abs/path/>     The directory where to install libpointmatcher (absolute path)
 #                                           (default location defined in the .env)
-#   --repository-version v1.3.1         Install libpointmatcher release tag version (default to master branch latest)
+#   --repository-version 1.4.0         Install libpointmatcher release tag version (default to master branch latest)
 #   --compile-test                      Compile the libpointmatcher unit-test
 #   --generate-doc                      Generate the libpointmatcher doxygen documentation
 #                                           in /usr/local/share/doc/libpointmatcher/api/html/index.html
@@ -62,7 +62,7 @@ function lpm::install_libpointmatcher(){
   fi
 
   # ====Begin======================================================================================
-  norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
+  n2st::norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
   export SHOW_SPLASH_ILU=false
 
   # ....Install general dependencies...............................................................
@@ -71,7 +71,7 @@ function lpm::install_libpointmatcher(){
   # shellcheck disable=SC2068
   source lpm_install_libpointmatcher_ubuntu.bash ${PARAMS[@]}
 
-  print_msg_done "Libpointmatcher install script completed. Have fun"
+  n2st::print_msg_done "Libpointmatcher install script completed. Have fun"
 }
 
 # ::::Main:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

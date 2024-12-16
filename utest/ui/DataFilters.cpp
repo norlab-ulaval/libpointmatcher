@@ -1,6 +1,8 @@
 #include "../utest.h"
 #include <ciso646>
 #include <cmath>
+#include <cstdint>
+#include "pointmatcher/Functions.h"
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -19,7 +21,7 @@ public:
 		icp.setDefault();
 		// Uncomment for console outputs
 		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
-		
+
 		// We'll test the filters on reading point cloud
 		icp.readingDataPointsFilters.clear();
 	}
@@ -31,15 +33,15 @@ public:
 	{
 		std::shared_ptr<PM::DataPointsFilter> testedDataPointFilter =
 			PM::get().DataPointsFilterRegistrar.create(name, params);
-	
+
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
-	
+
 	void addFilter(string name)
 	{
 		std::shared_ptr<PM::DataPointsFilter> testedDataPointFilter =
 			PM::get().DataPointsFilterRegistrar.create(name);
-		
+
 		icp.readingDataPointsFilters.push_back(testedDataPointFilter);
 	}
 
@@ -69,13 +71,55 @@ public:
 
 		return pointCloud;
 	}
+
+	DP validateAngleLimitFilter(const DP& cloud, double thetaMin, double thetaMax, double phiMin, double phiMax, bool removeInside)
+    {
+        const int nbRows = cloud.features.rows();
+    	params = PM::Parameters();
+    	params["thetaMin"] = toParam(thetaMin);
+    	params["thetaMax"] = toParam(thetaMax);
+    	params["phiMin"] = toParam(phiMin);
+    	params["phiMax"] = toParam(phiMax);
+    	params["removeInside"] = toParam(removeInside);
+
+    	std::shared_ptr<PM::DataPointsFilter> angleLimitFilter = PM::get().DataPointsFilterRegistrar.create("AngleLimitDataPointsFilter", params);
+    	const DP filteredCloud = angleLimitFilter->filter(cloud);
+
+    	EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
+    	EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+    	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+        for (unsigned i = 0; i < filteredCloud.getNbPoints(); ++i)
+        {
+            const Eigen::Vector3d point = filteredCloud.features.col(i).head(3);
+            NumericType r = point.norm();
+            NumericType r_plane = point.head(nbRows-2).norm();
+            NumericType theta = PointMatcherSupport::radToDeg(acos(point(nbRows-2) / r));
+            NumericType phi = PointMatcherSupport::radToDeg(acos(point(0) / r_plane));
+
+            if (point(1) < 0)
+                phi = -phi;
+            if (removeInside)
+            {
+                EXPECT_TRUE(theta < thetaMin || theta > thetaMax || phi < phiMin || phi > phiMax);
+            }
+            else
+            {
+                EXPECT_GE(theta, thetaMin);
+                EXPECT_LE(theta, thetaMax);
+                EXPECT_GE(phi, phiMin);
+                EXPECT_LE(phi, phiMax);
+            }
+        }
+        return filteredCloud;
+    }
 };
 
 TEST_F(DataFilterTest, IdentityDataPointsFilter)
 {
 	// build test cloud
 	DP ref2DCopy(ref2D);
-	
+
 	// apply and checked
 	addFilter("IdentityDataPointsFilter");
 	icp.readingDataPointsFilters.apply(ref2DCopy);
@@ -87,7 +131,7 @@ TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
 	// build test cloud
 	DP ref2DCopy(ref2D);
 	int goodCount(0);
-	const float nan(std::numeric_limits<float>::quiet_NaN());
+	const NumericType nan(std::numeric_limits<NumericType>::quiet_NaN());
 	for (int i(0); i < ref2DCopy.features.cols(); ++i)
 	{
 		if (rand() % 3 == 0)
@@ -97,7 +141,7 @@ TEST_F(DataFilterTest, RemoveNaNDataPointsFilter)
 		else
 			++goodCount;
 	}
-	
+
 	// apply and checked
 	addFilter("RemoveNaNDataPointsFilter");
 	icp.readingDataPointsFilters.apply(ref2DCopy);
@@ -110,40 +154,40 @@ TEST_F(DataFilterTest, MaxDistDataPointsFilter)
 	params = PM::Parameters();
 	params["dim"] = "0";
 	params["maxDist"] = toParam(6.0);
-	
+
 	// Filter on x axis
 	params["dim"] = "0";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
-	
+
 	// Filter on y axis
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
-	
+
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
 	EXPECT_ANY_THROW(validate2dTransformation());
 	validate3dTransformation();
-	
+
 	// Filter on a radius
 	params["dim"] = "-1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxDistDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
-	
+
 	// Parameter outside valid range
 	params["dim"] = "3";
 	//TODO: specify the exception, move that to GenericTest
 	EXPECT_ANY_THROW(addFilter("MaxDistDataPointsFilter", params));
-	
+
 }
 
 TEST_F(DataFilterTest, MinDistDataPointsFilter)
@@ -152,21 +196,21 @@ TEST_F(DataFilterTest, MinDistDataPointsFilter)
 	params = PM::Parameters();
 	params["dim"] = "0";
 	params["minDist"] = toParam(0.05);
-	
+
 	// Filter on x axis
 	params["dim"] = "0";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
-	
+
 	// Filter on y axis
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
-	
+
 	//TODO: move that to specific 2D test
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
@@ -174,14 +218,14 @@ TEST_F(DataFilterTest, MinDistDataPointsFilter)
 	addFilter("MinDistDataPointsFilter", params);
 	EXPECT_ANY_THROW(validate2dTransformation());
 	validate3dTransformation();
-	
+
 	// Filter on a radius
 	params["dim"] = "-1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MinDistDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
-		
+
 }
 
 TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
@@ -191,21 +235,21 @@ TEST_F(DataFilterTest, MaxQuantileOnAxisDataPointsFilter)
 	params = PM::Parameters();
 	params["dim"] = "0";
 	params["ratio"] = ratio;
-	
+
 	// Filter on x axis
 	params["dim"] = "0";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
-	
+
 	// Filter on y axis
 	params["dim"] = "1";
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxQuantileOnAxisDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
-	
+
 	// Filter on z axis (not existing)
 	params["dim"] = "2";
 	icp.readingDataPointsFilters.clear();
@@ -220,8 +264,8 @@ TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 {
 	// This filter create descriptor, so parameters should'nt impact results
 	params = PM::Parameters();
-	params["knn"] =  "5"; 
-	params["epsilon"] =  "0.1"; 
+	params["knn"] =  "5";
+	params["epsilon"] =  "0.1";
 	params["keepNormals"] =  "1";
 	params["keepDensities"] =  "1";
 	params["keepEigenValues"] =  "1";
@@ -230,7 +274,7 @@ TEST_F(DataFilterTest, SurfaceNormalDataPointsFilter)
 	// FIXME: the parameter keepMatchedIds seems to do nothing...
 
 	addFilter("SurfaceNormalDataPointsFilter", params);
-	validate2dTransformation();	
+	validate2dTransformation();
 	validate3dTransformation();
 
 	// TODO: standardize how filter are tested:
@@ -243,13 +287,13 @@ TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
 {
 	// Ratio has been selected to not affect the points too much
  	vector<double> ratio = {100, 1000, 5000};
- 
+
  	for(unsigned i=0; i < ratio.size(); i++)
  	{
  		icp.readingDataPointsFilters.clear();
 		params = PM::Parameters();
-		params["knn"] = "5"; 
-		params["epsilon"] = "0.1"; 
+		params["knn"] = "5";
+		params["epsilon"] = "0.1";
 		params["keepNormals"] = "0";
 		params["keepDensities"] = "1";
 		params["keepEigenValues"] = "0";
@@ -262,14 +306,14 @@ TEST_F(DataFilterTest, MaxDensityDataPointsFilter)
 		params["maxDensity"] = toParam(ratio[i]);
 
  		addFilter("MaxDensityDataPointsFilter", params);
- 		
+
 		// FIXME BUG: the density in 2D is not well computed
-		//validate2dTransformation();	
- 
+		//validate2dTransformation();
+
  		//double nbInitPts = data2D.features.cols();
  		//double nbRemainingPts = icp.getPrefilteredReadingPtsCount();
  		//EXPECT_TRUE(nbRemainingPts < nbInitPts);
- 		
+
  		validate3dTransformation();
 
 		double nbInitPts = data3D.features.cols();
@@ -288,7 +332,7 @@ TEST_F(DataFilterTest, SamplingSurfaceNormalDataPointsFilter)
 	params["keepDensities"] = "1";
 	params["keepEigenValues"] = "1";
 	params["keepEigenVectors"] = "1";
-	
+
 	addFilter("SamplingSurfaceNormalDataPointsFilter", params);
 	validate2dTransformation();
 	validate3dTransformation();
@@ -397,48 +441,48 @@ TEST_F(DataFilterTest, FixStepSamplingDataPointsFilter)
 TEST_F(DataFilterTest, MaxPointCountDataPointsFilter)
 {
 	DP cloud = ref3D;
-	
+
 	const size_t maxCount = 1000;
-		
-	params = PM::Parameters(); 
+
+	params = PM::Parameters();
 	params["seed"] = "42";
 	params["maxCount"] = toParam(maxCount);
-	
+
 	std::shared_ptr<PM::DataPointsFilter> maxPtsFilter =
 			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
 
 	DP filteredCloud = maxPtsFilter->filter(cloud);
-	
+
 	//Check number of points
 	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
 	EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
-	
+
 	EXPECT_EQ(filteredCloud.getNbPoints(), maxCount);
-	
+
 	//Same seed should result same filtered cloud
 	DP filteredCloud2 = maxPtsFilter->filter(cloud);
-	
+
 	EXPECT_TRUE(filteredCloud == filteredCloud2);
-	
+
 	//Different seeds should not result same filtered cloud but same number
 	params.clear();
 	params["seed"] = "1";
 	params["maxCount"] = toParam(maxCount);
-	
+
 	std::shared_ptr<PM::DataPointsFilter> maxPtsFilter2 =
 			PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
-			
+
 	DP filteredCloud3 = maxPtsFilter2->filter(cloud);
-	
+
 	EXPECT_FALSE(filteredCloud3 == filteredCloud2);
-	
+
 	EXPECT_EQ(filteredCloud3.getNbPoints(), maxCount);
-	
+
 	EXPECT_EQ(filteredCloud3.getNbPoints(), filteredCloud2.getNbPoints());
 	EXPECT_EQ(filteredCloud3.getDescriptorDim(), filteredCloud2.getDescriptorDim());
 	EXPECT_EQ(filteredCloud3.getTimeDim(), filteredCloud2.getTimeDim());
-	
+
 	//Validate transformation
 	icp.readingDataPointsFilters.clear();
 	addFilter("MaxPointCountDataPointsFilter", params);
@@ -449,25 +493,25 @@ TEST_F(DataFilterTest, MaxPointCountDataPointsFilter)
 TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 {
 	const unsigned int nbPts = 60000;
-	const DP cloud = generateRandomDataPoints(nbPts);	
-	params = PM::Parameters(); 
+	const DP cloud = generateRandomDataPoints(nbPts);
+	params = PM::Parameters();
 
 	std::shared_ptr<PM::DataPointsFilter> octreeFilter;
-	
+
 	for(const int meth : {0,1,2,3})
 		for(const size_t maxData : {1,5})
-			for(const float maxSize : {0.,0.05})
+			for(const NumericType maxSize : {0.,0.05})
 			{
 				params.clear();
 				params["maxPointByNode"] = toParam(maxData);
 				params["maxSizeByNode"] = toParam(maxSize);
 				params["samplingMethod"] = toParam(meth);
 				params["buildParallel"] = "1";
-	
+
 				octreeFilter = PM::get().DataPointsFilterRegistrar.create("OctreeGridDataPointsFilter", params);
 
 				const DP filteredCloud = octreeFilter->filter(cloud);
-			
+
 				if(maxData==1 and maxSize==0.)
 				{
 					// 1/pts by octants + validate parallel build
@@ -477,11 +521,11 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 					EXPECT_EQ(cloud.getNbPoints(), filteredCloud.getNbPoints());
 					EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
 					EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
-	
+
 					EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
 				}
 				else
-				{	
+				{
 					//Check number of points
 					EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
 				}
@@ -496,30 +540,30 @@ TEST_F(DataFilterTest, OctreeGridDataPointsFilter)
 TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 {
 	const size_t nbPts = 60000;
-	DP cloud = generateRandomDataPoints(nbPts);	
-	params = PM::Parameters(); 
-	
+	DP cloud = generateRandomDataPoints(nbPts);
+	params = PM::Parameters();
+
 	//const size_t nbPts2D = ref2D.getNbPoints();
 	const size_t nbPts3D = ref3D.getNbPoints();
-	
+
 	std::shared_ptr<PM::DataPointsFilter> nssFilter;
-	
+
 	//Compute normals
 	auto paramsNorm = PM::Parameters();
-			paramsNorm["knn"] = "5"; 
-			paramsNorm["epsilon"] = "0.1"; 
+			paramsNorm["knn"] = "5";
+			paramsNorm["epsilon"] = "0.1";
 			paramsNorm["keepNormals"] = "1";
 	std::shared_ptr<PM::DataPointsFilter> normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
 
 	normalFilter->inPlaceFilter(cloud);
-	
+
 	//Evaluate filter
 	std::vector<size_t> samples = {/* 2*nbPts2D/3, nbPts2D,*/ 1500, 5000, nbPts, nbPts3D};
-	for(const float epsilon : {M_PI/6., M_PI/32., M_PI/64.})
+	for(const NumericType epsilon : {M_PI/6., M_PI/32., M_PI/64.})
 		for(const size_t nbSample : samples)
 		{
 			icp.readingDataPointsFilters.clear();
-			
+
 			params.clear();
 			params["epsilon"] = toParam(epsilon);
 			params["nbSample"] = toParam(nbSample);
@@ -528,9 +572,9 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 
 			addFilter("SurfaceNormalDataPointsFilter", paramsNorm);
 			addFilter("NormalSpaceDataPointsFilter", params);
-			
+
 			const DP filteredCloud = nssFilter->filter(cloud);
-					
+
 			/*
 			if(nbSample <= nbPts2D)
 			{
@@ -542,7 +586,7 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 			{
 				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts3D);
 			}
-			else */ 
+			else */
 			if (nbSample == nbPts)
 			{
 				//Check number of points
@@ -552,8 +596,8 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 
 				EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
 			}
-			
-			validate3dTransformation();			
+
+			validate3dTransformation();
 			EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
 		}
 }
@@ -561,28 +605,28 @@ TEST_F(DataFilterTest, NormalSpaceDataPointsFilter)
 TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
 {
 	const size_t nbPts = 60000;
-	DP cloud = generateRandomDataPoints(nbPts);	
-	params = PM::Parameters(); 
-	
+	DP cloud = generateRandomDataPoints(nbPts);
+	params = PM::Parameters();
+
 	const size_t nbPts3D = ref3D.getNbPoints();
-	
+
 	std::shared_ptr<PM::DataPointsFilter> covsFilter;
-	
+
 	//Compute normals
 	auto paramsNorm = PM::Parameters();
-			paramsNorm["knn"] = "5"; 
-			paramsNorm["epsilon"] = "0.1"; 
+			paramsNorm["knn"] = "5";
+			paramsNorm["epsilon"] = "0.1";
 			paramsNorm["keepNormals"] = "1";
 	std::shared_ptr<PM::DataPointsFilter> normalFilter = PM::get().DataPointsFilterRegistrar.create("SurfaceNormalDataPointsFilter", paramsNorm);
 
 	normalFilter->inPlaceFilter(cloud);
-	
+
 	//Evaluate filter
 	std::vector<size_t> samples = {500, 1500, 5000, nbPts, nbPts3D};
 	for(const size_t nbSample : samples)
 	{
 		icp.readingDataPointsFilters.clear();
-		
+
 		params.clear();
 		params["nbSample"] = toParam(nbSample);
 
@@ -590,9 +634,9 @@ TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
 
 		addFilter("SurfaceNormalDataPointsFilter", paramsNorm);
 		addFilter("CovarianceSamplingDataPointsFilter", params);
-		
+
 		const DP filteredCloud = covsFilter->filter(cloud);
-				
+
 		if (nbSample == nbPts3D)
 		{
 			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts3D);
@@ -606,8 +650,8 @@ TEST_F(DataFilterTest, CovarianceSamplingDataPointsFilter)
 
 			EXPECT_EQ(filteredCloud.getNbPoints(), nbPts);
 		}
-		
-		validate3dTransformation();			
+
+		validate3dTransformation();
 		EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
 	}
 }
@@ -617,7 +661,7 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 	// Test with point cloud
 	DP cloud = generateRandomDataPoints();
 
-	params = PM::Parameters(); 
+	params = PM::Parameters();
 	params["vSizeX"] = "0.5";
 	params["vSizeY"] = "0.5";
 	params["vSizeZ"] = "0.5";
@@ -636,17 +680,17 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 	// Test with ICP
 	vector<bool> useCentroid = {false, true};
 	vector<bool> averageExistingDescriptors = {false, true};
-	for (unsigned i = 0 ; i < useCentroid.size() ; i++) 
+	for (unsigned i = 0 ; i < useCentroid.size() ; i++)
 	{
-		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++) 
+		for (unsigned j = 0; j < averageExistingDescriptors.size(); j++)
 		{
-			params = PM::Parameters(); 
+			params = PM::Parameters();
 			params["vSizeX"] = "0.02";
 			params["vSizeY"] = "0.02";
 			params["vSizeZ"] = "0.02";
 			params["useCentroid"] = toParam(true);
 			params["averageExistingDescriptors"] = toParam(true);
-			
+
 			icp.readingDataPointsFilters.clear();
 			addFilter("VoxelGridDataPointsFilter", params);
 			validate2dTransformation();
@@ -663,7 +707,7 @@ TEST_F(DataFilterTest, VoxelGridDataPointsFilter)
 			params["vSizeZ"] = "1";
 			params["useCentroid"] = toParam(true);
 			params["averageExistingDescriptors"] = toParam(true);
-			
+
 			icp.readingDataPointsFilters.clear();
 			addFilter("VoxelGridDataPointsFilter", params);
 			validate3dTransformation();
@@ -680,14 +724,14 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 	// Adding descriptor "densities"
 	icp.readingDataPointsFilters.clear();
 	params = PM::Parameters();
-	params["knn"] = "5"; 
-	params["epsilon"] = "0.1"; 
+	params["knn"] = "5";
+	params["epsilon"] = "0.1";
 	params["keepNormals"] = "0";
 	params["keepDensities"] = "1";
 	params["keepEigenValues"] = "0";
 	params["keepEigenVectors"] = "0";
 	params["keepMatchedIds"] = "0";
-	
+
 
 	addFilter("SurfaceNormalDataPointsFilter", params);
 	icp.readingDataPointsFilters.apply(ref3Ddensities);
@@ -716,11 +760,11 @@ TEST_F(DataFilterTest, CutAtDescriptorThresholdDataPointsFilter)
 			DP ref3DCopy = ref3Ddensities;
 
 			icp.readingDataPointsFilters.clear();
-			params = PM::Parameters(); 
+			params = PM::Parameters();
 			params["descName"] = toParam("densities");
 			params["useLargerThan"] = toParam(useLargerThan);
 			params["threshold"] = toParam(thresholds[i]);
-			
+
 
 			addFilter("CutAtDescriptorThresholdDataPointsFilter", params);
 			icp.readingDataPointsFilters.apply(ref3DCopy);
@@ -815,9 +859,9 @@ TEST_F(DataFilterTest, DistanceLimitDataPointsFilter)
 TEST_F(DataFilterTest, SameFilterInstanceTwice)
 {
 	params = PM::Parameters();
-	
+
 	std::shared_ptr<PM::DataPointsFilter> df = PM::get().DataPointsFilterRegistrar.create("MaxPointCountDataPointsFilter", params);
-	
+
 	icp.referenceDataPointsFilters.push_back(df);
 	icp.readingDataPointsFilters.push_back(df);
 }
@@ -829,7 +873,7 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 						 0., -0.002311, -0.163689};
 	const double expectedErrors_HDL32E[6]  = {0., -0.002945, -0.075866,
 						  0., -0.002998,-0.082777 };
-	
+
 	PM::Matrix points = (PM::Matrix(3,6) << 1, 1, 1, 5, 5, 5,
 		0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0).finished();
@@ -838,12 +882,12 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 	pointsLabels.push_back(DP::Label("y", 1));
 	pointsLabels.push_back(DP::Label("z", 1));
 	pointsLabels.push_back(DP::Label("pad", 1));
-	
+
 	PM::Matrix desc = (PM::Matrix(4,6) << 0., 0.7854, 1.4835, 0., 0.7854, 1.4835, //0,45,85 degrees
 		-1, -1, -1, -5, -5, -5,
 		0,  0,  0,  0,  0,  0, // observation : point to sensor
 		0,  0,  0,  0,  0,  0).finished();
-	
+
 	PM::Matrix desc2 = (PM::Matrix(4,6) << 0., 0.7854, std::nanf(""), 0., 0.7854, M_PI_2, //0,45,90 degrees
 		-1, -1, -1, -5, -5, -5,
 		0,  0,  0,  0,  0,  0, // observation : point to sensor
@@ -851,31 +895,31 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 	DP::Labels descLabels;
 	descLabels.push_back(DP::Label("incidenceAngles", 1));
 	descLabels.push_back(DP::Label("observationDirections", 3));
-	
+
 	PM::Int64Matrix randTimes = PM::Int64Matrix::Random(2, nbPts);
 	DP::Labels timeLabels;
 	timeLabels.push_back(DP::Label("dummyTime", 2));
-	
+
 	// Construct the point cloud from the generated matrices
 	DP pointCloud = DP(points, pointsLabels, desc, descLabels, randTimes, timeLabels);
-	
-	
+
+
 	PM::Parameters parameters;
 	parameters["sensorType"] = toParam(0); //LMS_1xx
 	std::shared_ptr<PM::DataPointsFilter> removeSensorBiasFilter = PM::get().DataPointsFilterRegistrar.create("RemoveSensorBiasDataPointsFilter", parameters);
 	DP resultCloud = removeSensorBiasFilter->filter(pointCloud);
 	EXPECT_EQ(pointCloud.getNbPoints(), resultCloud.getNbPoints());
-	
+
 	for(std::size_t i = 0; i< nbPts; ++i)
 	{
 		const double error = pointCloud.features.col(i).norm() - resultCloud.features.col(i).norm();
 		EXPECT_NEAR(expectedErrors_LMS1xx[i], error, 1e-3); // below mm
 	}
-	
+
 	parameters["sensorType"] = toParam(1); //HDL32E
 	removeSensorBiasFilter = PM::get().DataPointsFilterRegistrar.create("RemoveSensorBiasDataPointsFilter", parameters);
 	resultCloud = removeSensorBiasFilter->filter(pointCloud);
-	
+
 	for(std::size_t i = 0; i< nbPts; ++i)
 	{
 		const double error = pointCloud.features.col(i).norm() - resultCloud.features.col(i).norm();
@@ -889,7 +933,7 @@ TEST_F(DataFilterTest, RemoveSensorBiasDataPointsFilter)
 	parameters["sensorType"] = toParam(0); //LMS_1xx
 	parameters["angleThreshold"] = toParam(30.);
 	removeSensorBiasFilter = PM::get().DataPointsFilterRegistrar.create("RemoveSensorBiasDataPointsFilter", parameters);
-	resultCloud = removeSensorBiasFilter->filter(pointCloud);	
+	resultCloud = removeSensorBiasFilter->filter(pointCloud);
 
 	//four points should have been rejected
 	EXPECT_EQ(pointCloud.getNbPoints()-4, resultCloud.getNbPoints());
@@ -912,10 +956,10 @@ TEST_F(DataFilterTest, SaliencyDataPointsFilter)
 TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 {
 	using DPFiltersPtr = std::shared_ptr<PM::DataPointsFilter>;
-	
+
 	// Test with point cloud
 	DP cloud = generateRandomDataPoints(300000);
-	
+
 	// This filter creates descriptors
 	params = PM::Parameters();
 		params["k"] = "50";
@@ -926,7 +970,7 @@ TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 		params["keepLabels"] = "1";
 		params["keepLambdas"] = "1";
 		params["keepTensors"] = "1";
-		
+
 	DPFiltersPtr spdf = PM::get().DataPointsFilterRegistrar.create(
 		"SpectralDecompositionDataPointsFilter", params
 	);
@@ -936,7 +980,7 @@ TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 	EXPECT_GT(cloud.getNbPoints(), filteredCloud.getNbPoints());
 	EXPECT_EQ(cloud.getDescriptorDim()+(3+3+1+3+1+4+7+3), filteredCloud.getDescriptorDim());
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
-	
+
 	params = PM::Parameters();
 		params["k"] = "50";
 		params["sigma"] = "1.";
@@ -946,7 +990,7 @@ TEST_F(DataFilterTest, SpectralDecompositionDataPointsFilter)
 		params["keepLabels"] = "1";
 		params["keepLambdas"] = "1";
 		params["keepTensors"] = "1";
-		
+
 	addFilter("SpectralDecompositionDataPointsFilter", params);
 	validate3dTransformation();
 }
@@ -960,7 +1004,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
 
     std::string descriptorName = "test_descriptor";
     std::size_t descriptorDimension = 3;
-    std::vector<float> descriptorValues{2, 3, 4};
+    std::vector<NumericType> descriptorValues{2, 3, 4};
 
 	// This filter adds a new descriptor
 	params = PM::Parameters();
@@ -978,7 +1022,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
 	EXPECT_EQ(cloud.getDescriptorDim()+descriptorDimension, filteredCloud.getDescriptorDim());
 	EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
 
-    Eigen::Matrix<float, 1, Eigen::Dynamic> row = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(cloud.getNbPoints());
+    Eigen::Matrix<NumericType, 1, Eigen::Dynamic> row = Eigen::Matrix<NumericType, 1, Eigen::Dynamic>::Ones(cloud.getNbPoints());
     EXPECT_EQ(filteredCloud.descriptorLabels.back().text, descriptorName);
     EXPECT_EQ(filteredCloud.descriptorLabels.back().span, descriptorDimension);
     for(unsigned i = 0; i < descriptorDimension; ++i)
@@ -987,7 +1031,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
     }
 
 
-    descriptorValues = std::vector<float>{-2, -3, -4};
+    descriptorValues = std::vector<NumericType>{-2, -3, -4};
     params["descriptorValues"] = toParam(descriptorValues);
 
 	addDescriptorFilter = PM::get().DataPointsFilterRegistrar.create(
@@ -1002,7 +1046,7 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
     }
 
 
-    descriptorValues = std::vector<float>{-2, -3, -4, -5};
+    descriptorValues = std::vector<NumericType>{-2, -3, -4, -5};
     params["descriptorDimension"] = toParam(4);
     params["descriptorValues"] = toParam(descriptorValues);
 	addDescriptorFilter = PM::get().DataPointsFilterRegistrar.create(
@@ -1017,4 +1061,60 @@ TEST_F(DataFilterTest, AddDescriptorDataPointsFilter)
 
 	addFilter("AddDescriptorDataPointsFilter", params);
 	validate3dTransformation();
+}
+
+
+TEST_F(DataFilterTest, AngleLimitDataPointsFilter)
+{
+    const unsigned int nbPts = 10000;
+	const DP cloud = generateRandomDataPoints(nbPts);
+
+	// Remove negative x-axis: thetaMin = -180, thetaMax = 180, phiMin = -180/2, phiMax = 180/2, removeInside = 0
+	DP filteredCloud = validateAngleLimitFilter(cloud, -180, 180, -90, 90, false);
+	for (unsigned i = 0; i < filteredCloud.getNbPoints(); ++i)
+    {
+        const Eigen::Vector3d point = filteredCloud.features.col(i).head(3);
+        EXPECT_GT(point(0), 0.0);
+    }
+
+	// Remove positive x-axis: thetaMin = -180, thetaMax = 180, phiMin = -180/2, phiMax = 180/2, removeInside = 1
+	filteredCloud = validateAngleLimitFilter(cloud, -180, 180, -90, 90, true);
+	for (unsigned i = 0; i < filteredCloud.getNbPoints(); ++i)
+    {
+        const Eigen::Vector3d point = filteredCloud.features.col(i).head(3);
+        EXPECT_LT(point(0), 0.0);
+    }
+
+	// Remove negative y-axis: thetaMin = -180, thetaMax = 180, phiMin = 0, phiMax = 180, removeInside = 0
+	filteredCloud = validateAngleLimitFilter(cloud, -180, 180, 0, 180, false);
+	for (unsigned i = 0; i < filteredCloud.getNbPoints(); ++i)
+    {
+        const Eigen::Vector3d point = filteredCloud.features.col(i).head(3);
+        EXPECT_GT(point(1), 0.0);
+    }
+
+	// Remove positive y-axis: thetaMin = -180, thetaMax = 180, phiMin = 0, phiMax = 180, removeInside = 1
+	filteredCloud = validateAngleLimitFilter(cloud, -180, 180, 0, 180, true);
+	for (unsigned i = 0; i < filteredCloud.getNbPoints(); ++i)
+    {
+        const Eigen::Vector3d point = filteredCloud.features.col(i).head(3);
+        EXPECT_LT(point(1), 0.0);
+    }
+
+	// // Remove negative z-axis: thetaMin = -90, thetaMax = 90, phiMin = -180, phiMax = 180, removeInside = 0
+	filteredCloud = validateAngleLimitFilter(cloud, -90, 90, -180, 180, false);
+
+	for (unsigned i = 0; i < filteredCloud.getNbPoints(); ++i)
+    {
+        const Eigen::Vector3d point = filteredCloud.features.col(i).head(3);
+        EXPECT_GT(point(2), 0.0);
+    }
+
+	// // Remove positive z-axis: thetaMin = -90, thetaMax = 90, phiMin = -180, phiMax = 180, removeInside = 1
+	filteredCloud = validateAngleLimitFilter(cloud, -90, 90, -180, 180, true);
+	for (unsigned i = 0; i < filteredCloud.getNbPoints(); ++i)
+    {
+        const Eigen::Vector3d point = filteredCloud.features.col(i).head(3);
+        EXPECT_LT(point(2), 0.0);
+    }
 }

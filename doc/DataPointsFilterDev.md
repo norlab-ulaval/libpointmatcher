@@ -1,6 +1,3 @@
-| [Tutorials Home](index.md) | [Previous](ICPWithoutYaml.md) | [Next](TransformationDev.md) |
-| :--- | :---: | ---: |
-
 # Creating a DataPointsFilter
 
 In the following tutorials we will discuss how you can extend the functionality provided in _libpointmatcher_ by taking advantage of its modular design.  The following tutorial will detail the development of a a new data filter, which is as of yet not included in libpointmatcher.  You may wish to develop customized DataPointFilters, Transformations, OutlierFilters which best fit your project.  However, if you believe that your own contributions would benefit a larger user base, please contact us to see how we can integrate them into libpointmatcher.
@@ -14,60 +11,61 @@ For a more detailed procedure or if it's the first time developping a filter, pl
 	- the implementation file : `Dummy.cpp`
 
 1. Declare your filter in the header with the minimal following interface:
+   ```cpp
+   template <typename T>
+   struct DummyDataPointsFilter : public PointMatcher<T>::DataPointsFilter
+   {
+      typedef PointMatcherSupport::Parametrizable P;
+      typedef P::Parameters Parameters;
+      typedef P::ParameterDoc ParameterDoc;
+      typedef P::ParametersDoc ParametersDoc;
+      
+      typedef typename PointMatcher<T>::DataPoints DataPoints;
+      
+      inline static const std::string description()
+      {
+          return "description";
+      }
+      inline static const ParametersDoc availableParameters()
+      {
+          return boost::assign::list_of<ParameterDoc>
+          ( "param", "param desc", "default value", "lower bound", "upper bound", &P::Comp<value_type> )
+          ;
+      }
+   
+      DummyDataPointsFilter(const Parameters& params = Parameters());
+      virtual ~DummyDataPointsFilter() {};
+      virtual DataPoints filter(const DataPoints& input);
+      virtual void inPlaceFilter(DataPoints& cloud);
+   };
+   ```
+3. Implement the filter in the `.cpp` file and declare the template at the end of the file as follow:
+   ```c++
+   template struct DummyDataPointsFilter<float>;
+   template struct DummyDataPointsFilter<double>;
+   ```
+4. Declare the filter in [pointmatcher/DataPointsFiltersImpl.h](https://github.com/norlab-ulaval/libpointmatcher/blob/master/pointmatcher/DataPointsFiltersImpl.h) as follow:
+   ```cpp
+   #include "DataPointsFilters/Dummy.h"
+   
+   template<typename T>
+   struct DataPointsFiltersImpl
+   {
+      /* other filters declaration */
+      /* our declaraction -> */ typedef ::DummyDataPointsFilter<T> DummyDataPointsFilter;
+   };
+   ```
 
-        template <typename T>
-        struct DummyDataPointsFilter : public PointMatcher<T>::DataPointsFilter
-        {
-            typedef PointMatcherSupport::Parametrizable P;
-            typedef P::Parameters Parameters;
-            typedef P::ParameterDoc ParameterDoc;
-            typedef P::ParametersDoc ParametersDoc;
-            
-            typedef typename PointMatcher<T>::DataPoints DataPoints;
-            
-            inline static const std::string description()
-            {
-                return "description";
-            }
-            inline static const ParametersDoc availableParameters()
-            {
-                return boost::assign::list_of<ParameterDoc>
-                ( "param", "param desc", "default value", "lower bound", "upper bound", &P::Comp<value_type> )
-                ;
-            }
-        
-            DummyDataPointsFilter(const Parameters& params = Parameters());
-            virtual ~DummyDataPointsFilter() {};
-            virtual DataPoints filter(const DataPoints& input);
-            virtual void inPlaceFilter(DataPoints& cloud);
-        };
-
-1. Implement the filter in the `.cpp` file and declare the template at the end of the file as follow:
-
-        template struct DummyDataPointsFilter<float>;
-        template struct DummyDataPointsFilter<double>;
-
-1. Declare the filter in [pointmatcher/DataPointsFiltersImpl.h](https://github.com/norlab-ulaval/libpointmatcher/blob/master/pointmatcher/DataPointsFiltersImpl.h) as follow:
-
-        #include "DataPointsFilters/Dummy.h"
-        
-        template<typename T>
-        struct DataPointsFiltersImpl
-        {
-            /* other filters declaration */
-            /* our declaraction -> */ typedef ::DummyDataPointsFilter<T> DummyDataPointsFilter;
-        };
- 
-1. Add it to the _Registry_ [pointmatcher/Registry.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/pointmatcher/Registry.cpp)
+5. Add it to the _Registry_ [pointmatcher/Registry.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/pointmatcher/Registry.cpp)
 	- If the filter has some parameters:
-
-            ADD_TO_REGISTRAR(DataPointsFilter, DummyDataPointsFilter, typename DataPointsFiltersImpl<T>::DummyDataPointsFilter)
- 
+   ```c++
+   ADD_TO_REGISTRAR(DataPointsFilter, DummyDataPointsFilter, typename DataPointsFiltersImpl<T>::DummyDataPointsFilter)
+   ``` 
     - If not:
-
-            ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, DummyDataPointsFilter, typename DataPointsFiltersImpl<T>::DummyDataPointsFilter)
-
-1. Finally, add the source file in the [CMakeLists.txt](https://github.com/norlab-ulaval/libpointmatcher/blob/master/CMakeLists.txt) in the `POINTMATCHER_SRC` variable.
+   ```c++
+   ADD_TO_REGISTRAR_NO_PARAM(DataPointsFilter, DummyDataPointsFilter, typename DataPointsFiltersImpl<T>::DummyDataPointsFilter)
+   ```
+6. Finally, add the source file in the [CMakeLists.txt](https://github.com/norlab-ulaval/libpointmatcher/blob/master/CMakeLists.txt) in the `POINTMATCHER_SRC` variable.
 
 
 ## The Voxel Grid Filter <a name="voxelgridhead"></a>

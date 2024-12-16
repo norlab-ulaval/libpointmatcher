@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.15)
 
 include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 include(CheckSymbolExists)
@@ -30,7 +30,9 @@ string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTM
 cmake_policy(SET CMP0048 NEW)
 # In 3.12+, find_package(<PackageName>) searches prefixes specified by the `<PackageName>_ROOT` CMake and the ``<PackageName>_ROOT`` environment variable, force this with CMP0074
 cmake_policy(SET CMP0074 NEW)
-project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION} LANGUAGES CXX )
+project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION} 
+		DESCRIPTION "libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds"
+		LANGUAGES CXX )
 
 set(CMAKE_DEBUG_POSTFIX "d")
 
@@ -126,9 +128,9 @@ endif()
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
-find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time)
+find_package(Boost REQUIRED COMPONENTS thread system program_options date_time)
 if (Boost_MINOR_VERSION GREATER 47)
-	find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options date_time chrono)
+	find_package(Boost REQUIRED COMPONENTS thread system program_options date_time chrono)
 endif ()
 
 #--------------------
@@ -158,7 +160,7 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 #--------------------
 if (NOT TARGET nabo)
   # Find libnabo:
-  find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
+  find_package(libnabo 1.1.1 REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
   if (TARGET libnabo::nabo)
  	set(libnabo_LIBRARIES libnabo::nabo)
     message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode,  libs=${libnabo_LIBRARIES})")
@@ -306,6 +308,7 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/Identity.cpp
 #DataPointsFilters
 	pointmatcher/DataPointsFilters/AddDescriptor.cpp
+	pointmatcher/DataPointsFilters/AngleLimit.cpp
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
@@ -335,6 +338,8 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/Sphericality.cpp
 	pointmatcher/DataPointsFilters/Saliency.cpp
 	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp
+#PointCloudGenerators
+	pointmatcher/PointCloudGenerator.cpp
 )
 
 

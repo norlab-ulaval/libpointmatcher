@@ -54,7 +54,7 @@ The order is important (i.e., nx before ny). This can also be used to remap 1D d
 
 			pyPointMatcherIO
 				.def_static("loadCSV", (DataPoints (*)(const std::string&)) &PMIO::loadCSV, py::arg("fileName"))
-				.def_static("saveCSV", (void (*)(const DataPoints&, const std::string&)) &PMIO::saveCSV, py::arg("data"), py::arg("fileName"));
+				.def_static("saveCSV", (void (*)(const DataPoints&, const std::string&, unsigned precision)) &PMIO::saveCSV, py::arg("data"), py::arg("fileName"), py::arg("precision"));
 
 			using SupportedVTKDataTypes = PMIO::SupportedVTKDataTypes;
 			py::enum_<SupportedVTKDataTypes>(pyPointMatcherIO, "SupportedVTKDataTypes", "Enumeration of legacy VTK data types that can be parsed")
@@ -71,13 +71,13 @@ The order is important (i.e., nx before ny). This can also be used to remap 1D d
 
 			pyPointMatcherIO
 				.def_static("loadVTK", (DataPoints (*)(const std::string&)) &PMIO::loadVTK, py::arg("fileName"))
-				.def_static("saveVTK", (void (*)(const DataPoints&, const std::string&, bool)) &PMIO::saveVTK, py::arg("data"), py::arg("fileName"), py::arg("binary") = false)
+				.def_static("saveVTK", (void (*)(const DataPoints&, const std::string&, bool, unsigned precision)) &PMIO::saveVTK, py::arg("data"), py::arg("fileName"), py::arg("binary") = false, py::arg("precision") = 7)
 
 				.def_static("loadPLY", (DataPoints (*)(const std::string&)) &PMIO::loadPLY, py::arg("fileName"))
-				.def_static("savePLY", (void (*)(const DataPoints&, const std::string&)) &PMIO::savePLY, py::arg("data"), py::arg("fileName"), "save datapoints to PLY point cloud format")
+				.def_static("savePLY", (void (*)(const DataPoints&, const std::string&, bool binary, unsigned precision)) &PMIO::savePLY, py::arg("data"), py::arg("fileName"), py::arg("binary"), py::arg("precision"), "save datapoints to PLY point cloud format")
 
 				.def_static("loadPCD", (DataPoints (*)(const std::string&)) &PMIO::loadPCD, py::arg("fileName"))
-				.def_static("savePCD", (void (*)(const DataPoints&, const std::string&)) &PMIO::savePCD, py::arg("data"), py::arg("fileName"), "save datapoints to PCD point cloud format");
+				.def_static("savePCD", (void (*)(const DataPoints&, const std::string&, unsigned precision)) &PMIO::savePCD, py::arg("data"), py::arg("fileName"), py::arg("precision"), "save datapoints to PCD point cloud format");
 
 			using FileInfo = PMIO::FileInfo;
 			using Vector3 = FileInfo::Vector3;
@@ -119,65 +119,64 @@ Note that the header must at least contain "reading".
 			pyPointMatcherIO
 				.def_static("plyPropTypeValid", &PMIO::plyPropTypeValid, "Check that property defined by type is a valid PLY type note: type must be lowercase");
 
-			using PLYProperty = PMIO::PLYProperty;
-			py::class_<PLYProperty>(pyPointMatcherIO, "PLYProperty", "Interface for PLY property")
-				.def_readwrite("name", &PLYProperty::name, "name of PLY property")
-				.def_readwrite("type", &PLYProperty::type, "type of PLY property")
-				.def_readwrite("idx_type", &PLYProperty::idx_type, "for list properties, type of number of elements")
-				.def_readwrite("pos", &PLYProperty::pos, "index of the property in element")
-				.def_readwrite("is_list", &PLYProperty::is_list, "member is true of property is a list")
-				.def_readwrite("pmType", &PLYProperty::pmType, "type of information in PointMatcher")
-				.def_readwrite("pmRowID", &PLYProperty::pmRowID, "row id used in a DataPoints")
-
-				.def(py::init<>(), "Default constructor. If used member values must be filled later.")
-				.def(py::init<const std::string&, const std::string&, const unsigned>(), py::arg("type"), py::arg("name"), py::arg("pos"), "regular property")
-				.def(py::init<const std::string&, const std::string&, const std::string&, const unsigned>(), py::arg("idx_type"), py::arg("type"), py::arg("name"), py::arg("pos"), "list property")
-
-				.def("__eq__", &PLYProperty::operator==, "compare with other property");
-
-			using PLYProperties = PMIO::PLYProperties;
-			py::bind_vector<PLYProperties>(pyPointMatcherIO, "PLYProperties", "Vector of properties specific to PLY files");
+//			using PLYProperty = PMIO::PLYProperty;
+//			py::class_<PLYProperty>(pyPointMatcherIO, "PLYProperty", "Interface for PLY property")
+//				.def_readwrite("name", &PLYProperty::name, "name of PLY property")
+//				.def_readwrite("type", &PLYProperty::type, "type of PLY property")
+//				.def_readwrite("idx_type", &PLYProperty::idx_type, "for list properties, type of number of elements")
+//				.def_readwrite("pos", &PLYProperty::pos, "index of the property in element")
+//				.def_readwrite("is_list", &PLYProperty::is_list, "member is true of property is a list")
+//				.def_readwrite("pmType", &PLYProperty::pmType, "type of information in PointMatcher")
+//				.def_readwrite("pmRowID", &PLYProperty::pmRowID, "row id used in a DataPoints")
+//
+//				.def(py::init<>(), "Default constructor. If used member values must be filled later.")
+//				.def(py::init<const std::string&, const std::string&, const unsigned>(), py::arg("type"), py::arg("name"), py::arg("pos"), "regular property")
+//				.def(py::init<const std::string&, const std::string&, const std::string&, const unsigned>(), py::arg("idx_type"), py::arg("type"), py::arg("name"), py::arg("pos"), "list property")
+//
+//				.def("__eq__", &PLYProperty::operator==, "compare with other property");
+//
+//			using PLYProperties = PMIO::PLYProperties;
+//			py::bind_vector<PLYProperties>(pyPointMatcherIO, "PLYProperties", "Vector of properties specific to PLY files");
 
 			using PLYDescPropMap = PMIO::PLYDescPropMap;
 			py::bind_map<PLYDescPropMap>(pyPointMatcherIO, "PLYDescPropMap", "Map from a descriptor name to a list PLY property\nex: \"normals\" -> nx, ny ,nz");
 
-			using PLYElement = PMIO::PLYElement;
-			py::class_<PLYElement>(pyPointMatcherIO, "PLYElement", "Interface for all PLY elements.")
-				.def_readwrite("name", &PLYElement::name, "name identifying the PLY element")
-				.def_readwrite("num", &PLYElement::num, "number of occurences of the element")
-				.def_readwrite("total_props", &PLYElement::total_props, "total number of properties in PLY element")
-				.def_readwrite("offset", &PLYElement::offset, "line at which data starts")
-				.def_readwrite("properties", &PLYElement::properties, "all properties found in the header")
-				.def_readwrite("nbFeatures", &PLYElement::nbFeatures, "number of valid features found in the header")
-				.def_readwrite("nbDescriptors", &PLYElement::nbDescriptors, "number of valid descriptors found in the header")
+//			using PLYElement = PMIO::PLYElement;
+//			py::class_<PLYElement>(pyPointMatcherIO, "PLYElement", "Interface for all PLY elements.")
+//				.def_readwrite("name", &PLYElement::name, "name identifying the PLY element")
+//				.def_readwrite("num", &PLYElement::num, "number of occurences of the element")
+//				.def_readwrite("total_props", &PLYElement::total_props, "total number of properties in PLY element")
+//				.def_readwrite("offset", &PLYElement::offset, "line at which data starts")
+//				.def_readwrite("properties", &PLYElement::properties, "all properties found in the header")
+//				.def_readwrite("nbFeatures", &PLYElement::nbFeatures, "number of valid features found in the header")
+//				.def_readwrite("nbDescriptors", &PLYElement::nbDescriptors, "number of valid descriptors found in the header")
+//
+//				.def(py::init<const std::string&, const unsigned, const unsigned>(), py::arg("name"), py::arg("num"), py::arg("offset"), R"pbdoc(
+//PLY Element constructor
+//
+//@param name name of the ply element (case-sensitive)
+//@param num number of times the element appears in the file
+//@param offset if there are several elements, the line offset at which this element begins.  Note that, as of writing, only one (vertex) element is supported.
+//
+//This object holds information about a PLY element contained in the file.
+//It is filled out when reading the header and used when parsing the data.
+//)pbdoc").def("__eq__", &PLYElement::operator==, "comparison operator for elements");
+//
+//			using PLYVertex = PMIO::PLYVertex;
+//			py::class_<PLYVertex, PLYElement>(pyPointMatcherIO, "PLYVertex", "Implementation of PLY vertex element")
+//				.def(py::init<const unsigned, const unsigned>(), py::arg("num"), py::arg("offset"), R"pbdoc(
+//Constructor
+//
+//@param num number of times the element appears in the file
+//@param offset if there are several elements, the line offset at which this element begins.  Note that, as of writing, only one (vertex) element is supported.
+//
+//Implementation of PLY element interface for the vertex element
+//)pbdoc");
 
-				.def(py::init<const std::string&, const unsigned, const unsigned>(), py::arg("name"), py::arg("num"), py::arg("offset"), R"pbdoc(
-PLY Element constructor
-
-@param name name of the ply element (case-sensitive)
-@param num number of times the element appears in the file
-@param offset if there are several elements, the line offset at which this element begins.  Note that, as of writing, only one (vertex) element is supported.
-
-This object holds information about a PLY element contained in the file.
-It is filled out when reading the header and used when parsing the data.
-)pbdoc").def("__eq__", &PLYElement::operator==, "comparison operator for elements");
-
-			using PLYVertex = PMIO::PLYVertex;
-			py::class_<PLYVertex, PLYElement>(pyPointMatcherIO, "PLYVertex", "Implementation of PLY vertex element")
-				.def(py::init<const unsigned, const unsigned>(), py::arg("num"), py::arg("offset"), R"pbdoc(
-Constructor
-
-@param num number of times the element appears in the file
-@param offset if there are several elements, the line offset at which this element begins.  Note that, as of writing, only one (vertex) element is supported.
-
-Implementation of PLY element interface for the vertex element
-)pbdoc");
-
-//		FIXME : Generate undefined symbol error for "elementSupported" or "createElement" method when importing the module
-//		using PLYElementF = PMIO::PLYElementF;
-//		py::class_<PLYElementF>(pyPointMatcherIO, "PLYElementF", "Factory for PLY elements")
-//			.def("elementSupported", &PLYElementF::elementSupported, py::arg("elem_name"), "returns true if element named elem_name is supported by this parser")
-//			.def_static("createElement", &PLYElementF::createElement, py::arg("elem_name"), py::arg("elem_num"), py::arg("offset"), "factory function, build element defined by name with elem_num elements");
+		using PLYElementF = PMIO::PLYElementF;
+		py::class_<PLYElementF>(pyPointMatcherIO, "PLYElementF", "Factory for PLY elements")
+			.def("elementSupported", &PLYElementF::elementSupported, py::arg("elem_name"), "returns true if element named elem_name is supported by this parser")
+			.def_static("createElement", &PLYElementF::createElement, py::arg("elem_name"), py::arg("elem_num"), py::arg("offset"), "factory function, build element defined by name with elem_num elements");
 
 			using PCDproperty = PMIO::PCDproperty;
 			py::class_<PCDproperty>(pyPointMatcherIO, "PCDproperty", "Information for a PCD property")

@@ -36,9 +36,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*!
 \mainpage libpointmatcher
 
-from http://github.com/ethz-asl/libpointmatcher by François Pomerleau and Stéphane Magnenat (http://stephane.magnenat.net), ASL-ETHZ, Switzerland (http://www.asl.ethz.ch)
+from http://github.com/norlab-ulaval/libpointmatcher by François Pomerleau and Stéphane Magnenat (http://stephane.magnenat.net), ASL-ETHZ, Switzerland (http://www.asl.ethz.ch)
 
-libpointmatcher is a modular ICP library, useful for robotics and computer vision. This help assumes that libpointmatcher is already installed, if not, please read the \c README.md file at the top-level of the source tree.
+libpointmatcher is a modular ICP library, useful for robotics and computer vision. This help assumes that libpointmatcher is already installed, if not, please read the \c README.md file at the top-level of the source tree. You can also follow the guide available on https://libpointmatcher.readthedocs.io/en/latest/.
 
 \section Test
 
@@ -62,7 +62,7 @@ You can list the available modules with:
 pmicp -l
 \endcode
 
-If you have compiled libpointmatcher with \ref yaml-cpp enabled, you can configure the ICP chain without any recompilation by passing a configuration file to the \c pmicp command using the \c --config switch. An example file is available in \c examples/data/default.yaml.
+Thanks to \ref yaml-cpp , you can configure the ICP chain without any recompilation by passing a configuration file to the \c pmicp command using the \c --config switch. An example file is available in \c examples/data/default.yaml.
 
 \section Understanding Understanding libpointmatcher
 
@@ -75,7 +75,7 @@ In libpointmatcher, every module is a class that can describe its own possible p
 This text-based configuration aids to explicit parameters used and eases the sharing of working setups with others, which ultimately allows for reproducibility and reusability of the solutions.
 
 The ICP chain takes as input two point clouds, in 2D or 3D, and estimates the translation and the rotation parameters that minimize the alignment error.
-We called the first point cloud the \e reference and the second the \e reading. 
+We called the first point cloud the \e reference and the second the \e reading.
 The ICP algorithm tries to align the reading onto the reference.
 To do so, it first applies filtering (PointMatcher::DataPointsFilters) to the point clouds, and then it iterates through a sequence of processing blocks.
 For each iteration, it associates points in reading to points in reference (PointMatcher::Matcher), rejects outliers (PointMatcher::OutlierFilters) and finds a transformation (PointMatcher::TransformationParameters) of reading that minimizes the alignment error (PointMatcher::ErrorMinimizer).
@@ -126,7 +126,7 @@ You have to modify 3 files to add a new \ref PointMatcher::DataPointsFilter "Dat
 	- The types of the parameters are used to properly cast the string value and can be:  \c &P::Comp<T>, \c &P::Comp<int>, \c &P::Comp<unsigned>, etc. See \c DataPointsFiltersImpl.h for examples.
 	- Uncomment and rename the constructor.
 
-- In \c DataPointsFiltersImpl.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the explicit instantiation (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct 
+- In \c DataPointsFiltersImpl.cpp, copy the implementation of \c IdentityDataPointsFilter at the end of the file including the explicit instantiation (i.e. \c template \c struct \c DataPointsFiltersImpl<float>::YourFilter; and \c template \c struct
 \c DataPointsFiltersImpl<double>::YourFilter;).
 - Add the constructor if needed.
 - At this stage, you should let the implementation of the filter function to hold only the statement that returns the input.

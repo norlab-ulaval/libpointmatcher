@@ -61,8 +61,8 @@ using namespace PointMatcherSupport;
 //---------------------------
 
 // Find the median coefficient of a matrix
-double median_coeff(Eigen::MatrixXf& A){
-  Eigen::Map<Eigen::VectorXf> v(A.data(),A.size());
+double median_coeff(Eigen::Matrix<NumericType, Eigen::Dynamic, Eigen::Dynamic>& A){
+  Eigen::Map<Eigen::Matrix<NumericType, 1, Eigen::Dynamic>> v(A.data(),A.size());
   std::sort(v.data(), v.data() + v.size());
   return v[v.size()/2];
 }
@@ -72,7 +72,7 @@ TEST(icpTest, icpTest)
 	DP ref  = DP::load(dataPath + "cloud.00000.vtk");
 	DP data = DP::load(dataPath + "cloud.00001.vtk");
 
-	namespace fs = boost::filesystem;
+	namespace fs = std::filesystem;
 	fs::path config_dir(dataPath + "icp_data");
 	EXPECT_TRUE( fs::exists(config_dir) && fs::is_directory(config_dir) );
 
@@ -85,7 +85,7 @@ TEST(icpTest, icpTest)
 		// Load config file, and form ICP object
 		PM::ICP icp;
 		std::string config_file = d->path().string();
-		if (fs::extension(config_file) != ".yaml") continue;
+		if (d->path().extension().string() != ".yaml") continue;
 		std::ifstream ifs(config_file.c_str());
 		EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
 
@@ -133,11 +133,11 @@ TEST(icpTest, icpTest)
 		// must be small, which is what we will test for.
 
 		// Find the median absolute difference between curT*data and refT*data
-		Eigen::MatrixXf AbsDiff = (curT*data.features - refT*data.features).array().abs();
+		Eigen::Matrix<NumericType, Eigen::Dynamic, Eigen::Dynamic> AbsDiff = (curT*data.features - refT*data.features).array().abs();
 		double median_diff = median_coeff(AbsDiff);
 
 		// Find the median absolute value of curT*data
-		Eigen::MatrixXf Data = (curT*data.features).array().abs();
+		Eigen::Matrix<NumericType, Eigen::Dynamic, Eigen::Dynamic> Data = (curT*data.features).array().abs();
 		double median_data = median_coeff(Data);
 
 		// Find the relative error
@@ -156,9 +156,9 @@ TEST(icpTest, icpSingular)
 
 	// create a x-y- planar grid point cloud in points
 	const size_t nX = 10, nY = nX;
-	Eigen::MatrixXf points(4, nX * nY);
-	const float d = 0.1;
-	const float oX = -(nX * d / 2), oY = -(nY * d / 2);
+	Eigen::Matrix<NumericType, Eigen::Dynamic, Eigen::Dynamic> points(4, nX * nY);
+	const NumericType d = 0.1;
+	const NumericType oX = -(nX * d / 2), oY = -(nY * d / 2);
 
 	for(size_t x = 0; x < nX; x++){
 		for(size_t y = 0; y < nY; y++){
@@ -174,7 +174,7 @@ TEST(icpTest, icpSingular)
 
 	PM::ICP icp;
 	std::string config_file = dataPath + "default-identity.yaml";
-	EXPECT_TRUE(boost::filesystem::exists(config_file));
+	EXPECT_TRUE(std::filesystem::exists(config_file));
 
 	std::ifstream ifs(config_file.c_str());
 	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
@@ -191,14 +191,14 @@ TEST(icpTest, icpIdentity)
 {
 	// Here we test point-to-plane ICP where we expect the output transform to be 
 	// the identity. This situation requires special treatment in the algorithm.
-	const float epsilon = 0.0001;
+	const NumericType epsilon = 0.0001;
 	
 	DP pts0 = DP::load(dataPath + "cloud.00000.vtk");
 	DP pts1 = DP::load(dataPath + "cloud.00000.vtk");
 
 	PM::ICP icp;
 	std::string config_file = dataPath + "default-identity.yaml";
-	EXPECT_TRUE(boost::filesystem::exists(config_file));
+	EXPECT_TRUE(std::filesystem::exists(config_file));
 
 	std::ifstream ifs(config_file.c_str());
 	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
@@ -218,7 +218,7 @@ TEST(icpTest, similarityTransform)
 
 	PM::ICP icp;
 	std::string config_file = dataPath + "icp_data/defaultSimilarityPointToPointMinDistDataPointsFilter.yaml";
-	EXPECT_TRUE(boost::filesystem::exists(config_file));
+	EXPECT_TRUE(std::filesystem::exists(config_file));
 
 	std::ifstream ifs(config_file.c_str());
 	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
