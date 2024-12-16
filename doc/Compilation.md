@@ -1,14 +1,14 @@
 # Compiling and installing libpointmatcher
 This tutorial will guide you through the different steps to install libpointmatcher and its dependencies.
 ### Supported platforms
-=== "Ubuntu"    
+=== "Ubuntu"
     | Name           |     Version  <br> (Tested on our CI/CD server)     |       Version  <br> (Tested on our CI/CD server)        | Version  <br> (Tested on our CI/CD server) |
     |:---------------|:--------------------------------------------------:|:-------------------------------------------------------:|:------------------------------------------:|
     | Ubuntu         |            bionic 18.04.1 LTS (64 bit)             |                focal 20.04 LTS (64 bit)                 |          jammy 22.04 LTS (64 bit)          |
     | Architecture   |                  x86 and arm64/v8                  |                     x86 and arm64/v8                    |              x86 and arm64/v8              |
-   
+
     __Note:__ we only support 64-bit systems because of some issues with Eigen. Other versions will most probably work but you'll have to try yourself to know for sure.
-    
+
 === "MacOS"
     | Name         | Version  <br> (Tested in Summer 2024) |
     |--------------|---------------------------------------|
@@ -22,28 +22,28 @@ This tutorial will guide you through the different steps to install libpointmatc
     | ------          | -------------  |
     | Windows         | 10 v1909 64bit |
 
-    Windows is currently not officially supported, but we can confirm that you can install `libpointmatcher` in [WSL](https://learn.microsoft.com/en-us/windows/wsl/about). 
-    
+    Windows is currently not officially supported, but we can confirm that you can install `libpointmatcher` in [WSL](https://learn.microsoft.com/en-us/windows/wsl/about).
+
     If you want to contribute to this documentation, your help is more than welcome.
-    
+
     Before reporting new building issues, have a look in the current/past list of issues. Add as many details as you can since you will most probably receive answers from developers that cannot reproduce the problem on their side. Here are some of them:
-    
+
     - Your directory structure need to be well organized as mentioned in [Issue #136](https://github.com/norlab-ulaval/libpointmatcher/issues/136).
     - There might be some problems related to libnabo as mentioned in [Issue #118](https://github.com/norlab-ulaval/libpointmatcher/issues/118).
-    
+
     Special thanks to the following users in helping us with the Windows support:
-    
+
     - [kwill](https://github.com/kwill) for keeping the documentation up-to-date and investing the time to get libpointmatcher compiling on Windows.
     - [braddodson](https://github.com/braddodson) for porting a version of libpointmatcher to `C#` with a limited set of features. The code can be found here: https://github.com/braddodson/pointmatcher.net
 
-    
+
 
 ### Dependencies
 Libpointmatcher relies on a number of standard libraries, most of which can be installed with standard package managers. The following table lists the minimum requirements necessary to instal libpointmatcher.
 
 | Library name | g++   | cmake  | boost  |  eigen  | yaml-cpp | libnabo | doxygen (opt.) |
 |:-------------|-------|:------:|:------:|:-------:|:--------:|:-------:|:--------------:|
-| **Version**  | 9.4.0 | 3.10.2 | 1.65.1 | 3.3.4-4 |   0.5    |  1.1.1  |   1.8.13-10    |
+| **Version**  | 9.4.0 | 3.15 | 1.65.1 | 3.3.4-4 |   0.5    |  1.1.1  |   1.8.13-10    |
 
 ## Detailed Installation Instructions
 The rest of this tutorial will guide you through the different requirements step by step.
@@ -57,7 +57,7 @@ Some installation steps are platform-dependent and need to be done beforehand.
     sudo apt update
     sudo apt install build-essential
     ```
-    
+
     ??? warning "Ubuntu 18 Bionic"
 
         While newer versions of Ubuntu come with gcc and g++ on newer versions than 9.4.0 and support all modern C++17 standard library features, it is not the case for Ubuntu Bionic.
@@ -72,37 +72,37 @@ Some installation steps are platform-dependent and need to be done beforehand.
 
 === "MacOS"
     ###### Installing Xcode via the App Store (OS X 10.10.2 and later)
-    
+
     Mac OS X does not come with a built-in C++ command-line compiler.  You must therefore install XCode by visiting the App Store.
 
     Once Xcode is installed on your machine, launch it.  Navigate to preferences, to the downloads tab.  In the components list, install the Command Line Tools component.
-    
+
     You should now have a working version of gcc. You can check by running the following command in your terminal:
-    
+
     ```bash
     gcc --version | grep gcc
     ```
-    
+
     A message similar to the following should appear
-    
+
     ```text
     gcc (Homebrew GCC 13.2.0) 13.2.0
     ```
-    
+
     ###### Installing Homebrew
-    
+
     Because Mac OS X does not come with a built-in package manager like in Ubuntu, you need to install one on your own.  A package manager is handy because it allows you to install, uninstall, update and maintain software packages with ease.  There are several possibilities including [Macports](http://www.macports.org/) and [Homebrew](http://brew.sh/).  While both are good options, we have a slight preference for homebrew which is easier to use.
-    
+
     You do not need a package manager to install libpointmatcher, but it simplifies things.  The following instructions will make use of homebrew and will thus assume that it is installed on your system.
-    
+
     Installing Homebrew is extremely easy and can be done by entering the following single command in your terminal
-    
+
     ```bash
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     ```
     Once the scripts finishes installing, you are good to go!
 === "Windows"
-    
+
     | Name            | Download Link                                           | Version <br> (Tested February 11, 2021) |
     | ------          | ----                                                    | -------------  |
     | Visual Studio   | <https://visualstudio.microsoft.com/>                   | 2019 16.8.5    |
@@ -112,10 +112,10 @@ Some installation steps are platform-dependent and need to be done beforehand.
     | Boost           | <https://www.boost.org/users/download/>                 | 1.75.0         |
     | Eigen3          | <http://eigen.tuxfamily.org/index.php>                  | 3.3.9          |
     | grep            | <http://gnuwin32.sourceforge.net/packages/grep.htm>     | 2.5.4          |
-  
-    
+
+
     - It's recommended to use **Windows PowerShell** with administrator privileges as your CLI
-    - All necessary environment variables will be configured so that **CMake automatically finds all libraries** and you don't have to specify the libraries' paths to CMake each time you use it  
+    - All necessary environment variables will be configured so that **CMake automatically finds all libraries** and you don't have to specify the libraries' paths to CMake each time you use it
     - When adding any environment variable, add for All users (system variables)
     - Environment variables are case-insensitive (PATH = Path)
     - Add new environment variables in PATH on top of the list (to avoid conflicts)
@@ -146,16 +146,23 @@ Instructions for downloading and installing boost to Unix systems can be found [
        .\b2.exe
        ```
 
-    4. Set the following three environment variables:  
-        `BOOST_LIBRARYDIR = C:\dev\boost_<version>\stage\lib`  
-        `BOOST_INCLUDEDIR = C:\dev\boost_<version>`  
-        `BOOST_DIR = C:\dev\boost_<version>\stage\lib\cmake\Boost-<version>`  
+    4. Set the following three environment variables:
+        `BOOST_LIBRARYDIR = C:\dev\boost_<version>\stage\lib`
+        `BOOST_INCLUDEDIR = C:\dev\boost_<version>`
+        `BOOST_DIR = C:\dev\boost_<version>\stage\lib\cmake\Boost-<version>`
     5. Add `C:\dev\boost_<version>\stage\lib` to `Path` environment variable
 
 
 #### Installing CMake
 
 [CMake](http://www.cmake.org/) is a cross-platform build system and is used for building the libpointmatcher library.  Refer to the homepage for installation instructions, or you can once again use the package manager
+The easist and prefered way to install CMake is with pip:
+```bash
+pip install cmake
+```
+Alternatively, you can install CMake using your package manager (apt, brew, etc.).
+However, note that some older Ubuntu versions (Ubuntu 18 and lower) don't come with the required version of CMake (3.15+).
+In this case, you will need to install CMake from the official website.
 
 === "Ubuntu"
     ```bash
@@ -169,8 +176,6 @@ Instructions for downloading and installing boost to Unix systems can be found [
     You can download and install cmake from their [website](https://cmake.org/download/).
 
 *NOTE:* CMake has a GUI called cmake-gui which can be useful for configuring builds.  We recommend you install this as well since it will be referred to in this tutorial.
-
-*NOTE 2:* Some functionalities like find_package() (only useful if you intent to link with your own project) will only work if you have CMake 2.8.11 or over. On Ubuntu 12.04, only 2.8.7 is available using apt-get. If you intent to use such functionality, you will have to compile CMake from sources.
 
 #### Installing Eigen
 
@@ -198,7 +203,7 @@ The yaml-cpp library allows to load libpointmatcher configurations from convenie
     sudo apt-get install libyaml-cpp-dev
     ```
 === "MacOS"
-    The straightforward way to install yaml-cpp library through brew was, as for the end of 2023, not functional  
+    The straightforward way to install yaml-cpp library through brew was, as for the end of 2023, not functional
     ```bash
     brew install yaml-cpp
     ```
@@ -210,7 +215,7 @@ The yaml-cpp library allows to load libpointmatcher configurations from convenie
     cd yaml-cpp
     ```
     Now you can compile and install yaml-cpp by entering the following commands
-    
+
     ```bash
     SRC_DIR=$PWD
     BUILD_DIR=${SRC_DIR}/build
@@ -287,7 +292,7 @@ Now you can compile libnabo by entering the following commands
     Following the previous steps,
     1. Put your "Solution Configuration" in `Release` mode
     2. Build the `ALL_BUILD` project
-    3. Rebuild for each configuration mode you will use, i.e. Release/Debug/RelWithDebInfo/MinSizeRel  
+    3. Rebuild for each configuration mode you will use, i.e. Release/Debug/RelWithDebInfo/MinSizeRel
        (Libnabo build a different .lib for each configuration mode)
 
 To make sure that everything is working properly, you can run the unit tests:
@@ -448,13 +453,13 @@ Now, to compile libpointmatcher into the `/build` directory, run the following c
     ```bash
     make -j N
     ```
-    *Note:* It is highly recommended to add the `-j N` optional argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time. 
+    *Note:* It is highly recommended to add the `-j N` optional argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time.
 
 === "MacOS"
     ```bash
     make -j N
     ```
-    *Note:* It is highly recommended to add the `-j N` optional argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time. 
+    *Note:* It is highly recommended to add the `-j N` optional argument to the `make` command in order to speed up the compilation process. Replace `N` by the number of parallel jobs you want to compile at the same time.
 
 === "Windows"
     Following the previous configuration in CMake GUI:
@@ -477,7 +482,7 @@ Finally, to install libpointmatcher on your system, run the following command:
     ```
 === "Windows"
     Following the previous configuration in CMake GUI:
-    
+
     1. Build the `INSTALL` project
     >    We have to install the library and not only build it, because otherwise all CMake files won't be able to be found by programs using libpointmatcher
     2. Set `libpointmatcher_DIR` environment variable to `C:\dev\libpointmatcher\build\install\share\libpointmatcher\cmake`
@@ -503,4 +508,3 @@ Some dependencies changed, and we don't keep track of all combinations possible.
     ```
     TODO
     ```
-    
