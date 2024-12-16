@@ -418,7 +418,7 @@ public:
 
 	virtual void TearDown()
 	{
-		EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(testFileName)));
+		EXPECT_TRUE(std::filesystem::remove(std::filesystem::path(testFileName)));
 	}
 
 
@@ -461,6 +461,11 @@ TEST_F(IOLoadSaveTest, VTKBinary)
 TEST_F(IOLoadSaveTest, PLY)
 {
 	loadSaveTest(dataPath + "unit_test.ply", true);
+}
+
+TEST_F(IOLoadSaveTest, PLYBinary)
+{
+	loadSaveTest(dataPath + "unit_test.bin.ply", true, 1, true);
 }
 
 TEST_F(IOLoadSaveTest, PCD)

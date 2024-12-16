@@ -3,13 +3,15 @@ services:
   # ====Dependency related services================================================================
   dependencies-general:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies-general:${NBS_IMAGE_TAG:?err}
+    pull_policy: build # Execute the `build` attribute over pulling the `image` attribute
     build:
       target: libpointmatcher-dependencies-general
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.dependencies
+      no_cache: true  # Enforce full rebuild
       platforms:
         - "linux/amd64"
-        - "linux/arm64/v8"
+        - "linux/arm64"
       args:
         BASE_IMAGE: ${DEPENDENCIES_BASE_IMAGE:?err}
         BASE_IMAGE_TAG: ${DEPENDENCIES_BASE_IMAGE_TAG:?err}
@@ -34,14 +36,15 @@ services:
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.dependencies.doxygen
-      platforms:
-        - "linux/amd64"
-        - "linux/arm64/v8"
+      pull: false # Use the local image store to execute the FROM directive
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies
         BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
         IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
     depends_on:
       - dependencies
     tty: true

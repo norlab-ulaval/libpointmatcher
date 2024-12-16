@@ -6,12 +6,12 @@ There exists a myriad of [graphics file formats](http://en.wikipedia.org/wiki/Ca
 
 ## Table of Supported File Formats
 
-| File Type | Extension | Versions Supported | Descriptors Supported | Additional Information |
-| --------- |:---------:|:------------------:|:---------------------:|---------|
-| Comma Separated Values | .csv | NA | yes (see [table of descriptor labels](#descmaptable)) | |
-| Visualization Toolkit Files | .vtk | Legacy format versions 3.0 and lower (ASCII only) | yes | Only polydata and unstructured grid VTK Datatypes supported.  More information can be found  [here](http://www.vtk.org/VTK/img/file-formats.pdf).|
-| Polygon File Format | .ply | 1.0 (ASCII only) | yes (see [table of descriptor labels](#descmaptable)) | | 
-| Point Cloud Library Format | .pcd | 0.7 (ASCII only) | yes (see [table of descriptor labels](#descmaptable)) | |
+| File Type | Extension |                Versions Supported                 | Descriptors Supported | Additional Information                                                                                                                            |
+| --------- |:---------:|:-------------------------------------------------:|:---------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| Comma Separated Values | .csv |                        NA                         | yes (see [table of descriptor labels](#descmaptable)) |                                                                                                                                                   |
+| Visualization Toolkit Files | .vtk | Legacy format versions 3.0 and lower (ASCII only) | yes | Only polydata and unstructured grid VTK Datatypes supported.  More information can be found  [here](http://www.vtk.org/VTK/img/file-formats.pdf). |
+| Polygon File Format | .ply |              1.0 (ASCII and binary)               | yes (see [table of descriptor labels](#descmaptable)) | Users are encouraged to execute `libpointmatcher` using `double` as the floating precision format to prevent overflows.                           | 
+| Point Cloud Library Format | .pcd |                 0.7 (ASCII only)                  | yes (see [table of descriptor labels](#descmaptable)) |                                                                                                                                                   |
 
 ## Comma Separated Values (CSV) Files
 

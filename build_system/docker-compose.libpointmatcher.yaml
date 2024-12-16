@@ -4,18 +4,18 @@ include:
 services:
 
   # ====Pull-request related services==============================================================
-  # ....Test logic related to libpointmatcher install casses.......................................
+  # ....Test logic related to libpointmatcher install cases........................................
   _test_compilation:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-compilation-test:${NBS_IMAGE_TAG:?err}
-    pull_policy: build
+    pull_policy: build # Execute the `build` attribute over pulling the `image` attribute
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.libpointmatcher.compilation_test
-      no_cache: false
+      no_cache: true  # Enforce full rebuild
       target: test-compilation-auto-path-resolution
       platforms:
         - "linux/amd64"
-        - "linux/arm64/v8"
+        - "linux/arm64"
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies-general
@@ -45,11 +45,11 @@ services:
   # ....Test logic related to libpointmatcher codebase unit-test...................................
   ci_PR:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-ci-pr:${NBS_IMAGE_TAG:?err}
-    pull_policy: build
+    pull_policy: build # Execute the `build` attribute over pulling the `image` attribute
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/ubuntu/Dockerfile.libpointmatcher.ci_PR
-      no_cache: false
+      no_cache: true  # Enforce full rebuild
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies
@@ -90,13 +90,14 @@ services:
   release:
     image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher:${NBS_IMAGE_TAG:?err}
     container_name: libpointmatcher
+    pull_policy: build # Execute the `build` attribute over pulling the `image` attribute
     build:
       context: ..
       dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/ubuntu/Dockerfile.libpointmatcher.hub_release
       platforms:
         - "linux/amd64"
-        - "linux/arm64/v8"
-      no_cache: false
+        - "linux/arm64"
+      no_cache: true  # Enforce full rebuild
       args:
         PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
         BASE_IMAGE: libpointmatcher-dependencies-doc

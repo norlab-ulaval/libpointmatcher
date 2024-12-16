@@ -72,7 +72,7 @@ TEST(icpTest, icpTest)
 	DP ref  = DP::load(dataPath + "cloud.00000.vtk");
 	DP data = DP::load(dataPath + "cloud.00001.vtk");
 
-	namespace fs = boost::filesystem;
+	namespace fs = std::filesystem;
 	fs::path config_dir(dataPath + "icp_data");
 	EXPECT_TRUE( fs::exists(config_dir) && fs::is_directory(config_dir) );
 
@@ -85,7 +85,7 @@ TEST(icpTest, icpTest)
 		// Load config file, and form ICP object
 		PM::ICP icp;
 		std::string config_file = d->path().string();
-		if (fs::extension(config_file) != ".yaml") continue;
+		if (d->path().extension().string() != ".yaml") continue;
 		std::ifstream ifs(config_file.c_str());
 		EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
 
@@ -174,7 +174,7 @@ TEST(icpTest, icpSingular)
 
 	PM::ICP icp;
 	std::string config_file = dataPath + "default-identity.yaml";
-	EXPECT_TRUE(boost::filesystem::exists(config_file));
+	EXPECT_TRUE(std::filesystem::exists(config_file));
 
 	std::ifstream ifs(config_file.c_str());
 	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
@@ -198,7 +198,7 @@ TEST(icpTest, icpIdentity)
 
 	PM::ICP icp;
 	std::string config_file = dataPath + "default-identity.yaml";
-	EXPECT_TRUE(boost::filesystem::exists(config_file));
+	EXPECT_TRUE(std::filesystem::exists(config_file));
 
 	std::ifstream ifs(config_file.c_str());
 	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
@@ -218,7 +218,7 @@ TEST(icpTest, similarityTransform)
 
 	PM::ICP icp;
 	std::string config_file = dataPath + "icp_data/defaultSimilarityPointToPointMinDistDataPointsFilter.yaml";
-	EXPECT_TRUE(boost::filesystem::exists(config_file));
+	EXPECT_TRUE(std::filesystem::exists(config_file));
 
 	std::ifstream ifs(config_file.c_str());
 	EXPECT_NO_THROW(icp.loadFromYaml(ifs)) << "This error was caused by the test file:" << endl << "   " << config_file;
