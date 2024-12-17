@@ -1,7 +1,7 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Unreleased
+1.4.4 (2024-12-16)
 ------------------
 **New features:**
 * Added Angle Limit Datapointsfilter, which filters points if they lie inside or outside of a given spherical wedge

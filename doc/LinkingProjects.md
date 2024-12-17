@@ -12,7 +12,7 @@ In this following example, we build a very simple CMake project containing one e
 cmake_minimum_required (VERSION 3.10.12)
 project (myProject)
 
-find_package(libpointmatcher 1.4.3 REQUIRED)
+find_package(libpointmatcher 1.4.4 REQUIRED)
 include_directories("${libpointmatcher_INCLUDE_DIRS}")
 message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 
