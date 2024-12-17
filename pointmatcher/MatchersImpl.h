@@ -39,9 +39,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 
 #include "nabo/nabo.h"
-#if NABO_VERSION_INT < 10007
-	#error "You need libnabo version 1.0.7 or greater"
-#endif
 
 template<typename T>
 struct MatchersImpl

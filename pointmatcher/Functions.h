@@ -59,6 +59,11 @@ namespace PointMatcherSupport
 		return v;
 	}
 
+    template<typename T>
+    T radToDeg(T rad)
+    {
+        return rad * (180.0 / M_PI);
+    }
 
 
 } // PointMatcherSupport
