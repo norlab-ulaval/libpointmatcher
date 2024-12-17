@@ -1,6 +1,22 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Unreleased
+------------------
+**New features:**
+* Added Angle Limit Datapointsfilter, which filters points if they lie inside or outside of a given spherical wedge
+* Added support for binary PLY files IO
+
+**Major changes:**
+* Min. Cmake version pumped to 3.15
+* Removed dependency on boost filesystem
+* Python bindings compile with recent versions of pybind11
+
+**Other changes:**
+* Updated Python GitHub action
+* Updated gitignore
+* Updated docs
+
 
 1.4.3 (2024-06-28)
 ------------------
