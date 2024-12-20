@@ -13,17 +13,14 @@ env:
   BOOST_MAJOR_VERSION: '1'
   BOOST_MINOR_VERSION: '80'
   BOOST_PATCH_VERSION: '0'
-  LIBNABO_VERSION: '1.0.7'
-  PYBIND11_VERSION: 'v2.10.2'
+  PYBIND11_VERSION: '2.13.6'
+  LIBNABO_VERSION: '1.1.2'
   BOOST_INSTALL_PATH: ${{ github.workspace }}/.tmp/boost/install
   BOOST_SRC_DIR: ${{ github.workspace }}/.tmp/boost
   LIBNABO_INSTALL_PATH: ${{ github.workspace }}/.tmp/libnabo-build/install
   LIBNABO_SRC_DIR: ${{ github.workspace }}/.tmp/libnabo
-  PYBIND11_INSTALL_PATH: ${{ github.workspace }}/.tmp/pybind11-build/install
-  PYBIND11_SRC_DIR: ${{ github.workspace }}/.tmp/pybind11
   PYTHON_WHEEL_DIR: ${{ github.workspace }}/.tmp/python-wheel
   VCPKG_DEFAULT_BINARY_CACHE: '${{ github.workspace }}/.tmp/bin-cache'
-  CMAKE_BUILD_PARALLEL_LEVEL: 2
   BUILD_DIR: ${{ github.workspace }}/build
 
 jobs:
@@ -31,20 +28,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python_version: ['3.8', '3.9', '3.10', '3.11']
-        os: 
+        python_version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        os:
           # - windows-2019 cannot compile on Windows
           # (!) TODO: The workflow contains code for Windows building, but we cannot compile it with MS MPI. Changes in the source code are needed.
 
-          - ubuntu-20.04
-      
+          - ubuntu-22.04 # test on Ubuntu 22.04 since other versions should behave similarly
+
     permissions:
       contents: write
-    
+
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Make temp dir
         run: mkdir ${{ github.workspace }}/.tmp
@@ -54,10 +51,10 @@ jobs:
         run: |
           echo "BOOST_DIR=boost_${{ env.BOOST_MAJOR_VERSION }}_${{ env.BOOST_MINOR_VERSION }}_${{ env.BOOST_PATCH_VERSION }}" >> $GITHUB_ENV
           echo "BOOST_VERSION=${{ env.BOOST_MAJOR_VERSION }}.${{ env.BOOST_MINOR_VERSION }}.${{ env.BOOST_PATCH_VERSION }}" >> $GITHUB_ENV
- 
+
       - name: Init env variable on Linux
         if: ${{ runner.os == 'Linux' }}
-        run: | 
+        run: |
           echo "BOOST_ARCHIVE_NAME=${{ env.BOOST_DIR }}.7z" >> $GITHUB_ENV
 
       - name: Init base env variable on Windows
@@ -65,12 +62,12 @@ jobs:
         run: |
           echo "BOOST_DIR=boost_${{ env.BOOST_MAJOR_VERSION }}_${{ env.BOOST_MINOR_VERSION }}_${{ env.BOOST_PATCH_VERSION }}" | Out-File -FilePath $env:GITHUB_ENV -Append
           echo "BOOST_VERSION=${{ env.BOOST_MAJOR_VERSION }}.${{ env.BOOST_MINOR_VERSION }}.${{ env.BOOST_PATCH_VERSION }}" | Out-File -FilePath $env:GITHUB_ENV -Append
- 
+
       - name: Init env variable on Windows
         if: ${{ runner.os == 'Windows' }}
-        run: | 
+        run: |
           echo "BOOST_ARCHIVE_NAME=${{ env.BOOST_DIR }}.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
-      
+
       - name: Cache boost
         id: cache-boost
         if: ${{ runner.os  == 'Linux' }}
@@ -79,12 +76,12 @@ jobs:
           path: ${{ env.BOOST_INSTALL_PATH }}
           key: ${{ runner.os }}-boost-cache-${{ env.BOOST_VERSION }}-python-${{ matrix.python_version }}
 
-      - name: Cache libnabo
-        id: cache-libnabo
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.LIBNABO_INSTALL_PATH }}
-          key: ${{ runner.os }}-libnabo-cache-${{ env.LIBNABO_VERSION }}
+      # - name: Cache libnabo
+      #   id: cache-libnabo
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ env.LIBNABO_INSTALL_PATH }}
+      #     key: ${{ runner.os }}-libnabo-cache-${{ env.LIBNABO_VERSION }}
 
       - name: Cache binary vcpkg
         if: ${{ runner.os  == 'Windows' }}
@@ -94,21 +91,12 @@ jobs:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           key: ${{ runner.os }}-vcpkg-cache-${{ matrix.python_version }}
 
-      - name: Cache pybind11
-        id: cache-pybind11
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.PYBIND11_INSTALL_PATH }}
-          key: ${{ runner.os }}-pybind11-cache--${{ env.PYBIND11_VERSION }}-python-${{ matrix.python_version }}
-      
       - name: Make dirs on Linux
         if: ${{ runner.os  == 'Linux' }}
         run: |
           mkdir -p ${{ env.BOOST_SRC_DIR }}
           mkdir -p ${{ env.LIBNABO_SRC_DIR }}
-          mkdir -p ${{ env.PYBIND11_SRC_DIR }}
           mkdir -p ${{ env.BOOST_INSTALL_PATH }}
-          mkdir -p ${{ env.PYBIND11_INSTALL_PATH }}
           mkdir -p ${{ env.LIBNABO_INSTALL_PATH }}
           mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
 
@@ -117,9 +105,7 @@ jobs:
         run: |
           mkdir -Force ${{ env.BOOST_SRC_DIR }}
           mkdir -Force ${{ env.LIBNABO_SRC_DIR }}
-          mkdir -Force ${{ env.PYBIND11_SRC_DIR }}
           mkdir -Force ${{ env.BOOST_INSTALL_PATH }}
-          mkdir -Force ${{ env.PYBIND11_INSTALL_PATH }}
           mkdir -Force ${{ env.LIBNABO_INSTALL_PATH }}
           mkdir -Force ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
 
@@ -135,7 +121,10 @@ jobs:
             ninja-build \
             catch \
             libomp-dev \
-            wget
+            wget \
+            p7zip-full \
+            sudo \
+            cmake
 
       - name: Install MS MPI
         if: ${{ runner.os == 'Windows' }}
@@ -153,9 +142,9 @@ jobs:
 
       - name: Install required dependencies for Python
         run: |
-          python -m pip install -U 'pip>=23.0'
-          pip install 'numpy>=1.20' wheel 'setuptools>=61.0' 'build~=0.10'
-      
+          python -m pip install -U pip
+          pip install 'numpy>=1.20' 'wheel' 'setuptools>=61.0' 'build~=0.10' 'cmake' 'pybind11==${{ env.PYBIND11_VERSION }}'
+
       - name: Install dependencies on Windows
         if: ${{ runner.os == 'Windows' }}
         run: |
@@ -163,7 +152,6 @@ jobs:
                 libopenmpt:x64-windows `
                 boost-mpi:x64-windows-static `
                 boost-thread:x64-windows-static `
-                boost-filesystem:x64-windows-static `
                 boost-system:x64-windows-static `
                 boost-program-options:x64-windows-static `
                 boost-date-time:x64-windows-static `
@@ -185,7 +173,7 @@ jobs:
         if: ${{ steps.cache-boost.outputs.cache-hit != 'true' && runner.os == 'Linux' }}
         working-directory: ${{ env.BOOST_SRC_DIR }}/${{ env.BOOST_DIR }}
         run: |
-          ./bootstrap.sh --with-libraries=thread,filesystem,system,program_options,date_time,chrono --with-icu --prefix=${{ env.BOOST_INSTALL_PATH }}
+          ./bootstrap.sh --with-libraries=thread,system,program_options,date_time,chrono --with-icu --prefix=${{ env.BOOST_INSTALL_PATH }}
           ./b2 cxxflags=-fPIC cflags=-fPIC link=static install
 
       - name: Download source code libnabo ${{ env.LIBNABO_VERSION }}
@@ -216,61 +204,24 @@ jobs:
           cd libnabo
           cmake -GNinja \
             -DBOOST_ROOT=${{ env.BOOST_INSTALL_PATH }} \
-            -DCMAKE_INSTALL_PREFIX=${{ env.LIBNABO_INSTALL_PATH }} \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DUSE_OPEN_MP:BOOL=ON \
             -S . -B ./build
-          cmake --build ./build --target install
+          sudo cmake --build ./build --target install --parallel 4
           cd -
           rm -r ./libnabo/build
-
-      - name: Download source code pybind11 ${{ env.PYBIND11_VERSION }}
-        if: steps.cache-pybind11.outputs.cache-hit != 'true'
-        working-directory: ${{ env.PYBIND11_SRC_DIR }}
-        run: |
-          git clone -b ${{ env.PYBIND11_VERSION }} --single-branch https://github.com/pybind/pybind11.git
-
-      
-      - name: Install pybind11 ${{ env.PYBIND11_VERSION }} on Linux
-        working-directory:  ${{ env.PYBIND11_SRC_DIR }}
-        if: ${{ steps.cache-pybind11.outputs.cache-hit != 'true' && runner.os == 'Linux' }}
-        run: |
-          cd pybind11
-          cmake -GNinja \
-            -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DPYBIND11_TEST:BOOL=OFF \
-            -S . -B ./build
-          cmake --build ./build --target install
-          rm -r ./build
-      
-      - name: Install pybind11 ${{ env.PYBIND11_VERSION }} on Windows
-        working-directory:  ${{ env.PYBIND11_SRC_DIR }}
-        if: ${{ steps.cache-pybind11.outputs.cache-hit != 'true' && runner.os == 'Windows' }}
-        run: |
-          cd pybind11
-          cmake -A x64 `
-            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
-            -DCMAKE_INSTALL_PREFIX=${{ env.PYBIND11_INSTALL_PATH }} `
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo `
-            -DPYBIND11_TEST:BOOL=OFF `
-            -S . -B ./build
-          cmake --build ./build --target install
-          rm -r ./build
 
       - name: Compile libpointmatcher on Linux
         if: runner.os == 'Linux'
         run: |
           cmake \
             -DBOOST_ROOT:PATH=${{ env.BOOST_INSTALL_PATH }} \
-            -DLIBNABO_INSTALL_DIR=${{ env.LIBNABO_INSTALL_PATH }} \
-            -Dpybind11_DIR=${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11 \
             -DBUILD_PYTHON_MODULE:BOOL=ON \
             -DUSE_OPEN_MP:BOOL=ON \
             -DBoost_USE_STATIC_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -S . -B ${{ env.BUILD_DIR }}
-          sudo cmake --build ${{ env.BUILD_DIR }} --target install
+          sudo cmake --build ${{ env.BUILD_DIR }} --target install --parallel 4
 
       - name: Compile libpointmatcher on Windows
         if: runner.os == 'Windows'
@@ -279,8 +230,7 @@ jobs:
         run: |
           cmake -A x64 `
             -DCMAKE_TOOLCHAIN_FILE:FILEPATH="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
-            -DLIBNABO_INSTALL_DIR:PATH="${{ env.LIBNABO_INSTALL_PATH }}" `
-            -Dpybind11_DIR:PATH="${{ env.PYBIND11_INSTALL_PATH }}/share/cmake/pybind11" `
+            -DLIBNABO_INSTALL_DIR:PATH="${{ env.LIBNABO_INSTALL_PATH }}" ``
             -DBUILD_PYTHON_MODULE:BOOL=ON `
             -DBoost_USE_STATIC_LIBS:BOOL=ON `
             -DPYTHON_INSTALL_TARGET:PATH="./python/${{ env.PYTHON_PACKAGE_NAME }}" `
@@ -288,8 +238,8 @@ jobs:
             -DUSE_OPEN_MP:BOOL=ON `
             -DCMAKE_BUILD_TYPE="RelWithDebInfo" `
             -S . -B ${{ env.BUILD_DIR }}
-          cmake --build ${{ env.BUILD_DIR }} --target install
-      
+          cmake --build ${{ env.BUILD_DIR }} --target install --parallel 4
+
       - name: Build python wheel
         working-directory: ./python
         run: |
@@ -299,7 +249,7 @@ jobs:
         working-directory: ./python
         run: |
           pip install ${{ env.PYTHON_WHEEL_DIR }}/*.whl
-      
+
       - name: Test import
         working-directory: ${{ runner.temp }}
         run: python -c "from pypointmatcher import *"

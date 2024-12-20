@@ -40,10 +40,10 @@ cd "${N2ST_PATH}"/src/utility_scripts/ && source "which_architecture_and_os.bash
 SHOW_SPLASH_IDU="${SHOW_SPLASH_IDU:-true}"
 
 if [[ "${SHOW_SPLASH_IDU}" == 'true' ]]; then
-  norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
+  n2st::norlab_splash "${NBS_SPLASH_NAME}" "https://github.com/${NBS_REPOSITORY_DOMAIN:?err}/${NBS_REPOSITORY_NAME:?err}"
 fi
 
-print_formated_script_header "lpm_install_dependencies_general_ubuntu.bash (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
+n2st::print_formated_script_header "lpm_install_dependencies_general_ubuntu.bash (${IMAGE_ARCH_AND_OS:?err})" "${MSG_LINE_CHAR_INSTALLER}"
 
 # ....Script command line flags....................................................................
 while [ $# -gt 0 ]; do
@@ -66,7 +66,7 @@ done
 
 
 # .................................................................................................
-teamcity_service_msg_blockOpened "Install development utilities"
+n2st::teamcity_service_msg_blockOpened "Install development utilities"
 
 sudo apt-get update &&
   sudo apt-get install --assume-yes \
@@ -78,14 +78,12 @@ sudo apt-get update &&
     git \
     software-properties-common \
   && sudo apt-get install --assume-yes "${APT_FLAGS[@]}" \
-    g++ \
     gcc \
+    g++ \
     catch \
     make \
-    cmake \
-    cmake-gui &&
+    python3-pip
   sudo rm -rf /var/lib/apt/lists/*
-
 ##cmake --version
 
 # Retrieve ubuntu version number: DISTRIB_RELEASE
@@ -103,21 +101,40 @@ if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
   sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 fi
 
+n2st::teamcity_service_msg_blockClosed
+# .................................................................................................
 
-teamcity_service_msg_blockClosed
+n2st::teamcity_service_msg_blockOpened "Install a newer CMake version"
+dpkg -l | grep -q "^ii  cmake" && sudo apt remove --purge --auto-remove cmake
+if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
+    sudo apt update && \
+    sudo apt install -y software-properties-common lsb-release && \
+    sudo apt clean all
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+    sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+    sudo apt update
+    sudo apt install -y cmake
+else
+    wget https://bootstrap.pypa.io/get-pip.py
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 get-pip.py
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install --upgrade pip
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install cmake
+fi
+print_msg "Cmake version is $(cmake --version)"
+n2st::teamcity_service_msg_blockClosed
 # .................................................................................................
 
 # (Priority) ToDo: add check to see if executed in a docker container. Current check does not do what its intended
 if [[ ${IS_TEAMCITY_RUN} == true ]]; then
-  print_msg "The install script is run in teamCity >> the python install step was executed earlier in the Dockerfile.dependencies"
+  n2st::print_msg "The install script is run in teamCity >> the python install step was executed earlier in the Dockerfile.dependencies"
 else
-  print_msg "The install script is executed in stand alone mode"
+  n2st::print_msg "The install script is executed in stand alone mode"
   cd "${NBS_PATH:?err}/src/utility_scripts" || exit 1
   bash "./nbs_install_python_dev_tools.bash"
 fi
 
 # .................................................................................................
-teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Boost"
+n2st::teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Boost"
 # https://www.boost.org/doc/libs/1_79_0/more/getting_started/unix-variants.html
 
 sudo apt-get update &&
@@ -125,9 +142,9 @@ sudo apt-get update &&
     libboost-all-dev &&
   sudo rm -rf /var/lib/apt/lists/*
 
-teamcity_service_msg_blockClosed
+n2st::teamcity_service_msg_blockClosed
 # .................................................................................................
-teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Eigen"
+n2st::teamcity_service_msg_blockOpened "Install Libpointmatcher dependencies › Eigen"
 # https://eigen.tuxfamily.org/index.php
 
 sudo apt-get update &&
@@ -135,18 +152,18 @@ sudo apt-get update &&
     libeigen3-dev &&
   sudo rm -rf /var/lib/apt/lists/*
 
-teamcity_service_msg_blockClosed
+n2st::teamcity_service_msg_blockClosed
 # .................................................................................................
-teamcity_service_msg_blockOpened "Install Libpointmatcher dev tools"
+n2st::teamcity_service_msg_blockOpened "Install Libpointmatcher dev tools"
 
 sudo apt-get update &&
   sudo apt-get install --assume-yes "${APT_FLAGS[@]}" \
     libyaml-cpp-dev &&
   sudo rm -rf /var/lib/apt/lists/*
 
-teamcity_service_msg_blockClosed
+n2st::teamcity_service_msg_blockClosed
 
 
-print_formated_script_footer "lpm_install_dependencies_general_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
+n2st::print_formated_script_footer "lpm_install_dependencies_general_ubuntu.bash (${IMAGE_ARCH_AND_OS})" "${MSG_LINE_CHAR_INSTALLER}"
 # ====Teardown=====================================================================================
 cd "${TMP_CWD}" || exit

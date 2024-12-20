@@ -25,7 +25,7 @@ N2ST_PATH=${N2ST_PATH:-"${LPM_PATH}/build_system/utilities/norlab-shell-script-t
 source "${N2ST_PATH}/import_norlab_shell_script_tools_lib.bash"
 
 # ====Begin========================================================================================
-print_formated_script_header 'lpm_execute_libpointmatcher_unittest.bash' ':'
+n2st::print_formated_script_header 'lpm_execute_libpointmatcher_unittest.bash' ':'
 
 cd "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/build" || exit 1
 
@@ -33,7 +33,7 @@ if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
   echo -e "##teamcity[testSuiteStarted name='gtest']"
   echo -e "##teamcity[testStarted name='gtest' captureStandardOutput='true']"
 else
-  print_msg "Starting Libpointmatcher GoogleTest unit-test"
+  n2st::print_msg "Starting Libpointmatcher GoogleTest unit-test"
 fi
 
 # .................................................................................................
@@ -59,14 +59,14 @@ if [[ ${IS_TEAMCITY_RUN} == true ]] || [[ ${TEAMCITY_VERSION} ]]; then
 else
 
   if [[ ${UTEST_EXIT_CODE} == 0 ]]; then
-    print_msg_done "${SUCCESS_MSG}"
+    n2st::print_msg_done "${SUCCESS_MSG}"
   else
-    print_msg_error "${FAILURE_MSG}"
+    n2st::print_msg_error "${FAILURE_MSG}"
   fi
 
 fi
 
-print_formated_script_footer 'lpm_execute_libpointmatcher_unittest.bash' ':'
+n2st::print_formated_script_footer 'lpm_execute_libpointmatcher_unittest.bash' ':'
 # ====Teardown=====================================================================================
 cd "${TMP_CWD}" || exit 1
 exit $UTEST_EXIT_CODE

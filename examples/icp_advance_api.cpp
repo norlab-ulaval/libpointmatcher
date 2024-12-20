@@ -36,8 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pointmatcher/PointMatcher.h"
 #include "pointmatcher/Bibliography.h"
 
-#include "boost/filesystem.hpp"
-
 #include <cassert>
 #include <fstream>
 #include <iostream>
