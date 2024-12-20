@@ -10,14 +10,14 @@ There exists a myriad of [graphics file formats](http://en.wikipedia.org/wiki/Ca
 | --------- |:---------:|:-------------------------------------------------:|:---------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | Comma Separated Values | .csv |                        NA                         | yes (see [table of descriptor labels](#descmaptable)) |                                                                                                                                                   |
 | Visualization Toolkit Files | .vtk | Legacy format versions 3.0 and lower (ASCII only) | yes | Only polydata and unstructured grid VTK Datatypes supported.  More information can be found  [here](http://www.vtk.org/VTK/img/file-formats.pdf). |
-| Polygon File Format | .ply |              1.0 (ASCII and binary)               | yes (see [table of descriptor labels](#descmaptable)) | Users are encouraged to execute `libpointmatcher` using `double` as the floating precision format to prevent overflows.                           | 
+| Polygon File Format | .ply |              1.0 (ASCII and binary)               | yes (see [table of descriptor labels](#descmaptable)) | Users are encouraged to execute `libpointmatcher` using `double` as the floating precision format to prevent overflows.                           |
 | Point Cloud Library Format | .pcd |                 0.7 (ASCII only)                  | yes (see [table of descriptor labels](#descmaptable)) |                                                                                                                                                   |
 
 ## Comma Separated Values (CSV) Files
 
 The most simple file format supported to store clouds is a plain text file containing comma separated values.  Data is structured in a table format and is separated into rows or lines and columns.  Columns are delimited by commas, tabs, or semicolons.  2D and 3D point features are supported as well as a limited number of point descriptors.
 
-It is common and best practice that the first line of the CSV file be a header identifying each data column.  Features are identified by the following names: "x", "y", and "z" if the point cloud in 3D.  Descriptors are divided into columns and these must be appropriately identified.  
+It is common and best practice that the first line of the CSV file be a header identifying each data column.  Features are identified by the following names: "x", "y", and "z" if the point cloud in 3D.  Descriptors are divided into columns and these must be appropriately identified.
 
 If the first line does not include a header, the user will be asked to identify which columns correspond to the "x", "y", and "z" feature fields.  Any additional content including descriptors is ignored.
 
@@ -26,7 +26,7 @@ If the first line does not include a header, the user will be asked to identify 
 So as to allow the visualization of point clouds in [Paraview](http://www.paraview.org/), libpointmatcher supports importing and exporting of Paraview's native VTK format.  VTK files can be used to represent a wide variety of 3D graphics including point clouds.  The VTK standard comprises of a simpler legacy format and a newer XML based format.  As of now libpointmatcher only supports the legacy format.
 
 VTK files can contain different geometrical topologies which are represented in different dataset types.  These types each have different file structures and can be one of the following :
-    
+
 * STRUCTURED_POINTS
 * STRUCTURE_GRID
 * UNSTRUCTURED_GRID
@@ -42,19 +42,19 @@ Descriptors are encoded in VTK files as dataset attributes which can be any of t
 * COLOR_SCALARS
 * VECTORS
 * NORMALS
-* TENSORS 
+* TENSORS
 
 Data contained in these attributes are loaded into the Datapoints feature matrices.  In the same way, Dataset descriptors are converted to the appropriate VTK attributes when exporting a point cloud.  The following table details which descriptors are exported to VTK files and the corresponding VTK attribute that is used to encode them.
 
 *Mapping Between libpointmatcher Descriptors and VTK attributes*
 
 | libpointmatcher Descriptor Label | VTK Dataset Attribute |
-| ----------------------------- | --------------------- | 
+| ----------------------------- | --------------------- |
 | normals                       | NORMALS               |
-| eigVectors                    | TENSOR                | 
-| color                         | COLOR_SCALARS         | 
+| eigVectors                    | TENSOR                |
+| color                         | COLOR_SCALARS         |
 | Any other 1D descriptor       | SCALARS               |
-| Any other 3D descriptor       | VECTORS               |  
+| Any other 3D descriptor       | VECTORS               |
 
 ## Polygon File Format (PLY or Stanford Triangle) Files
 
@@ -70,7 +70,7 @@ The [Point Cloud Library](http://pointclouds.org/)(PCL) is an alternative librar
 
 The developers of PCL have developed their [own file format](https://pcl.readthedocs.io/projects/tutorials/en/latest/pcd_file_format.html) for storing point clouds.  libpointmatcher is compatible with this format and can import and export PCD files in the latest format (v 0.7).
 
-The PCD format also exists in binary, however only the plain text (ASCII) version is supported.  Because PCD does not prescribe standards for descriptors, libpointmatcher utilizes the [same identifier mapping](#descmaptable) for identifying descriptors.   
+The PCD format also exists in binary, however only the plain text (ASCII) version is supported.  Because PCD does not prescribe standards for descriptors, libpointmatcher utilizes the [same identifier mapping](#descmaptable) for identifying descriptors.
 
 ## Descriptor Property Identifiers (PLY, CSV, PCD) <a name="descmaptable"></a>
 
@@ -88,7 +88,7 @@ The PCD format also exists in binary, however only the plain text (ASCII) versio
 | red            | red value (0.0-1.0) of RGB color code | descriptor |  color |
 | green          | green value (0.0-1.0) of RGB color code | descriptor |  color |
 | blue           | blue value (0.0-1.0) of RGB color code | descriptor |  color |
-| alpha          | alpha value (0.0-1.0) of RGBA color code | descriptor | color | 
+| alpha          | alpha value (0.0-1.0) of RGBA color code | descriptor | color |
 | intensity    | laser scan intensity at point | descriptor | intensity |
 | eigValues0-2           | eigen values of nearest neighbors at point. Format is eigValues followed by the number of the eigen value (2 for 2D and 3 for 3D) | descriptor | eigValue |
 | eigVectors0-2X-Z       | eigen vectors of nearest neighbors at point.  Format is eigVectors followed by the number of the eigen vector (2 for 2D and 3 for 3D) followed by the axis identifier (X, Y or Z) | descriptor | eigVectors |
@@ -99,6 +99,12 @@ Several identifiers may synonymously point to the same libpointmatcher descripto
 While most files should contain data structured in a natural order ie ("x", "y" then "z", or "red", "green", then "blue") this cannot be guaranteed.  Therefore libpointmatcher will attempt to reorder the descriptor components when loading a file, and will always export them in a natural order.
 
 ---
+### How is time information represented in libpointmatcher
+Historically, libpointmatcher split the time information into two fields: `time_splitTime_low32` and `time_splitTime_high32`.
+While data in this format can still be loaded, the prefered way is a descriptor called `time`.
+This descriptor is internally represented as an `unsigned long`.
+The corresponding VTK property is `SCALARS time unsigned_long`.
+
 ### Note For libpointmatcher Developers
 
 The association between descriptor properties identifiers and libpointmatcher descriptor labels is set in the `getDescAssocationMap` function in [pointmatcher/IO.cpp](https://github.com/norlab-ulaval/libpointmatcher/blob/master/pointmatcher/IO.cpp).  To extend IO support to additional descriptors, you can modify this function.

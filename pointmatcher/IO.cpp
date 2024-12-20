@@ -943,6 +943,7 @@ template<typename T>
 typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is)
 {
 	std::map<std::string, SplitTime> labelledSplitTime;
+	Int64Matrix timeMatrix;
 
 	DataPoints loadedPoints;
 
@@ -1095,6 +1096,11 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 
 			bool isTimeSec = false;
 			bool isTimeNsec = false;
+			bool isTime = false;
+			if (name == "time")
+            {
+                isTime = true;
+            }
 
 
 			if(boost::algorithm::ends_with(name, "_splitTime_high32"))
@@ -1147,7 +1153,20 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadVTK(std::istream& is
 
 
 			// Load time data
-			if(isTimeSec || isTimeNsec)
+			if (isTime)
+			{
+			     // Skip LOOKUP_TABLE line
+				if(skipLookupTable)
+				{
+					safeGetLine(is, line);
+				}
+				timeMatrix = Int64Matrix(1,pointCount);
+
+				// Load full unsplit nanoseconds datafield
+				readVtkData(type, isBinary, timeMatrix.transpose(), is);
+				loadedPoints.addTime(name, timeMatrix);
+			}
+			else if(isTimeSec || isTimeNsec) // backwards compatibility with old time parsing
 			{
 				// Skip LOOKUP_TABLE line
 				if(skipLookupTable)

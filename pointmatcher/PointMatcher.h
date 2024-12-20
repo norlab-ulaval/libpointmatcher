@@ -157,6 +157,8 @@ struct PointMatcher
 
 	//! The scalar type
 	typedef T ScalarType;
+	//! The time type
+	typedef std::int64_t TimeType;
 	//! A vector over ScalarType
 	typedef typename Eigen::Matrix<T, Eigen::Dynamic, 1> Vector;
 	//! A vector of vector over ScalarType, not a matrix
@@ -170,7 +172,7 @@ struct PointMatcher
 	//! A dense integer matrix
 	typedef typename Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> IntMatrix;
 	//! A dense signed 64-bits matrix
-	typedef typename Eigen::Matrix<std::int64_t, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
+	typedef typename Eigen::Matrix<TimeType, Eigen::Dynamic, Eigen::Dynamic> Int64Matrix;
 	//! A dense array over ScalarType
 	typedef typename Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> Array;
 

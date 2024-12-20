@@ -139,16 +139,20 @@ std::istream & readVtkData(std::string dataType, bool readBinary, MatrixRef into
 	if(dataType == "float")
 	{
 		return readVtkData<float>(readBinary, into, in);
-	} 
-	else if (dataType == "double") 
+	}
+	else if (dataType == "double")
 	{
 		return readVtkData<double>(readBinary, into, in);
-	} 
-	else if (dataType == "unsigned_int") 
+	}
+	else if (dataType == "unsigned_int")
 	{
 		return readVtkData<unsigned int>(readBinary, into, in);
 	}
-	else 
+	else if (dataType == "unsigned_long")
+	{
+		return readVtkData<unsigned long>(readBinary, into, in);
+	}
+	else
 	{
 		throw std::runtime_error(std::string("Unsupported data type : " + dataType + "! Expected 'float' or 'double'."));
 	}
