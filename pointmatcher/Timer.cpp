@@ -40,13 +40,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <mach/mach.h>
 #endif
 
-#if defined(_POSIX_TIMERS) && !defined(FORCE_DISABLE_POSIX_TIMERS)
 namespace PointMatcherSupport
 {
 	timer::timer():
 		_start_time(curTime())
 	{
+	   #if defined(_POSIX_TIMERS) && !defined(FORCE_DISABLE_POSIX_TIMERS)
 	   std::cout << "Using POSIX timer\n";
+       #else
+       std::cout << "Using std::chrono timer\n";
+       #endif
 	}
 
 	void timer::restart()
@@ -61,46 +64,35 @@ namespace PointMatcherSupport
 
 	timer::Time timer::curTime() const
 	{
-		#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
-		clock_serv_t host_clock;
-		mach_timespec_t now;
-		host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &host_clock);
-		clock_get_time(host_clock, &now);
-		return Time(now.tv_sec) * Time(1000000000) + Time(now.tv_nsec);
-		#else // __MACH__
-		struct timespec ts;
-		#ifdef CLOCK_PROCESS_CPUTIME_ID
-		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
-		#else // BSD and old Linux
-		clock_gettime(CLOCK_PROF, &ts);
-		#endif
-		return Time(ts.tv_sec) * Time(1000000000) + Time(ts.tv_nsec);
-		#endif // __MACH__
+	    #if defined(_POSIX_TIMERS) && !defined(FORCE_DISABLE_POSIX_TIMERS)
+    		#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+    		clock_serv_t host_clock;
+    		mach_timespec_t now;
+    		host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &host_clock);
+    		clock_get_time(host_clock, &now);
+    		return Time(now.tv_sec) * Time(1000000000) + Time(now.tv_nsec);
+    		#else // __MACH__
+    		struct timespec ts;
+    		#ifdef CLOCK_PROCESS_CPUTIME_ID
+    		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
+    		#else // BSD and old Linux
+    		clock_gettime(CLOCK_PROF, &ts);
+    		#endif
+    		return Time(ts.tv_sec) * Time(1000000000) + Time(ts.tv_nsec);
+    		#endif // __MACH__
+      #else
+ 	    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+      #endif // _POSIX_TIMERS
+
 	}
 } // namespace PointMatcherSupport
-#else // _POSIX_TIMERS
-namespace PointMatcherSupport
-{
-	//! Create and start the timer
-	timer::timer():
-	    _start_time(curTime())
-    {
-        std::cout << "Using std::chrono timer\n";
-    }
-	//! Restart the counter
-	void timer::restart()
-	{
-		_start_time = curTime();
-	}
-	//! Return elapsed time in seconds
-	double timer::elapsed() const
-	{
-	    return  double(curTime() - _start_time) / double(1000000000);
-	}
+// #else // _POSIX_TIMERS
+// namespace PointMatcherSupport
+// {
 
-	timer::Time timer::curTime() const
-	{
-	    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-	}
-}// namespace PointMatcherSupport
-#endif // _POSIX_TIMERS
+// 	timer::Time timer::curTime() const
+// 	{
+// 	    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+// 	}
+// }// namespace PointMatcherSupport
+// #endif // _POSIX_TIMERS
