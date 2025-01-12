@@ -40,24 +40,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <mach/mach.h>
 #endif
 
-#ifdef _POSIX_TIMERS
+#if defined(_POSIX_TIMERS) && !defined(FORCE_DISABLE_POSIX_TIMERS)
 namespace PointMatcherSupport
 {
 	timer::timer():
 		_start_time(curTime())
 	{
-	} 
-	
+	   std::cout << "Using POSIX timer\n";
+	}
+
 	void timer::restart()
 	{
 		_start_time = curTime();
 	}
-	
+
 	double timer::elapsed() const
 	{
 		return  double(curTime() - _start_time) / double(1000000000);
 	}
-	
+
 	timer::Time timer::curTime() const
 	{
 		#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
@@ -77,5 +78,29 @@ namespace PointMatcherSupport
 		#endif // __MACH__
 	}
 } // namespace PointMatcherSupport
-#endif // _POSIX_TIMERS
+#else // _POSIX_TIMERS
+namespace PointMatcherSupport
+{
+	//! Create and start the timer
+	timer::timer():
+	    _start_time(curTime())
+    {
+        std::cout << "Using std::chrono timer\n";
+    }
+	//! Restart the counter
+	void timer::restart()
+	{
+		_start_time = curTime();
+	}
+	//! Return elapsed time in seconds
+	double timer::elapsed() const
+	{
+	    return  double(curTime() - _start_time) / double(1000000000);
+	}
 
+	timer::Time timer::curTime() const
+	{
+	    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+	}
+}// namespace PointMatcherSupport
+#endif // _POSIX_TIMERS
