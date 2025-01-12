@@ -45,11 +45,6 @@ namespace PointMatcherSupport
 	timer::timer():
 		_start_time(curTime())
 	{
-	   #if defined(_POSIX_TIMERS) && !defined(FORCE_DISABLE_POSIX_TIMERS)
-	   std::cout << "Using POSIX timer\n";
-       #else
-       std::cout << "Using std::chrono timer\n";
-       #endif
 	}
 
 	void timer::restart()
