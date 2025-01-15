@@ -81,13 +81,3 @@ namespace PointMatcherSupport
 
 	}
 } // namespace PointMatcherSupport
-// #else // _POSIX_TIMERS
-// namespace PointMatcherSupport
-// {
-
-// 	timer::Time timer::curTime() const
-// 	{
-// 	    return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-// 	}
-// }// namespace PointMatcherSupport
-// #endif // _POSIX_TIMERS
