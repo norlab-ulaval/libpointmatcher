@@ -144,6 +144,25 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
+	struct MinMatchesOutlierFilter: public OutlierFilter
+	{
+		inline static const std::string description()
+		{
+			return "This checker stops the ICP if there are not enough matches.";
+		}
+		inline static const ParametersDoc availableParameters()
+		{
+			return {
+				{"minMatchesNumber", "minimum number of matches", "0", "0", "2147483647", &P::Comp<unsigned>}
+			};
+		}
+		
+		const unsigned minMatchesNumber;
+		
+		MinMatchesOutlierFilter(const Parameters& params = Parameters());
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+	};
+
 	struct VarTrimmedDistOutlierFilter: public OutlierFilter
 	{
 		inline static const std::string description()

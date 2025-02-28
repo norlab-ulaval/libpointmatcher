@@ -96,7 +96,6 @@ typename PointMatcher<T>::Matches MatchersImpl<T>::KDTreeMatcher::findClosests(
 	static_assert(NNS::InvalidIndex == Matches::InvalidId, "");
 	static_assert(NNS::InvalidValue == Matches::InvalidDist, "");
 	this->visitCounter += featureNNS->knn(filteredReading.features, matches.ids, matches.dists, knn, epsilon, NNS::ALLOW_SELF_MATCH, maxDist);
-
 	return matches;
 }
 

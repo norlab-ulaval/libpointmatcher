@@ -48,6 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace PointMatcherSupport;
 
+
 // NullOutlierFilter
 template<typename T>
 typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::NullOutlierFilter::compute(
@@ -148,6 +149,45 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::TrimmedDistOutli
 
 template struct OutlierFiltersImpl<float>::TrimmedDistOutlierFilter;
 template struct OutlierFiltersImpl<double>::TrimmedDistOutlierFilter;
+
+// MinMatchesOutlierFilter
+template<typename T>
+OutlierFiltersImpl<T>::MinMatchesOutlierFilter::MinMatchesOutlierFilter(const Parameters& params):
+	OutlierFilter("MinMatchesOutlierFilter", MinMatchesOutlierFilter::availableParameters(), params),
+	minMatchesNumber(Parametrizable::get<T>("minMatchesNumber"))
+{
+}
+
+template<typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::MinMatchesOutlierFilter::compute(
+	const DataPoints& filteredReading,
+	const DataPoints& filteredReference,
+	const Matches& input)
+{
+	typedef typename PointMatcherSupport::MinNumMatchesError MinNumMatchesError;
+	vector<T> values;
+	values.reserve(input.dists.rows() * input.dists.cols());
+	for (int x = 0; x < input.dists.cols(); ++x)
+	{
+		for (int y = 0; y < input.dists.rows(); ++y)
+		{
+			if (input.dists(y, x) != numeric_limits<T>::infinity())
+			{
+				values.push_back(input.dists(y, x));
+			}
+		}
+	}
+	std::cout << "number of points: " << filteredReading.features.cols() << std::endl;
+	std::cout << "number of matches: " << values.size() << std::endl;
+	if (values.size() < minMatchesNumber)
+	{
+		throw MinNumMatchesError("Minimum number of matches not reached for ICP optimization.");
+	}
+	return OutlierWeights((input.dists.array() <= *max_element(values.begin(), values.end())).template cast<T>());
+}
+
+template struct OutlierFiltersImpl<float>::MinMatchesOutlierFilter;
+template struct OutlierFiltersImpl<double>::MinMatchesOutlierFilter;
 
 // VarTrimmedDistOutlierFilter
 template<typename T>

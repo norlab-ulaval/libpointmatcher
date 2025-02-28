@@ -109,12 +109,26 @@ PointToPlaneWithAltitudeErrorMinimizer<T>::PointToPlaneWithAltitudeErrorMinimize
 	}
 	else if(force4DOF)
 	{
-		LOG_INFO_STREAM("PointMatcher::PointToPlaneErrorMinimizer - minimization will be in 4-DOF (yaw,x,y,z).");
+        if(forceAltitude)
+        {
+            LOG_INFO_STREAM("PointMatcher::PointToPlaneErrorMinimizer - minimization will be in 3D.");
+        }
+        else
+        {
+            LOG_INFO_STREAM("PointMatcher::PointToPlaneErrorMinimizer - minimization will be in 4-DOF (yaw,x,y,z).");
+        }
 	}
 	else
 	{
-		LOG_INFO_STREAM("PointMatcher::PointToPlaneErrorMinimizer - minimization will be in 3D.");
-	}
+        if(forceAltitude)
+        {
+            LOG_INFO_STREAM("PointMatcher::PointToPlaneErrorMinimizer - minimization will be in 5D.");
+        }
+        else
+        {
+            LOG_INFO_STREAM("PointMatcher::PointToPlaneErrorMinimizer - minimization will be in 6-DOF.");
+        }
+    }
 }
 
 
@@ -217,8 +231,8 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithAltitudeError
 		   	//VK: Instead for "cross" as in 3D, we need only a dot product with the matrixGamma factor for 4DOF
 		   	//VK: This should be published in 2020 or 2021
 			matrixGamma << 0,-1, 0,
-			         1, 0, 0,
-			         0, 0, 0;
+			               1, 0, 0,
+			               0, 0, 0;
 			cross = ((matrixGamma*mPts.reading.features.block(0, 0, 3, nbPts)).transpose()*normalRef).diagonal().transpose();
 		}
 
@@ -240,7 +254,7 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithAltitudeError
 		}
 
 		// Unadjust covariance A = wF * F'
-		const Matrix A = wF * F.transpose();
+        const Matrix A = wF * F.transpose();
 
 		const Matrix deltas = mPts.reading.features - mPts.reference.features;
 
@@ -253,11 +267,44 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithAltitudeError
 		}
 
 		// b = -(wF' * dot)
-		const Vector b = -(wF * dotProd.transpose());
+		Vector b = -(wF * dotProd.transpose());
 
-		Vector x(A.rows());
+        Matrix AProjected;
+        Vector bProjected;
 
-		solvePossiblyUnderdeterminedLinearSystem<T>(A, b, x);
+        if (forceAltitude)
+        {
+
+            if(force4DOF)
+            {
+                Matrix Proj(3,4);
+                Proj << 1, 0, 0, 0,
+                        0, 1, 0, 0,
+                        0, 0, 1, 0;
+                AProjected = Proj * A *Proj.transpose();
+                bProjected = Proj * b;
+            }
+            else
+            {
+                Matrix Proj(5,6);
+                Proj << 1, 0, 0, 0, 0, 0,
+                        0, 1, 0, 0, 0, 0,
+                        0, 0, 1, 0, 0, 0,
+                        0, 0, 0, 1, 0, 0,
+                        0, 0, 0, 0, 1, 0;
+                AProjected = Proj * A *Proj.transpose();
+                bProjected = Proj * b;
+            }
+
+        }
+        else
+        {
+            AProjected = A;
+            bProjected = b;
+        }
+
+        Vector x(AProjected.rows());
+        solvePossiblyUnderdeterminedLinearSystem<T>(AProjected, bProjected, x);
 
 		// Transform parameters to matrix
 		Matrix mOut;
@@ -292,7 +339,7 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithAltitudeError
                     {
                         Vector transPart(3, 1);
                         transPart << 0.0,0.0,0.0;
-                        transPart = x.segment(3, 2);  //x=[alpha,beta,gamma,x,y,z]
+                        transPart = x.segment(3, 2);  //x=[alpha,beta,gamma,x,y]
                         transform.translation() = transPart;
                         // std::cout << "translation: " << transform.translation() << std::endl;
                     }
@@ -304,7 +351,7 @@ typename PointMatcher<T>::TransformationParameters PointToPlaneWithAltitudeError
                 {
                     Vector transPart(3, 1);
                     transPart << 0.0,0.0,0.0;
-                    transPart = x.segment(1, 2);  //x=[gamma,x,y,z]
+                    transPart = x.segment(1, 2);  //x=[gamma,x,y]
                     transform.translation() = transPart;
                     // std::cout << "translation: " << transform.translation() << std::endl;
                 }

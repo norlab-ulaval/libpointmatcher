@@ -47,5 +47,9 @@ PointMatcherSupport::ConfigurationError::ConfigurationError(const std::string& r
 	runtime_error(reason)
 {}
 
+PointMatcherSupport::MinNumMatchesError::MinNumMatchesError(const std::string& reason):
+  runtime_error(reason)
+{}
+
 template struct PointMatcher<float>::ConvergenceError;
 template struct PointMatcher<double>::ConvergenceError;

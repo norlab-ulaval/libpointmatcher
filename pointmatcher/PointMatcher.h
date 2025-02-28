@@ -99,6 +99,13 @@ namespace PointMatcherSupport
 		ConfigurationError(const std::string& reason);
 	};
 
+	//! An expception thrown when the minimum number of matches is not reached
+	struct MinNumMatchesError: std::runtime_error
+	{
+		//! return an exception when a transformation has invalid parameters
+		MinNumMatchesError(const std::string& reason);
+	};
+
 	
 	//! The logger interface, used to output warnings and informations
 	struct Logger: public Parametrizable
