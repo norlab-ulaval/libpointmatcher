@@ -24,6 +24,7 @@ Libpointmatcher provides an implementation of the following outlier filters:
 * Trimmed
 * Median
 * Surface Normal
+* Descriptor Match
 
 Filters not implemented yet are:
 

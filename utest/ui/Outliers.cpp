@@ -150,3 +150,91 @@ TEST_F(OutlierFilterTest, VarTrimmedDistOutlierFilterParameters)
 	EXPECT_EQ(1.0f, weights(0, 0));
 	EXPECT_EQ(1.0f, weights(0, 1));
 }
+
+// Test for DescriptorMatchOutlierFilter
+TEST_F(OutlierFilterTest, DescriptorMatchOutlierFilter)
+{
+	// Create simple reading and reference point clouds
+	PM::Matrix readingFeat(3, 2);
+	readingFeat << 0, 1,
+		0, 0,
+		0, 0;
+	PM::Matrix referenceFeat(3, 2);
+	referenceFeat << 0, 1.1,
+		0, 0,
+		0, 0;
+
+	// Define standard feature labels
+	PM::DataPoints::Labels featureLabels;
+	featureLabels.push_back(PM::DataPoints::Label("x", 1));
+	featureLabels.push_back(PM::DataPoints::Label("y", 1));
+	featureLabels.push_back(PM::DataPoints::Label("z", 1));
+
+	// Add 'intensity' descriptor
+	PM::Matrix readingDesc(1, 2);
+	readingDesc << 10, 20; // Intensity values for reading points
+	PM::Matrix referenceDesc(1, 2);
+	referenceDesc << 10.5, 15; // Intensity values for reference points
+
+	// Create DataPoints with feature labels
+	PM::DataPoints reading(readingFeat, featureLabels);
+	reading.addDescriptor("intensity", readingDesc);
+	PM::DataPoints reference(referenceFeat, featureLabels);
+	reference.addDescriptor("intensity", referenceDesc);
+
+	// Create matches (point 0 -> point 0, point 1 -> point 1)
+	PM::Matches::Ids ids(1, 2);
+	ids << 0, 1;
+	PM::Matches::Dists dists(1, 2);
+	dists << 0.01, 0.1; // Dummy distances
+	PM::Matches matches(dists, ids);
+
+	// --- Test Case: Default (Squared L2 norm, soft threshold) ---
+	addFilter("DescriptorMatchOutlierFilter", {
+		{"descName", "intensity"},
+		{"sigma", toParam(5.0)} // Sigma for weighting
+	});
+
+	// Compute weights
+	PM::OutlierWeights weights = testedOutlierFilter->compute(reading, reference, matches);
+
+	// Expected weights calculation (Squared L2 soft):
+	// Match 0: Reading intensity 10, Reference intensity 10.5. Diff = 0.5. Diff^2 = 0.25
+	//          Weight = exp(-0.25 / (5.0^2)) = exp(-0.25 / 25) = exp(-0.01) approx 0.9900
+	// Match 1: Reading intensity 20, Reference intensity 15. Diff = 5. Diff^2 = 25
+	//          Weight = exp(-25 / (5.0^2)) = exp(-25 / 25) = exp(-1) approx 0.3679
+
+	ASSERT_EQ(weights.rows(), 1);
+	ASSERT_EQ(weights.cols(), 2);
+	EXPECT_NEAR(weights(0, 0), std::exp(-0.25 / 25.0), 1e-4);
+	EXPECT_NEAR(weights(0, 1), std::exp(-25.0 / 25.0), 1e-4);
+
+	// --- Test case with missing descriptor in reference ---
+	icp.outlierFilters.clear(); // Use default filter settings for this test
+	addFilter("DescriptorMatchOutlierFilter", {{"descName", "intensity"}, {"sigma", toParam(5.0)}});
+	PM::DataPoints referenceNoDesc(referenceFeat, featureLabels);
+	PM::OutlierWeights weightsMissingRef = testedOutlierFilter->compute(reading, referenceNoDesc, matches);
+	EXPECT_EQ(weightsMissingRef(0, 0), 1.0); // Should default to 1 if descriptor missing
+	EXPECT_EQ(weightsMissingRef(0, 1), 1.0);
+	EXPECT_TRUE(std::dynamic_pointer_cast<OutlierFiltersImpl<NumericType>::DescriptorMatchOutlierFilter>(testedOutlierFilter)->warningPrinted); // Check flag
+
+	// --- Test case with missing descriptor in reading ---
+	// Reset warning flag for next test
+	std::dynamic_pointer_cast<OutlierFiltersImpl<NumericType>::DescriptorMatchOutlierFilter>(testedOutlierFilter)->warningPrinted = false;
+	PM::DataPoints readingNoDesc(readingFeat, featureLabels);
+	PM::OutlierWeights weightsMissingRead = testedOutlierFilter->compute(readingNoDesc, reference, matches);
+	EXPECT_EQ(weightsMissingRead(0, 0), 1.0); // Should default to 1
+	EXPECT_EQ(weightsMissingRead(0, 1), 1.0);
+	EXPECT_TRUE(std::dynamic_pointer_cast<OutlierFiltersImpl<NumericType>::DescriptorMatchOutlierFilter>(testedOutlierFilter)->warningPrinted); // Check flag
+
+	// --- Test case with mismatched descriptor dimensions ---
+	std::dynamic_pointer_cast<OutlierFiltersImpl<NumericType>::DescriptorMatchOutlierFilter>(testedOutlierFilter)->warningPrinted = false;
+	PM::Matrix referenceDesc2D(2, 2);
+	referenceDesc2D << 10.5, 15, 1, 2;
+	PM::DataPoints referenceMismatchDim(referenceFeat, featureLabels);
+	referenceMismatchDim.addDescriptor("intensity", referenceDesc2D);
+	PM::OutlierWeights weightsMismatch = testedOutlierFilter->compute(reading, referenceMismatchDim, matches);
+	EXPECT_EQ(weightsMismatch(0, 0), 1.0); // Should default to 1
+	EXPECT_EQ(weightsMismatch(0, 1), 1.0);
+	EXPECT_TRUE(std::dynamic_pointer_cast<OutlierFiltersImpl<NumericType>::DescriptorMatchOutlierFilter>(testedOutlierFilter)->warningPrinted); // Check flag
+}

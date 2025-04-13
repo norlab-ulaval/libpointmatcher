@@ -220,6 +220,38 @@ struct OutlierFiltersImpl
 		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
 	};
 
+	/**
+	 * @brief Descriptor Match Outlier Filter: Weights matches based on the similarity
+	 * of a specified descriptor between the reading and reference points.
+	 *
+	 * Assigns higher weights to pairs where the descriptor values are closer.
+	 * Uses an exponential decay based on the squared Euclidean distance between descriptor vectors:
+	 * weight = exp(-||desc_read - desc_ref||^2 / sigma^2).
+	 */
+	struct DescriptorMatchOutlierFilter : public OutlierFilter
+	{
+		inline static const std::string description()
+		{
+			return "Weights matches based on the similarity of a specified descriptor. Uses exp(-||desc_read - desc_ref||^2 / sigma^2).";
+		}
+
+		inline static const ParametersDoc availableParameters()
+		{
+			return {
+				{"descName", "Name of the descriptor field to compare (e.g., 'intensity', 'rgb', 'normals'). Must exist in both clouds.", "intensity"},
+				{"sigma", "Controls the sensitivity to descriptor differences. Smaller sigma means only very similar descriptors get high weights. Must be > 0.", "0.1", "0.000001", "inf", &P::Comp<T>}
+			};
+		}
+
+		const std::string descName;
+		const T sigmaSquared; // Store sigma^2 for efficiency
+		bool warningPrinted;
+
+		DescriptorMatchOutlierFilter(const Parameters& params = Parameters());
+		virtual OutlierWeights compute(const DataPoints& filteredReading, const DataPoints& filteredReference, const Matches& input);
+	};
+
+
 	struct RobustOutlierFilter: public OutlierFilter
 	{
 
