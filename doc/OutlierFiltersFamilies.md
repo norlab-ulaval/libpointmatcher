@@ -77,6 +77,7 @@ Filters not implemented yet are:
 20. [RANSAC](#ransachead)
 21. [Relative Motion Threshold (RMT)](#rmthead)
 22. [BiDistance](#bidistancehead)
+23. [Descriptor Match](#descriptormatchhead)
 
 ## Descriptions
 
@@ -467,7 +468,7 @@ Therefore the results of RMT are more dependent of the way dt is computed than t
 
 * F.Pomerleau, F.Colas, F.Ferland, and F.Michaud,"Relative Motion Threshold for Rejection in ICP Registration", Field and Service Robotics, vol.62 p.229-238, Jul.2015.
 
-#### BiDisance <a name="bidistancehead"></a>
+#### BiDistance <a name="bidistancehead"></a>
 
 The BiDistance outlier filtering method affects an uniform weight based on the tuning parameter k and a parameter computed at each iteration noted B. 
 This computed parameter is the bidirectional correspondence between the two point sets. Since this outlier filter is a weight function with two variables, it can be plotted as a 3D graph. 
@@ -485,3 +486,28 @@ The weight function results can get really high due to the exponential in the eq
 **Reference of its use in ICP:**
 
 * J.Zhu, D.Wang, X.Bai, H.Lu, C.Jin, and Z.Li, "Regression of point clouds based on the ratio of bidirectional distances", Proceedings of the 4th international Conference on 3D vision, pp.102-107, 2016.
+
+#### Descriptor Match <a name="descriptormatchhead"></a>
+
+Weights matches based on the similarity of a specified descriptor between reading and reference point clouds. Uses an exponential decay on the squared Euclidean distance between descriptor vectors:
+
+```math
+w(e, \sigma) = \exp\left(-\frac{||\mathbf{d}_{read} - \mathbf{d}_{ref}||^2}{\sigma^2}\right)
+```
+
+Parameters:
+- descName: Name of the descriptor field (e.g., "intensity", "rgb", "normals").
+- sigma: Controls sensitivity to descriptor differences; smaller values enforce stricter similarity.
+
+**Equations:**
+
+```math
+w(e, \sigma) = \exp\left(-\frac{e^2}{\sigma^2}\right)
+```
+```math
+p(e, \sigma) = \frac{\sigma^2}{2} \left(1 - \exp\left(-\frac{e^2}{\sigma^2}\right)\right)
+```
+**Plots:**
+
+![descriptormatch threek](images/descriptormatch_threek.png)
+![descriptormatch multik](images/descriptormatch_multik.png)
