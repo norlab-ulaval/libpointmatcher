@@ -237,4 +237,40 @@ TEST_F(OutlierFilterTest, DescriptorMatchOutlierFilter)
 	EXPECT_EQ(weightsMismatch(0, 0), 1.0); // Should default to 1
 	EXPECT_EQ(weightsMismatch(0, 1), 1.0);
 	EXPECT_TRUE(std::dynamic_pointer_cast<OutlierFiltersImpl<NumericType>::DescriptorMatchOutlierFilter>(testedOutlierFilter)->warningPrinted); // Check flag
+
+	// --- Test case with 3D descriptor (RGB) ---
+	icp.outlierFilters.clear(); // Clear previous filters
+	PM::Matrix readingRgbDesc(3, 2);
+	readingRgbDesc << 100, 200, // R
+					  50, 150,  // G
+					  25, 75;   // B
+	PM::Matrix referenceRgbDesc(3, 2);
+	referenceRgbDesc << 110, 180, // R
+						55, 160,  // G
+						30, 80;   // B
+
+	PM::DataPoints readingRgb(readingFeat, featureLabels);
+	readingRgb.addDescriptor("rgb", readingRgbDesc);
+	PM::DataPoints referenceRgb(referenceFeat, featureLabels);
+	referenceRgb.addDescriptor("rgb", referenceRgbDesc);
+
+	addFilter("DescriptorMatchOutlierFilter", {
+		{"descName", "rgb"},
+		{"sigma", toParam(30.0)} // Sigma for RGB weighting
+	});
+
+	PM::OutlierWeights weightsRgb = testedOutlierFilter->compute(readingRgb, referenceRgb, matches);
+
+	// Expected weights calculation (RGB):
+	// Match 0: Read [100, 50, 25], Ref [110, 55, 30]. Diff = [-10, -5, -5].
+	//          Diff^2 Norm = (-10)^2 + (-5)^2 + (-5)^2 = 100 + 25 + 25 = 150
+	//          Weight = exp(-150 / (30.0^2)) = exp(-150 / 900) = exp(-1/6) approx 0.8465
+	// Match 1: Read [200, 150, 75], Ref [180, 160, 80]. Diff = [20, -10, -5].
+	//          Diff^2 Norm = (20)^2 + (-10)^2 + (-5)^2 = 400 + 100 + 25 = 525
+	//          Weight = exp(-525 / (30.0^2)) = exp(-525 / 900) = exp(-7/12) approx 0.5581
+
+	ASSERT_EQ(weightsRgb.rows(), 1);
+	ASSERT_EQ(weightsRgb.cols(), 2);
+	EXPECT_NEAR(weightsRgb(0, 0), std::exp(-150.0 / 900.0), 1e-4);
+	EXPECT_NEAR(weightsRgb(0, 1), std::exp(-525.0 / 900.0), 1e-4);
 }
