@@ -383,6 +383,11 @@ if (EXTRA_DEPS)
 	add_dependencies(pointmatcher ${EXTRA_DEPS})
 endif()
 
+option(DISABLE_POSIX_TIMERS "Disable POSIX timers" OFF)
+if(DISABLE_POSIX_TIMERS)
+    target_compile_definitions(pointmatcher PRIVATE FORCE_DISABLE_POSIX_TIMERS)
+endif()
+
 if (POSIX_TIMERS AND NOT APPLE)
 	target_link_libraries(pointmatcher PRIVATE rt)
 endif ()

@@ -36,29 +36,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_TIMER_H
 #define __POINTMATCHER_TIMER_H
 
+#include <iostream>
 #include <time.h>
 #ifndef WIN32
 #include <unistd.h>
 #endif // WIN32
+#if !defined(_POSIX_TIMERS) || defined(FORCE_DISABLE_POSIX_TIMERS)
+#include <chrono>
+#endif
 
-#ifdef _POSIX_TIMERS
+// #if defined(_POSIX_TIMERS) && !defined(FORCE_DISABLE_POSIX_TIMERS)
 namespace PointMatcherSupport
 {
 	/**
-		High-precision timer class, using clock_gettime() or clock_get_time()
-		
-		The interface is a subset of the one boost::timer provides,
-		but the implementation is much more precise
+    	This is an interface between std::chrono::steady_clock and lpm
+
+    	Uses either std::chrono::steady_clock if _POSIX_TIMERS is not set, or
+		clock_gettime() or clock_get_time() if _POSIX_TIMERS is set,
+		generally in time.h or unistd.h. Then, the implementation is much more precise
 		on systems where clock() has low precision, such as glibc.
-		
-		This code gets compiled if _POSIX_TIMERS is set,
-		generally in time.h or unistd.h
+
+		The interface is a subset of the original boost::timer class.
 	*/
 	struct timer
 	{
 		//! 64-bit time
 		typedef unsigned long long Time;
-		
+
 		//! Create and start the timer
 		timer();
 		//! Restart the counter
@@ -69,16 +73,9 @@ namespace PointMatcherSupport
 	private:
 		//! Return time at call
 		Time curTime() const;
-		
+
 		Time _start_time; //! time when counter started
 	};
 } // namespace PointMatcherSupport
-#else // _POSIX_TIMERS
-#include <boost/timer.hpp>
-namespace PointMatcherSupport
-{
-	typedef boost::timer timer;
-}
-#endif // _POSIX_TIMERS
 
 #endif // __POINTMATCHER_TIMER_H
