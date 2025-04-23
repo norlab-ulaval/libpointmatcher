@@ -97,6 +97,18 @@ namespace python
 					.def(py::init<const Parameters&>(), py::arg("params") = Parameters())
 					.def("compute", &GenericDescriptorOutlierFilter::compute, py::arg("filteredReading"), py::arg("filteredReference"), py::arg("input"));
 
+				using DescriptorMatchOutlierFilter = OutlierFiltersImpl::DescriptorMatchOutlierFilter;
+				py::class_<DescriptorMatchOutlierFilter, std::shared_ptr<DescriptorMatchOutlierFilter>, OutlierFilter>(pyOutlierFilterImpl, "DescriptorMatchOutlierFilter")
+					.def_static("description", &DescriptorMatchOutlierFilter::description)
+					.def_static("availableParameters", &DescriptorMatchOutlierFilter::availableParameters)
+
+					.def_readonly("descName", &DescriptorMatchOutlierFilter::descName)
+					.def_readonly("sigmaSquared", &DescriptorMatchOutlierFilter::sigmaSquared)
+					.def_readonly("warningPrinted", &DescriptorMatchOutlierFilter::warningPrinted)
+
+					.def(py::init<const Parameters&>(), py::arg("params") = Parameters())
+					.def("compute", &DescriptorMatchOutlierFilter::compute, py::arg("filteredReading"), py::arg("filteredReference"), py::arg("input"));
+
 				using RobustOutlierFilter = OutlierFiltersImpl::RobustOutlierFilter;
 				py::class_<RobustOutlierFilter, std::shared_ptr<RobustOutlierFilter>, OutlierFilter>(pyOutlierFilterImpl, "RobustOutlierFilter")
 					.def_static("description", &RobustOutlierFilter::description)
