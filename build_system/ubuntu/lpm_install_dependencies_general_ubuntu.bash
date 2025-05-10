@@ -88,7 +88,7 @@ sudo apt-get update &&
 
 # Retrieve ubuntu version number: DISTRIB_RELEASE
 source /etc/lsb-release
-print_msg "Ubuntu version is ${DISTRIB_RELEASE}"
+n2st::print_msg "Ubuntu version is ${DISTRIB_RELEASE}"
 if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
   # Update Bionic outdated compiler
   # Ref https://github.com/norlab-ulaval/libpointmatcher/pull/581#issuecomment-2284415233
@@ -114,16 +114,21 @@ if [[ ${DISTRIB_RELEASE} == '18.04' ]]; then
     sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
     sudo apt update
     sudo apt install -y cmake
+elif [[ ${DISTRIB_RELEASE} == '20.04' ]]; then
+    wget https://bootstrap.pypa.io/pip/3.8/get-pip.py
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 get-pip.py
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install --upgrade pip
+    PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install cmake
 else
     wget https://bootstrap.pypa.io/get-pip.py
     PIP_BREAK_SYSTEM_PACKAGES=1 python3 get-pip.py
     PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install --upgrade pip
     PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install cmake
 fi
-print_msg "Cmake version is $(cmake --version)"
+n2st::print_msg "Cmake version is $(cmake --version)"
 n2st::teamcity_service_msg_blockClosed
-# .................................................................................................
 
+# .................................................................................................
 # (Priority) ToDo: add check to see if executed in a docker container. Current check does not do what its intended
 if [[ ${IS_TEAMCITY_RUN} == true ]]; then
   n2st::print_msg "The install script is run in teamCity >> the python install step was executed earlier in the Dockerfile.dependencies"
