@@ -1692,11 +1692,11 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 					break;
 				case TIME:
 					if (vertex->properties[propID].name == "timestamp_sec")
-							times(row, col) += value * 1000000000LL;
+							times(0, col) += value * 1000000000LL;
 					else if (vertex->properties[propID].name == "timestamp_nsec")
-							times(row, col) += value;
+							times(0, col) += value;
 					else
-							times(row, col) = value;
+							times(0, col) = value;
 					break;
 				case UNSUPPORTED:
 					throw runtime_error("Implementation error in loadPLY(). This should not throw.");
@@ -1795,9 +1795,10 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		}
 	}
 
-	ofs << "property int timestamp_sec" << "\n";
-	ofs << "property int timestamp_nsec" << "\n";
-
+	if (data.times.rows() > 0){
+		ofs << "property int timestamp_sec" << "\n";
+		ofs << "property int timestamp_nsec" << "\n";
+	}
 	ofs << "end_header\n";
 
 	// write points
@@ -1840,16 +1841,19 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 				ofs << " ";
 		}
 
-		static_assert(std::is_same<std::decay_t<decltype(data.times(p))>,long>::value,"Type mismatch!");
-		int sec = data.times(p) / 1000000000LL;
-		int nsec = data.times(p) % 1000000000LL;
-		if (binary){
-			ofs.write(reinterpret_cast<const char*>(&sec), sizeof(int));
-			ofs.write(reinterpret_cast<const char*>(&nsec), sizeof(int));
-		}
-		else{
-			ofs << " " << sec;
-			ofs << " " << nsec;
+		if (data.times.rows() > 0){
+			static_assert(std::is_same<std::decay_t<decltype(data.times(p))>,long>::value,"Type mismatch!");
+			int sec = data.times(p) / 1000000000LL;
+			int nsec = data.times(p) % 1000000000LL;
+			if (binary){
+				ofs.write(reinterpret_cast<const char*>(&sec), sizeof(int));
+				ofs.write(reinterpret_cast<const char*>(&nsec), sizeof(int));
+			}
+			else{
+				ofs << " " << sec;
+				ofs << " " << nsec;
+			}
+			
 		}
 		if(!binary)
 			ofs << "\n";
