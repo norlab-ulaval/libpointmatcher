@@ -1,0 +1,37 @@
+# =================================================================================================
+# Files or directories with designated code owner.
+#
+# Note:
+#   - Each line is a file pattern followed by one or more owners.
+#   - Branch with branch protection rule "Require review from Code Owners"
+#     will automaticaly trigger a request to a designated code owner
+# =================================================================================================
+
+# ....Repository wide code owner...................................................................
+# These owners will be the default owners for everything in the repo.
+#*       @pomerlef
+
+
+# ....High level files.............................................................................
+/README.md @pomerlef
+/LICENSE @pomerlef
+
+# ....Core directories and files...................................................................
+/doc @boxanm @simonpierredeschenes @aguenette @pomerlef
+/pointmatcher @boxanm @simonpierredeschenes @aguenette
+/python @boxanm @simonpierredeschenes @aguenette
+/utest @boxanm @simonpierredeschenes @aguenette
+/examples @boxanm @simonpierredeschenes @aguenette
+
+# ....User install tools...........................................................................
+/.env.libpointmatcher @RedLeader962
+/libpointmatcher_installer.bash @RedLeader962
+/libpointmatcher_dependencies_installer.bash @RedLeader962
+
+# ....DevOps related...............................................................................
+/.github/ @RedLeader962
+/build_system/ @RedLeader962
+/.gitmodules @RedLeader962
+/.gitignore @RedLeader962
+/.dockerignore @RedLeader962
+

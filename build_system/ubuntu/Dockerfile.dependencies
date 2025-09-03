@@ -1,0 +1,105 @@
+ARG BASE_IMAGE=ubuntu
+ARG BASE_IMAGE_TAG=focal
+FROM ${BASE_IMAGE}:${BASE_IMAGE_TAG} AS base-image
+
+LABEL org.opencontainers.image.authors="luc.coupal.1@ulaval.ca"
+
+ARG NBS_LIB_INSTALL_PATH
+ARG NBS_REPOSITORY_NAME
+ENV NBS_LIB_INSTALL_PATH=${NBS_LIB_INSTALL_PATH:?'Build argument needs to be set and non-empty.'}
+ENV NBS_REPOSITORY_NAME=${NBS_REPOSITORY_NAME:?'Build argument needs to be set and non-empty.'}
+
+ENV NBS_PATH=${NBS_LIB_INSTALL_PATH}/norlab-build-system
+ENV N2ST_PATH=${NBS_LIB_INSTALL_PATH}/norlab-shell-script-tools
+
+ARG NBS_SUPERPROJECT_BUILD_SYSTEM_DIR
+ENV NBS_SUPERPROJECT_BUILD_SYSTEM_DIR=${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:-"${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}"}
+
+ARG IS_TEAMCITY_RUN
+ENV IS_TEAMCITY_RUN=${IS_TEAMCITY_RUN:-false}
+
+SHELL ["/bin/bash", "-c"]
+ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
+ENV TZ=Etc/UTC
+
+ENV TERM=${TERM:-"xterm-256color"}
+
+# ....Setup timezone and localization..............................................................
+# change the locale from POSIX to UTF-8
+RUN apt-get update && \
+    apt-get install --assume-yes --no-install-recommends \
+        locales \
+        tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV PYTHONIOENCODING=utf-8
+
+
+# ====Begin install================================================================================
+
+# ....Install development utilities................................................................
+RUN apt-get update && \
+    apt-get install --assume-yes --no-install-recommends \
+        sudo \
+        bash-completion \
+        git \
+        vim \
+        tree \
+        curl \
+        wget \
+        gnupg2 \
+        zip gzip tar unzip \
+        net-tools \
+        ca-certificates \
+        apt-utils && \
+    rm -rf /var/lib/apt/lists/*
+
+# ....Install norlab-build-system library..........................................................
+WORKDIR "${NBS_LIB_INSTALL_PATH}"
+RUN git clone --recurse-submodules https://github.com/norlab-ulaval/norlab-build-system.git
+RUN git clone --recurse-submodules https://github.com/norlab-ulaval/norlab-shell-script-tools.git
+
+# ====Begin========================================================================================
+
+# Required for norlab-build-system path resolution logic
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}"
+COPY ./.git ./.git
+
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}"
+
+#COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/utilities/norlab-build-system ./utilities/norlab-build-system/
+#COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/utilities/norlab-shell-script-tools ./utilities/norlab-shell-script-tools/
+
+COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/.env .
+
+WORKDIR "${NBS_PATH}/src/utility_scripts/"
+RUN chmod +x ./nbs_install_python_dev_tools.bash
+RUN bash nbs_install_python_dev_tools.bash
+
+
+# ====Install Libpointmatcher dependencies=========================================================
+FROM base-image AS libpointmatcher-dependencies-general
+
+WORKDIR "${NBS_LIB_INSTALL_PATH}/${NBS_REPOSITORY_NAME}/${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}"
+
+COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/ubuntu/lpm_install_dependencies_general_ubuntu.bash ./ubuntu/
+COPY ./${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR}/ubuntu/lpm_install_dependencies_libnabo_ubuntu.bash ./ubuntu/
+
+WORKDIR ./ubuntu
+RUN chmod +x ./lpm_install_dependencies_general_ubuntu.bash
+RUN bash ./lpm_install_dependencies_general_ubuntu.bash
+
+FROM libpointmatcher-dependencies-general AS libpointmatcher-dependencies-libnabo
+
+RUN chmod +x ./lpm_install_dependencies_libnabo_ubuntu.bash
+RUN bash ./lpm_install_dependencies_libnabo_ubuntu.bash
+
+# ====End==========================================================================================
+#FROM libpointmatcher-dependencies-libnabo AS final
+WORKDIR "${NBS_LIB_INSTALL_PATH}/"
+RUN rm -r -f "./${NBS_REPOSITORY_NAME}"
+
+CMD [ "bash" ]

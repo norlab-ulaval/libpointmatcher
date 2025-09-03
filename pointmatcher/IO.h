@@ -57,9 +57,9 @@ struct PointMatcherIO
 	//! Map to associate common descriptor sublabels to PM descriptor matrix row and labels
 	//! ex: nx, ny, nz are associated with (0,normals) (1,normals) (2,normals) respectively
 	typedef std::map<std::string, LabelAssociationPair > SublabelAssociationMap;
-	
+
 	static std::string getColLabel(const Label& label, const int row); //!< convert a descriptor label to an appropriate sub-label
-	
+
 	//! Type of information in a DataPoints. Each type is stored in its own dense matrix.
 	enum PMPropTypes
 		{
@@ -112,7 +112,7 @@ struct PointMatcherIO
 	};
 
 	//! Vector containing the mapping of all external names to PointMatcher representation.
-	//! The order is important (i.e., nx before ny). This can also be used to remap 
+	//! The order is important (i.e., nx before ny). This can also be used to remap
 	//! 1D descriptor name to a better one.
 	static const SupportedLabels & getSupportedExternalLabels()
 	{
@@ -183,7 +183,7 @@ struct PointMatcherIO
 	static DataPoints loadCSV(const std::string& fileName);
 	static DataPoints loadCSV(std::istream& is);
 
-	static void saveCSV(const DataPoints& data, const std::string& fileName);
+	static void saveCSV(const DataPoints& data, const std::string& fileName, unsigned precision);
 	static void saveCSV(const DataPoints& data, std::ostream& os);
 
 	// VTK
@@ -212,19 +212,19 @@ struct PointMatcherIO
 	static DataPoints loadVTK(const std::string& fileName);
 	static DataPoints loadVTK(std::istream& is);
 
-	static void saveVTK(const DataPoints& data, const std::string& fileName, bool binary = false);
+	static void saveVTK(const DataPoints& data, const std::string& fileName, bool binary = false, unsigned precision = 7);
 
 	// PLY
 	static DataPoints loadPLY(const std::string& fileName);
 	static DataPoints loadPLY(std::istream& is);
 
-	static void savePLY(const DataPoints& data, const std::string& fileName); //!< save datapoints to PLY point cloud format
+	static void savePLY(const DataPoints& data, const std::string& fileName, bool binary, unsigned precision); //!< save datapoints to PLY point cloud format
 
 	// PCD
 	static DataPoints loadPCD(const std::string& fileName);
 	static DataPoints loadPCD(std::istream& is);
 
-	static void savePCD(const DataPoints& data, const std::string& fileName); //!< save datapoints to PCD point cloud format
+	static void savePCD(const DataPoints& data, const std::string& fileName, unsigned precision); //!< save datapoints to PCD point cloud format
 
 	//! Information to exploit a reading from a file using this library. Fields might be left blank if unused.
 	struct FileInfo
@@ -266,16 +266,29 @@ struct PointMatcherIO
 	//! Interface for PLY property
 	struct PLYProperty
 	{
+        enum class PLYPropertyType : uint8_t
+        {
+            INVALID,
+            INT8,
+            UINT8,
+            INT16,
+            UINT16,
+            INT32,
+            UINT32,
+            FLOAT32,
+            FLOAT64
+        };
+
 		//PLY information:
 		std::string name; //!< name of PLY property
-		std::string type; //!< type of PLY property
+		PLYPropertyType type; //!< type of PLY property
 		std::string idx_type; //!< for list properties, type of number of elements
 		unsigned pos; //!< index of the property in element
 		bool is_list; //!< member is true of property is a list
-		
+
 		//PointMatcher information:
 		PMPropTypes pmType; //!< type of information in PointMatcher
-		int pmRowID; //!< row id used in a DataPoints 
+		int pmRowID; //!< row id used in a DataPoints
 
 		PLYProperty() { } //!< Default constructor. If used member values must be filled later.
 
@@ -286,19 +299,31 @@ struct PointMatcherIO
 		PLYProperty(const std::string& idx_type, const std::string& type, const std::string& name, const unsigned pos); //! list prop ctor
 
 		bool operator==(const PLYProperty& other) const; //! compare with other property
+		inline PLYPropertyType get_type_from_string(const std::string &s)
+        {
+            if (s == "int8" || s == "char")           return PLYPropertyType::INT8;
+            else if (s == "uint8" || s == "uchar")    return PLYPropertyType::UINT8;
+            else if (s == "int16" || s == "short")    return PLYPropertyType::INT16;
+            else if (s == "uint16" || s == "ushort")  return PLYPropertyType::UINT16;
+            else if (s == "int32" || s == "int")      return PLYPropertyType::INT32;
+            else if (s == "uint32" || s == "uint")    return PLYPropertyType::UINT32;
+            else if (s == "float32" || s == "float")  return PLYPropertyType::FLOAT32;
+            else if (s == "float64" || s == "double") return PLYPropertyType::FLOAT64;
+            return PLYPropertyType::INVALID;
+        }
 	};
 
 	//! Map from a descriptor name to a list PLY property
 	//! ex: "normals" -> nx, ny ,nz
 	typedef std::map<std::string, std::vector<PLYProperty> > PLYDescPropMap;
-	
+
 	//! Vector of properties specific to PLY files
 	typedef std::vector<PLYProperty> PLYProperties;
 
 	//! Iterator for a vector of PLY properties
 	typedef typename PLYProperties::iterator it_PLYProp;
 
-	//! Interface for all PLY elements. 
+	//! Interface for all PLY elements.
 	class PLYElement
 	{
 	public:
@@ -367,7 +392,7 @@ struct PointMatcherIO
 		unsigned int size; //!< Size of the property in bytes
 		char type; //!< Type: I: signed, U: unsigned, F: float
 		unsigned int count; //!< number of dimension
-		
+
 		//PointMatcher information:
 		PMPropTypes pmType; //!< type of information in PointMatcher
 		int pmRowID; //!< row id used in a DataPoints

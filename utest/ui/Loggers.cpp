@@ -23,8 +23,8 @@ TEST(Loggers, FileLogger)
 
 	fileLog.reset(); // The logger needs to release the files to allow them to be removed
 
-	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(infoFileName)));
-	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(warningFileName)));
+	EXPECT_TRUE(std::filesystem::remove(std::filesystem::path(infoFileName)));
+	EXPECT_TRUE(std::filesystem::remove(std::filesystem::path(warningFileName)));
 }
 
 TEST(Loggers, FileLoggerInfoToConsole)
@@ -65,7 +65,7 @@ TEST(Loggers, FileLoggerInfoToFile)
 
 	fileLog.reset(); // The logger needs to release the file to allow it to be removed
 
-	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(infoFileName)));
+	EXPECT_TRUE(std::filesystem::remove(std::filesystem::path(infoFileName)));
 }
 
 TEST(Loggers, FileLoggerWarningToFile)
@@ -84,5 +84,5 @@ TEST(Loggers, FileLoggerWarningToFile)
 
 	fileLog.reset(); // The logger needs to release the file to allow it to be removed
 
-	EXPECT_TRUE(boost::filesystem::remove(boost::filesystem::path(warningFileName)));
+	EXPECT_TRUE(std::filesystem::remove(std::filesystem::path(warningFileName)));
 }

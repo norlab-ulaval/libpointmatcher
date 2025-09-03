@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <boost/format.hpp>
 
-#include "utils.h"
+#include "DataPointsFilters/utils/utils.h"
 
 // SurfaceNormalDataPointsFilter
 // Constructor
@@ -184,7 +184,7 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 		const Vector mean = d.rowwise().sum() / T(realKnn);
 		const Matrix NN = d.colwise() - mean;
 
-		const Matrix C(NN * NN.transpose());
+		const Matrix C((NN * NN.transpose()) / T(realKnn));
 		Vector eigenVa = Vector::Zero(featDim-1, 1);
 		Matrix eigenVe = Matrix::Zero(featDim-1, featDim-1);
 		// Ensure that the matrix is suited for eigenvalues calculation
@@ -202,10 +202,10 @@ void SurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 					const size_t idxSize = idx.size();
 					Vector tmp_eigenVa = eigenVa;
 					Matrix tmp_eigenVe = eigenVe;
-					for(size_t i=0; i<idxSize; ++i)
+					for(size_t j=0; j<idxSize; ++j)
 					{
-						eigenVa(i,0) = tmp_eigenVa(idx[i], 0);
-						eigenVe.col(i) = tmp_eigenVe.col(idx[i]);
+						eigenVa(j,0) = tmp_eigenVa(idx[j], 0);
+						eigenVe.col(j) = tmp_eigenVe.col(idx[j]);
 					}
 				}
 			}

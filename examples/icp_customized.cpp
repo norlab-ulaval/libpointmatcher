@@ -36,7 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pointmatcher/PointMatcher.h"
 #include <cassert>
 #include <iostream>
-#include "boost/filesystem.hpp"
 
 using namespace std;
 
@@ -136,15 +135,14 @@ int main(int argc, char *argv[])
 	std::shared_ptr<PM::Inspector> nullInspect =
 		PM::get().InspectorRegistrar.create("NullInspector");
 
-	//name = "VTKFileInspector";
-    //	params["dumpDataLinks"] = "1"; 
-    //	params["dumpReading"] = "1"; 
-    //	params["dumpReference"] = "1"; 
+//	name = "VTKFileInspector";
+//	params["dumpDataLinks"] = "1";
+//	params["dumpReading"] = "1";
+//	params["dumpReference"] = "1";
+//	std::shared_ptr<PM::Inspector> vtkInspect =
+//		PM::get().InspectorRegistrar.create(name, params);
+//	params.clear();
 
-	//PM::Inspector* vtkInspect =
-	//	PM::get().InspectorRegistrar.create(name, params);
-	params.clear();
-	
 	// Prepare transformation
 	std::shared_ptr<PM::Transformation> rigidTrans =
 		PM::get().TransformationRegistrar.create("RigidTransformation");

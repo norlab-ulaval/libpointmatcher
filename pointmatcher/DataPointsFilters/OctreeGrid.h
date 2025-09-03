@@ -93,7 +93,7 @@ public:
 		DataPoints&	pts;
 
 		//Build map of (old index to new index), 
-		// in case we sample pts at the begining of the pointcloud
+		// in case we sample pts at the beginning of the point cloud
 		std::unordered_map<std::size_t, std::size_t> mapidx;
 
 		FirstPtsSampler(DataPoints& dp);

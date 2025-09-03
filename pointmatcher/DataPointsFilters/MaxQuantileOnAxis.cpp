@@ -45,7 +45,8 @@ MaxQuantileOnAxisDataPointsFilter<T>::MaxQuantileOnAxisDataPointsFilter(
 	PointMatcher<T>::DataPointsFilter("MaxQuantileOnAxisDataPointsFilter",
 		MaxQuantileOnAxisDataPointsFilter::availableParameters(), params),
 	dim(Parametrizable::get<unsigned>("dim")),
-	ratio(Parametrizable::get<T>("ratio"))
+	ratio(Parametrizable::get<T>("ratio")),
+	removeBeyond(Parametrizable::get<bool>("removeBeyond"))
 {
 }
 
@@ -68,33 +69,64 @@ void MaxQuantileOnAxisDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 		throw InvalidParameter((boost::format("MaxQuantileOnAxisDataPointsFilter: Error, filtering on dimension number %1%, larger than feature dimensionality %2%") % dim % cloud.features.rows()).str());
 
 	const int nbPointsIn = cloud.features.cols();
-	const int nbPointsOut = nbPointsIn * ratio;
+	
+	if (removeBeyond) {
+		const int nbPointsOut = nbPointsIn * ratio;
 
-	// build array
-	std::vector<T> values;
-	values.reserve(nbPointsIn);
-	for (int x = 0; x < nbPointsIn; ++x)
-		values.push_back(cloud.features(dim, x));
+		// build array
+		std::vector<T> values;
+		values.reserve(nbPointsIn);
+		for (int x = 0; x < nbPointsIn; ++x)
+			values.push_back(cloud.features(dim, x));
 
-	// get quartiles value
-	std::nth_element(values.begin(), values.begin() + (values.size() * ratio), values.end());
-	const T limit = values[nbPointsOut];
+		// get quartiles value
+		std::nth_element(values.begin(), values.begin() + (values.size() * ratio), values.end());
+		const T limit = values[nbPointsOut];
 
-	// copy towards beginning the elements we keep
-	int j = 0;
-	for (int i = 0; i < nbPointsIn; ++i)
-	{
-		if (cloud.features(dim, i) < limit)
+		// copy towards beginning the elements we keep
+		int j = 0;
+		for (int i = 0; i < nbPointsIn; ++i)
 		{
-			assert(j <= i);
-			cloud.setColFrom(j, cloud, i);
-			++j;
+			if (cloud.features(dim, i) < limit)
+			{
+				assert(j <= i);
+				cloud.setColFrom(j, cloud, i);
+				++j;
+			}
 		}
+		assert(j <= nbPointsOut);
+
+		cloud.conservativeResize(j);
 	}
-	assert(j <= nbPointsOut);
+	else {
+		const int nbPointsOut = nbPointsIn * (1 - ratio);
 
-	cloud.conservativeResize(j);
+		// build array
+		std::vector<T> values;
+		values.reserve(nbPointsIn);
+		for (int x = 0; x < nbPointsIn; ++x)
+			values.push_back(cloud.features(dim, x));
 
+		// get quartiles value
+		std::nth_element(values.begin(), values.begin() + (values.size() * ratio), values.end());
+
+		const T limit = values[nbPointsIn-nbPointsOut];
+
+		// copy towards beginning the elements we keep
+		int j = 0;
+		for (int i = 0; i < nbPointsIn; ++i)
+		{
+			if (cloud.features(dim, i) > limit)
+			{
+				assert(j <= i);
+				cloud.setColFrom(j, cloud, i);
+				++j;
+			}
+		}
+		assert(j <= nbPointsOut);
+
+		cloud.conservativeResize(j);
+	}
 }
 
 template struct MaxQuantileOnAxisDataPointsFilter<float>;

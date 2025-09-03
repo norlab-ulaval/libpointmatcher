@@ -36,17 +36,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PointMatcher.h"
 #include "PointMatcherPrivate.h"
 
-#ifdef SYSTEM_YAML_CPP
-    #include "yaml-cpp/yaml.h"
-#else
-	#include "yaml-cpp-pm/yaml.h"
-    namespace YAML = YAML_PM;
-#endif // HAVE_YAML_CPP
+#include <yaml-cpp/yaml.h>
 
 //! Construct without parameter
 template<typename T>
 PointMatcher<T>::DataPointsFilter::DataPointsFilter()
-{} 
+{}
 
 //! Construct with parameters
 template<typename T>
@@ -73,23 +68,25 @@ template<typename T>
 PointMatcher<T>::DataPointsFilters::DataPointsFilters()
 {}
 
-//! Construct a chain from a YAML file
 template<typename T>
-PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in)
+PointMatcher<T>::DataPointsFilters::DataPointsFilters(const YAML::Node& doc)
 {
-	YAML::Parser parser(in);
-	YAML::Node doc;
-	parser.GetNextDocument(doc);
-	
 	// Fix for issue #6: compilation on gcc 4.4.4
 	//PointMatcher<T> pm;
 	const PointMatcher & pm = PointMatcher::get();
-	
-	for(YAML::Iterator moduleIt = doc.begin(); moduleIt != doc.end(); ++moduleIt)
+
+	for(YAML::const_iterator moduleIt = doc.begin(); moduleIt != doc.end(); ++moduleIt)
 	{
 		const YAML::Node& module(*moduleIt);
 		this->push_back(pm.REG(DataPointsFilter).createFromYAML(module));
 	}
+}
+
+//! Construct a chain from a YAML file
+template<typename T>
+PointMatcher<T>::DataPointsFilters::DataPointsFilters(std::istream& in) :
+        DataPointsFilters(YAML::Load(in))
+{
 }
 
 //! Init the chain
@@ -123,11 +120,11 @@ void PointMatcher<T>::DataPointsFilters::apply(DataPoints& cloud)
 		cloud.assertDescriptorConsistency();
 
 		const int nbPointsOut(cloud.features.cols());
-		LOG_INFO_STREAM("* " << (*it)->className << " - " << nbPointsOut << " points out (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "\%)");
+		LOG_INFO_STREAM("* " << (*it)->className << " - " << nbPointsOut << " points out (-" << (100 - double(nbPointsOut*100.)/nbPointsIn) << "%)");
 	}
 	
 	const int nbPointsAfterFilters(cloud.features.cols());
-	LOG_INFO_STREAM("Applied " << this->size() << " filters - " << nbPointsAfterFilters << " points out (-" << (100 - double(nbPointsAfterFilters*100.)/nbPointsBeforeFilters) << "\%)");
+	LOG_INFO_STREAM("Applied " << this->size() << " filters - " << nbPointsAfterFilters << " points out (-" << (100 - double(nbPointsAfterFilters*100.)/nbPointsBeforeFilters) << "%)");
 }
 
 template struct PointMatcher<float>::DataPointsFilters;

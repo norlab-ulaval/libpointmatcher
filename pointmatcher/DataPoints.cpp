@@ -164,7 +164,8 @@ unsigned PointMatcher<T>::DataPoints::getNbPoints() const
 template<typename T>
 unsigned PointMatcher<T>::DataPoints::getEuclideanDim() const
 {
-	return (features.rows() - 1);
+    const size_t nbRows = features.rows();
+    return (nbRows == 0) ? 0 : (nbRows - 1);
 }
 
 //! Return the dimension of the point cloud in homogeneous coordinates (one more than Euclidean dimension)

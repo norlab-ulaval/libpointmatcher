@@ -46,11 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TransformationCheckersImpl.h"
 #include "InspectorsImpl.h"
 
-#ifdef SYSTEM_YAML_CPP
-    #include "yaml-cpp/yaml.h"
-#else
-	#include "yaml-cpp-pm/yaml.h"
-#endif // HAVE_YAML_CPP
+#include <yaml-cpp/yaml.h>
 
 using namespace std;
 using namespace PointMatcherSupport;
@@ -114,16 +110,13 @@ void PointMatcher<T>::ICPChainBase::setDefault()
 
 //! Construct an ICP algorithm from a YAML file
 template<typename T>
-void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
+void PointMatcher<T>::ICPChainBase::loadFromYamlNode(const YAML::Node& doc)
 {
 	this->cleanup();
-	
-	YAML::Parser parser(in);
-	YAML::Node doc;
-	parser.GetNextDocument(doc);
+
 	typedef set<string> StringSet;
 	StringSet usedModuleTypes;
-	
+
 	// Fix for issue #6: compilation on gcc 4.4.4
 	//PointMatcher<T> pm;
 	const PointMatcher & pm = PointMatcher::get();
@@ -146,24 +139,33 @@ void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
 		this->transformations.push_back(std::make_shared<typename TransformationsImpl<T>::RigidTransformation>());
 	else
 		this->transformations.push_back(std::make_shared<typename TransformationsImpl<T>::SimilarityTransformation>());
-	
+
 	usedModuleTypes.insert(createModulesFromRegistrar("transformationCheckers", doc, pm.REG(TransformationChecker), transformationCheckers));
 	usedModuleTypes.insert(createModuleFromRegistrar("inspector", doc, pm.REG(Inspector),inspector));
-	
-	
+
+
 	// FIXME: this line cause segfault when there is an error in the yaml file...
 	//loadAdditionalYAMLContent(doc);
-	
+
 	// check YAML entries that do not correspend to any module
-	for(YAML::Iterator moduleTypeIt = doc.begin(); moduleTypeIt != doc.end(); ++moduleTypeIt)
+	for(YAML::const_iterator moduleTypeIt = doc.begin(); moduleTypeIt != doc.end(); ++moduleTypeIt)
 	{
-		string moduleType;
-		moduleTypeIt.first() >> moduleType;
+		std::string moduleType = moduleTypeIt->first.as<std::string>();
+
 		if (usedModuleTypes.find(moduleType) == usedModuleTypes.end())
 			throw InvalidModuleType(
 				(boost::format("Module type %1% does not exist") % moduleType).str()
 			);
 	}
+
+}
+
+//! Construct an ICP algorithm from a YAML file
+template<typename T>
+void PointMatcher<T>::ICPChainBase::loadFromYaml(std::istream& in)
+{
+	YAML::Node doc = YAML::Load(in);
+    loadFromYamlNode(doc);
 }
 
 //! Return the remaining number of points in reading after prefiltering but before the iterative process
@@ -192,16 +194,18 @@ template<typename T>
 template<typename R>
 const std::string& PointMatcher<T>::ICPChainBase::createModulesFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::vector<std::shared_ptr<typename R::TargetType> >& modules)
 {
-	const YAML::Node *reg = doc.FindValue(regName);
+	const YAML::Node reg = doc[regName];
+
 	if (reg)
 	{
 		//cout << regName << endl;
-		for(YAML::Iterator moduleIt = reg->begin(); moduleIt != reg->end(); ++moduleIt)
+		for(YAML::const_iterator moduleIt = reg.begin(); moduleIt != reg.end(); ++moduleIt)
 		{
 			const YAML::Node& module(*moduleIt);
 			modules.push_back(registrar.createFromYAML(module));
 		}
 	}
+
 	return regName;
 }
 
@@ -210,28 +214,33 @@ template<typename T>
 template<typename R>
 const std::string& PointMatcher<T>::ICPChainBase::createModuleFromRegistrar(const std::string& regName, const YAML::Node& doc, const R& registrar, std::shared_ptr<typename R::TargetType>& module)
 {
-	const YAML::Node *reg = doc.FindValue(regName);
+	const YAML::Node reg = doc[regName];
+
 	if (reg)
 	{
 		//cout << regName << endl;
-		module = registrar.createFromYAML(*reg);
+		module = registrar.createFromYAML(reg);
 	}
 	else
 		module.reset();
+
 	return regName;
 }
 
 template<typename T>
-std::string PointMatcher<T>::ICPChainBase::nodeVal(const std::string& regName, const PointMatcherSupport::YAML::Node& doc)
+std::string PointMatcher<T>::ICPChainBase::nodeVal(const std::string& regName, const YAML::Node& doc)
 {
-	const YAML::Node *reg = doc.FindValue(regName);
+	const YAML::Node reg = doc[regName];
+
 	if (reg)
 	{
 		std::string name;
 		Parametrizable::Parameters params;
-		PointMatcherSupport::getNameParamsFromYAML(*reg, name, params);
+		PointMatcherSupport::getNameParamsFromYAML(reg, name, params);
+
 		return name;
 	}
+
 	return "";
 }
 
@@ -420,7 +429,7 @@ typename PointMatcher<T>::TransformationParameters PointMatcher<T>::ICP::compute
 		{
 			this->transformationCheckers.check(T_iter, iterate);
 		}
-		catch(const typename TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached & e)
+		catch(const typename TransformationCheckersImpl<T>::CounterTransformationChecker::MaxNumIterationsReached &)
 		{
 			iterate = false;
 			this->maxNumIterationsReached = true;
@@ -525,6 +534,12 @@ void PointMatcher<T>::ICPSequence::setDefault()
 	{
 		this->matcher->init(mapPointCloud);
 	}
+}
+
+template<typename T>
+void PointMatcher<T>::ICPSequence::loadFromYamlNode(const YAML::Node& doc)
+{
+	ICPChainBase::loadFromYamlNode(doc);
 }
 
 template<typename T>

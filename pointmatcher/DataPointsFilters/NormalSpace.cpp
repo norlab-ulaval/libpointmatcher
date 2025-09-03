@@ -99,7 +99,7 @@ void NormalSpaceDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud)
 	// Generate a random sequence of indices so that elements are placed in buckets in random order
 	std::vector<std::size_t> randIdcs(nbPoints);
 	std::iota(randIdcs.begin(), randIdcs.end(), 0);
-	std::random_shuffle(randIdcs.begin(), randIdcs.end());
+	std::shuffle(randIdcs.begin(), randIdcs.end(), gen);
 
 	///(1) put all points of the data into buckets based on their normal direction
 	for (auto randIdx : randIdcs)

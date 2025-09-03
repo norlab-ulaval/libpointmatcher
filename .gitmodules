@@ -1,0 +1,8 @@
+[submodule "build_system/utilities/norlab-build-system"]
+	path = build_system/utilities/norlab-build-system
+	url = https://github.com/norlab-ulaval/norlab-build-system.git
+	branch = main
+[submodule "build_system/utilities/norlab-shell-script-tools"]
+	path = build_system/utilities/norlab-shell-script-tools
+	url = https://github.com/norlab-ulaval/norlab-shell-script-tools.git
+	branch = main

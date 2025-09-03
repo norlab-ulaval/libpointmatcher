@@ -36,6 +36,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_DATAPOINTSFILTERS_H
 #define __POINTMATCHER_DATAPOINTSFILTERS_H
 
+#include "DataPointsFilters/AddDescriptor.h"
+#include "DataPointsFilters/AngleLimit.h"
 #include "DataPointsFilters/Identity.h"
 #include "DataPointsFilters/RemoveNaN.h"
 #include "DataPointsFilters/MaxDist.h"
@@ -62,11 +64,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataPointsFilters/CovarianceSampling.h"
 #include "DataPointsFilters/DistanceLimit.h"
 #include "DataPointsFilters/RemoveSensorBias.h"
+#include "DataPointsFilters/Sphericality.h"
+#include "DataPointsFilters/Saliency.h"
+#include "DataPointsFilters/SpectralDecomposition.h"
 
 template<typename T>
 struct DataPointsFiltersImpl
 {
 	typedef ::IdentityDataPointsFilter<T>   IdentityDataPointsFilter;
+	typedef ::AddDescriptorDataPointsFilter<T>   AddDescriptorDataPointsFilter;
+	typedef ::AngleLimitDataPointsFilter<T>   AngleLimitDataPointsFilter;
 	typedef ::RemoveNaNDataPointsFilter<T>  RemoveNaNDataPointsFilter;
 	typedef ::MaxDistDataPointsFilter<T>	MaxDistDataPointsFilter;
 	typedef ::MinDistDataPointsFilter<T>	MinDistDataPointsFilter;
@@ -92,7 +99,9 @@ struct DataPointsFiltersImpl
 	typedef ::CovarianceSamplingDataPointsFilter<T> CovarianceSamplingDataPointsFilter;
 	typedef ::DistanceLimitDataPointsFilter<T> DistanceLimitDataPointsFilter;
 	typedef ::RemoveSensorBiasDataPointsFilter<T> RemoveSensorBiasDataPointsFilter;
-
+    typedef ::SphericalityDataPointsFilter<T> SphericalityDataPointsFilter;
+	typedef ::SaliencyDataPointsFilter<T> SaliencyDataPointsFilter;
+	typedef ::SpectralDecompositionDataPointsFilter<T> SpectralDecompositionDataPointsFilter;
 }; // DataPointsFiltersImpl
 
 #endif // __POINTMATCHER_DATAPOINTSFILTERS_H

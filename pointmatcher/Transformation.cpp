@@ -66,12 +66,9 @@ void PointMatcher<T>::Transformations::apply(DataPoints& cloud, const Transforma
 	// TODO: This API must be re-written to not even have the concept
 	// of chain for this classs. 
 	int num_iter = 0;
-
-	DataPoints transformedCloud;
 	for (TransformationsConstIt it = this->begin(); it != this->end(); ++it)
 	{
-		transformedCloud = (*it)->compute(cloud, parameters);
-		swapDataPoints(cloud, transformedCloud);
+		(*it)->inPlaceCompute(parameters, cloud);
 		num_iter++;
 	}
 	if (num_iter != 1)

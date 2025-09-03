@@ -4,7 +4,7 @@ libdir=${prefix}/lib
 includedir=${prefix}/include
 
 Name: @CMAKE_PROJECT_NAME@
-Description: See https://github.com/ethz-asl/libpointmatcher
+Description: See https://github.com/norlab-ulaval/libpointmatcher
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} @LIBRARY_CC_ARGS@
 Cflags: -I${includedir}/

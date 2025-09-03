@@ -36,6 +36,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __POINTMATCHER_PRIVATE_H
 #define __POINTMATCHER_PRIVATE_H
 
+#include "PointMatcher.h"
+
 namespace PointMatcherSupport
 {
 	//! Mutex to protect creation and deletion of logger

@@ -1,0 +1,4 @@
+- AddDescriptorDataPointsFilter:
+        descriptorName: deviation
+        descriptorDimension: 9
+        descriptorValues: [0.0009, 0, 0, 0, 0.0009, 0, 0, 0, 0.0009]

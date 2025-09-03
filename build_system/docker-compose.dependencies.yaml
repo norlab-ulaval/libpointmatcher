@@ -1,0 +1,51 @@
+services:
+
+  # ====Dependency related services================================================================
+  dependencies-general:
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies-general:${NBS_IMAGE_TAG:?err}
+    pull_policy: build # Execute the `build` attribute over pulling the `image` attribute
+    build:
+      target: libpointmatcher-dependencies-general
+      context: ..
+      dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.dependencies
+      no_cache: true  # Enforce full rebuild
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+      args:
+        BASE_IMAGE: ${DEPENDENCIES_BASE_IMAGE:?err}
+        BASE_IMAGE_TAG: ${DEPENDENCIES_BASE_IMAGE_TAG:?err}
+        NBS_SUPERPROJECT_BUILD_SYSTEM_DIR: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}
+        IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
+        NBS_LIB_INSTALL_PATH: ${NBS_LIB_INSTALL_PATH:?err}
+        NBS_REPOSITORY_NAME: ${NBS_REPOSITORY_NAME:?err}
+    tty: true
+    stdin_open: true
+    init: true  # Propagate exit code (See remark in task NMO-266)
+
+  dependencies:
+    extends: dependencies-general
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies:${NBS_IMAGE_TAG:?err}
+    build:
+      target: libpointmatcher-dependencies-libnabo
+    depends_on:
+      - dependencies-general
+
+  dependencies-doc:
+    image: ${NBS_DOCKERHUB_NAMESPACE:?err}/libpointmatcher-dependencies-doc:${NBS_IMAGE_TAG:?err}
+    build:
+      context: ..
+      dockerfile: ${NBS_SUPERPROJECT_BUILD_SYSTEM_DIR:?err}/ubuntu/Dockerfile.dependencies.doxygen
+      pull: false # Use the local image store to execute the FROM directive
+      args:
+        PROJECT_HUB: ${NBS_DOCKERHUB_NAMESPACE}
+        BASE_IMAGE: libpointmatcher-dependencies
+        BASE_IMAGE_TAG: ${NBS_IMAGE_TAG}
+        IS_TEAMCITY_RUN: ${IS_TEAMCITY_RUN}
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    depends_on:
+      - dependencies
+    tty: true
+    stdin_open: true

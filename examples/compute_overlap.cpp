@@ -37,11 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pointmatcher/IO.h"
 #include <cassert>
 #include <iostream>
-#include <iomanip>
 #include <fstream>
-#include <boost/format.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace std;

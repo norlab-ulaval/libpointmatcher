@@ -8,11 +8,10 @@
 #include <string>
 #include <fstream>
 
-#include "boost/filesystem.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/operations.hpp"
+#include <filesystem>
 
-typedef PointMatcher<float> PM;
+typedef double NumericType;
+typedef PointMatcher<NumericType> PM;
 typedef PM::DataPoints DP;
 
 extern std::string dataPath;
@@ -71,8 +70,8 @@ public:
 		const BOOST_AUTO(validTrans, validT3d.block(0, dim-1, dim-1, 1).norm());
 		const BOOST_AUTO(testTrans, testT.block(0, dim-1, dim-1, 1).norm());
 	
-		const BOOST_AUTO(testRotation, Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(testT.topLeftCorner(3,3))));
-		const BOOST_AUTO(validRotation, Eigen::Quaternion<float>(Eigen::Matrix<float,3,3>(validT3d.topLeftCorner(3,3))));
+		const BOOST_AUTO(testRotation, Eigen::Quaternion<NumericType>(Eigen::Matrix<NumericType,3,3>(testT.topLeftCorner(3,3))));
+		const BOOST_AUTO(validRotation, Eigen::Quaternion<NumericType>(Eigen::Matrix<NumericType,3,3>(validT3d.topLeftCorner(3,3))));
 		
 		const BOOST_AUTO(angleDist, validRotation.angularDistance(testRotation));
 		

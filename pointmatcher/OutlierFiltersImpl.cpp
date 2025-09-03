@@ -181,9 +181,9 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 {
 	typedef typename PointMatcher<T>::ConvergenceError ConvergenceError;
 	typedef typename Eigen::Array<T, Eigen::Dynamic, 1> LineArray;
-	
+
 	const int points_nbr = matches.dists.rows() * matches.dists.cols();
-	
+
 	// vector containing the squared distances of the matches
 	std::vector<T> tmpSortedDist;
 	tmpSortedDist.reserve(points_nbr);
@@ -191,9 +191,9 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 		for (int y = 0; y < matches.dists.rows(); ++y)
 			if ((matches.dists(y, x) != numeric_limits<T>::infinity()) && (matches.dists(y, x) > 0))
 				tmpSortedDist.push_back(matches.dists(y, x));
-	if (tmpSortedDist.size() == 0)
-		throw ConvergenceError("no outlier to filter");
-			
+	if (tmpSortedDist.empty())
+		throw ConvergenceError("Inlier ratio optimization failed due to absence of matches");
+
 	std::sort(tmpSortedDist.begin(), tmpSortedDist.end());
 	std::vector<T> tmpCumSumSortedDist;
 	tmpCumSumSortedDist.reserve(points_nbr);
@@ -215,7 +215,7 @@ T OutlierFiltersImpl<T>::VarTrimmedDistOutlierFilter::optimizeInlierRatio(const 
 	int minIndex(0);// = FRMS.minCoeff();
 	FRMS.minCoeff(&minIndex);
 	const T optRatio = (float)(minIndex + minEl)/ (float)points_nbr;
-	
+
 	return optRatio;
 }
 
@@ -240,7 +240,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 {
 	const BOOST_AUTO(normalsReading, filteredReading.getDescriptorViewByName("normals"));
 	const BOOST_AUTO(normalsReference, filteredReference.getDescriptorViewByName("normals"));
-	
+
 	// select weight from median
 	OutlierWeights w(input.dists.rows(), input.dists.cols());
 
@@ -250,7 +250,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 		{
 			const Vector normalRead = normalsReading.col(x).normalized();
 
-			for (int y = 0; y < w.rows(); ++y) // knn 
+			for (int y = 0; y < w.rows(); ++y) // knn
 			{
 				const int idRef = input.ids(y, x);
 
@@ -261,7 +261,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::SurfaceNormalOut
 
 				const Vector normalRef = normalsReference.col(idRef).normalized();
 
-				const T value = anyabs(normalRead.dot(normalRef));
+				const T value = normalRead.dot(normalRef);
 
 				if(value < eps) // test to keep the points
 					w(y, x) = 0;
@@ -314,7 +314,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 
 	const int knn = input.dists.rows();
 	const int readPtsCount = input.dists.cols();
-	
+
 	OutlierWeights w(knn, readPtsCount);
 
 	const DataPoints *cloud;
@@ -322,7 +322,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	if(source == "reference")
 		cloud = &filteredReference;
 	else
-		cloud = &filteredReference;
+		cloud = &filteredReading;
 
 	ConstView desc(cloud->getDescriptorViewByName(descName));
 
@@ -336,23 +336,31 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 	{
 		for(int i=0; i < readPtsCount; i++)
 		{
-			const int idRead = input.ids(k, i);
-			if (idRead == MatchersImpl<T>::NNS::InvalidIndex){
-				w(k,i) = 0;
-				continue;
+			int point_id;
+			if (source == "reference") {
+				point_id = input.ids(k, i);
+				if (point_id == MatchersImpl<T>::NNS::InvalidIndex){
+					LOG_INFO_STREAM("Invalid Index in GenericOutlierFilter, setting weight to 0.");
+					w(k,i) = 0;
+					continue;
+				}
+			} else {
+				// We don't need to look up corresponding points in the reference
+				//, we index into the reading PC directly.
+				point_id = i;
 			}
 			if(useSoftThreshold == false)
 			{
 				if(useLargerThan == true)
 				{
-					if (desc(0, idRead) > threshold)
+					if (desc(0, point_id) > threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
 				}
 				else
 				{
-					if (desc(0, idRead) < threshold)
+					if (desc(0, point_id) < threshold)
 						w(k,i) = 1;
 					else
 						w(k,i) = 0;
@@ -361,7 +369,7 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 			else
 			{
 				// use soft threshold by assigning the weight using the descriptor
-				w(k,i) = desc(0, idRead);
+				w(k,i) = desc(0, point_id);
 			}
 		}
 	}
@@ -375,6 +383,129 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 
 template struct OutlierFiltersImpl<float>::GenericDescriptorOutlierFilter;
 template struct OutlierFiltersImpl<double>::GenericDescriptorOutlierFilter;
+
+// DescriptorMatchOutlierFilter
+template <typename T>
+OutlierFiltersImpl<T>::DescriptorMatchOutlierFilter::DescriptorMatchOutlierFilter(const Parameters &params):
+ OutlierFilter("DescriptorMatchOutlierFilter", DescriptorMatchOutlierFilter::availableParameters(), params),
+	descName(Parametrizable::getParamValueString("descName")),
+	sigmaSquared(std::pow(Parametrizable::get<T>("sigma"), 2)), // Calculate sigmaSquared directly
+	warningPrinted(false)
+{
+	// Simplified validation
+	if (Parametrizable::get<T>("sigma") <= 0)
+	{
+		throw InvalidParameter("DescriptorMatchOutlierFilter: sigma must be greater than 0.");
+	}
+	if (descName.empty())
+	{
+		throw InvalidParameter("DescriptorMatchOutlierFilter: descName cannot be empty.");
+	}
+}
+
+template <typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::DescriptorMatchOutlierFilter::compute(
+	const DataPoints &filteredReading,
+	const DataPoints &filteredReference,
+	const Matches &input)
+{
+	const int knn = input.dists.rows();
+	const int readPtsCount = input.dists.cols();
+	OutlierWeights w = OutlierWeights::Ones(knn, readPtsCount); // Initialize weights to 1
+
+	// Check if descriptors exist in both clouds
+	bool readingHasDesc = filteredReading.descriptorExists(descName);
+	bool referenceHasDesc = filteredReference.descriptorExists(descName);
+
+	if (!readingHasDesc)
+	{
+		if (!warningPrinted)
+		{
+			LOG_WARNING_STREAM("DescriptorMatchOutlierFilter: Descriptor '" << descName << "' not found in reading cloud. Skipping filter.");
+			warningPrinted = true;
+		}
+		return w; // Return weights of 1
+	}
+
+	if (!referenceHasDesc)
+	{
+		if (!warningPrinted)
+		{
+			LOG_WARNING_STREAM("DescriptorMatchOutlierFilter: Descriptor '" << descName << "' not found in reference cloud. Skipping filter.");
+			warningPrinted = true;
+		}
+		return w; // Return weights of 1
+	}
+
+	// Get descriptor views
+	const auto descReadingView = filteredReading.getDescriptorViewByName(descName);
+	const auto descReferenceView = filteredReference.getDescriptorViewByName(descName);
+
+	// Check descriptor dimensions
+	if (descReadingView.rows() != descReferenceView.rows())
+	{
+		if (!warningPrinted)
+		{
+			LOG_WARNING_STREAM(
+				"DescriptorMatchOutlierFilter: Descriptor '"
+					<< descName
+					<< "' has different dimensions in reading (" << descReadingView.rows()
+					<< "D) and reference (" << descReferenceView.rows()
+					<< "D) clouds. Skipping filter."
+			);
+			warningPrinted = true;
+		}
+		return w; // Return weights of 1
+	}
+
+	const int descDim = descReadingView.rows();
+	if (descDim == 0)
+	{
+		if (!warningPrinted)
+		{
+			LOG_WARNING_STREAM("DescriptorMatchOutlierFilter: Descriptor '" << descName << "' has 0 dimensions. Skipping filter.");
+			warningPrinted = true;
+		}
+		return w; // Return weights of 1
+	}
+
+	// Compute weights based on descriptor difference
+	for (int i = 0; i < readPtsCount; ++i) // Index for reading points
+	{
+		const auto &descRead = descReadingView.col(i);
+
+		for (int k = 0; k < knn; ++k) // Index for k-th match
+		{
+			const int refIdx = input.ids(k, i);
+
+			if (refIdx == MatchersImpl<T>::NNS::InvalidIndex)
+			{
+				w(k, i) = 0; // No match, zero weight
+				continue;
+			}
+
+			if (refIdx < 0 || refIdx >= descReferenceView.cols())
+			{
+				LOG_WARNING_STREAM("DescriptorMatchOutlierFilter: Invalid reference index " << refIdx << " encountered. Setting weight to 0.");
+				w(k, i) = 0;
+				continue;
+			}
+
+			const auto &descRef = descReferenceView.col(refIdx);
+
+			// Calculate squared L2 norm of the difference
+			const T diffSquaredNorm = (descRead - descRef).squaredNorm();
+
+			// Calculate weight using exponential decay
+			w(k, i) = std::exp(-diffSquaredNorm / sigmaSquared);
+		}
+	}
+
+	return w;
+}
+
+template struct OutlierFiltersImpl<float>::DescriptorMatchOutlierFilter;
+template struct OutlierFiltersImpl<double>::DescriptorMatchOutlierFilter;
 
 // RobustOutlierFilter
 template<typename T>

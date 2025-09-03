@@ -1,10 +1,15 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.15)
 
+include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 include(CheckSymbolExists)
+include(CMakePackageConfigHelpers)
+
 
 #========================
 # Project details / setup
 #========================
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) # add -fPIC as required
 
 # Extract version from header, done first to satisfy CMP0048,
 # see `cmake --help-policy CMP0048` for more information.
@@ -17,17 +22,19 @@ file(
 # If no matches found, something is wrong with PointMatcher.h
 if (NOT POINTMATCHER_PROJECT_VERSION)
 	message(SEND_ERROR "Cannot find version number in '${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher/PointMatcher.h'.")
-endif (NOT POINTMATCHER_PROJECT_VERSION)
+endif ()
 # Transform '#define POINTMATCHER_VERSION "X.Y.Z"' into 'X.Y.Z'
 string(REGEX REPLACE ".*\"(.*)\".*" "\\1" POINTMATCHER_PROJECT_VERSION "${POINTMATCHER_PROJECT_VERSION}")
 
 # In 3.0+, project(...) should specify VERSION to satisfy CMP0048
-if (CMAKE_VERSION VERSION_LESS 3.0.0)
-	project(libpointmatcher)
-else (CMAKE_VERSION VERSION_LESS 3.0.0)
-	cmake_policy(SET CMP0048 NEW)
-	project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION})
-endif (CMAKE_VERSION VERSION_LESS 3.0.0)
+cmake_policy(SET CMP0048 NEW)
+# In 3.12+, find_package(<PackageName>) searches prefixes specified by the `<PackageName>_ROOT` CMake and the ``<PackageName>_ROOT`` environment variable, force this with CMP0074
+cmake_policy(SET CMP0074 NEW)
+project(libpointmatcher VERSION ${POINTMATCHER_PROJECT_VERSION}
+		DESCRIPTION "libpointmatcher is a modular library implementing the Iterative Closest Point (ICP) algorithm for aligning point clouds"
+		LANGUAGES CXX )
+
+set(CMAKE_DEBUG_POSTFIX "d")
 
 # Check if 32 bit platform
 # By default, libpointmatcher is not compatible with and will not build on a
@@ -36,14 +43,14 @@ if( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
     MESSAGE(SEND_ERROR "32 bits compiler detected. Libpointmatcher is only supported in 64 bits." )
     SET( EX_PLATFORM 32 )
     SET( EX_PLATFORM_NAME "x86" )
-endif( NOT CMAKE_SIZEOF_VOID_P EQUAL 8 )
+endif()
 
 ## WARNING: unsupported
 ## To force install as a 32 bit library, set BUILD_32 to true
 if( BUILD_32 )
 	MESSAGE(STATUS "Building as a 32 bit library")
 	SET(CMAKE_CXX_FLAGS "-m32")
-endif( BUILD_32 )
+endif()
 
 # Ensure proper build type
 if (NOT CMAKE_BUILD_TYPE)
@@ -51,26 +58,27 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING
     "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
     FORCE)
-else (NOT CMAKE_BUILD_TYPE)
+else ()
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("\n=================================================================================")
     message("\n-- Build type: Debug. Performance will be terrible!")
     message("-- Add -DCMAKE_BUILD_TYPE=Release to the CMake command line to get an optimized build.")
     message("\n=================================================================================")
-  endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
-endif (NOT CMAKE_BUILD_TYPE)
+  endif ()
+endif ()
 
 
 #================= extra building definitions ==============================
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-O3)
-endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+endif()
 
 # For Windows
 if( MSVC )
 	add_definitions( /D _VARIADIC_MAX=10 ) # VS2012 does not support tuples correctly yet
 	add_definitions( /D _USE_MATH_DEFINES) # defines M_PI for Visual Studio
 	add_definitions( /D _ENABLE_EXTENDED_ALIGNED_STORAGE) # this variable must be defined with VS2017 to acknowledge alignment changes of aligned_storage
+	add_definitions(/bigobj)
 endif()
 
 #======================= installation =====================================
@@ -96,9 +104,6 @@ foreach(p LIB BIN INCLUDE CMAKE)
 	endif()
 endforeach()
 
-# Install package.xml for catkin
-install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
-
 #===========================================================================
 
 
@@ -106,29 +111,39 @@ install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
 
 # initially
 set(EXTERNAL_LIBS "")
-set(EXTRA_DEPS "")
 
-# compile local version of gtest and yaml-cpp
+# compile local version of gtest
 add_subdirectory(contrib)
 
+#---------------------------
+# DEPENDENCY:  POSIX Threads
+#---------------------------
+find_package(Threads REQUIRED)
+if (CMAKE_VERSION VERSION_LESS 3.1.0)
+  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+else()
+  set(EXTERNAL_LIBS ${EXTERNAL_LIBS} Threads::Threads)
+endif()
 
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
-find_package(Boost COMPONENTS thread filesystem system program_options date_time REQUIRED)
+find_package(Boost REQUIRED COMPONENTS thread system program_options date_time)
 if (Boost_MINOR_VERSION GREATER 47)
-	find_package(Boost COMPONENTS thread filesystem system program_options date_time chrono REQUIRED)
-endif (Boost_MINOR_VERSION GREATER 47)
-include_directories(${Boost_INCLUDE_DIRS})
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${Boost_LIBRARIES})
-
+	find_package(Boost REQUIRED COMPONENTS thread system program_options date_time chrono)
+endif ()
 
 #--------------------
 # DEPENDENCY: eigen 3
 #--------------------
-find_path(EIGEN_INCLUDE_DIR Eigen/Core
-	/usr/local/include/eigen3
-	/usr/include/eigen3
+find_path(EIGEN_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
+  HINTS  ENV EIGEN3_INC_DIR
+         ENV EIGEN3_DIR
+  PATHS  Eigen/Core
+         /usr/local/include
+         /usr/include
+  PATH_SUFFIXES include eigen3 eigen
+  DOC "Directory containing the Eigen3 header files"
 )
 
 # Suppress Eigen's warning by adding it to the system's library
@@ -143,11 +158,23 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 #--------------------
 # DEPENDENCY: nabo
 #--------------------
-find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
-#include(libnaboConfig)
-include_directories(${libnabo_INCLUDE_DIRS})
-set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${libnabo_LIBRARIES})
-message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+if (NOT TARGET nabo)
+  # Find libnabo:
+  find_package(libnabo 1.1.1 REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
+  if (TARGET libnabo::nabo)
+ 	set(libnabo_LIBRARIES libnabo::nabo)
+    message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode,  libs=${libnabo_LIBRARIES})")
+  else()
+    message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INCLUDE_DIRS} libs=${libnabo_LIBRARIES})")
+  endif()
+else()
+  # libnabo already part of this project (e.g. as a git submodule)
+  # (This, plus the use of cmake target properties in libnabo, will also
+  # introduce the required include directories, flags, etc.)
+endif()
+# This cmake target alias will be defined by either:
+# a) libnabo sources if built as a git submodule in the same project than this library, or
+# b) by libnabo-targets.cmake, included by find_package(libnabo) above.
 
 #--------------------
 # DEPENDENCY: OpenMP (optional)
@@ -155,15 +182,7 @@ message(STATUS "libnabo found, version ${libnabo_VERSION} (include=${libnabo_INC
 set(USE_OPEN_MP FALSE CACHE BOOL "Set to TRUE to use OpenMP")
 if (USE_OPEN_MP)
 	find_package(OpenMP)
-	if (OPENMP_FOUND)
-		add_definitions(-fopenmp -DHAVE_OPENMP)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-		if (CMAKE_COMPILER_IS_GNUCC)
-			set(EXTERNAL_LIBS ${EXTERNAL_LIBS} gomp)
-    	message("-- OpenMP found, parallel computer enabled")
-		endif(CMAKE_COMPILER_IS_GNUCC)
-	endif(OPENMP_FOUND)
-endif (USE_OPEN_MP)
+endif ()
 
 #--------------------
 # DEPENDENCY: OpenCL (optional)
@@ -174,87 +193,62 @@ if (USE_OPEN_CL)
 		find_library(OPENCL_LIBRARIES opencl64)
 		if (!OPENCL_LIBRARIES)
 			find_library(OPENCL_LIBRARIES opencl32)
-		endif (!OPENCL_LIBRARIES)
-	else (WIN32)
+		endif ()
+	else ()
 		find_library(OPENCL_LIBRARIES OpenCL ENV LD_LIBRARY_PATH)
-	endif (WIN32)
+	endif ()
 	# if found, add
 	if (OPENCL_LIBRARIES)
 		set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${OPENCL_LIBRARIES})
-    message("-- openCL found, parallel computer enabled for kd-tree")
-	endif (OPENCL_LIBRARIES)
-endif(USE_OPEN_CL)
+    	message("-- openCL found, parallel computer enabled for kd-tree")
+	endif ()
+endif()
 
 
 #--------------------
-# DEPENDENCY: yaml-cpp (local or system, optional)
+# DEPENDENCY: yaml-cpp
 #--------------------
-option(USE_SYSTEM_YAML_CPP "Use system version of yaml-cpp rather than one packaged with libpointmatcher" FALSE)
 
-if(USE_SYSTEM_YAML_CPP)
-    message(STATUS "Looking for yaml-cpp on system")
-    find_path(yaml-cpp_INCLUDE_DIRS yaml-cpp/yaml.h
-            /usr/local/include
-    )
-    find_library(yaml-cpp_LIBRARIES yaml-cpp PATHS
-            /usr/local/lib
-    )
-    if(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-            include_directories(${yaml-cpp_INCLUDE_DIRS})
-            add_definitions(-DSYSTEM_YAML_CPP)
-            set(yamlcpp_FOUND)
-            set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp_LIBRARIES} )
-            message("-- yaml-cpp found, text-based configuration enabled")
-    else(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-            message("-- yaml-cpp not found, text-based configuration and related applications disabled")
-    endif(yaml-cpp_INCLUDE_DIRS AND yaml-cpp_LIBRARIES)
-else(USE_SYSTEM_YAML_CPP)
-        include_directories(contrib/yaml-cpp-pm/include)
-
-#note: this is not working....
-        #get_property(yaml-cpp-pm_INCLUDE TARGET yaml-cpp-pm PROPERTY INCLUDE_DIRECTORIES)
-        #include_directories(${yaml-cpp-pm_INCLUDE})
-
-        get_property(yaml-cpp-pm_LIB TARGET yaml-cpp-pm PROPERTY LOCATION)
-        set (EXTERNAL_LIBS ${EXTERNAL_LIBS} ${yaml-cpp-pm_LIB} )
-        set (EXTRA_DEPS ${EXTRA_DEPS} yaml-cpp-pm)
-        set(yamlcpp_FOUND)
-
-        get_property(yaml-cpp-pm_VERSION TARGET yaml-cpp-pm PROPERTY VERSION)
-        message("-- using built-in yaml-cpp, version ${yaml-cpp-pm_VERSION}")
-        message("   -- text-based configuration enabled")
-endif(USE_SYSTEM_YAML_CPP)
-
+message(STATUS "Looking for yaml-cpp on system...")
+find_package(yaml-cpp CONFIG REQUIRED)
+if(TARGET yaml-cpp::yaml-cpp)
+    message(STATUS "yaml-cpp found, version ${yaml-cpp_VERSION}")
+	set(YAML_CPP_LIBRARIES "yaml-cpp::yaml-cpp")
+endif()
+if(YAML_CPP_LIBRARIES STREQUAL "")
+    message(STATUS "yaml-cpp found, version ${yaml-cpp_VERSION}")
+	set(YAML_CPP_LIBRARIES "yaml-cpp") # Fix linking issue on MacOS with yaml-cpp 0.7.0
+endif ()
 
 #--------------------
 # DEPENDENCY: rt (optional)
 #--------------------
 # link rt support if POSIX timers are used
 check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
-if (POSIX_TIMERS AND NOT APPLE)
-	set(EXTERNAL_LIBS ${EXTERNAL_LIBS} rt)
-endif (POSIX_TIMERS AND NOT APPLE)
 
 #============================= end dependencies =================================
 
 
 #========================== libpointmatcher itself ==============================
 
-# Check the compiler version as we need full C++11 support.
+# Check the compiler version as we need full C++17 support.
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	# using Clang
-	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.3")
-		message(WARNING, "Your clang compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 3.3 or later is supported")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5")
+		message(WARNING, "Your clang compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 5 or later is supported")
 	endif ()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 	# using AppleClang
-	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
-		message(WARNING "Your XCode environment has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 5.1 or later is supported")
+	if (USE_OPEN_MP)
+		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	endif ()
+	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0")
+		message(WARNING "Your XCode environment has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 7.0 or later is supported")
 	endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	# using GCC
-	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.2")
-		message(WARNING, "Your g++ compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 4.8.2 or later is supported")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9")
+		message(WARNING, "Your g++ compiler has version ${CMAKE_CXX_COMPILER_VERSION}, while only version 9 or later is supported")
 	endif ()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	# using MSVC
@@ -263,18 +257,18 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	endif()
 endif ()
 
-# enable C++11 support.
-if (CMAKE_VERSION VERSION_LESS "3.1")
+# enable C++17 support.
+if (CMAKE_VERSION VERSION_LESS "3.8")
 	if (MSVC)
 		message(FATAL_ERROR, "CMake version 3.1 or later is required to compiler ${PROJECT_NAME} with Microsoft Visual C++")
 	endif ()
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		set (CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 	else ()
-		set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+		set (CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 	endif ()
 else ()
-	set (CMAKE_CXX_STANDARD 11)
+	set (CMAKE_CXX_STANDARD 17)
 endif ()
 
 # SOURCE
@@ -315,7 +309,9 @@ set(POINTMATCHER_SRC
 	pointmatcher/ErrorMinimizers/PointToPointWithCov.cpp
 	pointmatcher/ErrorMinimizers/PointToPointSimilarity.cpp
 	pointmatcher/ErrorMinimizers/Identity.cpp
-#DataPointsFilters	
+#DataPointsFilters
+	pointmatcher/DataPointsFilters/AddDescriptor.cpp
+	pointmatcher/DataPointsFilters/AngleLimit.cpp
 	pointmatcher/DataPointsFilters/Identity.cpp
 	pointmatcher/DataPointsFilters/RemoveNaN.cpp
 	pointmatcher/DataPointsFilters/MaxDist.cpp
@@ -342,51 +338,66 @@ set(POINTMATCHER_SRC
 	pointmatcher/DataPointsFilters/CovarianceSampling.cpp
 	pointmatcher/DataPointsFilters/DistanceLimit.cpp
 	pointmatcher/DataPointsFilters/RemoveSensorBias.cpp
+	pointmatcher/DataPointsFilters/Sphericality.cpp
+	pointmatcher/DataPointsFilters/Saliency.cpp
+	pointmatcher/DataPointsFilters/SpectralDecomposition.cpp
+#PointCloudGenerators
+	pointmatcher/PointCloudGenerator.cpp
 )
-
-include_directories(${CMAKE_SOURCE_DIR})
 
 
 file(GLOB_RECURSE POINTMATCHER_HEADERS "pointmatcher/*.h")
 
-# MacOS and Windows deal with shared/dynamic library differently. For
-# simplicity, we only authorize static library in those cases.
-if(APPLE OR WIN32)
 
-	add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
-	install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+# In CMake >=3.4 we can easily build shared libraries in Mac and Windows.
+# No need to distinguish between operating systems while building targets
 
-else(APPLE OR WIN32)
-	set(SHARED_LIBS "true" CACHE BOOL "To build shared (true) or static (false) library")
+add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
 
-	if (SHARED_LIBS)
-		add_library(pointmatcher SHARED ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS})
-		install(TARGETS pointmatcher
-						ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
-						LIBRARY DESTINATION ${INSTALL_LIB_DIR}
-						RUNTIME DESTINATION ${INSTALL_BIN_DIR})
-		#install(TARGETS pointmatcher LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-	else(SHARED_LIBS)
-		add_library(pointmatcher ${POINTMATCHER_SRC} ${POINTMATCHER_HEADERS} )
-		install(TARGETS pointmatcher ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
-	endif(SHARED_LIBS)
-endif(APPLE OR WIN32)
+target_include_directories(pointmatcher PUBLIC
+  $<INSTALL_INTERFACE:>
+  $<INSTALL_INTERFACE:pointmatcher>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pointmatcher>
+  $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
+)
 
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher)
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters)
-target_include_directories(pointmatcher PRIVATE ${CMAKE_SOURCE_DIR}/pointmatcher/DataPointsFilters/utils)
+if (NOT MSVC)
+	target_compile_options(pointmatcher PRIVATE -Wall)
+else()
+	target_compile_options(pointmatcher PRIVATE /bigobj)
+endif()
 
-# link all libraries to libpointmatcher
-add_definitions(-Wall)
-#target_link_libraries(pointmatcher ${yaml-cpp_LIBRARIES} ${libnabo_LIBRARIES})
-target_link_libraries(pointmatcher ${EXTERNAL_LIBS})
+target_link_libraries(pointmatcher PUBLIC ${YAML_CPP_LIBRARIES})
+target_include_directories(pointmatcher PUBLIC ${YAML_CPP_INCLUDE_DIR})
 
-if(EXTRA_DEPS)
+target_link_libraries(pointmatcher PUBLIC ${Boost_LIBRARIES})
+
+if (TARGET libnabo::nabo)
+  target_link_libraries(pointmatcher PRIVATE libnabo::nabo)
+else()
+  include_directories(pointmatcher ${libnabo_INCLUDE_DIRS})
+  target_link_libraries(pointmatcher PRIVATE ${libnabo_LIBRARIES})
+endif()
+target_link_libraries(pointmatcher PRIVATE ${EXTERNAL_LIBS})
+if (EXTRA_DEPS)
 	add_dependencies(pointmatcher ${EXTRA_DEPS})
-endif(EXTRA_DEPS)
+endif()
+
+if (POSIX_TIMERS AND NOT APPLE)
+	target_link_libraries(pointmatcher PRIVATE rt)
+endif ()
+
+if (OpenMP_CXX_FOUND)
+	message("-- OpenMP found, parallel computer enabled")
+	message(STATUS "${OpenMP_CXX_LIBRARIES} ${OpenMP_CXX_INCLUDE_DIR}")
+	include_directories(pointmatcher ${OpenMP_CXX_INCLUDE_DIR})
+	target_link_libraries(pointmatcher PUBLIC ${OpenMP_CXX_LIBRARIES})
+endif ()
+
 set_target_properties(pointmatcher PROPERTIES VERSION "${POINTMATCHER_PROJECT_VERSION}" SOVERSION 1)
 
-#========================= Install header ===========================
+#========================= Install commands ===========================
 
 install(FILES
 	pointmatcher/DeprecationWarnings.h
@@ -400,13 +411,30 @@ install(FILES
 	DESTINATION ${INSTALL_INCLUDE_DIR}/pointmatcher
 )
 
+install(TARGETS pointmatcher EXPORT ${PROJECT_NAME}-config
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+if(GENERATE_API_DOC)
+	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
+	if (DOXYGEN_FOUND)
+		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
+	endif ()
+endif()
+
+# Install package.xml for catkin
+install(FILES package.xml DESTINATION "share/${PROJECT_NAME}")
+
+
 #========================= Documentation ===========================
 
 set(GENERATE_API_DOC false CACHE BOOL "Set to true to build the documentation using Doxygen")
 
 if(GENERATE_API_DOC)
 
-	message("-- API Documentation (doxygen): enabled")
+	message(STATUS "API Documentation (doxygen): enabled")
 
 	# Note: there seems to be equations in the documentation leading to the
 	# use of Latex anyway. This cause problems for user without latex...
@@ -418,32 +446,39 @@ if(GENERATE_API_DOC)
 
 	add_dependencies(pointmatcher doc)
 
-	install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
-	if (DOXYGEN_FOUND)
-		install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
-	endif (DOXYGEN_FOUND)
-
-else(GENERATE_API_DOC)
-
+else()
 	message("-- API Documentation (doxygen): disabled")
-
-endif(GENERATE_API_DOC)
+endif()
 
 
 #=============== trigger other makefile ======================
 
 # Example programs
-add_subdirectory(examples)
+option(BUILD_EXAMPLES "Build libpointmatcher examples" ON)
+if (BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
+
 # Evaluation programs
-add_subdirectory(evaluations)
+option(BUILD_EVALUATIONS "Build libpointmatcher evaluations" ON)
+if (BUILD_EVALUATIONS)
+  add_subdirectory(evaluations)
+endif()
 
 # Unit testing
-
 option(BUILD_TESTS "Build all tests." OFF)
-
 if (BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(utest)
+endif()
+
+# ========================= Python module =============================
+option(BUILD_PYTHON_MODULE "Build the python module for libpointmatcher" OFF)
+option(USE_SYSTEM_PYBIND11 "Use the system installed pybind11 rather than using a git submodule" ON)
+set(PYTHON_INSTALL_TARGET "" CACHE PATH "Target where to install the python module")
+
+if (BUILD_PYTHON_MODULE)
+	add_subdirectory(python)
 endif()
 
 #=================== allow find_package() =========================
@@ -457,45 +492,44 @@ endif()
 
 # 1- local build #
 
-# Register the local build in case one doesn't use "make install"
-export(PACKAGE libpointmatcher)
+# Install cmake config module
+install(EXPORT ${PROJECT_NAME}-config DESTINATION share/${PROJECT_NAME}/cmake)
+
+# make project importable from build_dir:
+export(
+	TARGETS pointmatcher
+	FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-config.cmake
+)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS pointmatcher)
 
 # Create variable for the local build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
 # Create variable with the library location
-get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
+set(POINTMATCHER_LIB  $<TARGET_FILE:pointmatcher>)
 
 # Configure config file for local build tree
-configure_file(libpointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" @ONLY)
+configure_package_config_file(libpointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake"
+  		INSTALL_DESTINATION share/libnabo/cmake
+		PATH_VARS PROJECT_NAME
+		)
 
 # 2- installation build #
 
 # Change the include location for the case of an install location
 set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
 
-#FIXME: this will only be applied to installed files. Confirm that we want that.
-# gather all the includes but remove ones in the source tree
-# because we added an include for the local yaml-cpp-pm we should also remove it
-list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
-
-if(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
-  list(REMOVE_ITEM EXTERNAL_LIBS ${yaml-cpp-pm_LIB})
-endif(SHARED_LIBS AND (NOT USE_SYSTEM_YAML_CPP))
-
-# Change the library location for an install location
-get_filename_component(POINTMATCHER_LIB_NAME ${POINTMATCHER_LIB} NAME)
-set(POINTMATCHER_LIB ${INSTALL_LIB_DIR}/${POINTMATCHER_LIB_NAME})
-
 # We put the generated file for installation in a different repository (i.e., ./CMakeFiles/)
-configure_file(libpointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" @ONLY)
+configure_package_config_file(libpointmatcherConfig.cmake.in
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake"
+  		INSTALL_DESTINATION share/libnabo/cmake
+		PATH_VARS PROJECT_NAME
+		)
 
 # The same versioning file can be used for both cases
-configure_file(libpointmatcherConfigVersion.cmake.in
-  "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake" @ONLY)
-
+write_basic_package_version_file(libpointmatcherConfigVersion.cmake
+		COMPATIBILITY AnyNewerVersion)
 
 # Install the libpointmatcherConfig.cmake and libpointmatcherConfigVersion.cmake
 install(
@@ -537,10 +571,12 @@ install(FILES
 unset(LIBRARY_CC_ARGS)
 
 #====================== uninstall target ===============================
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+if (NOT TARGET uninstall)
+  configure_file(
+	  "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+	  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+	  IMMEDIATE @ONLY)
 
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+  add_custom_target(uninstall
+	  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()

@@ -18,7 +18,6 @@ CONFIG          += c++11
 #QMAKE_LFLAGS   += -mmacosx-version-min=10.7
 
 LIBS     	+= 	/usr/local/lib/libboost_thread-mt.dylib \
-                	/usr/local/lib/libboost_filesystem-mt.dylib \
                         /usr/local/lib/libboost_system-mt.dylib \
                         /usr/local/lib/libboost_program_options-mt.dylib \
                         /usr/local/lib/libboost_date_time-mt.dylib \

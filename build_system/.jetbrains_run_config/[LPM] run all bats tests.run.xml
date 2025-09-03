@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="[LPM] run all bats tests" type="ShConfigurationType" folderName="[LPM] A | bats tests">
+    <option name="SCRIPT_TEXT" value="" />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+    <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build_system/tests/run_bats_core_test_in_n2st.bash" />
+    <option name="SCRIPT_OPTIONS" value="build_system/tests/tests_bats/" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/build_system" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+    <option name="INTERPRETER_PATH" value="/bin/zsh" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_SCRIPT_FILE" value="true" />
+    <envs>
+      <env name="DOCKER_CONTEXT" value="desktop-linux" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

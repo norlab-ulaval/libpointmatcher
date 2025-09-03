@@ -33,8 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 #include "SamplingSurfaceNormal.h"
-
-#include "utils.h"
+#include "DataPointsFilters/utils/utils.h"
 
 // Eigenvalues
 #include "Eigen/QR"
@@ -152,6 +151,8 @@ void SamplingSurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 		cloud.features.col(i) = cloud.features.col(k);
 		if (cloud.descriptors.rows() != 0)
 			cloud.descriptors.col(i) = cloud.descriptors.col(k);
+		if (cloud.times.rows() != 0)
+			cloud.times.col(i) = cloud.times.col(k);
 		if(keepNormals)
 			buildData.normals->col(i) = buildData.normals->col(k);
 		if(keepDensities)
@@ -161,9 +162,7 @@ void SamplingSurfaceNormalDataPointsFilter<T>::inPlaceFilter(
 		if(keepEigenVectors)
 			buildData.eigenVectors->col(i) = buildData.eigenVectors->col(k);
 	}
-	cloud.features.conservativeResize(Eigen::NoChange, ptsOut);
-	cloud.descriptors.conservativeResize(Eigen::NoChange, ptsOut);
-
+	cloud.conservativeResize(ptsOut);
 	// warning if some points were dropped
 	if(buildData.unfitPointsCount != 0)
 		LOG_INFO_STREAM("  SamplingSurfaceNormalDataPointsFilter - Could not compute normal for " << buildData.unfitPointsCount << " pts.");
@@ -246,7 +245,7 @@ void SamplingSurfaceNormalDataPointsFilter<T>::fuseRange(
 	const Matrix NN = (d.colwise() - mean);
 
 	// compute covariance
-	const Matrix C(NN * NN.transpose());
+	const Matrix C((NN * NN.transpose()) / T(colCount));
 	Vector eigenVa = Vector::Identity(featDim-1, 1);
 	Matrix eigenVe = Matrix::Identity(featDim-1, featDim-1);
 	// Ensure that the matrix is suited for eigenvalues calculation
