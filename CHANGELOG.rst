@@ -1,6 +1,11 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Unreleased
+------------------
+**New features:**
+* WIP
+
 1.4.4 (2024-12-16)
 ------------------
 **New features:**
