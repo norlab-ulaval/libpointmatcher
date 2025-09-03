@@ -128,9 +128,21 @@ endif()
 #--------------------
 # DEPENDENCY:  boost
 #--------------------
-find_package(Boost REQUIRED COMPONENTS thread system program_options date_time)
+find_package(Boost QUIET COMPONENTS thread system program_options date_time)
+if(NOT Boost_FOUND)
+    # If system component not found, try without it (for newer versions where system is header-only)
+    find_package(Boost REQUIRED COMPONENTS thread program_options date_time)
+    message(STATUS "Boost system component not found - using header-only version")
+else()
+    # Found with system component
+    message(STATUS "Found Boost with system component")
+endif()
 if (Boost_MINOR_VERSION GREATER 47)
-	find_package(Boost REQUIRED COMPONENTS thread system program_options date_time chrono)
+    if(Boost_system_FOUND)
+        find_package(Boost REQUIRED COMPONENTS thread system program_options date_time chrono)
+    else()
+        find_package(Boost REQUIRED COMPONENTS thread program_options date_time chrono)
+    endif()
 endif ()
 
 #--------------------
