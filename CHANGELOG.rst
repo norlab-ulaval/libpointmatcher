@@ -1,10 +1,13 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package libpointmatcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Unreleased
+1.4.5 (2025-09-03)
 ------------------
 **New features:**
-* WIP
+* Point to Gaussian implementation
+* Fix header only boost Boost_LIBRARIES
+* Python bindings installation scripts
+* Python bindings requrements.txt
 
 1.4.4 (2024-12-16)
 ------------------
