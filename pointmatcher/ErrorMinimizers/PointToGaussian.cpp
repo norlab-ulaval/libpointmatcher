@@ -57,7 +57,8 @@ template<typename T>
 PointToGaussianErrorMinimizer<T>::PointToGaussianErrorMinimizer(const Parameters& params):
 	PointToPlaneErrorMinimizer<T>(PointToGaussianErrorMinimizer::availableParameters(), params),
 	confidenceInPenalties(Parametrizable::get<T>("confidenceInPenalties")),
-	force2D(Parametrizable::get<bool>("force2D"))
+	force2D(Parametrizable::get<bool>("force2D")),
+	force4DOF(Parametrizable::get<bool>("force4DOF"))
 {
 }
 
