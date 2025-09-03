@@ -44,6 +44,7 @@ set(PYBIND11_SOURCES
     #errorminimizers module
     errorminimizers/identity.cpp
     errorminimizers/point_to_plane.cpp
+    errorminimizers/point_to_gaussian.cpp
     errorminimizers/point_to_plane_with_cov.cpp
     errorminimizers/point_to_point.cpp
     errorminimizers/point_to_point_similarity.cpp
