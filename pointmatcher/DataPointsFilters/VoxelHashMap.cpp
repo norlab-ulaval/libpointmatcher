@@ -1,12 +1,13 @@
 #include "VoxelHashMap.h"
 #include <unordered_map>
+#include <vector>
 #include <cassert>
-
-
 
 
 template <typename T>
 VoxelHashMapDataPointsFilter<T>::VoxelHashMapDataPointsFilter(const Parameters& params) :
+	PointMatcher<T>::DataPointsFilter("VoxelHashMapDataPointsFilter", 
+		VoxelHashMapDataPointsFilter::availableParameters(), params),
 	voxelSize(Parametrizable::get<T>("voxelSize")),
 	pointsPerVoxel(Parametrizable::get<size_t>("pointsPerVoxel"))
 {
