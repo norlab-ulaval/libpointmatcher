@@ -24,6 +24,7 @@
 #include "datapointsfilters/simple_sensor_noise.h"
 #include "datapointsfilters/sphericality.h"
 #include "datapointsfilters/surface_normal.h"
+#include "datapointsfilters/voxel_hash_map.h"
 
 namespace python
 {
@@ -57,6 +58,7 @@ namespace python
 			datapointsfilters::pybindSimpleSensorNoise(datapointsfilterModule);
 			datapointsfilters::pybindSphericality(datapointsfilterModule);
 			datapointsfilters::pybindSurfaceNormal(datapointsfilterModule);
+			datapointsfilters::pybindVoxelHashMap(datapointsfilterModule);
 		}
 	}
 }
