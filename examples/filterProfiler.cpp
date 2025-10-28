@@ -10,6 +10,10 @@
 #include <boost/assign.hpp>
 #include <ctime>
 #include <time.h>
+#include <vector>
+#include <iomanip>
+#include <numeric>
+#include <algorithm>
 
 using namespace PointMatcherSupport;
 using namespace std;
@@ -19,81 +23,186 @@ typedef PointMatcher<float> PM;
 typedef PM::DataPoints DP;
 typedef PM::Parameters Parameters;
 
-int main(int argc, char *argv[])
-{
+// Function to calculate statistics
+struct Stats {
+    double mean;
+    double stddev;
+    double min;
+    double max;
+};
 
-	if (argc < 2 || argc > 3)
-			{
-			std::cerr << "USAGE: filterProfiler <path_to_input_cloud> <summarizationMethod (optional) 2 or 1 or 0>" << std::endl;
-			return -1;
-			}
-
-	char* useCentroid;
-	if (argc == 3) {
-			if (strcmp(argv[2],"1") != 0 && strcmp(argv[2],"0")) {
-					cerr << "param useCentroid must be 1 or 0" << endl;
-					return -1;
-			} else
-			{
-					useCentroid = argv[2];
-			}
-	} else {
-			useCentroid = "1";
-	}
-
-		//setLogger(PM::get().LoggerRegistrar.create("FileLogger"));
-
-		DP in(DP::load(argv[1]));
-
-		std::shared_ptr<PM::DataPointsFilter> randomSample =
-			PM::get().DataPointsFilterRegistrar.create(
-					"RandomSamplingDataPointsFilter",
-					{{"prob", toParam(0.5)}}
-			);
-
-		cout << "starting random sample filter" << endl;
-		clock_t time_a = clock();
-		randomSample->inPlaceFilter(in);
-		clock_t time_b = clock();
-
-		if (time_a == ((clock_t)-1) || time_b == ((clock_t)-1))
-		{
-		    perror("Unable to calculate elapsed time");
-		    return -1;
-		}
-		else
-		{
-		    cout << "Performed random sampling in " << (float)(time_b - time_a)/CLOCKS_PER_SEC << " seconds" << endl;
-		}
-
-		std::shared_ptr<PM::DataPointsFilter> voxelf =
-			PM::get().DataPointsFilterRegistrar.create(
-					"VoxelGridDataPointsFilter",
-					{
-						{"vSizeX", "0.2"},
-						{"vSizeY", "0.2"},
-						{"vSizeZ", "0.2"},
-						{"useCentroid",useCentroid},
-						{"averageExistingDescriptors","0"}
-					}
-			);
-
-		cout << "starting voxel grid sample filter, useCentroid: " << useCentroid << endl;
-		time_a = clock();
-		voxelf->inPlaceFilter(in);
-		time_b = clock();
-
-		if (time_a == ((clock_t)-1) || time_b == ((clock_t)-1))
-		{
-			perror("Unable to calculate elapsed time");
-			return -1;
-		}
-		else
-		{
-			cout << "Performed voxel grid sampling in " << (float)(time_b - time_a)/CLOCKS_PER_SEC << " seconds" << endl;
-		}
-
-		return 0;
+Stats calculateStats(const std::vector<double>& times) {
+    Stats stats;
+    stats.mean = std::accumulate(times.begin(), times.end(), 0.0) / times.size();
+    
+    double variance = 0.0;
+    for (double time : times) {
+        variance += (time - stats.mean) * (time - stats.mean);
+    }
+    variance /= times.size();
+    stats.stddev = std::sqrt(variance);
+    
+    stats.min = *std::min_element(times.begin(), times.end());
+    stats.max = *std::max_element(times.begin(), times.end());
+    
+    return stats;
 }
 
+// Function to run filter benchmark
+Stats benchmarkFilter(std::shared_ptr<PM::DataPointsFilter> filter, 
+                     const std::vector<std::string>& cloudFiles, 
+                     int runsPerFile,
+                     const std::string& filterName) {
+    
+    std::vector<double> allTimes;
+    
+    cout << "\n" << std::string(50, '=') << endl;
+    cout << "Benchmarking: " << filterName << endl;
+    cout << std::string(50, '=') << endl;
+    
+    for (size_t fileIdx = 0; fileIdx < cloudFiles.size(); fileIdx++) {
+        const std::string& filename = cloudFiles[fileIdx];
+        
+        // Extract just the filename for display
+        size_t lastSlash = filename.find_last_of("/");
+        string displayName = (lastSlash != string::npos) ? filename.substr(lastSlash + 1) : filename;
+        
+        cout << "Processing file " << (fileIdx + 1) << "/" << cloudFiles.size() 
+             << ": " << displayName << endl;
+        
+        try {
+            DP originalCloud = DP::load(filename);
+            cout << "  Points in cloud: " << originalCloud.getNbPoints() << endl;
+            
+            std::vector<double> fileTimes;
+            
+            for (int run = 0; run < runsPerFile; run++) {
+                // Create a copy for each run to avoid cumulative effects
+                DP testCloud = originalCloud;
+                
+                clock_t time_a = clock();
+                filter->inPlaceFilter(testCloud);
+                clock_t time_b = clock();
+                
+                if (time_a == ((clock_t)-1) || time_b == ((clock_t)-1)) {
+                    cout << "  Warning: Unable to measure time for run " << (run + 1) << endl;
+                    continue;
+                }
+                
+                double elapsed = (double)(time_b - time_a) / CLOCKS_PER_SEC;
+                fileTimes.push_back(elapsed);
+                allTimes.push_back(elapsed);
+                
+                cout << "  Run " << (run + 1) << "/" << runsPerFile 
+                     << ": " << std::fixed << std::setprecision(6) << elapsed 
+                     << "s (" << testCloud.getNbPoints() << " points after filtering)" << endl;
+            }
+            
+            if (!fileTimes.empty()) {
+                Stats fileStats = calculateStats(fileTimes);
+                cout << "  File average: " << std::fixed << std::setprecision(6) 
+                     << fileStats.mean << "s (±" << fileStats.stddev << "s)" << endl;
+            }
+            
+        } catch (const std::exception& e) {
+            cout << "  Error loading file: " << e.what() << endl;
+            continue;
+        }
+    }
+    
+    return calculateStats(allTimes);
+}
 
+int main(int argc, char *argv[])
+{
+    // Configuration
+    const int runsPerFile = 5;  // Number of runs per point cloud file
+    const std::string dataDir = "../../examples/data";
+    
+    // Specific point cloud files to test
+    std::vector<std::string> cloudFiles = {
+        dataDir + "/2D_twoBoxes.csv",
+        dataDir + "/car_cloud400.csv", 
+        dataDir + "/cloud.00000.vtk",
+        dataDir + "/cloud.00001.vtk",
+        dataDir + "/cloud.00002.vtk"
+    };
+    
+    cout << std::string(60, '=') << endl;
+    cout << "Point Cloud Filter Performance Comparison" << endl;
+    cout << std::string(60, '=') << endl;
+    cout << "Runs per file: " << runsPerFile << endl;
+    cout << "Data directory: " << dataDir << endl;
+    
+    cout << "Testing " << cloudFiles.size() << " point cloud files:" << endl;
+    for (size_t i = 0; i < cloudFiles.size(); i++) {
+        size_t lastSlash = cloudFiles[i].find_last_of("/");
+        string displayName = (lastSlash != string::npos) ? cloudFiles[i].substr(lastSlash + 1) : cloudFiles[i];
+        cout << "  " << (i + 1) << ". " << displayName << endl;
+    }
+    
+    // Create filter instances
+    std::shared_ptr<PM::DataPointsFilter> randomSample =
+        PM::get().DataPointsFilterRegistrar.create(
+                "RandomSamplingDataPointsFilter",
+                {{"prob", toParam(0.5)}}
+        );
+
+    std::shared_ptr<PM::DataPointsFilter> voxelHashFilter =
+        PM::get().DataPointsFilterRegistrar.create(
+                "VoxelHashMapDataPointsFilter",
+                {
+                    {"voxelSize", toParam(0.5)},
+                    {"pointsPerVoxel", toParam(10)},
+                }
+        );
+
+    // Benchmark RandomSamplingDataPointsFilter
+    Stats randomStats = benchmarkFilter(randomSample, cloudFiles, runsPerFile, 
+                                       "RandomSamplingDataPointsFilter (prob=0.5)");
+
+    // Benchmark VoxelHashMapDataPointsFilter
+    Stats voxelStats = benchmarkFilter(voxelHashFilter, cloudFiles, runsPerFile, 
+                                      "VoxelHashMapDataPointsFilter (voxelSize=1.0, pointsPerVoxel=1)");
+
+    // Print final comparison
+    cout << "\n" << std::string(60, '=') << endl;
+    cout << "FINAL RESULTS SUMMARY" << endl;
+    cout << std::string(60, '=') << endl;
+    
+    cout << std::left << std::setw(35) << "Filter" << std::setw(12) << "Mean (s)" 
+         << std::setw(12) << "Std Dev (s)" << std::setw(10) << "Min (s)" 
+         << std::setw(10) << "Max (s)" << endl;
+    cout << std::string(79, '-') << endl;
+    
+    cout << std::left << std::setw(35) << "RandomSamplingDataPointsFilter" 
+         << std::fixed << std::setprecision(6)
+         << std::setw(12) << randomStats.mean
+         << std::setw(12) << randomStats.stddev
+         << std::setw(10) << randomStats.min
+         << std::setw(10) << randomStats.max << endl;
+         
+    cout << std::left << std::setw(35) << "VoxelHashMapDataPointsFilter" 
+         << std::fixed << std::setprecision(6)
+         << std::setw(12) << voxelStats.mean
+         << std::setw(12) << voxelStats.stddev
+         << std::setw(10) << voxelStats.min
+         << std::setw(10) << voxelStats.max << endl;
+    
+    // Performance comparison
+    cout << "\nPerformance Comparison:" << endl;
+    if (randomStats.mean < voxelStats.mean) {
+        double speedup = voxelStats.mean / randomStats.mean;
+        cout << "RandomSamplingDataPointsFilter is " << std::fixed << std::setprecision(2) 
+             << speedup << "x faster on average" << endl;
+    } else {
+        double speedup = randomStats.mean / voxelStats.mean;
+        cout << "VoxelHashMapDataPointsFilter is " << std::fixed << std::setprecision(2) 
+             << speedup << "x faster on average" << endl;
+    }
+    
+    cout << "\nTotal runs performed: " << (cloudFiles.size() * runsPerFile * 2) << endl;
+    cout << std::string(60, '=') << endl;
+
+    return 0;
+}

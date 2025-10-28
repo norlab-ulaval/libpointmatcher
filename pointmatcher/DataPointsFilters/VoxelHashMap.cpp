@@ -28,10 +28,10 @@ void VoxelHashMapDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud) {
 
 	const int featDim(cloud.features.rows());
 	assert(featDim == 3 || featDim == 4);
-
 	int insertedPointsCount = 0;
 
     for (int i = 0; i < cloud.getNbPoints(); ++i) {
+        // It will implicitly work in 2D where the z coordinate will always be the homogeneous coordinate (1)
         Voxel voxel = PointToVoxel(cloud.features.col(i), voxelSize);
         auto search = hashMap.find(voxel);
 
@@ -56,7 +56,6 @@ void VoxelHashMapDataPointsFilter<T>::inPlaceFilter(DataPoints& cloud) {
 
     cloud.conservativeResize(insertedPointsCount);
 }
-
 
 template struct VoxelHashMapDataPointsFilter<float>;
 template struct VoxelHashMapDataPointsFilter<double>;
