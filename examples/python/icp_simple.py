@@ -9,7 +9,7 @@ DP = PM.DataPoints
 # Path of output directory (default: tests/icp_simple/)
 # The output directory must already exist
 # Leave empty to save in the current directory
-output_base_directory = "tests/icp_simple/"
+output_base_directory = ""
 
 # Name of output files (default: test)
 output_base_file = "test"
