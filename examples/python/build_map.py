@@ -20,7 +20,7 @@ total_point_count = 30000
 # Path of output directory (default: tests/build_map/)
 # The output directory must already exist
 # Leave empty to save in the current directory
-output_base_directory = ""
+output_base_directory = "tests/icp_simple/"
 
 # Name of output file: file_name.{vtk,csv,ply} (default: test.vtk)
 output_file_name = "test.vtk"
@@ -73,10 +73,8 @@ uniform_subsample = PM.get().DataPointsFilterRegistrar.create("MaxDensityDataPoi
 params.clear()
 
 shadow_filter = PM.get().DataPointsFilterRegistrar.create("ShadowDataPointsFilter")
-voxel_hash_map_params = pms.Parametrizable.Parameters()
 
-				# .def_readonly("voxelSize", &VoxelHashMapDataPointsFilter::voxelSize)
-				# .def_readonly("pointsPerVoxel", &VoxelHashMapDataPointsFilter::pointsPerVoxel)
+voxel_hash_map_params = pms.Parametrizable.Parameters()
 voxel_hash_map_params["voxelSize"] = "0.1"
 voxel_hash_map_params["pointsPerVoxel"] = "1"
 voxel_hash_map = PM.get().DataPointsFilterRegistrar.create("VoxelHashMapDataPointsFilter", voxel_hash_map_params)
