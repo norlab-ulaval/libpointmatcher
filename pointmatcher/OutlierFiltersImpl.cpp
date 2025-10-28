@@ -384,6 +384,129 @@ typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::GenericDescripto
 template struct OutlierFiltersImpl<float>::GenericDescriptorOutlierFilter;
 template struct OutlierFiltersImpl<double>::GenericDescriptorOutlierFilter;
 
+// DescriptorMatchOutlierFilter
+template <typename T>
+OutlierFiltersImpl<T>::DescriptorMatchOutlierFilter::DescriptorMatchOutlierFilter(const Parameters &params):
+ OutlierFilter("DescriptorMatchOutlierFilter", DescriptorMatchOutlierFilter::availableParameters(), params),
+	descName(Parametrizable::getParamValueString("descName")),
+	sigmaSquared(std::pow(Parametrizable::get<T>("sigma"), 2)), // Calculate sigmaSquared directly
+	warningPrinted(false)
+{
+	// Simplified validation
+	if (Parametrizable::get<T>("sigma") <= 0)
+	{
+		throw InvalidParameter("DescriptorMatchOutlierFilter: sigma must be greater than 0.");
+	}
+	if (descName.empty())
+	{
+		throw InvalidParameter("DescriptorMatchOutlierFilter: descName cannot be empty.");
+	}
+}
+
+template <typename T>
+typename PointMatcher<T>::OutlierWeights OutlierFiltersImpl<T>::DescriptorMatchOutlierFilter::compute(
+	const DataPoints &filteredReading,
+	const DataPoints &filteredReference,
+	const Matches &input)
+{
+	const int knn = input.dists.rows();
+	const int readPtsCount = input.dists.cols();
+	OutlierWeights w = OutlierWeights::Ones(knn, readPtsCount); // Initialize weights to 1
+
+	// Check if descriptors exist in both clouds
+	bool readingHasDesc = filteredReading.descriptorExists(descName);
+	bool referenceHasDesc = filteredReference.descriptorExists(descName);
+
+	if (!readingHasDesc)
+	{
+		if (!warningPrinted)
+		{
+			LOG_WARNING_STREAM("DescriptorMatchOutlierFilter: Descriptor '" << descName << "' not found in reading cloud. Skipping filter.");
+			warningPrinted = true;
+		}
+		return w; // Return weights of 1
+	}
+
+	if (!referenceHasDesc)
+	{
+		if (!warningPrinted)
+		{
+			LOG_WARNING_STREAM("DescriptorMatchOutlierFilter: Descriptor '" << descName << "' not found in reference cloud. Skipping filter.");
+			warningPrinted = true;
+		}
+		return w; // Return weights of 1
+	}
+
+	// Get descriptor views
+	const auto descReadingView = filteredReading.getDescriptorViewByName(descName);
+	const auto descReferenceView = filteredReference.getDescriptorViewByName(descName);
+
+	// Check descriptor dimensions
+	if (descReadingView.rows() != descReferenceView.rows())
+	{
+		if (!warningPrinted)
+		{
+			LOG_WARNING_STREAM(
+				"DescriptorMatchOutlierFilter: Descriptor '"
+					<< descName
+					<< "' has different dimensions in reading (" << descReadingView.rows()
+					<< "D) and reference (" << descReferenceView.rows()
+					<< "D) clouds. Skipping filter."
+			);
+			warningPrinted = true;
+		}
+		return w; // Return weights of 1
+	}
+
+	const int descDim = descReadingView.rows();
+	if (descDim == 0)
+	{
+		if (!warningPrinted)
+		{
+			LOG_WARNING_STREAM("DescriptorMatchOutlierFilter: Descriptor '" << descName << "' has 0 dimensions. Skipping filter.");
+			warningPrinted = true;
+		}
+		return w; // Return weights of 1
+	}
+
+	// Compute weights based on descriptor difference
+	for (int i = 0; i < readPtsCount; ++i) // Index for reading points
+	{
+		const auto &descRead = descReadingView.col(i);
+
+		for (int k = 0; k < knn; ++k) // Index for k-th match
+		{
+			const int refIdx = input.ids(k, i);
+
+			if (refIdx == MatchersImpl<T>::NNS::InvalidIndex)
+			{
+				w(k, i) = 0; // No match, zero weight
+				continue;
+			}
+
+			if (refIdx < 0 || refIdx >= descReferenceView.cols())
+			{
+				LOG_WARNING_STREAM("DescriptorMatchOutlierFilter: Invalid reference index " << refIdx << " encountered. Setting weight to 0.");
+				w(k, i) = 0;
+				continue;
+			}
+
+			const auto &descRef = descReferenceView.col(refIdx);
+
+			// Calculate squared L2 norm of the difference
+			const T diffSquaredNorm = (descRead - descRef).squaredNorm();
+
+			// Calculate weight using exponential decay
+			w(k, i) = std::exp(-diffSquaredNorm / sigmaSquared);
+		}
+	}
+
+	return w;
+}
+
+template struct OutlierFiltersImpl<float>::DescriptorMatchOutlierFilter;
+template struct OutlierFiltersImpl<double>::DescriptorMatchOutlierFilter;
+
 // RobustOutlierFilter
 template<typename T>
 typename OutlierFiltersImpl<T>::RobustOutlierFilter::RobustFctMap
