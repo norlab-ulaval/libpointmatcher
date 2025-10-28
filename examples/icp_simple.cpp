@@ -1,210 +1,94 @@
+// kate: replace-tabs off; indent-width 4; indent-mode normal
+// vim: ts=4:sw=4:noexpandtab
 /*
- * filterProfiler.cpp
- *
- *  Created on: Feb 27, 2014
- *      Author: sam
- */
 
+Copyright (c) 2010--2012,
+François Pomerleau and Stephane Magnenat, ASL, ETHZ, Switzerland
+You can contact the authors at <f dot pomerleau at gmail dot com> and
+<stephane at magnenat dot net>
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the <organization> nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL ETH-ASL BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+#include "pointmatcher/PointMatcher.h"
+#include <cassert>
 #include <iostream>
-#include <pointmatcher/PointMatcher.h>
-#include <boost/assign.hpp>
-#include <ctime>
-#include <time.h>
-#include <vector>
-#include <iomanip>
-#include <numeric>
-#include <algorithm>
 
-using namespace PointMatcherSupport;
 using namespace std;
-using namespace boost;
 
-typedef PointMatcher<float> PM;
-typedef PM::DataPoints DP;
-typedef PM::Parameters Parameters;
+void validateArgs(int argc, char *argv[], bool& isCSV);
 
-// Function to calculate statistics
-struct Stats {
-    double mean;
-    double stddev;
-    double min;
-    double max;
-};
-
-Stats calculateStats(const std::vector<double>& times) {
-    Stats stats;
-    stats.mean = std::accumulate(times.begin(), times.end(), 0.0) / times.size();
-    
-    double variance = 0.0;
-    for (double time : times) {
-        variance += (time - stats.mean) * (time - stats.mean);
-    }
-    variance /= times.size();
-    stats.stddev = std::sqrt(variance);
-    
-    stats.min = *std::min_element(times.begin(), times.end());
-    stats.max = *std::max_element(times.begin(), times.end());
-    
-    return stats;
-}
-
-// Function to run filter benchmark
-Stats benchmarkFilter(std::shared_ptr<PM::DataPointsFilter> filter, 
-                     const std::vector<std::string>& cloudFiles, 
-                     int runsPerFile,
-                     const std::string& filterName) {
-    
-    std::vector<double> allTimes;
-    
-    cout << "\n" << std::string(50, '=') << endl;
-    cout << "Benchmarking: " << filterName << endl;
-    cout << std::string(50, '=') << endl;
-    
-    for (size_t fileIdx = 0; fileIdx < cloudFiles.size(); fileIdx++) {
-        const std::string& filename = cloudFiles[fileIdx];
-        
-        // Extract just the filename for display
-        size_t lastSlash = filename.find_last_of("/");
-        string displayName = (lastSlash != string::npos) ? filename.substr(lastSlash + 1) : filename;
-        
-        cout << "Processing file " << (fileIdx + 1) << "/" << cloudFiles.size() 
-             << ": " << displayName << endl;
-        
-        try {
-            DP originalCloud = DP::load(filename);
-            cout << "  Points in cloud: " << originalCloud.getNbPoints() << endl;
-            
-            std::vector<double> fileTimes;
-            
-            for (int run = 0; run < runsPerFile; run++) {
-                // Create a copy for each run to avoid cumulative effects
-                DP testCloud = originalCloud;
-                
-                clock_t time_a = clock();
-                filter->inPlaceFilter(testCloud);
-                clock_t time_b = clock();
-                
-                if (time_a == ((clock_t)-1) || time_b == ((clock_t)-1)) {
-                    cout << "  Warning: Unable to measure time for run " << (run + 1) << endl;
-                    continue;
-                }
-                
-                double elapsed = (double)(time_b - time_a) / CLOCKS_PER_SEC;
-                fileTimes.push_back(elapsed);
-                allTimes.push_back(elapsed);
-                
-                cout << "  Run " << (run + 1) << "/" << runsPerFile 
-                     << ": " << std::fixed << std::setprecision(6) << elapsed 
-                     << "s (" << testCloud.getNbPoints() << " points after filtering)" << endl;
-            }
-            
-            if (!fileTimes.empty()) {
-                Stats fileStats = calculateStats(fileTimes);
-                cout << "  File average: " << std::fixed << std::setprecision(6) 
-                     << fileStats.mean << "s (±" << fileStats.stddev << "s)" << endl;
-            }
-            
-        } catch (const std::exception& e) {
-            cout << "  Error loading file: " << e.what() << endl;
-            continue;
-        }
-    }
-    
-    return calculateStats(allTimes);
-}
-
+/**
+  * Code example for ICP taking 2 points clouds (2D or 3D) relatively close 
+  * and computing the transformation between them.
+  */
 int main(int argc, char *argv[])
 {
-    // Configuration
-    const int runsPerFile = 5;  // Number of runs per point cloud file
-    const std::string dataDir = "/home/nicolas-lauzon/libs-norlab/libpointmatcher/examples/data";
-    
-    // Specific point cloud files to test
-    std::vector<std::string> cloudFiles = {
-        dataDir + "/2D_twoBoxes.csv",
-        dataDir + "/car_cloud400.csv", 
-        dataDir + "/cloud.00000.vtk",
-        dataDir + "/cloud.00001.vtk",
-        dataDir + "/cloud.00002.vtk"
-    };
-    
-    cout << std::string(60, '=') << endl;
-    cout << "Point Cloud Filter Performance Comparison" << endl;
-    cout << std::string(60, '=') << endl;
-    cout << "Runs per file: " << runsPerFile << endl;
-    cout << "Data directory: " << dataDir << endl;
-    
-    cout << "Testing " << cloudFiles.size() << " point cloud files:" << endl;
-    for (size_t i = 0; i < cloudFiles.size(); i++) {
-        size_t lastSlash = cloudFiles[i].find_last_of("/");
-        string displayName = (lastSlash != string::npos) ? cloudFiles[i].substr(lastSlash + 1) : cloudFiles[i];
-        cout << "  " << (i + 1) << ". " << displayName << endl;
-    }
-    
-    // Create filter instances
-    std::shared_ptr<PM::DataPointsFilter> randomSample =
-        PM::get().DataPointsFilterRegistrar.create(
-                "RandomSamplingDataPointsFilter",
-                {{"prob", toParam(0.5)}}
-        );
+	bool isCSV = true;
+	validateArgs(argc, argv, isCSV);
+	
+	typedef PointMatcher<float> PM;
+	typedef PM::DataPoints DP;
+	
+	// Load point clouds
+	const DP ref(DP::load(argv[1]));
+	const DP data(DP::load(argv[2]));
 
-    std::shared_ptr<PM::DataPointsFilter> voxelHashFilter =
-        PM::get().DataPointsFilterRegistrar.create(
-                "VoxelHashMapDataPointsFilter",
-                {
-                    {"voxelSize", toParam(0.5)},
-                    {"pointsPerVoxel", toParam(10)},
-                }
-        );
+	// Create the default ICP algorithm
+	PM::ICP icp;
+	
+	// See the implementation of setDefault() to create a custom ICP algorithm
+	icp.setDefault();
 
-    // Benchmark RandomSamplingDataPointsFilter
-    Stats randomStats = benchmarkFilter(randomSample, cloudFiles, runsPerFile, 
-                                       "RandomSamplingDataPointsFilter (prob=0.5)");
+	// Compute the transformation to express data in ref
+	PM::TransformationParameters T = icp(data, ref);
 
-    // Benchmark VoxelHashMapDataPointsFilter
-    Stats voxelStats = benchmarkFilter(voxelHashFilter, cloudFiles, runsPerFile, 
-                                      "VoxelHashMapDataPointsFilter (voxelSize=1.0, pointsPerVoxel=1)");
+	// Transform data to express it in ref
+	DP data_out(data);
+	icp.transformations.apply(data_out, T);
+	
+	// Safe files to see the results
+	ref.save("test_ref.vtk");
+	data.save("test_data_in.vtk");
+	data_out.save("test_data_out.vtk");
+	cout << "Final transformation:" << endl << T << endl;
 
-    // Print final comparison
-    cout << "\n" << std::string(60, '=') << endl;
-    cout << "FINAL RESULTS SUMMARY" << endl;
-    cout << std::string(60, '=') << endl;
-    
-    cout << std::left << std::setw(35) << "Filter" << std::setw(12) << "Mean (s)" 
-         << std::setw(12) << "Std Dev (s)" << std::setw(10) << "Min (s)" 
-         << std::setw(10) << "Max (s)" << endl;
-    cout << std::string(79, '-') << endl;
-    
-    cout << std::left << std::setw(35) << "RandomSamplingDataPointsFilter" 
-         << std::fixed << std::setprecision(6)
-         << std::setw(12) << randomStats.mean
-         << std::setw(12) << randomStats.stddev
-         << std::setw(10) << randomStats.min
-         << std::setw(10) << randomStats.max << endl;
-         
-    cout << std::left << std::setw(35) << "VoxelHashMapDataPointsFilter" 
-         << std::fixed << std::setprecision(6)
-         << std::setw(12) << voxelStats.mean
-         << std::setw(12) << voxelStats.stddev
-         << std::setw(10) << voxelStats.min
-         << std::setw(10) << voxelStats.max << endl;
-    
-    // Performance comparison
-    cout << "\nPerformance Comparison:" << endl;
-    if (randomStats.mean < voxelStats.mean) {
-        double speedup = voxelStats.mean / randomStats.mean;
-        cout << "RandomSamplingDataPointsFilter is " << std::fixed << std::setprecision(2) 
-             << speedup << "x faster on average" << endl;
-    } else {
-        double speedup = randomStats.mean / voxelStats.mean;
-        cout << "VoxelHashMapDataPointsFilter is " << std::fixed << std::setprecision(2) 
-             << speedup << "x faster on average" << endl;
-    }
-    
-    cout << "\nTotal runs performed: " << (cloudFiles.size() * runsPerFile * 2) << endl;
-    cout << std::string(60, '=') << endl;
-
-    return 0;
+	return 0;
 }
 
-
+void validateArgs(int argc, char *argv[], bool& isCSV )
+{
+	if (argc != 3)
+	{
+		cerr << "Wrong number of arguments, usage " << argv[0] << " reference.csv reading.csv" << endl;
+		cerr << "Will create 3 vtk files for inspection: ./test_ref.vtk, ./test_data_in.vtk and ./test_data_out.vtk" << endl;
+		cerr << endl << "2D Example:" << endl;
+		cerr << "  " << argv[0] << " ../../examples/data/2D_twoBoxes.csv ../../examples/data/2D_oneBox.csv" << endl;
+		cerr << endl << "3D Example:" << endl;
+		cerr << "  " << argv[0] << " ../../examples/data/car_cloud400.csv ../../examples/data/car_cloud401.csv" << endl;
+		exit(1);
+	}
+}
