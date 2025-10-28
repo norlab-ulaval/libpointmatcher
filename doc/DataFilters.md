@@ -48,6 +48,8 @@ Note that *datapoint filters* differ from *outlier filters* which appear further
 
 16. [Angle Limit Filter](#anglelimit)
 
+17. [Voxel Hash Map Filter](#voxelhashmap)
+
 ### Descriptor Augmenting
 
 1. [Add Descriptor Filter](#adddescriptorhead)
@@ -114,6 +116,22 @@ __Impact on the number of points:__ reduces number of points
 |thetaMin       |Minimum value on the y-axis defining one side of the box | -inf | -inf to inf|
 |thetaMax       |Maximum value on the y-axis defining one side of the box | inf | -inf to inf|
 |removeInside   |if set to 1, points contained within the sphere wedge are removed, else points outside are removed  |1   | 0 or 1|
+
+## Voxel Hash Map Filter <a name="voxelhashmap"></a>
+### Description
+
+Filter points in dense area of the cloud by enforcing a maximum number of points per voxel. The cloud is segmented in constant size squared or cubed voxel. Utilizes an HashMap to speed up the filtering process compared to the (#voxelgridhead) filter.
+
+__Required descriptors:__ none
+__Output descriptor:__ none
+__Sensor assumed to be at the origin:__ no
+__Impact on the number of points:__ reduces number of points
+
+
+|Parameter  |Description  |Default value    |Allowable range|
+|---------  |:---------|:----------------|:-----------------|
+| voxelSize |The size of each voxel | 1.0| 0.0 to inf       |
+|pointsPerVoxel       |The ammount of points per voxel | 3 | 1 to 9999999|
 
 
 ## Bounding Box Filter <a name="boundingboxhead"></a>

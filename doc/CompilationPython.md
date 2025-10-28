@@ -6,20 +6,20 @@ This tutorial presents the different steps of compiling *pypointmatcher*, the li
 
 To get started, you will need the same prerequisites as libpointmatcher, but also some additional dependencies as listed here:
 
-| Name             | Version <br> (Tested October 2023 on Ubuntu 22.04) |
+| Name             | Version <br> (Tested October 2025 on Ubuntu 22.04) |
 | :--------------- |:--------------------------------------------------:|
-| pybind11         |                       2.5.0                        |
+| pybind11         |                       3.0.1                        |
 | Python3          |                      3.10.12                       |
 | python3-dev      |                       3.10.6                       |
 | catch            |                       1.12.1                       |
-| pytest           |                       7.4.2                        |
+| pytest           |                       8.4.2                        |
 
 > ***Note:*** *This guide assumes you're using a virtual python environment. For this, you can use the [virtualenv tool](https://virtualenv.pypa.io/en/stable/). If you are not familiar with Python virtual environments, you can [read this tutorial](https://realpython.com/python-virtual-environments-a-primer/), which explains very well the reasons for using a virtual environment, or [watch this video tutorial](https://youtu.be/nnhjvHYRsmM)*
 
 Install `pytest` with `pip`:
 
 ```bash
-pip3 install pytest wheel build
+pip3 install pytest wheel build pybind11
 ```
 
 And `catch` and `python3-dev` with your package manager:
@@ -40,43 +40,6 @@ To overcome this, open `Disk Utility` and add a new case-sensitive APFS volume t
 Then, move libpointmatcher to the new volume.
 
 The rest of this tutorial will guide you through the necessary steps to compile pypointmatcher.
-
-## pybind11
-
-pybind11 is a library used to create Python bindings of existing C++ code and vice versa. So, in order to be able to compile pypointmatcher, you must either install pybind11 on your system or add it as a git submodule in the libpointmatcher's `contrib/` directory. You must then create a symbolic link to this git submodule in the `python/` directory. Go [here](#installing-pybind11) for the installation steps or [here](#adding-pybind11) for the git sudmodule steps.
-
-### Installing pybind11 <a name="installing-pybind11"></a>
-
-The very first step is to clone [pybind11](https://github.com/pybind/pybind11) into a directory of your choice.
-
-At the moment, pypointmatcher is only tested for compilation with **version 2.5.0** of pybind11. To install the right version, run the following commands:
-
-```bash
-cd pybind11
-git checkout v2.5.0
-```
-
-Once this is done, run the following commands:
-
-```bash
-mkdir build && cd build
-cmake ..
-
-# With multiple versions of python3
-# cmake -DPYTHON_EXECUTABLE=$(python3.6 -c "import sys; print(sys.executable)") ..
-
-make check -j 4
-```
-
-This will both compile and run pybind11 tests. Next, you can install pybind11 by running this command:
-
-```bash
-sudo make install
-```
-
-Once this is done, return to libpointmatcher's `build/` directory.
-
-You're now ready to proceed to the [configuration step](#configuration).
 
 ### Configuring the variables <a name="configuration"></a>
 
