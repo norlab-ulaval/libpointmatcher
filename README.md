@@ -16,7 +16,7 @@ The library is written in C++ for efficiency with [bindings in Python](doc/index
 <img alt="GitHub forks" src="https://img.shields.io/github/forks/norlab-ulaval/libpointmatcher">
 <img alt="GitHub License" src="https://img.shields.io/github/license/norlab-ulaval/libpointmatcher">
 <img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/norlab-ulaval/libpointmatcher">
-<a href="http://132.203.26.125:8111"><img alt="Static Badge" src="https://img.shields.io/badge/JetBrains%20TeamCity-CI-green?style=plastic&logo=teamcity"></a>
+<a href="http://132.203.26.125:8111"><img src="https://img.shields.io/static/v1?label=JetBrains TeamCity&message=CI/CD&color=green?style=plastic&logo=teamcity" /></a>
 <a href="https://hub.docker.com/repository/docker/norlabulaval/libpointmatcher/"> <img alt="Docker Image Version (latest semver)" src="https://img.shields.io/docker/v/norlabulaval/libpointmatcher?logo=docker&label=libpointmatcher"> </a>
 
 <br>
@@ -47,12 +47,13 @@ The library is written in C++ for efficiency with [bindings in Python](doc/index
 [//]: # (====Supported OS and aarch===============================================================)
 
 ### Supported OS And Architecture
-_libpointmatcher_ is tested on our build system under the following:
-- OS: Ubuntu bionic (18.04), focal (20.04) and jammy (22.04)
-- Computer architecture: x86 and arm64/v8
+_libpointmatcher_ is tested on our build system under the following architecture and OS:
+- Ubuntu bionic (18.04), focal (20.04) and jammy (22.04)
+- x86 and arm64/v8
 
 Note:
-- _libpointmatcher_ reportedly works on Mac OS X (latest) and Windows (latest)
+- _libpointmatcher_ reportedly works on MacOs OsX (latest) and Windows (latest)
+
 
 ---
 
@@ -94,15 +95,20 @@ You can read the latest changes in the [release notes](doc/ReleaseNotes.md).
 
 
 # Quick Start
+Although we suggest to use the [tutorials](doc/index.md), here is a quick version of it:
 
-## Docker images
-To install docker related dependencies on ubuntu, execute the following
-```shell
-cd libpointmatcher/build_system/lpm_utility_script
+The library has a light dependency list:
 
-# Execute docker tools install script i.e. docker daemon, docker compose, docker buildx
-bash lpm_install_docker_tools.bash
-```
+ * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
+ * [boost] version 1.48 and up, portable C++ source libraries,
+ * [libnabo] version 1.0.7, a fast K Nearest Neighbour library for low-dimensional spaces,
+
+and was compiled on:
+  * Ubuntu ([see how](/doc/CompilationUbuntu.md))
+  * Mac OS X ([see how](/doc/CompilationMac.md))
+  * Windows ([see how](/doc/CompilationWindows.md) - partially supported)
+
+### Docker images
 
 Run the following commands to pull and run libpointmatcher in a docker container
 
@@ -116,33 +122,26 @@ See
 available [libpointmatcher image tags](https://hub.docker.com/repository/docker/norlabulaval/libpointmatcher/)
 on dockerhub.
 
-
-## Compilation and Installation
-### Installer scripts
-For beginner users unfamiliar with compiling and installing a library in Linux, you can use the provided installer script for ubuntu:
+To install docker related dependencies on ubuntu, execute the following
 ```shell
-cd libpointmatcher
-bash libpointmatcher_dependencies_installer.bash
-bash libpointmatcher_installer.bash --build-system-CI-install
+cd ./build_system/lpm_utility_script
+
+# Execute docker tools install script i.e. docker daemon, docker compose, docker buildx
+bash lpm_install_docker_tools.bash
 ```
-The first script installs all Libpointmatcher dependencies. The second script installs Libpointmatcher.
-The `--build-system-CI-install` flag tell the installer to colocate the build and the repository.
-If you want to install to a different location, instead use the `--install-path </dir/abs/path/>` flag. 
-Use the `--help` flag for more options.
 
-### Custom install
-Although we suggest to use the [tutorials](doc/Compilation.md), here is a quick version of it:
 
-The library has a light dependency list:
+### Compilation & Installation
 
- * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
- * [boost] version 1.48 and up, portable C++ source libraries,
- * [libnabo] version 1.0.7, a fast K Nearest Neighbour library for low-dimensional spaces,
+For beginner users unfamiliar with compiling and installing a library in Linux, go [here](doc/CompilationUbuntu.md) for detailed instructions on compiling libpointmatcher from the source code.
 
-and was compiled on:
-  * Ubuntu ([see how](/doc/CompilationUbuntu.md))
-  * Mac OS X ([see how](/doc/CompilationMac.md))
-  * Windows ([see how](/doc/CompilationWindows.md) - partially supported)
+For conveniences, you can use the provided installer script for ubuntu
+```shell
+bash libpointmatcher_dependencies_installer.bash
+
+# Use the --help flag to see the list of optional flag
+bash libpointmatcher_installer.bash [<optional flag>]
+```
 
 If you are comfortable with Linux and CMake and have already installed the prerequisites above, the following commands should install libpointmatcher on your system.
 
@@ -154,7 +153,7 @@ sudo make install
 ```
 
 
-## Testing
+### Testing
 
 Libpointmatcher ships with a version of the Google testing framework [GTest](https://github.com/google/googletest).  Unit tests are located in the `utest/` directory and are compiled with libpointmatcher (CMake variable `BUILD_TESTS` must be set to `TRUE` before compiling).  To run the tests and make sure that your compiled version is working correctly, run the test executable in your build directory:
 
@@ -163,7 +162,7 @@ cd build
 utest/utest --path ../examples/data/
 ```
 
-## Linking to external projects.
+### Linking to external projects.
 
 We mainly develop for __cmake projects__ and we provide example files under [`examples/demo_cmake/`](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/demo_cmake) to help you in your own project. We also provide a __QT Creator__ example in [`examples/demo_QT/`](https://github.com/norlab-ulaval/libpointmatcher/tree/master/examples/demo_Qt), which manually lists all the dependencies in the file [`demo.pro`](https://github.com/norlab-ulaval/libpointmatcher/blob/master/examples/demo_Qt/demo.pro). You would need to ajust those paths to point at the appropriate locations on your system. For a more detailed procedure, check the [Linking Projects to libpointmatcher](doc/LinkingProjects.md) section.
 
