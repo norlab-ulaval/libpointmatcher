@@ -38,7 +38,7 @@ struct VoxelHashMapDataPointsFilter : public PointMatcher<T>::DataPointsFilter
 
    inline static const std::string description()
    {
-       return "Construct Voxel hash map of the point cloud. Down-sample by keeping only pointsPerVoxel random points per voxel.";
+       return "Construct Voxel hash map of the point cloud. The first \"pointsPerVoxel\" points to be inserted are kept. Once the voxel is full, further points are discarded.";
    }
    inline static const ParametersDoc availableParameters()
    {

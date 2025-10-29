@@ -120,7 +120,7 @@ __Impact on the number of points:__ reduces number of points
 ## Voxel Hash Map Filter <a name="voxelhashmap"></a>
 ### Description
 
-Filter points in dense area of the cloud by enforcing a maximum number of points per voxel. The cloud is segmented in constant size squared or cubed voxel. Utilizes an HashMap to speed up the filtering process compared to the (#voxelgridhead) filter.
+Builds a voxelized representation of the point cloud to filter out points in dense regions by enforcing a maximum number of points per voxel. A voxel hash map is constructed from the point cloud, where only the first points_per_voxel points inserted into each voxel are retained. Once a voxel reaches its capacity, additional points are discarded. This method uses a hash map to accelerate the filtering process compared to the standard voxel grid filter (#voxelgridhead).
 
 __Required descriptors:__ none
 __Output descriptor:__ none
