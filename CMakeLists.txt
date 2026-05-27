@@ -130,7 +130,7 @@ endif()
 #--------------------
 find_package(Boost REQUIRED COMPONENTS thread system program_options date_time)
 if (Boost_MINOR_VERSION GREATER 47)
-	find_package(Boost REQUIRED COMPONENTS thread system program_options date_time chrono)
+	find_package(Boost REQUIRED COMPONENTS thread program_options date_time chrono)
 endif ()
 
 #--------------------
