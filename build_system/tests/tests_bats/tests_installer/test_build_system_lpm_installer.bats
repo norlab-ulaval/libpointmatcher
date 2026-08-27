@@ -36,6 +36,7 @@ fi
 TESTED_FILE3="lpm_install_dependencies_libnabo_ubuntu.bash"
 TESTED_FILE4="lpm_install_libpointmatcher_ubuntu.bash"
 TESTED_FILE_PATH3="./build_system/ubuntu"
+TESTED_FILE_PATH="."
 
 # executed once before starting the first test (valide for all test in that file)
 setup_file() {
