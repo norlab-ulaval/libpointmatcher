@@ -151,7 +151,9 @@ struct PointMatcherIO
 				{"eigVectors", "eigVectors2Z", DESCRIPTOR},
 				{"intensity", "intensity", DESCRIPTOR},
 				//{"internalName", "externalName", DESCRIPTOR},
-				{"time", "time", TIME}
+				{"time", "time", TIME},
+				{"timestamp_sec", "timestamp_sec", TIME},
+				{"timestamp_nsec", "timestamp_nsec", TIME}
 				//{"internalName", "externalName", TIME}
 			};
 

@@ -1559,12 +1559,29 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 
 	const unsigned int featDim = featLabelGen.getLabels().totalDim();
 	const unsigned int descDim = descLabelGen.getLabels().totalDim();
-	const unsigned int timeDim = timeLabelGen.getLabels().totalDim();
+	unsigned int timeDim_tmp = timeLabelGen.getLabels().totalDim();
+
+	bool found_sec = false, found_nsec = false, found_time = false;
+	for (const auto& lbl : timeLabelGen.getLabels())
+	{
+	    if (lbl.text == "timestamp_sec")
+	        found_sec = true;
+	    if (lbl.text == "timestamp_nsec")
+	        found_nsec = true;
+	    if (lbl.text == "time")
+	        found_time = true;
+	}
+
+	if (found_sec && found_nsec && !found_time)
+		--timeDim_tmp;
+	const unsigned int& timeDim = timeDim_tmp;
+
+		
 	const unsigned int nbPoints = vertex->num;
 
 	Matrix features = Matrix(featDim, nbPoints);
 	Matrix descriptors = Matrix(descDim, nbPoints);
-	Int64Matrix times = Int64Matrix(timeDim, nbPoints);
+	Int64Matrix times = Int64Matrix::Zero(timeDim, nbPoints);
 
 
 	///////////////////////////
@@ -1674,7 +1691,12 @@ typename PointMatcherIO<T>::DataPoints PointMatcherIO<T>::loadPLY(std::istream& 
 					descriptors(row, col) = value;
 					break;
 				case TIME:
-					times(row, col) = value;
+					if (vertex->properties[propID].name == "timestamp_sec")
+							times(0, col) += value * 1000000000LL;
+					else if (vertex->properties[propID].name == "timestamp_nsec")
+							times(0, col) += value;
+					else
+							times(0, col) = value;
 					break;
 				case UNSUPPORTED:
 					throw runtime_error("Implementation error in loadPLY(). This should not throw.");
@@ -1773,6 +1795,10 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 		}
 	}
 
+	if (data.times.rows() > 0){
+		ofs << "property int timestamp_sec" << "\n";
+		ofs << "property int timestamp_nsec" << "\n";
+	}
 	ofs << "end_header\n";
 
 	// write points
@@ -1814,8 +1840,23 @@ void PointMatcherIO<T>::savePLY(const DataPoints& data,
 			if(d != descRows-1 && !binary)
 				ofs << " ";
 		}
-        if(!binary)
-		    ofs << "\n";
+
+		if (data.times.rows() > 0){
+			static_assert(std::is_same<std::decay_t<decltype(data.times(p))>,long>::value,"Type mismatch!");
+			int sec = data.times(p) / 1000000000LL;
+			int nsec = data.times(p) % 1000000000LL;
+			if (binary){
+				ofs.write(reinterpret_cast<const char*>(&sec), sizeof(int));
+				ofs.write(reinterpret_cast<const char*>(&nsec), sizeof(int));
+			}
+			else{
+				ofs << " " << sec;
+				ofs << " " << nsec;
+			}
+			
+		}
+		if(!binary)
+			ofs << "\n";
 	}
 
 	ofs.close();

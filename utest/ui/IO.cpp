@@ -252,6 +252,50 @@ TEST(IOTest, loadPLY)
 	EXPECT_TRUE(pointCloud.descriptors(1, 1) == 22);
 	EXPECT_TRUE(pointCloud.descriptors(2, 4) == 33);
 
+
+	//test with timestamps
+
+	is.clear();
+	is.str(
+	"ply\n"
+	"format ascii 1.0\n"
+	"element vertex 5\n"
+	"\n" //empty line
+	"property float z\n" // wrong order
+	"property float y\n"
+	"property float x\n"
+	"property float grrrr\n" //unknown property
+	"property float nz\n" // wrong order
+	"property float ny\n"
+	"property float nx\n"
+	"property int timestamp_sec\n"
+	"property int timestamp_nsec\n"
+
+	"end_header\n"
+	"3 2 1 99 33 22 11 42 42000000\n"
+	"3 2 1 99 33 22 11 43 43000000\n"
+	"\n" //empty line
+	"3 2 1 99 33 22 11 44 44000000 3 2 1 99 33 22 11 45 45000000\n" // no line break
+	"3 2 1 99 33 22 11 46 46000000\n"
+
+	);
+	
+	pointCloud = IO::loadPLY(is);
+	
+	// Confirm sizes and dimensions
+	EXPECT_TRUE(pointCloud.features.cols() == 5);
+	EXPECT_TRUE(pointCloud.features.rows() == 4); //x, y, z, pad
+	EXPECT_TRUE(pointCloud.descriptors.cols() == 5);
+	EXPECT_TRUE(pointCloud.descriptors.rows() == 4);//nx, ny, nz, grrrr
+	EXPECT_TRUE(pointCloud.times.cols() == 5);
+	EXPECT_TRUE(pointCloud.times.rows() == 1); // timestamp_sec and timestamp_nsec merged into times
+		
+	// Random value check
+	EXPECT_TRUE(pointCloud.features(0, 0) == 1);
+	EXPECT_TRUE(pointCloud.features(2, 2) == 3);
+	EXPECT_TRUE(pointCloud.descriptors(1, 1) == 22);
+	EXPECT_TRUE(pointCloud.descriptors(2, 4) == 33);
+	EXPECT_TRUE(pointCloud.times(0, 2) == 44 * 1000000000L + 44000000);
 }
 
 
