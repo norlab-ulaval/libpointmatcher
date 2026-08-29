@@ -1118,3 +1118,58 @@ TEST_F(DataFilterTest, AngleLimitDataPointsFilter)
         EXPECT_LT(point(2), 0.0);
     }
 }
+
+TEST_F(DataFilterTest, VoxelHashMapDataPointsFilter)
+{
+	const unsigned int nbPts = 60000;
+	DP cloud = generateRandomDataPoints(nbPts);
+
+	// 3D tests
+	vector<float> voxelSizes3d = {0.5, 1.0, 2.0, 5.0};
+	vector<int> pointsPerVoxel3d = {1, 5, 10, 15};
+	for (unsigned i = 0 ; i < voxelSizes3d.size() ; i++)
+	{
+		for (unsigned j = 0; j < pointsPerVoxel3d.size(); j++)
+		{
+			// setup params
+			params = PM::Parameters();
+			params["voxelSize"] = toParam(voxelSizes3d[i]);
+			params["pointsPerVoxel"] = toParam(pointsPerVoxel3d[j]);
+
+			// Test with point cloud
+			std::shared_ptr<PM::DataPointsFilter> voxelHashMapFilter =
+					PM::get().DataPointsFilterRegistrar.create("VoxelHashMapDataPointsFilter", params);
+			DP filteredCloud = voxelHashMapFilter->filter(cloud);
+
+			// With reasonable parameters, we expect some filtering
+			EXPECT_GE(cloud.getNbPoints(), filteredCloud.getNbPoints());
+			EXPECT_EQ(cloud.getDescriptorDim(), filteredCloud.getDescriptorDim());
+			EXPECT_EQ(cloud.getTimeDim(), filteredCloud.getTimeDim());
+
+			// Test with ICP in 3D
+			icp.readingDataPointsFilters.clear();
+			addFilter("VoxelHashMapDataPointsFilter", params);
+			validate3dTransformation();
+		}
+	}
+
+	// 2D tests
+	// We need to keep more points in 2D for ICP to work properly
+	vector<float> voxelSizes2d = {0.05, 0.1, 0.2};
+	vector<int> pointsPerVoxel2d = {10, 15};
+	for (unsigned i = 0 ; i < voxelSizes2d.size() ; i++)
+	{
+		for (unsigned j = 0; j < pointsPerVoxel2d.size(); j++)
+		{
+			// setup params
+			params = PM::Parameters();
+			params["voxelSize"] = toParam(voxelSizes2d[i]);
+			params["pointsPerVoxel"] = toParam(pointsPerVoxel2d[j]);
+
+			// Test with ICP in 2D
+			icp.readingDataPointsFilters.clear();
+			addFilter("VoxelHashMapDataPointsFilter", params);
+			validate2dTransformation();
+		}
+	}
+}
